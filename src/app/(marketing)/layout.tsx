@@ -80,28 +80,28 @@ export default function MarketingLayout({
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-white">
-                    Data Sources
+                  <Link href="/security" className="hover:text-white">
+                    Security
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-4">Company</h4>
+              <h4 className="font-semibold text-white mb-4">Support</h4>
               <ul className="space-y-2 text-sm text-slate-400">
                 <li>
-                  <Link href="#" className="hover:text-white">
-                    About
+                  <a href="mailto:support@ghostmydata.com" className="hover:text-white">
+                    Contact Us
+                  </a>
+                </li>
+                <li>
+                  <Link href="/login" className="hover:text-white">
+                    Sign In
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-white">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-white">
-                    Careers
+                  <Link href="/register" className="hover:text-white">
+                    Get Started
                   </Link>
                 </li>
               </ul>
@@ -120,9 +120,9 @@ export default function MarketingLayout({
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-white">
-                    Security
-                  </Link>
+                  <a href="mailto:legal@ghostmydata.com" className="hover:text-white">
+                    Legal Inquiries
+                  </a>
                 </li>
               </ul>
             </div>
