@@ -1,0 +1,202 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  plan          String    @default("FREE") // FREE, PRO, ENTERPRISE
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  profiles        PersonalProfile[]
+  scans           Scan[]
+  exposures       Exposure[]
+  whitelists      Whitelist[]
+  removalRequests RemovalRequest[]
+  subscription    Subscription?
+  accounts        Account[]
+  sessions        Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PersonalProfile {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // PII Fields (encrypted at application level)
+  fullName    String?
+  aliases     String?  // JSON string array of other names
+  emails      String?  // JSON string array
+  phones      String?  // JSON string array
+  addresses   String?  // JSON array of address objects
+  dateOfBirth String?  // Encrypted date string
+  ssnHash     String?  // Hashed, never stored plain
+  photoUrls   String?  // JSON string array
+  usernames   String?  // JSON string array
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Scan {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status         String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, FAILED
+  type           String   // FULL, QUICK, MONITORING
+
+  // Results
+  exposuresFound Int      @default(0)
+  sourcesChecked Int      @default(0)
+  progress       Int      @default(0) // 0-100 percentage
+
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime @default(now())
+
+  exposures      Exposure[]
+}
+
+model Exposure {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scanId        String?
+  scan          Scan?    @relation(fields: [scanId], references: [id])
+
+  source        String   // DataSource enum value
+  sourceUrl     String?  // URL where data was found
+  sourceName    String   // Human-readable source name
+
+  dataType      String   // ExposureType enum value
+  dataPreview   String?  // Masked preview of exposed data
+  severity      String   // LOW, MEDIUM, HIGH, CRITICAL
+
+  status        String   @default("ACTIVE") // ACTIVE, REMOVAL_PENDING, REMOVAL_IN_PROGRESS, REMOVED, WHITELISTED
+  isWhitelisted Boolean  @default(false)
+
+  firstFoundAt  DateTime @default(now())
+  lastSeenAt    DateTime @default(now())
+
+  removalRequest RemovalRequest?
+
+  @@index([userId])
+  @@index([scanId])
+}
+
+model Whitelist {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  source     String   // DataSource enum value
+  sourceUrl  String?
+  sourceName String
+  reason     String?  // Why user wants to keep this
+
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+model RemovalRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exposureId  String   @unique
+  exposure    Exposure @relation(fields: [exposureId], references: [id])
+
+  status      String   @default("PENDING") // PENDING, SUBMITTED, IN_PROGRESS, COMPLETED, FAILED, REQUIRES_MANUAL
+  method      String   // AUTO_FORM, AUTO_EMAIL, API, MANUAL_GUIDE
+
+  submittedAt DateTime?
+  completedAt DateTime?
+  attempts    Int      @default(0)
+  lastError   String?
+  notes       String?  // Additional notes or instructions
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  stripePriceId        String?
+  stripeCurrentPeriodEnd DateTime?
+
+  plan                 String    @default("FREE") // FREE, PRO, ENTERPRISE
+  status               String    @default("active") // active, canceled, past_due
+
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model Alert {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // NEW_EXPOSURE, REMOVAL_COMPLETED, SCAN_COMPLETED
+  title       String
+  message     String
+  isRead      Boolean  @default(false)
+  metadata    String?  // JSON for additional data
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
