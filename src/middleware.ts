@@ -9,7 +9,8 @@ export default auth((req) => {
   const isAuthPage =
     nextUrl.pathname.startsWith("/login") ||
     nextUrl.pathname.startsWith("/register") ||
-    nextUrl.pathname.startsWith("/forgot-password");
+    nextUrl.pathname.startsWith("/forgot-password") ||
+    nextUrl.pathname.startsWith("/reset-password");
 
   const isDashboardPage = nextUrl.pathname.startsWith("/dashboard");
   const isApiAuthPage = nextUrl.pathname.startsWith("/api/auth");
@@ -42,6 +43,7 @@ export const config = {
     "/login",
     "/register",
     "/forgot-password",
+    "/reset-password",
     "/api/:path*",
   ],
 };

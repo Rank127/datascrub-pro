@@ -111,6 +111,42 @@ export class ScanOrchestrator {
   }
 }
 
+// Helper to safely decrypt and parse JSON
+function safeDecryptAndParse<T>(
+  encrypted: string | null | undefined,
+  decryptFn: (encrypted: string) => string
+): T | undefined {
+  if (!encrypted) return undefined;
+
+  try {
+    // Try to decrypt first
+    const decrypted = decryptFn(encrypted);
+    return JSON.parse(decrypted) as T;
+  } catch {
+    // If decryption fails, try parsing as plain JSON (legacy data)
+    try {
+      return JSON.parse(encrypted) as T;
+    } catch {
+      return undefined;
+    }
+  }
+}
+
+// Helper to safely decrypt a string
+function safeDecrypt(
+  encrypted: string | null | undefined,
+  decryptFn: (encrypted: string) => string
+): string | undefined {
+  if (!encrypted) return undefined;
+
+  try {
+    return decryptFn(encrypted);
+  } catch {
+    // Return as-is if decryption fails (legacy unencrypted data)
+    return encrypted;
+  }
+}
+
 // Helper to convert encrypted profile to scan input
 export async function prepareProfileForScan(
   profile: {
@@ -127,20 +163,15 @@ export async function prepareProfileForScan(
 ): Promise<ScanInput> {
   return {
     fullName: profile.fullName || undefined,
-    aliases: profile.aliases
-      ? JSON.parse(decryptFn(profile.aliases))
-      : undefined,
-    emails: profile.emails ? JSON.parse(decryptFn(profile.emails)) : undefined,
-    phones: profile.phones ? JSON.parse(decryptFn(profile.phones)) : undefined,
-    addresses: profile.addresses
-      ? JSON.parse(decryptFn(profile.addresses))
-      : undefined,
-    dateOfBirth: profile.dateOfBirth
-      ? decryptFn(profile.dateOfBirth)
-      : undefined,
+    aliases: safeDecryptAndParse<string[]>(profile.aliases, decryptFn),
+    emails: safeDecryptAndParse<string[]>(profile.emails, decryptFn),
+    phones: safeDecryptAndParse<string[]>(profile.phones, decryptFn),
+    addresses: safeDecryptAndParse<Array<{ street: string; city: string; state: string; zipCode: string; country: string }>>(
+      profile.addresses,
+      decryptFn
+    ),
+    dateOfBirth: safeDecrypt(profile.dateOfBirth, decryptFn),
     ssnHash: profile.ssnHash || undefined,
-    usernames: profile.usernames
-      ? JSON.parse(decryptFn(profile.usernames))
-      : undefined,
+    usernames: safeDecryptAndParse<string[]>(profile.usernames, decryptFn),
   };
 }

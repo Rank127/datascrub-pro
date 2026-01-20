@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DataSourceNames,
   SeverityColors,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 interface ExposureCardProps {
   id: string;
   source: DataSource;
+  sourceName: string;
   sourceUrl?: string | null;
   dataType: ExposureType;
   dataPreview?: string | null;
@@ -26,7 +28,11 @@ interface ExposureCardProps {
   isWhitelisted: boolean;
   firstFoundAt: Date;
   onWhitelist?: () => void;
+  onUnwhitelist?: () => void;
   onRemove?: () => void;
+  selected?: boolean;
+  onSelect?: (id: string) => void;
+  showCheckbox?: boolean;
 }
 
 const dataTypeLabels: Record<ExposureType, string> = {
@@ -56,7 +62,9 @@ const dataTypeIcons: Record<ExposureType, string> = {
 };
 
 export function ExposureCard({
+  id,
   source,
+  sourceName,
   sourceUrl,
   dataType,
   dataPreview,
@@ -65,14 +73,35 @@ export function ExposureCard({
   isWhitelisted,
   firstFoundAt,
   onWhitelist,
+  onUnwhitelist,
   onRemove,
+  selected,
+  onSelect,
+  showCheckbox = false,
 }: ExposureCardProps) {
-  const sourceName = DataSourceNames[source] || source;
+  const displayName = sourceName || DataSourceNames[source] || source;
+  const canSelect = status === "ACTIVE" && !isWhitelisted;
 
   return (
-    <Card className="bg-slate-800/50 border-slate-700 hover:border-slate-600 transition-colors">
+    <Card className={cn(
+      "bg-slate-800/50 border-slate-700 hover:border-slate-600 transition-colors",
+      selected && "border-emerald-600 bg-emerald-900/20"
+    )}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
+          {/* Checkbox */}
+          {showCheckbox && canSelect && (
+            <div className="pt-1">
+              <Checkbox
+                checked={selected}
+                onCheckedChange={() => onSelect?.(id)}
+                className="border-slate-500 data-[state=checked]:bg-emerald-600"
+              />
+            </div>
+          )}
+          {showCheckbox && !canSelect && (
+            <div className="w-4" />
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <Badge
@@ -90,7 +119,7 @@ export function ExposureCard({
             </div>
 
             <h3 className="font-medium text-white truncate">
-              {sourceName}
+              {displayName}
             </h3>
 
             <p className="text-sm text-slate-400 mt-1">
@@ -146,9 +175,16 @@ export function ExposureCard({
             )}
 
             {isWhitelisted && (
-              <span title="Whitelisted">
-                <Shield className="h-5 w-5 text-emerald-500" />
-              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-emerald-500 border-emerald-500/50 hover:bg-emerald-500/10 hover:text-orange-400 hover:border-orange-400/50"
+                onClick={onUnwhitelist}
+                title="Remove from whitelist"
+              >
+                <Shield className="h-4 w-4 mr-1" />
+                Undo
+              </Button>
             )}
           </div>
         </div>

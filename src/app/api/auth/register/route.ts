@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/db";
+import { encrypt } from "@/lib/encryption/crypto";
+import { sendWelcomeEmail } from "@/lib/email";
+import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -10,6 +13,13 @@ const registerSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  // Rate limiting
+  const identifier = getClientIdentifier(request);
+  const rateLimitResult = rateLimit(identifier, "auth-register");
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult);
+  }
+
   try {
     const body = await request.json();
     const result = registerSchema.safeParse(body);
@@ -48,14 +58,17 @@ export async function POST(request: Request) {
       },
     });
 
-    // Create default personal profile
+    // Create default personal profile with encrypted data
     await prisma.personalProfile.create({
       data: {
         userId: user.id,
-        emails: JSON.stringify([email]),
+        emails: encrypt(JSON.stringify([email])),
         fullName: name,
       },
     });
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(email, name).catch(console.error);
 
     return NextResponse.json(
       { message: "Account created successfully", userId: user.id },
@@ -63,8 +76,9 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error("Registration error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "An error occurred during registration" },
+      { error: "An error occurred during registration", details: errorMessage },
       { status: 500 }
     );
   }

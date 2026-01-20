@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +17,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
-  Settings,
   User,
   Bell,
   Shield,
@@ -25,12 +25,34 @@ import {
   Save,
   Crown,
   Check,
+  ExternalLink,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
-import Link from "next/link";
 
+interface SubscriptionData {
+  plan: string;
+  status: string;
+  currentPeriodEnd: string | null;
+}
+
+// Wrapper component to handle Suspense for useSearchParams
 export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-slate-400" /></div>}>
+      <SettingsContent />
+    </Suspense>
+  );
+}
+
+function SettingsContent() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Account settings
   const [name, setName] = useState(session?.user?.name || "");
@@ -43,27 +65,113 @@ export default function SettingsPage() {
   const [weeklyReports, setWeeklyReports] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
 
-  const handleSaveAccount = async () => {
-    setIsLoading(true);
-    // TODO: Implement account update
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsLoading(false);
+  // Check for success/canceled URL params from Stripe redirect
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      setMessage({ type: "success", text: "Your subscription has been activated successfully!" });
+      // Refetch subscription data
+      fetchSubscription();
+    } else if (searchParams.get("canceled") === "true") {
+      setMessage({ type: "error", text: "Checkout was canceled. No charges were made." });
+    }
+  }, [searchParams]);
+
+  // Fetch subscription data
+  const fetchSubscription = async () => {
+    try {
+      const response = await fetch("/api/subscription");
+      if (response.ok) {
+        const data = await response.json();
+        setSubscription(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch subscription:", error);
+    }
   };
 
-  // Mock plan data
-  const currentPlan: string = "FREE";
+  useEffect(() => {
+    fetchSubscription();
+  }, []);
+
+  const handleSaveAccount = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      if (response.ok) {
+        setMessage({ type: "success", text: "Account updated successfully!" });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to update account." });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpgrade = async (plan: "PRO" | "ENTERPRISE") => {
+    setUpgradeLoading(plan);
+    try {
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.url) {
+          window.location.href = data.url;
+        }
+      } else {
+        const error = await response.json();
+        setMessage({ type: "error", text: error.error || "Failed to start checkout" });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to connect to payment service" });
+    } finally {
+      setUpgradeLoading(null);
+    }
+  };
+
+  const handleManageBilling = async () => {
+    setPortalLoading(true);
+    try {
+      const response = await fetch("/api/stripe/portal", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.url) {
+          window.location.href = data.url;
+        }
+      } else {
+        const error = await response.json();
+        setMessage({ type: "error", text: error.error || "Failed to open billing portal" });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to connect to billing portal" });
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
+  const currentPlan = subscription?.plan || "FREE";
   const plans = [
     {
       name: "FREE",
       price: "$0",
-      features: ["1 scan/month", "Basic exposure report", "Manual removal guides"],
+      features: ["10 scans/month", "Basic exposure report", "Manual removal guides"],
       current: currentPlan === "FREE",
     },
     {
       name: "PRO",
       price: "$9.99",
       features: [
-        "10 scans/month",
+        "50 scans/month",
         "Automated removals",
         "Weekly monitoring",
         "Priority support",
@@ -93,6 +201,30 @@ export default function SettingsPage() {
           Manage your account and preferences
         </p>
       </div>
+
+      {/* Status Message */}
+      {message && (
+        <div
+          className={`p-4 rounded-lg flex items-center gap-2 ${
+            message.type === "success"
+              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+              : "bg-red-500/20 text-red-300 border border-red-500/30"
+          }`}
+        >
+          {message.type === "success" ? (
+            <CheckCircle className="h-5 w-5" />
+          ) : (
+            <XCircle className="h-5 w-5" />
+          )}
+          {message.text}
+          <button
+            onClick={() => setMessage(null)}
+            className="ml-auto text-sm underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Account Settings */}
       <Card className="bg-slate-800/50 border-slate-700">
@@ -126,9 +258,10 @@ export default function SettingsPage() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-slate-700/50 border-slate-600 text-white"
+                disabled
+                className="bg-slate-700/50 border-slate-600 text-white opacity-60"
               />
+              <p className="text-xs text-slate-500">Email cannot be changed</p>
             </div>
           </div>
           <Button
@@ -251,15 +384,47 @@ export default function SettingsPage() {
       {/* Subscription */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white">
-            <CreditCard className="h-5 w-5 text-emerald-500" />
-            Subscription
-          </CardTitle>
-          <CardDescription className="text-slate-400">
-            Manage your subscription and billing
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <CreditCard className="h-5 w-5 text-emerald-500" />
+                Subscription
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Manage your subscription and billing
+              </CardDescription>
+            </div>
+            {currentPlan !== "FREE" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleManageBilling}
+                disabled={portalLoading}
+                className="border-slate-600"
+              >
+                {portalLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Manage Billing
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
+          {subscription?.currentPeriodEnd && currentPlan !== "FREE" && (
+            <div className="mb-4 p-3 bg-slate-700/30 rounded-lg">
+              <p className="text-sm text-slate-300">
+                Current period ends:{" "}
+                <span className="text-white font-medium">
+                  {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                </span>
+              </p>
+            </div>
+          )}
           <div className="grid gap-4 md:grid-cols-3">
             {plans.map((plan) => (
               <div
@@ -303,12 +468,29 @@ export default function SettingsPage() {
                     </li>
                   ))}
                 </ul>
-                {!plan.current && (
+                {!plan.current && plan.name !== "FREE" && (
                   <Button
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
                     size="sm"
+                    onClick={() => handleUpgrade(plan.name as "PRO" | "ENTERPRISE")}
+                    disabled={upgradeLoading === plan.name}
                   >
-                    Upgrade
+                    {upgradeLoading === plan.name ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Upgrade"
+                    )}
+                  </Button>
+                )}
+                {plan.current && plan.name !== "FREE" && (
+                  <Button
+                    variant="outline"
+                    className="w-full border-slate-600"
+                    size="sm"
+                    onClick={handleManageBilling}
+                    disabled={portalLoading}
+                  >
+                    Manage
                   </Button>
                 )}
               </div>

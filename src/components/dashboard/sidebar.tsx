@@ -39,7 +39,7 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center gap-2 px-6 border-b border-slate-800">
         <Shield className="h-8 w-8 text-emerald-500" />
-        <span className="text-xl font-bold text-white">DataScrub Pro</span>
+        <span className="text-xl font-bold text-white">GhostMyData</span>
       </div>
 
       {/* Navigation */}

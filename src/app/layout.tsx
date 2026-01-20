@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DataScrub Pro - Personal Data Removal Service",
+  title: "GhostMyData - Make Your Personal Data Disappear",
   description:
     "Find and remove your personal data from data brokers, breach databases, and the dark web. Take control of your privacy with automated removal requests.",
   keywords: [

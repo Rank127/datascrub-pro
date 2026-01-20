@@ -61,7 +61,7 @@ function LoginForm() {
         </div>
         <CardTitle className="text-2xl text-white">Welcome back</CardTitle>
         <CardDescription className="text-slate-400">
-          Sign in to your DataScrub Pro account
+          Sign in to your GhostMyData account
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>

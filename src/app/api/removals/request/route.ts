@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { executeRemoval } from "@/lib/removers/removal-service";
+import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
 
@@ -10,18 +12,16 @@ const requestSchema = z.object({
 
 // Determine removal method based on data source
 function getRemovalMethod(source: string): RemovalMethod {
-  const dataBrokers = [
-    "SPOKEO",
-    "WHITEPAGES",
-    "BEENVERIFIED",
-    "INTELIUS",
-    "PEOPLEFINDER",
-    "TRUEPEOPLESEARCH",
-    "RADARIS",
-    "FASTPEOPLESEARCH",
-    "USSEARCH",
-    "PIPL",
-  ];
+  const broker = getDataBrokerInfo(source);
+
+  if (broker) {
+    if (broker.removalMethod === "EMAIL" || broker.removalMethod === "BOTH") {
+      return "AUTO_EMAIL";
+    }
+    if (broker.removalMethod === "FORM") {
+      return "AUTO_FORM";
+    }
+  }
 
   const socialMedia = [
     "LINKEDIN",
@@ -34,10 +34,6 @@ function getRemovalMethod(source: string): RemovalMethod {
     "YOUTUBE",
   ];
 
-  if (dataBrokers.includes(source)) {
-    return "AUTO_FORM";
-  }
-
   if (socialMedia.includes(source)) {
     return "MANUAL_GUIDE";
   }
@@ -46,7 +42,7 @@ function getRemovalMethod(source: string): RemovalMethod {
     return "MANUAL_GUIDE"; // Can't automate dark web removal
   }
 
-  // Breach databases - send emails
+  // Default to email for breach databases
   return "AUTO_EMAIL";
 }
 
@@ -78,7 +74,7 @@ export async function POST(request: Request) {
 
     const userPlan = (user?.plan || "FREE") as Plan;
 
-    // Free users can't use automated removal
+    // Require paid plan for automated removals
     if (userPlan === "FREE") {
       return NextResponse.json(
         {
@@ -142,29 +138,23 @@ export async function POST(request: Request) {
       data: { status: "REMOVAL_PENDING" },
     });
 
-    // In a real app, this would trigger a background job to:
-    // 1. Submit opt-out forms for data brokers
-    // 2. Send CCPA/GDPR emails
-    // 3. Update status as the removal progresses
+    // Execute the removal (send emails, provide instructions)
+    const executionResult = await executeRemoval(
+      removalRequest.id,
+      session.user.id
+    );
 
-    // Simulate processing (mark as submitted)
-    await prisma.removalRequest.update({
+    // Get updated request
+    const updatedRequest = await prisma.removalRequest.findUnique({
       where: { id: removalRequest.id },
-      data: {
-        status: "SUBMITTED",
-        submittedAt: new Date(),
-        attempts: 1,
-      },
-    });
-
-    await prisma.exposure.update({
-      where: { id: exposureId },
-      data: { status: "REMOVAL_IN_PROGRESS" },
     });
 
     return NextResponse.json({
-      request: removalRequest,
-      message: "Removal request submitted successfully",
+      request: updatedRequest,
+      message: executionResult.message,
+      method: executionResult.method,
+      instructions: executionResult.instructions,
+      success: executionResult.success,
     });
   } catch (error) {
     console.error("Removal request error:", error);

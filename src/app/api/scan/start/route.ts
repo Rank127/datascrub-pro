@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption/crypto";
+import { sendExposureAlertEmail } from "@/lib/email";
+import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
 import {
   ScanOrchestrator,
   prepareProfileForScan,
@@ -19,6 +21,12 @@ export async function POST(request: Request) {
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Rate limiting (per user)
+    const rateLimitResult = rateLimit(session.user.id, "scan");
+    if (!rateLimitResult.success) {
+      return rateLimitResponse(rateLimitResult);
     }
 
     const body = await request.json();
@@ -54,8 +62,8 @@ export async function POST(request: Request) {
     });
 
     const scanLimits: Record<Plan, number> = {
-      FREE: 1,
-      PRO: 10,
+      FREE: 10,  // Increased for testing
+      PRO: 50,
       ENTERPRISE: -1, // unlimited
     };
 
@@ -132,6 +140,30 @@ export async function POST(request: Request) {
         progress: 100,
       },
     });
+
+    // Send exposure alert email if exposures found (non-blocking)
+    if (exposures.length > 0 && session.user.email) {
+      const critical = scanResults.filter(r => r.severity === "CRITICAL").length;
+      const high = scanResults.filter(r => r.severity === "HIGH").length;
+      const sources = [...new Set(scanResults.map(r => r.sourceName))];
+
+      sendExposureAlertEmail(
+        session.user.email,
+        session.user.name || "",
+        { count: exposures.length, critical, high, sources }
+      ).catch(console.error);
+
+      // Create an alert record
+      await prisma.alert.create({
+        data: {
+          userId: session.user.id,
+          type: "SCAN_COMPLETED",
+          title: "Scan Completed",
+          message: `Found ${exposures.length} data exposure${exposures.length !== 1 ? 's' : ''} across ${sources.length} source${sources.length !== 1 ? 's' : ''}.`,
+          metadata: JSON.stringify({ scanId: scan.id, exposuresFound: exposures.length }),
+        },
+      });
+    }
 
     return NextResponse.json({
       scanId: scan.id,

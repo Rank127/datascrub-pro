@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -24,6 +24,8 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  Trash2,
+  ShieldCheck,
 } from "lucide-react";
 import type { DataSource, Severity, ExposureStatus } from "@/lib/types";
 
@@ -56,10 +58,40 @@ export default function ExposuresPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
+
+  // Get only actionable exposures (not already removed or whitelisted)
+  const actionableExposures = exposures.filter(
+    (e) => e.status === "ACTIVE" && !e.isWhitelisted
+  );
+  const allSelected = actionableExposures.length > 0 &&
+    actionableExposures.every((e) => selectedIds.has(e.id));
+  const someSelected = selectedIds.size > 0;
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(actionableExposures.map((e) => e.id)));
+    }
+  };
 
   const fetchExposures = useCallback(async () => {
     setLoading(true);
@@ -102,6 +134,22 @@ export default function ExposuresPage() {
     }
   };
 
+  const handleUnwhitelist = async (exposureId: string) => {
+    try {
+      const response = await fetch("/api/exposures", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exposureId, action: "unwhitelist" }),
+      });
+
+      if (response.ok) {
+        fetchExposures();
+      }
+    } catch (error) {
+      console.error("Failed to unwhitelist:", error);
+    }
+  };
+
   const handleRemove = async (exposureId: string) => {
     try {
       const response = await fetch("/api/removals/request", {
@@ -115,6 +163,48 @@ export default function ExposuresPage() {
       }
     } catch (error) {
       console.error("Failed to request removal:", error);
+    }
+  };
+
+  const handleBulkWhitelist = async () => {
+    if (selectedIds.size === 0) return;
+    setBulkLoading(true);
+    try {
+      const promises = Array.from(selectedIds).map((id) =>
+        fetch("/api/exposures", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ exposureId: id, action: "whitelist" }),
+        })
+      );
+      await Promise.all(promises);
+      setSelectedIds(new Set());
+      fetchExposures();
+    } catch (error) {
+      console.error("Failed to bulk whitelist:", error);
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleBulkRemove = async () => {
+    if (selectedIds.size === 0) return;
+    setBulkLoading(true);
+    try {
+      const promises = Array.from(selectedIds).map((id) =>
+        fetch("/api/removals/request", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ exposureId: id }),
+        })
+      );
+      await Promise.all(promises);
+      setSelectedIds(new Set());
+      fetchExposures();
+    } catch (error) {
+      console.error("Failed to bulk remove:", error);
+    } finally {
+      setBulkLoading(false);
     }
   };
 
@@ -212,13 +302,67 @@ export default function ExposuresPage() {
         </CardContent>
       </Card>
 
+      {/* Bulk Actions Bar */}
+      {someSelected && (
+        <Card className="bg-emerald-900/30 border-emerald-700/50">
+          <CardContent className="py-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-emerald-300">
+                {selectedIds.size} exposure{selectedIds.size !== 1 ? "s" : ""} selected
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                  onClick={handleBulkWhitelist}
+                  disabled={bulkLoading}
+                >
+                  <ShieldCheck className="h-4 w-4 mr-1" />
+                  Whitelist Selected
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700"
+                  onClick={handleBulkRemove}
+                  disabled={bulkLoading}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Remove Selected
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Exposures List */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <CardTitle className="text-white">All Exposures</CardTitle>
-          <CardDescription className="text-slate-400">
-            Click on an exposure to view details or take action
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-white">All Exposures</CardTitle>
+              <CardDescription className="text-slate-400">
+                Select exposures to take bulk actions
+              </CardDescription>
+            </div>
+            {actionableExposures.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="select-all"
+                  checked={allSelected}
+                  onCheckedChange={toggleSelectAll}
+                  className="border-slate-500 data-[state=checked]:bg-emerald-600"
+                />
+                <label
+                  htmlFor="select-all"
+                  className="text-sm text-slate-400 cursor-pointer"
+                >
+                  Select All
+                </label>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -244,6 +388,7 @@ export default function ExposuresPage() {
                   key={exposure.id}
                   id={exposure.id}
                   source={exposure.source}
+                  sourceName={exposure.sourceName}
                   sourceUrl={exposure.sourceUrl}
                   dataType={exposure.dataType as "EMAIL" | "PHONE" | "NAME" | "ADDRESS" | "DOB" | "SSN" | "PHOTO" | "USERNAME" | "FINANCIAL" | "COMBINED_PROFILE"}
                   dataPreview={exposure.dataPreview}
@@ -252,7 +397,11 @@ export default function ExposuresPage() {
                   isWhitelisted={exposure.isWhitelisted}
                   firstFoundAt={new Date(exposure.firstFoundAt)}
                   onWhitelist={() => handleWhitelist(exposure.id)}
+                  onUnwhitelist={() => handleUnwhitelist(exposure.id)}
                   onRemove={() => handleRemove(exposure.id)}
+                  showCheckbox={true}
+                  selected={selectedIds.has(exposure.id)}
+                  onSelect={toggleSelect}
                 />
               ))}
 

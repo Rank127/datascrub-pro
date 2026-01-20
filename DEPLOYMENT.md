@@ -1,0 +1,201 @@
+# GhostMyData - Production Deployment Guide
+
+## Required Environment Variables
+
+Set these in your Vercel dashboard (Settings → Environment Variables):
+
+### Database (Supabase)
+```
+DATABASE_URL=postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true
+DIRECT_URL=postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:5432/postgres
+```
+
+### Authentication
+```
+AUTH_SECRET=<generate with: openssl rand -base64 32>
+AUTH_URL=https://your-domain.com
+```
+
+### Encryption
+```
+ENCRYPTION_KEY=<generate with: openssl rand -hex 32>
+```
+
+### External APIs
+```
+HIBP_API_KEY=<your Have I Been Pwned API key - $3.50/month at https://haveibeenpwned.com/API/Key>
+```
+
+### Stripe Billing
+```
+STRIPE_SECRET_KEY=sk_live_xxx (or sk_test_xxx for testing)
+STRIPE_PUBLISHABLE_KEY=pk_live_xxx (or pk_test_xxx for testing)
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+
+# Price IDs from your Stripe Dashboard → Products
+STRIPE_PRO_MONTHLY_PRICE_ID=price_xxx
+STRIPE_PRO_YEARLY_PRICE_ID=price_xxx
+STRIPE_ENTERPRISE_MONTHLY_PRICE_ID=price_xxx
+STRIPE_ENTERPRISE_YEARLY_PRICE_ID=price_xxx
+```
+
+### Email (Resend)
+```
+RESEND_API_KEY=re_xxx (get at https://resend.com)
+RESEND_FROM_EMAIL=GhostMyData <noreply@ghostmydata.com>
+```
+
+### App Configuration
+```
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+NEXT_PUBLIC_APP_NAME=GhostMyData
+```
+
+---
+
+## Stripe Setup
+
+1. **Create Products in Stripe Dashboard:**
+   - Go to Products → Add product
+   - Create "PRO" product with monthly price ($9.99)
+   - Create "ENTERPRISE" product with monthly price ($29.99)
+   - Copy the Price IDs to environment variables
+
+2. **Set up Webhook:**
+   - Go to Developers → Webhooks → Add endpoint
+   - URL: `https://your-domain.com/api/stripe/webhook`
+   - Events to listen for:
+     - `checkout.session.completed`
+     - `customer.subscription.created`
+     - `customer.subscription.updated`
+     - `customer.subscription.deleted`
+     - `invoice.payment_succeeded`
+     - `invoice.payment_failed`
+   - Copy the Signing secret to `STRIPE_WEBHOOK_SECRET`
+
+3. **Configure Customer Portal:**
+   - Go to Settings → Billing → Customer portal
+   - Enable features: Update payment method, Cancel subscription, View invoices
+
+---
+
+## Resend Email Setup
+
+1. Sign up at https://resend.com
+2. Verify your domain (or use their test domain for development)
+3. Copy API key to `RESEND_API_KEY`
+4. Set `RESEND_FROM_EMAIL` to your verified domain email
+
+---
+
+## Have I Been Pwned API
+
+1. Go to https://haveibeenpwned.com/API/Key
+2. Subscribe ($3.50/month)
+3. Copy API key to `HIBP_API_KEY`
+
+---
+
+## Database Migrations
+
+Run migrations on first deploy:
+
+```bash
+npx prisma migrate deploy
+```
+
+Or through Vercel:
+```bash
+npx prisma db push
+```
+
+---
+
+## Feature Checklist
+
+### Core Features (Complete)
+- [x] User registration and login
+- [x] Password reset with email
+- [x] Profile management with encrypted PII
+- [x] Data exposure scanning (HIBP integration)
+- [x] Exposure viewing and filtering
+- [x] Whitelist management
+- [x] Bulk selection and actions
+- [x] Removal request system
+- [x] CCPA/GDPR removal emails
+
+### Billing (Complete)
+- [x] Stripe checkout integration
+- [x] Subscription management
+- [x] Customer portal
+- [x] Webhook handling
+- [x] Plan-based feature gating
+
+### Notifications (Complete)
+- [x] Welcome emails
+- [x] Password reset emails
+- [x] Exposure alert emails
+- [x] Removal status updates
+- [x] Subscription confirmation
+
+### Security (Complete)
+- [x] PII encryption at rest
+- [x] Password hashing (bcrypt)
+- [x] Rate limiting on critical endpoints
+- [x] Plan restrictions for paid features
+
+---
+
+## Testing Checklist
+
+Before going live, test these flows:
+
+1. **Registration Flow**
+   - [ ] Register new account
+   - [ ] Verify welcome email received
+   - [ ] Verify profile created
+
+2. **Login Flow**
+   - [ ] Login with correct credentials
+   - [ ] Test forgot password
+   - [ ] Verify reset email received
+   - [ ] Reset password successfully
+
+3. **Profile & Scanning**
+   - [ ] Complete profile with test data
+   - [ ] Run a scan
+   - [ ] Verify exposures displayed
+   - [ ] Verify exposure alert email
+
+4. **Whitelist**
+   - [ ] Whitelist an exposure
+   - [ ] Un-whitelist an exposure
+   - [ ] Verify whitelisted items excluded from removal
+
+5. **Removal (Paid Plan Required)**
+   - [ ] Upgrade to paid plan
+   - [ ] Request removal
+   - [ ] Verify removal email sent/instructions provided
+
+6. **Billing**
+   - [ ] Complete Stripe checkout
+   - [ ] Verify plan updated
+   - [ ] Access customer portal
+   - [ ] Cancel subscription
+   - [ ] Verify downgrade to FREE
+
+---
+
+## Monitoring
+
+Consider adding:
+- [ ] Sentry for error tracking
+- [ ] Vercel Analytics for usage metrics
+- [ ] Uptime monitoring (UptimeRobot, Pingdom)
+
+---
+
+## Support
+
+- GitHub Issues: https://github.com/your-repo/issues
+- Documentation: (add your docs URL)

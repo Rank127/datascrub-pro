@@ -31,6 +31,7 @@ const mockRecentExposures = [
   {
     id: "1",
     source: "SPOKEO" as const,
+    sourceName: "Spokeo - People Search",
     sourceUrl: "https://spokeo.com",
     dataType: "COMBINED_PROFILE" as const,
     dataPreview: "J*** D** - 123 M*** St, City",
@@ -42,6 +43,7 @@ const mockRecentExposures = [
   {
     id: "2",
     source: "HAVEIBEENPWNED" as const,
+    sourceName: "Have I Been Pwned - LinkedIn Breach",
     sourceUrl: null,
     dataType: "EMAIL" as const,
     dataPreview: "j***@g***.com",
@@ -53,6 +55,7 @@ const mockRecentExposures = [
   {
     id: "3",
     source: "LINKEDIN" as const,
+    sourceName: "LinkedIn Profile",
     sourceUrl: "https://linkedin.com",
     dataType: "USERNAME" as const,
     dataPreview: "@johndoe",
@@ -207,6 +210,7 @@ export default function DashboardPage() {
               key={exposure.id}
               {...exposure}
               onWhitelist={() => console.log("Whitelist", exposure.id)}
+              onUnwhitelist={() => console.log("Unwhitelist", exposure.id)}
               onRemove={() => console.log("Remove", exposure.id)}
             />
           ))}

@@ -1,7 +1,7 @@
-# DataScrub Pro - User Acceptance Testing (UAT) Plan
+# GhostMyData - User Acceptance Testing (UAT) Plan
 
 ## Document Information
-- **Application**: DataScrub Pro - Personal Data Removal Service
+- **Application**: GhostMyData - Personal Data Removal Service
 - **Version**: 1.0.0
 - **Environment**: http://localhost:3001
 - **Date**: January 2026
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-This UAT plan covers comprehensive testing of all user-facing features of DataScrub Pro, a personal data removal service that helps users find and remove their personal information from data brokers, breach databases, dark web, and social media platforms.
+This UAT plan covers comprehensive testing of all user-facing features of GhostMyData, a personal data removal service that helps users find and remove their personal information from data brokers, breach databases, dark web, and social media platforms.
 
 ### Testing Objectives
 1. Verify all user workflows function as expected

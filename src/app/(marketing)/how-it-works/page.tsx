@@ -104,7 +104,7 @@ export default function HowItWorksPage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            How DataScrub Pro Works
+            How GhostMyData Works
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
             Our 5-step process finds and removes your personal data from across

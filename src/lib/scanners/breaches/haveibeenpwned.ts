@@ -1,5 +1,5 @@
 import { BaseScanner, type ScanInput, type ScanResult } from "../base-scanner";
-import { DataSource, DataSourceNames } from "@/lib/types";
+import { DataSourceNames } from "@/lib/types";
 
 interface BreachData {
   Name: string;
@@ -12,64 +12,20 @@ interface BreachData {
   IsSensitive: boolean;
 }
 
-// Mock breach data for development
-const MOCK_BREACHES: BreachData[] = [
-  {
-    Name: "LinkedIn2021",
-    Title: "LinkedIn 2021",
-    Domain: "linkedin.com",
-    BreachDate: "2021-06-22",
-    DataClasses: ["Email addresses", "Names", "Phone numbers", "Employers"],
-    Description: "In June 2021, LinkedIn experienced a data breach.",
-    IsVerified: true,
-    IsSensitive: false,
-  },
-  {
-    Name: "Adobe",
-    Title: "Adobe",
-    Domain: "adobe.com",
-    BreachDate: "2013-10-04",
-    DataClasses: ["Email addresses", "Passwords", "Password hints", "Usernames"],
-    Description: "In October 2013, 153 million Adobe accounts were breached.",
-    IsVerified: true,
-    IsSensitive: false,
-  },
-  {
-    Name: "Dropbox",
-    Title: "Dropbox",
-    Domain: "dropbox.com",
-    BreachDate: "2012-07-01",
-    DataClasses: ["Email addresses", "Passwords"],
-    Description: "In mid-2012, Dropbox suffered a data breach.",
-    IsVerified: true,
-    IsSensitive: false,
-  },
-  {
-    Name: "Twitter2023",
-    Title: "Twitter (2023)",
-    Domain: "twitter.com",
-    BreachDate: "2023-01-01",
-    DataClasses: ["Email addresses", "Names", "Phone numbers", "Usernames"],
-    Description: "In early 2023, a breach exposed Twitter user data.",
-    IsVerified: true,
-    IsSensitive: false,
-  },
-];
-
 export class HaveIBeenPwnedScanner extends BaseScanner {
   name = "Have I Been Pwned Scanner";
-  source: DataSource = "HAVEIBEENPWNED";
+  source = "HAVEIBEENPWNED" as const;
 
-  private apiKey?: string;
+  private apiKey: string;
+  private baseUrl = "https://haveibeenpwned.com/api/v3";
 
-  constructor(apiKey?: string) {
+  constructor() {
     super();
-    this.apiKey = apiKey;
+    this.apiKey = process.env.HIBP_API_KEY || "";
   }
 
   async isAvailable(): Promise<boolean> {
-    // In production, check if API key is valid
-    return true;
+    return !!this.apiKey;
   }
 
   async scan(input: ScanInput): Promise<ScanResult[]> {
@@ -79,53 +35,82 @@ export class HaveIBeenPwnedScanner extends BaseScanner {
       return results;
     }
 
+    if (!this.apiKey) {
+      console.warn("HIBP API key not configured");
+      return results;
+    }
+
     for (const email of input.emails) {
-      // Simulate API delay
-      await this.delay(Math.random() * 500 + 200);
+      try {
+        // HIBP rate limit: 10 requests per minute, add delay between requests
+        if (input.emails.indexOf(email) > 0) {
+          await this.delay(6100); // 6.1 seconds between requests to stay under rate limit
+        }
 
-      // In production, this would call the real HIBP API:
-      // const response = await fetch(
-      //   `https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(email)}`,
-      //   {
-      //     headers: {
-      //       "hibp-api-key": this.apiKey,
-      //       "User-Agent": "DataScrub-Pro",
-      //     },
-      //   }
-      // );
+        const breaches = await this.fetchBreaches(email);
 
-      // For development, use mock data
-      const breaches = this.getMockBreaches(email);
+        for (const breach of breaches) {
+          const severity = this.calculateBreachSeverity(breach);
 
-      for (const breach of breaches) {
-        const severity = this.calculateBreachSeverity(breach);
-
-        results.push({
-          source: "HAVEIBEENPWNED",
-          sourceName: `${DataSourceNames.HAVEIBEENPWNED} - ${breach.Title}`,
-          sourceUrl: `https://haveibeenpwned.com/account/${encodeURIComponent(email)}`,
-          dataType: "EMAIL",
-          dataPreview: this.maskData(email, "EMAIL"),
-          severity,
-          rawData: {
-            breachName: breach.Name,
-            breachDate: breach.BreachDate,
-            dataClasses: breach.DataClasses,
-            domain: breach.Domain,
-          },
-        });
+          results.push({
+            source: "HAVEIBEENPWNED",
+            sourceName: `${DataSourceNames.HAVEIBEENPWNED} - ${breach.Title}`,
+            sourceUrl: `https://haveibeenpwned.com/account/${encodeURIComponent(email)}`,
+            dataType: "EMAIL",
+            dataPreview: this.maskData(email, "EMAIL"),
+            severity,
+            rawData: {
+              breachName: breach.Name,
+              breachDate: breach.BreachDate,
+              dataClasses: breach.DataClasses,
+              domain: breach.Domain,
+              description: breach.Description,
+              isVerified: breach.IsVerified,
+            },
+          });
+        }
+      } catch (error) {
+        console.error(`HIBP scan failed for email:`, error);
+        // Continue with other emails
       }
     }
 
     return results;
   }
 
-  private getMockBreaches(email: string): BreachData[] {
-    // Deterministically select breaches based on email hash
-    const hash = email.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const numBreaches = hash % 4; // 0-3 breaches
+  private async fetchBreaches(email: string): Promise<BreachData[]> {
+    const response = await fetch(
+      `${this.baseUrl}/breachedaccount/${encodeURIComponent(email)}?truncateResponse=false`,
+      {
+        headers: {
+          "hibp-api-key": this.apiKey,
+          "User-Agent": "GhostMyData",
+        },
+      }
+    );
 
-    return MOCK_BREACHES.slice(0, numBreaches);
+    // 404 means no breaches found (this is good!)
+    if (response.status === 404) {
+      return [];
+    }
+
+    // 401 means invalid API key
+    if (response.status === 401) {
+      throw new Error("Invalid HIBP API key");
+    }
+
+    // 429 means rate limited
+    if (response.status === 429) {
+      const retryAfter = response.headers.get("retry-after") || "2";
+      await this.delay(parseInt(retryAfter) * 1000);
+      return this.fetchBreaches(email); // Retry once
+    }
+
+    if (!response.ok) {
+      throw new Error(`HIBP API error: ${response.status}`);
+    }
+
+    return response.json();
   }
 
   private calculateBreachSeverity(
@@ -138,7 +123,9 @@ export class HaveIBeenPwnedScanner extends BaseScanner {
         (d) =>
           d.includes("password") ||
           d.includes("credit card") ||
-          d.includes("social security")
+          d.includes("social security") ||
+          d.includes("bank") ||
+          d.includes("financial")
       )
     ) {
       return "CRITICAL";
@@ -149,7 +136,8 @@ export class HaveIBeenPwnedScanner extends BaseScanner {
         (d) =>
           d.includes("phone") ||
           d.includes("address") ||
-          d.includes("date of birth")
+          d.includes("date of birth") ||
+          d.includes("ip address")
       )
     ) {
       return "HIGH";

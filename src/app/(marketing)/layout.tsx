@@ -15,7 +15,7 @@ export default function MarketingLayout({
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2">
               <Shield className="h-8 w-8 text-emerald-500" />
-              <span className="text-xl font-bold text-white">DataScrub Pro</span>
+              <span className="text-xl font-bold text-white">GhostMyData</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-8">
@@ -59,7 +59,7 @@ export default function MarketingLayout({
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Shield className="h-6 w-6 text-emerald-500" />
-                <span className="font-bold text-white">DataScrub Pro</span>
+                <span className="font-bold text-white">GhostMyData</span>
               </div>
               <p className="text-sm text-slate-400">
                 Take control of your personal data. Find it, remove it, protect
@@ -110,12 +110,12 @@ export default function MarketingLayout({
               <h4 className="font-semibold text-white mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-slate-400">
                 <li>
-                  <Link href="#" className="hover:text-white">
+                  <Link href="/privacy" className="hover:text-white">
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-white">
+                  <Link href="/terms" className="hover:text-white">
                     Terms of Service
                   </Link>
                 </li>
@@ -128,7 +128,7 @@ export default function MarketingLayout({
             </div>
           </div>
           <div className="border-t border-slate-800 mt-8 pt-8 text-center text-sm text-slate-500">
-            &copy; {new Date().getFullYear()} DataScrub Pro. All rights reserved.
+            &copy; {new Date().getFullYear()} GhostMyData. All rights reserved.
           </div>
         </div>
       </footer>

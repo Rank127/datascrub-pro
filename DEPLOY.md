@@ -1,4 +1,4 @@
-# DataScrub Pro - Deployment Guide
+# GhostMyData - Deployment Guide
 
 Total time: ~15 minutes | Total cost: $0 to start
 
@@ -20,7 +20,7 @@ Total time: ~15 minutes | Total cost: $0 to start
 1. Go to https://supabase.com
 2. Click "Start your project" → Sign in with GitHub
 3. Click "New Project"
-   - Name: `datascrub-pro`
+   - Name: `ghostmydata`
    - Database Password: **SAVE THIS** (you'll need it)
    - Region: Choose closest to you
    - Click "Create new project"
@@ -49,20 +49,20 @@ Total time: ~15 minutes | Total cost: $0 to start
 Run these commands in your terminal:
 
 ```bash
-cd /home/rock/DarkWebCleanup/datascrub-pro-v2
+cd /home/rock/DarkWebCleanup/ghostmydata-v2
 
 # Initialize git
 git init
 git add .
-git commit -m "Initial commit - DataScrub Pro"
+git commit -m "Initial commit - GhostMyData"
 
 # Create GitHub repo (you'll need GitHub CLI or do it manually)
 # Option A: GitHub CLI
-gh repo create datascrub-pro --private --source=. --push
+gh repo create ghostmydata --private --source=. --push
 
 # Option B: Manual
 # 1. Go to github.com → New Repository
-# 2. Name: datascrub-pro
+# 2. Name: ghostmydata
 # 3. Private
 # 4. Don't initialize with README
 # 5. Copy the commands shown and run them
@@ -75,7 +75,7 @@ gh repo create datascrub-pro --private --source=. --push
 
 1. Go to https://vercel.com/dashboard
 2. Click "Add New..." → "Project"
-3. Find `datascrub-pro` → Click "Import"
+3. Find `ghostmydata` → Click "Import"
 4. **Configure Environment Variables** (click to expand):
 
    Add these variables:
@@ -88,7 +88,7 @@ gh repo create datascrub-pro --private --source=. --push
    | `AUTH_URL` | `https://your-project.vercel.app` (update after deploy) |
    | `ENCRYPTION_KEY` | Run: `openssl rand -hex 32` |
    | `NEXT_PUBLIC_APP_URL` | `https://your-project.vercel.app` |
-   | `NEXT_PUBLIC_APP_NAME` | `DataScrub Pro` |
+   | `NEXT_PUBLIC_APP_NAME` | `GhostMyData` |
 
 5. Click "Deploy"
 6. Wait 2-3 minutes for build
@@ -165,9 +165,9 @@ openssl rand -hex 32
 ## Your URLs
 
 After deployment:
-- **App**: `https://datascrub-pro-xxx.vercel.app` (or your custom domain)
+- **App**: `https://ghostmydata-xxx.vercel.app` (or your custom domain)
 - **Supabase Dashboard**: `https://supabase.com/dashboard/project/[PROJECT-ID]`
-- **Vercel Dashboard**: `https://vercel.com/[USERNAME]/datascrub-pro`
+- **Vercel Dashboard**: `https://vercel.com/[USERNAME]/ghostmydata`
 
 ---
 

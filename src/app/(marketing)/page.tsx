@@ -88,7 +88,7 @@ export default function HomePage() {
             </h1>
 
             <p className="text-xl text-slate-400 max-w-3xl mx-auto mb-8">
-              DataScrub Pro finds where your personal information is exposed
+              GhostMyData finds where your personal information is exposed
               online and automatically removes it from data brokers, breach
               databases, and the dark web.
             </p>
@@ -196,7 +196,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              How DataScrub Pro Works
+              How GhostMyData Works
             </h2>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
               Our automated system finds and removes your personal data from
