@@ -256,6 +256,12 @@ export default function HomePage() {
       <section className="bg-slate-900/50 border-y border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/20 rounded-full border border-orange-500/30 mb-6">
+              <Zap className="h-4 w-4 text-orange-400" />
+              <span className="text-sm font-semibold text-orange-400">
+                Limited Time: 40% OFF Introductory Sale
+              </span>
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Simple, Transparent Pricing
             </h2>
@@ -293,9 +299,15 @@ export default function HomePage() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500 rounded-full text-xs font-semibold text-white">
                 Most Popular
               </div>
+              <div className="absolute -top-3 -right-3 px-2 py-1 bg-orange-500 rounded-full text-xs font-bold text-white">
+                40% OFF
+              </div>
               <h3 className="text-xl font-semibold text-white mb-2">Pro</h3>
-              <div className="text-3xl font-bold text-white mb-4">
-                $9.99<span className="text-sm font-normal text-slate-400">/month</span>
+              <div className="mb-4">
+                <span className="text-lg text-slate-500 line-through">$19.99</span>
+                <div className="text-3xl font-bold text-white">
+                  $11.99<span className="text-sm font-normal text-slate-400">/month</span>
+                </div>
               </div>
               <ul className="space-y-3 mb-6">
                 {[
@@ -318,10 +330,16 @@ export default function HomePage() {
             </div>
 
             {/* Enterprise */}
-            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+            <div className="relative p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <div className="absolute -top-3 -right-3 px-2 py-1 bg-orange-500 rounded-full text-xs font-bold text-white">
+                40% OFF
+              </div>
               <h3 className="text-xl font-semibold text-white mb-2">Enterprise</h3>
-              <div className="text-3xl font-bold text-white mb-4">
-                $29.99<span className="text-sm font-normal text-slate-400">/month</span>
+              <div className="mb-4">
+                <span className="text-lg text-slate-500 line-through">$49.00</span>
+                <div className="text-3xl font-bold text-white">
+                  $29.00<span className="text-sm font-normal text-slate-400">/month</span>
+                </div>
               </div>
               <ul className="space-y-3 mb-6">
                 {[
@@ -339,7 +357,7 @@ export default function HomePage() {
               </ul>
               <Link href="/register">
                 <Button variant="outline" className="w-full border-slate-600">
-                  Contact Sales
+                  Start Free Trial
                 </Button>
               </Link>
             </div>

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, X } from "lucide-react";
+import { CheckCircle, X, Zap } from "lucide-react";
 
 const plans = [
   {
     name: "Free",
     price: "$0",
+    originalPrice: null,
     description: "Get started with basic data discovery",
     features: [
       { text: "1 email scan per month", included: true },
@@ -20,10 +21,12 @@ const plans = [
     cta: "Get Started",
     ctaLink: "/register",
     popular: false,
+    sale: false,
   },
   {
     name: "Pro",
-    price: "$9.99",
+    price: "$11.99",
+    originalPrice: "$19.99",
     description: "Full protection for individuals",
     features: [
       { text: "Unlimited email scans", included: true },
@@ -38,10 +41,12 @@ const plans = [
     cta: "Start Free Trial",
     ctaLink: "/register",
     popular: true,
+    sale: true,
   },
   {
     name: "Enterprise",
-    price: "$29.99",
+    price: "$29.00",
+    originalPrice: "$49.00",
     description: "Complete protection for families",
     features: [
       { text: "Everything in Pro", included: true },
@@ -56,6 +61,7 @@ const plans = [
     cta: "Start Free Trial",
     ctaLink: "/register",
     popular: false,
+    sale: true,
   },
 ];
 
@@ -92,6 +98,12 @@ export default function PricingPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
       {/* Header */}
       <div className="text-center mb-16">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/20 rounded-full border border-orange-500/30 mb-6">
+          <Zap className="h-4 w-4 text-orange-400" />
+          <span className="text-sm font-semibold text-orange-400">
+            Limited Time: 40% OFF Introductory Sale
+          </span>
+        </div>
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
           Simple, Transparent Pricing
         </h1>
@@ -117,12 +129,22 @@ export default function PricingPage() {
                 Most Popular
               </div>
             )}
+            {plan.sale && (
+              <div className="absolute -top-4 -right-4 px-3 py-1 bg-orange-500 rounded-full text-sm font-bold text-white">
+                40% OFF
+              </div>
+            )}
 
             <div className="mb-6">
               <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-4xl font-bold text-white">{plan.price}</span>
-                <span className="text-slate-400">/month</span>
+              <div className="mb-2">
+                {plan.originalPrice && (
+                  <span className="text-lg text-slate-500 line-through mr-2">{plan.originalPrice}</span>
+                )}
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-bold text-white">{plan.price}</span>
+                  <span className="text-slate-400">/month</span>
+                </div>
               </div>
               <p className="text-slate-400">{plan.description}</p>
             </div>

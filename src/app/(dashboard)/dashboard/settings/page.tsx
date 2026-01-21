@@ -164,12 +164,15 @@ function SettingsContent() {
     {
       name: "FREE",
       price: "$0",
+      originalPrice: null,
       features: ["10 scans/month", "Basic exposure report", "Manual removal guides"],
       current: currentPlan === "FREE",
+      sale: false,
     },
     {
       name: "PRO",
-      price: "$9.99",
+      price: "$11.99",
+      originalPrice: "$19.99",
       features: [
         "50 scans/month",
         "Automated removals",
@@ -178,10 +181,12 @@ function SettingsContent() {
       ],
       current: currentPlan === "PRO",
       recommended: true,
+      sale: true,
     },
     {
       name: "ENTERPRISE",
-      price: "$29.99",
+      price: "$29.00",
+      originalPrice: "$49.00",
       features: [
         "Unlimited scans",
         "Dark web monitoring",
@@ -190,6 +195,7 @@ function SettingsContent() {
         "API access",
       ],
       current: currentPlan === "ENTERPRISE",
+      sale: true,
     },
   ];
 
@@ -445,18 +451,33 @@ function SettingsContent() {
                     Current
                   </Badge>
                 )}
+                {plan.sale && !plan.current && !plan.recommended && (
+                  <Badge className="absolute -top-2 -right-2 bg-orange-500">
+                    40% OFF
+                  </Badge>
+                )}
                 <div className="flex items-center gap-2 mb-2">
                   {plan.name !== "FREE" && (
                     <Crown className="h-4 w-4 text-yellow-500" />
                   )}
                   <h3 className="font-semibold text-white">{plan.name}</h3>
+                  {plan.sale && (
+                    <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded">
+                      40% OFF
+                    </span>
+                  )}
                 </div>
-                <p className="text-2xl font-bold text-white mb-4">
-                  {plan.price}
-                  <span className="text-sm font-normal text-slate-400">
-                    /month
+                <div className="mb-4">
+                  {plan.originalPrice && (
+                    <span className="text-sm text-slate-500 line-through mr-2">{plan.originalPrice}</span>
+                  )}
+                  <span className="text-2xl font-bold text-white">
+                    {plan.price}
+                    <span className="text-sm font-normal text-slate-400">
+                      /month
+                    </span>
                   </span>
-                </p>
+                </div>
                 <ul className="space-y-2 mb-4">
                   {plan.features.map((feature) => (
                     <li
