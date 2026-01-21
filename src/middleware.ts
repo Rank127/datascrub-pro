@@ -15,9 +15,10 @@ export default auth((req) => {
   const isDashboardPage = nextUrl.pathname.startsWith("/dashboard");
   const isApiAuthPage = nextUrl.pathname.startsWith("/api/auth");
   const isPublicApiPage = nextUrl.pathname.startsWith("/api/auth/register");
+  const isBingVerify = nextUrl.pathname === "/api/bing-verify";
 
-  // Allow API auth routes
-  if (isApiAuthPage) {
+  // Allow public API routes
+  if (isApiAuthPage || isBingVerify) {
     return NextResponse.next();
   }
 
@@ -44,6 +45,7 @@ export const config = {
     "/register",
     "/forgot-password",
     "/reset-password",
-    "/api/:path*",
+    // Exclude bing-verify and cron endpoints from auth middleware
+    "/api/((?!bing-verify|cron).*)",
   ],
 };
