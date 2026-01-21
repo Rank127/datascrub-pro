@@ -4,6 +4,12 @@
   "buildCommand": "prisma db push --accept-data-loss && prisma generate && next build",
   "installCommand": "npm install",
   "regions": ["iad1"],
+  "rewrites": [
+    {
+      "source": "/BingSiteAuth.xml",
+      "destination": "/api/bing-verify"
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/monitoring",
