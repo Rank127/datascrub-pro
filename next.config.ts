@@ -40,6 +40,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/BingSiteAuth.xml",
+        destination: "/api/bing-verify",
+      },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
   },
