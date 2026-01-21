@@ -1,4 +1,31 @@
+import type { Metadata } from "next";
 import { Shield, Lock, Server, Eye, Key, FileCheck, AlertTriangle, CheckCircle } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Security - Bank-Level Data Protection",
+  description:
+    "GhostMyData uses AES-256 encryption, SOC 2 compliant infrastructure, and industry-leading security practices to protect your personal data. Learn about our security measures.",
+  keywords: [
+    "data security",
+    "AES-256 encryption",
+    "SOC 2 compliance",
+    "secure data removal",
+    "privacy security",
+    "encrypted data storage",
+    "secure personal data",
+    "cybersecurity",
+  ],
+  alternates: {
+    canonical: "https://ghostmydata.com/security",
+  },
+  openGraph: {
+    title: "Security - GhostMyData",
+    description:
+      "Bank-level security with AES-256 encryption, SOC 2 compliance, and 24/7 monitoring to protect your data.",
+    url: "https://ghostmydata.com/security",
+    type: "website",
+  },
+};
 
 const securityFeatures = [
   {

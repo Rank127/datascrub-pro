@@ -1,5 +1,36 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+
+export const metadata: Metadata = {
+  title: "GhostMyData - Remove Your Personal Data From The Internet",
+  description:
+    "Find and remove your personal data from data brokers, breach databases, and the dark web. Automated privacy protection with 98% removal success rate. Start your free scan today.",
+  keywords: [
+    "data removal service",
+    "remove personal data from internet",
+    "data broker removal",
+    "privacy protection",
+    "personal data removal",
+    "delete my data online",
+    "opt out of data brokers",
+    "Spokeo removal",
+    "WhitePages removal",
+    "BeenVerified removal",
+    "people search removal",
+    "identity protection",
+  ],
+  alternates: {
+    canonical: "https://ghostmydata.com",
+  },
+  openGraph: {
+    title: "GhostMyData - Remove Your Personal Data From The Internet",
+    description:
+      "Find and remove your personal data from data brokers, breach databases, and the dark web. Start your free scan today.",
+    url: "https://ghostmydata.com",
+    type: "website",
+  },
+};
 import {
   Shield,
   Search,

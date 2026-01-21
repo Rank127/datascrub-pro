@@ -1,3 +1,34 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy - How We Protect Your Data",
+  description:
+    "Learn how GhostMyData protects your personal information. We use AES-256 encryption, never sell your data, and comply with CCPA, GDPR, and other privacy regulations.",
+  keywords: [
+    "GhostMyData privacy policy",
+    "data protection policy",
+    "privacy terms",
+    "GDPR compliance",
+    "CCPA compliance",
+    "data security",
+    "personal data protection",
+  ],
+  alternates: {
+    canonical: "https://ghostmydata.com/privacy",
+  },
+  openGraph: {
+    title: "Privacy Policy - GhostMyData",
+    description:
+      "Our commitment to protecting your privacy. AES-256 encryption, zero data selling, full GDPR/CCPA compliance.",
+    url: "https://ghostmydata.com/privacy",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
 export default function PrivacyPage() {
   return (
     <div className="py-24">

@@ -1,3 +1,33 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms of Service - User Agreement",
+  description:
+    "GhostMyData Terms of Service. Read our user agreement covering service usage, subscription terms, data removal authorization, privacy rights, and legal terms.",
+  keywords: [
+    "GhostMyData terms of service",
+    "user agreement",
+    "service terms",
+    "legal terms",
+    "subscription terms",
+    "data removal terms",
+  ],
+  alternates: {
+    canonical: "https://ghostmydata.com/terms",
+  },
+  openGraph: {
+    title: "Terms of Service - GhostMyData",
+    description:
+      "Read our terms of service covering data removal authorization, subscription billing, and user responsibilities.",
+    url: "https://ghostmydata.com/terms",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
 export default function TermsPage() {
   return (
     <div className="py-24">

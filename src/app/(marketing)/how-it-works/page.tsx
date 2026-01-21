@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +11,32 @@ import {
   Bell,
   CheckCircle,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "How It Works - 5-Step Data Removal Process",
+  description:
+    "Learn how GhostMyData removes your personal data in 5 simple steps: Create profile, scan 50+ sources, review exposures, automated removal, and continuous monitoring.",
+  keywords: [
+    "how data removal works",
+    "data broker opt out process",
+    "remove personal information online",
+    "automated data removal",
+    "personal data scan",
+    "data exposure monitoring",
+    "CCPA removal process",
+    "GDPR data deletion",
+  ],
+  alternates: {
+    canonical: "https://ghostmydata.com/how-it-works",
+  },
+  openGraph: {
+    title: "How GhostMyData Works - 5-Step Data Removal",
+    description:
+      "Our automated 5-step process finds and removes your data from 50+ sources with 98% success rate.",
+    url: "https://ghostmydata.com/how-it-works",
+    type: "website",
+  },
+};
 
 const steps = [
   {

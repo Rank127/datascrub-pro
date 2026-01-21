@@ -1,6 +1,33 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, X, Zap } from "lucide-react";
+import { FAQSchema } from "@/components/seo/structured-data";
+
+export const metadata: Metadata = {
+  title: "Pricing - Affordable Data Removal Plans",
+  description:
+    "Choose from free, Pro ($11.99/mo), or Enterprise ($29/mo) data removal plans. 40% off introductory sale. Automated removal requests, continuous monitoring, and dark web protection.",
+  keywords: [
+    "data removal pricing",
+    "privacy protection cost",
+    "data broker removal service price",
+    "personal data removal plans",
+    "cheap data removal service",
+    "affordable privacy protection",
+    "GhostMyData pricing",
+  ],
+  alternates: {
+    canonical: "https://ghostmydata.com/pricing",
+  },
+  openGraph: {
+    title: "Pricing - GhostMyData Data Removal Plans",
+    description:
+      "Affordable data removal plans starting free. Pro plan $11.99/mo with automated removal. 40% off introductory sale.",
+    url: "https://ghostmydata.com/pricing",
+    type: "website",
+  },
+};
 
 const plans = [
   {
@@ -95,7 +122,9 @@ const faqs = [
 
 export default function PricingPage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+    <>
+      <FAQSchema faqs={faqs} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
       {/* Header */}
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/20 rounded-full border border-orange-500/30 mb-6">
@@ -204,5 +233,6 @@ export default function PricingPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -3,8 +3,12 @@ import { prisma } from "@/lib/db";
 import { encrypt, decrypt } from "@/lib/encryption/crypto";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = "developer@ghostmydata.com";
+
+// Lazy initialization to avoid build-time errors
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 interface TestResult {
   name: string;
@@ -630,7 +634,7 @@ export async function GET(request: Request) {
         </div>
       `;
 
-      await resend.emails.send({
+      await getResend().emails.send({
         from: process.env.RESEND_FROM_EMAIL || "GhostMyData <noreply@send.ghostmydata.com>",
         to: [ADMIN_EMAIL],
         subject: `${statusEmoji} GhostMyData Health: ${overall} - ${summary.failed} failed, ${summary.warnings} warnings`,
