@@ -129,6 +129,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        <meta name="msvalidate.01" content="EB8B76BA0A76EF68700EDBCC7434AA48" />
         <OrganizationSchema />
         <WebsiteSchema />
         <SoftwareApplicationSchema />
