@@ -13,6 +13,7 @@ export function UpgradeBanner({ variant = "sidebar" }: UpgradeBannerProps) {
   const [plan, setPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [upgradeLoading, setUpgradeLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPlan = async () => {
@@ -33,6 +34,7 @@ export function UpgradeBanner({ variant = "sidebar" }: UpgradeBannerProps) {
 
   const handleUpgrade = async () => {
     setUpgradeLoading(true);
+    setError(null);
     try {
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -40,14 +42,17 @@ export function UpgradeBanner({ variant = "sidebar" }: UpgradeBannerProps) {
         body: JSON.stringify({ plan: "PRO" }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.url) {
-          window.location.href = data.url;
-        }
+      const data = await response.json();
+
+      if (response.ok && data.url) {
+        window.location.href = data.url;
+      } else {
+        setError(data.error || "Failed to start checkout. Please try again.");
+        console.error("Checkout error:", data);
       }
-    } catch (error) {
-      console.error("Failed to start checkout:", error);
+    } catch (err) {
+      setError("Connection error. Please try again.");
+      console.error("Failed to start checkout:", err);
     } finally {
       setUpgradeLoading(false);
     }
@@ -76,6 +81,9 @@ export function UpgradeBanner({ variant = "sidebar" }: UpgradeBannerProps) {
             40% OFF
           </span>
         </div>
+        {error && (
+          <p className="text-xs text-red-400 mb-2">{error}</p>
+        )}
         <Button
           size="sm"
           className="w-full bg-emerald-600 hover:bg-emerald-700 text-sm"
@@ -122,27 +130,32 @@ export function UpgradeBanner({ variant = "sidebar" }: UpgradeBannerProps) {
             </div>
           </div>
         </div>
-        <div className="flex gap-3">
-          <Link href="/dashboard/settings">
-            <Button variant="outline" className="border-slate-600 text-slate-300">
-              View Plans
-              <ArrowRight className="h-4 w-4 ml-2" />
+        <div className="flex flex-col items-end gap-2">
+          {error && (
+            <p className="text-sm text-red-400">{error}</p>
+          )}
+          <div className="flex gap-3">
+            <Link href="/dashboard/settings">
+              <Button variant="outline" className="border-slate-600 text-slate-300">
+                View Plans
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleUpgrade}
+              disabled={upgradeLoading}
+            >
+              {upgradeLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Upgrade Now
+                </>
+              )}
             </Button>
-          </Link>
-          <Button
-            className="bg-emerald-600 hover:bg-emerald-700"
-            onClick={handleUpgrade}
-            disabled={upgradeLoading}
-          >
-            {upgradeLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4 mr-2" />
-                Upgrade Now
-              </>
-            )}
-          </Button>
+          </div>
         </div>
       </div>
     </div>
