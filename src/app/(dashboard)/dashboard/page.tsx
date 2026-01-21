@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { RiskScore } from "@/components/dashboard/risk-score";
 import { ExposureCard } from "@/components/dashboard/exposure-card";
+import { UpgradeBanner } from "@/components/dashboard/upgrade-banner";
 import {
   AlertTriangle,
   Search,
@@ -88,6 +89,9 @@ export default function DashboardPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Upgrade Banner - shows for FREE users only */}
+      <UpgradeBanner variant="card" />
 
       {/* Risk Score and Stats */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

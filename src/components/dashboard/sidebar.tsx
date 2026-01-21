@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { UpgradeBanner } from "@/components/dashboard/upgrade-banner";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -63,6 +64,9 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Upgrade Banner - shows for FREE users only */}
+      <UpgradeBanner variant="sidebar" />
 
       {/* User section */}
       <div className="border-t border-slate-800 p-4">
