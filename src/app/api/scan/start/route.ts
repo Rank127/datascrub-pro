@@ -10,6 +10,7 @@ import {
 } from "@/lib/scanners/scan-orchestrator";
 import type { Plan, ScanType } from "@/lib/types";
 import { z } from "zod";
+import { isAdmin, getEffectivePlan } from "@/lib/admin";
 
 const scanRequestSchema = z.object({
   type: z.enum(["FULL", "QUICK", "MONITORING"]),
@@ -44,10 +45,11 @@ export async function POST(request: Request) {
     // Get user's plan
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { plan: true },
+      select: { plan: true, email: true },
     });
 
-    const userPlan = (user?.plan || "FREE") as Plan;
+    // Admin users get ENTERPRISE access
+    const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE") as Plan;
 
     // Check scan limits based on plan
     const currentMonth = new Date();

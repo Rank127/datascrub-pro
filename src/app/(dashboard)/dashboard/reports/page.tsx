@@ -20,6 +20,7 @@ import {
   AlertTriangle,
   CheckCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 
 // Mock report data
 const reports = [
@@ -62,6 +63,82 @@ const summaryData = {
   averageRemovalTime: "3.2 days",
 };
 
+// Generate CSV content for a report
+function generateReportCSV(report: typeof reports[0]) {
+  const headers = ["Metric", "Value"];
+  const rows = [
+    ["Report Period", report.period],
+    ["Generated Date", report.generatedAt],
+    ["New Exposures Found", report.stats.newExposures.toString()],
+    ["Exposures Removed", report.stats.removedExposures.toString()],
+    ["Risk Score Change", `${report.stats.riskScoreChange}%`],
+  ];
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+  ].join("\n");
+
+  return csvContent;
+}
+
+// Download a single report
+function downloadReport(report: typeof reports[0]) {
+  const csvContent = generateReportCSV(report);
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+
+  link.setAttribute("href", url);
+  link.setAttribute("download", `ghostmydata-report-${report.period.replace(" ", "-").toLowerCase()}.csv`);
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  toast.success(`Downloaded ${report.period} report`);
+}
+
+// Export all reports
+function exportAllReports() {
+  const headers = ["Period", "Generated Date", "New Exposures", "Removed Exposures", "Risk Score Change"];
+  const rows = reports.map(report => [
+    report.period,
+    report.generatedAt,
+    report.stats.newExposures.toString(),
+    report.stats.removedExposures.toString(),
+    `${report.stats.riskScoreChange}%`,
+  ]);
+
+  const summaryRows = [
+    [],
+    ["Summary Statistics"],
+    ["Total Exposures Removed", summaryData.totalExposuresRemoved.toString()],
+    ["Risk Score Reduction", `${summaryData.riskScoreReduction}%`],
+    ["Sources Monitored", summaryData.sourcesMonitored.toString()],
+    ["Average Removal Time", summaryData.averageRemovalTime],
+  ];
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map(row => row.map(cell => `"${cell}"`).join(",")),
+    ...summaryRows.map(row => row.map(cell => `"${cell}"`).join(","))
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+
+  link.setAttribute("href", url);
+  link.setAttribute("download", `ghostmydata-all-reports-${new Date().toISOString().split("T")[0]}.csv`);
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  toast.success("Downloaded all reports");
+}
+
 export default function ReportsPage() {
   return (
     <div className="space-y-6">
@@ -72,7 +149,10 @@ export default function ReportsPage() {
             View your monthly data protection reports
           </p>
         </div>
-        <Button className="bg-emerald-600 hover:bg-emerald-700">
+        <Button
+          className="bg-emerald-600 hover:bg-emerald-700"
+          onClick={exportAllReports}
+        >
           <Download className="mr-2 h-4 w-4" />
           Export All
         </Button>
@@ -232,6 +312,7 @@ export default function ReportsPage() {
                     variant="outline"
                     size="sm"
                     className="border-slate-600"
+                    onClick={() => downloadReport(report)}
                   >
                     <Download className="h-4 w-4" />
                   </Button>

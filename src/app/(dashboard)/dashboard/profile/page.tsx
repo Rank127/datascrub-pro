@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,7 @@ interface Address {
 
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [success, setSuccess] = useState(false);
 
   // Basic info
@@ -66,10 +67,38 @@ export default function ProfilePage() {
   // Sensitive info
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [ssn, setSsn] = useState("");
+  const [hasExistingSSN, setHasExistingSSN] = useState(false);
 
   // Usernames
   const [usernames, setUsernames] = useState<string[]>([]);
   const [newUsername, setNewUsername] = useState("");
+
+  // Load existing profile data on mount
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const response = await fetch("/api/profile");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.profile) {
+            setFullName(data.profile.fullName || "");
+            setAliases(data.profile.aliases || []);
+            setEmails(data.profile.emails || []);
+            setPhones(data.profile.phones || []);
+            setAddresses(data.profile.addresses || []);
+            setDateOfBirth(data.profile.dateOfBirth || "");
+            setHasExistingSSN(data.profile.hasSSN || false);
+            setUsernames(data.profile.usernames || []);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load profile:", error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    }
+    loadProfile();
+  }, []);
 
   const addItem = (
     item: string,
@@ -105,9 +134,24 @@ export default function ProfilePage() {
     }
   };
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleSave = async () => {
     setIsLoading(true);
     setSuccess(false);
+    setError(null);
+
+    // Auto-add any pending items from input fields
+    const finalEmails = newEmail && !emails.includes(newEmail) ? [...emails, newEmail] : emails;
+    const finalPhones = newPhone && !phones.includes(newPhone) ? [...phones, newPhone] : phones;
+    const finalAliases = newAlias && !aliases.includes(newAlias) ? [...aliases, newAlias] : aliases;
+    const finalUsernames = newUsername && !usernames.includes(newUsername) ? [...usernames, newUsername] : usernames;
+
+    // Update state with any auto-added items
+    if (finalEmails !== emails) { setEmails(finalEmails); setNewEmail(""); }
+    if (finalPhones !== phones) { setPhones(finalPhones); setNewPhone(""); }
+    if (finalAliases !== aliases) { setAliases(finalAliases); setNewAlias(""); }
+    if (finalUsernames !== usernames) { setUsernames(finalUsernames); setNewUsername(""); }
 
     try {
       const response = await fetch("/api/profile", {
@@ -115,22 +159,31 @@ export default function ProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fullName,
-          aliases,
-          emails,
-          phones,
+          aliases: finalAliases,
+          emails: finalEmails,
+          phones: finalPhones,
           addresses,
           dateOfBirth,
           ssn,
-          usernames,
+          usernames: finalUsernames,
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         setSuccess(true);
+        setSsn(""); // Clear SSN field after save (it's hashed, can't be retrieved)
+        setHasExistingSSN(!!ssn || hasExistingSSN); // Update SSN indicator
         setTimeout(() => setSuccess(false), 3000);
+      } else {
+        setError(data.error || "Failed to save profile");
+        setTimeout(() => setError(null), 5000);
       }
-    } catch (error) {
-      console.error("Failed to save profile:", error);
+    } catch (err) {
+      console.error("Failed to save profile:", err);
+      setError("Network error - please try again");
+      setTimeout(() => setError(null), 5000);
     } finally {
       setIsLoading(false);
     }
@@ -154,6 +207,22 @@ export default function ProfilePage() {
         </Alert>
       )}
 
+      {error && (
+        <Alert className="bg-red-500/10 border-red-500/20">
+          <Shield className="h-4 w-4 text-red-500" />
+          <AlertDescription className="text-red-400">
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {isLoadingProfile ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+          <span className="ml-2 text-slate-400">Loading profile...</span>
+        </div>
+      ) : (
+      <>
       <Tabs defaultValue="basic" className="space-y-6">
         <TabsList className="bg-slate-800 border-slate-700">
           <TabsTrigger value="basic" className="data-[state=active]:bg-slate-700">
@@ -204,7 +273,7 @@ export default function ProfilePage() {
                   Aliases / Previous Names
                 </Label>
                 <p className="text-xs text-slate-500">
-                  Include maiden names, nicknames, or previous legal names
+                  Include maiden names, nicknames, or previous legal names. Click + or press Enter to add.
                 </p>
                 <div className="flex gap-2">
                   <Input
@@ -266,6 +335,7 @@ export default function ProfilePage() {
               {/* Emails */}
               <div className="space-y-2">
                 <Label className="text-slate-200">Email Addresses</Label>
+                <p className="text-xs text-slate-500">Type an email and click + or press Enter to add it</p>
                 <div className="flex gap-2">
                   <Input
                     type="email"
@@ -312,6 +382,7 @@ export default function ProfilePage() {
               {/* Phones */}
               <div className="space-y-2">
                 <Label className="text-slate-200">Phone Numbers</Label>
+                <p className="text-xs text-slate-500">Type a phone number and click + or press Enter to add it</p>
                 <div className="flex gap-2">
                   <Input
                     type="tel"
@@ -507,12 +578,17 @@ export default function ProfilePage() {
                 <p className="text-xs text-slate-500">
                   Used only to check dark web exposure. Stored as a one-way hash.
                 </p>
+                {hasExistingSSN && (
+                  <p className="text-xs text-emerald-400">
+                    SSN already on file. Enter a new value to update it.
+                  </p>
+                )}
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
                     id="ssn"
                     type="password"
-                    placeholder="XXX-XX-XXXX"
+                    placeholder={hasExistingSSN ? "***-**-**** (on file)" : "XXX-XX-XXXX"}
                     value={ssn}
                     onChange={(e) => setSsn(e.target.value)}
                     className="pl-10 bg-slate-700/50 border-slate-600 text-white"
@@ -532,7 +608,7 @@ export default function ProfilePage() {
                 Usernames & Handles
               </CardTitle>
               <CardDescription className="text-slate-400">
-                Add usernames you use across different platforms
+                Add usernames you use across different platforms. Click + or press Enter to add.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -603,6 +679,8 @@ export default function ProfilePage() {
           )}
         </Button>
       </div>
+      </>
+      )}
     </div>
   );
 }

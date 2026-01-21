@@ -22,6 +22,14 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Notification Preferences
+  emailNotifications  Boolean @default(true)
+  newExposureAlerts   Boolean @default(true)
+  removalUpdates      Boolean @default(true)
+  weeklyReports       Boolean @default(true)
+  marketingEmails     Boolean @default(false)
+  reportFrequency     String  @default("weekly") // daily, weekly, monthly
+
   // Relations
   profiles        PersonalProfile[]
   scans           Scan[]

@@ -1,0 +1,142 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { sendWeeklyReportEmail } from "@/lib/email";
+
+// Verify cron secret to prevent unauthorized calls
+function verifyCronSecret(request: Request): boolean {
+  const authHeader = request.headers.get("authorization");
+  const cronSecret = process.env.CRON_SECRET;
+
+  // If no CRON_SECRET is set, allow the request (for development)
+  if (!cronSecret) return true;
+
+  return authHeader === `Bearer ${cronSecret}`;
+}
+
+// GET /api/cron/reports - Send periodic report emails
+export async function GET(request: Request) {
+  // Verify this is a legitimate cron request
+  if (!verifyCronSecret(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    // Determine which frequencies to process based on current day
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const dayOfMonth = now.getDate();
+
+    const frequenciesToProcess: string[] = ["daily"];
+
+    // Weekly reports on Monday (day 1)
+    if (dayOfWeek === 1) {
+      frequenciesToProcess.push("weekly");
+    }
+
+    // Monthly reports on the 1st
+    if (dayOfMonth === 1) {
+      frequenciesToProcess.push("monthly");
+    }
+
+    // Fetch users who want reports and have email notifications enabled
+    const users = await prisma.user.findMany({
+      where: {
+        emailNotifications: true,
+        weeklyReports: true,
+        reportFrequency: { in: frequenciesToProcess },
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        reportFrequency: true,
+      },
+    });
+
+    let sentCount = 0;
+    let errorCount = 0;
+
+    for (const user of users) {
+      try {
+        // Calculate stats for this user
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        const [totalExposures, newExposures, removedThisWeek, pendingRemovals] = await Promise.all([
+          prisma.exposure.count({
+            where: { userId: user.id, status: "ACTIVE" },
+          }),
+          prisma.exposure.count({
+            where: {
+              userId: user.id,
+              firstFoundAt: { gte: oneWeekAgo },
+            },
+          }),
+          prisma.removalRequest.count({
+            where: {
+              userId: user.id,
+              status: "COMPLETED",
+              completedAt: { gte: oneWeekAgo },
+            },
+          }),
+          prisma.removalRequest.count({
+            where: {
+              userId: user.id,
+              status: { in: ["PENDING", "SUBMITTED", "IN_PROGRESS"] },
+            },
+          }),
+        ]);
+
+        // Calculate risk score (simplified)
+        const riskScore = Math.min(100, Math.max(0, totalExposures * 5));
+
+        // Get previous week's total to calculate change
+        const twoWeeksAgo = new Date();
+        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+        const previousWeekExposures = await prisma.exposure.count({
+          where: {
+            userId: user.id,
+            firstFoundAt: { lte: oneWeekAgo, gte: twoWeeksAgo },
+          },
+        });
+
+        const previousRiskScore = Math.min(100, Math.max(0, (totalExposures + removedThisWeek - newExposures) * 5));
+        const riskChange = riskScore - previousRiskScore;
+
+        // Send the report email
+        const result = await sendWeeklyReportEmail(user.email, user.name || "", {
+          totalExposures,
+          newExposures,
+          removedThisWeek,
+          pendingRemovals,
+          riskScore,
+          riskChange,
+        });
+
+        if (result.success) {
+          sentCount++;
+        } else {
+          errorCount++;
+          console.error(`Failed to send report to ${user.email}:`, result.error);
+        }
+      } catch (error) {
+        errorCount++;
+        console.error(`Error processing report for user ${user.id}:`, error);
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Sent ${sentCount} reports, ${errorCount} errors`,
+      frequencies: frequenciesToProcess,
+      usersProcessed: users.length,
+    });
+  } catch (error) {
+    console.error("Cron reports error:", error);
+    return NextResponse.json(
+      { error: "Failed to process reports" },
+      { status: 500 }
+    );
+  }
+}

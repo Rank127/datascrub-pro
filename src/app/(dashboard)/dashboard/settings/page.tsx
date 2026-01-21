@@ -64,6 +64,54 @@ function SettingsContent() {
   const [removalUpdates, setRemovalUpdates] = useState(true);
   const [weeklyReports, setWeeklyReports] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
+  const [reportFrequency, setReportFrequency] = useState("weekly");
+  const [notificationLoading, setNotificationLoading] = useState(false);
+
+  // Fetch notification preferences
+  const fetchNotificationPrefs = async () => {
+    try {
+      const response = await fetch("/api/notifications");
+      if (response.ok) {
+        const data = await response.json();
+        setEmailNotifications(data.emailNotifications ?? true);
+        setNewExposureAlerts(data.newExposureAlerts ?? true);
+        setRemovalUpdates(data.removalUpdates ?? true);
+        setWeeklyReports(data.weeklyReports ?? true);
+        setMarketingEmails(data.marketingEmails ?? false);
+        setReportFrequency(data.reportFrequency ?? "weekly");
+      }
+    } catch (error) {
+      console.error("Failed to fetch notification preferences:", error);
+    }
+  };
+
+  // Save notification preferences
+  const handleSaveNotifications = async () => {
+    setNotificationLoading(true);
+    try {
+      const response = await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailNotifications,
+          newExposureAlerts,
+          removalUpdates,
+          weeklyReports,
+          marketingEmails,
+          reportFrequency,
+        }),
+      });
+      if (response.ok) {
+        setMessage({ type: "success", text: "Notification preferences saved!" });
+      } else {
+        setMessage({ type: "error", text: "Failed to save notification preferences." });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to save notification preferences." });
+    } finally {
+      setNotificationLoading(false);
+    }
+  };
 
   // Check for success/canceled URL params from Stripe redirect
   useEffect(() => {
@@ -91,6 +139,7 @@ function SettingsContent() {
 
   useEffect(() => {
     fetchSubscription();
+    fetchNotificationPrefs();
   }, []);
 
   const handleSaveAccount = async () => {
@@ -383,6 +432,46 @@ function SettingsContent() {
                 className="border-slate-600 data-[state=checked]:bg-emerald-600"
               />
             </div>
+          </div>
+          <Separator className="bg-slate-700" />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-slate-200">Report Frequency</Label>
+                <p className="text-sm text-slate-500">
+                  How often to receive summary reports
+                </p>
+              </div>
+              <select
+                value={reportFrequency}
+                onChange={(e) => setReportFrequency(e.target.value)}
+                disabled={!emailNotifications || !weeklyReports}
+                className="bg-slate-700 border border-slate-600 text-white rounded-md px-3 py-2 text-sm disabled:opacity-50"
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+          </div>
+          <div className="pt-4">
+            <Button
+              onClick={handleSaveNotifications}
+              className="bg-emerald-600 hover:bg-emerald-700"
+              disabled={notificationLoading}
+            >
+              {notificationLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Notification Preferences
+                </>
+              )}
+            </Button>
           </div>
         </CardContent>
       </Card>

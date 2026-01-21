@@ -5,6 +5,7 @@ import { executeRemoval } from "@/lib/removers/removal-service";
 import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
+import { isAdmin, getEffectivePlan } from "@/lib/admin";
 
 const requestSchema = z.object({
   exposureId: z.string(),
@@ -69,12 +70,12 @@ export async function POST(request: Request) {
     // Check user's plan
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { plan: true },
+      select: { plan: true, email: true },
     });
 
-    const userPlan = (user?.plan || "FREE") as Plan;
+    const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE") as Plan;
 
-    // Require paid plan for automated removals
+    // Require paid plan for automated removals (admins bypass this)
     if (userPlan === "FREE") {
       return NextResponse.json(
         {

@@ -66,6 +66,12 @@ export async function POST(request: Request) {
         break;
       }
 
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        await handleRefund(charge);
+        break;
+      }
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
@@ -267,4 +273,71 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
       },
     }),
   ]);
+}
+
+async function handleRefund(charge: Stripe.Charge) {
+  const customerId = charge.customer as string;
+
+  if (!customerId) {
+    console.error("No customer ID in refund charge");
+    return;
+  }
+
+  const subscription = await prisma.subscription.findFirst({
+    where: { stripeCustomerId: customerId },
+  });
+
+  if (!subscription) {
+    console.error("No subscription found for refund customer:", customerId);
+    return;
+  }
+
+  const refundAmount = charge.amount_refunded / 100;
+  const isFullRefund = charge.refunded && charge.amount === charge.amount_refunded;
+
+  if (isFullRefund) {
+    // Full refund - cancel subscription and downgrade to FREE
+    await prisma.$transaction([
+      prisma.subscription.update({
+        where: { id: subscription.id },
+        data: {
+          plan: "FREE",
+          status: "canceled",
+          stripeSubscriptionId: null,
+          stripePriceId: null,
+        },
+      }),
+      prisma.user.update({
+        where: { id: subscription.userId },
+        data: { plan: "FREE" },
+      }),
+      prisma.alert.create({
+        data: {
+          userId: subscription.userId,
+          type: "REFUND_PROCESSED",
+          title: "Refund Processed",
+          message: `A full refund of $${refundAmount.toFixed(2)} has been processed. Your account has been moved to the Free plan.`,
+        },
+      }),
+    ]);
+
+    // Cancel the Stripe subscription if it exists
+    if (subscription.stripeSubscriptionId) {
+      try {
+        await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
+      } catch (err) {
+        console.error("Failed to cancel Stripe subscription after refund:", err);
+      }
+    }
+  } else {
+    // Partial refund - just notify the user
+    await prisma.alert.create({
+      data: {
+        userId: subscription.userId,
+        type: "REFUND_PROCESSED",
+        title: "Partial Refund Processed",
+        message: `A partial refund of $${refundAmount.toFixed(2)} has been processed.`,
+      },
+    });
+  }
 }
