@@ -115,9 +115,11 @@ export const metadata: Metadata = {
   category: "technology",
   classification: "Privacy & Security",
   referrer: "origin-when-cross-origin",
-  other: {
-    "google-site-verification": "YOUR_GOOGLE_VERIFICATION_CODE",
-    "msvalidate.01": "EB8B76BA0A76EF68700EDBCC7434AA48",
+  verification: {
+    google: "YOUR_GOOGLE_VERIFICATION_CODE",
+    other: {
+      "msvalidate.01": ["EB8B76BA0A76EF68700EDBCC7434AA48"],
+    },
   },
 };
 
