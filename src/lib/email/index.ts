@@ -320,6 +320,59 @@ export async function sendSubscriptionEmail(email: string, name: string, plan: "
   return sendEmail(email, `🎉 Your ${APP_NAME} ${plan} subscription is active!`, html);
 }
 
+// Refund Confirmation Email
+export async function sendRefundConfirmationEmail(
+  email: string,
+  name: string,
+  refundAmount: number,
+  isFullRefund: boolean
+) {
+  const html = baseTemplate(`
+    <h1 style="color: #10b981; margin-top: 0;">💰 Refund Processed</h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      We've processed your refund request. Here are the details:
+    </p>
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Refund Amount</td>
+          <td style="padding: 12px 0; color: #10b981; text-align: right; font-weight: 600; font-size: 18px; border-bottom: 1px solid #334155;">$${refundAmount.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Refund Type</td>
+          <td style="padding: 12px 0; color: #e2e8f0; text-align: right; border-bottom: 1px solid #334155;">${isFullRefund ? 'Full Refund' : 'Partial Refund'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8;">Processing Time</td>
+          <td style="padding: 12px 0; color: #e2e8f0; text-align: right;">5-10 business days</td>
+        </tr>
+      </table>
+    </div>
+    ${isFullRefund
+      ? `<p style="font-size: 16px; line-height: 1.6;">
+          Your subscription has been cancelled and your account has been moved to the <strong>Free plan</strong>.
+          You can continue using basic features or upgrade again anytime.
+        </p>`
+      : `<p style="font-size: 16px; line-height: 1.6;">
+          Your subscription remains active. If you have any questions about this partial refund, please contact our support team.
+        </p>`
+    }
+    <p style="font-size: 16px; line-height: 1.6;">
+      The refund will appear on your original payment method within 5-10 business days, depending on your bank.
+    </p>
+    ${buttonHtml("Go to Dashboard", `${APP_URL}/dashboard`)}
+    <p style="font-size: 14px; color: #94a3b8;">
+      Thank you for trying ${APP_NAME}. If you have any feedback about your experience,
+      we'd love to hear from you at <a href="mailto:support@ghostmydata.com" style="color: #10b981;">support@ghostmydata.com</a>.
+    </p>
+  `);
+
+  return sendEmail(email, `💰 Your $${refundAmount.toFixed(2)} Refund Has Been Processed`, html);
+}
+
 // CCPA/GDPR Removal Request Email (sent to data brokers)
 interface RemovalRequestEmail {
   toEmail: string;

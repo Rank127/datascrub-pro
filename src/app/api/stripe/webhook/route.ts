@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
 import { stripe, getPlanFromPriceId } from "@/lib/stripe";
-import { sendSubscriptionEmail } from "@/lib/email";
+import { sendSubscriptionEmail, sendRefundConfirmationEmail } from "@/lib/email";
 import Stripe from "stripe";
 
 export async function POST(request: Request) {
@@ -285,6 +285,11 @@ async function handleRefund(charge: Stripe.Charge) {
 
   const subscription = await prisma.subscription.findFirst({
     where: { stripeCustomerId: customerId },
+    include: {
+      user: {
+        select: { email: true, name: true },
+      },
+    },
   });
 
   if (!subscription) {
@@ -339,5 +344,15 @@ async function handleRefund(charge: Stripe.Charge) {
         message: `A partial refund of $${refundAmount.toFixed(2)} has been processed.`,
       },
     });
+  }
+
+  // Send refund confirmation email
+  if (subscription.user?.email) {
+    sendRefundConfirmationEmail(
+      subscription.user.email,
+      subscription.user.name || "",
+      refundAmount,
+      isFullRefund
+    ).catch(console.error);
   }
 }
