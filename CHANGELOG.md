@@ -16,6 +16,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-01-22
+
+### Added
+- **FREE Plan Limits**
+  - 2 scans per month for FREE users
+  - 1 removal request per month for FREE users
+  - Upgrade prompts with link to pricing when limits reached
+
+- **Manual Removal Enhancements**
+  - Clickable opt-out URL links for data broker removals
+  - Privacy email contact displayed for each source
+  - Estimated processing time shown for removals
+
+- **Reports API**
+  - New `/api/reports` endpoint for user-specific report data
+  - Dynamic calculation of exposures removed, risk reduction, sources monitored
+  - Monthly reports generated from actual user data
+
+### Changed
+- Reports page now shows real user data instead of mock/static data
+- Enterprise pricing corrected to $49.99 → $29.99 (40% off) across all pages
+- Scan page shows upgrade link when monthly limit reached
+- Exposures page shows toast notification with upgrade link when removal limit reached
+
+### Fixed
+- Missing `og:image` meta tag on homepage
+- Inconsistent Enterprise pricing on Settings and Homepage ($29.00 → $29.99)
+- Reports showing same static data for all users
+
+---
+
 ## [1.2.0] - 2026-01-21
 
 ### Added
@@ -205,6 +236,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.3.0 | 2026-01-22 | FREE plan limits, dynamic reports, manual removal links |
 | 1.2.0 | 2026-01-21 | SEO optimizations, RSS feed, OG images |
 | 1.1.0 | 2026-01-21 | Refund system, upgrade flow, email notifications |
 | 1.0.0 | 2026-01-21 | Production launch, SEO, health checks, blog |
