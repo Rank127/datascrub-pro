@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="256" fill="#0f172a"/>
+
+  <!-- Ghost Body -->
+  <path d="M256 96c-72 0-128 56-128 128v160l32-32 32 32 32-32 32 32 32-32 32 32 32-32 32 32V224c0-72-56-128-128-128z" fill="#10b981"/>
+
+  <!-- Ghost Face - Left Eye -->
+  <circle cx="208" cy="224" r="24" fill="#0f172a"/>
+  <circle cx="216" cy="216" r="8" fill="white"/>
+
+  <!-- Ghost Face - Right Eye -->
+  <circle cx="304" cy="224" r="24" fill="#0f172a"/>
+  <circle cx="312" cy="216" r="8" fill="white"/>
+
+  <!-- Shield Overlay (Privacy Symbol) -->
+  <path d="M256 280c-32 0-56 24-56 56v40c0 8 4 16 12 20l44 24 44-24c8-4 12-12 12-20v-40c0-32-24-56-56-56z" fill="#0f172a" fill-opacity="0.3"/>
+  <path d="M256 296c-24 0-40 16-40 40v28l40 20 40-20v-28c0-24-16-40-40-40z" fill="#059669"/>
+
+  <!-- Checkmark in Shield -->
+  <path d="M240 344l-12-12 8-8 12 12 24-24 8 8-32 32z" fill="white" stroke="white" stroke-width="2"/>
+</svg>
