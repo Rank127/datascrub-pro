@@ -168,8 +168,10 @@ export default function TermsPage() {
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
               <li>You may cancel your subscription at any time through your account settings or by contacting support</li>
               <li>Upon cancellation, you will retain access to paid features until the end of your current billing period</li>
-              <li>We do not provide prorated refunds for partial billing periods</li>
-              <li>Refunds may be provided at our sole discretion for extenuating circumstances</li>
+              <li><strong className="text-slate-300">30-Day Money-Back Guarantee:</strong> If you are not satisfied with our service, you may request a full refund within 30 days of your initial subscription purchase by contacting support@ghostmydata.com</li>
+              <li>Refund requests made after 30 days from the initial purchase are not eligible for a refund</li>
+              <li>We do not provide prorated refunds for partial billing periods outside the 30-day guarantee window</li>
+              <li>Refunds are processed within 5-10 business days and returned to the original payment method</li>
               <li>If you believe you were charged in error, contact us within 30 days of the charge</li>
             </ul>
 
