@@ -1,177 +1,168 @@
-# Supabase CLI
+# GhostMyData
 
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
+Personal data removal service that helps users find and remove their personal information from data brokers, breach databases, dark web, and social media.
 
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
+**Live Site:** https://ghostmydata.com
 
-This repository contains all the functionality for Supabase CLI.
+## Features
 
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
+### Core Functionality
+- **Data Discovery**: Scan 50+ data sources for personal information exposure
+- **Automated Removal**: Submit opt-out requests to data brokers automatically
+- **Breach Monitoring**: HaveIBeenPwned integration for breach detection
+- **Dark Web Monitoring**: Monitor dark web marketplaces and forums (Enterprise)
+- **Whitelist Management**: Keep accounts you want, remove the rest
+- **Continuous Monitoring**: Daily/weekly scans with email alerts
 
-## Getting started
+### User Features
+- Secure profile with encrypted PII storage (AES-256)
+- Risk score and exposure dashboard
+- Removal request tracking
+- Monthly privacy reports
+- Email notifications for new exposures
 
-### Install the CLI
+### Business Features
+- Stripe subscription billing
+- 30-day money-back guarantee
+- Automated refund processing
+- Customer portal for subscription management
 
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+## Tech Stack
+
+- **Framework**: Next.js 16 with App Router
+- **Language**: TypeScript
+- **Database**: PostgreSQL (Supabase)
+- **ORM**: Prisma
+- **Auth**: NextAuth.js v5
+- **Payments**: Stripe
+- **Email**: Resend
+- **UI**: Tailwind CSS + shadcn/ui
+- **Hosting**: Vercel
+
+## Pricing Plans
+
+| Plan | Price | Features |
+|------|-------|----------|
+| Free | $0 | 1 scan/month, manual removal guides |
+| Pro | $11.99/mo | 10 scans/month, automated removals, weekly monitoring |
+| Enterprise | $29.00/mo | Unlimited scans, dark web monitoring, family plan (5 profiles) |
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (marketing)/      # Public pages (landing, pricing, blog)
+│   ├── (auth)/           # Login, register, password reset
+│   ├── (dashboard)/      # User dashboard
+│   └── api/              # API routes
+├── components/
+│   ├── ui/               # shadcn components
+│   ├── dashboard/        # Dashboard components
+│   └── seo/              # Structured data components
+├── lib/
+│   ├── db/               # Prisma client
+│   ├── auth/             # NextAuth config
+│   ├── email/            # Email templates
+│   ├── encryption/       # PII encryption
+│   ├── scanners/         # Data source integrations
+│   └── stripe/           # Stripe utilities
+└── content/              # Blog posts, templates
+```
+
+## SEO Features
+
+- Dynamic sitemap generation (`/sitemap.xml`)
+- RSS feed for blog (`/feed.xml`)
+- Dynamic Open Graph images (`/og/[slug].png`)
+- Structured data schemas:
+  - Organization
+  - WebSite with search
+  - FAQ schema
+  - BlogPosting schema
+  - Product/Pricing schema
+- Optimized metadata for all pages
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database (Supabase recommended)
+- Stripe account
+- Resend account
+
+### Installation
 
 ```bash
-npm i supabase --save-dev
+# Clone the repository
+git clone https://github.com/Rank127/datascrub-pro.git
+cd datascrub-pro
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your values
+
+# Push database schema
+npx prisma db push
+
+# Start development server
+npm run dev
 ```
 
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
+### Environment Variables
 
-```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
-```
+See `DEPLOYMENT.md` for full list of required environment variables.
 
-> **Note**
-For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
+## Documentation
 
-<details>
-  <summary><b>macOS</b></summary>
+- `DEPLOYMENT.md` - Production deployment guide
+- `DEPLOY.md` - Quick start deployment
+- `OPERATIONS_GUIDE.md` - Full operations manual
+- `docs/REFUND_GUIDE.md` - Refund processing procedures
+- `docs/UAT-TESTING-PLAN.md` - Testing checklist
 
-  Available via [Homebrew](https://brew.sh). To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To install the beta release channel:
-  
-  ```sh
-  brew install supabase/tap/supabase-beta
-  brew link --overwrite supabase-beta
-  ```
-  
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Windows</b></summary>
-
-  Available via [Scoop](https://scoop.sh). To install:
-
-  ```powershell
-  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-  scoop install supabase
-  ```
-
-  To upgrade:
-
-  ```powershell
-  scoop update supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Linux</b></summary>
-
-  Available via [Homebrew](https://brew.sh) and Linux packages.
-
-  #### via Homebrew
-
-  To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-
-  #### via Linux packages
-
-  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
-
-  ```sh
-  sudo apk add --allow-untrusted <...>.apk
-  ```
-
-  ```sh
-  sudo dpkg -i <...>.deb
-  ```
-
-  ```sh
-  sudo rpm -i <...>.rpm
-  ```
-
-  ```sh
-  sudo pacman -U <...>.pkg.tar.zst
-  ```
-</details>
-
-<details>
-  <summary><b>Other Platforms</b></summary>
-
-  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
-
-  ```sh
-  go install github.com/supabase/cli@latest
-  ```
-
-  Add a symlink to the binary in `$PATH` for easier access:
-
-  ```sh
-  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
-  ```
-
-  This works on other non-standard Linux distros.
-</details>
-
-<details>
-  <summary><b>Community Maintained Packages</b></summary>
-
-  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
-  To install in your working directory:
-
-  ```bash
-  pkgx install supabase
-  ```
-
-  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
-</details>
-
-### Run the CLI
+## Deployment
 
 ```bash
-supabase bootstrap
+# Deploy to Vercel
+vercel --prod
+
+# Or push to master/main branch for auto-deploy
+git push origin master
 ```
 
-Or using npx:
+## API Endpoints
 
-```bash
-npx supabase bootstrap
-```
+### Public
+- `GET /api/auth/[...nextauth]` - Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/forgot-password` - Password reset
 
-The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+### Protected (requires auth)
+- `GET/PUT /api/profile` - User profile
+- `POST /api/scan/start` - Start scan
+- `GET /api/scan/status` - Scan status
+- `GET /api/exposures` - List exposures
+- `POST /api/whitelist` - Manage whitelist
+- `POST /api/removals/request` - Request removal
+- `GET /api/subscription` - Subscription info
 
-## Docs
+### Webhooks
+- `POST /api/stripe/webhook` - Stripe events
 
-Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+### Cron Jobs
+- `GET /api/cron/monitoring` - Daily exposure checks
+- `GET /api/cron/reports` - Weekly email reports
+- `GET /api/cron/health-check` - System health check
 
-## Breaking changes
+## License
 
-We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+Proprietary - All rights reserved
 
-However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+## Support
 
-## Developing
-
-To run from source:
-
-```sh
-# Go >= 1.22
-go run . help
-```
+- Email: support@ghostmydata.com
+- Security: security@ghostmydata.com

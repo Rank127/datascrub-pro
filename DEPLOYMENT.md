@@ -42,7 +42,7 @@ STRIPE_ENTERPRISE_YEARLY_PRICE_ID=price_xxx
 ### Email (Resend)
 ```
 RESEND_API_KEY=re_xxx (get at https://resend.com)
-RESEND_FROM_EMAIL=GhostMyData <noreply@ghostmydata.com>
+RESEND_FROM_EMAIL=GhostMyData <noreply@send.ghostmydata.com>
 ```
 
 ### App Configuration
@@ -57,8 +57,8 @@ NEXT_PUBLIC_APP_NAME=GhostMyData
 
 1. **Create Products in Stripe Dashboard:**
    - Go to Products → Add product
-   - Create "PRO" product with monthly price ($9.99)
-   - Create "ENTERPRISE" product with monthly price ($29.99)
+   - Create "PRO" product with monthly price ($11.99)
+   - Create "ENTERPRISE" product with monthly price ($29.00)
    - Copy the Price IDs to environment variables
 
 2. **Set up Webhook:**
@@ -71,6 +71,7 @@ NEXT_PUBLIC_APP_NAME=GhostMyData
      - `customer.subscription.deleted`
      - `invoice.payment_succeeded`
      - `invoice.payment_failed`
+     - `charge.refunded`
    - Copy the Signing secret to `STRIPE_WEBHOOK_SECRET`
 
 3. **Configure Customer Portal:**
@@ -137,6 +138,8 @@ npx prisma db push
 - [x] Exposure alert emails
 - [x] Removal status updates
 - [x] Subscription confirmation
+- [x] Subscription cancellation
+- [x] Refund confirmation
 
 ### Security (Complete)
 - [x] PII encryption at rest

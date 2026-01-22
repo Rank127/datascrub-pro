@@ -49,7 +49,7 @@ Total time: ~15 minutes | Total cost: $0 to start
 Run these commands in your terminal:
 
 ```bash
-cd /home/rock/DarkWebCleanup/ghostmydata-v2
+cd /path/to/datascrub-pro
 
 # Initialize git
 git init
@@ -58,11 +58,11 @@ git commit -m "Initial commit - GhostMyData"
 
 # Create GitHub repo (you'll need GitHub CLI or do it manually)
 # Option A: GitHub CLI
-gh repo create ghostmydata --private --source=. --push
+gh repo create datascrub-pro --private --source=. --push
 
 # Option B: Manual
 # 1. Go to github.com → New Repository
-# 2. Name: ghostmydata
+# 2. Name: datascrub-pro
 # 3. Private
 # 4. Don't initialize with README
 # 5. Copy the commands shown and run them

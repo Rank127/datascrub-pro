@@ -3,8 +3,9 @@
 ## Document Information
 - **Application**: GhostMyData - Personal Data Removal Service
 - **Version**: 1.0.0
-- **Environment**: http://localhost:3001
-- **Date**: January 2026
+- **Production URL**: https://ghostmydata.com
+- **Development**: http://localhost:3000
+- **Last Updated**: January 2026
 
 ---
 
@@ -616,9 +617,14 @@ npx prisma db push --force-reset
 npx prisma generate
 ```
 
-### C. Known Limitations (Development)
-1. Mock data used for scanners (no real API integrations)
-2. Email notifications not implemented
-3. Stripe payments not integrated
-4. Password reset is simulated
-5. 2FA not implemented
+### C. Known Limitations
+1. Mock data used for some scanners (HIBP is real, others simulated)
+2. 2FA not implemented
+3. Some dark web scanners use simulated data
+
+### D. Implemented Features (Production Ready)
+1. Email notifications via Resend (all types working)
+2. Stripe payments fully integrated (checkout, portal, webhooks)
+3. Password reset with email tokens
+4. Refund processing with automated emails
+5. SEO optimizations (sitemap, RSS, OG images, structured data)
