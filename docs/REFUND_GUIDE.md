@@ -147,9 +147,13 @@ Generally not offered, but if needed:
 The Stripe webhook automatically handles:
 - Updating the user's plan to FREE when subscription is cancelled
 - Creating an alert in the user's account about the refund
-- Sending an automated email notification (if configured)
+- **Sending an automated refund confirmation email** to the customer with:
+  - Refund amount
+  - Refund type (full or partial)
+  - Processing time (5-10 business days)
+  - Account status update
 
-No manual database updates are required.
+No manual database updates or customer email notifications are required - the system handles everything automatically when you process the refund in Stripe.
 
 ---
 
