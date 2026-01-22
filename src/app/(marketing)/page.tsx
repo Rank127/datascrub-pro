@@ -30,6 +30,14 @@ export const metadata: Metadata = {
       "Find and remove your personal data from data brokers, breach databases, and the dark web. Start your free scan today.",
     url: "https://ghostmydata.com",
     type: "website",
+    images: [
+      {
+        url: "https://ghostmydata.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "GhostMyData - Personal Data Removal Service",
+      },
+    ],
   },
 };
 import {
