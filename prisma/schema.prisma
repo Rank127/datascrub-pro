@@ -17,6 +17,7 @@ model User {
   passwordHash  String
   name          String?
   plan          String    @default("FREE") // FREE, PRO, ENTERPRISE
+  role          String    @default("USER") // USER, SEO_MANAGER, SUPPORT, ADMIN, LEGAL, SUPER_ADMIN
   emailVerified DateTime?
   image         String?
   createdAt     DateTime  @default(now())
@@ -39,6 +40,7 @@ model User {
   subscription    Subscription?
   accounts        Account[]
   sessions        Session[]
+  auditLogs       AuditLog[]      // Logs created by this user
 }
 
 model Account {
@@ -207,4 +209,40 @@ model Alert {
   createdAt   DateTime @default(now())
 
   @@index([userId])
+}
+
+// Audit log for tracking all data access and modifications
+model AuditLog {
+  id            String   @id @default(cuid())
+
+  // Who performed the action
+  actorId       String
+  actor         User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  actorEmail    String   // Denormalized for quick reference
+  actorRole     String   // Role at time of action
+
+  // What action was performed
+  action        String   // VIEW_USER, VIEW_PII, UNMASK_PII, EXPORT_DATA, DELETE_USER, MODIFY_ROLE, etc.
+  resource      String   // users, profiles, exposures, etc.
+  resourceId    String?  // ID of the specific resource
+
+  // Target user (if action is on another user's data)
+  targetUserId  String?
+  targetEmail   String?  // Denormalized, masked
+
+  // Additional context
+  ipAddress     String?
+  userAgent     String?
+  details       String?  // JSON with additional context
+
+  // Result
+  success       Boolean  @default(true)
+  errorMessage  String?
+
+  createdAt     DateTime @default(now())
+
+  @@index([actorId])
+  @@index([targetUserId])
+  @@index([action])
+  @@index([createdAt])
 }
