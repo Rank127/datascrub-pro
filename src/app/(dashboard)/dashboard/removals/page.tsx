@@ -34,6 +34,9 @@ interface RemovalRequest {
   attempts: number;
   lastError: string | null;
   createdAt: string;
+  optOutUrl: string | null;
+  optOutEmail: string | null;
+  estimatedDays: number | null;
   exposure: {
     id: string;
     source: DataSource;
@@ -300,8 +303,23 @@ export default function RemovalsPage() {
                         <p className="text-sm text-orange-400 mb-2">
                           This source requires manual action. Follow these steps:
                         </p>
-                        <ol className="text-sm text-slate-400 list-decimal list-inside space-y-1">
-                          <li>Visit the source website</li>
+                        <ol className="text-sm text-slate-400 list-decimal list-inside space-y-2">
+                          <li>
+                            Visit the opt-out page:{" "}
+                            {removal.optOutUrl ? (
+                              <a
+                                href={removal.optOutUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-emerald-400 hover:text-emerald-300 underline inline-flex items-center gap-1"
+                              >
+                                {removal.exposure.sourceName} Opt-Out
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            ) : (
+                              <span>Search for &quot;{removal.exposure.sourceName} opt out&quot;</span>
+                            )}
+                          </li>
                           <li>Find the opt-out or privacy settings</li>
                           <li>Submit a removal request with your information</li>
                           <li>
@@ -309,6 +327,22 @@ export default function RemovalsPage() {
                             request
                           </li>
                         </ol>
+                        {removal.optOutEmail && (
+                          <p className="text-xs text-slate-500 mt-2">
+                            Or email:{" "}
+                            <a
+                              href={`mailto:${removal.optOutEmail}`}
+                              className="text-emerald-400 hover:text-emerald-300 underline"
+                            >
+                              {removal.optOutEmail}
+                            </a>
+                          </p>
+                        )}
+                        {removal.estimatedDays && (
+                          <p className="text-xs text-slate-500 mt-1">
+                            Estimated processing time: {removal.estimatedDays} days
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>

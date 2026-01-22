@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     });
 
     const scanLimits: Record<Plan, number> = {
-      FREE: 10,  // Increased for testing
+      FREE: 2,
       PRO: 50,
       ENTERPRISE: -1, // unlimited
     };
@@ -72,7 +72,13 @@ export async function POST(request: Request) {
     const limit = scanLimits[userPlan];
     if (limit !== -1 && scansThisMonth >= limit) {
       return NextResponse.json(
-        { error: "Monthly scan limit reached. Please upgrade your plan." },
+        {
+          error: `You've reached your monthly scan limit (${limit} scans). Upgrade your plan for more scans.`,
+          requiresUpgrade: true,
+          upgradeUrl: "/pricing",
+          currentUsage: scansThisMonth,
+          limit,
+        },
         { status: 403 }
       );
     }

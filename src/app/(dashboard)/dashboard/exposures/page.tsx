@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExposureCard } from "@/components/dashboard/exposure-card";
 import {
   AlertTriangle,
@@ -27,6 +29,7 @@ import {
   Trash2,
   ShieldCheck,
 } from "lucide-react";
+import { toast } from "sonner";
 import type { DataSource, Severity, ExposureStatus } from "@/lib/types";
 
 interface Exposure {
@@ -159,10 +162,26 @@ export default function ExposuresPage() {
       });
 
       if (response.ok) {
+        toast.success("Removal request submitted");
         fetchExposures();
+      } else {
+        const data = await response.json();
+        if (data.requiresUpgrade) {
+          toast.error(
+            <div>
+              {data.error}{" "}
+              <a href="/pricing" className="text-emerald-400 underline">
+                View Plans
+              </a>
+            </div>
+          );
+        } else {
+          toast.error(data.error || "Failed to request removal");
+        }
       }
     } catch (error) {
       console.error("Failed to request removal:", error);
+      toast.error("Failed to request removal");
     }
   };
 
@@ -190,19 +209,46 @@ export default function ExposuresPage() {
   const handleBulkRemove = async () => {
     if (selectedIds.size === 0) return;
     setBulkLoading(true);
+    let hasUpgradeError = false;
     try {
-      const promises = Array.from(selectedIds).map((id) =>
-        fetch("/api/removals/request", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ exposureId: id }),
+      const results = await Promise.all(
+        Array.from(selectedIds).map(async (id) => {
+          const response = await fetch("/api/removals/request", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ exposureId: id }),
+          });
+          if (!response.ok) {
+            const data = await response.json();
+            if (data.requiresUpgrade) {
+              hasUpgradeError = true;
+            }
+            return { success: false, data };
+          }
+          return { success: true };
         })
       );
-      await Promise.all(promises);
+
+      const successCount = results.filter((r) => r.success).length;
+      if (successCount > 0) {
+        toast.success(`${successCount} removal request(s) submitted`);
+      }
+      if (hasUpgradeError) {
+        toast.error(
+          <div>
+            You&apos;ve reached your removal limit.{" "}
+            <a href="/pricing" className="text-emerald-400 underline">
+              Upgrade your plan
+            </a>{" "}
+            for unlimited removals.
+          </div>
+        );
+      }
       setSelectedIds(new Set());
       fetchExposures();
     } catch (error) {
       console.error("Failed to bulk remove:", error);
+      toast.error("Failed to process removal requests");
     } finally {
       setBulkLoading(false);
     }

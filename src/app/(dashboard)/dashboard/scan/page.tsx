@@ -46,6 +46,7 @@ export default function ScanPage() {
     scanId: string;
   } | null>(null);
   const [error, setError] = useState("");
+  const [requiresUpgrade, setRequiresUpgrade] = useState(false);
   const [recentScans, setRecentScans] = useState<Scan[]>([]);
   const [loadingScans, setLoadingScans] = useState(true);
 
@@ -70,6 +71,7 @@ export default function ScanPage() {
   const startScan = async () => {
     setIsScanning(true);
     setError("");
+    setRequiresUpgrade(false);
     setScanResult(null);
     setScanProgress(0);
 
@@ -96,6 +98,9 @@ export default function ScanPage() {
       if (!response.ok) {
         const data = await response.json();
         setError(data.error || "Scan failed");
+        if (data.requiresUpgrade) {
+          setRequiresUpgrade(true);
+        }
         return;
       }
 
@@ -223,7 +228,17 @@ export default function ScanPage() {
           {error && (
             <Alert variant="destructive" className="mb-4 bg-red-500/10 border-red-500/20">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>
+                {error}
+                {requiresUpgrade && (
+                  <Link
+                    href="/pricing"
+                    className="ml-2 text-emerald-400 hover:text-emerald-300 underline"
+                  >
+                    View Plans
+                  </Link>
+                )}
+              </AlertDescription>
             </Alert>
           )}
 

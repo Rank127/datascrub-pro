@@ -75,15 +75,40 @@ export async function POST(request: Request) {
 
     const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE") as Plan;
 
-    // Require paid plan for automated removals (admins bypass this)
-    if (userPlan === "FREE") {
-      return NextResponse.json(
-        {
-          error: "Automated removal requires a paid plan. Please upgrade to PRO.",
-          requiresUpgrade: true,
+    // Check removal limits based on plan
+    const removalLimits: Record<Plan, number> = {
+      FREE: 1,
+      PRO: -1, // unlimited
+      ENTERPRISE: -1, // unlimited
+    };
+
+    const limit = removalLimits[userPlan];
+
+    if (limit !== -1) {
+      // Count removal requests this month for FREE users
+      const currentMonth = new Date();
+      currentMonth.setDate(1);
+      currentMonth.setHours(0, 0, 0, 0);
+
+      const removalsThisMonth = await prisma.removalRequest.count({
+        where: {
+          userId: session.user.id,
+          createdAt: { gte: currentMonth },
         },
-        { status: 403 }
-      );
+      });
+
+      if (removalsThisMonth >= limit) {
+        return NextResponse.json(
+          {
+            error: `You've reached your monthly removal limit (${limit} removal). Upgrade your plan for unlimited removals.`,
+            requiresUpgrade: true,
+            upgradeUrl: "/pricing",
+            currentUsage: removalsThisMonth,
+            limit,
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // Get the exposure

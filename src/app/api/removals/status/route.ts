@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 
 export async function GET() {
   try {
@@ -28,6 +29,17 @@ export async function GET() {
       },
     });
 
+    // Enrich removals with opt-out URLs from data broker directory
+    const enrichedRemovals = removals.map((removal) => {
+      const brokerInfo = getDataBrokerInfo(removal.exposure.source);
+      return {
+        ...removal,
+        optOutUrl: brokerInfo?.optOutUrl || removal.exposure.sourceUrl || null,
+        optOutEmail: brokerInfo?.privacyEmail || null,
+        estimatedDays: brokerInfo?.estimatedDays || null,
+      };
+    });
+
     // Get stats
     const stats = await prisma.removalRequest.groupBy({
       by: ["status"],
@@ -36,7 +48,7 @@ export async function GET() {
     });
 
     return NextResponse.json({
-      removals,
+      removals: enrichedRemovals,
       stats: Object.fromEntries(stats.map((s) => [s.status, s._count])),
     });
   } catch (error) {
