@@ -272,7 +272,7 @@ export function PricingSchema() {
         "@type": "Offer",
         name: "Enterprise Plan",
         description: "Complete protection with dark web monitoring, family plan for 5 profiles, and daily monitoring",
-        price: "29.00",
+        price: "29.99",
         priceCurrency: "USD",
         availability: "https://schema.org/InStock",
         url: "https://ghostmydata.com/register",
@@ -280,7 +280,7 @@ export function PricingSchema() {
         itemCondition: "https://schema.org/NewCondition",
         priceSpecification: {
           "@type": "UnitPriceSpecification",
-          price: "29.00",
+          price: "29.99",
           priceCurrency: "USD",
           billingDuration: "P1M",
           unitText: "month",

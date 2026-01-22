@@ -7,7 +7,7 @@ import { FAQSchema, PricingSchema } from "@/components/seo/structured-data";
 export const metadata: Metadata = {
   title: "Pricing - Affordable Data Removal Plans",
   description:
-    "Choose from free, Pro ($11.99/mo), or Enterprise ($29/mo) data removal plans. 40% off introductory sale. Automated removal requests, continuous monitoring, and dark web protection.",
+    "Choose from free, Pro ($11.99/mo), or Enterprise ($29.99/mo) data removal plans. 40% off introductory sale. Automated removal requests, continuous monitoring, and dark web protection.",
   keywords: [
     "data removal pricing",
     "privacy protection cost",
@@ -72,8 +72,8 @@ const plans = [
   },
   {
     name: "Enterprise",
-    price: "$29.00",
-    originalPrice: "$49.00",
+    price: "$29.99",
+    originalPrice: "$49.99",
     description: "Complete protection for families",
     features: [
       { text: "Everything in Pro", included: true },
