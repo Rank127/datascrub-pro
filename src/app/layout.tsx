@@ -69,6 +69,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: siteUrl,
+    types: {
+      "application/rss+xml": [{ url: `${siteUrl}/feed.xml`, title: "GhostMyData Blog RSS Feed" }],
+    },
   },
   openGraph: {
     type: "website",

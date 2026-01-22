@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, ArrowRight, Shield, DollarSign, Zap, Users } from "lucide-react";
+import { FAQSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {
   title: "GhostMyData vs Incogni: Complete Comparison (2026)",
@@ -27,6 +28,29 @@ export const metadata: Metadata = {
     type: "article",
   },
 };
+
+const faqs = [
+  {
+    question: "Is GhostMyData better than Incogni?",
+    answer: "GhostMyData offers more comprehensive protection including dark web monitoring, breach alerts, and covers more data brokers (50+ vs 35+). Incogni is a good budget option but lacks these additional security features.",
+  },
+  {
+    question: "How much does Incogni cost compared to GhostMyData?",
+    answer: "Incogni costs $6.49/month when billed annually or $12.99/month for monthly billing. GhostMyData offers a free tier, with paid plans starting at $11.99/month including more features like breach monitoring.",
+  },
+  {
+    question: "Does Incogni have dark web monitoring?",
+    answer: "No, Incogni does not offer dark web monitoring. It focuses only on data broker removal. GhostMyData includes dark web monitoring in its Enterprise plan.",
+  },
+  {
+    question: "Can I try Incogni or GhostMyData for free?",
+    answer: "GhostMyData offers a free tier with a comprehensive scan and manual removal guides. Incogni does not have a free tier, but offers a 30-day money-back guarantee.",
+  },
+  {
+    question: "Which service covers more data brokers?",
+    answer: "GhostMyData covers 50+ data brokers while Incogni covers approximately 35+ data brokers. Both target major people-search sites, but GhostMyData has broader coverage.",
+  },
+];
 
 const comparisonData = [
   {
@@ -93,6 +117,8 @@ const comparisonData = [
 
 export default function CompareIncogniPage() {
   return (
+    <>
+    <FAQSchema faqs={faqs} />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
       {/* Header */}
       <div className="text-center mb-16">
@@ -292,6 +318,26 @@ export default function CompareIncogniPage() {
         </ul>
       </div>
 
+      {/* FAQ Section */}
+      <div className="mb-16">
+        <h2 className="text-2xl font-bold text-white mb-8 text-center">
+          Frequently Asked Questions
+        </h2>
+        <div className="space-y-4 max-w-3xl mx-auto">
+          {faqs.map((faq) => (
+            <div
+              key={faq.question}
+              className="p-6 bg-slate-800/50 rounded-xl border border-slate-700"
+            >
+              <h3 className="text-lg font-semibold text-white mb-2">
+                {faq.question}
+              </h3>
+              <p className="text-slate-400">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* CTA */}
       <div className="text-center p-8 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20">
         <h2 className="text-3xl font-bold text-white mb-4">
@@ -309,5 +355,6 @@ export default function CompareIncogniPage() {
         </Link>
       </div>
     </div>
+    </>
   );
 }

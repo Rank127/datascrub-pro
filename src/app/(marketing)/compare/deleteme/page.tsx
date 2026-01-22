@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, X, ArrowRight, Shield, DollarSign, Clock, Zap } from "lucide-react";
+import { FAQSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {
   title: "GhostMyData vs DeleteMe: Which Data Removal Service is Better? (2026)",
@@ -27,6 +28,29 @@ export const metadata: Metadata = {
     type: "article",
   },
 };
+
+const faqs = [
+  {
+    question: "Is GhostMyData better than DeleteMe?",
+    answer: "GhostMyData offers more features at a comparable price, including dark web monitoring, a free tier, and monthly billing options. DeleteMe has been operating longer (since 2011), but lacks modern features like dark web monitoring and requires annual billing.",
+  },
+  {
+    question: "How much does DeleteMe cost compared to GhostMyData?",
+    answer: "DeleteMe costs $129/year (no monthly option) for individual plans. GhostMyData offers a free tier, and paid plans starting at $11.99/month with both monthly and annual billing options.",
+  },
+  {
+    question: "Which service removes more data brokers?",
+    answer: "GhostMyData covers 50+ data brokers while DeleteMe covers approximately 40+ data brokers. Both services target major people-search sites like Spokeo, WhitePages, and BeenVerified.",
+  },
+  {
+    question: "Does DeleteMe have dark web monitoring?",
+    answer: "No, DeleteMe does not offer dark web monitoring. GhostMyData includes dark web monitoring in its Enterprise plan, alerting you when your data appears on dark web marketplaces and forums.",
+  },
+  {
+    question: "Can I try these services before paying?",
+    answer: "GhostMyData offers a free tier that includes a comprehensive scan and manual removal guides. DeleteMe does not have a free tier, but offers a 30-day money-back guarantee.",
+  },
+];
 
 const comparisonData = [
   {
@@ -99,6 +123,8 @@ const comparisonData = [
 
 export default function CompareDeleteMePage() {
   return (
+    <>
+    <FAQSchema faqs={faqs} />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
       {/* Header */}
       <div className="text-center mb-16">
@@ -299,6 +325,26 @@ export default function CompareDeleteMePage() {
         </ul>
       </div>
 
+      {/* FAQ Section */}
+      <div className="mb-16">
+        <h2 className="text-2xl font-bold text-white mb-8 text-center">
+          Frequently Asked Questions
+        </h2>
+        <div className="space-y-4 max-w-3xl mx-auto">
+          {faqs.map((faq) => (
+            <div
+              key={faq.question}
+              className="p-6 bg-slate-800/50 rounded-xl border border-slate-700"
+            >
+              <h3 className="text-lg font-semibold text-white mb-2">
+                {faq.question}
+              </h3>
+              <p className="text-slate-400">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* CTA */}
       <div className="text-center p-8 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20">
         <h2 className="text-3xl font-bold text-white mb-4">
@@ -316,5 +362,6 @@ export default function CompareDeleteMePage() {
         </Link>
       </div>
     </div>
+    </>
   );
 }

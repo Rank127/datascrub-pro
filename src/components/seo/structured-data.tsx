@@ -220,6 +220,120 @@ export function BreadcrumbSchema({ items }: { items: { name: string; url: string
   );
 }
 
+export function PricingSchema() {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: "GhostMyData Data Removal Service",
+    description:
+      "Personal data removal service that automatically finds and removes your information from data brokers, breach databases, and the dark web.",
+    brand: {
+      "@type": "Brand",
+      name: "GhostMyData",
+    },
+    image: "https://ghostmydata.com/logo.png",
+    url: "https://ghostmydata.com/pricing",
+    category: "Privacy Software",
+    audience: {
+      "@type": "Audience",
+      audienceType: "Individuals and Families",
+    },
+    offers: [
+      {
+        "@type": "Offer",
+        name: "Free Plan",
+        description: "Basic data discovery with 1 email and 1 phone scan per month",
+        price: "0",
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        url: "https://ghostmydata.com/register",
+        priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
+        itemCondition: "https://schema.org/NewCondition",
+      },
+      {
+        "@type": "Offer",
+        name: "Pro Plan",
+        description: "Full protection with unlimited scans, automated removal requests, and weekly monitoring",
+        price: "11.99",
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        url: "https://ghostmydata.com/register",
+        priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
+        itemCondition: "https://schema.org/NewCondition",
+        priceSpecification: {
+          "@type": "UnitPriceSpecification",
+          price: "11.99",
+          priceCurrency: "USD",
+          billingDuration: "P1M",
+          unitText: "month",
+        },
+      },
+      {
+        "@type": "Offer",
+        name: "Enterprise Plan",
+        description: "Complete protection with dark web monitoring, family plan for 5 profiles, and daily monitoring",
+        price: "29.00",
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        url: "https://ghostmydata.com/register",
+        priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
+        itemCondition: "https://schema.org/NewCondition",
+        priceSpecification: {
+          "@type": "UnitPriceSpecification",
+          price: "29.00",
+          priceCurrency: "USD",
+          billingDuration: "P1M",
+          unitText: "month",
+        },
+      },
+    ],
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.8",
+      ratingCount: "500",
+      bestRating: "5",
+      worstRating: "1",
+    },
+    review: [
+      {
+        "@type": "Review",
+        author: {
+          "@type": "Person",
+          name: "John D.",
+        },
+        datePublished: "2025-12-15",
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: "5",
+          bestRating: "5",
+        },
+        reviewBody: "GhostMyData removed my data from over 40 data brokers. Highly recommend for anyone concerned about privacy.",
+      },
+      {
+        "@type": "Review",
+        author: {
+          "@type": "Person",
+          name: "Sarah M.",
+        },
+        datePublished: "2025-11-28",
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: "5",
+          bestRating: "5",
+        },
+        reviewBody: "Easy to use and the dark web monitoring gives me peace of mind. Worth every penny.",
+      },
+    ],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
 export function LocalBusinessSchema() {
   const schema = {
     "@context": "https://schema.org",

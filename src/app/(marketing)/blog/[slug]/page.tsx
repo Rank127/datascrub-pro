@@ -43,11 +43,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       modifiedTime: post.updatedAt || post.publishedAt,
       authors: [post.author],
       tags: post.tags,
+      images: [
+        {
+          url: `https://ghostmydata.com/og/${post.slug}.png`,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
+      images: [`https://ghostmydata.com/og/${post.slug}.png`],
     },
   };
 }
@@ -109,21 +118,30 @@ export default async function BlogPostPage({ params }: Props) {
     { name: post.title, url: `https://ghostmydata.com/blog/${post.slug}` },
   ];
 
-  const articleSchema = {
+  const blogPostSchema = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: post.title,
     description: post.description,
+    image: `https://ghostmydata.com/og/${post.slug}.png`,
     author: {
       "@type": "Organization",
       name: post.author,
+      url: "https://ghostmydata.com",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://ghostmydata.com/logo.png",
+      },
     },
     publisher: {
       "@type": "Organization",
       name: "GhostMyData",
+      url: "https://ghostmydata.com",
       logo: {
         "@type": "ImageObject",
         url: "https://ghostmydata.com/logo.png",
+        width: 512,
+        height: 512,
       },
     },
     datePublished: post.publishedAt,
@@ -132,6 +150,18 @@ export default async function BlogPostPage({ params }: Props) {
       "@type": "WebPage",
       "@id": `https://ghostmydata.com/blog/${post.slug}`,
     },
+    url: `https://ghostmydata.com/blog/${post.slug}`,
+    articleSection: post.category,
+    keywords: post.tags.join(", "),
+    wordCount: post.content.split(/\s+/).length,
+    timeRequired: post.readTime.replace(" read", ""),
+    inLanguage: "en-US",
+    isAccessibleForFree: true,
+    copyrightHolder: {
+      "@type": "Organization",
+      name: "GhostMyData",
+    },
+    copyrightYear: new Date(post.publishedAt).getFullYear(),
   };
 
   return (
@@ -139,7 +169,7 @@ export default async function BlogPostPage({ params }: Props) {
       <BreadcrumbSchema items={breadcrumbs} />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostSchema) }}
       />
 
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24">

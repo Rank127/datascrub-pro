@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, X, Zap } from "lucide-react";
-import { FAQSchema } from "@/components/seo/structured-data";
+import { FAQSchema, PricingSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {
   title: "Pricing - Affordable Data Removal Plans",
@@ -124,6 +124,7 @@ export default function PricingPage() {
   return (
     <>
       <FAQSchema faqs={faqs} />
+      <PricingSchema />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
       {/* Header */}
       <div className="text-center mb-16">
