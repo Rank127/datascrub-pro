@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 import { runFullAudit } from "@/lib/seo-agent/technical-audit";
 import { analyzeAllContent } from "@/lib/seo-agent/content-optimizer";
 import { getTopBlogIdeas } from "@/lib/seo-agent/blog-generator";
@@ -8,7 +9,34 @@ import {
   formatReportForEmail,
   formatReportAsJson,
 } from "@/lib/seo-agent/report-generator";
-import { sendEmail } from "@/lib/email";
+
+// Initialize Resend for email notifications
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
+async function sendSEOAlertEmail(to: string, subject: string, content: string): Promise<boolean> {
+  if (!resend) {
+    console.log("[SEO Agent] Email service not configured, skipping email");
+    return false;
+  }
+
+  try {
+    const { error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "GhostMyData <onboarding@resend.dev>",
+      to,
+      subject,
+      html: `<pre style="font-family: monospace; white-space: pre-wrap; background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: 8px;">${content}</pre>`,
+    });
+
+    if (error) {
+      console.error("[SEO Agent] Email error:", error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("[SEO Agent] Failed to send email:", err);
+    return false;
+  }
+}
 
 // Verify cron secret to prevent unauthorized access
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -68,16 +96,11 @@ export async function GET(request: Request) {
     const adminEmail = process.env.ADMIN_EMAILS?.split(",")[0];
     if (adminEmail && (report.overallScore < 70 || report.criticalIssues.length > 0)) {
       console.log("[SEO Agent] Sending alert email...");
-      try {
-        await sendEmail({
-          to: adminEmail,
-          subject: `GhostMyData SEO Alert - Score: ${report.overallScore}/100`,
-          text: formatReportForEmail(report),
-          html: `<pre style="font-family: monospace; white-space: pre-wrap;">${formatReportForEmail(report)}</pre>`,
-        });
-      } catch (emailError) {
-        console.error("[SEO Agent] Failed to send email:", emailError);
-      }
+      await sendSEOAlertEmail(
+        adminEmail,
+        `GhostMyData SEO Alert - Score: ${report.overallScore}/100`,
+        formatReportForEmail(report)
+      );
     }
 
     console.log(`[SEO Agent] Run complete. Score: ${report.overallScore}/100`);
@@ -162,18 +185,12 @@ export async function POST(request: Request) {
       if (sendEmailReport) {
         const adminEmail = process.env.ADMIN_EMAILS?.split(",")[0];
         if (adminEmail) {
-          try {
-            await sendEmail({
-              to: adminEmail,
-              subject: `GhostMyData SEO Report - Score: ${report.overallScore}/100`,
-              text: formatReportForEmail(report),
-              html: `<pre style="font-family: monospace; white-space: pre-wrap;">${formatReportForEmail(report)}</pre>`,
-            });
-            results.emailSent = true;
-          } catch (emailError) {
-            console.error("[SEO Agent] Failed to send email:", emailError);
-            results.emailSent = false;
-          }
+          const emailSent = await sendSEOAlertEmail(
+            adminEmail,
+            `GhostMyData SEO Report - Score: ${report.overallScore}/100`,
+            formatReportForEmail(report)
+          );
+          results.emailSent = emailSent;
         }
       }
     }
