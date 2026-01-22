@@ -234,8 +234,8 @@ function SettingsContent() {
     },
     {
       name: "ENTERPRISE",
-      price: "$29.00",
-      originalPrice: "$49.00",
+      price: "$29.99",
+      originalPrice: "$49.99",
       features: [
         "Unlimited scans",
         "Dark web monitoring",
