@@ -59,6 +59,14 @@ export function hashSSN(ssn: string): string {
     .digest("hex");
 }
 
+export function hashData(data: string): string {
+  // Generic one-way hash for deduplication
+  const salt = process.env.ENCRYPTION_KEY || "default-salt";
+  return createHash("sha256")
+    .update(data + salt)
+    .digest("hex");
+}
+
 export function maskEmail(email: string): string {
   const [localPart, domain] = email.split("@");
   if (!domain) return email;

@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -67,8 +66,8 @@ interface DNCData {
 }
 
 export default function DNCPage() {
-  const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
+  const [plan, setPlan] = useState<string | null>(null);
   const [data, setData] = useState<DNCData | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newPhone, setNewPhone] = useState("");
@@ -76,15 +75,30 @@ export default function DNCPage() {
   const [submitting, setSubmitting] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const isPlanEnterprise = session?.user?.plan === "ENTERPRISE";
+  const isPlanEnterprise = plan === "ENTERPRISE";
 
   useEffect(() => {
-    if (isPlanEnterprise) {
+    const fetchPlan = async () => {
+      try {
+        const response = await fetch("/api/subscription");
+        if (response.ok) {
+          const data = await response.json();
+          setPlan(data.plan);
+        }
+      } catch (error) {
+        console.error("Failed to fetch subscription:", error);
+      }
+    };
+    fetchPlan();
+  }, []);
+
+  useEffect(() => {
+    if (plan === "ENTERPRISE") {
       fetchDNCData();
-    } else {
+    } else if (plan !== null) {
       setLoading(false);
     }
-  }, [isPlanEnterprise]);
+  }, [plan]);
 
   const fetchDNCData = async () => {
     try {
