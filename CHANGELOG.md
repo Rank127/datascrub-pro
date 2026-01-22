@@ -16,6 +16,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-01-22
+
+### Added
+- **Role-Based Access Control (RBAC) Security System**
+  - Six role levels: USER, SEO_MANAGER, SUPPORT, ADMIN, LEGAL, SUPER_ADMIN
+  - Fine-grained permission matrix with 20+ permissions
+  - Environment-based role assignments via `ROLE_ASSIGNMENTS` env var
+  - Role hierarchy enforcement (can't assign roles higher than your own)
+
+- **PII Masking System**
+  - Automatic email masking: `john@gmail.com` → `j***n@g***.com`
+  - Phone masking: `555-123-4567` → `***-***-4567`
+  - Name masking: `John Doe` → `J*** D**`
+  - Address and DOB masking for compliance
+  - Role-based visibility (LEGAL/SUPER_ADMIN see full PII)
+
+- **Audit Logging System**
+  - `AuditLog` database model for tracking all data access
+  - Logs actor, action, resource, target user, IP address, user agent
+  - Role changes tracked with before/after values
+  - PII unmask events logged for compliance (GDPR/CCPA)
+  - `/api/admin/audit-logs` endpoint for viewing logs
+
+- **Admin Dashboard** (`/dashboard/admin`)
+  - User management interface with search and role filtering
+  - Role editing dialog for authorized users
+  - User activity stats (scans, exposures)
+  - PII masked/unmasked based on viewer's role
+  - Pagination for large user lists
+
+- **Admin API Endpoints**
+  - `GET /api/admin/users` - List users with role-based PII masking
+  - `PATCH /api/admin/users` - Update user role or plan
+  - `GET /api/admin/audit-logs` - View audit logs with filtering
+
+- **Dashboard Stats API** (`/api/dashboard/stats`)
+  - Real-time user statistics endpoint
+  - Dynamic risk score calculation based on active exposures
+  - Removal progress tracking by category (data brokers, breaches, social)
+
+### Changed
+- Dashboard page now fetches real user data instead of hardcoded mock data
+- Risk score dynamically calculated from actual exposure severity
+- Removal progress shows real completion percentages
+- New users see "No exposures found yet" state with CTA to scan
+- `ADMIN_EMAILS` updated to use dedicated super admin email
+
+### Security
+- SEO_MANAGER role restricted from accessing user PII
+- SUPPORT role can only see masked PII
+- ADMIN role can manage users but sees masked PII
+- LEGAL role has full PII access for compliance purposes
+- All data access logged to audit trail
+- Role changes require appropriate permissions
+
+### Database
+- Added `role` field to User model (default: USER)
+- Added `AuditLog` model with indexes for efficient querying
+- Added relation from User to AuditLog for actor tracking
+
+---
+
 ## [1.3.0] - 2026-01-22
 
 ### Added
@@ -236,6 +298,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.4.0 | 2026-01-22 | RBAC security, PII masking, audit logging, admin dashboard |
 | 1.3.0 | 2026-01-22 | FREE plan limits, dynamic reports, manual removal links |
 | 1.2.0 | 2026-01-21 | SEO optimizations, RSS feed, OG images |
 | 1.1.0 | 2026-01-21 | Refund system, upgrade flow, email notifications |
