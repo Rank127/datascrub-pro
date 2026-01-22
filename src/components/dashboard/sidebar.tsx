@@ -13,6 +13,7 @@ import {
   Trash2,
   Bell,
   FileText,
+  PhoneOff,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -29,6 +30,7 @@ const navigation = [
   { name: "Removals", href: "/dashboard/removals", icon: Trash2 },
   { name: "Alerts", href: "/dashboard/alerts", icon: Bell },
   { name: "Reports", href: "/dashboard/reports", icon: FileText },
+  { name: "Do Not Call", href: "/dashboard/dnc", icon: PhoneOff },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 

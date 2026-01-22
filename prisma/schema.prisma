@@ -211,6 +211,37 @@ model Alert {
   @@index([userId])
 }
 
+// Do Not Call Registry registrations
+model DNCRegistration {
+  id            String   @id @default(cuid())
+  userId        String
+
+  // Phone number (encrypted)
+  phoneNumber   String   // Encrypted phone number
+  phoneHash     String   // Hash for deduplication
+
+  // Registration details
+  status        String   @default("PENDING") // PENDING, SUBMITTED, VERIFIED, FAILED
+  registeredAt  DateTime? // When successfully registered
+  verifiedAt    DateTime? // When last verified on registry
+  expiresAt     DateTime? // DNC registrations don't expire for cell phones, but do for landlines after 5 years
+
+  // Phone type affects expiration
+  phoneType     String   @default("UNKNOWN") // MOBILE, LANDLINE, VOIP, UNKNOWN
+
+  // Tracking
+  attempts      Int      @default(0)
+  lastError     String?
+  notes         String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, phoneHash])
+  @@index([userId])
+  @@index([status])
+}
+
 // Audit log for tracking all data access and modifications
 model AuditLog {
   id            String   @id @default(cuid())
