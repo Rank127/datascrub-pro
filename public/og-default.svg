@@ -11,30 +11,34 @@
   </defs>
   <rect width="1200" height="630" fill="url(#grad)"/>
 
-  <!-- Logo Circle Background -->
-  <circle cx="200" cy="315" r="120" fill="#1e293b"/>
-
-  <!-- Ghost Body -->
-  <path d="M200 195c-48 0-85 37-85 85v107l21-21 21 21 22-21 21 21 21-21 21 21 22-21 21 21V280c0-48-37-85-85-85z" fill="#10b981"/>
-
-  <!-- Ghost Face - Left Eye -->
-  <circle cx="168" cy="280" r="16" fill="#0f172a"/>
-  <circle cx="173" cy="275" r="5" fill="white"/>
-
-  <!-- Ghost Face - Right Eye -->
-  <circle cx="232" cy="280" r="16" fill="#0f172a"/>
-  <circle cx="237" cy="275" r="5" fill="white"/>
-
-  <!-- Shield in Ghost -->
-  <path d="M200 320c-20 0-36 16-36 36v24l36 18 36-18v-24c0-20-16-36-36-36z" fill="#059669"/>
-  <path d="M188 360l-8-8 5-5 8 8 16-16 5 5-21 21z" fill="white"/>
+  <!-- Shield Logo -->
+  <g transform="translate(120, 195)">
+    <!-- Shield Shape -->
+    <path
+      d="M80 20c-48 0-60 20-60 20v100c0 50 30 70 60 90 30-20 60-40 60-90V40s-12-20-60-20z"
+      fill="none"
+      stroke="#10b981"
+      stroke-width="8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <!-- Checkmark -->
+    <path
+      d="M50 115l24 24 40-48"
+      fill="none"
+      stroke="#10b981"
+      stroke-width="8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
 
   <!-- Text: GhostMyData -->
-  <text x="360" y="290" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="bold" fill="white">GhostMyData</text>
+  <text x="320" y="290" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="bold" fill="white">GhostMyData</text>
 
   <!-- Tagline -->
-  <text x="360" y="360" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#94a3b8">Remove Your Personal Data From The Internet</text>
+  <text x="320" y="360" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#94a3b8">Remove Your Personal Data From The Internet</text>
 
   <!-- Bottom URL -->
-  <text x="360" y="500" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#64748b">ghostmydata.com</text>
+  <text x="320" y="480" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#64748b">ghostmydata.com</text>
 </svg>
