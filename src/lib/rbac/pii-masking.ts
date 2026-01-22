@@ -174,7 +174,10 @@ export interface MaskedUserProfile extends Omit<UserProfile, "emails" | "phones"
 }
 
 export function maskUserProfile(profile: UserProfile): MaskedUserProfile {
-  const masked: MaskedUserProfile = { ...profile };
+  // Explicitly construct masked object to avoid type issues with null values
+  const masked: MaskedUserProfile = {
+    id: profile.id,
+  };
 
   if (profile.email) {
     masked.email = maskEmail(profile.email);
