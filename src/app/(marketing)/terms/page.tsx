@@ -21,6 +21,14 @@ export const metadata: Metadata = {
       "Read our terms of service covering data removal authorization, subscription billing, and user responsibilities.",
     url: "https://ghostmydata.com/terms",
     type: "website",
+    images: [
+      {
+        url: "https://ghostmydata.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "GhostMyData Terms of Service",
+      },
+    ],
   },
   robots: {
     index: true,

@@ -185,15 +185,18 @@ export async function auditPage(baseUrl: string, path: string): Promise<SEOAudit
       if (missing.length < 3) totalScore += 5;
     }
 
-    // Check for H1 tag
+    // Check for H1 tag (handles JSX with nested elements)
     maxScore += 10;
-    const h1Match = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
-    if (h1Match) {
+    const h1Exists = /<h1[^>]*>/i.test(html);
+    const h1ContentMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    if (h1Exists && h1ContentMatch) {
+      // Extract text content from H1, stripping nested tags
+      const h1Text = h1ContentMatch[1].replace(/<[^>]+>/g, "").trim().substring(0, 50);
       checks.push({
         name: "H1 Tag",
         status: "pass",
         message: "H1 tag present",
-        value: h1Match[1].substring(0, 50),
+        value: h1Text || "H1 found",
       });
       totalScore += 10;
     } else {

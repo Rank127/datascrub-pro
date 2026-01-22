@@ -26,6 +26,14 @@ export const metadata: Metadata = {
       "Expert guides on data removal, privacy protection, and understanding your data rights.",
     url: "https://ghostmydata.com/blog",
     type: "website",
+    images: [
+      {
+        url: "https://ghostmydata.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "GhostMyData Privacy Blog",
+      },
+    ],
   },
 };
 

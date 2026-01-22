@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacy Policy - How We Protect Your Data",
   description:
-    "Learn how GhostMyData protects your personal information. We use AES-256 encryption, never sell your data, and comply with CCPA, GDPR, and other privacy regulations.",
+    "How GhostMyData protects your data. AES-256 encryption, never sell your data, CCPA and GDPR compliant. Read our full privacy policy.",
   keywords: [
     "GhostMyData privacy policy",
     "data protection policy",
@@ -22,6 +22,14 @@ export const metadata: Metadata = {
       "Our commitment to protecting your privacy. AES-256 encryption, zero data selling, full GDPR/CCPA compliance.",
     url: "https://ghostmydata.com/privacy",
     type: "website",
+    images: [
+      {
+        url: "https://ghostmydata.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "GhostMyData Privacy Policy",
+      },
+    ],
   },
   robots: {
     index: true,

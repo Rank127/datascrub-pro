@@ -26,6 +26,14 @@ export const metadata: Metadata = {
       "Side-by-side comparison of GhostMyData and DeleteMe. Find out which data removal service offers better value.",
     url: "https://ghostmydata.com/compare/deleteme",
     type: "article",
+    images: [
+      {
+        url: "https://ghostmydata.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "GhostMyData vs DeleteMe Comparison",
+      },
+    ],
   },
 };
 

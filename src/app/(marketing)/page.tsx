@@ -6,7 +6,7 @@ import { FAQSchema } from "@/components/seo/structured-data";
 export const metadata: Metadata = {
   title: "GhostMyData - Remove Your Personal Data From The Internet",
   description:
-    "Find and remove your personal data from data brokers, breach databases, and the dark web. Automated privacy protection with 98% removal success rate. Start your free scan today.",
+    "Remove your personal data from data brokers, breach databases, and the dark web. Automated privacy protection with 98% success rate. Free scan.",
   keywords: [
     "data removal service",
     "remove personal data from internet",

@@ -4,7 +4,7 @@ import { Shield, Lock, Server, Eye, Key, FileCheck, AlertTriangle, CheckCircle }
 export const metadata: Metadata = {
   title: "Security - Bank-Level Data Protection",
   description:
-    "GhostMyData uses AES-256 encryption, SOC 2 compliant infrastructure, and industry-leading security practices to protect your personal data. Learn about our security measures.",
+    "GhostMyData uses AES-256 encryption, SOC 2 compliant infrastructure, and industry-leading security to protect your data.",
   keywords: [
     "data security",
     "AES-256 encryption",
@@ -24,6 +24,14 @@ export const metadata: Metadata = {
       "Bank-level security with AES-256 encryption, SOC 2 compliance, and 24/7 monitoring to protect your data.",
     url: "https://ghostmydata.com/security",
     type: "website",
+    images: [
+      {
+        url: "https://ghostmydata.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "GhostMyData Security",
+      },
+    ],
   },
 };
 

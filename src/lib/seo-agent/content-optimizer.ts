@@ -252,20 +252,20 @@ export async function analyzePageContent(baseUrl: string, path: string): Promise
       });
     }
 
-    // Check for H1 tag
-    const h1Match = html.match(/<h1/gi);
-    if (!h1Match) {
+    // Check for H1 tag (handles JSX with nested elements)
+    const h1Matches = html.match(/<h1[^>]*>[\s\S]*?<\/h1>/gi);
+    if (!h1Matches || h1Matches.length === 0) {
       suggestions.push({
         type: "structure",
         priority: "high",
         message: "Missing H1 tag",
         recommendation: "Add a single H1 tag with the main heading of the page.",
       });
-    } else if (h1Match.length > 1) {
+    } else if (h1Matches.length > 1) {
       suggestions.push({
         type: "structure",
         priority: "medium",
-        message: `Multiple H1 tags found (${h1Match.length})`,
+        message: `Multiple H1 tags found (${h1Matches.length})`,
         recommendation: "Use only one H1 tag per page.",
       });
     }

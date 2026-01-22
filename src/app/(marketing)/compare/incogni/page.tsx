@@ -7,7 +7,7 @@ import { FAQSchema } from "@/components/seo/structured-data";
 export const metadata: Metadata = {
   title: "GhostMyData vs Incogni: Complete Comparison (2026)",
   description:
-    "Compare GhostMyData and Incogni data removal services. See pricing, features, coverage, and which service offers better privacy protection for your needs.",
+    "Compare GhostMyData vs Incogni data removal services. See pricing, features, coverage, and which offers better privacy protection.",
   keywords: [
     "ghostmydata vs incogni",
     "incogni alternative",
@@ -26,6 +26,14 @@ export const metadata: Metadata = {
       "Detailed comparison of GhostMyData and Incogni. Find out which privacy service is right for you.",
     url: "https://ghostmydata.com/compare/incogni",
     type: "article",
+    images: [
+      {
+        url: "https://ghostmydata.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "GhostMyData vs Incogni Comparison",
+      },
+    ],
   },
 };
 

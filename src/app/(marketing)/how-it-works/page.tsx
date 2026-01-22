@@ -35,6 +35,14 @@ export const metadata: Metadata = {
       "Our automated 5-step process finds and removes your data from 50+ sources with 98% success rate.",
     url: "https://ghostmydata.com/how-it-works",
     type: "website",
+    images: [
+      {
+        url: "https://ghostmydata.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "How GhostMyData Works - Data Removal Process",
+      },
+    ],
   },
 };
 

@@ -7,7 +7,7 @@ import { FAQSchema, PricingSchema } from "@/components/seo/structured-data";
 export const metadata: Metadata = {
   title: "Pricing - Affordable Data Removal Plans",
   description:
-    "Choose from free, Pro ($11.99/mo), or Enterprise ($29.99/mo) data removal plans. 40% off introductory sale. Automated removal requests, continuous monitoring, and dark web protection.",
+    "Choose free, Pro ($11.99/mo), or Enterprise data removal plans. 40% off sale. Automated removal, continuous monitoring, and dark web protection.",
   keywords: [
     "data removal pricing",
     "privacy protection cost",
@@ -26,6 +26,14 @@ export const metadata: Metadata = {
       "Affordable data removal plans starting free. Pro plan $11.99/mo with automated removal. 40% off introductory sale.",
     url: "https://ghostmydata.com/pricing",
     type: "website",
+    images: [
+      {
+        url: "https://ghostmydata.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "GhostMyData Pricing - Data Removal Plans",
+      },
+    ],
   },
 };
 
