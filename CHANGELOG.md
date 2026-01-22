@@ -16,6 +16,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2026-01-22
+
+### Added
+- **Do Not Call (DNC) Registry Feature** (Enterprise only)
+  - Dashboard page at `/dashboard/dnc` for managing phone registrations
+  - Add phone numbers with type selection (Mobile, Landline, VoIP)
+  - Status tracking: PENDING → SUBMITTED → VERIFIED
+  - Phone number encryption at rest (AES-256)
+  - Masked phone display for privacy
+  - Info panel with DNC registry benefits and limitations
+  - Links to donotcall.gov and FTC phone number (1-888-382-1222)
+  - Upgrade prompt for non-Enterprise users
+
+- **DNC API Endpoints**
+  - `GET /api/dnc` - List all DNC registrations with stats
+  - `POST /api/dnc` - Add new phone number for registration
+  - `GET /api/dnc/[id]` - Get specific registration details
+  - `POST /api/dnc/[id]` - Submit or verify registration
+  - `DELETE /api/dnc/[id]` - Remove registration
+
+- **DNC Service Library** (`src/lib/dnc/`)
+  - Phone number validation (US format)
+  - Phone formatting and masking utilities
+  - Enterprise plan access checking
+  - Registration management functions
+
+- **SEO Agent** (Automated weekly cron job)
+  - Technical SEO audit (meta tags, H1, OG tags, canonical, structured data)
+  - Content analysis (keyword density, readability, word count)
+  - Blog topic generation for data broker removal guides
+  - Comprehensive SEO reports stored as alerts
+  - Email notifications for low scores or critical issues
+  - Cron schedule: Sundays at 9 AM UTC
+
+- **SEO Agent Endpoints**
+  - `GET /api/cron/seo-agent` - Run full automated SEO audit
+  - `POST /api/cron/seo-agent` - Manual trigger with options
+
+### Changed
+- Added "Do Not Call" link to dashboard sidebar navigation
+- Added DNC registration as Enterprise plan feature on pricing page
+- Added DNC to homepage pricing preview
+- Added DNC to competitor comparison tables (vs DeleteMe, vs Incogni)
+- Improved meta descriptions (trimmed to 160 chars optimal)
+- Added OG images to all marketing pages
+- Fixed H1 tag detection in SEO agent to handle JSX with nested elements
+
+### Database
+- Added `DNCRegistration` model with encrypted phone storage
+- Added `hashData` function to encryption module
+
+### Security
+- DNC feature gated to Enterprise plan only
+- Phone numbers encrypted with AES-256 before storage
+- Phone hash for deduplication without exposing numbers
+- API endpoints require authentication
+
+---
+
 ## [1.4.0] - 2026-01-22
 
 ### Added
@@ -298,6 +357,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.5.0 | 2026-01-22 | Do Not Call registry (Enterprise), SEO agent automation |
 | 1.4.0 | 2026-01-22 | RBAC security, PII masking, audit logging, admin dashboard |
 | 1.3.0 | 2026-01-22 | FREE plan limits, dynamic reports, manual removal links |
 | 1.2.0 | 2026-01-21 | SEO optimizations, RSS feed, OG images |
