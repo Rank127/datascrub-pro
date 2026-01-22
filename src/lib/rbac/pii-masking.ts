@@ -213,12 +213,14 @@ export function maskUserProfile(profile: UserProfile): MaskedUserProfile {
   if (profile.addresses) {
     try {
       const addresses = JSON.parse(profile.addresses);
-      masked.addresses = Array.isArray(addresses) ? addresses.map((addr: string | object) => {
+      masked.addresses = Array.isArray(addresses) ? addresses.map((addr: string | object): string => {
         if (typeof addr === "string") return maskAddress(addr);
         if (typeof addr === "object" && addr !== null) {
-          return Object.fromEntries(
+          // Convert masked address object to JSON string
+          const maskedObj = Object.fromEntries(
             Object.entries(addr).map(([k, v]) => [k, typeof v === "string" ? maskAddress(v) : v])
           );
+          return JSON.stringify(maskedObj);
         }
         return "***";
       }) : [];
