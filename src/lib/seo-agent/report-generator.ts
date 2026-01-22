@@ -60,8 +60,8 @@ export async function storeReport(report: SEOReport): Promise<void> {
         type: "SEO_REPORT",
         title: `SEO Report - Score: ${report.overallScore}/100`,
         message: report.summary,
-        severity: report.overallScore >= 80 ? "LOW" : report.overallScore >= 60 ? "MEDIUM" : "HIGH",
         metadata: JSON.stringify({
+          severity: report.overallScore >= 80 ? "LOW" : report.overallScore >= 60 ? "MEDIUM" : "HIGH",
           reportId: report.id,
           technicalScore: report.technicalScore,
           contentScore: report.contentScore,
