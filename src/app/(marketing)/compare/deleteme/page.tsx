@@ -104,6 +104,12 @@ const comparisonData = [
     winner: "ghostmydata",
   },
   {
+    feature: "Do Not Call Registration",
+    ghostmydata: "Yes (Enterprise)",
+    deleteme: "No",
+    winner: "ghostmydata",
+  },
+  {
     feature: "Removal Time",
     ghostmydata: "1-7 days average",
     deleteme: "7-14 days average",

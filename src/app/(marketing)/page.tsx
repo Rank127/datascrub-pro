@@ -420,9 +420,9 @@ export default function HomePage() {
                 {[
                   "Unlimited scans",
                   "Dark web monitoring",
+                  "Do Not Call registration",
                   "Family plan (5 profiles)",
                   "Daily monitoring",
-                  "API access",
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-2 text-slate-300">
                     <CheckCircle className="h-4 w-4 text-emerald-500" />

@@ -98,6 +98,12 @@ const comparisonData = [
     winner: "ghostmydata",
   },
   {
+    feature: "Do Not Call Registration",
+    ghostmydata: "Yes (Enterprise)",
+    incogni: "No",
+    winner: "ghostmydata",
+  },
+  {
     feature: "VPN Bundle",
     ghostmydata: "No",
     incogni: "Yes (Surfshark)",
