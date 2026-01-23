@@ -2,8 +2,7 @@ import type { Scanner, ScanInput, ScanResult } from "./base-scanner";
 import { MockDataBrokerScanner } from "./data-brokers/mock-broker-scanner";
 import { createRealBrokerScanners } from "./data-brokers";
 import { HaveIBeenPwnedScanner } from "./breaches/haveibeenpwned";
-import { DarkWebScanner } from "./dark-web/monitor";
-import { SocialMediaScanner } from "./social/social-scanner";
+import { DehashedScanner } from "./breaches/dehashed";
 import type { Plan, ScanType } from "@/lib/types";
 
 // Configuration: Set to true to use real data broker scanners
@@ -36,6 +35,7 @@ export class ScanOrchestrator {
 
     // Always include breach scanners
     this.scanners.push(new HaveIBeenPwnedScanner());
+    this.scanners.push(new DehashedScanner()); // Searches breach databases and dark web dumps
 
     // Quick scan only checks breaches
     if (type === "QUICK") {
@@ -55,13 +55,9 @@ export class ScanOrchestrator {
         this.scanners.push(...MockDataBrokerScanner.createAll());
       }
 
-      // Add social media scanner (still mock for now)
-      this.scanners.push(new SocialMediaScanner());
-    }
-
-    // Dark web monitoring for Enterprise only
-    if (userPlan === "ENTERPRISE") {
-      this.scanners.push(new DarkWebScanner(true));
+      // Note: Social media scanner disabled until API integration available
+      // Note: Dark web scanner disabled until API integration available
+      // Dehashed provides dark web/breach coverage for now
     }
   }
 
