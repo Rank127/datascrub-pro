@@ -3,6 +3,7 @@ import { MockDataBrokerScanner } from "./data-brokers/mock-broker-scanner";
 import { createRealBrokerScanners } from "./data-brokers";
 import { HaveIBeenPwnedScanner } from "./breaches/haveibeenpwned";
 import { DehashedScanner } from "./breaches/dehashed";
+import { SocialMediaScanner } from "./social/social-scanner";
 import type { Plan, ScanType } from "@/lib/types";
 
 // Configuration: Set to true to use real data broker scanners
@@ -55,9 +56,8 @@ export class ScanOrchestrator {
         this.scanners.push(...MockDataBrokerScanner.createAll());
       }
 
-      // Note: Social media scanner disabled until API integration available
-      // Note: Dark web scanner disabled until API integration available
-      // Dehashed provides dark web/breach coverage for now
+      // Social media scanner provides manual check links
+      this.scanners.push(new SocialMediaScanner());
     }
   }
 
