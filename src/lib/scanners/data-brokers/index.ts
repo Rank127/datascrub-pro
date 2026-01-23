@@ -14,6 +14,13 @@ export { RadarisScanner } from "./radaris-scanner";
 export { InteliusScanner } from "./intelius-scanner";
 export { PeopleFinderScanner } from "./peoplefinder-scanner";
 
+// Manual check scanners for sites with advanced bot protection
+export {
+  ManualCheckScanner,
+  createFastPeopleSearchManualScanner,
+  createPeopleFinderManualScanner,
+} from "./manual-check-scanner";
+
 // Legacy mock scanner (kept for testing/development)
 export { MockDataBrokerScanner } from "./mock-broker-scanner";
 
@@ -21,15 +28,21 @@ import { SpokeoScanner } from "./spokeo-scanner";
 import { WhitePagesScanner } from "./whitepages-scanner";
 import { BeenVerifiedScanner } from "./beenverified-scanner";
 import { TruePeopleSearchScanner } from "./truepeoplesearch-scanner";
-import { FastPeopleSearchScanner } from "./fastpeoplesearch-scanner";
 import { RadarisScanner } from "./radaris-scanner";
 import { InteliusScanner } from "./intelius-scanner";
-import { PeopleFinderScanner } from "./peoplefinder-scanner";
+import {
+  createFastPeopleSearchManualScanner,
+  createPeopleFinderManualScanner,
+} from "./manual-check-scanner";
 import type { Scanner } from "../base-scanner";
 
 /**
  * Create all real data broker scanners
  * Use this instead of MockDataBrokerScanner.createAll() for production
+ *
+ * Note: FastPeopleSearch and PeopleFinders use manual check scanners
+ * because they have advanced bot protection that blocks scraping.
+ * These return a link for the user to check manually.
  */
 export function createRealBrokerScanners(): Scanner[] {
   return [
@@ -37,10 +50,10 @@ export function createRealBrokerScanners(): Scanner[] {
     new WhitePagesScanner(),
     new BeenVerifiedScanner(),
     new TruePeopleSearchScanner(),
-    new FastPeopleSearchScanner(),
+    createFastPeopleSearchManualScanner(), // Manual check - advanced bot protection
     new RadarisScanner(),
     new InteliusScanner(),
-    new PeopleFinderScanner(),
+    createPeopleFinderManualScanner(), // Manual check - advanced bot protection
   ];
 }
 
@@ -48,15 +61,22 @@ export function createRealBrokerScanners(): Scanner[] {
  * Get scanner by data source
  */
 export function getScannerBySource(source: string): Scanner | null {
+  // Manual check scanners (sites with advanced bot protection)
+  if (source === "FASTPEOPLESEARCH") {
+    return createFastPeopleSearchManualScanner();
+  }
+  if (source === "PEOPLEFINDER") {
+    return createPeopleFinderManualScanner();
+  }
+
+  // Regular scraped scanners
   const scannerMap: Record<string, new () => Scanner> = {
     SPOKEO: SpokeoScanner,
     WHITEPAGES: WhitePagesScanner,
     BEENVERIFIED: BeenVerifiedScanner,
     TRUEPEOPLESEARCH: TruePeopleSearchScanner,
-    FASTPEOPLESEARCH: FastPeopleSearchScanner,
     RADARIS: RadarisScanner,
     INTELIUS: InteliusScanner,
-    PEOPLEFINDER: PeopleFinderScanner,
   };
 
   const ScannerClass = scannerMap[source];
