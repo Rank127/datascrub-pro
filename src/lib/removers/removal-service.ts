@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { sendCCPARemovalRequest, sendRemovalUpdateEmail } from "@/lib/email";
 import { getDataBrokerInfo, getOptOutInstructions } from "./data-broker-directory";
+import { calculateVerifyAfterDate } from "./verification-service";
 import type { RemovalMethod } from "@/lib/types";
 
 interface RemovalExecutionResult {
@@ -167,11 +168,18 @@ async function updateRemovalStatus(
   status: string,
   error?: string
 ) {
+  // Get current request to determine source for verification scheduling
+  const currentRequest = await prisma.removalRequest.findUnique({
+    where: { id: requestId },
+    include: { exposure: { select: { source: true } } },
+  });
+
   const data: {
     status: string;
     attempts: { increment: number };
     submittedAt?: Date;
     lastError?: string;
+    verifyAfter?: Date;
   } = {
     status,
     attempts: { increment: 1 },
@@ -179,6 +187,11 @@ async function updateRemovalStatus(
 
   if (status === "SUBMITTED") {
     data.submittedAt = new Date();
+    // Schedule verification based on source type
+    if (currentRequest?.exposure.source) {
+      data.verifyAfter = calculateVerifyAfterDate(currentRequest.exposure.source);
+      console.log(`[Removal] Scheduled verification for ${data.verifyAfter.toISOString()}`);
+    }
   }
 
   if (error) {

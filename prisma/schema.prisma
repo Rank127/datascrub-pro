@@ -175,10 +175,16 @@ model RemovalRequest {
   lastError   String?
   notes       String?  // Additional notes or instructions
 
+  // Verification tracking
+  verifyAfter       DateTime?  // When to run verification scan
+  lastVerifiedAt    DateTime?  // Last verification attempt
+  verificationCount Int        @default(0) // Number of verification attempts
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([userId])
+  @@index([verifyAfter]) // For efficient cron queries
 }
 
 model Subscription {
