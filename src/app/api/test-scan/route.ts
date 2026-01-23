@@ -9,6 +9,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { ScanOrchestrator, prepareProfileForScan } from "@/lib/scanners/scan-orchestrator";
 import { decrypt } from "@/lib/encryption/crypto";
+import type { Plan } from "@/lib/types";
 
 // Simple secret to prevent random access
 const TEST_SECRET = "ghostmydata-test-2026";
@@ -72,7 +73,7 @@ export async function GET(request: Request) {
     // Initialize orchestrator
     const orchestrator = new ScanOrchestrator({
       type: "FULL",
-      userPlan: user.plan,
+      userPlan: user.plan as Plan,
     });
 
     console.log("[TestScan] Scanners:", orchestrator.getScannerNames());
