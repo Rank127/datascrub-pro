@@ -1,0 +1,455 @@
+/**
+ * Browser Automation Service for Form-Based Opt-Outs
+ *
+ * This service handles automated form submissions for data broker opt-outs.
+ * In production, it uses cloud browser services (Browserless.io) for reliable
+ * headless browser automation in serverless environments.
+ *
+ * For local development, it can use puppeteer directly.
+ */
+
+import { DATA_BROKER_DIRECTORY, type DataBrokerInfo } from "./data-broker-directory";
+
+// Browser automation result
+export interface AutomationResult {
+  success: boolean;
+  method: "FORM_SUBMIT" | "API" | "MANUAL_REQUIRED";
+  message: string;
+  screenshotUrl?: string;
+  confirmationCode?: string;
+  nextSteps?: string[];
+  error?: string;
+}
+
+// Form field mapping for different data brokers
+export interface FormFieldMapping {
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  reason?: string;
+  captcha?: boolean;
+  additionalFields?: Record<string, string>;
+}
+
+// Opt-out form configurations for different brokers
+const FORM_CONFIGS: Record<string, {
+  url: string;
+  fields: FormFieldMapping;
+  submitButton: string;
+  confirmationIndicator: string;
+  requiresCaptcha: boolean;
+  notes?: string;
+}> = {
+  TRUEPEOPLESEARCH: {
+    url: "https://www.truepeoplesearch.com/removal",
+    fields: {
+      name: "input[name='name'], #name",
+      email: "input[name='email'], #email",
+    },
+    submitButton: "button[type='submit'], .remove-btn",
+    confirmationIndicator: ".success-message, .confirmation",
+    requiresCaptcha: false,
+    notes: "Simple form, usually processes quickly",
+  },
+  FASTPEOPLESEARCH: {
+    url: "https://www.fastpeoplesearch.com/removal",
+    fields: {
+      name: "input[name='name']",
+      email: "input[name='email']",
+    },
+    submitButton: "button[type='submit']",
+    confirmationIndicator: ".success, .removed",
+    requiresCaptcha: false,
+  },
+  SPOKEO: {
+    url: "https://www.spokeo.com/optout",
+    fields: {
+      email: "input[name='email'], input[type='email']",
+    },
+    submitButton: "button[type='submit'], .submit-btn",
+    confirmationIndicator: ".confirmation, .success",
+    requiresCaptcha: true,
+    notes: "Requires email verification after submission",
+  },
+  WHITEPAGES: {
+    url: "https://www.whitepages.com/suppression-requests",
+    fields: {
+      name: "input[name='name']",
+      email: "input[name='email']",
+      phone: "input[name='phone']",
+    },
+    submitButton: "button[type='submit']",
+    confirmationIndicator: ".success, .confirmation",
+    requiresCaptcha: true,
+    notes: "May require phone verification",
+  },
+  BEENVERIFIED: {
+    url: "https://www.beenverified.com/opt-out/",
+    fields: {
+      email: "input[name='email']",
+    },
+    submitButton: "button[type='submit']",
+    confirmationIndicator: ".success",
+    requiresCaptcha: true,
+  },
+  RADARIS: {
+    url: "https://radaris.com/control/privacy",
+    fields: {
+      name: "input[name='name']",
+      email: "input[name='email']",
+    },
+    submitButton: "button[type='submit']",
+    confirmationIndicator: ".success",
+    requiresCaptcha: true,
+    notes: "Complex multi-step process",
+  },
+  FAMILYTREENOW: {
+    url: "https://www.familytreenow.com/optout",
+    fields: {
+      name: "input[name='name']",
+    },
+    submitButton: "button.opt-out",
+    confirmationIndicator: ".success, .opted-out",
+    requiresCaptcha: false,
+  },
+  THATSTHEM: {
+    url: "https://thatsthem.com/optout",
+    fields: {
+      name: "input[name='name']",
+      email: "input[name='email']",
+    },
+    submitButton: "button[type='submit']",
+    confirmationIndicator: ".success",
+    requiresCaptcha: false,
+  },
+};
+
+// Browserless.io configuration
+interface BrowserlessConfig {
+  apiKey: string;
+  endpoint: string;
+}
+
+function getBrowserlessConfig(): BrowserlessConfig | null {
+  const apiKey = process.env.BROWSERLESS_API_KEY;
+  if (!apiKey) return null;
+
+  return {
+    apiKey,
+    endpoint: process.env.BROWSERLESS_ENDPOINT || "https://chrome.browserless.io",
+  };
+}
+
+/**
+ * Execute form submission via Browserless.io
+ * Uses their /function API for custom browser automation
+ */
+async function executeBrowserlessForm(
+  brokerKey: string,
+  formData: {
+    name: string;
+    email: string;
+    phone?: string;
+    address?: string;
+    profileUrl?: string;
+  }
+): Promise<AutomationResult> {
+  const config = getBrowserlessConfig();
+  if (!config) {
+    return {
+      success: false,
+      method: "MANUAL_REQUIRED",
+      message: "Browser automation not configured (BROWSERLESS_API_KEY missing)",
+      nextSteps: ["Configure BROWSERLESS_API_KEY in environment variables"],
+    };
+  }
+
+  const formConfig = FORM_CONFIGS[brokerKey];
+  if (!formConfig) {
+    return {
+      success: false,
+      method: "MANUAL_REQUIRED",
+      message: `No form configuration for ${brokerKey}`,
+      nextSteps: ["Submit opt-out manually using the broker's website"],
+    };
+  }
+
+  if (formConfig.requiresCaptcha) {
+    return {
+      success: false,
+      method: "MANUAL_REQUIRED",
+      message: `${brokerKey} requires CAPTCHA - manual submission needed`,
+      nextSteps: [
+        `Visit ${formConfig.url}`,
+        "Complete the opt-out form manually",
+        "Solve the CAPTCHA",
+        "Submit and save confirmation",
+      ],
+    };
+  }
+
+  try {
+    // Browserless function to fill and submit the form
+    const browserlessCode = `
+      module.exports = async ({ page, context }) => {
+        const { url, fields, submitButton, confirmationIndicator, formData } = context;
+
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+
+        // Fill form fields
+        if (fields.name && formData.name) {
+          await page.waitForSelector(fields.name, { timeout: 5000 }).catch(() => null);
+          await page.type(fields.name, formData.name);
+        }
+
+        if (fields.email && formData.email) {
+          await page.waitForSelector(fields.email, { timeout: 5000 }).catch(() => null);
+          await page.type(fields.email, formData.email);
+        }
+
+        if (fields.phone && formData.phone) {
+          await page.waitForSelector(fields.phone, { timeout: 5000 }).catch(() => null);
+          await page.type(fields.phone, formData.phone);
+        }
+
+        // Click submit button
+        await page.waitForSelector(submitButton, { timeout: 5000 });
+        await page.click(submitButton);
+
+        // Wait for confirmation
+        await page.waitForTimeout(3000);
+
+        // Check for success indicator
+        const success = await page.$(confirmationIndicator) !== null;
+
+        // Take screenshot
+        const screenshot = await page.screenshot({ encoding: 'base64' });
+
+        return {
+          success,
+          screenshot,
+          url: page.url(),
+        };
+      };
+    `;
+
+    const response = await fetch(`${config.endpoint}/function?token=${config.apiKey}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code: browserlessCode,
+        context: {
+          url: formConfig.url,
+          fields: formConfig.fields,
+          submitButton: formConfig.submitButton,
+          confirmationIndicator: formConfig.confirmationIndicator,
+          formData,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Browserless API error: ${error}`);
+    }
+
+    const result = await response.json();
+
+    if (result.success) {
+      return {
+        success: true,
+        method: "FORM_SUBMIT",
+        message: `Successfully submitted opt-out form for ${brokerKey}`,
+        screenshotUrl: result.screenshot ? `data:image/png;base64,${result.screenshot}` : undefined,
+        nextSteps: formConfig.notes
+          ? [formConfig.notes]
+          : ["Check your email for verification link if required"],
+      };
+    } else {
+      return {
+        success: false,
+        method: "MANUAL_REQUIRED",
+        message: `Form submission did not show confirmation for ${brokerKey}`,
+        nextSteps: [
+          `Visit ${formConfig.url} to complete opt-out manually`,
+          "The form may have changed or requires additional steps",
+        ],
+      };
+    }
+  } catch (error) {
+    console.error(`[BrowserAutomation] Error for ${brokerKey}:`, error);
+    return {
+      success: false,
+      method: "MANUAL_REQUIRED",
+      message: `Automation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      error: error instanceof Error ? error.message : "Unknown error",
+      nextSteps: [
+        `Visit ${formConfig.url} to complete opt-out manually`,
+      ],
+    };
+  }
+}
+
+/**
+ * Get manual opt-out instructions for a broker
+ */
+export function getManualOptOutInstructions(brokerKey: string): {
+  url: string;
+  steps: string[];
+  estimatedDays: number;
+} {
+  const broker = DATA_BROKER_DIRECTORY[brokerKey];
+  const formConfig = FORM_CONFIGS[brokerKey];
+
+  if (!broker) {
+    return {
+      url: "",
+      steps: ["Data broker not found in directory"],
+      estimatedDays: 30,
+    };
+  }
+
+  const steps: string[] = [];
+
+  if (broker.optOutUrl) {
+    steps.push(`1. Visit the opt-out page: ${broker.optOutUrl}`);
+    steps.push("2. Search for your listing using your name and location");
+    steps.push("3. Select your profile from the search results");
+  }
+
+  if (formConfig) {
+    steps.push("4. Fill out the opt-out form with your information");
+    if (formConfig.requiresCaptcha) {
+      steps.push("5. Complete the CAPTCHA verification");
+    }
+    steps.push(`${formConfig.requiresCaptcha ? "6" : "5"}. Submit the form and save any confirmation`);
+  } else if (broker.privacyEmail) {
+    steps.push(`4. If no form is available, email: ${broker.privacyEmail}`);
+    steps.push("5. Include your full name and any profile URLs");
+    steps.push("6. Reference CCPA/GDPR rights in your request");
+  }
+
+  if (broker.notes) {
+    steps.push(`Note: ${broker.notes}`);
+  }
+
+  return {
+    url: broker.optOutUrl || "",
+    steps,
+    estimatedDays: broker.estimatedDays,
+  };
+}
+
+/**
+ * Main function to attempt automated form opt-out
+ */
+export async function attemptAutomatedOptOut(
+  brokerKey: string,
+  userData: {
+    name: string;
+    email: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    profileUrl?: string;
+  }
+): Promise<AutomationResult> {
+  const broker = DATA_BROKER_DIRECTORY[brokerKey];
+
+  if (!broker) {
+    return {
+      success: false,
+      method: "MANUAL_REQUIRED",
+      message: `Unknown broker: ${brokerKey}`,
+    };
+  }
+
+  // Check if we have form configuration for this broker
+  const formConfig = FORM_CONFIGS[brokerKey];
+
+  if (!formConfig) {
+    // No form config - provide manual instructions
+    const instructions = getManualOptOutInstructions(brokerKey);
+    return {
+      success: false,
+      method: "MANUAL_REQUIRED",
+      message: `Automated opt-out not available for ${broker.name}`,
+      nextSteps: instructions.steps,
+    };
+  }
+
+  // Check if form requires CAPTCHA
+  if (formConfig.requiresCaptcha) {
+    return {
+      success: false,
+      method: "MANUAL_REQUIRED",
+      message: `${broker.name} requires CAPTCHA verification`,
+      nextSteps: [
+        `Visit ${formConfig.url}`,
+        "Complete the opt-out form",
+        "Solve the CAPTCHA",
+        "Submit and note any confirmation number",
+      ],
+    };
+  }
+
+  // Attempt automated form submission via Browserless
+  return executeBrowserlessForm(brokerKey, userData);
+}
+
+/**
+ * Get brokers that support automated opt-out
+ */
+export function getAutomatedOptOutBrokers(): string[] {
+  return Object.entries(FORM_CONFIGS)
+    .filter(([, config]) => !config.requiresCaptcha)
+    .map(([key]) => key);
+}
+
+/**
+ * Get brokers that require manual opt-out
+ */
+export function getManualOptOutBrokers(): string[] {
+  const automatedBrokers = new Set(Object.keys(FORM_CONFIGS).filter(
+    key => !FORM_CONFIGS[key].requiresCaptcha
+  ));
+
+  return Object.keys(DATA_BROKER_DIRECTORY).filter(
+    key => !automatedBrokers.has(key)
+  );
+}
+
+/**
+ * Check if Browserless automation is configured
+ */
+export function isAutomationEnabled(): boolean {
+  return !!process.env.BROWSERLESS_API_KEY;
+}
+
+/**
+ * Get automation status and capabilities
+ */
+export function getAutomationStatus(): {
+  enabled: boolean;
+  provider: string;
+  automatedBrokers: number;
+  manualBrokers: number;
+} {
+  const automatedBrokers = getAutomatedOptOutBrokers();
+  const manualBrokers = getManualOptOutBrokers();
+
+  return {
+    enabled: isAutomationEnabled(),
+    provider: process.env.BROWSERLESS_API_KEY ? "Browserless.io" : "None",
+    automatedBrokers: automatedBrokers.length,
+    manualBrokers: manualBrokers.length,
+  };
+}

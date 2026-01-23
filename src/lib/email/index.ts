@@ -373,6 +373,228 @@ export async function sendRefundConfirmationEmail(
   return sendEmail(email, `💰 Your $${refundAmount.toFixed(2)} Refund Has Been Processed`, html);
 }
 
+// Removal Follow-up Reminder Email (30/45 day reminder)
+interface FollowUpReminderData {
+  sourceName: string;
+  dataType: string;
+  submittedAt: Date;
+  daysSinceSubmission: number;
+  removalRequestId: string;
+}
+
+export async function sendFollowUpReminderEmail(
+  email: string,
+  name: string,
+  reminder: FollowUpReminderData
+) {
+  const submittedDate = reminder.submittedAt.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const isOverdue = reminder.daysSinceSubmission >= 45;
+  const urgencyColor = isOverdue ? "#ef4444" : "#f97316";
+
+  const html = baseTemplate(`
+    <h1 style="color: ${urgencyColor}; margin-top: 0;">📬 Removal Follow-up Reminder</h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      It's been <strong>${reminder.daysSinceSubmission} days</strong> since we submitted your data removal request.
+      Here's the status:
+    </p>
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 8px 0; color: #94a3b8;">Source:</td>
+          <td style="padding: 8px 0; color: #e2e8f0; text-align: right; font-weight: 600;">${reminder.sourceName}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #94a3b8;">Data Type:</td>
+          <td style="padding: 8px 0; color: #e2e8f0; text-align: right;">${reminder.dataType}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #94a3b8;">Submitted On:</td>
+          <td style="padding: 8px 0; color: #e2e8f0; text-align: right;">${submittedDate}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #94a3b8;">Days Elapsed:</td>
+          <td style="padding: 8px 0; color: ${urgencyColor}; text-align: right; font-weight: 600;">${reminder.daysSinceSubmission} days</td>
+        </tr>
+      </table>
+    </div>
+    ${isOverdue
+      ? `<div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; padding: 16px; margin: 24px 0;">
+          <p style="margin: 0; color: #ef4444; font-weight: 600;">⚠️ Past CCPA 45-Day Deadline</p>
+          <p style="margin: 8px 0 0 0; font-size: 14px; color: #e2e8f0;">
+            Under CCPA, organizations must respond within 45 days. This request is overdue.
+            We recommend sending a follow-up request or contacting them directly.
+          </p>
+        </div>`
+      : `<p style="font-size: 16px; line-height: 1.6;">
+          Under CCPA (45 days) and GDPR (30 days), organizations must respond to data deletion requests.
+          ${reminder.daysSinceSubmission >= 30
+            ? `This request has passed the <strong>GDPR 30-day deadline</strong>.`
+            : `You have ${45 - reminder.daysSinceSubmission} days until the CCPA deadline.`
+          }
+        </p>`
+    }
+    <p style="font-size: 16px; line-height: 1.6;">
+      <strong>What you can do:</strong>
+    </p>
+    <ul style="font-size: 16px; line-height: 1.8; padding-left: 20px; color: #e2e8f0;">
+      <li>Check your email for any responses from ${reminder.sourceName}</li>
+      <li>Re-send the removal request with escalation language</li>
+      <li>Contact them directly if no response is received</li>
+    </ul>
+    ${buttonHtml("View Removal Status", `${APP_URL}/dashboard/removals`)}
+    ${buttonHtml("Re-send Request", `${APP_URL}/api/removals/resend?id=${reminder.removalRequestId}`)}
+  `);
+
+  return sendEmail(
+    email,
+    `📬 ${isOverdue ? "[Overdue]" : "[Reminder]"} Follow-up: ${reminder.sourceName} removal (${reminder.daysSinceSubmission} days)`,
+    html
+  );
+}
+
+// Batch follow-up summary email (when multiple reminders are due)
+interface BatchFollowUpData {
+  totalPending: number;
+  over30Days: number;
+  over45Days: number;
+  reminders: Array<{
+    sourceName: string;
+    daysSinceSubmission: number;
+  }>;
+}
+
+export async function sendBatchFollowUpEmail(
+  email: string,
+  name: string,
+  data: BatchFollowUpData
+) {
+  const html = baseTemplate(`
+    <h1 style="color: #f97316; margin-top: 0;">📊 Removal Request Status Summary</h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Here's a summary of your pending data removal requests:
+    </p>
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Total Pending</td>
+          <td style="padding: 12px 0; color: #e2e8f0; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">${data.totalPending}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Over GDPR Deadline (30 days)</td>
+          <td style="padding: 12px 0; color: ${data.over30Days > 0 ? '#f97316' : '#10b981'}; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">${data.over30Days}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8;">Over CCPA Deadline (45 days)</td>
+          <td style="padding: 12px 0; color: ${data.over45Days > 0 ? '#ef4444' : '#10b981'}; text-align: right; font-weight: 600;">${data.over45Days}</td>
+        </tr>
+      </table>
+    </div>
+    ${data.over45Days > 0
+      ? `<div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; padding: 16px; margin: 24px 0;">
+          <p style="margin: 0; color: #ef4444; font-weight: 600;">⚠️ ${data.over45Days} request${data.over45Days !== 1 ? 's' : ''} past CCPA deadline</p>
+          <p style="margin: 8px 0 0 0; font-size: 14px; color: #e2e8f0;">
+            Consider escalating these requests or contacting the organizations directly.
+          </p>
+        </div>`
+      : ''
+    }
+    <p style="font-size: 16px; line-height: 1.6;"><strong>Requests requiring attention:</strong></p>
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      ${data.reminders.slice(0, 10).map(r => `
+        <div style="padding: 8px 0; border-bottom: 1px solid #334155; display: flex; justify-content: space-between;">
+          <span style="color: #e2e8f0;">${r.sourceName}</span>
+          <span style="color: ${r.daysSinceSubmission >= 45 ? '#ef4444' : r.daysSinceSubmission >= 30 ? '#f97316' : '#10b981'}; font-weight: 600;">
+            ${r.daysSinceSubmission} days
+          </span>
+        </div>
+      `).join('')}
+      ${data.reminders.length > 10 ? `
+        <p style="margin: 12px 0 0 0; color: #94a3b8; font-size: 14px;">
+          ...and ${data.reminders.length - 10} more
+        </p>
+      ` : ''}
+    </div>
+    ${buttonHtml("View All Removals", `${APP_URL}/dashboard/removals`)}
+  `);
+
+  return sendEmail(
+    email,
+    `📊 ${data.over45Days > 0 ? '[Action Required] ' : ''}${data.totalPending} Pending Removal Requests`,
+    html
+  );
+}
+
+// Monthly re-scan reminder email
+export async function sendRescanReminderEmail(
+  email: string,
+  name: string,
+  lastScanDate: Date | null,
+  exposureCount: number
+) {
+  const lastScanText = lastScanDate
+    ? lastScanDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+    : "Never";
+  const daysSinceLastScan = lastScanDate
+    ? Math.floor((Date.now() - lastScanDate.getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+
+  const html = baseTemplate(`
+    <h1 style="color: #10b981; margin-top: 0;">🔍 Time for Your Monthly Privacy Scan</h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      It's been a while since your last privacy scan. Regular scans help you stay on top of new data exposures
+      and keep your personal information secure.
+    </p>
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Last Scan</td>
+          <td style="padding: 12px 0; color: #e2e8f0; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">
+            ${lastScanText}
+            ${daysSinceLastScan ? ` (${daysSinceLastScan} days ago)` : ''}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8;">Known Exposures</td>
+          <td style="padding: 12px 0; color: ${exposureCount > 0 ? '#f97316' : '#10b981'}; text-align: right; font-weight: 600;">${exposureCount}</td>
+        </tr>
+      </table>
+    </div>
+    <p style="font-size: 16px; line-height: 1.6;">
+      <strong>Why scan regularly?</strong>
+    </p>
+    <ul style="font-size: 16px; line-height: 1.8; padding-left: 20px; color: #e2e8f0;">
+      <li>New data breaches happen constantly</li>
+      <li>Data brokers re-aggregate information regularly</li>
+      <li>Removed data may reappear from other sources</li>
+      <li>Stay ahead of identity theft risks</li>
+    </ul>
+    ${buttonHtml("Start Scan Now", `${APP_URL}/dashboard/scan`)}
+    <p style="font-size: 14px; color: #94a3b8;">
+      Tip: PRO and ENTERPRISE users get automated weekly/daily scans. Upgrade to never miss a new exposure.
+    </p>
+  `);
+
+  return sendEmail(
+    email,
+    `🔍 Time for Your Monthly Privacy Scan`,
+    html
+  );
+}
+
 // CCPA/GDPR Removal Request Email (sent to data brokers)
 interface RemovalRequestEmail {
   toEmail: string;
