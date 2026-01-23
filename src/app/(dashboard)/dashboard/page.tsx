@@ -179,76 +179,84 @@ export default function DashboardPage() {
       {/* Risk Score and Stats */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {/* Risk Score Card */}
-        <Card className="bg-slate-800/50 border-slate-700 md:col-span-2 lg:col-span-1">
-          <CardContent className="flex items-center justify-center py-6">
-            <RiskScore score={stats.riskScore} size="md" />
-          </CardContent>
-        </Card>
+        <Link href="/dashboard/exposures" className="md:col-span-2 lg:col-span-1">
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-slate-600 transition-all cursor-pointer h-full">
+            <CardContent className="flex items-center justify-center py-6">
+              <RiskScore score={stats.riskScore} size="md" />
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Active Exposures */}
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-400">
-              Active Exposures
-            </CardTitle>
-            <AlertTriangle className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {stats.activeExposures}
-            </div>
-            <div className="flex items-center text-xs text-slate-500">
-              {stats.activeExposures > 0 ? (
-                <>
-                  <TrendingUp className="mr-1 h-3 w-3 text-red-400" />
-                  <span className="text-red-400">Needs attention</span>
-                </>
-              ) : (
-                <>
-                  <TrendingDown className="mr-1 h-3 w-3 text-emerald-400" />
-                  <span className="text-emerald-400">All clear</span>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <Link href="/dashboard/exposures?status=ACTIVE">
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-orange-500/50 transition-all cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-400">
+                Active Exposures
+              </CardTitle>
+              <AlertTriangle className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {stats.activeExposures}
+              </div>
+              <div className="flex items-center text-xs text-slate-500">
+                {stats.activeExposures > 0 ? (
+                  <>
+                    <TrendingUp className="mr-1 h-3 w-3 text-red-400" />
+                    <span className="text-red-400">Needs attention</span>
+                  </>
+                ) : (
+                  <>
+                    <TrendingDown className="mr-1 h-3 w-3 text-emerald-400" />
+                    <span className="text-emerald-400">All clear</span>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Removed */}
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-400">
-              Successfully Removed
-            </CardTitle>
-            <Trash2 className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {stats.removedExposures}
-            </div>
-            <div className="flex items-center text-xs text-emerald-400">
-              <TrendingDown className="mr-1 h-3 w-3" />
-              {stats.removedExposures > 0 ? "Protected" : "No removals yet"}
-            </div>
-          </CardContent>
-        </Card>
+        <Link href="/dashboard/removals">
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-emerald-500/50 transition-all cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-400">
+                Successfully Removed
+              </CardTitle>
+              <Trash2 className="h-4 w-4 text-emerald-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {stats.removedExposures}
+              </div>
+              <div className="flex items-center text-xs text-emerald-400">
+                <TrendingDown className="mr-1 h-3 w-3" />
+                {stats.removedExposures > 0 ? "Protected" : "No removals yet"}
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Whitelisted */}
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-400">
-              Whitelisted
-            </CardTitle>
-            <Shield className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {stats.whitelistedItems}
-            </div>
-            <p className="text-xs text-slate-500">
-              Accounts you want to keep
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/dashboard/whitelist">
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-blue-500/50 transition-all cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-400">
+                Whitelisted
+              </CardTitle>
+              <Shield className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {stats.whitelistedItems}
+              </div>
+              <p className="text-xs text-slate-500">
+                Accounts you want to keep
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* Pending Removals Progress */}

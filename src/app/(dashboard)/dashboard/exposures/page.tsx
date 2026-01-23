@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,7 +56,8 @@ interface ExposureStats {
   bySeverity: Record<string, number>;
 }
 
-export default function ExposuresPage() {
+function ExposuresPageContent() {
+  const searchParams = useSearchParams();
   const [exposures, setExposures] = useState<Exposure[]>([]);
   const [stats, setStats] = useState<ExposureStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,9 +66,13 @@ export default function ExposuresPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
 
-  // Filters
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [severityFilter, setSeverityFilter] = useState<string>("all");
+  // Filters - initialize from URL params
+  const [statusFilter, setStatusFilter] = useState<string>(
+    searchParams.get("status") || "all"
+  );
+  const [severityFilter, setSeverityFilter] = useState<string>(
+    searchParams.get("severity") || "all"
+  );
 
   // Get only actionable exposures (not already removed or whitelisted)
   const actionableExposures = exposures.filter(
@@ -482,5 +488,19 @@ export default function ExposuresPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function ExposuresPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        </div>
+      }
+    >
+      <ExposuresPageContent />
+    </Suspense>
   );
 }
