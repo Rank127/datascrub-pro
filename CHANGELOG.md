@@ -12,7 +12,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real dark web scanner integrations
 - Mobile app (React Native)
 - API access for Enterprise users
-- Additional data broker integrations
+- Browser automation for form-based opt-outs (Browserless.io)
+
+---
+
+## [1.7.0] - 2026-01-23
+
+### Added
+- **LeakCheck Paid API Integration**
+  - Upgraded from free public API to paid API v2
+  - Rate limiting queue (10 requests/minute) to prevent API blocks
+  - Supports email, phone, AND username lookups (previously email only)
+  - Returns detailed breach data (exposed passwords, IPs, phones)
+  - Quota monitoring for API usage tracking
+  - Falls back to public API if no API key configured
+
+- **Expanded Data Broker Coverage (58 brokers)**
+  - AllBrokersScanner now includes ALL data brokers in directory
+  - Previously skipped brokers with dedicated scrapers (Spokeo, WhitePages, etc.)
+  - Now generates check links for all 58 brokers regardless of scraper status
+  - Added mailto: fallback for email-only brokers (INFOSPACE, etc.)
+
+- **Automated Follow-Up Emails**
+  - 30-day CCPA/GDPR follow-up reminders
+  - 45-day escalation reminders for unresponsive brokers
+  - Batch emails for users with 5+ pending requests
+  - Daily cron job at 9 AM UTC (`/api/cron/follow-up-reminders`)
+
+- **Monthly Re-Scan Scheduling**
+  - Automatic monthly scans for PRO/Enterprise users
+  - Email reminders for FREE users to re-scan
+  - Runs 1st of each month at 10 AM UTC (`/api/cron/monthly-rescan`)
+
+- **Profile Variations for Searches**
+  - Name variations (50+ nickname mappings: Robert→Bob, William→Bill, etc.)
+  - Phone format variations (7 different formats)
+  - Address normalization (state abbreviations, street abbreviations)
+
+### Changed
+- Scan now returns 70+ sources (58 brokers + 2 breach DBs + 10 social)
+- LeakCheck scanner uses paid API endpoint (`/api/v2/query`)
+- AllBrokersScanner skip list reduced from 22 to 14 (only social + breach DBs)
+
+### Technical
+- New environment variable: `LEAKCHECK_API_KEY`
+- New file: `src/lib/scanners/profile-variations.ts`
+- Updated: `src/lib/scanners/breaches/leakcheck.ts` (complete rewrite)
+- Updated: `src/lib/scanners/data-brokers/all-brokers-scanner.ts`
+- New cron jobs in `vercel.json`: follow-up-reminders, monthly-rescan
 
 ---
 
@@ -416,6 +463,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.7.0 | 2026-01-23 | LeakCheck paid API, 58 data brokers, follow-up emails, monthly re-scans |
+| 1.6.0 | 2026-01-22 | Real data broker scanners (8 active scrapers) |
 | 1.5.0 | 2026-01-22 | Do Not Call registry (Enterprise), SEO agent automation |
 | 1.4.0 | 2026-01-22 | RBAC security, PII masking, audit logging, admin dashboard |
 | 1.3.0 | 2026-01-22 | FREE plan limits, dynamic reports, manual removal links |

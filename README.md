@@ -7,9 +7,12 @@ Personal data removal service that helps users find and remove their personal in
 ## Features
 
 ### Core Functionality
-- **Data Discovery**: Scan 50+ data sources for personal information exposure
+- **Data Discovery**: Scan 70+ data sources for personal information exposure
+  - 58 data brokers (Spokeo, WhitePages, BeenVerified, etc.)
+  - 2 breach databases (HaveIBeenPwned, LeakCheck)
+  - 10 social media platforms
 - **Automated Removal**: Submit opt-out requests to data brokers automatically
-- **Breach Monitoring**: HaveIBeenPwned integration for breach detection
+- **Breach Monitoring**: HaveIBeenPwned + LeakCheck API integration for breach detection
 - **Dark Web Monitoring**: Monitor dark web marketplaces and forums (Enterprise)
 - **Whitelist Management**: Keep accounts you want, remove the rest
 - **Continuous Monitoring**: Daily/weekly scans with email alerts
