@@ -160,8 +160,12 @@ export class AllBrokersScanner extends BaseScanner {
       } else if (brokerInfo.optOutUrl) {
         // Fallback to opt-out URL
         searchUrl = brokerInfo.optOutUrl;
+      } else if (brokerInfo.privacyEmail) {
+        // Use mailto: link for email-only brokers
+        searchUrl = `mailto:${brokerInfo.privacyEmail}`;
       } else {
-        // Skip if no URL available
+        // Skip only if no URL and no email available
+        console.log(`[AllBrokersScanner] Skipping ${brokerKey} - no contact method`);
         continue;
       }
 
