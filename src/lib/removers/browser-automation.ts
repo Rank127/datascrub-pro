@@ -1,11 +1,19 @@
 /**
  * Browser Automation Service for Form-Based Opt-Outs
  *
- * This service handles automated form submissions for data broker opt-outs.
- * In production, it uses cloud browser services (Browserless.io) for reliable
- * headless browser automation in serverless environments.
+ * STATUS: FUTURE RELEASE - Requires paid Browserless.io subscription
  *
- * For local development, it can use puppeteer directly.
+ * This service handles automated form submissions for data broker opt-outs.
+ * Currently provides manual opt-out instructions as the default behavior.
+ *
+ * When BROWSERLESS_API_KEY is configured, it can automate form submissions
+ * for data brokers that don't require CAPTCHA.
+ *
+ * Browserless.io Pricing (as of 2026):
+ * - Free tier: 1,000 sessions/month
+ * - Paid plans start at $50/month for 10,000 sessions
+ *
+ * For now, all opt-outs use manual instructions or CCPA/GDPR email requests.
  */
 
 import { DATA_BROKER_DIRECTORY, type DataBrokerInfo } from "./data-broker-directory";

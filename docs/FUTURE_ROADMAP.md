@@ -2,11 +2,11 @@
 
 This document outlines longer-term features and improvements planned for future releases.
 
-## Current Release (v1.0) - Completed Features
+## Current Release (v1.0) - Completed Features (FREE)
 
 ### Scanning
-- ✅ LeakCheck breach database integration
-- ✅ HaveIBeenPwned API integration
+- ✅ LeakCheck breach database integration (FREE public API)
+- ✅ HaveIBeenPwned API integration (API key provided)
 - ✅ Social media platform directory (8 platforms)
 - ✅ Data broker directory (66+ brokers)
 - ✅ Profile variations for comprehensive searches
@@ -17,13 +17,32 @@ This document outlines longer-term features and improvements planned for future 
 - ✅ Automated removal request submission
 - ✅ Verification system (re-scan to confirm removal)
 - ✅ 30/45 day follow-up reminders
-- ✅ Browser automation foundation (Browserless.io)
+- ✅ Manual opt-out instructions for all brokers
 
 ### Monitoring
 - ✅ Monthly re-scan reminders (FREE users)
 - ✅ Automated monitoring scans (PRO/ENTERPRISE)
 - ✅ New exposure alerts
 - ✅ Weekly privacy reports
+
+---
+
+## Pending Features (Require Paid Services)
+
+### Browser Automation for Form Opt-Outs
+**Status:** Code ready, requires BROWSERLESS_API_KEY
+**Cost:** ~$50/month for 10,000 sessions (Browserless.io)
+**File:** `src/lib/removers/browser-automation.ts`
+
+What it does:
+- Automatically fills and submits opt-out forms
+- Works for brokers without CAPTCHA (TruePeopleSearch, FastPeopleSearch, etc.)
+- Falls back to manual instructions for CAPTCHA-protected sites
+
+To enable:
+1. Sign up at https://browserless.io
+2. Add `BROWSERLESS_API_KEY` to Vercel environment variables
+3. Redeploy
 
 ---
 
