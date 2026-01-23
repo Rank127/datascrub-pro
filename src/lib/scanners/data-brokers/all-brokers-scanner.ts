@@ -110,15 +110,15 @@ function getSeverityForBroker(brokerKey: string): Severity {
  * Scanner that generates check links for ALL brokers in the directory
  */
 export class AllBrokersScanner extends BaseScanner {
-  // Brokers to skip (already handled by dedicated scrapers or social media scanner)
+  // Only skip social media and breach databases (handled by other scanners)
+  // NOTE: We NO LONGER skip dedicated broker scanners (Spokeo, WhitePages, etc.)
+  // because scraping may fail due to bot protection. We always generate check links
+  // for ALL data brokers so users can manually verify their listings.
   private skipBrokers = new Set([
-    // These have dedicated scrapers
-    "SPOKEO", "WHITEPAGES", "BEENVERIFIED", "TRUEPEOPLESEARCH",
-    "FASTPEOPLESEARCH", "RADARIS", "INTELIUS", "PEOPLEFINDER",
     // Social media is handled by SocialMediaScanner
     "LINKEDIN", "FACEBOOK", "TWITTER", "INSTAGRAM", "TIKTOK",
     "REDDIT", "PINTEREST", "YOUTUBE", "SNAPCHAT", "DISCORD",
-    // Breach databases handled by dedicated scanners
+    // Breach databases handled by dedicated scanners (HIBP, LeakCheck)
     "HAVEIBEENPWNED", "DEHASHED", "LEAKCHECK", "SNUSBASE",
   ]);
 
