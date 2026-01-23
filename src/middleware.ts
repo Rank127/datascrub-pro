@@ -2,9 +2,26 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// CORS headers for API routes
+const corsHeaders = {
+  "Access-Control-Allow-Origin": process.env.CORS_ORIGIN || "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+  "Access-Control-Allow-Credentials": "true",
+  "Access-Control-Max-Age": "86400",
+};
+
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
+
+  // Handle CORS preflight requests
+  if (req.method === "OPTIONS" && nextUrl.pathname.startsWith("/api")) {
+    return new NextResponse(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
 
   const isAuthPage =
     nextUrl.pathname.startsWith("/login") ||
