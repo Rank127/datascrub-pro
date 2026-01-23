@@ -644,9 +644,9 @@ export function getBrokersByCategory(category: keyof typeof BROKER_CATEGORIES): 
 
 // Get all data brokers (excluding social media and breach databases)
 export function getDataBrokersOnly(): Record<string, DataBrokerInfo> {
-  const excludeCategories = ["SOCIAL_MEDIA", "BREACH_DATABASE"];
-  const excludeKeys = new Set(
-    excludeCategories.flatMap(cat => BROKER_CATEGORIES[cat as keyof typeof BROKER_CATEGORIES])
+  const excludeCategories = ["SOCIAL_MEDIA", "BREACH_DATABASE"] as const;
+  const excludeKeys = new Set<string>(
+    excludeCategories.flatMap(cat => BROKER_CATEGORIES[cat])
   );
 
   return Object.fromEntries(
