@@ -62,8 +62,9 @@ export async function GET(request: Request) {
           where: { status: "ACTIVE" },
           select: { id: true },
         },
-        profile: {
+profiles: {
           select: { id: true },
+          take: 1,
         },
       },
     });
@@ -71,7 +72,7 @@ export async function GET(request: Request) {
     console.log(`[Monthly Rescan] Found ${usersNeedingScan.length} users needing scan`);
 
     for (const user of usersNeedingScan) {
-      if (!user.email || !user.profile) continue;
+      if (!user.email || user.profiles.length === 0) continue;
 
       try {
         const lastScanDate = user.scans[0]?.createdAt || null;
@@ -118,7 +119,7 @@ export async function GET(request: Request) {
     const usersWithMonitoring = await prisma.user.findMany({
       where: {
         plan: { in: ["PRO", "ENTERPRISE"] },
-        profile: { isNot: null },
+        profiles: { some: {} },
       },
       select: {
         id: true,
