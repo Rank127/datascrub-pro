@@ -102,38 +102,48 @@ export async function GET(request: Request) {
       },
     });
 
-    // Save exposures to database
+    // Save exposures to database (find existing or create new)
     let savedCount = 0;
     for (const result of results) {
       try {
-        await prisma.exposure.upsert({
+        // Check if exposure already exists
+        const existing = await prisma.exposure.findFirst({
           where: {
-            userId_source_sourceName_dataType: {
-              userId: user.id,
-              source: result.source,
-              sourceName: result.sourceName,
-              dataType: result.dataType,
-            },
-          },
-          update: {
-            lastSeenAt: new Date(),
-            sourceUrl: result.sourceUrl,
-            dataPreview: result.dataPreview,
-            severity: result.severity,
-            scanId: scan.id,
-          },
-          create: {
             userId: user.id,
-            scanId: scan.id,
             source: result.source,
             sourceName: result.sourceName,
-            sourceUrl: result.sourceUrl,
             dataType: result.dataType,
-            dataPreview: result.dataPreview,
-            severity: result.severity,
-            status: "ACTIVE",
           },
         });
+
+        if (existing) {
+          // Update existing
+          await prisma.exposure.update({
+            where: { id: existing.id },
+            data: {
+              lastSeenAt: new Date(),
+              sourceUrl: result.sourceUrl,
+              dataPreview: result.dataPreview,
+              severity: result.severity,
+              scanId: scan.id,
+            },
+          });
+        } else {
+          // Create new
+          await prisma.exposure.create({
+            data: {
+              userId: user.id,
+              scanId: scan.id,
+              source: result.source,
+              sourceName: result.sourceName,
+              sourceUrl: result.sourceUrl,
+              dataType: result.dataType,
+              dataPreview: result.dataPreview,
+              severity: result.severity,
+              status: "ACTIVE",
+            },
+          });
+        }
         savedCount++;
       } catch (e) {
         console.error("[TestScan] Error saving exposure:", e);
