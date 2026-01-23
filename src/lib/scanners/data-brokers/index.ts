@@ -24,6 +24,9 @@ export {
 // Legacy mock scanner (kept for testing/development)
 export { MockDataBrokerScanner } from "./mock-broker-scanner";
 
+// All brokers scanner - generates check links for ALL 66+ brokers
+export { AllBrokersScanner, createAllBrokersScanner } from "./all-brokers-scanner";
+
 import { SpokeoScanner } from "./spokeo-scanner";
 import { WhitePagesScanner } from "./whitepages-scanner";
 import { BeenVerifiedScanner } from "./beenverified-scanner";
@@ -34,6 +37,7 @@ import {
   createFastPeopleSearchManualScanner,
   createPeopleFinderManualScanner,
 } from "./manual-check-scanner";
+import { createAllBrokersScanner } from "./all-brokers-scanner";
 import type { Scanner } from "../base-scanner";
 
 /**
@@ -46,6 +50,7 @@ import type { Scanner } from "../base-scanner";
  */
 export function createRealBrokerScanners(): Scanner[] {
   return [
+    // Active scrapers for major brokers
     new SpokeoScanner(),
     new WhitePagesScanner(),
     new BeenVerifiedScanner(),
@@ -54,6 +59,8 @@ export function createRealBrokerScanners(): Scanner[] {
     new RadarisScanner(),
     new InteliusScanner(),
     createPeopleFinderManualScanner(), // Manual check - advanced bot protection
+    // All remaining 50+ brokers from the directory
+    createAllBrokersScanner(),
   ];
 }
 
