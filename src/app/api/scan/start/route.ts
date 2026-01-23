@@ -12,6 +12,9 @@ import type { Plan, ScanType } from "@/lib/types";
 import { z } from "zod";
 import { isAdmin, getEffectivePlan } from "@/lib/admin";
 
+// Allow longer execution time for scans (Vercel Pro: up to 300s)
+export const maxDuration = 120; // 2 minutes should be enough with parallel scanning
+
 const scanRequestSchema = z.object({
   type: z.enum(["FULL", "QUICK", "MONITORING"]),
 });
@@ -117,9 +120,65 @@ export async function POST(request: Request) {
     // Run scan
     const scanResults = await orchestrator.runScan(scanInput);
 
-    // Save exposures
+    // Get existing exposures for this user to avoid duplicates
+    const existingExposures = await prisma.exposure.findMany({
+      where: { userId: session.user.id },
+      select: {
+        id: true,
+        source: true,
+        sourceName: true,
+        sourceUrl: true,
+        dataPreview: true,
+        status: true,
+      },
+    });
+
+    // Create a map for quick lookup
+    const existingMap = new Map(
+      existingExposures.map((e) => [
+        `${e.source}:${e.sourceName}:${e.dataPreview || ''}`,
+        e,
+      ])
+    );
+
+    // Filter and process results
+    const newExposures: typeof scanResults = [];
+    const updatedExposureIds: string[] = [];
+
+    for (const result of scanResults) {
+      const key = `${result.source}:${result.sourceName}:${result.dataPreview || ''}`;
+      const existing = existingMap.get(key);
+
+      if (existing) {
+        // Skip if already in removal process or removed
+        if (
+          existing.status === "REMOVAL_PENDING" ||
+          existing.status === "REMOVAL_IN_PROGRESS" ||
+          existing.status === "REMOVED"
+        ) {
+          console.log(`[Scan] Skipping ${result.sourceName} - already in removal/removed`);
+          continue;
+        }
+
+        // Update lastSeenAt for existing active exposures
+        updatedExposureIds.push(existing.id);
+      } else {
+        // This is a new exposure
+        newExposures.push(result);
+      }
+    }
+
+    // Update lastSeenAt for existing exposures that were found again
+    if (updatedExposureIds.length > 0) {
+      await prisma.exposure.updateMany({
+        where: { id: { in: updatedExposureIds } },
+        data: { lastSeenAt: new Date() },
+      });
+    }
+
+    // Create only NEW exposures
     const exposures = await Promise.all(
-      scanResults.map((result) =>
+      newExposures.map((result) =>
         prisma.exposure.create({
           data: {
             userId: session.user.id,
@@ -136,6 +195,8 @@ export async function POST(request: Request) {
         })
       )
     );
+
+    console.log(`[Scan] New: ${exposures.length}, Updated: ${updatedExposureIds.length}, Skipped: ${scanResults.length - newExposures.length - updatedExposureIds.length}`);
 
     // Update scan record
     await prisma.scan.update({

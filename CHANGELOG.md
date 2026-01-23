@@ -16,6 +16,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-01-22
+
+### Added
+- **Real Data Broker Scanners** (Production-ready)
+  - Replaced mock scanners with real HTTP-based scanners
+  - 8 data brokers now scanned with actual web requests:
+    - Spokeo
+    - WhitePages
+    - BeenVerified
+    - TruePeopleSearch
+    - FastPeopleSearch
+    - Radaris
+    - Intelius
+    - PeopleFinders
+
+- **Base Broker Scanner Architecture** (`src/lib/scanners/data-brokers/`)
+  - `BaseBrokerScanner` class with HTTP utilities
+  - Browser-like request headers to avoid bot detection
+  - HTML parsing for profile detection
+  - Rate limiting per scanner (configurable delays)
+  - Automatic severity calculation based on exposed data
+
+- **Scanner Configuration System** (`src/lib/scanners/config.ts`)
+  - Centralized scanner settings
+  - Toggle between real/mock scanners via `USE_MOCK_SCANNERS` env var
+  - Global rate limiting configuration
+  - Opt-out information database for all brokers
+
+- **Opt-Out Instructions**
+  - Each scanner includes detailed opt-out instructions
+  - Estimated removal times
+  - Privacy contact emails
+  - Verification requirements
+
+- **Competitive Analysis Report** (`docs/COMPETITIVE-ANALYSIS.md`)
+  - Analysis of 7 major competitors (DeleteMe, Incogni, Kanary, etc.)
+  - Pricing comparisons
+  - Feature gap analysis
+  - Strategic recommendations
+  - Implementation roadmap
+
+### Changed
+- Scan orchestrator now uses real scanners by default
+- Environment variable `USE_MOCK_SCANNERS=true` to use mock data
+- Improved scan result data with opt-out URLs and instructions
+
+### Technical
+- New scanner files:
+  - `spokeo-scanner.ts`
+  - `whitepages-scanner.ts`
+  - `beenverified-scanner.ts`
+  - `truepeoplesearch-scanner.ts`
+  - `fastpeoplesearch-scanner.ts`
+  - `radaris-scanner.ts`
+  - `intelius-scanner.ts`
+  - `peoplefinder-scanner.ts`
+
+---
+
 ## [1.5.0] - 2026-01-22
 
 ### Added

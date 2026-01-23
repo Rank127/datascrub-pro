@@ -1,9 +1,14 @@
 import type { Scanner, ScanInput, ScanResult } from "./base-scanner";
 import { MockDataBrokerScanner } from "./data-brokers/mock-broker-scanner";
+import { createRealBrokerScanners } from "./data-brokers";
 import { HaveIBeenPwnedScanner } from "./breaches/haveibeenpwned";
 import { DarkWebScanner } from "./dark-web/monitor";
 import { SocialMediaScanner } from "./social/social-scanner";
 import type { Plan, ScanType } from "@/lib/types";
+
+// Configuration: Set to true to use real data broker scanners
+// Set via environment variable or default to true for production
+const USE_REAL_SCANNERS = process.env.USE_MOCK_SCANNERS !== "true";
 
 export interface ScanProgress {
   currentScanner: string;
@@ -39,10 +44,18 @@ export class ScanOrchestrator {
 
     // Full scan includes data brokers
     if (type === "FULL" || type === "MONITORING") {
-      // Add data broker scanners
-      this.scanners.push(...MockDataBrokerScanner.createAll());
+      // Add data broker scanners - use real or mock based on configuration
+      if (USE_REAL_SCANNERS) {
+        const realScanners = createRealBrokerScanners();
+        console.log(`[ScanOrchestrator] Using REAL data broker scanners (${realScanners.length} scanners)`);
+        console.log(`[ScanOrchestrator] Scanners: ${realScanners.map(s => s.name).join(", ")}`);
+        this.scanners.push(...realScanners);
+      } else {
+        console.log("[ScanOrchestrator] Using MOCK data broker scanners");
+        this.scanners.push(...MockDataBrokerScanner.createAll());
+      }
 
-      // Add social media scanner
+      // Add social media scanner (still mock for now)
       this.scanners.push(new SocialMediaScanner());
     }
 
@@ -56,37 +69,67 @@ export class ScanOrchestrator {
     input: ScanInput,
     onProgress?: (progress: ScanProgress) => void
   ): Promise<ScanResult[]> {
-    const allResults: ScanResult[] = [];
     const totalScanners = this.scanners.length;
+    console.log(`[ScanOrchestrator] Starting scan with ${totalScanners} scanners`);
 
-    for (let i = 0; i < this.scanners.length; i++) {
-      const scanner = this.scanners[i];
+    // Initial progress
+    if (onProgress) {
+      onProgress({
+        currentScanner: "Starting scanners...",
+        scannersCompleted: 0,
+        totalScanners,
+        resultsFound: 0,
+        progress: 0,
+      });
+    }
 
-      // Check if scanner is available
+    const allResults: ScanResult[] = [];
+
+    // ScrapingBee has max concurrency of 5, so batch data broker scanners
+    // Separate scanners into batches to avoid hitting rate limits
+    const BATCH_SIZE = 4; // Stay under ScrapingBee's limit of 5
+
+    // Helper to run a single scanner
+    const runScanner = async (scanner: Scanner): Promise<ScanResult[]> => {
       const isAvailable = await scanner.isAvailable();
       if (!isAvailable) {
-        continue;
+        console.log(`[ScanOrchestrator] ${scanner.name} not available, skipping`);
+        return [];
       }
 
-      // Report progress
-      if (onProgress) {
-        onProgress({
-          currentScanner: scanner.name,
-          scannersCompleted: i,
-          totalScanners,
-          resultsFound: allResults.length,
-          progress: Math.round((i / totalScanners) * 100),
-        });
-      }
-
+      console.log(`[ScanOrchestrator] Starting ${scanner.name}...`);
       try {
         const results = await scanner.scan(input);
-        allResults.push(...results);
+        console.log(`[ScanOrchestrator] ${scanner.name} completed with ${results.length} results`);
+        return results;
       } catch (error) {
-        console.error(`Scanner ${scanner.name} failed:`, error);
-        // Continue with other scanners
+        console.error(`[ScanOrchestrator] ${scanner.name} failed:`, error);
+        return [];
+      }
+    };
+
+    // Process scanners in batches
+    for (let i = 0; i < this.scanners.length; i += BATCH_SIZE) {
+      const batch = this.scanners.slice(i, i + BATCH_SIZE);
+      console.log(`[ScanOrchestrator] Running batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.map(s => s.name).join(", ")}`);
+
+      const batchPromises = batch.map(scanner => runScanner(scanner));
+      const batchResults = await Promise.allSettled(batchPromises);
+
+      for (const result of batchResults) {
+        if (result.status === "fulfilled") {
+          allResults.push(...result.value);
+        }
+      }
+
+      // Small delay between batches to avoid rate limiting
+      if (i + BATCH_SIZE < this.scanners.length) {
+        console.log(`[ScanOrchestrator] Waiting 1s before next batch...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
+
+    console.log(`[ScanOrchestrator] All scanners complete. Total results: ${allResults.length}`);
 
     // Final progress update
     if (onProgress) {
