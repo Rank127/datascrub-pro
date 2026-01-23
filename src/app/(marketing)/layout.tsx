@@ -127,8 +127,21 @@ export default function MarketingLayout({
               </ul>
             </div>
           </div>
-          <div className="border-t border-slate-800 mt-8 pt-8 text-center text-sm text-slate-500">
-            &copy; {new Date().getFullYear()} GhostMyData. All rights reserved.
+          <div className="border-t border-slate-800 mt-8 pt-8 text-sm text-slate-500">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <span>&copy; {new Date().getFullYear()} GhostMyData. All rights reserved.</span>
+              <span>
+                Breach monitoring powered by{" "}
+                <a
+                  href="https://leakcheck.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-400 hover:text-white underline"
+                >
+                  LeakCheck
+                </a>
+              </span>
+            </div>
           </div>
         </div>
       </footer>

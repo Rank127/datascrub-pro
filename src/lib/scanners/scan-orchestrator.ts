@@ -3,6 +3,7 @@ import { MockDataBrokerScanner } from "./data-brokers/mock-broker-scanner";
 import { createRealBrokerScanners } from "./data-brokers";
 import { HaveIBeenPwnedScanner } from "./breaches/haveibeenpwned";
 import { DehashedScanner } from "./breaches/dehashed";
+import { LeakCheckScanner } from "./breaches/leakcheck";
 import { SocialMediaScanner } from "./social/social-scanner";
 import type { Plan, ScanType } from "@/lib/types";
 
@@ -36,7 +37,8 @@ export class ScanOrchestrator {
 
     // Always include breach scanners
     this.scanners.push(new HaveIBeenPwnedScanner());
-    this.scanners.push(new DehashedScanner()); // Searches breach databases and dark web dumps
+    this.scanners.push(new LeakCheckScanner()); // Free API - breach databases
+    this.scanners.push(new DehashedScanner()); // Paid API - dark web dumps (optional)
 
     // Quick scan only checks breaches
     if (type === "QUICK") {
