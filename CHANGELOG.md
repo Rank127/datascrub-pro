@@ -16,6 +16,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.20.0] - 2026-01-23
+
+### Added
+- **🎉 1,500 SOURCES MILESTONE!**
+  - Total source directory: **1,500 sources** across **92 categories**
+  - Added 498 additional data brokers in massive expansion
+  - New sources include:
+    - US Regional People Search: 30 sources (state-specific records)
+    - Phone & Email Lookup: 25 sources
+    - Property & Real Estate: 15 sources
+    - Healthcare Data: 20 sources
+    - Financial & Credit: 20 sources
+    - Employment & HR: 10 sources
+    - Legal & Court Records: 25 sources
+    - B2B & Professional: 30 sources
+    - International Europe: 30 sources (France, Germany, Italy, Spain, etc.)
+    - International Asia: 20 sources (India, Singapore, Japan, Korea, etc.)
+    - International Americas: 15 sources (Canada, Mexico, Brazil, etc.)
+    - Genealogy & Historical: 15 sources
+    - Social Media & Public Records: 10 sources
+    - Marketing & Advertising: 15 sources
+    - Identity Verification: 10 sources
+    - Location & Geospatial: 10 sources
+    - Vehicle & DMV Records: 10 sources
+    - Tenant & Rental Screening: 10 sources
+    - Insurance Data: 10 sources
+    - Education Data: 10 sources
+    - Government & Civic Records: 10 sources
+    - Consumer Review & Rating: 15 sources
+    - Tech & Device Data: 10 sources
+    - Health & Wellness: 10 sources
+    - Financial Services: 10 sources
+    - International Middle East & Africa: 17 sources
+- **Most comprehensive privacy protection directory available**
+
+---
+
 ## [1.19.0] - 2026-01-23
 
 ### Added
