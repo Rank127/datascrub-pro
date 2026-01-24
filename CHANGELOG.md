@@ -16,6 +16,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.16.0] - 2026-01-23
+
+### Added
+- **Dark Web Monitoring Expansion - 90 Additional Sources**
+  - Total dark web monitoring sources: 285
+  - Total source directory: 700+ sources across 58 categories
+  - New monitoring categories:
+    - Initial Access Brokers (IAB): 10 sources (RDP shops, VPN access, SSH keys, AWS/Azure creds)
+    - Botnet & Malware Panels: 10 sources (Emotet, TrickBot, QakBot, Cobalt Strike, Sliver)
+    - Phishing & Scam Monitoring: 10 sources (Evilginx, GoPhish, BEC, crypto scams)
+    - Cryptocurrency Threats: 10 sources (Wallet drainers, NFT scams, seed phrase leaks)
+    - Gaming Account Fraud: 10 sources (Steam, Epic, Roblox, PSN, Xbox, Valorant)
+    - Social Media Account Markets: 10 sources (Instagram, TikTok, Twitter, Facebook, YouTube)
+    - Streaming Account Fraud: 10 sources (Netflix, Spotify, Disney+, HBO, Amazon Prime)
+    - Government & Military Leaks: 5 sources (Clearance data, federal employee, LEO)
+    - Healthcare Data Leaks: 5 sources (HIPAA, medical records, prescriptions)
+    - Corporate Data Exposure: 10 sources (SharePoint, Confluence, Slack, GitHub, S3/Azure/GCP)
+- **58 total source categories** for comprehensive threat monitoring
+
+---
+
 ## [1.15.0] - 2026-01-23
 
 ### Added

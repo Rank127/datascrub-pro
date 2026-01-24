@@ -4671,6 +4671,586 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     estimatedDays: 1,
     notes: "Dark web marketplace",
   },
+
+  // ==========================================
+  // INITIAL ACCESS BROKER (IAB) MONITORS
+  // ==========================================
+  IAB_MARKET_MONITOR: {
+    name: "IAB Marketplace Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Initial access broker marketplaces",
+  },
+  RDP_SHOP_MONITOR: {
+    name: "RDP Shop Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Compromised RDP credential shops",
+  },
+  VPN_ACCESS_MONITOR: {
+    name: "VPN Access Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Stolen VPN credentials marketplace",
+  },
+  CITRIX_ACCESS_MONITOR: {
+    name: "Citrix Access Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Compromised Citrix access sales",
+  },
+  WEBSHELL_MARKET_MONITOR: {
+    name: "Webshell Market Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Webshell and backdoor marketplace",
+  },
+  PULSE_VPN_MONITOR: {
+    name: "Pulse VPN Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Pulse Secure VPN credential leaks",
+  },
+  FORTINET_LEAK_MONITOR: {
+    name: "Fortinet Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "FortiGate credential leak monitoring",
+  },
+  SSH_KEY_MARKET_MONITOR: {
+    name: "SSH Key Market Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Stolen SSH key marketplace",
+  },
+  AWS_CREDS_MONITOR: {
+    name: "AWS Credentials Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Leaked AWS access keys",
+  },
+  AZURE_CREDS_MONITOR: {
+    name: "Azure Credentials Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Leaked Azure credentials",
+  },
+
+  // ==========================================
+  // BOTNET & MALWARE PANELS
+  // ==========================================
+  EMOTET_PANEL_MONITOR: {
+    name: "Emotet Panel Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Emotet botnet data monitoring",
+  },
+  TRICKBOT_MONITOR: {
+    name: "TrickBot Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "TrickBot stolen data monitoring",
+  },
+  QAKBOT_MONITOR: {
+    name: "QakBot Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "QakBot/Qbot data monitoring",
+  },
+  ICEDID_MONITOR: {
+    name: "IcedID Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "IcedID banking trojan logs",
+  },
+  DRIDEX_MONITOR: {
+    name: "Dridex Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dridex banking malware",
+  },
+  BAZARLOADER_MONITOR: {
+    name: "BazarLoader Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "BazarLoader infection data",
+  },
+  COBALT_STRIKE_MONITOR: {
+    name: "Cobalt Strike Beacon Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cobalt Strike C2 victim data",
+  },
+  SLIVER_C2_MONITOR: {
+    name: "Sliver C2 Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Sliver framework victim monitoring",
+  },
+  BRUTE_RATEL_MONITOR: {
+    name: "Brute Ratel Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Brute Ratel C4 monitoring",
+  },
+  HAVOC_C2_MONITOR: {
+    name: "Havoc C2 Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Havoc framework monitoring",
+  },
+
+  // ==========================================
+  // PHISHING & SCAM MONITORING
+  // ==========================================
+  PHISHING_KIT_MONITOR: {
+    name: "Phishing Kit Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Phishing kit victim data",
+  },
+  EVILGINX_MONITOR: {
+    name: "Evilginx Panel Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Evilginx phishing data",
+  },
+  GOPHISH_MONITOR: {
+    name: "GoPhish Campaign Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "GoPhish victim data exposure",
+  },
+  MODLISHKA_MONITOR: {
+    name: "Modlishka Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Modlishka reverse proxy phishing",
+  },
+  SCAM_PAGE_MONITOR: {
+    name: "Scam Page Database",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Known scam page victim data",
+  },
+  CRYPTO_SCAM_MONITOR: {
+    name: "Crypto Scam Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cryptocurrency scam victim lists",
+  },
+  ROMANCE_SCAM_MONITOR: {
+    name: "Romance Scam Database",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Romance scam victim exposure",
+  },
+  BEC_VICTIM_MONITOR: {
+    name: "BEC Victim Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Business email compromise victims",
+  },
+  TECH_SUPPORT_SCAM_MONITOR: {
+    name: "Tech Support Scam Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Tech support scam victim data",
+  },
+  INVESTMENT_SCAM_MONITOR: {
+    name: "Investment Scam Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Investment fraud victim lists",
+  },
+
+  // ==========================================
+  // CRYPTOCURRENCY THREAT MONITORING
+  // ==========================================
+  CRYPTO_DRAINER_MONITOR: {
+    name: "Crypto Drainer Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Wallet drainer victim monitoring",
+  },
+  NFT_SCAM_MONITOR: {
+    name: "NFT Scam Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "NFT scam victim data",
+  },
+  DEFI_EXPLOIT_MONITOR: {
+    name: "DeFi Exploit Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "DeFi exploit victim tracking",
+  },
+  SEED_PHRASE_MONITOR: {
+    name: "Seed Phrase Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cryptocurrency seed phrase leaks",
+  },
+  PRIVATE_KEY_MONITOR: {
+    name: "Private Key Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Crypto private key exposure",
+  },
+  EXCHANGE_BREACH_MONITOR: {
+    name: "Exchange Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cryptocurrency exchange breaches",
+  },
+  METAMASK_PHISH_MONITOR: {
+    name: "MetaMask Phishing Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "MetaMask phishing victim data",
+  },
+  LEDGER_LEAK_MONITOR: {
+    name: "Ledger Data Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Ledger hardware wallet user leaks",
+  },
+  TREZOR_PHISH_MONITOR: {
+    name: "Trezor Phishing Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Trezor phishing victim data",
+  },
+  COINBASE_BREACH_MONITOR: {
+    name: "Coinbase Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Coinbase user data exposure",
+  },
+
+  // ==========================================
+  // GAMING & VIRTUAL GOODS FRAUD
+  // ==========================================
+  STEAM_ACCOUNT_MONITOR: {
+    name: "Steam Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Stolen Steam account marketplace",
+  },
+  EPIC_GAMES_MONITOR: {
+    name: "Epic Games Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Epic/Fortnite account theft",
+  },
+  ROBLOX_ACCOUNT_MONITOR: {
+    name: "Roblox Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Roblox account marketplace",
+  },
+  MINECRAFT_ACCOUNT_MONITOR: {
+    name: "Minecraft Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Minecraft account trading",
+  },
+  PSN_ACCOUNT_MONITOR: {
+    name: "PSN Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "PlayStation Network accounts",
+  },
+  XBOX_ACCOUNT_MONITOR: {
+    name: "Xbox Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Xbox Live account theft",
+  },
+  VALORANT_ACCOUNT_MONITOR: {
+    name: "Valorant Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Valorant account marketplace",
+  },
+  LOL_ACCOUNT_MONITOR: {
+    name: "League of Legends Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "LoL account trading",
+  },
+  GENSHIN_ACCOUNT_MONITOR: {
+    name: "Genshin Impact Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Genshin account marketplace",
+  },
+  WOW_ACCOUNT_MONITOR: {
+    name: "World of Warcraft Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "WoW account theft monitoring",
+  },
+
+  // ==========================================
+  // SOCIAL MEDIA ACCOUNT MARKETS
+  // ==========================================
+  INSTAGRAM_ACCOUNT_MARKET: {
+    name: "Instagram Account Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Stolen Instagram account sales",
+  },
+  TIKTOK_ACCOUNT_MARKET: {
+    name: "TikTok Account Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "TikTok account marketplace",
+  },
+  TWITTER_ACCOUNT_MARKET: {
+    name: "Twitter/X Account Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Twitter account trading",
+  },
+  FACEBOOK_ACCOUNT_MARKET: {
+    name: "Facebook Account Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Facebook account marketplace",
+  },
+  YOUTUBE_ACCOUNT_MARKET: {
+    name: "YouTube Account Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "YouTube channel sales",
+  },
+  SNAPCHAT_ACCOUNT_MARKET: {
+    name: "Snapchat Account Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Snapchat account trading",
+  },
+  LINKEDIN_ACCOUNT_MARKET: {
+    name: "LinkedIn Account Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "LinkedIn account sales",
+  },
+  DISCORD_ACCOUNT_MARKET: {
+    name: "Discord Account Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Discord account/nitro marketplace",
+  },
+  TWITCH_ACCOUNT_MARKET: {
+    name: "Twitch Account Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Twitch account trading",
+  },
+  REDDIT_ACCOUNT_MARKET: {
+    name: "Reddit Account Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Reddit account marketplace",
+  },
+
+  // ==========================================
+  // STREAMING SERVICE ACCOUNTS
+  // ==========================================
+  NETFLIX_ACCOUNT_MONITOR: {
+    name: "Netflix Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Netflix credential marketplace",
+  },
+  SPOTIFY_ACCOUNT_MONITOR: {
+    name: "Spotify Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Spotify account trading",
+  },
+  DISNEY_PLUS_MONITOR: {
+    name: "Disney+ Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Disney+ credential sales",
+  },
+  HBO_MAX_MONITOR: {
+    name: "HBO Max Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "HBO Max account marketplace",
+  },
+  AMAZON_PRIME_MONITOR: {
+    name: "Amazon Prime Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Amazon Prime account sales",
+  },
+  HULU_ACCOUNT_MONITOR: {
+    name: "Hulu Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Hulu credential trading",
+  },
+  APPLE_TV_MONITOR: {
+    name: "Apple TV+ Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Apple TV+ account sales",
+  },
+  PARAMOUNT_PLUS_MONITOR: {
+    name: "Paramount+ Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Paramount+ credential marketplace",
+  },
+  CRUNCHYROLL_MONITOR: {
+    name: "Crunchyroll Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Crunchyroll account trading",
+  },
+  VPN_ACCOUNT_MONITOR: {
+    name: "VPN Service Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "NordVPN, ExpressVPN account sales",
+  },
+
+  // ==========================================
+  // GOVERNMENT & MILITARY LEAKS
+  // ==========================================
+  GOV_BREACH_MONITOR: {
+    name: "Government Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Government data breach monitoring",
+  },
+  MILITARY_LEAK_MONITOR: {
+    name: "Military Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Military personnel data leaks",
+  },
+  CLEARANCE_DATA_MONITOR: {
+    name: "Security Clearance Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Security clearance data exposure",
+  },
+  FEDERAL_EMPLOYEE_MONITOR: {
+    name: "Federal Employee Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Federal employee data leaks",
+  },
+  LAW_ENFORCEMENT_MONITOR: {
+    name: "Law Enforcement Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Police/LEO data exposure",
+  },
+
+  // ==========================================
+  // HEALTHCARE & MEDICAL DATA
+  // ==========================================
+  HIPAA_BREACH_MONITOR: {
+    name: "HIPAA Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Healthcare data breach monitoring",
+  },
+  MEDICAL_RECORDS_MONITOR: {
+    name: "Medical Records Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Medical record leak detection",
+  },
+  PRESCRIPTION_DATA_MONITOR: {
+    name: "Prescription Data Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Prescription history exposure",
+  },
+  INSURANCE_CLAIM_MONITOR: {
+    name: "Insurance Claim Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Health insurance claim leaks",
+  },
+  PATIENT_DATABASE_MONITOR: {
+    name: "Patient Database Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Hospital patient data exposure",
+  },
+
+  // ==========================================
+  // CORPORATE & ENTERPRISE DATA
+  // ==========================================
+  CORPORATE_EMAIL_MONITOR: {
+    name: "Corporate Email Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Corporate email credential leaks",
+  },
+  SHAREPOINT_LEAK_MONITOR: {
+    name: "SharePoint Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "SharePoint data exposure",
+  },
+  CONFLUENCE_LEAK_MONITOR: {
+    name: "Confluence Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Confluence wiki data leaks",
+  },
+  JIRA_LEAK_MONITOR: {
+    name: "Jira Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Jira project data exposure",
+  },
+  SLACK_LEAK_MONITOR: {
+    name: "Slack Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Slack workspace data leaks",
+  },
+  GITHUB_SECRET_MONITOR: {
+    name: "GitHub Secret Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "GitHub exposed secrets/keys",
+  },
+  GITLAB_LEAK_MONITOR: {
+    name: "GitLab Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "GitLab repository leaks",
+  },
+  S3_BUCKET_MONITOR: {
+    name: "S3 Bucket Exposure Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Exposed AWS S3 bucket data",
+  },
+  AZURE_BLOB_MONITOR: {
+    name: "Azure Blob Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Azure blob storage exposure",
+  },
+  GCP_BUCKET_MONITOR: {
+    name: "GCP Bucket Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Google Cloud storage leaks",
+  },
 };
 
 // Broker categories for organization
@@ -4921,6 +5501,60 @@ export const BROKER_CATEGORIES = {
     "TOR2DOOR_MONITOR", "MEGA_DARKNET_MONITOR", "HYDRA_SUCCESSOR_MONITOR",
     "OMGOMG_MARKET_MONITOR", "BLACKSPRUT_MONITOR", "KRAKEN_DARKNET_MONITOR",
     "SOLARIS_MARKET_MONITOR"
+  ],
+  INITIAL_ACCESS_BROKERS: [
+    "IAB_MARKET_MONITOR", "RDP_SHOP_MONITOR", "VPN_ACCESS_MONITOR",
+    "CITRIX_ACCESS_MONITOR", "WEBSHELL_MARKET_MONITOR", "PULSE_VPN_MONITOR",
+    "FORTINET_LEAK_MONITOR", "SSH_KEY_MARKET_MONITOR", "AWS_CREDS_MONITOR",
+    "AZURE_CREDS_MONITOR"
+  ],
+  BOTNET_MALWARE_PANELS: [
+    "EMOTET_PANEL_MONITOR", "TRICKBOT_MONITOR", "QAKBOT_MONITOR", "ICEDID_MONITOR",
+    "DRIDEX_MONITOR", "BAZARLOADER_MONITOR", "COBALT_STRIKE_MONITOR",
+    "SLIVER_C2_MONITOR", "BRUTE_RATEL_MONITOR", "HAVOC_C2_MONITOR"
+  ],
+  PHISHING_SCAM_MONITORING: [
+    "PHISHING_KIT_MONITOR", "EVILGINX_MONITOR", "GOPHISH_MONITOR", "MODLISHKA_MONITOR",
+    "SCAM_PAGE_MONITOR", "CRYPTO_SCAM_MONITOR", "ROMANCE_SCAM_MONITOR",
+    "BEC_VICTIM_MONITOR", "TECH_SUPPORT_SCAM_MONITOR", "INVESTMENT_SCAM_MONITOR"
+  ],
+  CRYPTO_THREAT_MONITORING: [
+    "CRYPTO_DRAINER_MONITOR", "NFT_SCAM_MONITOR", "DEFI_EXPLOIT_MONITOR",
+    "SEED_PHRASE_MONITOR", "PRIVATE_KEY_MONITOR", "EXCHANGE_BREACH_MONITOR",
+    "METAMASK_PHISH_MONITOR", "LEDGER_LEAK_MONITOR", "TREZOR_PHISH_MONITOR",
+    "COINBASE_BREACH_MONITOR"
+  ],
+  GAMING_ACCOUNT_FRAUD: [
+    "STEAM_ACCOUNT_MONITOR", "EPIC_GAMES_MONITOR", "ROBLOX_ACCOUNT_MONITOR",
+    "MINECRAFT_ACCOUNT_MONITOR", "PSN_ACCOUNT_MONITOR", "XBOX_ACCOUNT_MONITOR",
+    "VALORANT_ACCOUNT_MONITOR", "LOL_ACCOUNT_MONITOR", "GENSHIN_ACCOUNT_MONITOR",
+    "WOW_ACCOUNT_MONITOR"
+  ],
+  SOCIAL_MEDIA_ACCOUNT_MARKETS: [
+    "INSTAGRAM_ACCOUNT_MARKET", "TIKTOK_ACCOUNT_MARKET", "TWITTER_ACCOUNT_MARKET",
+    "FACEBOOK_ACCOUNT_MARKET", "YOUTUBE_ACCOUNT_MARKET", "SNAPCHAT_ACCOUNT_MARKET",
+    "LINKEDIN_ACCOUNT_MARKET", "DISCORD_ACCOUNT_MARKET", "TWITCH_ACCOUNT_MARKET",
+    "REDDIT_ACCOUNT_MARKET"
+  ],
+  STREAMING_ACCOUNT_FRAUD: [
+    "NETFLIX_ACCOUNT_MONITOR", "SPOTIFY_ACCOUNT_MONITOR", "DISNEY_PLUS_MONITOR",
+    "HBO_MAX_MONITOR", "AMAZON_PRIME_MONITOR", "HULU_ACCOUNT_MONITOR",
+    "APPLE_TV_MONITOR", "PARAMOUNT_PLUS_MONITOR", "CRUNCHYROLL_MONITOR",
+    "VPN_ACCOUNT_MONITOR"
+  ],
+  GOVERNMENT_MILITARY_LEAKS: [
+    "GOV_BREACH_MONITOR", "MILITARY_LEAK_MONITOR", "CLEARANCE_DATA_MONITOR",
+    "FEDERAL_EMPLOYEE_MONITOR", "LAW_ENFORCEMENT_MONITOR"
+  ],
+  HEALTHCARE_DATA_LEAKS: [
+    "HIPAA_BREACH_MONITOR", "MEDICAL_RECORDS_MONITOR", "PRESCRIPTION_DATA_MONITOR",
+    "INSURANCE_CLAIM_MONITOR", "PATIENT_DATABASE_MONITOR"
+  ],
+  CORPORATE_DATA_EXPOSURE: [
+    "CORPORATE_EMAIL_MONITOR", "SHAREPOINT_LEAK_MONITOR", "CONFLUENCE_LEAK_MONITOR",
+    "JIRA_LEAK_MONITOR", "SLACK_LEAK_MONITOR", "GITHUB_SECRET_MONITOR",
+    "GITLAB_LEAK_MONITOR", "S3_BUCKET_MONITOR", "AZURE_BLOB_MONITOR",
+    "GCP_BUCKET_MONITOR"
   ],
 } as const;
 
