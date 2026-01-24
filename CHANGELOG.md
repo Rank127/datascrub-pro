@@ -16,6 +16,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.0] - 2026-01-23
+
+### Added
+- **AI & Deepfake Protection** (Enterprise Feature)
+  - Protection against AI training datasets, facial recognition databases, and voice cloning services
+  - 18 new data sources for comprehensive AI protection:
+    - **AI Training (9)**: LAION AI, Stability AI, OpenAI, Midjourney, Meta AI, Google AI, LinkedIn AI, Adobe Firefly/AI, Amazon AI
+    - **Facial Recognition (6)**: Clearview AI, PimEyes, FaceCheck.ID, Social Catfish, TinEye, Yandex Images
+    - **Voice Cloning (3)**: ElevenLabs, Resemble AI, Murf AI
+  - New AI Protection Scanner for Enterprise users
+  - Dashboard section showing AI protection stats with upgrade teaser for non-Enterprise users
+
+- **New Exposure Types**
+  - `FACE_DATA` - Facial recognition data exposure
+  - `VOICE_DATA` - Voice sample data exposure
+  - `AI_TRAINING_DATA` - Data in AI training datasets
+  - `BIOMETRIC` - General biometric data exposure
+
+- **Dashboard Enhancements**
+  - New AI & Deepfake Protection card on dashboard
+  - Shows breakdown by category: AI Training, Facial Recognition, Voice Cloning
+  - Enterprise users see their exposure counts
+  - Non-Enterprise users see feature preview with upgrade CTA
+
+### Changed
+- **Scan Orchestrator**
+  - Added AI Protection Scanner for Enterprise plan users
+  - Scans now include all 18 AI-related sources for Enterprise accounts
+
+- **Dashboard Stats API**
+  - Returns user's plan for conditional UI rendering
+  - Includes AI protection statistics
+  - Tracks AI protection removal progress
+
+### Technical
+- New files:
+  - `src/lib/scanners/ai-protection/ai-scanner.ts` - AI Protection Scanner
+  - `src/lib/scanners/ai-protection/index.ts` - Scanner exports
+- Updated files:
+  - `src/lib/types.ts` - Added AI data sources and exposure types
+  - `src/lib/removers/data-broker-directory.ts` - Added 18 AI protection sources
+  - `src/lib/scanners/scan-orchestrator.ts` - Integrated AI scanner for Enterprise
+  - `src/app/(dashboard)/dashboard/page.tsx` - AI Protection dashboard section
+  - `src/app/api/dashboard/stats/route.ts` - AI protection stats
+  - `src/components/dashboard/exposure-card.tsx` - New exposure type labels
+
+---
+
 ## [1.9.0] - 2026-01-23
 
 ### Added

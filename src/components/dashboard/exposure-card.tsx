@@ -50,6 +50,11 @@ const dataTypeLabels: Record<ExposureType, string> = {
   USERNAME: "Username",
   FINANCIAL: "Financial Data",
   COMBINED_PROFILE: "Full Profile",
+  // AI-related exposure types
+  FACE_DATA: "Facial Data",
+  VOICE_DATA: "Voice Data",
+  AI_TRAINING_DATA: "AI Training Data",
+  BIOMETRIC: "Biometric Data",
 };
 
 const dataTypeIcons: Record<ExposureType, string> = {
@@ -63,6 +68,11 @@ const dataTypeIcons: Record<ExposureType, string> = {
   USERNAME: "at-sign",
   FINANCIAL: "credit-card",
   COMBINED_PROFILE: "user-circle",
+  // AI-related exposure types
+  FACE_DATA: "scan",
+  VOICE_DATA: "mic",
+  AI_TRAINING_DATA: "bot",
+  BIOMETRIC: "fingerprint",
 };
 
 export function ExposureCard({

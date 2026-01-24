@@ -586,6 +586,162 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 30,
   },
+
+  // ==========================================
+  // AI TRAINING & DEEPFAKE PROTECTION
+  // ==========================================
+  LAION_AI: {
+    name: "LAION AI Dataset",
+    optOutUrl: "https://haveibeentrained.com/",
+    privacyEmail: "contact@laion.ai",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "Check if your images are in LAION-5B dataset used to train Stable Diffusion and other AI models",
+  },
+  STABILITY_AI: {
+    name: "Stability AI",
+    optOutUrl: "https://stability.ai/opt-out",
+    privacyEmail: "legal@stability.ai",
+    removalMethod: "BOTH",
+    estimatedDays: 45,
+    notes: "Opt out of Stable Diffusion training - honors Spawning Do Not Train registry",
+  },
+  OPENAI: {
+    name: "OpenAI",
+    optOutUrl: "https://privacy.openai.com/policies",
+    privacyEmail: "privacy@openai.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 45,
+    notes: "Request data deletion and opt out of training via privacy portal",
+  },
+  MIDJOURNEY: {
+    name: "Midjourney",
+    optOutUrl: "https://docs.midjourney.com/docs/terms-of-service",
+    privacyEmail: "privacy@midjourney.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 45,
+    notes: "Contact support to opt out of image training",
+  },
+  META_AI: {
+    name: "Meta AI",
+    optOutUrl: "https://www.facebook.com/help/contact/540404257914453",
+    privacyEmail: "privacy@fb.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "Opt out of Meta AI training for Facebook and Instagram data",
+  },
+  GOOGLE_AI: {
+    name: "Google AI Training",
+    optOutUrl: "https://myaccount.google.com/data-and-privacy",
+    privacyEmail: "privacy@google.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "Manage AI training settings in Google account privacy settings",
+  },
+  LINKEDIN_AI: {
+    name: "LinkedIn AI Training",
+    optOutUrl: "https://www.linkedin.com/mypreferences/d/settings/data-for-generative-ai-improvement",
+    privacyEmail: "privacy@linkedin.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    notes: "Opt out of LinkedIn using your data for AI training",
+  },
+  ADOBE_AI: {
+    name: "Adobe Firefly/AI",
+    optOutUrl: "https://www.adobe.com/go/privacy_your_choices",
+    privacyEmail: "privacy@adobe.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Only analyzes content submitted to Adobe Stock - opt out via privacy page",
+  },
+  AMAZON_AI: {
+    name: "Amazon AI Training",
+    optOutUrl: "https://www.amazon.com/gp/help/customer/display.html?nodeId=GXPU3YPMBZQRWZK2",
+    privacyEmail: "privacy@amazon.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "Opt out of Amazon using your data for AI improvements",
+  },
+
+  // ==========================================
+  // FACIAL RECOGNITION DATABASES
+  // ==========================================
+  CLEARVIEW_AI: {
+    name: "Clearview AI",
+    optOutUrl: "https://clearview.ai/privacy/requests",
+    privacyEmail: "privacy@clearview.ai",
+    removalMethod: "FORM",
+    estimatedDays: 45,
+    notes: "Large facial recognition database used by law enforcement - opt out removes your face from searches",
+  },
+  PIMEYES: {
+    name: "PimEyes",
+    optOutUrl: "https://pimeyes.com/en/opt-out-request",
+    privacyEmail: "privacy@pimeyes.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Face search engine - submit opt-out to remove your face from search results",
+  },
+  FACECHECK_ID: {
+    name: "FaceCheck.ID",
+    optOutUrl: "https://facecheck.id/fc/optout",
+    privacyEmail: "support@facecheck.id",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Facial recognition search engine - opt out to prevent face matching",
+  },
+  SOCIAL_CATFISH: {
+    name: "Social Catfish",
+    optOutUrl: "https://socialcatfish.com/opt-out/",
+    privacyEmail: "privacy@socialcatfish.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Reverse image and identity search - includes facial recognition",
+  },
+  TINEYE: {
+    name: "TinEye",
+    optOutUrl: "https://tineye.com/removal",
+    privacyEmail: "support@tineye.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Reverse image search engine - can request image removal",
+  },
+  YANDEX_IMAGES: {
+    name: "Yandex Images",
+    optOutUrl: "https://yandex.com/support/images/troubleshooting.html",
+    privacyEmail: "privacy@support.yandex.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "Yandex reverse image search - request removal via support",
+  },
+
+  // ==========================================
+  // AI VOICE CLONING PROTECTION
+  // ==========================================
+  ELEVENLABS: {
+    name: "ElevenLabs",
+    optOutUrl: "https://elevenlabs.io/privacy",
+    privacyEmail: "privacy@elevenlabs.io",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "AI voice cloning service - request voice sample removal",
+  },
+  RESEMBLE_AI: {
+    name: "Resemble AI",
+    optOutUrl: "https://www.resemble.ai/privacy",
+    privacyEmail: "privacy@resemble.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "Voice cloning platform - contact for voice data removal",
+  },
+  MURF_AI: {
+    name: "Murf AI",
+    optOutUrl: "https://murf.ai/privacy",
+    privacyEmail: "privacy@murf.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "AI voice generator - opt out of voice training",
+  },
 };
 
 // Broker categories for organization
@@ -625,6 +781,17 @@ export const BROKER_CATEGORIES = {
   SOCIAL_MEDIA: [
     "LINKEDIN", "FACEBOOK", "TWITTER", "INSTAGRAM", "TIKTOK", "REDDIT",
     "PINTEREST", "YOUTUBE", "SNAPCHAT", "DISCORD"
+  ],
+  AI_TRAINING: [
+    "LAION_AI", "STABILITY_AI", "OPENAI", "MIDJOURNEY", "META_AI",
+    "GOOGLE_AI", "LINKEDIN_AI", "ADOBE_AI", "AMAZON_AI"
+  ],
+  FACIAL_RECOGNITION: [
+    "CLEARVIEW_AI", "PIMEYES", "FACECHECK_ID", "SOCIAL_CATFISH",
+    "TINEYE", "YANDEX_IMAGES"
+  ],
+  VOICE_CLONING: [
+    "ELEVENLABS", "RESEMBLE_AI", "MURF_AI"
   ],
 } as const;
 

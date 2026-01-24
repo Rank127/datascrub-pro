@@ -5,6 +5,7 @@ import { HaveIBeenPwnedScanner } from "./breaches/haveibeenpwned";
 import { DehashedScanner } from "./breaches/dehashed";
 import { LeakCheckScanner } from "./breaches/leakcheck";
 import { SocialMediaScanner } from "./social/social-scanner";
+import { AIProtectionScanner } from "./ai-protection";
 import type { Plan, ScanType } from "@/lib/types";
 
 // Configuration: Set to true to use real data broker scanners
@@ -60,6 +61,13 @@ export class ScanOrchestrator {
 
       // Social media scanner provides manual check links
       this.scanners.push(new SocialMediaScanner());
+
+      // AI Protection Scanner - Enterprise only feature
+      // Scans for AI training datasets, facial recognition databases, and voice cloning services
+      if (userPlan === "ENTERPRISE") {
+        console.log("[ScanOrchestrator] Adding AI Protection Scanner (Enterprise feature)");
+        this.scanners.push(new AIProtectionScanner());
+      }
     }
   }
 

@@ -1,6 +1,18 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getEffectivePlan } from "@/lib/admin";
+
+// AI Protection source categories
+const AI_TRAINING_SOURCES = [
+  "LAION_AI", "STABILITY_AI", "OPENAI", "MIDJOURNEY", "META_AI",
+  "GOOGLE_AI", "LINKEDIN_AI", "ADOBE_AI", "AMAZON_AI"
+];
+const FACIAL_RECOGNITION_SOURCES = [
+  "CLEARVIEW_AI", "PIMEYES", "FACECHECK_ID", "SOCIAL_CATFISH", "TINEYE", "YANDEX_IMAGES"
+];
+const VOICE_CLONING_SOURCES = ["ELEVENLABS", "RESEMBLE_AI", "MURF_AI"];
+const ALL_AI_SOURCES = [...AI_TRAINING_SOURCES, ...FACIAL_RECOGNITION_SOURCES, ...VOICE_CLONING_SOURCES];
 
 export async function GET() {
   try {
@@ -11,6 +23,13 @@ export async function GET() {
     }
 
     const userId = session.user.id;
+
+    // Get user info for plan
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true, email: true },
+    });
+    const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE");
 
     // Fetch all stats in parallel
     const [
@@ -24,6 +43,10 @@ export async function GET() {
       manualActionDone,
       recentExposures,
       removalsByCategory,
+      aiTrainingExposures,
+      facialRecognitionExposures,
+      voiceCloningExposures,
+      aiOptedOutExposures,
     ] = await Promise.all([
       // Total exposures
       prisma.exposure.count({
@@ -93,6 +116,19 @@ export async function GET() {
         where: { userId },
         _count: true,
       }),
+      // AI Protection stats
+      prisma.exposure.count({
+        where: { userId, source: { in: AI_TRAINING_SOURCES } },
+      }),
+      prisma.exposure.count({
+        where: { userId, source: { in: FACIAL_RECOGNITION_SOURCES } },
+      }),
+      prisma.exposure.count({
+        where: { userId, source: { in: VOICE_CLONING_SOURCES } },
+      }),
+      prisma.exposure.count({
+        where: { userId, source: { in: ALL_AI_SOURCES }, status: "REMOVED" },
+      }),
     ]);
 
     // Calculate risk score based on exposures
@@ -122,7 +158,7 @@ export async function GET() {
     const breachSources = ["HAVEIBEENPWNED", "DEHASHED", "BREACH_DB"];
     const socialSources = ["LINKEDIN", "FACEBOOK", "TWITTER", "INSTAGRAM", "TIKTOK", "REDDIT"];
 
-    const [dataBrokerRemovals, breachRemovals, socialRemovals] = await Promise.all([
+    const [dataBrokerRemovals, breachRemovals, socialRemovals, aiProtectionRemovals] = await Promise.all([
       prisma.removalRequest.findMany({
         where: {
           userId,
@@ -141,6 +177,13 @@ export async function GET() {
         where: {
           userId,
           exposure: { source: { in: socialSources } },
+        },
+        select: { status: true },
+      }),
+      prisma.removalRequest.findMany({
+        where: {
+          userId,
+          exposure: { source: { in: ALL_AI_SOURCES } },
         },
         select: { status: true },
       }),
@@ -166,12 +209,21 @@ export async function GET() {
           done: manualActionDone,
           pending: manualActionTotal - manualActionDone,
         },
+        aiProtection: {
+          total: aiTrainingExposures + facialRecognitionExposures + voiceCloningExposures,
+          aiTraining: aiTrainingExposures,
+          facialRecognition: facialRecognitionExposures,
+          voiceCloning: voiceCloningExposures,
+          optedOut: aiOptedOutExposures,
+        },
+        userPlan,
       },
       recentExposures,
       removalProgress: {
         dataBrokers: calculateProgress(dataBrokerRemovals),
         breaches: calculateProgress(breachRemovals),
         socialMedia: calculateProgress(socialRemovals),
+        aiProtection: calculateProgress(aiProtectionRemovals),
       },
     });
   } catch (error) {

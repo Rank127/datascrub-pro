@@ -53,6 +53,27 @@ export const DataSource = {
   REDDIT: "REDDIT",
   PINTEREST: "PINTEREST",
   YOUTUBE: "YOUTUBE",
+  // AI Training Datasets
+  LAION_AI: "LAION_AI",
+  STABILITY_AI: "STABILITY_AI",
+  OPENAI: "OPENAI",
+  MIDJOURNEY: "MIDJOURNEY",
+  META_AI: "META_AI",
+  GOOGLE_AI: "GOOGLE_AI",
+  LINKEDIN_AI: "LINKEDIN_AI",
+  ADOBE_AI: "ADOBE_AI",
+  AMAZON_AI: "AMAZON_AI",
+  // Facial Recognition
+  CLEARVIEW_AI: "CLEARVIEW_AI",
+  PIMEYES: "PIMEYES",
+  FACECHECK_ID: "FACECHECK_ID",
+  SOCIAL_CATFISH: "SOCIAL_CATFISH",
+  TINEYE: "TINEYE",
+  YANDEX_IMAGES: "YANDEX_IMAGES",
+  // Voice Cloning
+  ELEVENLABS: "ELEVENLABS",
+  RESEMBLE_AI: "RESEMBLE_AI",
+  MURF_AI: "MURF_AI",
   OTHER: "OTHER",
 } as const;
 export type DataSource = (typeof DataSource)[keyof typeof DataSource];
@@ -69,6 +90,11 @@ export const ExposureType = {
   USERNAME: "USERNAME",
   FINANCIAL: "FINANCIAL",
   COMBINED_PROFILE: "COMBINED_PROFILE",
+  // AI-related exposure types
+  FACE_DATA: "FACE_DATA",
+  VOICE_DATA: "VOICE_DATA",
+  AI_TRAINING_DATA: "AI_TRAINING_DATA",
+  BIOMETRIC: "BIOMETRIC",
 } as const;
 export type ExposureType = (typeof ExposureType)[keyof typeof ExposureType];
 
@@ -212,6 +238,27 @@ export const DataSourceNames: Record<DataSource, string> = {
   REDDIT: "Reddit",
   PINTEREST: "Pinterest",
   YOUTUBE: "YouTube",
+  // AI Training Datasets
+  LAION_AI: "LAION AI Dataset",
+  STABILITY_AI: "Stability AI",
+  OPENAI: "OpenAI",
+  MIDJOURNEY: "Midjourney",
+  META_AI: "Meta AI",
+  GOOGLE_AI: "Google AI",
+  LINKEDIN_AI: "LinkedIn AI",
+  ADOBE_AI: "Adobe Firefly/AI",
+  AMAZON_AI: "Amazon AI",
+  // Facial Recognition
+  CLEARVIEW_AI: "Clearview AI",
+  PIMEYES: "PimEyes",
+  FACECHECK_ID: "FaceCheck.ID",
+  SOCIAL_CATFISH: "Social Catfish",
+  TINEYE: "TinEye",
+  YANDEX_IMAGES: "Yandex Images",
+  // Voice Cloning
+  ELEVENLABS: "ElevenLabs",
+  RESEMBLE_AI: "Resemble AI",
+  MURF_AI: "Murf AI",
   OTHER: "Other",
 };
 

@@ -19,6 +19,10 @@ import {
   Loader2,
   HandHelping,
   SendHorizontal,
+  Bot,
+  Scan,
+  Mic,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -36,6 +40,14 @@ interface DashboardStats {
     done: number;
     pending: number;
   };
+  aiProtection?: {
+    total: number;
+    aiTraining: number;
+    facialRecognition: number;
+    voiceCloning: number;
+    optedOut: number;
+  };
+  userPlan?: string;
 }
 
 interface RemovalProgress {
@@ -64,6 +76,7 @@ interface DashboardData {
     dataBrokers: RemovalProgress;
     breaches: RemovalProgress;
     socialMedia: RemovalProgress;
+    aiProtection: RemovalProgress;
   };
 }
 
@@ -153,12 +166,15 @@ export default function DashboardPage() {
     totalRemovalRequests: 0,
     riskScore: 0,
     manualAction: { total: 0, done: 0, pending: 0 },
+    aiProtection: { total: 0, aiTraining: 0, facialRecognition: 0, voiceCloning: 0, optedOut: 0 },
+    userPlan: "FREE",
   };
 
   const removalProgress = data?.removalProgress || {
     dataBrokers: { completed: 0, total: 0, percentage: 0 },
     breaches: { completed: 0, total: 0, percentage: 0 },
     socialMedia: { completed: 0, total: 0, percentage: 0 },
+    aiProtection: { completed: 0, total: 0, percentage: 0 },
   };
 
   const recentExposures = data?.recentExposures || [];
@@ -356,9 +372,118 @@ export default function DashboardPage() {
                 <Progress value={removalProgress.socialMedia.percentage} className="h-2 bg-slate-700" />
               </div>
             )}
+            {removalProgress.aiProtection.total > 0 && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">AI Protection</span>
+                  <span className="text-white">
+                    {removalProgress.aiProtection.completed}/{removalProgress.aiProtection.total} completed
+                  </span>
+                </div>
+                <Progress value={removalProgress.aiProtection.percentage} className="h-2 bg-slate-700" />
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
+
+      {/* AI Protection Section - Enterprise Feature */}
+      <Card className="bg-slate-800/50 border-slate-700">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-500/20 rounded-lg">
+              <Bot className="h-5 w-5 text-purple-400" />
+            </div>
+            <div>
+              <CardTitle className="text-white flex items-center gap-2">
+                AI & Deepfake Protection
+                {stats.userPlan !== "ENTERPRISE" && (
+                  <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">
+                    Enterprise
+                  </span>
+                )}
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Protect your face, voice, and data from AI training
+              </CardDescription>
+            </div>
+          </div>
+          {stats.userPlan === "ENTERPRISE" ? (
+            <Link href="/dashboard/exposures?category=ai">
+              <Button variant="ghost" className="text-purple-400 hover:text-purple-300">
+                View all
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/pricing">
+              <Button className="bg-purple-600 hover:bg-purple-700">
+                <Lock className="mr-2 h-4 w-4" />
+                Upgrade
+              </Button>
+            </Link>
+          )}
+        </CardHeader>
+        <CardContent>
+          {stats.userPlan === "ENTERPRISE" ? (
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="flex items-center gap-3 p-4 bg-slate-900/50 rounded-lg">
+                <div className="p-2 bg-blue-500/20 rounded-lg">
+                  <Bot className="h-5 w-5 text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-white">
+                    {stats.aiProtection?.aiTraining || 0}
+                  </p>
+                  <p className="text-xs text-slate-400">AI Training Sources</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-4 bg-slate-900/50 rounded-lg">
+                <div className="p-2 bg-orange-500/20 rounded-lg">
+                  <Scan className="h-5 w-5 text-orange-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-white">
+                    {stats.aiProtection?.facialRecognition || 0}
+                  </p>
+                  <p className="text-xs text-slate-400">Facial Recognition</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-4 bg-slate-900/50 rounded-lg">
+                <div className="p-2 bg-pink-500/20 rounded-lg">
+                  <Mic className="h-5 w-5 text-pink-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-white">
+                    {stats.aiProtection?.voiceCloning || 0}
+                  </p>
+                  <p className="text-xs text-slate-400">Voice Cloning</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="flex items-center gap-3 p-3 bg-slate-900/30 rounded-lg opacity-60">
+                  <Bot className="h-5 w-5 text-blue-400" />
+                  <span className="text-sm text-slate-400">9 AI Training Datasets</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-slate-900/30 rounded-lg opacity-60">
+                  <Scan className="h-5 w-5 text-orange-400" />
+                  <span className="text-sm text-slate-400">6 Facial Recognition DBs</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-slate-900/30 rounded-lg opacity-60">
+                  <Mic className="h-5 w-5 text-pink-400" />
+                  <span className="text-sm text-slate-400">3 Voice Cloning Services</span>
+                </div>
+              </div>
+              <p className="text-sm text-slate-400">
+                Upgrade to Enterprise to scan for your data in AI training datasets, facial recognition databases, and voice cloning services. Protect yourself from deepfakes and unauthorized AI use.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* No data state */}
       {stats.totalExposures === 0 && (
