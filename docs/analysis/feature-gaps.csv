@@ -1,0 +1,12 @@
+Category,Feature,GhostMyData Status,Competitor Leader,Gap Priority,Implementation Effort,Business Impact,Notes
+Critical,Data Broker Coverage,58 brokers,Privacy Bee 860+,Critical,High,Critical,Need minimum 200+ to be competitive
+Critical,Removal Proof Screenshots,Not implemented,Optery,High,Medium,High,Before/after screenshots build trust
+Critical,Custom Site Removal Requests,Not implemented,Incogni Unlimited,High,Medium,High,Users want to remove from specific sites
+Important,Mobile App,Planned,Kanary and Aura,Medium,High,Medium,React Native for iOS and Android
+Important,Email Phone Masking,Not implemented,DeleteMe and Kanary,Medium,Medium,Medium,Generate temporary emails for opt-outs
+Important,Browser Extension,Not implemented,Privacy Bee and Aura,Medium,Medium,Medium,Quick scan from browser toolbar
+Important,Third Party Security Audit,Not implemented,Incogni Deloitte,Medium,High cost,Medium,SOC 2 or ISO 27001 certification
+Nice-to-Have,Identity Theft Insurance,Not implemented,Aura $1M,Low,Low partnership,Medium,Partner with insurance provider
+Nice-to-Have,Credit Monitoring,Not implemented,Aura,Low,High,Low,Complex integration with bureaus
+Nice-to-Have,VPN Bundle Partnership,Not implemented,Incogni Surfshark,Low,Medium,Low,Revenue sharing opportunity
+Future,AI Deepfake Protection,Not implemented,Emerging trend,Low,High,Future,Growing concern in 2026
