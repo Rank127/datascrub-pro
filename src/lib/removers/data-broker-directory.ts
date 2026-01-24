@@ -146,12 +146,12 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   MYLIFE: {
     name: "MyLife",
-    optOutUrl: "https://www.mylife.com/privacy-policy#removal",
+    optOutUrl: "https://www.mylife.com/ccpa/index.pubview",
     optOutEmail: "privacy@mylife.com",
     privacyEmail: "privacy@mylife.com",
     removalMethod: "BOTH",
     estimatedDays: 14,
-    notes: "May require identity verification",
+    notes: "Use the CCPA data request form - may require identity verification",
   },
   CLUSTRMAPS: {
     name: "ClustrMaps",
@@ -241,10 +241,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   YELLOWPAGES: {
     name: "YellowPages",
-    optOutUrl: "https://www.yellowpages.com/about/privacy-policy",
+    optOutUrl: "https://www.yellowpages.com/members/suppression",
     privacyEmail: "privacy@yellowpages.com",
-    removalMethod: "EMAIL",
+    removalMethod: "BOTH",
     estimatedDays: 14,
+    notes: "Use the suppression request form to remove personal listings",
   },
   INFOSPACE: {
     name: "InfoSpace",
@@ -366,11 +367,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   // ==========================================
   ZOOMINFO: {
     name: "ZoomInfo",
-    optOutUrl: "https://www.zoominfo.com/about-zoominfo/privacy-center",
+    optOutUrl: "https://www.zoominfo.com/update/remove",
     privacyEmail: "privacy@zoominfo.com",
     removalMethod: "BOTH",
     estimatedDays: 30,
-    notes: "B2B data broker - may require proof of identity",
+    notes: "B2B data broker - submit removal request with your email to opt out",
   },
   LUSHA: {
     name: "Lusha",
@@ -416,10 +417,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   FULLCONTACT: {
     name: "FullContact",
-    optOutUrl: "https://www.fullcontact.com/privacy-center/",
+    optOutUrl: "https://platform.fullcontact.com/your-privacy-choices",
     privacyEmail: "privacy@fullcontact.com",
     removalMethod: "BOTH",
     estimatedDays: 14,
+    notes: "Use 'Your Privacy Choices' form to opt out of data collection",
   },
 
   // ==========================================
@@ -435,17 +437,19 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   ORACLE_DATACLOUD: {
     name: "Oracle Data Cloud",
-    optOutUrl: "https://www.oracle.com/legal/privacy/marketing-cloud-data-cloud-privacy-policy.html#optout",
+    optOutUrl: "https://www.oracle.com/marketingcloud/opt-status.html",
     privacyEmail: "privacy@oracle.com",
     removalMethod: "FORM",
     estimatedDays: 45,
+    notes: "Use the Oracle Marketing Cloud opt-out status page to submit removal request",
   },
   EPSILON: {
     name: "Epsilon",
-    optOutUrl: "https://www.epsilon.com/privacy-policy",
+    optOutUrl: "https://www.epsilon.com/us/consumer-preference-center",
     privacyEmail: "privacy@epsilon.com",
-    removalMethod: "EMAIL",
+    removalMethod: "BOTH",
     estimatedDays: 30,
+    notes: "Use the Consumer Preference Center to opt out of marketing data",
   },
   EXPERIAN_MARKETING: {
     name: "Experian Marketing",
@@ -456,10 +460,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   EQUIFAX_MARKETING: {
     name: "Equifax Marketing",
-    optOutUrl: "https://www.equifax.com/personal/privacy/",
+    optOutUrl: "https://www.equifax.com/personal/education/credit/report/remove-your-info-from-equifax/",
     privacyEmail: "privacy@equifax.com",
-    removalMethod: "EMAIL",
+    removalMethod: "BOTH",
     estimatedDays: 30,
+    notes: "Follow the guide to opt out of Equifax marketing lists",
   },
   LEXISNEXIS: {
     name: "LexisNexis",
