@@ -78,16 +78,20 @@ export async function GET(request: Request) {
       _count: true,
     });
 
-    // Get manual action stats
-    const manualActionStats = await prisma.exposure.aggregate({
-      where: { userId: session.user.id, requiresManualAction: true },
-      _count: true,
-    });
-
-    const manualActionDone = await prisma.exposure.aggregate({
-      where: { userId: session.user.id, requiresManualAction: true, manualActionTaken: true },
-      _count: true,
-    });
+    // Get manual action stats and removal stats
+    const [manualActionStats, manualActionDone, totalRemovalRequests] = await Promise.all([
+      prisma.exposure.aggregate({
+        where: { userId: session.user.id, requiresManualAction: true },
+        _count: true,
+      }),
+      prisma.exposure.aggregate({
+        where: { userId: session.user.id, requiresManualAction: true, manualActionTaken: true },
+        _count: true,
+      }),
+      prisma.removalRequest.count({
+        where: { userId: session.user.id },
+      }),
+    ]);
 
     return NextResponse.json({
       exposures,
@@ -109,6 +113,7 @@ export async function GET(request: Request) {
           done: manualActionDone._count,
           pending: manualActionStats._count - manualActionDone._count,
         },
+        totalRemovalRequests,
       },
     });
   } catch (error) {

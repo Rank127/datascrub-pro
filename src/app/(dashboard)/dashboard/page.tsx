@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Loader2,
   HandHelping,
+  SendHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ interface DashboardStats {
   removedExposures: number;
   whitelistedItems: number;
   pendingRemovals: number;
+  totalRemovalRequests: number;
   riskScore: number;
   manualAction: {
     total: number;
@@ -148,6 +150,7 @@ export default function DashboardPage() {
     removedExposures: 0,
     whitelistedItems: 0,
     pendingRemovals: 0,
+    totalRemovalRequests: 0,
     riskScore: 0,
     manualAction: { total: 0, done: 0, pending: 0 },
   };
@@ -184,7 +187,7 @@ export default function DashboardPage() {
       <UpgradeBanner variant="card" />
 
       {/* Risk Score and Stats */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6">
         {/* Risk Score Card */}
         <Link href="/dashboard/exposures" className="md:col-span-2 lg:col-span-1">
           <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-slate-600 transition-all cursor-pointer h-full">
@@ -224,12 +227,34 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
+        {/* Submitted for Removal */}
+        <Link href="/dashboard/removals">
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-purple-500/50 transition-all cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-400">
+                Submitted
+              </CardTitle>
+              <SendHorizontal className="h-4 w-4 text-purple-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {stats.totalRemovalRequests}
+              </div>
+              <p className="text-xs text-slate-500">
+                {stats.pendingRemovals > 0
+                  ? `${stats.pendingRemovals} in progress`
+                  : "Removal requests"}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
         {/* Removed */}
         <Link href="/dashboard/removals">
           <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-emerald-500/50 transition-all cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-slate-400">
-                Successfully Removed
+                Removed
               </CardTitle>
               <Trash2 className="h-4 w-4 text-emerald-500" />
             </CardHeader>

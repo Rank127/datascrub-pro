@@ -19,6 +19,7 @@ export async function GET() {
       removedExposures,
       whitelistedItems,
       pendingRemovals,
+      totalRemovalRequests,
       manualActionTotal,
       manualActionDone,
       recentExposures,
@@ -47,12 +48,16 @@ export async function GET() {
       prisma.whitelist.count({
         where: { userId },
       }),
-      // Pending removals
+      // Pending removals (in progress)
       prisma.removalRequest.count({
         where: {
           userId,
           status: { in: ["PENDING", "SUBMITTED", "IN_PROGRESS"] },
         },
+      }),
+      // Total removal requests submitted
+      prisma.removalRequest.count({
+        where: { userId },
       }),
       // Manual action total
       prisma.exposure.count({
@@ -154,6 +159,7 @@ export async function GET() {
         removedExposures,
         whitelistedItems,
         pendingRemovals,
+        totalRemovalRequests,
         riskScore,
         manualAction: {
           total: manualActionTotal,

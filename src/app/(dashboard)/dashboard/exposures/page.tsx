@@ -30,6 +30,7 @@ import {
   Trash2,
   ShieldCheck,
   HandHelping,
+  SendHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { DataSource, Severity, ExposureStatus } from "@/lib/types";
@@ -63,6 +64,7 @@ interface ExposureStats {
     done: number;
     pending: number;
   };
+  totalRemovalRequests: number;
 }
 
 function ExposuresPageContent() {
@@ -321,7 +323,7 @@ function ExposuresPageContent() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         <Card className="bg-slate-800/50 border-slate-700">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold text-white">{totalExposures}</div>
@@ -346,6 +348,17 @@ function ExposuresPageContent() {
         </Card>
         <Card className="bg-slate-800/50 border-slate-700">
           <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <SendHorizontal className="h-5 w-5 text-purple-400" />
+              <div className="text-2xl font-bold text-purple-400">
+                {stats?.totalRemovalRequests || 0}
+              </div>
+            </div>
+            <p className="text-sm text-slate-400">Submitted</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardContent className="pt-6">
             <div className="text-2xl font-bold text-emerald-400">
               {stats?.byStatus?.REMOVED || 0}
             </div>
@@ -360,7 +373,7 @@ function ExposuresPageContent() {
                 {stats?.manualAction?.done || 0}/{stats?.manualAction?.total || 0}
               </div>
             </div>
-            <p className="text-sm text-slate-400">Manual Actions Done</p>
+            <p className="text-sm text-slate-400">Manual Actions</p>
           </CardContent>
         </Card>
       </div>
