@@ -1582,6 +1582,42 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "EMAIL",
     estimatedDays: 30,
   },
+
+  // ==========================================
+  // ADDITIONAL REQUESTED BROKERS
+  // ==========================================
+  OURSTATES: {
+    name: "OurStates.org",
+    optOutUrl: "https://ourstates.org/optout",
+    privacyEmail: "privacy@ourstates.org",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    notes: "State records aggregator - opt out to remove your listing",
+  },
+  IDCRAWL: {
+    name: "IDCrawl",
+    optOutUrl: "https://www.idcrawl.com/opt-out",
+    privacyEmail: "privacy@idcrawl.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    notes: "Free people search engine - request removal via opt-out form",
+  },
+  REALTYHOP: {
+    name: "RealtyHop",
+    optOutUrl: "https://www.realtyhop.com/privacy",
+    privacyEmail: "privacy@realtyhop.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+    notes: "Real estate platform - request removal of owner information",
+  },
+  SHOWCASE: {
+    name: "Showcase.com",
+    optOutUrl: "https://www.showcase.com/privacy",
+    privacyEmail: "privacy@showcase.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+    notes: "Real estate listings - request owner info removal",
+  },
 };
 
 // Broker categories for organization
@@ -1594,7 +1630,7 @@ export const BROKER_CATEGORIES = {
     "ADVANCED_PEOPLE_SEARCH", "ZABASEARCH", "PEEKYOU", "BEEN_VERIFIED_PEOPLE",
     "PUBLICRECORDS360", "PERSOPO", "SMARTBACKGROUNDCHECKS", "LOCATEFAMILY",
     "PEOPLEWISE", "PEOPLESEARCHNOW", "PEOPLEBYNAME", "VIRTORY", "VERICORA",
-    "GLADIKNOW", "IDENTITYPI", "QUICKPEOPLETRACE"
+    "GLADIKNOW", "IDENTITYPI", "QUICKPEOPLETRACE", "OURSTATES", "IDCRAWL"
   ],
   BACKGROUND_CHECK: [
     "TRUTHFINDER", "CHECKPEOPLE", "CYBERBACKGROUNDCHECKS", "PUBLICDATACHECK",
@@ -1613,7 +1649,7 @@ export const BROKER_CATEGORIES = {
   PROPERTY_RECORDS: [
     "NEIGHBOR_WHO", "HOMEMETRY", "BLOCKSHOPPER", "OWNERLY", "REHOLD",
     "PROPERTYSHARK", "ZILLOW", "REDFIN", "REALTOR_COM", "TRULIA",
-    "HOUSEVALUES", "ADDRESSREPORT", "LANDWATCH"
+    "HOUSEVALUES", "ADDRESSREPORT", "LANDWATCH", "REALTYHOP", "SHOWCASE"
   ],
   EMAIL_IDENTITY: [
     "VOTERRECORDS", "EMAILSHERLOCK", "EMAILFINDER", "HUNTER_IO"
