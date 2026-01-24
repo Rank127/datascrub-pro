@@ -40,6 +40,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enterprise users see their exposure counts
   - Non-Enterprise users see feature preview with upgrade CTA
 
+- **Dedicated AI Protection Page** (`/dashboard/ai-protection`)
+  - Full-featured page with tabs for Overview, AI Training, Facial Recognition, Voice Cloning
+  - Stats overview showing total sources checked and opted-out count
+  - Progress bar tracking AI protection status
+  - Non-Enterprise users see detailed feature preview with upgrade CTA
+  - Added to sidebar navigation with Bot icon
+
 ### Changed
 - **Scan Orchestrator**
   - Added AI Protection Scanner for Enterprise plan users
@@ -54,6 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New files:
   - `src/lib/scanners/ai-protection/ai-scanner.ts` - AI Protection Scanner
   - `src/lib/scanners/ai-protection/index.ts` - Scanner exports
+  - `src/app/(dashboard)/dashboard/ai-protection/page.tsx` - AI Protection page
+  - `src/app/api/ai-protection/route.ts` - AI Protection API endpoint
 - Updated files:
   - `src/lib/types.ts` - Added AI data sources and exposure types
   - `src/lib/removers/data-broker-directory.ts` - Added 18 AI protection sources
@@ -61,6 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `src/app/(dashboard)/dashboard/page.tsx` - AI Protection dashboard section
   - `src/app/api/dashboard/stats/route.ts` - AI protection stats
   - `src/components/dashboard/exposure-card.tsx` - New exposure type labels
+  - `src/components/dashboard/sidebar.tsx` - Added AI Protection navigation
 
 ---
 

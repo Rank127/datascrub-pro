@@ -409,7 +409,7 @@ export default function DashboardPage() {
             </div>
           </div>
           {stats.userPlan === "ENTERPRISE" ? (
-            <Link href="/dashboard/exposures?category=ai">
+            <Link href="/dashboard/ai-protection">
               <Button variant="ghost" className="text-purple-400 hover:text-purple-300">
                 View all
                 <ArrowRight className="ml-2 h-4 w-4" />

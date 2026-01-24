@@ -16,6 +16,7 @@ import {
   PhoneOff,
   Settings,
   LogOut,
+  Bot,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ const navigation = [
   { name: "Exposures", href: "/dashboard/exposures", icon: AlertTriangle },
   { name: "Whitelist", href: "/dashboard/whitelist", icon: ListChecks },
   { name: "Removals", href: "/dashboard/removals", icon: Trash2 },
+  { name: "AI Protection", href: "/dashboard/ai-protection", icon: Bot },
   { name: "Alerts", href: "/dashboard/alerts", icon: Bell },
   { name: "Reports", href: "/dashboard/reports", icon: FileText },
   { name: "Do Not Call", href: "/dashboard/dnc", icon: PhoneOff },
