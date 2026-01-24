@@ -375,10 +375,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   LUSHA: {
     name: "Lusha",
-    optOutUrl: "https://www.lusha.com/opt-out/",
+    optOutUrl: "https://privacy.lusha.com/hc/en-us/requests/new",
     privacyEmail: "privacy@lusha.com",
-    removalMethod: "FORM",
+    removalMethod: "BOTH",
     estimatedDays: 14,
+    notes: "Submit a privacy request to remove your data from Lusha",
   },
   APOLLO: {
     name: "Apollo.io",
@@ -396,10 +397,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   LEADIQ: {
     name: "LeadIQ",
-    optOutUrl: "https://leadiq.com/opt-out",
+    optOutUrl: "https://leadiq.com/privacy-center",
     privacyEmail: "privacy@leadiq.com",
-    removalMethod: "FORM",
+    removalMethod: "BOTH",
     estimatedDays: 14,
+    notes: "Use Privacy Center to submit a data deletion request",
   },
   COGNISM: {
     name: "Cognism",
@@ -410,10 +412,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   CLEARBIT: {
     name: "Clearbit",
-    optOutUrl: "https://dashboard.clearbit.com/optout",
+    optOutUrl: "https://claim.clearbit.com/claim",
     privacyEmail: "privacy@clearbit.com",
-    removalMethod: "FORM",
+    removalMethod: "BOTH",
     estimatedDays: 10,
+    notes: "Use the Clearbit claim form to request data removal",
   },
   FULLCONTACT: {
     name: "FullContact",
@@ -460,11 +463,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   EQUIFAX_MARKETING: {
     name: "Equifax Marketing",
-    optOutUrl: "https://www.equifax.com/personal/education/credit/report/remove-your-info-from-equifax/",
+    optOutUrl: "https://myprivacy.equifax.com/personal-info",
     privacyEmail: "privacy@equifax.com",
     removalMethod: "BOTH",
     estimatedDays: 30,
-    notes: "Follow the guide to opt out of Equifax marketing lists",
+    notes: "Use MyPrivacy portal to opt out of Equifax marketing",
   },
   LEXISNEXIS: {
     name: "LexisNexis",

@@ -151,18 +151,26 @@ export class AllBrokersScanner extends BaseScanner {
         continue;
       }
 
-      // Build search URL if we have a pattern, otherwise use opt-out URL
-      let searchUrl: string;
-      const urlBuilder = SEARCH_URL_PATTERNS[brokerKey];
+      // For manual action exposures, use the opt-out URL as the primary link
+      // This is what users actually need to take action
+      let primaryUrl: string;
+      let searchUrl: string | undefined;
 
+      // Build search URL if we have a pattern (for user to verify listing)
+      const urlBuilder = SEARCH_URL_PATTERNS[brokerKey];
       if (urlBuilder) {
         searchUrl = urlBuilder(name, city, state);
-      } else if (brokerInfo.optOutUrl) {
-        // Fallback to opt-out URL
-        searchUrl = brokerInfo.optOutUrl;
+      }
+
+      // Primary URL should be opt-out URL (what user needs to take action)
+      if (brokerInfo.optOutUrl) {
+        primaryUrl = brokerInfo.optOutUrl;
       } else if (brokerInfo.privacyEmail) {
         // Use mailto: link for email-only brokers
-        searchUrl = `mailto:${brokerInfo.privacyEmail}`;
+        primaryUrl = `mailto:${brokerInfo.privacyEmail}`;
+      } else if (searchUrl) {
+        // Fallback to search URL if no opt-out available
+        primaryUrl = searchUrl;
       } else {
         // Skip only if no URL and no email available
         console.log(`[AllBrokersScanner] Skipping ${brokerKey} - no contact method`);
@@ -172,7 +180,7 @@ export class AllBrokersScanner extends BaseScanner {
       results.push({
         source: brokerKey as DataSource,
         sourceName: brokerInfo.name,
-        sourceUrl: searchUrl,
+        sourceUrl: primaryUrl,
         dataType: "COMBINED_PROFILE",
         dataPreview: `Check if listed on ${brokerInfo.name}`,
         severity: getSeverityForBroker(brokerKey),
@@ -184,7 +192,7 @@ export class AllBrokersScanner extends BaseScanner {
           estimatedRemovalDays: brokerInfo.estimatedDays,
           removalMethod: brokerInfo.removalMethod,
           notes: brokerInfo.notes,
-          reason: `Potential exposure on ${brokerInfo.name}. Click to verify if your information is listed.`,
+          reason: `Potential exposure on ${brokerInfo.name}. Click to opt out or check if listed.`,
         },
       });
     }
