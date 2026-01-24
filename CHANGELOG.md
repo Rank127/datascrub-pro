@@ -16,6 +16,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.0] - 2026-01-23
+
+### Added
+- **Removal Proof Screenshots**
+  - Automatic screenshot capture when exposures are found (before removal)
+  - Screenshot capture when removal is verified (after removal)
+  - "View Proof" button on Removals page showing before/after comparison
+  - Form submission screenshots (when using browser automation)
+  - Uses thum.io free API for on-demand screenshot generation
+
+- **Screenshot Service** (`src/lib/screenshots/screenshot-service.ts`)
+  - `generateScreenshotUrl()` - Creates screenshot URL without blocking
+  - `captureScreenshot()` - Returns screenshot URL with metadata
+  - `captureScreenshotAsBase64()` - For direct database storage
+  - Custom delays per data broker for slow-loading pages
+  - Graceful fallback for unsupported URL types
+
+### Changed
+- **Database Schema**
+  - Added `proofScreenshot`, `proofScreenshotAt` to Exposure model
+  - Added `beforeScreenshot`, `afterScreenshot`, `formScreenshot` to RemovalRequest
+  - Added corresponding timestamp fields for audit trail
+
+- **Scan Flow**
+  - New exposures now include proof screenshot URL
+  - Screenshots generated lazily (on-demand when viewed)
+
+- **Verification Flow**
+  - Copies before screenshot from exposure when removal completes
+  - Generates after screenshot showing data is removed
+
+### Technical
+- Updated files:
+  - `prisma/schema.prisma` - New screenshot fields
+  - `src/lib/screenshots/screenshot-service.ts` - New service
+  - `src/app/api/scan/start/route.ts` - Screenshot capture on scan
+  - `src/lib/removers/verification-service.ts` - Screenshot on verification
+  - `src/app/api/removals/status/route.ts` - Return screenshot data
+  - `src/app/(dashboard)/dashboard/removals/page.tsx` - View Proof dialog
+
+---
+
 ## [1.8.0] - 2026-01-23
 
 ### Added
@@ -523,6 +565,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.9.0 | 2026-01-23 | Removal proof screenshots with before/after comparison |
 | 1.8.0 | 2026-01-23 | Manual action tracking, opt-out URL fixes, Submitted for Removal card |
 | 1.7.0 | 2026-01-23 | LeakCheck paid API, 58 data brokers, follow-up emails, monthly re-scans |
 | 1.6.0 | 2026-01-22 | Real data broker scanners (8 active scrapers) |
