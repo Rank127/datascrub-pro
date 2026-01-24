@@ -24,7 +24,12 @@ import {
   CheckCircle2,
   Clock,
   Search,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  AlertTriangle,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import type { DataSource, Severity, ExposureStatus, ExposureType } from "@/lib/types";
 
@@ -55,14 +60,80 @@ interface ManualExposure {
   manualActionTakenAt: string | null;
 }
 
+// Grouped exposures by broker
+interface GroupedExposure {
+  source: DataSource;
+  sourceName: string;
+  sourceUrl: string | null;
+  exposures: ManualExposure[];
+  highestSeverity: Severity;
+  totalCount: number;
+  pendingCount: number;
+  doneCount: number;
+}
+
+// Helper to get highest severity
+function getHighestSeverity(exposures: ManualExposure[]): Severity {
+  const severityOrder: Severity[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
+  for (const severity of severityOrder) {
+    if (exposures.some(e => e.severity === severity)) {
+      return severity;
+    }
+  }
+  return "LOW";
+}
+
+// Group exposures by source/broker
+function groupExposuresByBroker(exposures: ManualExposure[]): GroupedExposure[] {
+  const grouped = new Map<string, ManualExposure[]>();
+
+  for (const exposure of exposures) {
+    const key = exposure.source;
+    if (!grouped.has(key)) {
+      grouped.set(key, []);
+    }
+    grouped.get(key)!.push(exposure);
+  }
+
+  return Array.from(grouped.entries()).map(([source, exps]) => ({
+    source: source as DataSource,
+    sourceName: exps[0].sourceName,
+    sourceUrl: exps[0].sourceUrl,
+    exposures: exps,
+    highestSeverity: getHighestSeverity(exps),
+    totalCount: exps.length,
+    pendingCount: exps.filter(e => !e.manualActionTaken).length,
+    doneCount: exps.filter(e => e.manualActionTaken).length,
+  })).sort((a, b) => {
+    // Sort by pending count (descending), then by severity
+    if (a.pendingCount !== b.pendingCount) return b.pendingCount - a.pendingCount;
+    const severityOrder: Severity[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
+    return severityOrder.indexOf(a.highestSeverity) - severityOrder.indexOf(b.highestSeverity);
+  });
+}
+
 export default function ManualReviewPage() {
   const [exposures, setExposures] = useState<ManualExposure[]>([]);
+  const [groupedExposures, setGroupedExposures] = useState<GroupedExposure[]>([]);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
-  const [stats, setStats] = useState({ total: 0, pending: 0, done: 0 });
+  const [stats, setStats] = useState({ total: 0, pending: 0, done: 0, brokers: 0 });
+
+  const toggleGroup = (source: string) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(source)) {
+        next.delete(source);
+      } else {
+        next.add(source);
+      }
+      return next;
+    });
+  };
 
   const fetchManualExposures = useCallback(async () => {
     setLoading(true);
@@ -83,6 +154,10 @@ export default function ManualReviewPage() {
           (e: ManualExposure) => e.requiresManualAction && !AI_SOURCES.includes(e.source)
         );
         setExposures(manualItems);
+
+        // Group by broker for consolidated view
+        const grouped = groupExposuresByBroker(manualItems);
+        setGroupedExposures(grouped);
         setTotalPages(data.pagination.totalPages);
 
         // Calculate stats excluding AI sources
@@ -91,10 +166,12 @@ export default function ManualReviewPage() {
         );
         const pendingCount = allManualItems.filter((e: ManualExposure) => !e.manualActionTaken).length;
         const doneCount = allManualItems.filter((e: ManualExposure) => e.manualActionTaken).length;
+        const uniqueBrokers = new Set(allManualItems.map((e: ManualExposure) => e.source)).size;
         setStats({
           total: allManualItems.length,
           pending: pendingCount,
           done: doneCount,
+          brokers: uniqueBrokers,
         });
       }
     } catch (error) {
@@ -226,14 +303,23 @@ export default function ManualReviewPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card className="bg-slate-800/50 border-slate-700">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
               <MousePointerClick className="h-5 w-5 text-amber-400" />
+              <div className="text-2xl font-bold text-white">{stats.brokers}</div>
+            </div>
+            <p className="text-sm text-slate-400">Sites to Review</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-slate-400" />
               <div className="text-2xl font-bold text-white">{stats.total}</div>
             </div>
-            <p className="text-sm text-slate-400">Total Manual Items</p>
+            <p className="text-sm text-slate-400">Total Exposures</p>
           </CardContent>
         </Card>
         <Card className="bg-slate-800/50 border-slate-700 border-amber-500/30">
@@ -338,27 +424,194 @@ export default function ManualReviewPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {exposures.map((exposure) => (
-            <ExposureCard
-              key={exposure.id}
-              id={exposure.id}
-              source={exposure.source}
-              sourceName={exposure.sourceName}
-              sourceUrl={exposure.sourceUrl}
-              dataType={exposure.dataType}
-              dataPreview={exposure.dataPreview}
-              severity={exposure.severity}
-              status={exposure.status}
-              isWhitelisted={exposure.isWhitelisted}
-              firstFoundAt={new Date(exposure.firstFoundAt)}
-              requiresManualAction={exposure.requiresManualAction}
-              manualActionTaken={exposure.manualActionTaken}
-              onWhitelist={() => handleWhitelist(exposure.id)}
-              onUnwhitelist={() => handleUnwhitelist(exposure.id)}
-              onRemove={() => handleRemove(exposure.id)}
-              onMarkDone={() => handleMarkDone(exposure.id)}
-              onMarkUndone={() => handleMarkUndone(exposure.id)}
-            />
+          {groupedExposures.map((group) => (
+            <Card
+              key={group.source}
+              className={`bg-slate-800/50 border-slate-700 ${
+                group.pendingCount === 0 ? "opacity-60" : ""
+              }`}
+            >
+              <CardContent className="py-4">
+                {/* Broker Header - Always visible */}
+                <div
+                  className="flex items-start justify-between gap-4 cursor-pointer"
+                  onClick={() => group.totalCount > 1 && toggleGroup(group.source)}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <h3 className="font-medium text-white">{group.sourceName}</h3>
+                      {group.totalCount > 1 && (
+                        <Badge variant="outline" className="border-slate-500 text-slate-300">
+                          {group.totalCount} exposures
+                        </Badge>
+                      )}
+                      <Badge
+                        variant="outline"
+                        className={
+                          group.pendingCount === 0
+                            ? "border-emerald-500/50 text-emerald-400"
+                            : "border-amber-500/50 text-amber-400"
+                        }
+                      >
+                        {group.pendingCount === 0 ? "All Reviewed" : `${group.pendingCount} Pending`}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className={
+                          group.highestSeverity === "CRITICAL"
+                            ? "border-red-500/50 text-red-400"
+                            : group.highestSeverity === "HIGH"
+                            ? "border-orange-500/50 text-orange-400"
+                            : group.highestSeverity === "MEDIUM"
+                            ? "border-yellow-500/50 text-yellow-400"
+                            : "border-blue-500/50 text-blue-400"
+                        }
+                      >
+                        {group.highestSeverity}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-3">
+                      {group.totalCount > 1
+                        ? `Found ${group.totalCount} data types exposed on this site`
+                        : group.exposures[0].dataPreview || "Check this site for your personal information"}
+                    </p>
+                    <div className="flex items-center gap-3">
+                      {group.sourceUrl && (
+                        <a
+                          href={group.sourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-sm text-amber-400 hover:text-amber-300"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Visit Site to Check
+                        </a>
+                      )}
+                      {group.totalCount > 1 && (
+                        <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+                          {expandedGroups.has(group.source) ? (
+                            <>
+                              <ChevronUp className="h-3 w-3" /> Hide details
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="h-3 w-3" /> Show details
+                            </>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    {group.pendingCount > 0 && (
+                      <Button
+                        size="sm"
+                        className="bg-emerald-600 hover:bg-emerald-700"
+                        onClick={() => {
+                          // Mark all pending as done
+                          group.exposures
+                            .filter(e => !e.manualActionTaken)
+                            .forEach(e => handleMarkDone(e.id));
+                        }}
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-1" />
+                        {group.totalCount > 1 ? "Mark All Done" : "Mark Done"}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Expanded Details - Individual exposures */}
+                {expandedGroups.has(group.source) && group.totalCount > 1 && (
+                  <div className="mt-4 pt-4 border-t border-slate-700 space-y-3">
+                    {group.exposures.map((exposure) => (
+                      <div
+                        key={exposure.id}
+                        className={`flex items-center justify-between p-3 rounded-lg bg-slate-900/50 ${
+                          exposure.manualActionTaken ? "opacity-60" : ""
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            variant="outline"
+                            className={
+                              exposure.manualActionTaken
+                                ? "border-emerald-500/50 text-emerald-400"
+                                : "border-amber-500/50 text-amber-400"
+                            }
+                          >
+                            {exposure.manualActionTaken ? "Done" : "Pending"}
+                          </Badge>
+                          <span className="text-sm text-slate-300">{exposure.dataType}</span>
+                          {exposure.dataPreview && (
+                            <span className="text-xs text-slate-500 font-mono">
+                              {exposure.dataPreview}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {!exposure.manualActionTaken ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
+                              onClick={() => handleMarkDone(exposure.id)}
+                            >
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              Done
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-slate-600 text-slate-400"
+                              onClick={() => handleMarkUndone(exposure.id)}
+                            >
+                              Undo
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-slate-600 text-slate-400"
+                            onClick={() => handleWhitelist(exposure.id)}
+                          >
+                            Whitelist
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Single exposure - show actions inline */}
+                {group.totalCount === 1 && (
+                  <div className="mt-3 flex items-center gap-2">
+                    {!group.exposures[0].manualActionTaken && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-slate-600"
+                        onClick={() => handleWhitelist(group.exposures[0].id)}
+                      >
+                        Whitelist
+                      </Button>
+                    )}
+                    {group.exposures[0].manualActionTaken && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-slate-600 text-slate-400"
+                        onClick={() => handleMarkUndone(group.exposures[0].id)}
+                      >
+                        Undo Done
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}

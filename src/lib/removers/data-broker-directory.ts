@@ -35,7 +35,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   BEENVERIFIED: {
     name: "BeenVerified",
-    optOutUrl: "https://www.beenverified.com/opt-out/",
+    optOutUrl: "https://www.beenverified.com/app/optout/search",
     optOutEmail: "privacy@beenverified.com",
     privacyEmail: "privacy@beenverified.com",
     removalMethod: "BOTH",
@@ -600,7 +600,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   STABILITY_AI: {
     name: "Stability AI",
-    optOutUrl: "https://stability.ai/opt-out",
+    optOutUrl: "https://stability.ai/privacy-policy",
     optOutEmail: "legal@stability.ai",
     privacyEmail: "legal@stability.ai",
     removalMethod: "EMAIL",
@@ -618,7 +618,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   OPENAI: {
     name: "OpenAI",
-    optOutUrl: "https://privacy.openai.com/policies",
+    optOutUrl: "https://help.openai.com/en/articles/7039943-data-usage-for-consumer-services-faq",
     privacyEmail: "privacy@openai.com",
     removalMethod: "EMAIL",
     estimatedDays: 45,
@@ -634,7 +634,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   META_AI: {
     name: "Meta AI",
-    optOutUrl: "https://www.facebook.com/help/contact/540404257914453",
+    optOutUrl: "https://www.facebook.com/help/contact/1994830253908714",
     privacyEmail: "privacy@fb.com",
     removalMethod: "FORM",
     estimatedDays: 30,
@@ -678,7 +678,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   // ==========================================
   CLEARVIEW_AI: {
     name: "Clearview AI",
-    optOutUrl: "https://clearview.ai/privacy/requests",
+    optOutUrl: "https://clearview.ai/privacy-requests",
     privacyEmail: "privacy@clearview.ai",
     removalMethod: "FORM",
     estimatedDays: 45,

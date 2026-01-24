@@ -7,6 +7,7 @@ import {
   SoftwareApplicationSchema,
   ServiceSchema,
 } from "@/components/seo/structured-data";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -143,6 +144,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-white`}
       >
+        <GoogleAnalytics />
         {children}
         <Toaster />
       </body>
