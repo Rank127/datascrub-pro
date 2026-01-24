@@ -742,6 +742,846 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     estimatedDays: 30,
     notes: "AI voice generator - opt out of voice training",
   },
+
+  // ==========================================
+  // ADDITIONAL PEOPLE SEARCH SITES
+  // ==========================================
+  ZABASEARCH: {
+    name: "ZabaSearch",
+    optOutUrl: "https://www.zabasearch.com/block_records/",
+    privacyEmail: "privacy@zabasearch.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    notes: "Free people search - requires verification",
+  },
+  PEEKYOU: {
+    name: "PeekYou",
+    optOutUrl: "https://www.peekyou.com/about/contact/optout/",
+    privacyEmail: "privacy@peekyou.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  BEEN_VERIFIED_PEOPLE: {
+    name: "Been Verified People Search",
+    optOutUrl: "https://www.beenverifiedpeople.com/optout",
+    privacyEmail: "privacy@beenverifiedpeople.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  PUBLICRECORDS360: {
+    name: "PublicRecords360",
+    optOutUrl: "https://www.publicrecords360.com/optout.html",
+    privacyEmail: "privacy@publicrecords360.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  PERSOPO: {
+    name: "Persopo",
+    optOutUrl: "https://www.persopo.com/opt-out",
+    privacyEmail: "privacy@persopo.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  SMARTBACKGROUNDCHECKS: {
+    name: "Smart Background Checks",
+    optOutUrl: "https://www.smartbackgroundchecks.com/optout",
+    privacyEmail: "privacy@smartbackgroundchecks.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  LOCATEFAMILY: {
+    name: "LocateFamily",
+    optOutUrl: "https://www.locatefamily.com/removal.html",
+    privacyEmail: "privacy@locatefamily.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  PEOPLEWISE: {
+    name: "PeopleWise",
+    optOutUrl: "https://www.peoplewise.com/optout",
+    privacyEmail: "privacy@peoplewise.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  PEOPLESEARCHNOW: {
+    name: "PeopleSearchNow",
+    optOutUrl: "https://www.peoplesearchnow.com/opt-out",
+    privacyEmail: "privacy@peoplesearchnow.com",
+    removalMethod: "FORM",
+    estimatedDays: 3,
+  },
+  PEOPLEBYNAME: {
+    name: "PeopleByName",
+    optOutUrl: "https://www.peoplebyname.com/remove.php",
+    privacyEmail: "privacy@peoplebyname.com",
+    removalMethod: "FORM",
+    estimatedDays: 5,
+  },
+  VIRTORY: {
+    name: "Virtory",
+    optOutUrl: "https://www.virtory.com/opt-out",
+    privacyEmail: "privacy@virtory.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  VERICORA: {
+    name: "Vericora",
+    optOutUrl: "https://vericora.com/ng/optout",
+    privacyEmail: "privacy@vericora.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  GLADIKNOW: {
+    name: "GladIKnow",
+    optOutUrl: "https://gladiknow.com/opt-out",
+    privacyEmail: "privacy@gladiknow.com",
+    removalMethod: "FORM",
+    estimatedDays: 5,
+  },
+  IDENTITYPI: {
+    name: "IdentityPI",
+    optOutUrl: "https://www.identitypi.com/optout",
+    privacyEmail: "privacy@identitypi.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  QUICKPEOPLETRACE: {
+    name: "QuickPeopleTrace",
+    optOutUrl: "https://www.quickpeopletrace.com/optout",
+    privacyEmail: "privacy@quickpeopletrace.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+
+  // ==========================================
+  // COURT RECORDS & LEGAL
+  // ==========================================
+  JUDYRECORDS: {
+    name: "JudyRecords",
+    optOutUrl: "https://www.judyrecords.com/record-removal",
+    privacyEmail: "privacy@judyrecords.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Court records search - removal may be limited by public records laws",
+  },
+  UNICOURT: {
+    name: "UniCourt",
+    optOutUrl: "https://unicourt.com/removal-request",
+    privacyEmail: "privacy@unicourt.com",
+    removalMethod: "BOTH",
+    estimatedDays: 30,
+    notes: "Legal data platform - requires identity verification",
+  },
+  COURTRECORDS_ORG: {
+    name: "CourtRecords.org",
+    optOutUrl: "https://courtrecords.org/optout",
+    privacyEmail: "privacy@courtrecords.org",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  ARRESTFACTS: {
+    name: "ArrestFacts",
+    optOutUrl: "https://arrestfacts.com/ng/control/privacy",
+    privacyEmail: "privacy@arrestfacts.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  CRIMINALSEARCHES: {
+    name: "CriminalSearches",
+    optOutUrl: "https://www.criminalsearches.com/optout",
+    privacyEmail: "privacy@criminalsearches.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  MUGSHOTS_COM: {
+    name: "Mugshots.com",
+    optOutUrl: "https://www.mugshots.com/removal.html",
+    privacyEmail: "removal@mugshots.com",
+    removalMethod: "BOTH",
+    estimatedDays: 30,
+    notes: "May require payment for expedited removal",
+  },
+  INSTANTARREST: {
+    name: "InstantArrest",
+    optOutUrl: "https://www.instantarrest.com/optout",
+    privacyEmail: "privacy@instantarrest.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  PUBLICPOLICERECORD: {
+    name: "PublicPoliceRecord",
+    optOutUrl: "https://publicpolicerecord.com/optout",
+    privacyEmail: "privacy@publicpolicerecord.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // REAL ESTATE & PROPERTY RECORDS
+  // ==========================================
+  PROPERTYSHARK: {
+    name: "PropertyShark",
+    optOutUrl: "https://www.propertyshark.com/mason/info/Opt-Out",
+    privacyEmail: "privacy@propertyshark.com",
+    removalMethod: "BOTH",
+    estimatedDays: 14,
+  },
+  ZILLOW: {
+    name: "Zillow",
+    optOutUrl: "https://www.zillow.com/z/data-privacy/",
+    privacyEmail: "privacy@zillow.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "Remove owner info from property listings",
+  },
+  REDFIN: {
+    name: "Redfin",
+    optOutUrl: "https://www.redfin.com/about/privacy-policy",
+    privacyEmail: "privacy@redfin.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  REALTOR_COM: {
+    name: "Realtor.com",
+    optOutUrl: "https://www.realtor.com/privacy-notice/",
+    privacyEmail: "privacy@realtor.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  TRULIA: {
+    name: "Trulia",
+    optOutUrl: "https://www.trulia.com/privacy",
+    privacyEmail: "privacy@trulia.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  HOUSEVALUES: {
+    name: "HouseValues",
+    optOutUrl: "https://www.housevalues.com/optout",
+    privacyEmail: "privacy@housevalues.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  ADDRESSREPORT: {
+    name: "AddressReport",
+    optOutUrl: "https://www.addressreport.com/removal",
+    privacyEmail: "privacy@addressreport.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  LANDWATCH: {
+    name: "LandWatch",
+    optOutUrl: "https://www.landwatch.com/privacy",
+    privacyEmail: "privacy@landwatch.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // BUSINESS & PROFESSIONAL DATA
+  // ==========================================
+  SEAMLESS_AI: {
+    name: "Seamless.AI",
+    optOutUrl: "https://www.seamless.ai/privacy-policy",
+    privacyEmail: "privacy@seamless.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  DATANYZE: {
+    name: "Datanyze",
+    optOutUrl: "https://www.datanyze.com/privacy-policy",
+    privacyEmail: "privacy@datanyze.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  UPLEAD: {
+    name: "UpLead",
+    optOutUrl: "https://www.uplead.com/privacy-policy/",
+    privacyEmail: "privacy@uplead.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  SNOV_IO: {
+    name: "Snov.io",
+    optOutUrl: "https://snov.io/privacy-policy",
+    privacyEmail: "gdpr@snov.io",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  FINDTHATLEADS: {
+    name: "FindThatLead",
+    optOutUrl: "https://findthatlead.com/en/privacy",
+    privacyEmail: "privacy@findthatlead.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  VOILANORBERT: {
+    name: "VoilaNorbert",
+    optOutUrl: "https://www.voilanorbert.com/privacy",
+    privacyEmail: "privacy@voilanorbert.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  ADAPT_IO: {
+    name: "Adapt.io",
+    optOutUrl: "https://adapt.io/privacy-policy",
+    privacyEmail: "privacy@adapt.io",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  CONTACTOUT: {
+    name: "ContactOut",
+    optOutUrl: "https://contactout.com/optout",
+    privacyEmail: "privacy@contactout.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  SIGNALHIRE: {
+    name: "SignalHire",
+    optOutUrl: "https://www.signalhire.com/privacy-policy",
+    privacyEmail: "privacy@signalhire.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  WIZA: {
+    name: "Wiza",
+    optOutUrl: "https://wiza.co/privacy-policy",
+    privacyEmail: "privacy@wiza.co",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  OVERLOOP: {
+    name: "Overloop",
+    optOutUrl: "https://overloop.com/privacy-policy",
+    privacyEmail: "privacy@overloop.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  SALESLOFT: {
+    name: "SalesLoft",
+    optOutUrl: "https://salesloft.com/privacy-notice/",
+    privacyEmail: "privacy@salesloft.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  AEROLEADS: {
+    name: "AeroLeads",
+    optOutUrl: "https://aeroleads.com/privacy-policy",
+    privacyEmail: "privacy@aeroleads.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  GETPROSPECT: {
+    name: "GetProspect",
+    optOutUrl: "https://getprospect.com/privacy-policy",
+    privacyEmail: "privacy@getprospect.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // PHONE & ADDRESS LOOKUP
+  // ==========================================
+  WHITEPAGES_PREMIUM: {
+    name: "WhitePages Premium",
+    optOutUrl: "https://www.whitepages.com/suppression-requests",
+    privacyEmail: "privacy@whitepages.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  PHONEBOOKS_COM: {
+    name: "PhoneBooks.com",
+    optOutUrl: "https://www.phonebooks.com/optout",
+    privacyEmail: "privacy@phonebooks.com",
+    removalMethod: "FORM",
+    estimatedDays: 5,
+  },
+  ADDRESSES_COM: {
+    name: "Addresses.com",
+    optOutUrl: "https://www.addresses.com/optout.php",
+    privacyEmail: "privacy@addresses.com",
+    removalMethod: "FORM",
+    estimatedDays: 5,
+  },
+  PHONELOOKUP: {
+    name: "PhoneLookup",
+    optOutUrl: "https://www.phonelookup.com/opt-out",
+    privacyEmail: "privacy@phonelookup.com",
+    removalMethod: "FORM",
+    estimatedDays: 5,
+  },
+  PHONEOWNER: {
+    name: "PhoneOwner",
+    optOutUrl: "https://phoneowner.com/page/optout",
+    privacyEmail: "privacy@phoneowner.com",
+    removalMethod: "FORM",
+    estimatedDays: 5,
+  },
+  SYNC_ME: {
+    name: "Sync.ME",
+    optOutUrl: "https://sync.me/optout/",
+    privacyEmail: "privacy@sync.me",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    notes: "Caller ID and spam blocking app - remove your info",
+  },
+  HIYA: {
+    name: "Hiya",
+    optOutUrl: "https://hiya.com/optout",
+    privacyEmail: "privacy@hiya.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  TRUECALLER: {
+    name: "Truecaller",
+    optOutUrl: "https://www.truecaller.com/unlisting",
+    privacyEmail: "privacy@truecaller.com",
+    removalMethod: "FORM",
+    estimatedDays: 1,
+    notes: "Unlist from Truecaller directory - usually instant",
+  },
+  MR_NUMBER: {
+    name: "Mr. Number",
+    optOutUrl: "https://mrnumber.com/remove",
+    privacyEmail: "privacy@mrnumber.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  CALLERIDTEST: {
+    name: "CallerIDTest",
+    optOutUrl: "https://calleridtest.com/opt-out",
+    privacyEmail: "privacy@calleridtest.com",
+    removalMethod: "FORM",
+    estimatedDays: 5,
+  },
+  OLDPHONEBOOK: {
+    name: "OldPhoneBook",
+    optOutUrl: "https://www.oldphonebook.com/opt-out",
+    privacyEmail: "privacy@oldphonebook.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+
+  // ==========================================
+  // MARKETING & ADVERTISING DATA
+  // ==========================================
+  LIVERAMP: {
+    name: "LiveRamp",
+    optOutUrl: "https://liveramp.com/opt_out/",
+    privacyEmail: "privacy@liveramp.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "Major data broker for advertising - opt out of identity graph",
+  },
+  TAPAD: {
+    name: "Tapad",
+    optOutUrl: "https://www.tapad.com/privacy-policy",
+    privacyEmail: "privacy@tapad.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  NEUSTAR: {
+    name: "Neustar",
+    optOutUrl: "https://www.home.neustar/privacy/opt-out",
+    privacyEmail: "privacy@team.neustar",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  NIELSEN: {
+    name: "Nielsen",
+    optOutUrl: "https://www.nielsen.com/us/en/legal/privacy-statement/digital-measurement-privacy-statement/",
+    privacyEmail: "privacy.department@nielsen.com",
+    removalMethod: "BOTH",
+    estimatedDays: 45,
+  },
+  LOTAME: {
+    name: "Lotame",
+    optOutUrl: "https://www.lotame.com/about-lotame/privacy/opt-out/",
+    privacyEmail: "privacy@lotame.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  DATALOGIX: {
+    name: "Datalogix (Oracle)",
+    optOutUrl: "https://www.oracle.com/legal/privacy/marketing-cloud-data-cloud-privacy-policy.html",
+    privacyEmail: "privacy@oracle.com",
+    removalMethod: "FORM",
+    estimatedDays: 45,
+  },
+  BLUEKAI: {
+    name: "BlueKai (Oracle)",
+    optOutUrl: "https://www.oracle.com/legal/privacy/marketing-cloud-data-cloud-privacy-policy.html",
+    privacyEmail: "privacy@oracle.com",
+    removalMethod: "FORM",
+    estimatedDays: 45,
+  },
+  INFOGROUP: {
+    name: "Infogroup (Data.com)",
+    optOutUrl: "https://www.infogroup.com/privacy-policy",
+    privacyEmail: "privacy@infogroup.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  TRANSUNION: {
+    name: "TransUnion Marketing",
+    optOutUrl: "https://www.transunion.com/consumer-privacy",
+    privacyEmail: "privacy@transunion.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  COMSCORE: {
+    name: "comScore",
+    optOutUrl: "https://www.comscore.com/About/Privacy-Policy",
+    privacyEmail: "privacy@comscore.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+
+  // ==========================================
+  // DATING & RELATIONSHIP SEARCH
+  // ==========================================
+  DATING_BACKGROUND: {
+    name: "DatingBackground",
+    optOutUrl: "https://www.datingbackground.com/opt-out",
+    privacyEmail: "privacy@datingbackground.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  MATCHDOTCOM_LOOKUP: {
+    name: "Match.com Background Check",
+    optOutUrl: "https://www.match.com/help/privacy.aspx",
+    privacyEmail: "privacy@match.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  DATESEARCHSITE: {
+    name: "DateSearchSite",
+    optOutUrl: "https://www.datesearchsite.com/optout",
+    privacyEmail: "privacy@datesearchsite.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  ROMANCESCAMS: {
+    name: "RomanceScams",
+    optOutUrl: "https://romancescams.org/removal",
+    privacyEmail: "privacy@romancescams.org",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // FINANCIAL & INSURANCE DATA
+  // ==========================================
+  EXPERIAN_CONSUMER: {
+    name: "Experian Consumer",
+    optOutUrl: "https://www.experian.com/privacy/opt-out-form",
+    privacyEmail: "privacy@experian.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  EQUIFAX_CONSUMER: {
+    name: "Equifax Consumer",
+    optOutUrl: "https://myprivacy.equifax.com/personal-info",
+    privacyEmail: "privacy@equifax.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  TRANSUNION_CONSUMER: {
+    name: "TransUnion Consumer",
+    optOutUrl: "https://www.transunion.com/consumer-privacy",
+    privacyEmail: "privacy@transunion.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  CHEXSYSTEMS: {
+    name: "ChexSystems",
+    optOutUrl: "https://www.chexsystems.com/security-freeze",
+    privacyEmail: "privacy@fnis.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  INNOVIS: {
+    name: "Innovis",
+    optOutUrl: "https://www.innovis.com/securityFreeze/index",
+    privacyEmail: "privacy@innovis.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  NCTUE: {
+    name: "NCTUE",
+    optOutUrl: "https://www.nctue.com/Consumers",
+    privacyEmail: "privacy@nctue.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "National Consumer Telecom & Utilities Exchange",
+  },
+  SAGESTREAM: {
+    name: "SageStream",
+    optOutUrl: "https://www.sagestreamllc.com/",
+    privacyEmail: "privacy@sagestreamllc.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+
+  // ==========================================
+  // VEHICLE & DRIVING RECORDS
+  // ==========================================
+  VEHICLEHISTORY: {
+    name: "VehicleHistory.com",
+    optOutUrl: "https://www.vehiclehistory.com/privacy-policy",
+    privacyEmail: "privacy@vehiclehistory.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  CARFAX: {
+    name: "CARFAX",
+    optOutUrl: "https://www.carfax.com/company/privacy-policy",
+    privacyEmail: "privacy@carfax.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  AUTOCHECK: {
+    name: "AutoCheck",
+    optOutUrl: "https://www.autocheck.com/consumers/privacy",
+    privacyEmail: "privacy@experian.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  DRIVINGRECORDS: {
+    name: "DrivingRecords",
+    optOutUrl: "https://www.drivingrecords.com/optout",
+    privacyEmail: "privacy@drivingrecords.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // GENEALOGY & FAMILY HISTORY
+  // ==========================================
+  ANCESTRY: {
+    name: "Ancestry",
+    optOutUrl: "https://support.ancestry.com/s/article/Removing-Public-Records-from-Ancestry",
+    privacyEmail: "privacy@ancestry.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "Request removal of public records from Ancestry.com",
+  },
+  MYHERITAGE: {
+    name: "MyHeritage",
+    optOutUrl: "https://www.myheritage.com/privacy-policy",
+    privacyEmail: "privacy@myheritage.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  FINDAGRAVE: {
+    name: "FindAGrave",
+    optOutUrl: "https://www.findagrave.com/cgi-bin/fg.cgi?page=privacyPolicy",
+    privacyEmail: "privacy@ancestry.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  BILLIONGRAVES: {
+    name: "BillionGraves",
+    optOutUrl: "https://billiongraves.com/privacy",
+    privacyEmail: "privacy@billiongraves.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  ARCHIVES_COM: {
+    name: "Archives.com",
+    optOutUrl: "https://www.archives.com/privacy",
+    privacyEmail: "privacy@archives.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  GENEALOGYBANK: {
+    name: "GenealogyBank",
+    optOutUrl: "https://www.genealogybank.com/privacy",
+    privacyEmail: "privacy@genealogybank.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  NEWSPAPERS_COM: {
+    name: "Newspapers.com",
+    optOutUrl: "https://www.newspapers.com/privacy",
+    privacyEmail: "privacy@ancestry.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // INTERNATIONAL DATA BROKERS
+  // ==========================================
+  CANADA411: {
+    name: "Canada411",
+    optOutUrl: "https://www.canada411.ca/privacy/",
+    privacyEmail: "privacy@yp.ca",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Canadian phone directory",
+  },
+  UK_192: {
+    name: "192.com (UK)",
+    optOutUrl: "https://www.192.com/optout/",
+    privacyEmail: "dataprotection@192.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "UK people search and electoral roll",
+  },
+  INFOBEL: {
+    name: "Infobel (International)",
+    optOutUrl: "https://www.infobel.com/en/privacy",
+    privacyEmail: "privacy@infobel.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "International phone directory",
+  },
+  YASNI: {
+    name: "Yasni (Germany)",
+    optOutUrl: "https://www.yasni.de/opt-out",
+    privacyEmail: "privacy@yasni.de",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "German people search engine",
+  },
+  WEBMII: {
+    name: "WebMii",
+    optOutUrl: "https://webmii.com/privacy",
+    privacyEmail: "privacy@webmii.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  PIPL_UK: {
+    name: "Pipl UK",
+    optOutUrl: "https://pipl.com/personal-information-removal-request",
+    privacyEmail: "privacy@pipl.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  FOREBEARS: {
+    name: "Forebears",
+    optOutUrl: "https://forebears.io/privacy",
+    privacyEmail: "privacy@forebears.io",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+    notes: "Surname and genealogy database",
+  },
+
+  // ==========================================
+  // EDUCATIONAL & PROFESSIONAL LICENSES
+  // ==========================================
+  NATIONAL_STUDENT_CLEARINGHOUSE: {
+    name: "National Student Clearinghouse",
+    optOutUrl: "https://www.studentclearinghouse.org/students/optional-block-request/",
+    privacyEmail: "privacy@studentclearinghouse.org",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "Educational record database",
+  },
+  VERIFYED: {
+    name: "VerifyEd",
+    optOutUrl: "https://www.verifyed.io/privacy",
+    privacyEmail: "privacy@verifyed.io",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  LICENSE_LOOKUP: {
+    name: "LicenseLookup",
+    optOutUrl: "https://www.licenselookup.com/optout",
+    privacyEmail: "privacy@licenselookup.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // HEALTHCARE DATA
+  // ==========================================
+  HEALTHGRADES: {
+    name: "Healthgrades",
+    optOutUrl: "https://www.healthgrades.com/content/patient-rights",
+    privacyEmail: "privacy@healthgrades.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "Doctor reviews and healthcare provider info",
+  },
+  VITALS: {
+    name: "Vitals",
+    optOutUrl: "https://www.vitals.com/privacy",
+    privacyEmail: "privacy@vitals.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  ZOCDOC: {
+    name: "Zocdoc",
+    optOutUrl: "https://www.zocdoc.com/about/privacypolicy",
+    privacyEmail: "privacy@zocdoc.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  DOXIMITY: {
+    name: "Doximity",
+    optOutUrl: "https://www.doximity.com/privacy",
+    privacyEmail: "privacy@doximity.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "Physician network",
+  },
+  NPPES: {
+    name: "NPPES (NPI Registry)",
+    optOutUrl: "https://nppes.cms.hhs.gov/",
+    privacyEmail: "customerservice@nppes.cms.hhs.gov",
+    removalMethod: "FORM",
+    estimatedDays: 45,
+    notes: "National Provider Identifier - medical provider registry",
+  },
+
+  // ==========================================
+  // LOCATION & TRACKING
+  // ==========================================
+  FOURSQUARE: {
+    name: "Foursquare",
+    optOutUrl: "https://foursquare.com/legal/privacy",
+    privacyEmail: "privacy@foursquare.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  SAFEGRAPH: {
+    name: "SafeGraph",
+    optOutUrl: "https://www.safegraph.com/privacy-policy",
+    privacyEmail: "privacy@safegraph.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "Location data broker",
+  },
+  MOBILEWALLA: {
+    name: "Mobilewalla",
+    optOutUrl: "https://www.mobilewalla.com/privacy-policy",
+    privacyEmail: "privacy@mobilewalla.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "Mobile device and location data",
+  },
+  XMODE: {
+    name: "X-Mode (Outlogic)",
+    optOutUrl: "https://www.outlogic.io/privacy-policy",
+    privacyEmail: "privacy@outlogic.io",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  GRAVY_ANALYTICS: {
+    name: "Gravy Analytics",
+    optOutUrl: "https://gravyanalytics.com/privacy/",
+    privacyEmail: "privacy@gravyanalytics.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  PLACER_AI: {
+    name: "Placer.ai",
+    optOutUrl: "https://www.placer.ai/privacy-policy",
+    privacyEmail: "privacy@placer.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
 };
 
 // Broker categories for organization
@@ -751,29 +1591,70 @@ export const BROKER_CATEGORIES = {
     "TRUEPEOPLESEARCH", "RADARIS", "FASTPEOPLESEARCH", "USSEARCH", "PIPL",
     "INSTANTCHECKMATE", "PEOPLELOOKER", "PEOPLEFINDERS", "THATSTHEM",
     "PUBLICRECORDSNOW", "FAMILYTREENOW", "MYLIFE", "CLUSTRMAPS", "ADDRESSES",
-    "ADVANCED_PEOPLE_SEARCH"
+    "ADVANCED_PEOPLE_SEARCH", "ZABASEARCH", "PEEKYOU", "BEEN_VERIFIED_PEOPLE",
+    "PUBLICRECORDS360", "PERSOPO", "SMARTBACKGROUNDCHECKS", "LOCATEFAMILY",
+    "PEOPLEWISE", "PEOPLESEARCHNOW", "PEOPLEBYNAME", "VIRTORY", "VERICORA",
+    "GLADIKNOW", "IDENTITYPI", "QUICKPEOPLETRACE"
   ],
   BACKGROUND_CHECK: [
     "TRUTHFINDER", "CHECKPEOPLE", "CYBERBACKGROUNDCHECKS", "PUBLICDATACHECK",
     "SEARCHPEOPLEFREE", "FREEPEOPLESEARCH", "SEARCHQUARRY"
   ],
+  COURT_RECORDS: [
+    "JUDYRECORDS", "UNICOURT", "COURTRECORDS_ORG", "ARRESTFACTS",
+    "CRIMINALSEARCHES", "MUGSHOTS_COM", "INSTANTARREST", "PUBLICPOLICERECORD"
+  ],
   PHONE_LOOKUP: [
     "ANYWHO", "YELLOWPAGES", "INFOSPACE", "NUWBER", "REVERSEPHONELOOKUP",
-    "SPYDIALER", "CALLTRUTH", "USPHONEBOOK"
+    "SPYDIALER", "CALLTRUTH", "USPHONEBOOK", "WHITEPAGES_PREMIUM",
+    "PHONEBOOKS_COM", "ADDRESSES_COM", "PHONELOOKUP", "PHONEOWNER",
+    "SYNC_ME", "HIYA", "TRUECALLER", "MR_NUMBER", "CALLERIDTEST", "OLDPHONEBOOK"
   ],
   PROPERTY_RECORDS: [
-    "NEIGHBOR_WHO", "HOMEMETRY", "BLOCKSHOPPER", "OWNERLY", "REHOLD"
+    "NEIGHBOR_WHO", "HOMEMETRY", "BLOCKSHOPPER", "OWNERLY", "REHOLD",
+    "PROPERTYSHARK", "ZILLOW", "REDFIN", "REALTOR_COM", "TRULIA",
+    "HOUSEVALUES", "ADDRESSREPORT", "LANDWATCH"
   ],
   EMAIL_IDENTITY: [
     "VOTERRECORDS", "EMAILSHERLOCK", "EMAILFINDER", "HUNTER_IO"
   ],
   PROFESSIONAL_B2B: [
     "ZOOMINFO", "LUSHA", "APOLLO", "ROCKETREACH", "LEADIQ", "COGNISM",
-    "CLEARBIT", "FULLCONTACT"
+    "CLEARBIT", "FULLCONTACT", "SEAMLESS_AI", "DATANYZE", "UPLEAD",
+    "SNOV_IO", "FINDTHATLEADS", "VOILANORBERT", "ADAPT_IO", "CONTACTOUT",
+    "SIGNALHIRE", "WIZA", "OVERLOOP", "SALESLOFT", "AEROLEADS", "GETPROSPECT"
   ],
   MARKETING: [
     "ACXIOM", "ORACLE_DATACLOUD", "EPSILON", "EXPERIAN_MARKETING",
-    "EQUIFAX_MARKETING", "LEXISNEXIS"
+    "EQUIFAX_MARKETING", "LEXISNEXIS", "LIVERAMP", "TAPAD", "NEUSTAR",
+    "NIELSEN", "LOTAME", "DATALOGIX", "BLUEKAI", "INFOGROUP",
+    "TRANSUNION", "COMSCORE"
+  ],
+  DATING_RELATIONSHIP: [
+    "DATING_BACKGROUND", "MATCHDOTCOM_LOOKUP", "DATESEARCHSITE", "ROMANCESCAMS"
+  ],
+  FINANCIAL: [
+    "EXPERIAN_CONSUMER", "EQUIFAX_CONSUMER", "TRANSUNION_CONSUMER",
+    "CHEXSYSTEMS", "INNOVIS", "NCTUE", "SAGESTREAM"
+  ],
+  VEHICLE_DRIVING: [
+    "VEHICLEHISTORY", "CARFAX", "AUTOCHECK", "DRIVINGRECORDS"
+  ],
+  GENEALOGY: [
+    "ANCESTRY", "MYHERITAGE", "FINDAGRAVE", "BILLIONGRAVES",
+    "ARCHIVES_COM", "GENEALOGYBANK", "NEWSPAPERS_COM"
+  ],
+  INTERNATIONAL: [
+    "CANADA411", "UK_192", "INFOBEL", "YASNI", "WEBMII", "PIPL_UK", "FOREBEARS"
+  ],
+  EDUCATIONAL: [
+    "NATIONAL_STUDENT_CLEARINGHOUSE", "VERIFYED", "LICENSE_LOOKUP"
+  ],
+  HEALTHCARE: [
+    "HEALTHGRADES", "VITALS", "ZOCDOC", "DOXIMITY", "NPPES"
+  ],
+  LOCATION_TRACKING: [
+    "FOURSQUARE", "SAFEGRAPH", "MOBILEWALLA", "XMODE", "GRAVY_ANALYTICS", "PLACER_AI"
   ],
   BREACH_DATABASE: [
     "HAVEIBEENPWNED", "DEHASHED", "LEAKCHECK", "SNUSBASE"

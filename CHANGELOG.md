@@ -16,6 +16,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.11.0] - 2026-01-23
+
+### Added
+- **Expanded Data Broker Directory to 216+ Sources**
+  - Added 115 new data brokers across multiple categories
+  - New categories: Court Records, Dating/Relationship, Financial, Vehicle/Driving, Genealogy, International, Educational, Healthcare, Location Tracking
+  - People Search: +15 brokers (ZabaSearch, PeekYou, Persopo, etc.)
+  - Court Records: +8 brokers (JudyRecords, UniCourt, Mugshots.com, etc.)
+  - Phone Lookup: +11 brokers (Truecaller, Hiya, Sync.ME, etc.)
+  - Property Records: +8 brokers (Zillow, Redfin, PropertyShark, etc.)
+  - Professional B2B: +14 brokers (Seamless.AI, ContactOut, SignalHire, etc.)
+  - Marketing: +10 brokers (LiveRamp, Nielsen, Lotame, etc.)
+  - Financial: +7 brokers (ChexSystems, Innovis, SageStream, etc.)
+  - Genealogy: +7 brokers (Ancestry, MyHeritage, FindAGrave, etc.)
+  - International: +7 brokers (Canada411, 192.com UK, Yasni, etc.)
+  - Healthcare: +5 brokers (Healthgrades, Zocdoc, Doximity, etc.)
+  - Location Tracking: +6 brokers (SafeGraph, Mobilewalla, Placer.ai, etc.)
+  - Vehicle/Driving: +4 brokers (CARFAX, AutoCheck, etc.)
+  - Dating: +4 brokers
+  - Educational: +3 brokers
+
+---
+
 ## [1.10.0] - 2026-01-23
 
 ### Added
