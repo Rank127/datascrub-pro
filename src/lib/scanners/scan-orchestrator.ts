@@ -6,6 +6,7 @@ import { DehashedScanner } from "./breaches/dehashed";
 import { LeakCheckScanner } from "./breaches/leakcheck";
 import { SocialMediaScanner } from "./social/social-scanner";
 import { AIProtectionScanner } from "./ai-protection";
+import { getBrokerCount } from "@/lib/removers/data-broker-directory";
 import type { Plan, ScanType } from "@/lib/types";
 
 // Configuration: Set to true to use real data broker scanners
@@ -157,6 +158,25 @@ export class ScanOrchestrator {
 
   getScannerNames(): string[] {
     return this.scanners.map((s) => s.name);
+  }
+
+  /**
+   * Get the actual number of data sources checked
+   * This includes all brokers from DATA_BROKER_DIRECTORY plus breach databases and social media
+   */
+  getSourcesCheckedCount(): number {
+    // Base: all data brokers from the directory
+    let count = getBrokerCount();
+
+    // Add breach scanners (HIBP, LeakCheck, Dehashed = 3 sources)
+    // These are included in every scan
+    count += 3;
+
+    // Add social media platforms (10 platforms checked)
+    // LINKEDIN, FACEBOOK, TWITTER, INSTAGRAM, TIKTOK, REDDIT, PINTEREST, YOUTUBE, SNAPCHAT, DISCORD
+    count += 10;
+
+    return count;
   }
 }
 

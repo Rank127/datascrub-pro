@@ -221,7 +221,7 @@ export async function POST(request: Request) {
         status: "COMPLETED",
         completedAt: new Date(),
         exposuresFound: exposures.length,
-        sourcesChecked: orchestrator.getScannerCount(),
+        sourcesChecked: orchestrator.getSourcesCheckedCount(),
         progress: 100,
       },
     });
@@ -253,7 +253,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       scanId: scan.id,
       exposuresFound: exposures.length,
-      sourcesChecked: orchestrator.getScannerCount(),
+      sourcesChecked: orchestrator.getSourcesCheckedCount(),
       status: "COMPLETED",
     });
   } catch (error) {
