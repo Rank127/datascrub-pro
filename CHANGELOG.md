@@ -16,6 +16,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.17.0] - 2026-01-23
+
+### Added
+- **Dark Web Monitoring Expansion - 80 Additional Sources**
+  - Total dark web monitoring sources: 365
+  - Total source directory: 780+ sources across 67 categories
+  - New monitoring categories:
+    - Mobile Device Leaks: 10 sources (iCloud, WhatsApp, Telegram, Signal backups)
+    - E-commerce & Retail Fraud: 10 sources (Amazon, PayPal, Venmo, Cash App, Stripe)
+    - Travel & Hospitality: 10 sources (Airline miles, Airbnb, Uber, DoorDash)
+    - Education & Academic: 10 sources (Student records, .edu emails, LMS platforms)
+    - IoT & Smart Devices: 10 sources (Ring, Nest, Alexa, smart locks, IP cameras)
+    - Automotive & Vehicle: 10 sources (Tesla, OnStar, connected cars, GPS trackers)
+    - Financial & Banking: 10 sources (Major banks, crypto exchanges, Robinhood)
+    - Dating & Adult Sites: 10 sources (Tinder, Bumble, OnlyFans, Ashley Madison)
+- **67 total source categories** for comprehensive threat monitoring
+
+---
+
 ## [1.16.0] - 2026-01-23
 
 ### Added

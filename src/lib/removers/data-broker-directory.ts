@@ -5251,6 +5251,518 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     estimatedDays: 1,
     notes: "Google Cloud storage leaks",
   },
+
+  // ==========================================
+  // MOBILE DEVICE DATA LEAKS
+  // ==========================================
+  IMEI_DATABASE_MONITOR: {
+    name: "IMEI Database Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Mobile device IMEI leak monitoring",
+  },
+  PHONE_BACKUP_MONITOR: {
+    name: "Phone Backup Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cloud phone backup exposure",
+  },
+  ICLOUD_BREACH_MONITOR: {
+    name: "iCloud Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Apple iCloud data leaks",
+  },
+  GOOGLE_ACCOUNT_MONITOR: {
+    name: "Google Account Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Google account credential leaks",
+  },
+  SAMSUNG_ACCOUNT_MONITOR: {
+    name: "Samsung Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Samsung account data exposure",
+  },
+  WHATSAPP_BACKUP_MONITOR: {
+    name: "WhatsApp Backup Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "WhatsApp cloud backup leaks",
+  },
+  TELEGRAM_DATA_MONITOR: {
+    name: "Telegram Data Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Telegram account data exposure",
+  },
+  SIGNAL_LEAK_MONITOR: {
+    name: "Signal Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Signal app data exposure",
+  },
+  VIBER_DATA_MONITOR: {
+    name: "Viber Data Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Viber account leak monitoring",
+  },
+  LINE_APP_MONITOR: {
+    name: "LINE App Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "LINE messenger data leaks",
+  },
+
+  // ==========================================
+  // E-COMMERCE & RETAIL FRAUD
+  // ==========================================
+  AMAZON_ACCOUNT_FRAUD: {
+    name: "Amazon Account Fraud Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Amazon account marketplace",
+  },
+  EBAY_ACCOUNT_MONITOR: {
+    name: "eBay Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "eBay account theft monitoring",
+  },
+  PAYPAL_ACCOUNT_MARKET: {
+    name: "PayPal Account Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "PayPal credential marketplace",
+  },
+  VENMO_ACCOUNT_MONITOR: {
+    name: "Venmo Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Venmo account trading",
+  },
+  CASHAPP_ACCOUNT_MONITOR: {
+    name: "Cash App Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cash App credential leaks",
+  },
+  ZELLE_FRAUD_MONITOR: {
+    name: "Zelle Fraud Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Zelle payment fraud monitoring",
+  },
+  SHOPIFY_STORE_MONITOR: {
+    name: "Shopify Store Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Shopify store credential leaks",
+  },
+  STRIPE_ACCOUNT_MONITOR: {
+    name: "Stripe Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Stripe payment credential leaks",
+  },
+  WALMART_ACCOUNT_MONITOR: {
+    name: "Walmart Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Walmart account marketplace",
+  },
+  TARGET_ACCOUNT_MONITOR: {
+    name: "Target Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Target account credential leaks",
+  },
+
+  // ==========================================
+  // TRAVEL & HOSPITALITY FRAUD
+  // ==========================================
+  AIRLINE_MILES_MONITOR: {
+    name: "Airline Miles Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Frequent flyer account theft",
+  },
+  HOTEL_POINTS_MONITOR: {
+    name: "Hotel Points Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Hotel loyalty point fraud",
+  },
+  AIRBNB_ACCOUNT_MONITOR: {
+    name: "Airbnb Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Airbnb account marketplace",
+  },
+  UBER_ACCOUNT_MONITOR: {
+    name: "Uber Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Uber account trading",
+  },
+  LYFT_ACCOUNT_MONITOR: {
+    name: "Lyft Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Lyft account marketplace",
+  },
+  DOORDASH_ACCOUNT_MONITOR: {
+    name: "DoorDash Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "DoorDash account leaks",
+  },
+  UBEREATS_ACCOUNT_MONITOR: {
+    name: "UberEats Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "UberEats account trading",
+  },
+  GRUBHUB_ACCOUNT_MONITOR: {
+    name: "Grubhub Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Grubhub credential marketplace",
+  },
+  BOOKING_COM_MONITOR: {
+    name: "Booking.com Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Booking.com account leaks",
+  },
+  EXPEDIA_ACCOUNT_MONITOR: {
+    name: "Expedia Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Expedia account trading",
+  },
+
+  // ==========================================
+  // EDUCATION & ACADEMIC DATA
+  // ==========================================
+  STUDENT_RECORDS_MONITOR: {
+    name: "Student Records Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Student record data leaks",
+  },
+  UNIVERSITY_BREACH_MONITOR: {
+    name: "University Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "University data breach monitoring",
+  },
+  EDU_EMAIL_MARKET: {
+    name: ".edu Email Market",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Educational email marketplace",
+  },
+  STUDENT_LOAN_MONITOR: {
+    name: "Student Loan Data Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Student loan data exposure",
+  },
+  SCHOLARSHIP_FRAUD_MONITOR: {
+    name: "Scholarship Fraud Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Scholarship application fraud",
+  },
+  LMS_BREACH_MONITOR: {
+    name: "LMS Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Learning management system breaches",
+  },
+  CANVAS_LEAK_MONITOR: {
+    name: "Canvas LMS Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Canvas platform data leaks",
+  },
+  BLACKBOARD_LEAK_MONITOR: {
+    name: "Blackboard Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Blackboard platform exposure",
+  },
+  COURSERA_ACCOUNT_MONITOR: {
+    name: "Coursera Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Coursera account marketplace",
+  },
+  UDEMY_ACCOUNT_MONITOR: {
+    name: "Udemy Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Udemy account trading",
+  },
+
+  // ==========================================
+  // IOT & SMART DEVICE VULNERABILITIES
+  // ==========================================
+  SMART_HOME_MONITOR: {
+    name: "Smart Home Device Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Smart home device exposure",
+  },
+  RING_CAMERA_MONITOR: {
+    name: "Ring Camera Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Ring doorbell credential leaks",
+  },
+  NEST_ACCOUNT_MONITOR: {
+    name: "Nest Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Google Nest device exposure",
+  },
+  WYZE_BREACH_MONITOR: {
+    name: "Wyze Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Wyze camera data leaks",
+  },
+  ALEXA_DATA_MONITOR: {
+    name: "Alexa Data Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Amazon Alexa data exposure",
+  },
+  SMART_TV_MONITOR: {
+    name: "Smart TV Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Smart TV data leaks",
+  },
+  ROUTER_VULN_MONITOR: {
+    name: "Router Vulnerability Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Home router credential leaks",
+  },
+  IP_CAMERA_MONITOR: {
+    name: "IP Camera Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "IP camera feed exposure",
+  },
+  BABY_MONITOR_LEAK: {
+    name: "Baby Monitor Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Baby monitor data exposure",
+  },
+  SMART_LOCK_MONITOR: {
+    name: "Smart Lock Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Smart lock credential leaks",
+  },
+
+  // ==========================================
+  // AUTOMOTIVE & VEHICLE DATA
+  // ==========================================
+  TESLA_ACCOUNT_MONITOR: {
+    name: "Tesla Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Tesla account credential leaks",
+  },
+  CONNECTED_CAR_MONITOR: {
+    name: "Connected Car Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Connected vehicle data exposure",
+  },
+  ONSTAR_DATA_MONITOR: {
+    name: "OnStar Data Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "GM OnStar data leaks",
+  },
+  UCONNECT_MONITOR: {
+    name: "Uconnect Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Chrysler Uconnect data exposure",
+  },
+  FORD_SYNC_MONITOR: {
+    name: "Ford SYNC Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Ford SYNC system data leaks",
+  },
+  VIN_DATABASE_MONITOR: {
+    name: "VIN Database Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Vehicle identification number leaks",
+  },
+  GPS_TRACKER_MONITOR: {
+    name: "GPS Tracker Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Vehicle GPS tracker data exposure",
+  },
+  FLEET_MANAGEMENT_MONITOR: {
+    name: "Fleet Management Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Fleet management system leaks",
+  },
+  OBD_DATA_MONITOR: {
+    name: "OBD Data Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "OBD-II diagnostic data leaks",
+  },
+  EV_CHARGING_MONITOR: {
+    name: "EV Charging Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "EV charging network data leaks",
+  },
+
+  // ==========================================
+  // FINANCIAL SERVICES & BANKING
+  // ==========================================
+  BANK_OF_AMERICA_MONITOR: {
+    name: "Bank of America Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "BofA account credential leaks",
+  },
+  CHASE_ACCOUNT_MONITOR: {
+    name: "Chase Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Chase bank account leaks",
+  },
+  WELLS_FARGO_MONITOR: {
+    name: "Wells Fargo Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Wells Fargo credential leaks",
+  },
+  CITI_ACCOUNT_MONITOR: {
+    name: "Citibank Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Citibank account exposure",
+  },
+  CAPITAL_ONE_MONITOR: {
+    name: "Capital One Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Capital One credential leaks",
+  },
+  CRYPTO_EXCHANGE_MONITOR: {
+    name: "Crypto Exchange Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cryptocurrency exchange leaks",
+  },
+  BINANCE_ACCOUNT_MONITOR: {
+    name: "Binance Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Binance account credential leaks",
+  },
+  KRAKEN_ACCOUNT_MONITOR: {
+    name: "Kraken Account Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Kraken exchange account leaks",
+  },
+  ROBINHOOD_MONITOR: {
+    name: "Robinhood Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Robinhood account exposure",
+  },
+  FIDELITY_MONITOR: {
+    name: "Fidelity Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Fidelity account leaks",
+  },
+
+  // ==========================================
+  // DATING & ADULT SITE LEAKS
+  // ==========================================
+  TINDER_DATA_MONITOR: {
+    name: "Tinder Data Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Tinder user data leaks",
+  },
+  BUMBLE_DATA_MONITOR: {
+    name: "Bumble Data Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Bumble user data exposure",
+  },
+  HINGE_DATA_MONITOR: {
+    name: "Hinge Data Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Hinge profile data leaks",
+  },
+  GRINDR_DATA_MONITOR: {
+    name: "Grindr Data Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Grindr user data exposure",
+  },
+  ASHLEY_MADISON_MONITOR: {
+    name: "Ashley Madison Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Ashley Madison breach monitoring",
+  },
+  ADULT_SITE_MONITOR: {
+    name: "Adult Site Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Adult website data leaks",
+  },
+  ONLYFANS_LEAK_MONITOR: {
+    name: "OnlyFans Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "OnlyFans creator data leaks",
+  },
+  DATING_APP_GENERAL: {
+    name: "Dating App General Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "General dating app data leaks",
+  },
+  FETLIFE_MONITOR: {
+    name: "FetLife Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "FetLife data exposure",
+  },
+  SEEKING_ARRANGEMENT_MONITOR: {
+    name: "Seeking Arrangement Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Seeking Arrangement leaks",
+  },
 };
 
 // Broker categories for organization
@@ -5555,6 +6067,54 @@ export const BROKER_CATEGORIES = {
     "JIRA_LEAK_MONITOR", "SLACK_LEAK_MONITOR", "GITHUB_SECRET_MONITOR",
     "GITLAB_LEAK_MONITOR", "S3_BUCKET_MONITOR", "AZURE_BLOB_MONITOR",
     "GCP_BUCKET_MONITOR"
+  ],
+  MOBILE_DEVICE_LEAKS: [
+    "IMEI_DATABASE_MONITOR", "PHONE_BACKUP_MONITOR", "ICLOUD_BREACH_MONITOR",
+    "GOOGLE_ACCOUNT_MONITOR", "SAMSUNG_ACCOUNT_MONITOR", "WHATSAPP_BACKUP_MONITOR",
+    "TELEGRAM_DATA_MONITOR", "SIGNAL_LEAK_MONITOR", "VIBER_DATA_MONITOR",
+    "LINE_APP_MONITOR"
+  ],
+  ECOMMERCE_RETAIL_FRAUD: [
+    "AMAZON_ACCOUNT_FRAUD", "EBAY_ACCOUNT_MONITOR", "PAYPAL_ACCOUNT_MARKET",
+    "VENMO_ACCOUNT_MONITOR", "CASHAPP_ACCOUNT_MONITOR", "ZELLE_FRAUD_MONITOR",
+    "SHOPIFY_STORE_MONITOR", "STRIPE_ACCOUNT_MONITOR", "WALMART_ACCOUNT_MONITOR",
+    "TARGET_ACCOUNT_MONITOR"
+  ],
+  TRAVEL_HOSPITALITY_FRAUD: [
+    "AIRLINE_MILES_MONITOR", "HOTEL_POINTS_MONITOR", "AIRBNB_ACCOUNT_MONITOR",
+    "UBER_ACCOUNT_MONITOR", "LYFT_ACCOUNT_MONITOR", "DOORDASH_ACCOUNT_MONITOR",
+    "UBEREATS_ACCOUNT_MONITOR", "GRUBHUB_ACCOUNT_MONITOR", "BOOKING_COM_MONITOR",
+    "EXPEDIA_ACCOUNT_MONITOR"
+  ],
+  EDUCATION_ACADEMIC_LEAKS: [
+    "STUDENT_RECORDS_MONITOR", "UNIVERSITY_BREACH_MONITOR", "EDU_EMAIL_MARKET",
+    "STUDENT_LOAN_MONITOR", "SCHOLARSHIP_FRAUD_MONITOR", "LMS_BREACH_MONITOR",
+    "CANVAS_LEAK_MONITOR", "BLACKBOARD_LEAK_MONITOR", "COURSERA_ACCOUNT_MONITOR",
+    "UDEMY_ACCOUNT_MONITOR"
+  ],
+  IOT_SMART_DEVICE_LEAKS: [
+    "SMART_HOME_MONITOR", "RING_CAMERA_MONITOR", "NEST_ACCOUNT_MONITOR",
+    "WYZE_BREACH_MONITOR", "ALEXA_DATA_MONITOR", "SMART_TV_MONITOR",
+    "ROUTER_VULN_MONITOR", "IP_CAMERA_MONITOR", "BABY_MONITOR_LEAK",
+    "SMART_LOCK_MONITOR"
+  ],
+  AUTOMOTIVE_VEHICLE_DATA: [
+    "TESLA_ACCOUNT_MONITOR", "CONNECTED_CAR_MONITOR", "ONSTAR_DATA_MONITOR",
+    "UCONNECT_MONITOR", "FORD_SYNC_MONITOR", "VIN_DATABASE_MONITOR",
+    "GPS_TRACKER_MONITOR", "FLEET_MANAGEMENT_MONITOR", "OBD_DATA_MONITOR",
+    "EV_CHARGING_MONITOR"
+  ],
+  FINANCIAL_BANKING_LEAKS: [
+    "BANK_OF_AMERICA_MONITOR", "CHASE_ACCOUNT_MONITOR", "WELLS_FARGO_MONITOR",
+    "CITI_ACCOUNT_MONITOR", "CAPITAL_ONE_MONITOR", "CRYPTO_EXCHANGE_MONITOR",
+    "BINANCE_ACCOUNT_MONITOR", "KRAKEN_ACCOUNT_MONITOR", "ROBINHOOD_MONITOR",
+    "FIDELITY_MONITOR"
+  ],
+  DATING_ADULT_SITE_LEAKS: [
+    "TINDER_DATA_MONITOR", "BUMBLE_DATA_MONITOR", "HINGE_DATA_MONITOR",
+    "GRINDR_DATA_MONITOR", "ASHLEY_MADISON_MONITOR", "ADULT_SITE_MONITOR",
+    "ONLYFANS_LEAK_MONITOR", "DATING_APP_GENERAL", "FETLIFE_MONITOR",
+    "SEEKING_ARRANGEMENT_MONITOR"
   ],
 } as const;
 
