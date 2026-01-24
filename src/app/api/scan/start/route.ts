@@ -250,16 +250,13 @@ export async function POST(request: Request) {
       });
     }
 
-    // HARDCODED TEST - if you see 8888, the new code is deployed
-    const sourcesChecked = 8888;
-    console.log(`[Scan API] HARDCODED 8888 TEST`);
+    const sourcesChecked = orchestrator.getSourcesCheckedCount();
 
     return NextResponse.json({
       scanId: scan.id,
       exposuresFound: exposures.length,
       sourcesChecked,
       status: "COMPLETED",
-      _test: "NEW_CODE_DEPLOYED_V2",
     });
   } catch (error) {
     console.error("Scan error:", error);

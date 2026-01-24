@@ -165,9 +165,15 @@ export class ScanOrchestrator {
    * This includes all brokers from DATA_BROKER_DIRECTORY plus breach databases and social media
    */
   getSourcesCheckedCount(): number {
-    // HARDCODED FOR DEBUG - should show 9999 if deployment is working
-    console.log(`[ScanOrchestrator] HARDCODED TEST - returning 9999`);
-    return 9999;
+    // Base: all data brokers from the directory
+    const brokerCount = getBrokerCount();
+
+    // Add breach scanners (HIBP, LeakCheck, Dehashed = 3 sources)
+    // Add social media platforms (10 platforms checked)
+    const total = brokerCount + 3 + 10;
+
+    console.log(`[ScanOrchestrator] Sources: ${brokerCount} brokers + 3 breach + 10 social = ${total}`);
+    return total;
   }
 }
 
