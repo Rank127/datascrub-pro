@@ -32,7 +32,7 @@ import type { DataSource, Severity, ExposureStatus, ExposureType } from "@/lib/t
 
 // AI Protection source categories
 const AI_TRAINING_SOURCES = [
-  "LAION_AI", "STABILITY_AI", "OPENAI", "MIDJOURNEY", "META_AI",
+  "SPAWNING_AI", "LAION_AI", "STABILITY_AI", "OPENAI", "MIDJOURNEY", "META_AI",
   "GOOGLE_AI", "LINKEDIN_AI", "ADOBE_AI", "AMAZON_AI"
 ];
 const FACIAL_RECOGNITION_SOURCES = [
@@ -77,7 +77,8 @@ interface AIProtectionData {
 // AI Service info for display
 const AI_SERVICES = {
   // AI Training
-  LAION_AI: { name: "LAION AI Dataset", description: "Check if your images are in LAION-5B used for Stable Diffusion", icon: Bot, color: "blue" },
+  SPAWNING_AI: { name: "Spawning AI (Do Not Train)", description: "Universal Do-Not-Train registry honored by major AI companies", icon: Bot, color: "blue" },
+  LAION_AI: { name: "LAION AI Dataset", description: "Request removal from LAION-5B dataset", icon: Bot, color: "blue" },
   STABILITY_AI: { name: "Stability AI", description: "Opt out of Stable Diffusion training", icon: Bot, color: "blue" },
   OPENAI: { name: "OpenAI", description: "Request data deletion from OpenAI models", icon: Bot, color: "blue" },
   MIDJOURNEY: { name: "Midjourney", description: "Opt out of Midjourney image training", icon: Bot, color: "blue" },

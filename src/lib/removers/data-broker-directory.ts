@@ -601,10 +601,20 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   STABILITY_AI: {
     name: "Stability AI",
     optOutUrl: "https://stability.ai/opt-out",
+    optOutEmail: "legal@stability.ai",
     privacyEmail: "legal@stability.ai",
-    removalMethod: "BOTH",
+    removalMethod: "EMAIL",
     estimatedDays: 45,
     notes: "Opt out of Stable Diffusion training - honors Spawning Do Not Train registry",
+  },
+  SPAWNING_AI: {
+    name: "Spawning AI (Do Not Train Registry)",
+    optOutUrl: "https://spawning.ai/",
+    optOutEmail: "info@spawning.ai",
+    privacyEmail: "info@spawning.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+    notes: "Register for Do-Not-Train registry - honored by Stability AI, LAION, and other AI training providers",
   },
   OPENAI: {
     name: "OpenAI",

@@ -54,6 +54,7 @@ export const DataSource = {
   PINTEREST: "PINTEREST",
   YOUTUBE: "YOUTUBE",
   // AI Training Datasets
+  SPAWNING_AI: "SPAWNING_AI",
   LAION_AI: "LAION_AI",
   STABILITY_AI: "STABILITY_AI",
   OPENAI: "OPENAI",
@@ -239,6 +240,7 @@ export const DataSourceNames: Record<DataSource, string> = {
   PINTEREST: "Pinterest",
   YOUTUBE: "YouTube",
   // AI Training Datasets
+  SPAWNING_AI: "Spawning AI (Do Not Train)",
   LAION_AI: "LAION AI Dataset",
   STABILITY_AI: "Stability AI",
   OPENAI: "OpenAI",
