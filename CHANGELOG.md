@@ -16,6 +16,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.13.0] - 2026-01-23
+
+### Added
+- **Expanded Data Broker Directory to 405+ Sources**
+  - Added 95 more data brokers across multiple categories
+  - New categories: Tenant/Rental Screening, Employment/HR Data, Data Enrichment
+  - People Search: +20 brokers (IDTrue, RecordsFinder, PersonSearch, state voter records, etc.)
+  - Phone Lookup: +13 brokers (Showcaller, Eyecon, GetContact, CarrierLookup, etc.)
+  - Background Check: +5 brokers (First Advantage, IntelliCorp, InfoMart, etc.)
+  - B2B/Sales Intelligence: +10 brokers (Leadfeeder, Demandbase, 6sense, Dun & Bradstreet, etc.)
+  - AdTech/Marketing: +15 brokers (MediaMath, AdRoll, Quantcast, TripleLift, TowerData, etc.)
+  - Real Estate: +8 brokers (RE/MAX, Century 21, Coldwell Banker, Keller Williams, etc.)
+  - International: +17 brokers (Sweden, Denmark, Norway, Brazil, Mexico, India, etc.)
+  - Tenant Screening: +5 brokers (RentBureau, RealPage, TransUnion Rental, etc.)
+  - Employment/HR: +6 brokers (The Work Number, HireRight, Checkr, Sterling, etc.)
+  - Dating/Social: +5 brokers (Bumble, Hinge, OkCupid, Tinder lookups, etc.)
+  - Data Enrichment: +5 brokers (People Data Labs, Coresignal, Proxycurl, Diffbot, etc.)
+- **26 total broker categories** for comprehensive privacy protection
+
+---
+
 ## [1.12.0] - 2026-01-23
 
 ### Added
