@@ -484,6 +484,61 @@ model RemovalRequest {
 
 ---
 
+## Manual Action Tracking
+
+Some exposures require manual user intervention (social media account deletion, certain data brokers with complex forms). The system tracks these separately.
+
+### How It Works
+
+1. **Detection**: When a removal method is `MANUAL_GUIDE` or `REQUIRES_MANUAL`, the exposure is flagged:
+   ```typescript
+   requiresManualAction: true
+   ```
+
+2. **Dashboard Stats**: Manual action progress is displayed across all dashboard pages:
+   - Dashboard: "Manual Actions" card showing done/total
+   - Exposures: Filter dropdown + stats card
+   - Removals: Stats card showing pending manual actions
+
+3. **User Actions**: Users can mark manual actions as complete:
+   - Click "Mark Done" button on exposure card
+   - System records: `manualActionTaken: true`, `manualActionTakenAt: timestamp`
+   - Can undo with "Undo" button if needed
+
+### Database Fields
+
+```prisma
+model Exposure {
+  // ... existing fields ...
+
+  requiresManualAction  Boolean   @default(false)  // Needs user intervention
+  manualActionTaken     Boolean   @default(false)  // User completed action
+  manualActionTakenAt   DateTime?                  // When action was taken
+}
+```
+
+### Filter Options
+
+On `/dashboard/exposures`, users can filter by manual action status:
+
+| Filter | Shows |
+|--------|-------|
+| All | All exposures |
+| Requires Action | `requiresManualAction = true` |
+| Action Pending | `requiresManualAction = true` AND `manualActionTaken = false` |
+| Action Done | `requiresManualAction = true` AND `manualActionTaken = true` |
+
+### Opt-Out URL Priority
+
+For manual action exposures, the system prioritizes URLs in this order:
+1. **Opt-out URL** - Direct link to removal form
+2. **Privacy email** - `mailto:` link for email-based removal
+3. **Search URL** - Fallback to where data was found
+
+This ensures users are directed to the most actionable link first.
+
+---
+
 ## Limitations
 
 1. **No Browser Automation**: Can't auto-fill web forms (would need Puppeteer/Playwright)

@@ -12,6 +12,10 @@ Personal data removal service that helps users find and remove their personal in
   - 2 breach databases (HaveIBeenPwned, LeakCheck)
   - 10 social media platforms
 - **Automated Removal**: Submit opt-out requests to data brokers automatically
+- **Manual Action Tracking**: Track and manage exposures requiring user intervention
+  - Filter by action status (pending, done)
+  - Mark actions as complete with one click
+  - Direct links to opt-out forms
 - **Breach Monitoring**: HaveIBeenPwned + LeakCheck API integration for breach detection
 - **Dark Web Monitoring**: Monitor dark web marketplaces and forums (Enterprise)
 - **Whitelist Management**: Keep accounts you want, remove the rest
@@ -148,9 +152,12 @@ git push origin master
 - `GET/PUT /api/profile` - User profile
 - `POST /api/scan/start` - Start scan
 - `GET /api/scan/status` - Scan status
-- `GET /api/exposures` - List exposures
+- `GET /api/exposures` - List exposures (with filters)
+- `PATCH /api/exposures` - Update exposure (whitelist, mark done)
 - `POST /api/whitelist` - Manage whitelist
 - `POST /api/removals/request` - Request removal
+- `GET /api/removals/status` - Removal request status
+- `GET /api/dashboard/stats` - Dashboard statistics
 - `GET /api/subscription` - Subscription info
 
 ### Webhooks

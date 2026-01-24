@@ -132,11 +132,15 @@ This UAT plan covers comprehensive testing of all user-facing features of GhostM
 | 1 | Login and view /dashboard | Dashboard loads | |
 | 2 | Verify welcome message | Shows user's first name | |
 | 3 | Verify risk score display | Circular score indicator visible | |
-| 4 | Verify stat cards | Active, Removed, Whitelisted counts | |
-| 5 | Verify removal progress | Progress bars display | |
-| 6 | Verify recent exposures | Exposure cards visible | |
-| 7 | Click "Start New Scan" | Navigates to /dashboard/scan | |
-| 8 | Click "View all" exposures | Navigates to /dashboard/exposures | |
+| 4 | Verify stat cards | 6 cards: Risk Score, Active, Submitted, Removed, Manual Actions, Whitelisted | |
+| 5 | Verify Submitted card | Shows total removal requests, purple icon | |
+| 6 | Verify Manual Actions card | Shows done/total count, amber icon | |
+| 7 | Verify removal progress | Progress bars display | |
+| 8 | Verify recent exposures | Exposure cards visible | |
+| 9 | Click "Start New Scan" | Navigates to /dashboard/scan | |
+| 10 | Click "View all" exposures | Navigates to /dashboard/exposures | |
+| 11 | Click Manual Actions card | Navigates to /dashboard/exposures?manualAction=pending | |
+| 12 | Click Submitted card | Navigates to /dashboard/removals | |
 
 #### TC-D02: Sidebar Navigation
 | Step | Action | Expected Result | Pass/Fail |
@@ -324,6 +328,40 @@ This UAT plan covers comprehensive testing of all user-facing features of GhostM
 | 1 | Find exposure with URL | Card with link icon | |
 | 2 | Click external link | Opens in new tab | |
 | 3 | Verify URL correct | Matches source URL | |
+
+#### TC-E07: Manual Action Filter
+| Step | Action | Expected Result | Pass/Fail |
+|------|--------|-----------------|-----------|
+| 1 | Click Manual Action dropdown | Options appear | |
+| 2 | Select "Requires Action" | Only manual action items shown | |
+| 3 | Select "Action Pending" | Only pending manual actions shown | |
+| 4 | Select "Action Done" | Only completed manual actions shown | |
+| 5 | Select "All" | All exposures shown | |
+| 6 | Combine with Status filter | Both filters applied correctly | |
+
+#### TC-E08: Mark Manual Action Done
+| Step | Action | Expected Result | Pass/Fail |
+|------|--------|-----------------|-----------|
+| 1 | Find exposure requiring manual action | Card shows "Mark Done" button | |
+| 2 | Click "Mark Done" | Button changes to "Undo" | |
+| 3 | Verify stats update | Manual Actions card shows updated count | |
+| 4 | Filter by "Action Done" | Item appears in filtered list | |
+| 5 | Click "Undo" | Button changes back to "Mark Done" | |
+| 6 | Verify stats update | Count decreases by 1 | |
+
+#### TC-E09: Submitted for Removal Card
+| Step | Action | Expected Result | Pass/Fail |
+|------|--------|-----------------|-----------|
+| 1 | View stats cards on Exposures page | "Submitted" card visible (purple) | |
+| 2 | Request removal for exposure | Submitted count increases | |
+| 3 | Click Submitted card | Navigates to /dashboard/removals | |
+
+#### TC-E10: Opt-Out URL Priority
+| Step | Action | Expected Result | Pass/Fail |
+|------|--------|-----------------|-----------|
+| 1 | Find manual action exposure | External link visible | |
+| 2 | Click external link | Opens opt-out form (not search page) | |
+| 3 | Verify URL is actionable | Direct link to removal/privacy form | |
 
 ---
 

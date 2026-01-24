@@ -157,19 +157,21 @@ src/
        │               │ usernames (enc)  │              │
        │               └──────────────────┘              │
        │                                                 │
-       │  1:N    ┌──────────────┐                       │
-       ├────────▶│  Exposure    │◀──────────────────────┘
-       │         ├──────────────┤         1:N
-       │         │ id           │
-       │         │ userId       │       ┌──────────────────┐
-       │         │ scanId       │       │ RemovalRequest   │
-       │         │ source       │──────▶├──────────────────┤
-       │         │ dataType     │  1:1  │ id               │
-       │         │ severity     │       │ exposureId       │
-       │         │ status       │       │ status           │
-       │         │ isWhitelisted│       │ method           │
-       │         └──────────────┘       │ attempts         │
-       │                                └──────────────────┘
+       │  1:N    ┌──────────────────────┐                 │
+       ├────────▶│      Exposure        │◀────────────────┘
+       │         ├──────────────────────┤       1:N
+       │         │ id                   │
+       │         │ userId               │     ┌──────────────────┐
+       │         │ scanId               │     │ RemovalRequest   │
+       │         │ source               │────▶├──────────────────┤
+       │         │ dataType             │ 1:1 │ id               │
+       │         │ severity             │     │ exposureId       │
+       │         │ status               │     │ status           │
+       │         │ isWhitelisted        │     │ method           │
+       │         │ requiresManualAction │     │ attempts         │
+       │         │ manualActionTaken    │     └──────────────────┘
+       │         │ manualActionTakenAt  │
+       │         └──────────────────────┘
        │
        │  1:N    ┌──────────────┐
        ├────────▶│  Whitelist   │
