@@ -15,7 +15,8 @@ export async function GET(request: Request) {
     const status = searchParams.get("status");
     const severity = searchParams.get("severity");
     const source = searchParams.get("source");
-    const manualAction = searchParams.get("manualAction"); // "required", "pending", "done"
+    const manualAction = searchParams.get("manualAction"); // "required", "pending", "done", "all"
+    const excludeManual = searchParams.get("excludeManual") === "true"; // Exclude manual review items
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
 
@@ -35,8 +36,13 @@ export async function GET(request: Request) {
       where.source = source;
     }
 
-    // Filter by manual action status
-    if (manualAction === "required") {
+    // Exclude manual review items (for main exposures page)
+    if (excludeManual) {
+      where.requiresManualAction = false;
+    }
+
+    // Filter by manual action status (for manual review page)
+    if (manualAction === "required" || manualAction === "all") {
       where.requiresManualAction = true;
     } else if (manualAction === "pending") {
       where.requiresManualAction = true;
