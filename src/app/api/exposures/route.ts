@@ -15,6 +15,7 @@ export async function GET(request: Request) {
     const status = searchParams.get("status");
     const severity = searchParams.get("severity");
     const source = searchParams.get("source");
+    const manualAction = searchParams.get("manualAction"); // "required", "pending", "done"
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
 
@@ -32,6 +33,17 @@ export async function GET(request: Request) {
 
     if (source) {
       where.source = source;
+    }
+
+    // Filter by manual action status
+    if (manualAction === "required") {
+      where.requiresManualAction = true;
+    } else if (manualAction === "pending") {
+      where.requiresManualAction = true;
+      where.manualActionTaken = false;
+    } else if (manualAction === "done") {
+      where.requiresManualAction = true;
+      where.manualActionTaken = true;
     }
 
     const [exposures, total] = await Promise.all([
@@ -66,6 +78,17 @@ export async function GET(request: Request) {
       _count: true,
     });
 
+    // Get manual action stats
+    const manualActionStats = await prisma.exposure.aggregate({
+      where: { userId: session.user.id, requiresManualAction: true },
+      _count: true,
+    });
+
+    const manualActionDone = await prisma.exposure.aggregate({
+      where: { userId: session.user.id, requiresManualAction: true, manualActionTaken: true },
+      _count: true,
+    });
+
     return NextResponse.json({
       exposures,
       pagination: {
@@ -81,6 +104,11 @@ export async function GET(request: Request) {
         bySeverity: Object.fromEntries(
           severityStats.map((s) => [s.severity, s._count])
         ),
+        manualAction: {
+          total: manualActionStats._count,
+          done: manualActionDone._count,
+          pending: manualActionStats._count - manualActionDone._count,
+        },
       },
     });
   } catch (error) {
@@ -94,7 +122,7 @@ export async function GET(request: Request) {
 
 const updateSchema = z.object({
   exposureId: z.string(),
-  action: z.enum(["whitelist", "unwhitelist"]),
+  action: z.enum(["whitelist", "unwhitelist", "markDone", "markUndone"]),
 });
 
 export async function PATCH(request: Request) {
@@ -151,7 +179,7 @@ export async function PATCH(request: Request) {
           },
         }),
       ]);
-    } else {
+    } else if (action === "unwhitelist") {
       // Remove from whitelist
       await Promise.all([
         prisma.exposure.update({
@@ -169,6 +197,24 @@ export async function PATCH(request: Request) {
           },
         }),
       ]);
+    } else if (action === "markDone") {
+      // Mark manual action as taken
+      await prisma.exposure.update({
+        where: { id: exposureId },
+        data: {
+          manualActionTaken: true,
+          manualActionTakenAt: new Date(),
+        },
+      });
+    } else if (action === "markUndone") {
+      // Unmark manual action
+      await prisma.exposure.update({
+        where: { id: exposureId },
+        data: {
+          manualActionTaken: false,
+          manualActionTakenAt: null,
+        },
+      });
     }
 
     return NextResponse.json({ success: true });

@@ -191,6 +191,8 @@ export async function POST(request: Request) {
             severity: result.severity,
             status: "ACTIVE",
             isWhitelisted: false,
+            // Mark as requiring manual action if it's a check link (not auto-scraped)
+            requiresManualAction: result.rawData?.manualCheckRequired === true,
           },
         })
       )

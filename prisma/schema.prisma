@@ -135,6 +135,11 @@ model Exposure {
   status        String   @default("ACTIVE") // ACTIVE, REMOVAL_PENDING, REMOVAL_IN_PROGRESS, REMOVED, WHITELISTED
   isWhitelisted Boolean  @default(false)
 
+  // Manual action tracking (for exposures requiring user to manually opt out)
+  requiresManualAction  Boolean   @default(false)  // True if user must take manual action
+  manualActionTaken     Boolean   @default(false)  // True if user marked as done
+  manualActionTakenAt   DateTime?                  // When user marked as done
+
   firstFoundAt  DateTime @default(now())
   lastSeenAt    DateTime @default(now())
 
@@ -142,6 +147,7 @@ model Exposure {
 
   @@index([userId])
   @@index([scanId])
+  @@index([userId, requiresManualAction])
 }
 
 model Whitelist {

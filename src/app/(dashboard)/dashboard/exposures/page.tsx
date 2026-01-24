@@ -29,6 +29,7 @@ import {
   ChevronRight,
   Trash2,
   ShieldCheck,
+  HandHelping,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { DataSource, Severity, ExposureStatus } from "@/lib/types";
@@ -44,6 +45,9 @@ interface Exposure {
   status: ExposureStatus;
   isWhitelisted: boolean;
   firstFoundAt: string;
+  requiresManualAction: boolean;
+  manualActionTaken: boolean;
+  manualActionTakenAt: string | null;
   removalRequest?: {
     id: string;
     status: string;
@@ -54,6 +58,11 @@ interface Exposure {
 interface ExposureStats {
   byStatus: Record<string, number>;
   bySeverity: Record<string, number>;
+  manualAction: {
+    total: number;
+    done: number;
+    pending: number;
+  };
 }
 
 function ExposuresPageContent() {
@@ -72,6 +81,9 @@ function ExposuresPageContent() {
   );
   const [severityFilter, setSeverityFilter] = useState<string>(
     searchParams.get("severity") || "all"
+  );
+  const [manualActionFilter, setManualActionFilter] = useState<string>(
+    searchParams.get("manualAction") || "all"
   );
 
   // Get only actionable exposures (not already removed or whitelisted)
@@ -108,6 +120,7 @@ function ExposuresPageContent() {
       const params = new URLSearchParams({ page: page.toString() });
       if (statusFilter !== "all") params.set("status", statusFilter);
       if (severityFilter !== "all") params.set("severity", severityFilter);
+      if (manualActionFilter !== "all") params.set("manualAction", manualActionFilter);
 
       const response = await fetch(`/api/exposures?${params}`);
       if (response.ok) {
@@ -121,7 +134,7 @@ function ExposuresPageContent() {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, severityFilter]);
+  }, [page, statusFilter, severityFilter, manualActionFilter]);
 
   useEffect(() => {
     fetchExposures();
@@ -156,6 +169,40 @@ function ExposuresPageContent() {
       }
     } catch (error) {
       console.error("Failed to unwhitelist:", error);
+    }
+  };
+
+  const handleMarkDone = async (exposureId: string) => {
+    try {
+      const response = await fetch("/api/exposures", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exposureId, action: "markDone" }),
+      });
+
+      if (response.ok) {
+        toast.success("Marked as done");
+        fetchExposures();
+      }
+    } catch (error) {
+      console.error("Failed to mark as done:", error);
+      toast.error("Failed to mark as done");
+    }
+  };
+
+  const handleMarkUndone = async (exposureId: string) => {
+    try {
+      const response = await fetch("/api/exposures", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exposureId, action: "markUndone" }),
+      });
+
+      if (response.ok) {
+        fetchExposures();
+      }
+    } catch (error) {
+      console.error("Failed to mark as undone:", error);
     }
   };
 
@@ -274,7 +321,7 @@ function ExposuresPageContent() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card className="bg-slate-800/50 border-slate-700">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold text-white">{totalExposures}</div>
@@ -303,6 +350,17 @@ function ExposuresPageContent() {
               {stats?.byStatus?.REMOVED || 0}
             </div>
             <p className="text-sm text-slate-400">Removed</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-800/50 border-slate-700 border-amber-700/50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <HandHelping className="h-5 w-5 text-amber-400" />
+              <div className="text-2xl font-bold text-amber-400">
+                {stats?.manualAction?.done || 0}/{stats?.manualAction?.total || 0}
+              </div>
+            </div>
+            <p className="text-sm text-slate-400">Manual Actions Done</p>
           </CardContent>
         </Card>
       </div>
@@ -347,6 +405,20 @@ function ExposuresPageContent() {
                   <SelectItem value="HIGH">High</SelectItem>
                   <SelectItem value="MEDIUM">Medium</SelectItem>
                   <SelectItem value="LOW">Low</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-slate-500">Manual Action</label>
+              <Select value={manualActionFilter} onValueChange={setManualActionFilter}>
+                <SelectTrigger className="w-44 bg-slate-700/50 border-slate-600">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="all">All Exposures</SelectItem>
+                  <SelectItem value="required">Requires Action</SelectItem>
+                  <SelectItem value="pending">Action Pending</SelectItem>
+                  <SelectItem value="done">Action Done</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -428,7 +500,7 @@ function ExposuresPageContent() {
                 No exposures found
               </h3>
               <p className="text-slate-500 mt-1">
-                {statusFilter !== "all" || severityFilter !== "all"
+                {statusFilter !== "all" || severityFilter !== "all" || manualActionFilter !== "all"
                   ? "Try adjusting your filters"
                   : "Run a scan to find data exposures"}
               </p>
@@ -448,9 +520,13 @@ function ExposuresPageContent() {
                   status={exposure.status}
                   isWhitelisted={exposure.isWhitelisted}
                   firstFoundAt={new Date(exposure.firstFoundAt)}
+                  requiresManualAction={exposure.requiresManualAction}
+                  manualActionTaken={exposure.manualActionTaken}
                   onWhitelist={() => handleWhitelist(exposure.id)}
                   onUnwhitelist={() => handleUnwhitelist(exposure.id)}
                   onRemove={() => handleRemove(exposure.id)}
+                  onMarkDone={() => handleMarkDone(exposure.id)}
+                  onMarkUndone={() => handleMarkUndone(exposure.id)}
                   showCheckbox={true}
                   selected={selectedIds.has(exposure.id)}
                   onSelect={toggleSelect}
