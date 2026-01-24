@@ -12,6 +12,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Trash2,
   Loader2,
   CheckCircle,
@@ -23,6 +31,8 @@ import {
   ExternalLink,
   RefreshCw,
   HandHelping,
+  Camera,
+  Image as ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { DataSourceNames, type DataSource, type Severity } from "@/lib/types";
@@ -39,6 +49,13 @@ interface RemovalRequest {
   optOutUrl: string | null;
   optOutEmail: string | null;
   estimatedDays: number | null;
+  // Screenshot proof fields
+  beforeScreenshot: string | null;
+  beforeScreenshotAt: string | null;
+  afterScreenshot: string | null;
+  afterScreenshotAt: string | null;
+  formScreenshot: string | null;
+  formScreenshotAt: string | null;
   exposure: {
     id: string;
     source: DataSource;
@@ -47,6 +64,8 @@ interface RemovalRequest {
     dataType: string;
     dataPreview: string | null;
     severity: Severity;
+    proofScreenshot: string | null;
+    proofScreenshotAt: string | null;
   };
 }
 
@@ -97,6 +116,126 @@ interface ManualActionStats {
   total: number;
   done: number;
   pending: number;
+}
+
+// Screenshot Proof Dialog Component
+function ScreenshotProofDialog({ removal }: { removal: RemovalRequest }) {
+  const beforeScreenshot = removal.beforeScreenshot || removal.exposure.proofScreenshot;
+  const afterScreenshot = removal.afterScreenshot;
+  const hasProof = beforeScreenshot || afterScreenshot;
+
+  if (!hasProof) return null;
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-emerald-600 text-emerald-400 hover:bg-emerald-600/20"
+        >
+          <Camera className="mr-2 h-4 w-4" />
+          View Proof
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl bg-slate-900 border-slate-700">
+        <DialogHeader>
+          <DialogTitle className="text-white flex items-center gap-2">
+            <Camera className="h-5 w-5 text-emerald-500" />
+            Removal Proof - {removal.exposure.sourceName}
+          </DialogTitle>
+          <DialogDescription className="text-slate-400">
+            Screenshots showing the data before and after removal
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid md:grid-cols-2 gap-4 mt-4">
+          {/* Before Screenshot */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-red-400">Before Removal</h4>
+              {removal.beforeScreenshotAt || removal.exposure.proofScreenshotAt ? (
+                <span className="text-xs text-slate-500">
+                  {new Date(removal.beforeScreenshotAt || removal.exposure.proofScreenshotAt!).toLocaleDateString()}
+                </span>
+              ) : null}
+            </div>
+            <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+              {beforeScreenshot ? (
+                <img
+                  src={beforeScreenshot}
+                  alt="Before removal"
+                  className="w-full h-auto"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-48 text-slate-500">
+                  <div className="text-center">
+                    <ImageIcon className="h-8 w-8 mx-auto mb-2" />
+                    <p className="text-sm">No screenshot available</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* After Screenshot */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-emerald-400">After Removal</h4>
+              {removal.afterScreenshotAt && (
+                <span className="text-xs text-slate-500">
+                  {new Date(removal.afterScreenshotAt).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+            <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+              {afterScreenshot ? (
+                <img
+                  src={afterScreenshot}
+                  alt="After removal"
+                  className="w-full h-auto"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-48 text-slate-500">
+                  <div className="text-center">
+                    <ImageIcon className="h-8 w-8 mx-auto mb-2" />
+                    <p className="text-sm">
+                      {removal.status === "COMPLETED"
+                        ? "Screenshot pending"
+                        : "Available after verification"}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Form Screenshot if available */}
+        {removal.formScreenshot && (
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-blue-400">Opt-out Form Submission</h4>
+              {removal.formScreenshotAt && (
+                <span className="text-xs text-slate-500">
+                  {new Date(removal.formScreenshotAt).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+            <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+              <img
+                src={removal.formScreenshot}
+                alt="Form submission"
+                className="w-full h-auto max-h-64 object-contain"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 export default function RemovalsPage() {
@@ -279,22 +418,28 @@ export default function RemovalsPage() {
                           </p>
                         </div>
                       </div>
-                      {removal.exposure.sourceUrl && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-slate-400 hover:text-white"
-                          asChild
-                        >
-                          <a
-                            href={removal.exposure.sourceUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                      <div className="flex items-center gap-2">
+                        {/* View Proof Button - show if screenshots available */}
+                        {(removal.beforeScreenshot || removal.afterScreenshot || removal.exposure.proofScreenshot) && (
+                          <ScreenshotProofDialog removal={removal} />
+                        )}
+                        {removal.exposure.sourceUrl && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-slate-400 hover:text-white"
+                            asChild
                           >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      )}
+                            <a
+                              href={removal.exposure.sourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex flex-wrap gap-4 text-sm">

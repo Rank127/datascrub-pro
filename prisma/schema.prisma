@@ -140,6 +140,10 @@ model Exposure {
   manualActionTaken     Boolean   @default(false)  // True if user marked as done
   manualActionTakenAt   DateTime?                  // When user marked as done
 
+  // Proof screenshot (captured when exposure is first found)
+  proofScreenshot       String?   // URL or base64 of screenshot showing the exposure
+  proofScreenshotAt     DateTime? // When the proof screenshot was captured
+
   firstFoundAt  DateTime @default(now())
   lastSeenAt    DateTime @default(now())
 
@@ -185,6 +189,14 @@ model RemovalRequest {
   verifyAfter       DateTime?  // When to run verification scan
   lastVerifiedAt    DateTime?  // Last verification attempt
   verificationCount Int        @default(0) // Number of verification attempts
+
+  // Removal proof screenshots
+  beforeScreenshot      String?   // Screenshot before removal (copy from exposure or new capture)
+  beforeScreenshotAt    DateTime? // When before screenshot was captured
+  afterScreenshot       String?   // Screenshot after removal showing data is gone
+  afterScreenshotAt     DateTime? // When after screenshot was captured
+  formScreenshot        String?   // Screenshot of opt-out form submission (if applicable)
+  formScreenshotAt      DateTime? // When form screenshot was captured
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

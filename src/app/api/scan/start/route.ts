@@ -11,6 +11,7 @@ import {
 import type { Plan, ScanType } from "@/lib/types";
 import { z } from "zod";
 import { isAdmin, getEffectivePlan } from "@/lib/admin";
+import { generateScreenshotUrl } from "@/lib/screenshots/screenshot-service";
 
 // Allow longer execution time for scans (Vercel Pro: up to 300s)
 export const maxDuration = 120; // 2 minutes should be enough with parallel scanning
@@ -176,10 +177,20 @@ export async function POST(request: Request) {
       });
     }
 
-    // Create only NEW exposures
+    // Create only NEW exposures (with proof screenshots for URLs)
     const exposures = await Promise.all(
-      newExposures.map((result) =>
-        prisma.exposure.create({
+      newExposures.map((result) => {
+        // Generate proof screenshot URL if we have a source URL
+        let proofScreenshot: string | null = null;
+        if (result.sourceUrl && !result.sourceUrl.startsWith('mailto:')) {
+          try {
+            proofScreenshot = generateScreenshotUrl(result.sourceUrl, { delay: 2 });
+          } catch (e) {
+            console.error(`[Scan] Failed to generate screenshot URL for ${result.sourceName}:`, e);
+          }
+        }
+
+        return prisma.exposure.create({
           data: {
             userId: session.user.id,
             scanId: scan.id,
@@ -193,9 +204,12 @@ export async function POST(request: Request) {
             isWhitelisted: false,
             // Mark as requiring manual action if it's a check link (not auto-scraped)
             requiresManualAction: result.rawData?.manualCheckRequired === true,
+            // Proof screenshot (captured on-demand when URL is accessed)
+            proofScreenshot,
+            proofScreenshotAt: proofScreenshot ? new Date() : null,
           },
-        })
-      )
+        });
+      })
     );
 
     console.log(`[Scan] New: ${exposures.length}, Updated: ${updatedExposureIds.length}, Skipped: ${scanResults.length - newExposures.length - updatedExposureIds.length}`);

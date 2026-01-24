@@ -4,6 +4,7 @@ import { sendRemovalUpdateEmail } from "@/lib/email";
 import { LeakCheckScanner } from "@/lib/scanners/breaches/leakcheck";
 import { HaveIBeenPwnedScanner } from "@/lib/scanners/breaches/haveibeenpwned";
 import type { ScanInput, ScanResult, Scanner } from "@/lib/scanners/base-scanner";
+import { generateScreenshotUrl } from "@/lib/screenshots/screenshot-service";
 
 // Days to wait before verification based on source
 const VERIFICATION_DELAYS: Record<string, number> = {
@@ -131,7 +132,18 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
   const removalRequest = await prisma.removalRequest.findUnique({
     where: { id: removalRequestId },
     include: {
-      exposure: true,
+      exposure: {
+        select: {
+          id: true,
+          source: true,
+          sourceName: true,
+          sourceUrl: true,
+          dataType: true,
+          dataPreview: true,
+          proofScreenshot: true,
+          proofScreenshotAt: true,
+        },
+      },
       user: {
         select: { id: true, email: true, name: true },
       },
@@ -219,6 +231,20 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
       // Exposure no longer found - mark as completed!
       console.log(`[Verification] Exposure no longer found - marking as COMPLETED`);
 
+      // Generate before/after screenshots for proof
+      const beforeScreenshot = removalRequest.exposure.proofScreenshot || null;
+      const beforeScreenshotAt = removalRequest.exposure.proofScreenshotAt || null;
+
+      // Generate after screenshot showing data is no longer found
+      let afterScreenshot: string | null = null;
+      if (removalRequest.exposure.sourceUrl && !removalRequest.exposure.sourceUrl.startsWith('mailto:')) {
+        try {
+          afterScreenshot = generateScreenshotUrl(removalRequest.exposure.sourceUrl, { delay: 2 });
+        } catch (e) {
+          console.error(`[Verification] Failed to generate after screenshot:`, e);
+        }
+      }
+
       await prisma.$transaction([
         prisma.removalRequest.update({
           where: { id: removalRequestId },
@@ -228,6 +254,11 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
             lastVerifiedAt: new Date(),
             verificationCount: { increment: 1 },
             notes: "Verified removed - data no longer found in scan",
+            // Screenshot proof
+            beforeScreenshot,
+            beforeScreenshotAt,
+            afterScreenshot,
+            afterScreenshotAt: afterScreenshot ? new Date() : null,
           },
         }),
         prisma.exposure.update({

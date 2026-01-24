@@ -14,7 +14,29 @@ export async function GET() {
     const removals = await prisma.removalRequest.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        exposureId: true,
+        status: true,
+        method: true,
+        submittedAt: true,
+        completedAt: true,
+        attempts: true,
+        lastError: true,
+        notes: true,
+        verifyAfter: true,
+        lastVerifiedAt: true,
+        verificationCount: true,
+        createdAt: true,
+        updatedAt: true,
+        // Screenshot proof fields
+        beforeScreenshot: true,
+        beforeScreenshotAt: true,
+        afterScreenshot: true,
+        afterScreenshotAt: true,
+        formScreenshot: true,
+        formScreenshotAt: true,
         exposure: {
           select: {
             id: true,
@@ -24,6 +46,8 @@ export async function GET() {
             dataType: true,
             dataPreview: true,
             severity: true,
+            proofScreenshot: true,
+            proofScreenshotAt: true,
           },
         },
       },
