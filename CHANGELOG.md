@@ -16,6 +16,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.12.0] - 2026-01-23
+
+### Added
+- **Expanded Data Broker Directory to 310+ Sources**
+  - Added 90 more data brokers across multiple categories
+  - New categories: Insurance/Risk, Email Verification, Identity Graphs
+  - People Search: +20 brokers (Spytox, SearchBug, VeriPages, etc.)
+  - Phone Lookup: +10 brokers (CallerSmart, NumberGuru, WhoCalledMe, etc.)
+  - Property Records: +8 brokers (Homes.com, Movoto, Opendoor, etc.)
+  - Professional B2B: +10 brokers (Kaspr, Swordfish, Tomba, etc.)
+  - Marketing/AdTech: +8 brokers (The Trade Desk, Criteo, PubMatic, etc.)
+  - Court Records: +6 brokers (DocketBird, CourtListener, PacerMonitor, etc.)
+  - Genealogy/Obituary: +6 brokers (Legacy.com, Fold3, Findmypast, etc.)
+  - International: +8 brokers (WhitePages AU, PagesJaunes FR, DasTelefonbuch DE, etc.)
+  - Insurance/Risk: +4 brokers (LexisNexis Risk, Verisk, C.L.U.E., etc.)
+  - Email Verification: +6 brokers (ZeroBounce, NeverBounce, Kickbox, etc.)
+  - Identity Graphs: +5 brokers (Drawbridge, IQVIA, ID5, etc.)
+
+---
+
 ## [1.11.0] - 2026-01-23
 
 ### Added
