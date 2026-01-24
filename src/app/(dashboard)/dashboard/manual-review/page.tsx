@@ -6,11 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -27,18 +23,17 @@ import {
   ChevronRight,
   CheckCircle2,
   Clock,
-  ExternalLink,
   Search,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { DataSource, Severity, ExposureStatus } from "@/lib/types";
+import type { DataSource, Severity, ExposureStatus, ExposureType } from "@/lib/types";
 
 interface ManualExposure {
   id: string;
   source: DataSource;
   sourceUrl: string | null;
   sourceName: string;
-  dataType: string;
+  dataType: ExposureType;
   dataPreview: string | null;
   severity: Severity;
   status: ExposureStatus;
@@ -55,6 +50,7 @@ export default function ManualReviewPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("pending");
+  const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [stats, setStats] = useState({ total: 0, pending: 0, done: 0 });
 
   const fetchManualExposures = useCallback(async () => {
@@ -64,6 +60,9 @@ export default function ManualReviewPage() {
         page: page.toString(),
         manualAction: statusFilter === "pending" ? "pending" : statusFilter === "done" ? "done" : "all",
       });
+      if (severityFilter !== "all") {
+        params.set("severity", severityFilter);
+      }
 
       const response = await fetch(`/api/exposures?${params}`);
       if (response.ok) {
@@ -85,7 +84,7 @@ export default function ManualReviewPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter]);
+  }, [page, statusFilter, severityFilter]);
 
   useEffect(() => {
     fetchManualExposures();
@@ -110,6 +109,25 @@ export default function ManualReviewPage() {
     }
   };
 
+  const handleMarkUndone = async (exposureId: string) => {
+    try {
+      const response = await fetch("/api/exposures", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exposureId, action: "markUndone" }),
+      });
+
+      if (response.ok) {
+        toast.success("Marked as pending");
+        fetchManualExposures();
+      } else {
+        toast.error("Failed to update");
+      }
+    } catch (error) {
+      toast.error("Failed to update");
+    }
+  };
+
   const handleWhitelist = async (exposureId: string) => {
     try {
       const response = await fetch("/api/exposures", {
@@ -126,6 +144,45 @@ export default function ManualReviewPage() {
       }
     } catch (error) {
       toast.error("Failed to whitelist");
+    }
+  };
+
+  const handleUnwhitelist = async (exposureId: string) => {
+    try {
+      const response = await fetch("/api/exposures", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exposureId, action: "unwhitelist" }),
+      });
+
+      if (response.ok) {
+        toast.success("Removed from whitelist");
+        fetchManualExposures();
+      } else {
+        toast.error("Failed to remove from whitelist");
+      }
+    } catch (error) {
+      toast.error("Failed to remove from whitelist");
+    }
+  };
+
+  const handleRemove = async (exposureId: string) => {
+    try {
+      const response = await fetch("/api/removals/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exposureId }),
+      });
+
+      if (response.ok) {
+        toast.success("Removal request submitted");
+        fetchManualExposures();
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Failed to request removal");
+      }
+    } catch (error) {
+      toast.error("Failed to request removal");
     }
   };
 
@@ -214,6 +271,18 @@ export default function ManualReviewPage() {
                 <SelectItem value="done">Reviewed</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={severityFilter} onValueChange={setSeverityFilter}>
+              <SelectTrigger className="w-[180px] bg-slate-700 border-slate-600">
+                <SelectValue placeholder="Filter by risk" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Risk Levels</SelectItem>
+                <SelectItem value="CRITICAL">Critical</SelectItem>
+                <SelectItem value="HIGH">High</SelectItem>
+                <SelectItem value="MEDIUM">Medium</SelectItem>
+                <SelectItem value="LOW">Low</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -248,85 +317,26 @@ export default function ManualReviewPage() {
       ) : (
         <div className="space-y-4">
           {exposures.map((exposure) => (
-            <Card
+            <ExposureCard
               key={exposure.id}
-              className={`bg-slate-800/50 border-slate-700 ${
-                exposure.manualActionTaken ? "opacity-60" : ""
-              }`}
-            >
-              <CardContent className="py-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-medium text-white">{exposure.sourceName}</h3>
-                      <Badge
-                        variant="outline"
-                        className={
-                          exposure.manualActionTaken
-                            ? "border-emerald-500/50 text-emerald-400"
-                            : "border-amber-500/50 text-amber-400"
-                        }
-                      >
-                        {exposure.manualActionTaken ? "Reviewed" : "Pending"}
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        className={
-                          exposure.severity === "CRITICAL"
-                            ? "border-red-500/50 text-red-400"
-                            : exposure.severity === "HIGH"
-                            ? "border-orange-500/50 text-orange-400"
-                            : exposure.severity === "MEDIUM"
-                            ? "border-yellow-500/50 text-yellow-400"
-                            : "border-blue-500/50 text-blue-400"
-                        }
-                      >
-                        {exposure.severity}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-slate-400 mb-3">
-                      {exposure.dataPreview || "Check this site for your personal information"}
-                    </p>
-                    <div className="flex items-center gap-3">
-                      {exposure.sourceUrl && (
-                        <a
-                          href={exposure.sourceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-sm text-amber-400 hover:text-amber-300"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                          Visit Site to Check
-                        </a>
-                      )}
-                      <span className="text-xs text-slate-500">
-                        Found {new Date(exposure.firstFoundAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {!exposure.manualActionTaken && (
-                      <Button
-                        size="sm"
-                        className="bg-emerald-600 hover:bg-emerald-700"
-                        onClick={() => handleMarkDone(exposure.id)}
-                      >
-                        <CheckCircle2 className="h-4 w-4 mr-1" />
-                        Mark Reviewed
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-slate-600"
-                      onClick={() => handleWhitelist(exposure.id)}
-                    >
-                      Whitelist
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              id={exposure.id}
+              source={exposure.source}
+              sourceName={exposure.sourceName}
+              sourceUrl={exposure.sourceUrl}
+              dataType={exposure.dataType}
+              dataPreview={exposure.dataPreview}
+              severity={exposure.severity}
+              status={exposure.status}
+              isWhitelisted={exposure.isWhitelisted}
+              firstFoundAt={new Date(exposure.firstFoundAt)}
+              requiresManualAction={exposure.requiresManualAction}
+              manualActionTaken={exposure.manualActionTaken}
+              onWhitelist={() => handleWhitelist(exposure.id)}
+              onUnwhitelist={() => handleUnwhitelist(exposure.id)}
+              onRemove={() => handleRemove(exposure.id)}
+              onMarkDone={() => handleMarkDone(exposure.id)}
+              onMarkUndone={() => handleMarkUndone(exposure.id)}
+            />
           ))}
         </div>
       )}

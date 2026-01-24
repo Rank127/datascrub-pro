@@ -424,8 +424,9 @@ export async function runVerificationBatch(): Promise<{
         break;
     }
 
-    // Small delay between verifications to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Longer delay between verifications to avoid rate limiting (15 seconds)
+    // This is especially important for LeakCheck which has strict rate limits
+    await new Promise(resolve => setTimeout(resolve, 15000));
   }
 
   return stats;

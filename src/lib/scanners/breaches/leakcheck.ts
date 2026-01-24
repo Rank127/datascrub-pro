@@ -29,18 +29,28 @@ interface LeakCheckResponse {
 }
 
 /**
- * Rate limiting queue for LeakCheck API
- * Ensures we don't exceed API rate limits
+ * Global rate limiting queue for LeakCheck API
+ * Ensures we don't exceed API rate limits across all instances
+ * This is a singleton to share rate limiting across all scanner instances
  */
 class RateLimitQueue {
+  private static instance: RateLimitQueue;
   private queue: Array<() => Promise<void>> = [];
   private processing = false;
   private lastRequest = 0;
   private minDelay: number;
 
-  constructor(requestsPerMinute: number = 10) {
-    // Calculate minimum delay between requests
+  private constructor(requestsPerMinute: number = 10) {
+    // Calculate minimum delay between requests (be conservative - 6 req/min = 10s between)
     this.minDelay = Math.ceil(60000 / requestsPerMinute);
+  }
+
+  static getInstance(): RateLimitQueue {
+    if (!RateLimitQueue.instance) {
+      // Conservative rate: 6 requests per minute to avoid hitting limits during test scans
+      RateLimitQueue.instance = new RateLimitQueue(6);
+    }
+    return RateLimitQueue.instance;
   }
 
   async add<T>(fn: () => Promise<T>): Promise<T> {
@@ -110,12 +120,13 @@ export class LeakCheckScanner extends BaseScanner {
   constructor() {
     super();
     this.apiKey = process.env.LEAKCHECK_API_KEY || "";
-    // LeakCheck allows ~10 requests per minute on most plans
-    this.rateLimitQueue = new RateLimitQueue(10);
+    // Use global singleton rate limiter shared across all instances
+    this.rateLimitQueue = RateLimitQueue.getInstance();
   }
 
   async isAvailable(): Promise<boolean> {
-    return !!this.apiKey;
+    // Always available - falls back to public API if no API key
+    return true;
   }
 
   async scan(input: ScanInput): Promise<ScanResult[]> {
@@ -178,9 +189,11 @@ export class LeakCheckScanner extends BaseScanner {
 
   private async checkLeak(
     query: string,
-    type: "email" | "phone" | "username"
+    type: "email" | "phone" | "username",
+    retryCount: number = 0
   ): Promise<ScanResult[]> {
-    console.log(`[LeakCheck] Checking ${type}: ${this.maskQuery(query)}`);
+    const MAX_RETRIES = 2;
+    console.log(`[LeakCheck] Checking ${type}: ${this.maskQuery(query)}${retryCount > 0 ? ` (retry ${retryCount})` : ''}`);
 
     const url = `${this.baseUrl}/${encodeURIComponent(query)}`;
 
@@ -193,9 +206,15 @@ export class LeakCheckScanner extends BaseScanner {
     });
 
     if (response.status === 429) {
-      console.warn("[LeakCheck] Rate limited, waiting 10s...");
-      await this.delay(10000);
-      return this.checkLeak(query, type); // Retry once
+      if (retryCount >= MAX_RETRIES) {
+        console.warn(`[LeakCheck] Rate limited after ${MAX_RETRIES} retries, skipping ${this.maskQuery(query)}`);
+        return [];
+      }
+      // Exponential backoff: 15s, 30s
+      const waitTime = 15000 * (retryCount + 1);
+      console.warn(`[LeakCheck] Rate limited, waiting ${waitTime / 1000}s before retry ${retryCount + 1}...`);
+      await this.delay(waitTime);
+      return this.checkLeak(query, type, retryCount + 1);
     }
 
     if (response.status === 401) {
@@ -264,13 +283,22 @@ export class LeakCheckScanner extends BaseScanner {
 
   /**
    * Fallback to public API if no API key configured
+   * Public API has stricter rate limits, so we're more conservative
    */
   private async scanPublicApi(input: ScanInput): Promise<ScanResult[]> {
     const results: ScanResult[] = [];
     const publicUrl = "https://leakcheck.io/api/public";
+    let consecutiveRateLimits = 0;
+    const MAX_CONSECUTIVE_RATE_LIMITS = 3;
 
     if (input.emails?.length) {
       for (const email of input.emails) {
+        // Stop if we've hit too many rate limits in a row
+        if (consecutiveRateLimits >= MAX_CONSECUTIVE_RATE_LIMITS) {
+          console.warn(`[LeakCheck] Public API: Too many rate limits (${MAX_CONSECUTIVE_RATE_LIMITS}), stopping scan`);
+          break;
+        }
+
         try {
           const url = `${publicUrl}?check=${encodeURIComponent(email)}`;
           const response = await fetch(url, {
@@ -281,10 +309,15 @@ export class LeakCheckScanner extends BaseScanner {
           });
 
           if (response.status === 429) {
-            console.warn("[LeakCheck] Public API rate limited");
-            await this.delay(5000);
+            consecutiveRateLimits++;
+            const waitTime = 10000 * consecutiveRateLimits; // 10s, 20s, 30s
+            console.warn(`[LeakCheck] Public API rate limited (${consecutiveRateLimits}/${MAX_CONSECUTIVE_RATE_LIMITS}), waiting ${waitTime / 1000}s...`);
+            await this.delay(waitTime);
             continue;
           }
+
+          // Reset consecutive rate limits on successful request
+          consecutiveRateLimits = 0;
 
           if (!response.ok) continue;
 
@@ -308,8 +341,8 @@ export class LeakCheckScanner extends BaseScanner {
             }
           }
 
-          // Rate limiting for public API
-          await this.delay(1500);
+          // Conservative rate limiting for public API - 5 seconds between requests
+          await this.delay(5000);
         } catch (error) {
           console.error(`[LeakCheck] Public API error:`, error);
         }
