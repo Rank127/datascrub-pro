@@ -17,6 +17,7 @@ import {
   TrendingUp,
   ArrowRight,
   Loader2,
+  HandHelping,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -28,6 +29,11 @@ interface DashboardStats {
   whitelistedItems: number;
   pendingRemovals: number;
   riskScore: number;
+  manualAction: {
+    total: number;
+    done: number;
+    pending: number;
+  };
 }
 
 interface RemovalProgress {
@@ -143,6 +149,7 @@ export default function DashboardPage() {
     whitelistedItems: 0,
     pendingRemovals: 0,
     riskScore: 0,
+    manualAction: { total: 0, done: 0, pending: 0 },
   };
 
   const removalProgress = data?.removalProgress || {
@@ -177,7 +184,7 @@ export default function DashboardPage() {
       <UpgradeBanner variant="card" />
 
       {/* Risk Score and Stats */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
         {/* Risk Score Card */}
         <Link href="/dashboard/exposures" className="md:col-span-2 lg:col-span-1">
           <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-slate-600 transition-all cursor-pointer h-full">
@@ -234,6 +241,28 @@ export default function DashboardPage() {
                 <TrendingDown className="mr-1 h-3 w-3" />
                 {stats.removedExposures > 0 ? "Protected" : "No removals yet"}
               </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Manual Actions */}
+        <Link href="/dashboard/exposures?manualAction=pending">
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-amber-500/50 transition-all cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-400">
+                Manual Actions
+              </CardTitle>
+              <HandHelping className="h-4 w-4 text-amber-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {stats.manualAction.done}/{stats.manualAction.total}
+              </div>
+              <p className="text-xs text-slate-500">
+                {stats.manualAction.pending > 0
+                  ? `${stats.manualAction.pending} pending`
+                  : "All done"}
+              </p>
             </CardContent>
           </Card>
         </Link>

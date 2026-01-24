@@ -41,15 +41,28 @@ export async function GET() {
     });
 
     // Get stats
-    const stats = await prisma.removalRequest.groupBy({
-      by: ["status"],
-      where: { userId: session.user.id },
-      _count: true,
-    });
+    const [stats, manualActionTotal, manualActionDone] = await Promise.all([
+      prisma.removalRequest.groupBy({
+        by: ["status"],
+        where: { userId: session.user.id },
+        _count: true,
+      }),
+      prisma.exposure.count({
+        where: { userId: session.user.id, requiresManualAction: true },
+      }),
+      prisma.exposure.count({
+        where: { userId: session.user.id, requiresManualAction: true, manualActionTaken: true },
+      }),
+    ]);
 
     return NextResponse.json({
       removals: enrichedRemovals,
       stats: Object.fromEntries(stats.map((s) => [s.status, s._count])),
+      manualAction: {
+        total: manualActionTotal,
+        done: manualActionDone,
+        pending: manualActionTotal - manualActionDone,
+      },
     });
   } catch (error) {
     console.error("Removals fetch error:", error);

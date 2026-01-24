@@ -22,7 +22,9 @@ import {
   FileText,
   ExternalLink,
   RefreshCw,
+  HandHelping,
 } from "lucide-react";
+import Link from "next/link";
 import { DataSourceNames, type DataSource, type Severity } from "@/lib/types";
 
 interface RemovalRequest {
@@ -91,9 +93,16 @@ const methodLabels: Record<string, string> = {
   MANUAL_GUIDE: "Manual Removal Guide",
 };
 
+interface ManualActionStats {
+  total: number;
+  done: number;
+  pending: number;
+}
+
 export default function RemovalsPage() {
   const [removals, setRemovals] = useState<RemovalRequest[]>([]);
   const [stats, setStats] = useState<Record<string, number>>({});
+  const [manualAction, setManualAction] = useState<ManualActionStats>({ total: 0, done: 0, pending: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -108,6 +117,7 @@ export default function RemovalsPage() {
         const data = await response.json();
         setRemovals(data.removals);
         setStats(data.stats);
+        setManualAction(data.manualAction || { total: 0, done: 0, pending: 0 });
       }
     } catch (error) {
       console.error("Failed to fetch removals:", error);
@@ -131,7 +141,7 @@ export default function RemovalsPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card className="bg-slate-800/50 border-slate-700">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold text-white">{totalRemovals}</div>
@@ -162,6 +172,19 @@ export default function RemovalsPage() {
             <p className="text-sm text-slate-400">Needs Attention</p>
           </CardContent>
         </Card>
+        <Link href="/dashboard/exposures?manualAction=pending">
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-amber-500/50 transition-all cursor-pointer h-full">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2">
+                <HandHelping className="h-5 w-5 text-amber-400" />
+                <div className="text-2xl font-bold text-amber-400">
+                  {manualAction.done}/{manualAction.total}
+                </div>
+              </div>
+              <p className="text-sm text-slate-400">Manual Actions</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* Overall Progress */}
