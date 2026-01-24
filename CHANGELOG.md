@@ -16,6 +16,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.18.0] - 2026-01-23
+
+### Added
+- **Data Broker Expansion - 200 Additional Sources**
+  - Total source directory: 957 sources across 83 categories
+  - New data broker categories added:
+    - Skip Tracing & Collections: 10 sources (TransUnion TrueLook, Accurint, IRB Search, Tracers)
+    - Automotive & Vehicle Data: 10 sources (Carfax, AutoCheck, Polk, VinAudit, J.D. Power)
+    - Insurance & Risk Data: 10 sources (LexisNexis CLUE, Verisk, MIB Group, Milliman)
+    - Healthcare Provider Data: 10 sources (IQVIA, Healthgrades, Doximity, WebMD, Zocdoc)
+    - B2B Data Providers: 20 sources (ZoomInfo, D&B, Lusha, Apollo, Clearbit, Cognism)
+    - Consumer Marketing Data: 10 sources (Acxiom, Oracle, Epsilon, LiveRamp, Nielsen)
+    - Retail & Shopping Data: 10 sources (Catalina, Ibotta, Fetch Rewards, Rakuten, Cardlytics)
+    - Location Data Providers: 10 sources (SafeGraph, Placer.ai, Unacast, Cuebiq, GroundTruth)
+    - Identity Resolution: 10 sources (FullContact, Pipl, People Data Labs, Versium, TowerData)
+    - Alternative Credit Data: 10 sources (ChexSystems, Certegy, TeleCheck, NCTUE, Clarity)
+    - Employment & Workforce: 10 sources (The Work Number, ADP, Paychex, Greenhouse, Lever)
+    - Legal & Court Records: 10 sources (PACER, CourtLink, Westlaw, Bloomberg Law)
+    - Real Estate Data: 10 sources (CoreLogic, ATTOM, First American, Reonomy, RealPage)
+    - Voter & Political Data: 10 sources (L2, Aristotle, Catalist, TargetSmart, NationBuilder)
+    - Social Media Aggregators: 10 sources (Brandwatch, Sprinklr, Hootsuite, NetBase Quid)
+    - Phone & Communication Data: 10 sources (Twilio, Ekata, TeleSign, Marchex, CallRail)
+    - International APAC: 10 sources (Australia, New Zealand, India directory services)
+    - International Latin America: 10 sources (Mexico, Brazil, Argentina, Chile, Colombia)
+    - International MENA/Africa: 10 sources (UAE, Saudi Arabia, Egypt, South Africa, Nigeria)
+    - Specialty Data Providers: 10 sources (Datalogix, Merkle, HealthVerity, Komodo Health)
+- **83 total source categories** for comprehensive privacy protection
+
+---
+
 ## [1.17.0] - 2026-01-23
 
 ### Added
