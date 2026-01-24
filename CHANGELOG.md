@@ -16,6 +16,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.0] - 2026-01-23
+
+### Added
+- **Manual Action Tracking System**
+  - Filter dropdown on Exposures page: All, Requires Action, Action Pending, Action Done
+  - Manual Actions stats card showing progress (done/total)
+  - "Mark Done" and "Undo" buttons on ExposureCard component
+  - Database fields: `requiresManualAction`, `manualActionTaken`, `manualActionTakenAt`
+
+- **"Submitted for Removal" Stats Card**
+  - New purple card on Dashboard showing total removal requests submitted
+  - Same card added to Exposures page for consistency
+  - Shows pending count when requests are in progress
+
+- **Consistent Dashboard Cards**
+  - Manual Actions card added to Dashboard (6 cards total)
+  - Manual Actions card added to Removals page (5 cards)
+  - Unified stats display across all dashboard pages
+
+### Fixed
+- **Data Broker Opt-Out URLs** (20+ brokers)
+  - FullContact: Updated to `platform.fullcontact.com/your-privacy-choices`
+  - Oracle Data Cloud: Updated to `oracle.com/marketingcloud/opt-status.html`
+  - Epsilon: Updated to `epsilon.com/us/consumer-preference-center`
+  - ZoomInfo: Updated to `zoominfo.com/update/remove`
+  - YellowPages: Updated to `yellowpages.com/members/suppression`
+  - MyLife: Updated to `mylife.com/ccpa/index.pubview`
+  - Equifax: Updated to `myprivacy.equifax.com/personal-info`
+  - Lusha: Updated to `privacy.lusha.com/hc/en-us/requests/new`
+  - LeadIQ: Updated to `leadiq.com/privacy-center`
+  - Clearbit: Updated to `claim.clearbit.com/claim`
+  - Fixed 404 errors for multiple broker opt-out pages
+
+- **AllBrokersScanner URL Priority**
+  - Changed primary exposure link from search URL to opt-out URL
+  - Manual action exposures now link directly to opt-out forms
+  - Falls back to mailto: for email-only brokers, then search URL
+
+### Changed
+- Dashboard grid updated from 5 to 6 columns for stats cards
+- Exposures page grid updated from 5 to 6 columns for stats cards
+- Removals page grid updated to 5 columns for stats cards
+- Exposures API now returns `totalRemovalRequests` and `manualAction` stats
+- Dashboard stats API now returns `totalRemovalRequests` and `manualAction` stats
+
+### Technical
+- Updated files:
+  - `src/app/(dashboard)/dashboard/exposures/page.tsx`
+  - `src/app/(dashboard)/dashboard/page.tsx`
+  - `src/app/(dashboard)/dashboard/removals/page.tsx`
+  - `src/app/api/exposures/route.ts`
+  - `src/app/api/dashboard/stats/route.ts`
+  - `src/app/api/removals/status/route.ts`
+  - `src/components/dashboard/exposure-card.tsx`
+  - `src/lib/removers/data-broker-directory.ts`
+  - `src/lib/scanners/data-brokers/all-brokers-scanner.ts`
+- Database script run to update 177 existing exposures with correct opt-out URLs
+
+---
+
 ## [1.7.0] - 2026-01-23
 
 ### Added
@@ -463,6 +523,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.8.0 | 2026-01-23 | Manual action tracking, opt-out URL fixes, Submitted for Removal card |
 | 1.7.0 | 2026-01-23 | LeakCheck paid API, 58 data brokers, follow-up emails, monthly re-scans |
 | 1.6.0 | 2026-01-22 | Real data broker scanners (8 active scrapers) |
 | 1.5.0 | 2026-01-22 | Do Not Call registry (Enterprise), SEO agent automation |
