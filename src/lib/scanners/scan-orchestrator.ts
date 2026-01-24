@@ -166,7 +166,10 @@ export class ScanOrchestrator {
    */
   getSourcesCheckedCount(): number {
     // Base: all data brokers from the directory
-    let count = getBrokerCount();
+    const brokerCount = getBrokerCount();
+    console.log(`[ScanOrchestrator] getBrokerCount() returned: ${brokerCount}`);
+
+    let count = brokerCount;
 
     // Add breach scanners (HIBP, LeakCheck, Dehashed = 3 sources)
     // These are included in every scan
@@ -176,6 +179,7 @@ export class ScanOrchestrator {
     // LINKEDIN, FACEBOOK, TWITTER, INSTAGRAM, TIKTOK, REDDIT, PINTEREST, YOUTUBE, SNAPCHAT, DISCORD
     count += 10;
 
+    console.log(`[ScanOrchestrator] getSourcesCheckedCount() returning: ${count}`);
     return count;
   }
 }

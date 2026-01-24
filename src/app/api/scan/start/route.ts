@@ -250,10 +250,13 @@ export async function POST(request: Request) {
       });
     }
 
+    const sourcesChecked = orchestrator.getSourcesCheckedCount();
+    console.log(`[Scan API] Returning sourcesChecked: ${sourcesChecked}`);
+
     return NextResponse.json({
       scanId: scan.id,
       exposuresFound: exposures.length,
-      sourcesChecked: orchestrator.getSourcesCheckedCount(),
+      sourcesChecked,
       status: "COMPLETED",
     });
   } catch (error) {
