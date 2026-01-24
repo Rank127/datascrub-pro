@@ -165,22 +165,9 @@ export class ScanOrchestrator {
    * This includes all brokers from DATA_BROKER_DIRECTORY plus breach databases and social media
    */
   getSourcesCheckedCount(): number {
-    // Base: all data brokers from the directory
-    const brokerCount = getBrokerCount();
-    console.log(`[ScanOrchestrator] getBrokerCount() returned: ${brokerCount}`);
-
-    let count = brokerCount;
-
-    // Add breach scanners (HIBP, LeakCheck, Dehashed = 3 sources)
-    // These are included in every scan
-    count += 3;
-
-    // Add social media platforms (10 platforms checked)
-    // LINKEDIN, FACEBOOK, TWITTER, INSTAGRAM, TIKTOK, REDDIT, PINTEREST, YOUTUBE, SNAPCHAT, DISCORD
-    count += 10;
-
-    console.log(`[ScanOrchestrator] getSourcesCheckedCount() returning: ${count}`);
-    return count;
+    // HARDCODED FOR DEBUG - should show 9999 if deployment is working
+    console.log(`[ScanOrchestrator] HARDCODED TEST - returning 9999`);
+    return 9999;
   }
 }
 
