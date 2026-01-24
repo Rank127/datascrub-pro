@@ -4040,6 +4040,637 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     estimatedDays: 1,
     notes: "Monitors for phone number exposure via gateway leaks",
   },
+
+  // ==========================================
+  // ADDITIONAL DARK WEB THREAT INTEL PLATFORMS
+  // ==========================================
+  MANDIANT_THREAT_INTEL: {
+    name: "Mandiant Threat Intelligence",
+    optOutUrl: "https://www.mandiant.com/privacy",
+    privacyEmail: "privacy@mandiant.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Google-owned threat intelligence platform",
+  },
+  CROWDSTRIKE_FALCON_X: {
+    name: "CrowdStrike Falcon X",
+    optOutUrl: "https://www.crowdstrike.com/privacy-notice/",
+    privacyEmail: "privacy@crowdstrike.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Threat intelligence and dark web monitoring",
+  },
+  PALO_ALTO_UNIT42: {
+    name: "Palo Alto Unit 42",
+    optOutUrl: "https://www.paloaltonetworks.com/privacy",
+    privacyEmail: "privacy@paloaltonetworks.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Threat research and dark web intelligence",
+  },
+  CISCO_TALOS: {
+    name: "Cisco Talos Intelligence",
+    optOutUrl: "https://www.cisco.com/c/en/us/about/legal/privacy-full.html",
+    privacyEmail: "privacy@cisco.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Threat intelligence with dark web coverage",
+  },
+  PROOFPOINT_THREAT: {
+    name: "Proofpoint Threat Intelligence",
+    optOutUrl: "https://www.proofpoint.com/us/privacy-policy",
+    privacyEmail: "privacy@proofpoint.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Email and dark web threat detection",
+  },
+  TRELLIX_INSIGHTS: {
+    name: "Trellix Threat Intelligence",
+    optOutUrl: "https://www.trellix.com/en-us/privacy.html",
+    privacyEmail: "privacy@trellix.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Advanced threat intelligence platform",
+  },
+  SECUREWORKS_CTU: {
+    name: "Secureworks Counter Threat Unit",
+    optOutUrl: "https://www.secureworks.com/privacy-policy",
+    privacyEmail: "privacy@secureworks.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web and underground monitoring",
+  },
+  ANOMALI_THREATSTREAM: {
+    name: "Anomali ThreatStream",
+    optOutUrl: "https://www.anomali.com/privacy-policy",
+    privacyEmail: "privacy@anomali.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Threat intelligence platform",
+  },
+  THREATCONNECT: {
+    name: "ThreatConnect",
+    optOutUrl: "https://threatconnect.com/privacy-policy/",
+    privacyEmail: "privacy@threatconnect.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Threat intelligence operations",
+  },
+  LOOKOUT_THREAT: {
+    name: "Lookout Threat Lab",
+    optOutUrl: "https://www.lookout.com/privacy-policy",
+    privacyEmail: "privacy@lookout.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Mobile and dark web threat intelligence",
+  },
+
+  // ==========================================
+  // MORE BREACH AGGREGATORS & LEAK SITES
+  // ==========================================
+  LEAKED_SOURCE: {
+    name: "Leaked.Source (Archives)",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Historical breach database archives",
+  },
+  COMB_MONITOR: {
+    name: "COMB Database Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Compilation of Many Breaches monitoring",
+  },
+  ANTIPUBLIC_MONITOR: {
+    name: "Anti Public Database Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Major breach compilation monitoring",
+  },
+  EXPLOIT_IN_MONITOR: {
+    name: "Exploit.in Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Major breach database monitoring",
+  },
+  COLLECTION_MONITOR: {
+    name: "Collection #1-5 Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Mega breach collections monitoring",
+  },
+  PEMIBLANC_MONITOR: {
+    name: "Pemiblanc Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "French breach database monitoring",
+  },
+  LEAKEDSOURCE_ARCHIVES: {
+    name: "LeakedSource Archives",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Historical breach data archives",
+  },
+  BREACH_COMPILATION: {
+    name: "Breach Compilation Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Multi-source breach compilations",
+  },
+  MAILRU_BREACH_MONITOR: {
+    name: "Mail.ru Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian email service breach monitoring",
+  },
+  RAMBLER_BREACH_MONITOR: {
+    name: "Rambler Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian portal breach monitoring",
+  },
+
+  // ==========================================
+  // MORE PASTE SITES & CODE SHARING
+  // ==========================================
+  RENTRY_MONITOR: {
+    name: "Rentry.co Monitor",
+    optOutUrl: "https://rentry.co/privacy",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Markdown paste site monitoring",
+  },
+  PRIVATEBIN_MONITOR: {
+    name: "PrivateBin Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Encrypted paste site monitoring",
+  },
+  ZEROBIN_MONITOR: {
+    name: "ZeroBin Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Zero-knowledge paste site",
+  },
+  TELEGRA_PH_MONITOR: {
+    name: "Telegraph Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Telegram publishing platform",
+  },
+  SNIPPET_HOST_MONITOR: {
+    name: "Snippet.host Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Code snippet sharing monitoring",
+  },
+  TOPTAL_PASTE_MONITOR: {
+    name: "Toptal Paste Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Developer paste site monitoring",
+  },
+  PASTE2_MONITOR: {
+    name: "Paste2 Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Alternative paste site",
+  },
+  PASTEALL_MONITOR: {
+    name: "PasteAll Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Multi-format paste monitoring",
+  },
+  DEFUSE_PASTE_MONITOR: {
+    name: "Defuse Paste Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Encrypted paste monitoring",
+  },
+  DOXBIN_MONITOR: {
+    name: "Doxbin Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Doxxing site monitoring - critical for personal info",
+  },
+
+  // ==========================================
+  // MORE UNDERGROUND FORUMS
+  // ==========================================
+  HACKFORUMS_MONITOR: {
+    name: "HackForums Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Script kiddie and hacking forum",
+  },
+  RAIDFORUMS_ARCHIVE: {
+    name: "RaidForums Archive Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Archived RaidForums data",
+  },
+  OGUSERS_MONITOR: {
+    name: "OGUsers Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Account trading forum",
+  },
+  LOLZTEAM_MONITOR: {
+    name: "Lolz.team Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian cracking community",
+  },
+  BHFIO_MONITOR: {
+    name: "BHF.io Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Hacking forum monitoring",
+  },
+  WWH_CLUB_MONITOR: {
+    name: "WWH Club Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Carding and fraud forum",
+  },
+  VERIFIED_FORUM_MONITOR: {
+    name: "Verified Forum Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian cybercrime forum",
+  },
+  ANTICHAT_MONITOR: {
+    name: "Antichat Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian security/hacking forum",
+  },
+  XAKEP_MONITOR: {
+    name: "Xakep Forum Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian hacker magazine forum",
+  },
+  DARKODE_MONITOR: {
+    name: "Darkode Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Elite hacking forum monitoring",
+  },
+
+  // ==========================================
+  // MORE CARDING & FINANCIAL FRAUD SITES
+  // ==========================================
+  JOKER_STASH_MONITOR: {
+    name: "Joker's Stash Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Major carding marketplace (successor sites)",
+  },
+  RESCATOR_MONITOR: {
+    name: "Rescator Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Card shop monitoring",
+  },
+  FERUM_SHOP_MONITOR: {
+    name: "FeRum Shop Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Carding shop monitoring",
+  },
+  UNICC_MONITOR: {
+    name: "UniCC Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Card marketplace monitoring",
+  },
+  BRIANKREBS_MONITOR: {
+    name: "BriansClub Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Major carding site monitoring",
+  },
+  VALIDCC_MONITOR: {
+    name: "ValidCC Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Card validation service monitoring",
+  },
+  SWIPE_STORE_MONITOR: {
+    name: "Swipe Store Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Card shop monitoring",
+  },
+  ALLWORLD_CARDS_MONITOR: {
+    name: "AllWorld Cards Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Global carding marketplace",
+  },
+  YALE_LODGE_MONITOR: {
+    name: "Yale Lodge Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Fullz and card data marketplace",
+  },
+  TRUMP_DUMPS_MONITOR: {
+    name: "Trump's Dumps Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Card dump marketplace",
+  },
+
+  // ==========================================
+  // MORE STEALER & MALWARE LOGS
+  // ==========================================
+  AURORA_STEALER_MONITOR: {
+    name: "Aurora Stealer Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Aurora stealer log monitoring",
+  },
+  META_STEALER_MONITOR: {
+    name: "META Stealer Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "META info stealer monitoring",
+  },
+  RHADAMANTHYS_MONITOR: {
+    name: "Rhadamanthys Stealer Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Advanced stealer monitoring",
+  },
+  DARKCLOUD_STEALER_MONITOR: {
+    name: "DarkCloud Stealer Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "DarkCloud logs monitoring",
+  },
+  PRYNT_STEALER_MONITOR: {
+    name: "Prynt Stealer Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Prynt info stealer logs",
+  },
+  WHITESNAKE_STEALER_MONITOR: {
+    name: "WhiteSnake Stealer Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "WhiteSnake malware monitoring",
+  },
+  MYSTIC_STEALER_MONITOR: {
+    name: "Mystic Stealer Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Mystic stealer log detection",
+  },
+  RISEPRO_STEALER_MONITOR: {
+    name: "RisePro Stealer Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "RisePro stealer monitoring",
+  },
+  STEALC_V2_MONITOR: {
+    name: "StealC v2 Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "StealC version 2 monitoring",
+  },
+  XWORM_RAT_MONITOR: {
+    name: "XWorm RAT Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "XWorm remote access trojan logs",
+  },
+
+  // ==========================================
+  // MORE RANSOMWARE LEAK SITES
+  // ==========================================
+  HIVE_RANSOMWARE_MONITOR: {
+    name: "Hive Ransomware Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Hive ransomware leak monitoring",
+  },
+  CONTI_LEAK_MONITOR: {
+    name: "Conti Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Conti ransomware data leaks",
+  },
+  REVIL_LEAK_MONITOR: {
+    name: "REvil/Sodinokibi Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "REvil ransomware leak site",
+  },
+  MAZE_LEAK_MONITOR: {
+    name: "Maze Ransomware Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Maze leak site monitoring",
+  },
+  NETWALKER_LEAK_MONITOR: {
+    name: "NetWalker Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "NetWalker ransomware leaks",
+  },
+  RAGNAR_LOCKER_MONITOR: {
+    name: "Ragnar Locker Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Ragnar Locker leak monitoring",
+  },
+  AVOSLOCKER_MONITOR: {
+    name: "AvosLocker Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "AvosLocker ransomware leaks",
+  },
+  CUBA_RANSOMWARE_MONITOR: {
+    name: "Cuba Ransomware Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cuba ransomware leak site",
+  },
+  SNATCH_TEAM_MONITOR: {
+    name: "Snatch Team Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Snatch ransomware monitoring",
+  },
+  VICE_SOCIETY_MONITOR: {
+    name: "Vice Society Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Vice Society leak monitoring",
+  },
+
+  // ==========================================
+  // TELEGRAM DARK WEB CHANNELS
+  // ==========================================
+  TELEGRAM_CREDIT_CARDS: {
+    name: "Telegram CC Channels",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Credit card trading channels",
+  },
+  TELEGRAM_FULLZ_CHANNELS: {
+    name: "Telegram Fullz Channels",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Identity data trading channels",
+  },
+  TELEGRAM_BANK_DROPS: {
+    name: "Telegram Bank Drops",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Bank drop channels monitoring",
+  },
+  TELEGRAM_SSN_CHANNELS: {
+    name: "Telegram SSN Channels",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "SSN trading channel monitoring",
+  },
+  TELEGRAM_LOGS_CLOUD: {
+    name: "Telegram Logs Cloud",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cloud stealer log channels",
+  },
+  TELEGRAM_RUSSIA_FRAUD: {
+    name: "Telegram Russian Fraud",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian-language fraud channels",
+  },
+  TELEGRAM_SPAM_TOOLS: {
+    name: "Telegram Spam/Tools",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Spam tool and exploit channels",
+  },
+  TELEGRAM_CRYPTO_FRAUD: {
+    name: "Telegram Crypto Fraud",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cryptocurrency fraud channels",
+  },
+  TELEGRAM_SIM_SWAP: {
+    name: "Telegram SIM Swap",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "SIM swapping service channels",
+  },
+  TELEGRAM_DOCUMENTS: {
+    name: "Telegram Document Fraud",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Fake document channels",
+  },
+
+  // ==========================================
+  // IDENTITY VERIFICATION BREACHES
+  // ==========================================
+  KYC_BREACH_MONITOR: {
+    name: "KYC Data Breach Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Know Your Customer data leaks",
+  },
+  ID_DOCUMENT_MONITOR: {
+    name: "ID Document Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Passport and ID leaks",
+  },
+  SELFIE_LEAK_MONITOR: {
+    name: "Selfie/Photo ID Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Identity verification photo leaks",
+  },
+  DRIVERS_LICENSE_MONITOR: {
+    name: "Drivers License Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "DL data leak monitoring",
+  },
+  PASSPORT_LEAK_MONITOR: {
+    name: "Passport Leak Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Passport data monitoring",
+  },
+
+  // ==========================================
+  // ADDITIONAL DARK WEB MARKETS
+  // ==========================================
+  INCOGNITO_MARKET_MONITOR: {
+    name: "Incognito Market Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web marketplace monitoring",
+  },
+  ARCHETYP_MARKET_MONITOR: {
+    name: "Archetyp Market Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web marketplace",
+  },
+  ABACUS_MARKET_MONITOR: {
+    name: "Abacus Market Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web marketplace",
+  },
+  TOR2DOOR_MONITOR: {
+    name: "Tor2Door Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web marketplace",
+  },
+  MEGA_DARKNET_MONITOR: {
+    name: "MEGA Darknet Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian dark web marketplace",
+  },
+  HYDRA_SUCCESSOR_MONITOR: {
+    name: "Hydra Successor Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Hydra market successor monitoring",
+  },
+  OMGOMG_MARKET_MONITOR: {
+    name: "OMG!OMG! Market Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian market monitoring",
+  },
+  BLACKSPRUT_MONITOR: {
+    name: "Blacksprut Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian marketplace monitoring",
+  },
+  KRAKEN_DARKNET_MONITOR: {
+    name: "Kraken Darknet Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian darknet market",
+  },
+  SOLARIS_MARKET_MONITOR: {
+    name: "Solaris Market Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web marketplace",
+  },
 };
 
 // Broker categories for organization
@@ -4237,6 +4868,59 @@ export const BROKER_CATEGORIES = {
     "COMBOLIST_MONITOR", "LOGS_MARKET_MONITOR", "FULLZ_MARKET_MONITOR",
     "SSN_DOB_MARKET_MONITOR", "CREDIT_CARD_SHOP_MONITOR", "BANK_LOG_MARKET_MONITOR",
     "ACCOUNT_SHOP_MONITOR", "CRYPTO_WALLET_MARKET_MONITOR", "EMAIL_2_SMS_GATEWAY_MONITOR"
+  ],
+  THREAT_INTEL_PLATFORMS: [
+    "MANDIANT_THREAT_INTEL", "CROWDSTRIKE_FALCON_X", "PALO_ALTO_UNIT42",
+    "CISCO_TALOS", "PROOFPOINT_THREAT", "TRELLIX_INSIGHTS", "SECUREWORKS_CTU",
+    "ANOMALI_THREATSTREAM", "THREATCONNECT", "LOOKOUT_THREAT"
+  ],
+  BREACH_AGGREGATORS: [
+    "LEAKED_SOURCE", "COMB_MONITOR", "ANTIPUBLIC_MONITOR", "EXPLOIT_IN_MONITOR",
+    "COLLECTION_MONITOR", "PEMIBLANC_MONITOR", "LEAKEDSOURCE_ARCHIVES",
+    "BREACH_COMPILATION", "MAILRU_BREACH_MONITOR", "RAMBLER_BREACH_MONITOR"
+  ],
+  ADDITIONAL_PASTE_SITES: [
+    "RENTRY_MONITOR", "PRIVATEBIN_MONITOR", "ZEROBIN_MONITOR", "TELEGRA_PH_MONITOR",
+    "SNIPPET_HOST_MONITOR", "TOPTAL_PASTE_MONITOR", "PASTE2_MONITOR",
+    "PASTEALL_MONITOR", "DEFUSE_PASTE_MONITOR", "DOXBIN_MONITOR"
+  ],
+  UNDERGROUND_FORUMS: [
+    "HACKFORUMS_MONITOR", "RAIDFORUMS_ARCHIVE", "OGUSERS_MONITOR", "LOLZTEAM_MONITOR",
+    "BHFIO_MONITOR", "WWH_CLUB_MONITOR", "VERIFIED_FORUM_MONITOR", "ANTICHAT_MONITOR",
+    "XAKEP_MONITOR", "DARKODE_MONITOR"
+  ],
+  CARDING_FRAUD_SITES: [
+    "JOKER_STASH_MONITOR", "RESCATOR_MONITOR", "FERUM_SHOP_MONITOR", "UNICC_MONITOR",
+    "BRIANKREBS_MONITOR", "VALIDCC_MONITOR", "SWIPE_STORE_MONITOR",
+    "ALLWORLD_CARDS_MONITOR", "YALE_LODGE_MONITOR", "TRUMP_DUMPS_MONITOR"
+  ],
+  ADDITIONAL_STEALER_LOGS: [
+    "AURORA_STEALER_MONITOR", "META_STEALER_MONITOR", "RHADAMANTHYS_MONITOR",
+    "DARKCLOUD_STEALER_MONITOR", "PRYNT_STEALER_MONITOR", "WHITESNAKE_STEALER_MONITOR",
+    "MYSTIC_STEALER_MONITOR", "RISEPRO_STEALER_MONITOR", "STEALC_V2_MONITOR",
+    "XWORM_RAT_MONITOR"
+  ],
+  ADDITIONAL_RANSOMWARE_LEAKS: [
+    "HIVE_RANSOMWARE_MONITOR", "CONTI_LEAK_MONITOR", "REVIL_LEAK_MONITOR",
+    "MAZE_LEAK_MONITOR", "NETWALKER_LEAK_MONITOR", "RAGNAR_LOCKER_MONITOR",
+    "AVOSLOCKER_MONITOR", "CUBA_RANSOMWARE_MONITOR", "SNATCH_TEAM_MONITOR",
+    "VICE_SOCIETY_MONITOR"
+  ],
+  TELEGRAM_FRAUD_CHANNELS: [
+    "TELEGRAM_CREDIT_CARDS", "TELEGRAM_FULLZ_CHANNELS", "TELEGRAM_BANK_DROPS",
+    "TELEGRAM_SSN_CHANNELS", "TELEGRAM_LOGS_CLOUD", "TELEGRAM_RUSSIA_FRAUD",
+    "TELEGRAM_SPAM_TOOLS", "TELEGRAM_CRYPTO_FRAUD", "TELEGRAM_SIM_SWAP",
+    "TELEGRAM_DOCUMENTS"
+  ],
+  IDENTITY_DOCUMENT_LEAKS: [
+    "KYC_BREACH_MONITOR", "ID_DOCUMENT_MONITOR", "SELFIE_LEAK_MONITOR",
+    "DRIVERS_LICENSE_MONITOR", "PASSPORT_LEAK_MONITOR"
+  ],
+  ADDITIONAL_DARK_MARKETS: [
+    "INCOGNITO_MARKET_MONITOR", "ARCHETYP_MARKET_MONITOR", "ABACUS_MARKET_MONITOR",
+    "TOR2DOOR_MONITOR", "MEGA_DARKNET_MONITOR", "HYDRA_SUCCESSOR_MONITOR",
+    "OMGOMG_MARKET_MONITOR", "BLACKSPRUT_MONITOR", "KRAKEN_DARKNET_MONITOR",
+    "SOLARIS_MARKET_MONITOR"
   ],
 } as const;
 

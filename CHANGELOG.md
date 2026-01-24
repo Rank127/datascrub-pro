@@ -16,6 +16,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.15.0] - 2026-01-23
+
+### Added
+- **Dark Web Monitoring Expansion - 95 Additional Sources**
+  - Total dark web monitoring sources: 195
+  - Total source directory: 600+ sources across 47 categories
+  - New monitoring categories:
+    - Threat Intelligence Platforms: 10 sources (Mandiant, CrowdStrike, Palo Alto Unit42, Cisco Talos, etc.)
+    - Breach Aggregators: 10 sources (COMB, AntiPublic, Collection #1-5, Exploit.in, etc.)
+    - Additional Paste Sites: 10 sources (Rentry, PrivateBin, ZeroBin, Doxbin, etc.)
+    - Underground Forums: 10 sources (HackForums, OGUsers, Lolz.team, Antichat, etc.)
+    - Carding/Fraud Sites: 10 sources (Joker's Stash, BriansClub, UniCC, Rescator, etc.)
+    - Additional Stealer Logs: 10 sources (Aurora, META, Rhadamanthys, WhiteSnake, etc.)
+    - Additional Ransomware Leaks: 10 sources (Hive, Conti, REvil, Maze, NetWalker, etc.)
+    - Telegram Fraud Channels: 10 sources (CC, Fullz, Bank drops, SIM swap, etc.)
+    - Identity Document Leaks: 5 sources (KYC, Passport, Driver's License, Selfie, etc.)
+    - Additional Dark Markets: 10 sources (Incognito, Archetyp, MEGA, Hydra successors, etc.)
+- **47 total source categories** for comprehensive privacy and threat monitoring
+
+---
+
 ## [1.14.0] - 2026-01-23
 
 ### Added

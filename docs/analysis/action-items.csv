@@ -7,11 +7,13 @@ Phase 1,5,Expand to 200+ data brokers,High,1 month,High,Research and testing,Com
 Phase 1,6,Expand to 400+ data brokers,Medium,2 weeks,High,Research,Completed,Implemented in v1.13.0 - expanded to 405 brokers across 26 categories
 Phase 1,7,Add dark web monitoring sources,Medium,1 week,High,Dark web integration,Completed,Implemented in v1.14.0 - 100 dark web sources across 10 new categories
 Phase 1,8,Expand to 500+ sources,Medium,2 weeks,High,Research,Completed,Implemented in v1.14.0 - 505+ total sources across 36 categories
-Phase 1,9,Implement custom site removal request form,Low,3 days,Medium,Email system,Not Started,Simple form to submit URLs for manual processing
-Phase 1,10,Add progress report PDF generation,Medium,1 week,Medium,Report API,Not Started,Monthly PDF reports with charts
-Phase 2,11,Build email masking service,Medium,2 weeks,Medium,Email infrastructure,Not Started,Generate temporary emails for opt-outs
-Phase 2,12,Create browser extension Chrome Firefox,Medium,3 weeks,Medium,Extension APIs,Not Started,Quick scan from toolbar
-Phase 2,13,Expand to 750+ sources,Medium,3 weeks,High,Research,Not Started,Continue adding international and niche brokers
-Phase 3,14,Mobile app MVP React Native,High,6-8 weeks,Medium,API refactoring,Not Started,iOS and Android
-Phase 3,15,Identity theft insurance partnership,Low,4-6 weeks,Medium,Legal and Business,Not Started,Partner with insurance provider
-Phase 3,16,SOC 2 Type II certification,High,3-6 months,Medium,Security audit,Not Started,Build enterprise trust
+Phase 1,9,Expand dark web monitoring to 200 sources,Medium,1 week,High,Dark web research,Completed,Implemented in v1.15.0 - 195 dark web sources across 21 categories
+Phase 1,10,Expand to 600+ total sources,Medium,2 weeks,High,Research,Completed,Implemented in v1.15.0 - 600+ sources across 47 categories
+Phase 1,11,Implement custom site removal request form,Low,3 days,Medium,Email system,Not Started,Simple form to submit URLs for manual processing
+Phase 1,12,Add progress report PDF generation,Medium,1 week,Medium,Report API,Not Started,Monthly PDF reports with charts
+Phase 2,13,Build email masking service,Medium,2 weeks,Medium,Email infrastructure,Not Started,Generate temporary emails for opt-outs
+Phase 2,14,Create browser extension Chrome Firefox,Medium,3 weeks,Medium,Extension APIs,Not Started,Quick scan from toolbar
+Phase 2,15,Expand to 1000+ sources,Medium,4 weeks,High,Research,Not Started,Continue adding international and dark web sources
+Phase 3,16,Mobile app MVP React Native,High,6-8 weeks,Medium,API refactoring,Not Started,iOS and Android
+Phase 3,17,Identity theft insurance partnership,Low,4-6 weeks,Medium,Legal and Business,Not Started,Partner with insurance provider
+Phase 3,18,SOC 2 Type II certification,High,3-6 months,Medium,Security audit,Not Started,Build enterprise trust
