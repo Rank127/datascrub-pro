@@ -16,6 +16,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.19.0] - 2026-01-23
+
+### Added
+- **🎉 1,000+ SOURCES MILESTONE!**
+  - Total source directory: **1,002 sources** across **92 categories**
+  - Added 45 additional data brokers to reach this milestone
+  - New categories added:
+    - Additional Background Check Services: 5 sources (GoodHire, CrimCheck, Verified First)
+    - Additional Consumer Data Providers: 5 sources (Infutor, Webbula, Data Axle, Throtle)
+    - Additional Real Estate & Property: 5 sources (ListHub, Homebot, Quantarium, HouseCanary)
+    - Additional Phone & Identity: 5 sources (WhiteCaller, PhoneInfo, Phone Detective)
+    - International Europe: 5 sources (Europages, Kompass, Hotfrog, Cylex)
+    - Business Intelligence: 5 sources (Owler, Crunchbase, PitchBook, CB Insights, PrivCo)
+    - Professional Directories: 5 sources (Avvo, Martindale-Hubbell, FindLaw, Lawyers.com)
+    - Advertising Data: 5 sources (The Trade Desk, Samba TV, Vizio Inscape)
+    - Additional Retail Data: 5 sources (ShopperTrak, Bazaarvoice, PowerReviews, Yotpo)
+- **92 total source categories** - the most comprehensive privacy protection directory available
+
+---
+
 ## [1.18.0] - 2026-01-23
 
 ### Added

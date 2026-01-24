@@ -4720,6 +4720,343 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
 
   // ==========================================
+  // ADDITIONAL DATA BROKERS - v1.19.0 (1000 MILESTONE)
+  // ==========================================
+
+  // Additional Background Check Services
+  GOODHIRE_BG: {
+    name: "GoodHire",
+    optOutUrl: "https://www.goodhire.com/privacy/",
+    privacyEmail: "privacy@goodhire.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  CRIMCHECK: {
+    name: "CrimCheck",
+    optOutUrl: "https://www.crimcheck.com/privacy/",
+    privacyEmail: "privacy@crimcheck.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  VERIFIED_FIRST: {
+    name: "Verified First",
+    optOutUrl: "https://www.verifiedfirst.com/privacy/",
+    privacyEmail: "privacy@verifiedfirst.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  ORANGE_TREE: {
+    name: "Orange Tree Employment Screening",
+    optOutUrl: "https://www.orangetreescreening.com/privacy/",
+    privacyEmail: "privacy@orangetreescreening.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  ASURINT: {
+    name: "Asurint",
+    optOutUrl: "https://www.asurint.com/privacy/",
+    privacyEmail: "privacy@asurint.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+
+  // Additional Consumer Data Providers
+  INFUTOR_DATA: {
+    name: "Infutor Data Solutions",
+    optOutUrl: "https://www.infutor.com/privacy/",
+    privacyEmail: "privacy@infutor.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  WEBBULA: {
+    name: "Webbula",
+    optOutUrl: "https://webbula.com/privacy/",
+    privacyEmail: "privacy@webbula.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  DATAAXLE: {
+    name: "Data Axle (formerly Infogroup)",
+    optOutUrl: "https://www.data-axle.com/privacy/",
+    privacyEmail: "privacy@data-axle.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  THROTLE: {
+    name: "Throtle",
+    optOutUrl: "https://throtle.io/privacy/",
+    privacyEmail: "privacy@throtle.io",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  SEMCASTING: {
+    name: "Semcasting",
+    optOutUrl: "https://semcasting.com/privacy/",
+    privacyEmail: "privacy@semcasting.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+
+  // Additional Real Estate & Property
+  LISTHUB: {
+    name: "ListHub",
+    optOutUrl: "https://www.listhub.com/privacy/",
+    privacyEmail: "privacy@listhub.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 21,
+  },
+  HOMEBOT: {
+    name: "Homebot",
+    optOutUrl: "https://homebot.ai/privacy/",
+    privacyEmail: "privacy@homebot.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  QUANTARIUM: {
+    name: "Quantarium",
+    optOutUrl: "https://www.quantarium.com/privacy/",
+    privacyEmail: "privacy@quantarium.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 21,
+  },
+  HOUSECANARY: {
+    name: "HouseCanary",
+    optOutUrl: "https://www.housecanary.com/privacy/",
+    privacyEmail: "privacy@housecanary.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 21,
+  },
+  HOMEUNION: {
+    name: "HomeUnion",
+    optOutUrl: "https://www.homeunion.com/privacy/",
+    privacyEmail: "privacy@homeunion.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 21,
+  },
+
+  // Additional Phone & Identity
+  WHITECALLER: {
+    name: "WhiteCaller",
+    optOutUrl: "https://whitecaller.com/privacy/",
+    privacyEmail: "support@whitecaller.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  PHONEBOOK_OF_THE_WORLD: {
+    name: "Phonebook of the World",
+    optOutUrl: "https://phonebookoftheworld.com/privacy/",
+    privacyEmail: "support@phonebookoftheworld.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  CALLER_ID_SERVICE: {
+    name: "CallerID Service",
+    optOutUrl: "https://calleridservice.com/privacy/",
+    privacyEmail: "support@calleridservice.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  PHONEINFO: {
+    name: "PhoneInfo",
+    optOutUrl: "https://phoneinfo.io/privacy/",
+    privacyEmail: "privacy@phoneinfo.io",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  PHONEDETECTIVE: {
+    name: "Phone Detective",
+    optOutUrl: "https://www.phonedetective.com/privacy/",
+    privacyEmail: "privacy@phonedetective.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+
+  // Additional International - Europe
+  INFOBEL_EU: {
+    name: "Infobel Europe",
+    optOutUrl: "https://www.infobel.com/privacy/",
+    privacyEmail: "privacy@infobel.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  EUROPAGES: {
+    name: "Europages",
+    optOutUrl: "https://www.europages.com/privacy/",
+    privacyEmail: "privacy@europages.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  KOMPASS_EU: {
+    name: "Kompass Europe",
+    optOutUrl: "https://www.kompass.com/privacy/",
+    privacyEmail: "privacy@kompass.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  HOTFROG_EU: {
+    name: "Hotfrog Europe",
+    optOutUrl: "https://www.hotfrog.com/privacy/",
+    privacyEmail: "privacy@hotfrog.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 21,
+  },
+  CYLEX_EU: {
+    name: "Cylex Europe",
+    optOutUrl: "https://www.cylex.com/privacy/",
+    privacyEmail: "privacy@cylex.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 21,
+  },
+
+  // Additional Business Intelligence
+  OWLER_DATA: {
+    name: "Owler",
+    optOutUrl: "https://www.owler.com/privacy/",
+    privacyEmail: "privacy@owler.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  CRUNCHBASE_DATA: {
+    name: "Crunchbase",
+    optOutUrl: "https://www.crunchbase.com/privacy/",
+    privacyEmail: "privacy@crunchbase.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  PITCHBOOK: {
+    name: "PitchBook",
+    optOutUrl: "https://pitchbook.com/privacy/",
+    privacyEmail: "privacy@pitchbook.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 21,
+  },
+  CB_INSIGHTS: {
+    name: "CB Insights",
+    optOutUrl: "https://www.cbinsights.com/privacy/",
+    privacyEmail: "privacy@cbinsights.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 21,
+  },
+  PRIVCO: {
+    name: "PrivCo",
+    optOutUrl: "https://www.privco.com/privacy/",
+    privacyEmail: "privacy@privco.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 21,
+  },
+
+  // Additional Professional Directories
+  AVVO_LEGAL: {
+    name: "Avvo",
+    optOutUrl: "https://www.avvo.com/privacy/",
+    privacyEmail: "privacy@avvo.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  MARTINDALE: {
+    name: "Martindale-Hubbell",
+    optOutUrl: "https://www.martindale.com/privacy/",
+    privacyEmail: "privacy@martindale.com",
+    removalMethod: "FORM",
+    estimatedDays: 21,
+  },
+  FINDLAW_DIR: {
+    name: "FindLaw Directory",
+    optOutUrl: "https://www.findlaw.com/privacy/",
+    privacyEmail: "privacy@findlaw.com",
+    removalMethod: "FORM",
+    estimatedDays: 21,
+  },
+  LAWYERS_COM: {
+    name: "Lawyers.com",
+    optOutUrl: "https://www.lawyers.com/privacy/",
+    privacyEmail: "privacy@lawyers.com",
+    removalMethod: "FORM",
+    estimatedDays: 21,
+  },
+  JUSTIA_DIR: {
+    name: "Justia Lawyer Directory",
+    optOutUrl: "https://www.justia.com/privacy/",
+    privacyEmail: "privacy@justia.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+
+  // Additional Advertising Data
+  THE_TRADE_DESK_DATA: {
+    name: "The Trade Desk",
+    optOutUrl: "https://www.thetradedesk.com/privacy/",
+    privacyEmail: "privacy@thetradedesk.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  BIDSWITCH: {
+    name: "BidSwitch (IPONWEB)",
+    optOutUrl: "https://www.bidswitch.com/privacy/",
+    privacyEmail: "privacy@bidswitch.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  SAMBA_TV: {
+    name: "Samba TV",
+    optOutUrl: "https://www.samba.tv/privacy/",
+    privacyEmail: "privacy@samba.tv",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  VIZIO_INSCAPE: {
+    name: "Vizio Inscape",
+    optOutUrl: "https://www.vizio.com/privacy/",
+    privacyEmail: "privacy@vizio.com",
+    removalMethod: "FORM",
+    estimatedDays: 21,
+  },
+  AUTOMATIC_TV: {
+    name: "Automatic (TV Data)",
+    optOutUrl: "https://automatic.com/privacy/",
+    privacyEmail: "privacy@automatic.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+
+  // Additional Retail Data
+  SHOPPERTRACK: {
+    name: "ShopperTrak",
+    optOutUrl: "https://www.shoppertrak.com/privacy/",
+    privacyEmail: "privacy@shoppertrak.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 21,
+  },
+  PRICESPIDER: {
+    name: "PriceSpider",
+    optOutUrl: "https://www.pricespider.com/privacy/",
+    privacyEmail: "privacy@pricespider.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  BAZAARVOICE: {
+    name: "Bazaarvoice",
+    optOutUrl: "https://www.bazaarvoice.com/privacy/",
+    privacyEmail: "privacy@bazaarvoice.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 21,
+  },
+  POWER_REVIEWS: {
+    name: "PowerReviews",
+    optOutUrl: "https://www.powerreviews.com/privacy/",
+    privacyEmail: "privacy@powerreviews.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  YOTPO_DATA: {
+    name: "Yotpo",
+    optOutUrl: "https://www.yotpo.com/privacy/",
+    privacyEmail: "privacy@yotpo.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
   // DARK WEB MONITORING SERVICES
   // ==========================================
   SPYCLOUD: {
@@ -7732,6 +8069,38 @@ export const BROKER_CATEGORIES = {
     "DATALOGIX_ORACLE", "MERKLE_DATA", "CROSSIX", "HEALTHVERITY",
     "KOMODO_HEALTH", "SYMPHONY_HEALTH", "PULSEPOINTLIFE", "ADTHEORENT",
     "DIGITALENVOY", "MAXMIND"
+  ],
+
+  // ==========================================
+  // ADDITIONAL CATEGORIES v1.19.0 (1000 MILESTONE)
+  // ==========================================
+
+  ADDITIONAL_BACKGROUND_CHECK: [
+    "GOODHIRE_BG", "CRIMCHECK", "VERIFIED_FIRST", "ORANGE_TREE", "ASURINT"
+  ],
+  ADDITIONAL_CONSUMER_DATA: [
+    "INFUTOR_DATA", "WEBBULA", "DATAAXLE", "THROTLE", "SEMCASTING"
+  ],
+  ADDITIONAL_REAL_ESTATE: [
+    "LISTHUB", "HOMEBOT", "QUANTARIUM", "HOUSECANARY", "HOMEUNION"
+  ],
+  ADDITIONAL_PHONE_IDENTITY: [
+    "WHITECALLER", "PHONEBOOK_OF_THE_WORLD", "CALLER_ID_SERVICE", "PHONEINFO", "PHONEDETECTIVE"
+  ],
+  INTERNATIONAL_EUROPE: [
+    "INFOBEL_EU", "EUROPAGES", "KOMPASS_EU", "HOTFROG_EU", "CYLEX_EU"
+  ],
+  BUSINESS_INTELLIGENCE: [
+    "OWLER_DATA", "CRUNCHBASE_DATA", "PITCHBOOK", "CB_INSIGHTS", "PRIVCO"
+  ],
+  PROFESSIONAL_DIRECTORIES: [
+    "AVVO_LEGAL", "MARTINDALE", "FINDLAW_DIR", "LAWYERS_COM", "JUSTIA_DIR"
+  ],
+  ADVERTISING_DATA: [
+    "THE_TRADE_DESK_DATA", "BIDSWITCH", "SAMBA_TV", "VIZIO_INSCAPE", "AUTOMATIC_TV"
+  ],
+  ADDITIONAL_RETAIL_DATA: [
+    "SHOPPERTRACK", "PRICESPIDER", "BAZAARVOICE", "POWER_REVIEWS", "YOTPO_DATA"
   ],
 } as const;
 
