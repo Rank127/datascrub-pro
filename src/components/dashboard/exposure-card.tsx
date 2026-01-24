@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,6 +38,7 @@ interface ExposureCardProps {
   selected?: boolean;
   onSelect?: (id: string) => void;
   showCheckbox?: boolean;
+  clickable?: boolean; // Make the card clickable to navigate to filtered view
 }
 
 const dataTypeLabels: Record<ExposureType, string> = {
@@ -96,14 +98,27 @@ export function ExposureCard({
   selected,
   onSelect,
   showCheckbox = false,
+  clickable = false,
 }: ExposureCardProps) {
   const displayName = sourceName || DataSourceNames[source] || source;
   const canSelect = status === "ACTIVE" && !isWhitelisted;
 
-  return (
+  // Build the link URL based on the exposure type
+  const getFilterUrl = () => {
+    if (requiresManualAction) {
+      return "/dashboard/manual-review";
+    }
+    const params = new URLSearchParams();
+    if (severity) params.set("severity", severity);
+    if (status) params.set("status", status);
+    return `/dashboard/exposures?${params.toString()}`;
+  };
+
+  const cardContent = (
     <Card className={cn(
       "bg-slate-800/50 border-slate-700 hover:border-slate-600 transition-colors",
-      selected && "border-emerald-600 bg-emerald-900/20"
+      selected && "border-emerald-600 bg-emerald-900/20",
+      clickable && "cursor-pointer hover:bg-slate-800/70"
     )}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
@@ -249,4 +264,15 @@ export function ExposureCard({
       </CardContent>
     </Card>
   );
+
+  // Wrap in Link if clickable
+  if (clickable) {
+    return (
+      <Link href={getFilterUrl()} className="block">
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }

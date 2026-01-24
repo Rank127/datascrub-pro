@@ -17,6 +17,7 @@ import {
   Settings,
   LogOut,
   Bot,
+  MousePointerClick,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const navigation = [
   { name: "My Profile", href: "/dashboard/profile", icon: User },
   { name: "Scan", href: "/dashboard/scan", icon: Search },
   { name: "Exposures", href: "/dashboard/exposures", icon: AlertTriangle },
+  { name: "Manual Review", href: "/dashboard/manual-review", icon: MousePointerClick },
   { name: "Whitelist", href: "/dashboard/whitelist", icon: ListChecks },
   { name: "Removals", href: "/dashboard/removals", icon: Trash2 },
   { name: "AI Protection", href: "/dashboard/ai-protection", icon: Bot },
