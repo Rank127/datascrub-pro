@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { trackManualReviewCompleted } from "@/components/analytics/google-analytics";
 import type { DataSource, Severity, ExposureStatus, ExposureType } from "@/lib/types";
 
 // AI-related sources that should be handled in AI Protection page (Enterprise only)
@@ -187,6 +188,7 @@ export default function ManualReviewPage() {
 
   const handleMarkDone = async (exposureId: string) => {
     try {
+      const exposure = exposures.find(e => e.id === exposureId);
       const response = await fetch("/api/exposures", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -194,6 +196,10 @@ export default function ManualReviewPage() {
       });
 
       if (response.ok) {
+        // Track manual review completion
+        if (exposure) {
+          trackManualReviewCompleted(exposure.sourceName);
+        }
         toast.success("Marked as reviewed");
         fetchManualExposures();
       } else {

@@ -28,6 +28,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
+import { trackRemovalRequested, trackManualReviewCompleted } from "@/components/analytics/google-analytics";
 import type { DataSource, Severity, ExposureStatus, ExposureType } from "@/lib/types";
 
 // AI Protection source categories
@@ -125,6 +126,12 @@ export default function AIProtectionPage() {
 
   const handleOptOut = async (exposureId: string) => {
     try {
+      const allExposures = [
+        ...(data?.exposures.aiTraining || []),
+        ...(data?.exposures.facialRecognition || []),
+        ...(data?.exposures.voiceCloning || []),
+      ];
+      const exposure = allExposures.find(e => e.id === exposureId);
       const response = await fetch("/api/removals/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,6 +139,10 @@ export default function AIProtectionPage() {
       });
 
       if (response.ok) {
+        // Track AI removal request
+        if (exposure) {
+          trackRemovalRequested(exposure.sourceName, exposure.dataType);
+        }
         toast.success("Opt-out request submitted");
         fetchAIProtectionData();
       } else {
@@ -145,6 +156,12 @@ export default function AIProtectionPage() {
 
   const handleMarkDone = async (exposureId: string) => {
     try {
+      const allExposures = [
+        ...(data?.exposures.aiTraining || []),
+        ...(data?.exposures.facialRecognition || []),
+        ...(data?.exposures.voiceCloning || []),
+      ];
+      const exposure = allExposures.find(e => e.id === exposureId);
       const response = await fetch("/api/exposures", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -152,6 +169,10 @@ export default function AIProtectionPage() {
       });
 
       if (response.ok) {
+        // Track AI manual review completion
+        if (exposure) {
+          trackManualReviewCompleted(exposure.sourceName);
+        }
         toast.success("Marked as done");
         fetchAIProtectionData();
       }

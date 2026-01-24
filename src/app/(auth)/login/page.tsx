@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, Loader2 } from "lucide-react";
+import { trackLogin } from "@/components/analytics/google-analytics";
 
 function LoginForm() {
   const router = useRouter();
@@ -43,6 +44,8 @@ function LoginForm() {
       if (result?.error) {
         setError("Invalid email or password");
       } else {
+        // Track successful login
+        trackLogin("email");
         router.push(callbackUrl);
         router.refresh();
       }

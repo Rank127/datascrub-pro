@@ -17,6 +17,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Shield, Loader2, Check } from "lucide-react";
+import { trackSignUp } from "@/components/analytics/google-analytics";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -58,6 +59,9 @@ export default function RegisterPage() {
         setError(data.error || "Registration failed");
         return;
       }
+
+      // Track successful sign up
+      trackSignUp("email");
 
       // Redirect to login with success message
       router.push("/login?registered=true");

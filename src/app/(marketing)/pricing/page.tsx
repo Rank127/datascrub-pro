@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { CheckCircle, X, Zap } from "lucide-react";
 import { FAQSchema, PricingSchema } from "@/components/seo/structured-data";
+import { PricingButton, PricingPageTracker } from "@/components/pricing/pricing-button";
 
 export const metadata: Metadata = {
   title: "Pricing - Affordable Data Removal Plans",
@@ -133,6 +132,7 @@ export default function PricingPage() {
     <>
       <FAQSchema faqs={faqs} />
       <PricingSchema />
+      <PricingPageTracker />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
       {/* Header */}
       <div className="text-center mb-16">
@@ -206,18 +206,13 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <Link href={plan.ctaLink}>
-              <Button
-                className={`w-full ${
-                  plan.popular
-                    ? "bg-emerald-600 hover:bg-emerald-700"
-                    : "bg-slate-700 hover:bg-slate-600"
-                }`}
-                size="lg"
-              >
-                {plan.cta}
-              </Button>
-            </Link>
+            <PricingButton
+              planName={plan.name}
+              price={parseFloat(plan.price.replace("$", "")) || 0}
+              ctaText={plan.cta}
+              ctaLink={plan.ctaLink}
+              popular={plan.popular}
+            />
           </div>
         ))}
       </div>

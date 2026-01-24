@@ -24,6 +24,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
+import { trackScanStarted, trackScanCompleted } from "@/components/analytics/google-analytics";
 
 interface Scan {
   id: string;
@@ -75,6 +76,9 @@ export default function ScanPage() {
     setScanResult(null);
     setScanProgress(0);
 
+    // Track scan started
+    trackScanStarted(scanType);
+
     // Simulate progress
     const progressInterval = setInterval(() => {
       setScanProgress((prev) => {
@@ -107,6 +111,10 @@ export default function ScanPage() {
       const data = await response.json();
       setScanProgress(100);
       setScanResult(data);
+
+      // Track scan completed
+      trackScanCompleted(scanType, data.exposuresFound, data.sourcesChecked);
+
       fetchRecentScans();
     } catch (err) {
       clearInterval(progressInterval);

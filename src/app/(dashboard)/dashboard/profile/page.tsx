@@ -27,6 +27,7 @@ import {
   Save,
   Shield,
 } from "lucide-react";
+import { trackProfileCompleted } from "@/components/analytics/google-analytics";
 
 interface Address {
   street: string;
@@ -172,6 +173,8 @@ export default function ProfilePage() {
       const data = await response.json();
 
       if (response.ok) {
+        // Track profile completion
+        trackProfileCompleted();
         setSuccess(true);
         setSsn(""); // Clear SSN field after save (it's hashed, can't be retrieved)
         setHasExistingSSN(!!ssn || hasExistingSSN); // Update SSN indicator

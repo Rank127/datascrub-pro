@@ -33,6 +33,7 @@ import {
   SendHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
+import { trackRemovalRequested } from "@/components/analytics/google-analytics";
 import type { DataSource, Severity, ExposureStatus } from "@/lib/types";
 
 interface Exposure {
@@ -215,6 +216,7 @@ function ExposuresPageContent() {
 
   const handleRemove = async (exposureId: string) => {
     try {
+      const exposure = exposures.find(e => e.id === exposureId);
       const response = await fetch("/api/removals/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -222,6 +224,10 @@ function ExposuresPageContent() {
       });
 
       if (response.ok) {
+        // Track the removal request
+        if (exposure) {
+          trackRemovalRequested(exposure.sourceName, exposure.dataType);
+        }
         toast.success("Removal request submitted");
         fetchExposures();
       } else {
