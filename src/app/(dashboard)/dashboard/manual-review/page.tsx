@@ -28,6 +28,17 @@ import {
 import { toast } from "sonner";
 import type { DataSource, Severity, ExposureStatus, ExposureType } from "@/lib/types";
 
+// AI-related sources that should be handled in AI Protection page (Enterprise only)
+const AI_SOURCES = [
+  // AI Training
+  "SPAWNING_AI", "LAION_AI", "STABILITY_AI", "OPENAI", "MIDJOURNEY", "META_AI",
+  "GOOGLE_AI", "LINKEDIN_AI", "ADOBE_AI", "AMAZON_AI",
+  // Facial Recognition
+  "CLEARVIEW_AI", "PIMEYES", "FACECHECK_ID", "SOCIAL_CATFISH", "TINEYE", "YANDEX_IMAGES",
+  // Voice Cloning
+  "ELEVENLABS", "RESEMBLE_AI", "MURF_AI",
+];
+
 interface ManualExposure {
   id: string;
   source: DataSource;
@@ -67,17 +78,24 @@ export default function ManualReviewPage() {
       const response = await fetch(`/api/exposures?${params}`);
       if (response.ok) {
         const data = await response.json();
-        // Filter to only manual action items
-        const manualItems = data.exposures.filter((e: ManualExposure) => e.requiresManualAction);
+        // Filter to only manual action items, excluding AI sources (handled in AI Protection)
+        const manualItems = data.exposures.filter(
+          (e: ManualExposure) => e.requiresManualAction && !AI_SOURCES.includes(e.source)
+        );
         setExposures(manualItems);
         setTotalPages(data.pagination.totalPages);
-        if (data.stats?.manualAction) {
-          setStats({
-            total: data.stats.manualAction.total,
-            pending: data.stats.manualAction.pending,
-            done: data.stats.manualAction.done,
-          });
-        }
+
+        // Calculate stats excluding AI sources
+        const allManualItems = data.exposures.filter(
+          (e: ManualExposure) => e.requiresManualAction && !AI_SOURCES.includes(e.source)
+        );
+        const pendingCount = allManualItems.filter((e: ManualExposure) => !e.manualActionTaken).length;
+        const doneCount = allManualItems.filter((e: ManualExposure) => e.manualActionTaken).length;
+        setStats({
+          total: allManualItems.length,
+          pending: pendingCount,
+          done: doneCount,
+        });
       }
     } catch (error) {
       console.error("Failed to fetch manual review items:", error);
@@ -250,6 +268,10 @@ export default function ManualReviewPage() {
                 Click the link to visit the site, search for your information manually,
                 and mark as reviewed once done. If you find your data, use the site&apos;s
                 opt-out process to request removal.
+              </p>
+              <p className="text-xs text-amber-200/50 mt-2">
+                Note: AI-related manual reviews (facial recognition, voice cloning, AI training)
+                are available in the <Link href="/dashboard/ai-protection" className="underline hover:text-amber-200">AI Protection</Link> page (Enterprise).
               </p>
             </div>
           </div>
