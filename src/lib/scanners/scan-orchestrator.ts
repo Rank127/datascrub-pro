@@ -6,7 +6,7 @@ import { DehashedScanner } from "./breaches/dehashed";
 import { LeakCheckScanner } from "./breaches/leakcheck";
 import { SocialMediaScanner } from "./social/social-scanner";
 import { AIProtectionScanner } from "./ai-protection";
-import { getBrokerCount } from "@/lib/removers/data-broker-directory";
+import { getBrokerCount } from "../removers/data-broker-directory";
 import type { Plan, ScanType } from "@/lib/types";
 
 // Configuration: Set to true to use real data broker scanners
