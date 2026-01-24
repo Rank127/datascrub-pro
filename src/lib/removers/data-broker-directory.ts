@@ -6,7 +6,7 @@ export interface DataBrokerInfo {
   optOutUrl?: string;
   optOutEmail?: string;
   privacyEmail?: string;
-  removalMethod: "FORM" | "EMAIL" | "BOTH";
+  removalMethod: "FORM" | "EMAIL" | "BOTH" | "MONITOR";
   estimatedDays: number; // Estimated time to process removal
   notes?: string;
 }
@@ -3204,6 +3204,842 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 30,
   },
+
+  // ==========================================
+  // DARK WEB MONITORING SERVICES
+  // ==========================================
+  SPYCLOUD: {
+    name: "SpyCloud",
+    optOutUrl: "https://spycloud.com/consumer-portal/",
+    privacyEmail: "privacy@spycloud.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web breach monitoring and identity exposure alerts",
+  },
+  RECORDED_FUTURE: {
+    name: "Recorded Future",
+    optOutUrl: "https://www.recordedfuture.com/privacy-policy",
+    privacyEmail: "privacy@recordedfuture.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Threat intelligence including dark web monitoring",
+  },
+  DARKOWL: {
+    name: "DarkOwl",
+    optOutUrl: "https://www.darkowl.com/privacy",
+    privacyEmail: "privacy@darkowl.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web intelligence and data exposure monitoring",
+  },
+  FLASHPOINT: {
+    name: "Flashpoint",
+    optOutUrl: "https://flashpoint.io/privacy-policy/",
+    privacyEmail: "privacy@flashpoint.io",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web threat intelligence platform",
+  },
+  INTEL471: {
+    name: "Intel 471",
+    optOutUrl: "https://intel471.com/privacy-policy",
+    privacyEmail: "privacy@intel471.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Underground cyber intelligence",
+  },
+  SIXGILL: {
+    name: "Sixgill",
+    optOutUrl: "https://www.cybersixgill.com/privacy-policy/",
+    privacyEmail: "privacy@cybersixgill.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Deep and dark web threat intelligence",
+  },
+  KELA: {
+    name: "KELA Cyber Intelligence",
+    optOutUrl: "https://ke-la.com/privacy-policy/",
+    privacyEmail: "privacy@ke-la.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Targeted dark web monitoring",
+  },
+  DIGITAL_SHADOWS: {
+    name: "Digital Shadows (ReliaQuest)",
+    optOutUrl: "https://www.reliaquest.com/privacy-policy/",
+    privacyEmail: "privacy@digitalshadows.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Digital risk protection and dark web monitoring",
+  },
+  ZEROFOX: {
+    name: "ZeroFox",
+    optOutUrl: "https://www.zerofox.com/privacy-policy/",
+    privacyEmail: "privacy@zerofox.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "External threat intelligence and dark web monitoring",
+  },
+  CYBERINT: {
+    name: "Cyberint",
+    optOutUrl: "https://cyberint.com/privacy-policy/",
+    privacyEmail: "privacy@cyberint.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Threat intelligence and dark web monitoring",
+  },
+  CONSTELLA: {
+    name: "Constella Intelligence",
+    optOutUrl: "https://constella.ai/privacy-policy/",
+    privacyEmail: "privacy@constella.ai",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Identity exposure and dark web breach detection",
+  },
+  SOCRADAR: {
+    name: "SOCRadar",
+    optOutUrl: "https://socradar.io/privacy-policy/",
+    privacyEmail: "privacy@socradar.io",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Extended threat intelligence with dark web coverage",
+  },
+
+  // ==========================================
+  // BREACH NOTIFICATION & LEAK DATABASES
+  // ==========================================
+  BREACHSENSE: {
+    name: "BreachSense",
+    optOutUrl: "https://breachsense.io/privacy",
+    privacyEmail: "privacy@breachsense.io",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Credential breach monitoring",
+  },
+  LEAKPEEK: {
+    name: "LeakPeek",
+    optOutUrl: "https://leakpeek.com/privacy",
+    privacyEmail: "privacy@leakpeek.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Data leak search engine",
+  },
+  LEAKIX: {
+    name: "LeakIX",
+    optOutUrl: "https://leakix.net/privacy",
+    privacyEmail: "privacy@leakix.net",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Internet-wide data leak detection",
+  },
+  INTELLIGENCE_X: {
+    name: "Intelligence X",
+    optOutUrl: "https://intelx.io/privacy-policy",
+    privacyEmail: "privacy@intelx.io",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web and breach data search engine",
+  },
+  NUCLEON: {
+    name: "Nucleon Cyber",
+    optOutUrl: "https://nucleon.io/privacy",
+    privacyEmail: "privacy@nucleon.io",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Leaked credentials monitoring",
+  },
+  SCYLLA_SH: {
+    name: "Scylla.sh",
+    optOutUrl: "https://scylla.sh/privacy",
+    privacyEmail: "privacy@scylla.sh",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Breach database search",
+  },
+  HASHES_ORG: {
+    name: "Hashes.org",
+    optOutUrl: "https://hashes.org/privacy.php",
+    privacyEmail: "privacy@hashes.org",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Password hash database",
+  },
+  WELEAKINFO: {
+    name: "WeLeakInfo (Successor)",
+    optOutUrl: "https://weleakinfo.to/privacy",
+    privacyEmail: "privacy@weleakinfo.to",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Breach compilation database",
+  },
+  BREACHDIRECTORY: {
+    name: "BreachDirectory",
+    optOutUrl: "https://breachdirectory.org/privacy",
+    privacyEmail: "privacy@breachdirectory.org",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Free breach checking service",
+  },
+  LEAKBASE: {
+    name: "LeakBase",
+    optOutUrl: "https://leakbase.io/privacy",
+    privacyEmail: "privacy@leakbase.io",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Data breach compilation",
+  },
+
+  // ==========================================
+  // PASTE SITE MONITORS
+  // ==========================================
+  PASTEBIN_MONITOR: {
+    name: "Pastebin Monitor",
+    optOutUrl: "https://pastebin.com/doc_privacy_statement",
+    privacyEmail: "privacy@pastebin.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Primary paste site - often used for leaked data",
+  },
+  GHOSTBIN_MONITOR: {
+    name: "Ghostbin Monitor",
+    optOutUrl: "https://ghostbin.com/privacy",
+    privacyEmail: "privacy@ghostbin.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Anonymous paste site monitoring",
+  },
+  DPASTE_MONITOR: {
+    name: "Dpaste Monitor",
+    optOutUrl: "https://dpaste.com/privacy",
+    privacyEmail: "privacy@dpaste.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Developer paste site",
+  },
+  HASTEBIN_MONITOR: {
+    name: "Hastebin Monitor",
+    optOutUrl: "https://hastebin.com/privacy",
+    privacyEmail: "privacy@hastebin.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Fast paste site monitoring",
+  },
+  PASTECODE_MONITOR: {
+    name: "Pastecode Monitor",
+    optOutUrl: "https://pastecode.io/privacy",
+    privacyEmail: "privacy@pastecode.io",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Code paste site monitoring",
+  },
+  JUSTPASTE_MONITOR: {
+    name: "JustPaste.it Monitor",
+    optOutUrl: "https://justpaste.it/privacy",
+    privacyEmail: "privacy@justpaste.it",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Anonymous paste site",
+  },
+  CONTROLC_MONITOR: {
+    name: "ControlC Monitor",
+    optOutUrl: "https://controlc.com/privacy",
+    privacyEmail: "privacy@controlc.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Text sharing site",
+  },
+  CODEPAD_MONITOR: {
+    name: "Codepad Monitor",
+    optOutUrl: "https://codepad.org/privacy",
+    privacyEmail: "privacy@codepad.org",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Code execution paste site",
+  },
+  IDEONE_MONITOR: {
+    name: "Ideone Monitor",
+    optOutUrl: "https://ideone.com/privacy",
+    privacyEmail: "privacy@ideone.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Online compiler and paste site",
+  },
+  SLEXY_MONITOR: {
+    name: "Slexy Monitor",
+    optOutUrl: "https://slexy.org/privacy",
+    privacyEmail: "privacy@slexy.org",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Syntax highlighting paste site",
+  },
+
+  // ==========================================
+  // DARK WEB MARKETPLACE MONITORS
+  // ==========================================
+  DARKMARKET_MONITOR: {
+    name: "Dark Market Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors dark web marketplaces for stolen data listings",
+  },
+  GENESIS_MARKET_MONITOR: {
+    name: "Genesis Market Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Bot marketplace monitoring for stolen credentials",
+  },
+  RUSSIAN_MARKET_MONITOR: {
+    name: "Russian Market Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors Russian-language dark web markets",
+  },
+  EXPLOIT_FORUM_MONITOR: {
+    name: "Exploit Forum Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian cybercrime forum monitoring",
+  },
+  XSS_FORUM_MONITOR: {
+    name: "XSS Forum Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Russian hacking forum monitoring",
+  },
+  BREACHFORUMS_MONITOR: {
+    name: "BreachForums Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Data breach trading forum",
+  },
+  RAIDFORUMS_SUCCESSOR_MONITOR: {
+    name: "RaidForums Successor Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors successors to RaidForums",
+  },
+  NULLED_FORUM_MONITOR: {
+    name: "Nulled Forum Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cracking forum monitoring",
+  },
+  CRACKED_FORUM_MONITOR: {
+    name: "Cracked Forum Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Hacking community monitoring",
+  },
+  SINISTER_FORUM_MONITOR: {
+    name: "Sinister Forum Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Underground forum monitoring",
+  },
+  DREAD_FORUM_MONITOR: {
+    name: "Dread Forum Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web Reddit-style forum",
+  },
+  ALPHABAY_MONITOR: {
+    name: "AlphaBay Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Major dark web marketplace monitoring",
+  },
+  VERSUS_MARKET_MONITOR: {
+    name: "Versus Market Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web marketplace monitoring",
+  },
+  KINGDOM_MARKET_MONITOR: {
+    name: "Kingdom Market Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web marketplace monitoring",
+  },
+  BOHEMIA_MARKET_MONITOR: {
+    name: "Bohemia Market Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web marketplace monitoring",
+  },
+
+  // ==========================================
+  // CREDENTIAL MONITORING SERVICES
+  // ==========================================
+  FIREFOX_MONITOR: {
+    name: "Firefox Monitor",
+    optOutUrl: "https://monitor.firefox.com/privacy",
+    privacyEmail: "privacy@mozilla.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Mozilla's breach notification service",
+  },
+  GOOGLE_PASSWORD_CHECKUP: {
+    name: "Google Password Checkup",
+    optOutUrl: "https://passwords.google.com/",
+    privacyEmail: "privacy@google.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Google's credential breach detection",
+  },
+  APPLE_SECURITY_RECOMMENDATIONS: {
+    name: "Apple Security Recommendations",
+    optOutUrl: "https://support.apple.com/privacy",
+    privacyEmail: "privacy@apple.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Apple's password security monitoring",
+  },
+  IDENTITY_GUARD: {
+    name: "Identity Guard",
+    optOutUrl: "https://www.identityguard.com/privacy-policy",
+    privacyEmail: "privacy@identityguard.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Identity theft protection with dark web monitoring",
+  },
+  LIFELOCK: {
+    name: "LifeLock (Norton)",
+    optOutUrl: "https://www.lifelock.com/legal/privacy-policy",
+    privacyEmail: "privacy@lifelock.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Identity theft protection service",
+  },
+  IDENTITYFORCE: {
+    name: "IdentityForce",
+    optOutUrl: "https://www.identityforce.com/privacy-policy",
+    privacyEmail: "privacy@identityforce.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Identity protection and dark web monitoring",
+  },
+  AURA_IDENTITY: {
+    name: "Aura Identity",
+    optOutUrl: "https://www.aura.com/legal/privacy-policy",
+    privacyEmail: "privacy@aura.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "All-in-one identity protection",
+  },
+  EXPERIAN_DARK_WEB: {
+    name: "Experian Dark Web Scan",
+    optOutUrl: "https://www.experian.com/privacy/",
+    privacyEmail: "privacy@experian.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Experian's dark web surveillance",
+  },
+  TRANSUNION_DARK_WEB: {
+    name: "TransUnion Dark Web Monitoring",
+    optOutUrl: "https://www.transunion.com/privacy",
+    privacyEmail: "privacy@transunion.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "TransUnion's dark web monitoring",
+  },
+  EQUIFAX_DARK_WEB: {
+    name: "Equifax Dark Web Monitoring",
+    optOutUrl: "https://www.equifax.com/privacy/",
+    privacyEmail: "privacy@equifax.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Equifax's dark web monitoring",
+  },
+  MCAFEE_IDENTITY: {
+    name: "McAfee Identity Protection",
+    optOutUrl: "https://www.mcafee.com/consumer/privacy.html",
+    privacyEmail: "privacy@mcafee.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "McAfee's identity and dark web monitoring",
+  },
+  BITDEFENDER_IDENTITY: {
+    name: "Bitdefender Digital Identity",
+    optOutUrl: "https://www.bitdefender.com/privacy/",
+    privacyEmail: "privacy@bitdefender.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Bitdefender's identity protection",
+  },
+  NORTON_DARK_WEB: {
+    name: "Norton Dark Web Monitoring",
+    optOutUrl: "https://www.norton.com/privacy",
+    privacyEmail: "privacy@nortonlifelock.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Norton's dark web surveillance",
+  },
+  AVAST_BREACHGUARD: {
+    name: "Avast BreachGuard",
+    optOutUrl: "https://www.avast.com/privacy-policy",
+    privacyEmail: "privacy@avast.com",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Avast's data breach monitoring",
+  },
+
+  // ==========================================
+  // DARK WEB SEARCH ENGINES
+  // ==========================================
+  AHMIA_SEARCH: {
+    name: "Ahmia Search Engine",
+    optOutUrl: "https://ahmia.fi/policy/",
+    privacyEmail: "privacy@ahmia.fi",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Tor hidden services search engine",
+  },
+  TORCH_SEARCH: {
+    name: "Torch Search Engine",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web search engine",
+  },
+  NOTEVIL_SEARCH: {
+    name: "NotEvil Search",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Tor network search engine",
+  },
+  HAYSTAK_SEARCH: {
+    name: "Haystak Search",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web indexed content search",
+  },
+  DARKSEARCH_IO: {
+    name: "DarkSearch.io",
+    optOutUrl: "https://darksearch.io/privacy",
+    privacyEmail: "privacy@darksearch.io",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Dark web search API",
+  },
+  ONION_SEARCH: {
+    name: "Onion Search Engine",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Onion sites indexer",
+  },
+
+  // ==========================================
+  // STEALER LOG MONITORS
+  // ==========================================
+  REDLINE_STEALER_MONITOR: {
+    name: "RedLine Stealer Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors for RedLine stealer log dumps",
+  },
+  RACCOON_STEALER_MONITOR: {
+    name: "Raccoon Stealer Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors Raccoon stealer malware logs",
+  },
+  VIDAR_STEALER_MONITOR: {
+    name: "Vidar Stealer Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors Vidar stealer log dumps",
+  },
+  AZORULT_MONITOR: {
+    name: "AZORult Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "AZORult malware log monitoring",
+  },
+  TAURUS_STEALER_MONITOR: {
+    name: "Taurus Stealer Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Taurus stealer log dumps",
+  },
+  LUMMA_STEALER_MONITOR: {
+    name: "Lumma Stealer Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Lumma stealer credentials monitoring",
+  },
+  TITAN_STEALER_MONITOR: {
+    name: "Titan Stealer Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Titan stealer log monitoring",
+  },
+  STEALC_MONITOR: {
+    name: "StealC Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "StealC malware log detection",
+  },
+
+  // ==========================================
+  // RANSOMWARE LEAK SITE MONITORS
+  // ==========================================
+  LOCKBIT_LEAK_MONITOR: {
+    name: "LockBit Leak Site Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors LockBit ransomware data leaks",
+  },
+  ALPHV_LEAK_MONITOR: {
+    name: "ALPHV/BlackCat Leak Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors ALPHV ransomware data leaks",
+  },
+  CLOP_LEAK_MONITOR: {
+    name: "Cl0p Leak Site Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors Cl0p ransomware victim data",
+  },
+  BLACKBASTA_LEAK_MONITOR: {
+    name: "Black Basta Leak Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Black Basta ransomware leak monitoring",
+  },
+  PLAY_RANSOMWARE_MONITOR: {
+    name: "Play Ransomware Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Play ransomware leak site monitoring",
+  },
+  ROYAL_RANSOMWARE_MONITOR: {
+    name: "Royal Ransomware Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Royal ransomware leak monitoring",
+  },
+  BIANLIAN_LEAK_MONITOR: {
+    name: "BianLian Leak Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "BianLian ransomware leak site",
+  },
+  AKIRA_RANSOMWARE_MONITOR: {
+    name: "Akira Ransomware Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Akira ransomware leak monitoring",
+  },
+  MEDUSA_LEAK_MONITOR: {
+    name: "Medusa Leak Site Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Medusa ransomware leak monitoring",
+  },
+  RHYSIDA_LEAK_MONITOR: {
+    name: "Rhysida Leak Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Rhysida ransomware leak site",
+  },
+
+  // ==========================================
+  // TELEGRAM & CHAT MONITORS
+  // ==========================================
+  TELEGRAM_LEAK_CHANNELS: {
+    name: "Telegram Leak Channels",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors Telegram channels sharing leaked data",
+  },
+  TELEGRAM_COMBOLIST: {
+    name: "Telegram Combolist Channels",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Credential combo list sharing channels",
+  },
+  TELEGRAM_STEALER_LOGS: {
+    name: "Telegram Stealer Log Channels",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Stealer log distribution channels",
+  },
+  DISCORD_LEAK_SERVERS: {
+    name: "Discord Leak Servers",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Discord servers sharing leaked credentials",
+  },
+  IRC_UNDERGROUND_CHANNELS: {
+    name: "IRC Underground Channels",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "IRC channels for data trading",
+  },
+  JABBER_XMPP_NETWORKS: {
+    name: "Jabber/XMPP Networks",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "XMPP networks used by cybercriminals",
+  },
+
+  // ==========================================
+  // COMBOLIST & CREDENTIAL MARKETS
+  // ==========================================
+  COMBOLIST_MONITOR: {
+    name: "Combolist Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors credential combination lists",
+  },
+  LOGS_MARKET_MONITOR: {
+    name: "Logs Market Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Bot and stealer log marketplaces",
+  },
+  FULLZ_MARKET_MONITOR: {
+    name: "Fullz Market Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Full identity data (fullz) markets",
+  },
+  SSN_DOB_MARKET_MONITOR: {
+    name: "SSN/DOB Market Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Social Security and DOB trading",
+  },
+  CREDIT_CARD_SHOP_MONITOR: {
+    name: "Credit Card Shop Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Stolen credit card marketplaces",
+  },
+  BANK_LOG_MARKET_MONITOR: {
+    name: "Bank Log Market Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Banking credential markets",
+  },
+  ACCOUNT_SHOP_MONITOR: {
+    name: "Account Shop Monitor",
+    
+    
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Stolen account marketplaces",
+  },
+  CRYPTO_WALLET_MARKET_MONITOR: {
+    name: "Crypto Wallet Market Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Cryptocurrency wallet theft markets",
+  },
+  EMAIL_2_SMS_GATEWAY_MONITOR: {
+    name: "Email-to-SMS Gateway Monitor",
+    removalMethod: "MONITOR",
+    estimatedDays: 1,
+    notes: "Monitors for phone number exposure via gateway leaks",
+  },
 };
 
 // Broker categories for organization
@@ -3350,6 +4186,57 @@ export const BROKER_CATEGORIES = {
   ],
   DATA_ENRICHMENT: [
     "PEOPLE_DATA_LABS", "CORESIGNAL", "PROXYCURL", "REVELIO_LABS", "DIFFBOT"
+  ],
+  DARK_WEB_MONITORING: [
+    "SPYCLOUD", "RECORDED_FUTURE", "DARKOWL", "FLASHPOINT", "INTEL471",
+    "SIXGILL", "KELA", "DIGITAL_SHADOWS", "ZEROFOX", "CYBERINT",
+    "CONSTELLA", "SOCRADAR"
+  ],
+  BREACH_LEAK_DB: [
+    "BREACHSENSE", "LEAKPEEK", "LEAKIX", "INTELLIGENCE_X", "NUCLEON",
+    "SCYLLA_SH", "HASHES_ORG", "WELEAKINFO", "BREACHDIRECTORY", "LEAKBASE"
+  ],
+  PASTE_SITE_MONITORS: [
+    "PASTEBIN_MONITOR", "GHOSTBIN_MONITOR", "DPASTE_MONITOR", "HASTEBIN_MONITOR",
+    "PASTECODE_MONITOR", "JUSTPASTE_MONITOR", "CONTROLC_MONITOR", "CODEPAD_MONITOR",
+    "IDEONE_MONITOR", "SLEXY_MONITOR"
+  ],
+  DARK_MARKETPLACE_MONITORS: [
+    "DARKMARKET_MONITOR", "GENESIS_MARKET_MONITOR", "RUSSIAN_MARKET_MONITOR",
+    "EXPLOIT_FORUM_MONITOR", "XSS_FORUM_MONITOR", "BREACHFORUMS_MONITOR",
+    "RAIDFORUMS_SUCCESSOR_MONITOR", "NULLED_FORUM_MONITOR", "CRACKED_FORUM_MONITOR",
+    "SINISTER_FORUM_MONITOR", "DREAD_FORUM_MONITOR", "ALPHABAY_MONITOR",
+    "VERSUS_MARKET_MONITOR", "KINGDOM_MARKET_MONITOR", "BOHEMIA_MARKET_MONITOR"
+  ],
+  CREDENTIAL_MONITORING: [
+    "FIREFOX_MONITOR", "GOOGLE_PASSWORD_CHECKUP", "APPLE_SECURITY_RECOMMENDATIONS",
+    "IDENTITY_GUARD", "LIFELOCK", "IDENTITYFORCE", "AURA_IDENTITY",
+    "EXPERIAN_DARK_WEB", "TRANSUNION_DARK_WEB", "EQUIFAX_DARK_WEB",
+    "MCAFEE_IDENTITY", "BITDEFENDER_IDENTITY", "NORTON_DARK_WEB", "AVAST_BREACHGUARD"
+  ],
+  DARK_WEB_SEARCH: [
+    "AHMIA_SEARCH", "TORCH_SEARCH", "NOTEVIL_SEARCH", "HAYSTAK_SEARCH",
+    "DARKSEARCH_IO", "ONION_SEARCH"
+  ],
+  STEALER_LOG_MONITORS: [
+    "REDLINE_STEALER_MONITOR", "RACCOON_STEALER_MONITOR", "VIDAR_STEALER_MONITOR",
+    "AZORULT_MONITOR", "TAURUS_STEALER_MONITOR", "LUMMA_STEALER_MONITOR",
+    "TITAN_STEALER_MONITOR", "STEALC_MONITOR"
+  ],
+  RANSOMWARE_LEAK_MONITORS: [
+    "LOCKBIT_LEAK_MONITOR", "ALPHV_LEAK_MONITOR", "CLOP_LEAK_MONITOR",
+    "BLACKBASTA_LEAK_MONITOR", "PLAY_RANSOMWARE_MONITOR", "ROYAL_RANSOMWARE_MONITOR",
+    "BIANLIAN_LEAK_MONITOR", "AKIRA_RANSOMWARE_MONITOR", "MEDUSA_LEAK_MONITOR",
+    "RHYSIDA_LEAK_MONITOR"
+  ],
+  CHAT_PLATFORM_MONITORS: [
+    "TELEGRAM_LEAK_CHANNELS", "TELEGRAM_COMBOLIST", "TELEGRAM_STEALER_LOGS",
+    "DISCORD_LEAK_SERVERS", "IRC_UNDERGROUND_CHANNELS", "JABBER_XMPP_NETWORKS"
+  ],
+  CREDENTIAL_MARKETS: [
+    "COMBOLIST_MONITOR", "LOGS_MARKET_MONITOR", "FULLZ_MARKET_MONITOR",
+    "SSN_DOB_MARKET_MONITOR", "CREDIT_CARD_SHOP_MONITOR", "BANK_LOG_MARKET_MONITOR",
+    "ACCOUNT_SHOP_MONITOR", "CRYPTO_WALLET_MARKET_MONITOR", "EMAIL_2_SMS_GATEWAY_MONITOR"
   ],
 } as const;
 

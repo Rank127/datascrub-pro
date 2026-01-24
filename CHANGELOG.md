@@ -16,6 +16,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.14.0] - 2026-01-23
+
+### Added
+- **Dark Web Monitoring - 100 Sources Added**
+  - Comprehensive dark web, breach, and threat intelligence monitoring
+  - Total source directory now includes 505+ sources across 36 categories
+  - New monitoring categories:
+    - Dark Web Intelligence: 12 sources (SpyCloud, Recorded Future, DarkOwl, Flashpoint, Intel 471, etc.)
+    - Breach/Leak Databases: 10 sources (BreachSense, LeakIX, Intelligence X, BreachDirectory, etc.)
+    - Paste Site Monitors: 10 sources (Pastebin, Ghostbin, Hastebin, JustPaste.it, etc.)
+    - Dark Marketplace Monitors: 15 sources (Genesis Market, BreachForums, AlphaBay, Dread, etc.)
+    - Credential Monitoring Services: 14 sources (Firefox Monitor, LifeLock, Aura, McAfee, Norton, etc.)
+    - Dark Web Search Engines: 6 sources (Ahmia, Torch, DarkSearch.io, etc.)
+    - Stealer Log Monitors: 8 sources (RedLine, Raccoon, Vidar, Lumma, etc.)
+    - Ransomware Leak Site Monitors: 10 sources (LockBit, ALPHV, Cl0p, Black Basta, etc.)
+    - Chat Platform Monitors: 6 sources (Telegram, Discord, IRC channels)
+    - Credential Markets: 9 sources (Combolist, Fullz, Bank logs, Crypto wallet markets)
+- **New "MONITOR" removal method** for detection-only sources
+- **36 total source categories** for comprehensive privacy protection
+
+---
+
 ## [1.13.0] - 2026-01-23
 
 ### Added
