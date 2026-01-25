@@ -116,12 +116,19 @@ export function checkPermission(
 }
 
 /**
- * Get the effective role for a user (DB role takes precedence)
+ * Get the effective role for a user
+ * ADMIN_EMAILS always grants SUPER_ADMIN (for bootstrap access)
+ * Otherwise, DB role takes precedence, then falls back to env-based role
  */
 export function getEffectiveRole(
   email: string | null | undefined,
   dbRole: string | null | undefined
 ): Role {
+  // ADMIN_EMAILS always grants SUPER_ADMIN (bootstrap override)
+  if (email && ADMIN_EMAILS.includes(email.toLowerCase())) {
+    return "SUPER_ADMIN";
+  }
+
   if (dbRole && Object.keys(ROLE_HIERARCHY).includes(dbRole)) {
     return dbRole as Role;
   }
