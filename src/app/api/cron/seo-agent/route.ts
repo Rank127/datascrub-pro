@@ -41,14 +41,41 @@ async function sendSEOAlertEmail(to: string, subject: string, content: string): 
 // Verify cron secret to prevent unauthorized access
 const CRON_SECRET = process.env.CRON_SECRET;
 
-// Pages to audit
+// Pages to audit - prioritized by SEO importance
 const PAGES_TO_AUDIT = [
+  // High priority - main pages
   "/",
   "/pricing",
   "/how-it-works",
   "/blog",
+  // Comparison pages (high-value keywords)
+  "/compare",
   "/compare/deleteme",
   "/compare/incogni",
+  "/compare/optery",
+  "/compare/kanary",
+  "/compare/privacy-bee",
+  // Data broker removal guides (high SEO value)
+  "/remove-from",
+  "/remove-from/spokeo",
+  "/remove-from/whitepages",
+  "/remove-from/beenverified",
+  "/remove-from/radaris",
+  "/remove-from/intelius",
+  "/remove-from/truepeoplesearch",
+  "/remove-from/fastpeoplesearch",
+  "/remove-from/mylife",
+  "/remove-from/ussearch",
+  "/remove-from/peoplefinder",
+  // Location-based landing pages
+  "/data-removal-california",
+  "/data-removal-texas",
+  "/data-removal-new-york",
+  "/data-removal-florida",
+  // Resource pages
+  "/resources",
+  "/testimonials",
+  // Legal pages (lower priority)
   "/privacy",
   "/terms",
   "/security",

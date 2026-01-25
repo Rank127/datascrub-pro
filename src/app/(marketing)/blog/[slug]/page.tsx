@@ -2,8 +2,42 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllPosts, getPostBySlug } from "@/lib/blog/posts";
-import { BreadcrumbSchema } from "@/components/seo/structured-data";
+import { BreadcrumbSchema, HowToSchema, type HowToStep } from "@/components/seo/structured-data";
 import { Calendar, Clock, ArrowLeft, ArrowRight, User, Tag } from "lucide-react";
+
+// Extract steps from markdown content for HowTo schema
+function extractHowToSteps(content: string): HowToStep[] {
+  const steps: HowToStep[] = [];
+  const stepRegex = /### Step (\d+)[:\s]+([^\n]+)\n+([\s\S]*?)(?=\n### Step|\n## |$)/gi;
+  let match;
+
+  while ((match = stepRegex.exec(content)) !== null) {
+    const stepTitle = match[2].trim();
+    const stepContent = match[3]
+      .replace(/^\d+\.\s+/gm, '') // Remove numbered list prefixes
+      .replace(/^- /gm, '') // Remove bullet prefixes
+      .split('\n')
+      .filter(line => line.trim())
+      .slice(0, 3) // Take first 3 meaningful lines
+      .join(' ')
+      .trim();
+
+    if (stepTitle && stepContent) {
+      steps.push({
+        name: stepTitle,
+        text: stepContent.substring(0, 500), // Limit length
+      });
+    }
+  }
+
+  return steps;
+}
+
+// Check if post is a "How To" guide
+function isHowToPost(title: string, slug: string): boolean {
+  return title.toLowerCase().startsWith('how to') ||
+         slug.startsWith('how-to-');
+}
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -118,6 +152,15 @@ export default async function BlogPostPage({ params }: Props) {
     { name: post.title, url: `https://ghostmydata.com/blog/${post.slug}` },
   ];
 
+  // Extract HowTo steps if this is a "how to" post
+  const isHowTo = isHowToPost(post.title, post.slug);
+  const howToSteps = isHowTo ? extractHowToSteps(post.content) : [];
+
+  // Estimate total time based on content (rough estimate)
+  const estimatedTime = isHowTo
+    ? `PT${Math.max(5, Math.min(30, howToSteps.length * 3))}M`
+    : undefined;
+
   const blogPostSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -167,6 +210,14 @@ export default async function BlogPostPage({ params }: Props) {
   return (
     <>
       <BreadcrumbSchema items={breadcrumbs} />
+      {isHowTo && howToSteps.length > 0 && (
+        <HowToSchema
+          name={post.title}
+          description={post.description}
+          totalTime={estimatedTime || "PT15M"}
+          steps={howToSteps}
+        />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostSchema) }}
