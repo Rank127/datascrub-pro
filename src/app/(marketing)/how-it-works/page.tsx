@@ -65,12 +65,12 @@ const steps = [
     icon: Search,
     title: "Run a Comprehensive Scan",
     description:
-      "Our system searches across 2,000+ data sources including data brokers, breach databases, dark web forums, social media platforms, and 19 AI/deepfake protection sources.",
+      "Our system searches across 2,000+ data sources including data brokers, breach databases, dark web forums, social media platforms, and 60 AI Shield sources.",
     details: [
       "2,000+ data brokers (Spokeo, WhitePages, etc.)",
       "Breach databases (Have I Been Pwned, LeakCheck)",
       "Dark web marketplaces and forums",
-      "19 AI & facial recognition databases",
+      "60 AI Shield sources (5 categories)",
     ],
   },
   {

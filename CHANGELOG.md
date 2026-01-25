@@ -11,8 +11,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Two-factor authentication (2FA)
 - Real dark web scanner integrations
 - Mobile app (React Native)
-- API access for Enterprise users
 - Browser automation for form-based opt-outs (Browserless.io)
+
+---
+
+## [1.22.0] - 2026-01-24
+
+### Added
+- **AI Shield (formerly AI & Deepfake Protection)**
+  - Expanded from 19 to **60 AI sources** across 5 categories:
+    - AI Training (20): OpenAI, Anthropic, Meta, Google, Microsoft, Apple, X/Grok, Reddit, etc.
+    - Facial Recognition (12): Clearview AI, PimEyes, Amazon Rekognition, etc.
+    - Voice Cloning (10): ElevenLabs, Resemble AI, PlayHT, Descript, etc.
+    - Deepfake Video (10): D-ID, HeyGen, Synthesia, Reface, FaceApp, etc.
+    - AI Avatar (8): Lensa AI, DALL-E, Ready Player Me, Pika Labs, etc.
+  - Renamed to "AI Shield" with "deepfake defense" tagline
+
+- **Source Grouping System**
+  - Smart consolidation of related data sources
+  - One removal request can cover multiple related brokers
+  - Groups include: BeenVerified network, Spawning.ai registry, Meta AI ecosystem, etc.
+
+- **Custom Removal Requests (Enterprise)**
+  - Submit any URL for manual removal assistance
+  - 10 requests per month limit
+  - Admin workflow for processing requests
+  - Full API: GET/POST/PATCH/DELETE endpoints
+
+### Changed
+- Updated all marketing pages to reflect 60 AI sources
+- Updated pricing page with "AI Shield - deepfake defense (50+ sources)"
+- Updated sidebar navigation to "AI Shield"
+- Added new data source types to Prisma schema
 
 ---
 

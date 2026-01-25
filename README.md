@@ -11,7 +11,7 @@ Personal data removal service that helps users find and remove their personal in
   - 2,000+ data brokers across 92 categories (Spokeo, WhitePages, BeenVerified, etc.)
   - 2 breach databases (HaveIBeenPwned, LeakCheck)
   - 10 social media platforms
-  - 19 AI & deepfake protection sources (Clearview AI, PimEyes, etc.)
+  - 60 AI Shield sources across 5 categories (AI training, facial recognition, voice cloning, deepfake video, AI avatars)
 - **Automated Removal**: Submit opt-out requests to data brokers automatically
 - **Manual Action Tracking**: Track and manage exposures requiring user intervention
   - Filter by action status (pending, done)

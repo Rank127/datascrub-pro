@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "Is GhostMyData better than Incogni?",
-    answer: "GhostMyData offers more comprehensive protection including dark web monitoring, breach alerts, and covers significantly more data brokers (2,000+ vs 35+) plus 19 AI/deepfake protection sources. Incogni is a budget option but lacks these features.",
+    answer: "GhostMyData offers more comprehensive protection including dark web monitoring, breach alerts, and covers significantly more data brokers (2,000+ vs 35+) plus 60 AI Shield sources. Incogni is a budget option but lacks these features.",
   },
   {
     question: "How much does Incogni cost compared to GhostMyData?",
@@ -56,7 +56,7 @@ const faqs = [
   },
   {
     question: "Which service covers more data brokers?",
-    answer: "GhostMyData covers 2,000+ data brokers plus 19 AI/deepfake protection sources, while Incogni covers approximately 35+ data brokers. GhostMyData offers industry-leading coverage.",
+    answer: "GhostMyData covers 2,000+ data brokers plus 60 AI Shield sources, while Incogni covers approximately 35+ data brokers. GhostMyData offers industry-leading coverage.",
   },
 ];
 
@@ -75,7 +75,7 @@ const comparisonData = [
   },
   {
     feature: "Data Brokers Covered",
-    ghostmydata: "2,000+ (plus 19 AI sources)",
+    ghostmydata: "2,000+ (plus 60 AI Shield sources)",
     incogni: "35+",
     winner: "ghostmydata",
   },
@@ -258,7 +258,7 @@ export default function CompareIncogniPage() {
               </div>
             </div>
             <p className="text-emerald-400 text-sm mt-4">
-              Includes: Dark web monitoring, breach alerts, 2,000+ data brokers, 19 AI sources
+              Includes: Dark web monitoring, breach alerts, 2,000+ data brokers, 60 AI Shield sources
             </p>
           </div>
 

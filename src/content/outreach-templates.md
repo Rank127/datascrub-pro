@@ -132,7 +132,7 @@ I noticed your article ranking the best data removal services and wanted to intr
 **Why GhostMyData stands out**:
 - **Free tier** - Users can scan for free (most competitors don't offer this)
 - **Dark web monitoring** - Included in Enterprise plan
-- **2,000+ data brokers** - Industry-leading coverage (plus 19 AI protection sources)
+- **2,000+ data brokers** - Industry-leading coverage (plus 60 AI Shield sources)
 - **Modern dashboard** - Real-time progress tracking
 
 We'd be happy to provide you with a review account so you can test the service yourself.

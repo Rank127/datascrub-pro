@@ -96,7 +96,7 @@ const dataSources = [
 const faqs = [
   {
     question: "How does GhostMyData find my personal information?",
-    answer: "We scan over 2,000 data sources including people-search sites (Spokeo, WhitePages, BeenVerified), breach databases (Have I Been Pwned), dark web monitoring services, and 19 AI/deepfake protection sources. Our automated system searches for your email addresses, phone numbers, names, and addresses across these sources.",
+    answer: "We scan over 2,000 data sources including people-search sites (Spokeo, WhitePages, BeenVerified), breach databases (Have I Been Pwned), dark web monitoring services, and 60 AI Shield sources. Our automated system searches for your email addresses, phone numbers, names, and addresses across these sources.",
   },
   {
     question: "How long does it take to remove my data?",

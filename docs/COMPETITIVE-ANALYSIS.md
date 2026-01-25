@@ -35,7 +35,7 @@ This report provides a comprehensive analysis of seven key competitors in the pe
 | **Optery** | $39/year | 370-635+ | Hybrid | Free tier, lowest entry price |
 | **Privacy Bee** | ~$95/year | 1,033 | Hybrid | Largest broker coverage |
 | **OneRep** | ~$100/year | 214-235 | Automated | Verification-first approach |
-| **GhostMyData** | $71.88/year | **2,000+** | Automated | Dark web, DNC registry, 19 AI sources, RBAC |
+| **GhostMyData** | $71.88/year | **2,000+** | Automated | Dark web, DNC registry, 60 AI Shield sources, RBAC, custom removals |
 
 ---
 
@@ -340,7 +340,7 @@ Start with the top 10 most common data brokers:
 - Store removal request status and retry logic
 
 #### 1.2 Expand Broker Database ✅ COMPLETED
-**Achieved:** 2,084 sources across 92 categories (+ 19 AI protection sources)
+**Achieved:** 2,084 sources across 92 categories (+ 60 AI Shield sources)
 
 Create a broker database with:
 - Opt-out URL
