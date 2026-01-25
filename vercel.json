@@ -8,26 +8,6 @@
     {
       "source": "/BingSiteAuth.xml",
       "destination": "/api/bing-verify"
-    },
-    {
-      "source": "/",
-      "has": [{ "type": "host", "value": "admin.ghostmydata.com" }],
-      "destination": "/admin"
-    },
-    {
-      "source": "/login",
-      "has": [{ "type": "host", "value": "admin.ghostmydata.com" }],
-      "destination": "/admin/login"
-    },
-    {
-      "source": "/dashboard",
-      "has": [{ "type": "host", "value": "admin.ghostmydata.com" }],
-      "destination": "/admin/dashboard"
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "admin.ghostmydata.com" }],
-      "destination": "/admin/:path*"
     }
   ],
   "crons": [

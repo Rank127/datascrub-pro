@@ -23,6 +23,8 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
   const isApiRoute = nextUrl.pathname.startsWith("/api");
+  const hostname = req.headers.get("host") || "";
+  const isAdminSubdomain = hostname.startsWith("admin.");
 
   // Handle CORS preflight requests
   if (req.method === "OPTIONS" && isApiRoute) {
@@ -30,6 +32,12 @@ export default auth((req) => {
       status: 204,
       headers: corsHeaders,
     });
+  }
+
+  // Handle admin subdomain - rewrite all requests to /admin/*
+  if (isAdminSubdomain && !nextUrl.pathname.startsWith("/admin") && !isApiRoute && !nextUrl.pathname.startsWith("/_next")) {
+    const newPath = nextUrl.pathname === "/" ? "/admin" : `/admin${nextUrl.pathname}`;
+    return NextResponse.rewrite(new URL(newPath, nextUrl));
   }
 
   const isAuthPage =
@@ -55,8 +63,8 @@ export default auth((req) => {
     return response;
   }
 
-  // Redirect logged-in users away from auth pages
-  if (isAuthPage && isLoggedIn) {
+  // Redirect logged-in users away from auth pages (but not on admin subdomain)
+  if (isAuthPage && isLoggedIn && !isAdminSubdomain) {
     return NextResponse.redirect(new URL("/dashboard", nextUrl));
   }
 
@@ -89,13 +97,7 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/admin/:path*",
-    "/login",
-    "/register",
-    "/forgot-password",
-    "/reset-password",
-    // Exclude bing-verify and cron endpoints from auth middleware
-    "/api/((?!bing-verify|cron).*)",
+    // Match all paths except static files and Next.js internals
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
