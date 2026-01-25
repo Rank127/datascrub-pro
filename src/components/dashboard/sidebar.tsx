@@ -31,7 +31,7 @@ const navigation = [
   { name: "Manual Review", href: "/dashboard/manual-review", icon: MousePointerClick },
   { name: "Whitelist", href: "/dashboard/whitelist", icon: ListChecks },
   { name: "Removals", href: "/dashboard/removals", icon: Trash2 },
-  { name: "AI Protection", href: "/dashboard/ai-protection", icon: Bot },
+  { name: "AI Shield", href: "/dashboard/ai-protection", icon: Bot },
   { name: "Alerts", href: "/dashboard/alerts", icon: Bell },
   { name: "Reports", href: "/dashboard/reports", icon: FileText },
   { name: "Do Not Call", href: "/dashboard/dnc", icon: PhoneOff },

@@ -420,7 +420,7 @@ export default function HomePage() {
                 {[
                   "Unlimited scans",
                   "Dark web monitoring",
-                  "AI & Deepfake Protection",
+                  "AI Shield (deepfake defense)",
                   "Do Not Call registration",
                   "Custom removal requests",
                   "Family plan (5 profiles)",

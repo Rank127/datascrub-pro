@@ -199,7 +199,7 @@ export default function AIProtectionPage() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <Bot className="h-7 w-7 text-purple-400" />
-            AI & Deepfake Protection
+            AI Shield
           </h1>
           <p className="text-slate-400 mt-1">
             Protect yourself from AI training datasets, facial recognition, and voice cloning
@@ -218,7 +218,7 @@ export default function AIProtectionPage() {
                   Enterprise Feature
                 </h2>
                 <p className="text-slate-300 max-w-xl">
-                  AI & Deepfake Protection scans 19 sources including AI training datasets,
+                  AI Shield scans 50+ sources including AI training datasets,
                   facial recognition databases, and voice cloning services to protect your
                   identity from unauthorized AI use.
                 </p>
@@ -376,7 +376,7 @@ export default function AIProtectionPage() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <Bot className="h-7 w-7 text-purple-400" />
-            AI & Deepfake Protection
+            AI Shield
             <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
               Enterprise
             </Badge>

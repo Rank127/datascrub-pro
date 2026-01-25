@@ -266,6 +266,53 @@ model DNCRegistration {
   @@index([status])
 }
 
+// Custom removal requests for Enterprise users
+// Allows users to submit URLs not in our standard database
+model CustomRemovalRequest {
+  id            String   @id @default(cuid())
+  userId        String
+
+  // The URL/site where user found their data
+  targetUrl     String
+  siteName      String?  // User-provided or auto-detected site name
+
+  // What data was found
+  dataType      String   // EMAIL, PHONE, NAME, ADDRESS, PHOTO, etc.
+  dataPreview   String?  // Description of what was found
+
+  // Status tracking
+  status        String   @default("PENDING") // PENDING, ASSIGNED, IN_PROGRESS, COMPLETED, REJECTED
+  priority      String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+
+  // Assignment
+  assignedToId  String?  // Admin/support user handling this
+  assignedAt    DateTime?
+
+  // Notes and communication
+  userNotes     String?  // Notes from the user
+  internalNotes String?  // Internal notes (not shown to user)
+  resolution    String?  // How it was resolved (for completed requests)
+
+  // Tracking
+  attempts      Int      @default(0)
+  lastAttemptAt DateTime?
+  lastError     String?
+
+  // Proof screenshots
+  userScreenshot    String?   // Screenshot uploaded by user
+  beforeScreenshot  String?   // Screenshot before removal
+  afterScreenshot   String?   // Screenshot after removal
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  completedAt   DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([assignedToId])
+  @@index([createdAt])
+}
+
 // Audit log for tracking all data access and modifications
 model AuditLog {
   id            String   @id @default(cuid())

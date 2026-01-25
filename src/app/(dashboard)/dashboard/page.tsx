@@ -396,7 +396,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <CardTitle className="text-white flex items-center gap-2">
-                AI & Deepfake Protection
+                AI Shield
                 {stats.userPlan !== "ENTERPRISE" && (
                   <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">
                     Enterprise

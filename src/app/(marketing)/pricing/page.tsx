@@ -86,7 +86,7 @@ const plans = [
       { text: "Everything in Pro", included: true },
       { text: "Unlimited scans", included: true },
       { text: "Dark web monitoring", included: true },
-      { text: "AI & Deepfake Protection (19 sources)", included: true },
+      { text: "AI Shield - deepfake defense (50+ sources)", included: true },
       { text: "Do Not Call (DNC) registration", included: true },
       { text: "Family plan (5 profiles)", included: true },
       { text: "Dedicated support", included: true },

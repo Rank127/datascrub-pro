@@ -23,7 +23,7 @@ export const ScanType = {
 } as const;
 export type ScanType = (typeof ScanType)[keyof typeof ScanType];
 
-// Data Sources
+// Data Sources (expanded for AI Shield - 60+ AI sources)
 export const DataSource = {
   // Data Brokers
   SPOKEO: "SPOKEO",
@@ -53,28 +53,87 @@ export const DataSource = {
   REDDIT: "REDDIT",
   PINTEREST: "PINTEREST",
   YOUTUBE: "YOUTUBE",
-  // AI Training Datasets
+
+  // ==========================================
+  // AI TRAINING DATASETS (20 sources)
+  // ==========================================
   SPAWNING_AI: "SPAWNING_AI",
   LAION_AI: "LAION_AI",
   STABILITY_AI: "STABILITY_AI",
   OPENAI: "OPENAI",
+  ANTHROPIC: "ANTHROPIC",
   MIDJOURNEY: "MIDJOURNEY",
   META_AI: "META_AI",
   GOOGLE_AI: "GOOGLE_AI",
+  MICROSOFT_AI: "MICROSOFT_AI",
   LINKEDIN_AI: "LINKEDIN_AI",
   ADOBE_AI: "ADOBE_AI",
   AMAZON_AI: "AMAZON_AI",
-  // Facial Recognition
+  APPLE_AI: "APPLE_AI",
+  X_AI: "X_AI",
+  REDDIT_AI: "REDDIT_AI",
+  SHUTTERSTOCK_AI: "SHUTTERSTOCK_AI",
+  GETTY_AI: "GETTY_AI",
+  HUGGINGFACE: "HUGGINGFACE",
+  COMMON_CRAWL: "COMMON_CRAWL",
+  COHERE_AI: "COHERE_AI",
+
+  // ==========================================
+  // FACIAL RECOGNITION (12 sources)
+  // ==========================================
   CLEARVIEW_AI: "CLEARVIEW_AI",
   PIMEYES: "PIMEYES",
   FACECHECK_ID: "FACECHECK_ID",
   SOCIAL_CATFISH: "SOCIAL_CATFISH",
   TINEYE: "TINEYE",
   YANDEX_IMAGES: "YANDEX_IMAGES",
-  // Voice Cloning
+  GOOGLE_IMAGES: "GOOGLE_IMAGES",
+  BING_IMAGES: "BING_IMAGES",
+  AMAZON_REKOGNITION: "AMAZON_REKOGNITION",
+  FINDFACE: "FINDFACE",
+  KAIROS: "KAIROS",
+  FACE_PLUS_PLUS: "FACE_PLUS_PLUS",
+
+  // ==========================================
+  // VOICE CLONING (10 sources)
+  // ==========================================
   ELEVENLABS: "ELEVENLABS",
   RESEMBLE_AI: "RESEMBLE_AI",
   MURF_AI: "MURF_AI",
+  PLAY_HT: "PLAY_HT",
+  DESCRIPT: "DESCRIPT",
+  LOVO_AI: "LOVO_AI",
+  REPLICA_STUDIOS: "REPLICA_STUDIOS",
+  COQUI_AI: "COQUI_AI",
+  SPEECHIFY: "SPEECHIFY",
+  WELLSAID_LABS: "WELLSAID_LABS",
+
+  // ==========================================
+  // DEEPFAKE VIDEO (10 sources)
+  // ==========================================
+  D_ID: "D_ID",
+  HEYGEN: "HEYGEN",
+  SYNTHESIA: "SYNTHESIA",
+  REFACE: "REFACE",
+  FACEAPP: "FACEAPP",
+  MYHERITAGE_DEEPNOSTALGIA: "MYHERITAGE_DEEPNOSTALGIA",
+  WOMBO: "WOMBO",
+  DEEP_ART_EFFECTS: "DEEP_ART_EFFECTS",
+  ROOP: "ROOP",
+  RUNWAY_ML: "RUNWAY_ML",
+
+  // ==========================================
+  // AI AVATAR (8 sources)
+  // ==========================================
+  LENSA_AI: "LENSA_AI",
+  READY_PLAYER_ME: "READY_PLAYER_ME",
+  ARTBREEDER: "ARTBREEDER",
+  DALL_E: "DALL_E",
+  STARRY_AI: "STARRY_AI",
+  NIGHTCAFE: "NIGHTCAFE",
+  PIKA_LABS: "PIKA_LABS",
+  SUNO_AI: "SUNO_AI",
+
   OTHER: "OTHER",
 } as const;
 export type DataSource = (typeof DataSource)[keyof typeof DataSource];
@@ -215,6 +274,7 @@ export const PlanFeatures = {
 
 // Data source display names
 export const DataSourceNames: Record<DataSource, string> = {
+  // Data Brokers
   SPOKEO: "Spokeo",
   WHITEPAGES: "WhitePages",
   BEENVERIFIED: "BeenVerified",
@@ -225,12 +285,15 @@ export const DataSourceNames: Record<DataSource, string> = {
   FASTPEOPLESEARCH: "FastPeopleSearch",
   USSEARCH: "USSearch",
   PIPL: "Pipl",
+  // Breaches
   HAVEIBEENPWNED: "Have I Been Pwned",
   DEHASHED: "DeHashed",
   BREACH_DB: "Breach Database",
+  // Dark Web
   DARK_WEB_MARKET: "Dark Web Marketplace",
   PASTE_SITE: "Paste Site",
   DARK_WEB_FORUM: "Dark Web Forum",
+  // Social Media
   LINKEDIN: "LinkedIn",
   FACEBOOK: "Facebook",
   TWITTER: "Twitter/X",
@@ -239,17 +302,29 @@ export const DataSourceNames: Record<DataSource, string> = {
   REDDIT: "Reddit",
   PINTEREST: "Pinterest",
   YOUTUBE: "YouTube",
+
   // AI Training Datasets
   SPAWNING_AI: "Spawning AI (Do Not Train)",
   LAION_AI: "LAION AI Dataset",
   STABILITY_AI: "Stability AI",
   OPENAI: "OpenAI",
+  ANTHROPIC: "Anthropic (Claude)",
   MIDJOURNEY: "Midjourney",
   META_AI: "Meta AI",
-  GOOGLE_AI: "Google AI",
+  GOOGLE_AI: "Google AI (Gemini)",
+  MICROSOFT_AI: "Microsoft AI (Copilot)",
   LINKEDIN_AI: "LinkedIn AI",
   ADOBE_AI: "Adobe Firefly/AI",
-  AMAZON_AI: "Amazon AI",
+  AMAZON_AI: "Amazon AI (Alexa)",
+  APPLE_AI: "Apple Intelligence",
+  X_AI: "X/Twitter AI (Grok)",
+  REDDIT_AI: "Reddit AI Training",
+  SHUTTERSTOCK_AI: "Shutterstock AI",
+  GETTY_AI: "Getty Images AI",
+  HUGGINGFACE: "Hugging Face",
+  COMMON_CRAWL: "Common Crawl",
+  COHERE_AI: "Cohere",
+
   // Facial Recognition
   CLEARVIEW_AI: "Clearview AI",
   PIMEYES: "PimEyes",
@@ -257,10 +332,47 @@ export const DataSourceNames: Record<DataSource, string> = {
   SOCIAL_CATFISH: "Social Catfish",
   TINEYE: "TinEye",
   YANDEX_IMAGES: "Yandex Images",
+  GOOGLE_IMAGES: "Google Images",
+  BING_IMAGES: "Bing Images",
+  AMAZON_REKOGNITION: "Amazon Rekognition",
+  FINDFACE: "FindFace/NTechLab",
+  KAIROS: "Kairos",
+  FACE_PLUS_PLUS: "Face++",
+
   // Voice Cloning
   ELEVENLABS: "ElevenLabs",
   RESEMBLE_AI: "Resemble AI",
   MURF_AI: "Murf AI",
+  PLAY_HT: "PlayHT",
+  DESCRIPT: "Descript Overdub",
+  LOVO_AI: "LOVO AI",
+  REPLICA_STUDIOS: "Replica Studios",
+  COQUI_AI: "Coqui AI",
+  SPEECHIFY: "Speechify",
+  WELLSAID_LABS: "WellSaid Labs",
+
+  // Deepfake Video
+  D_ID: "D-ID",
+  HEYGEN: "HeyGen",
+  SYNTHESIA: "Synthesia",
+  REFACE: "Reface App",
+  FACEAPP: "FaceApp",
+  MYHERITAGE_DEEPNOSTALGIA: "MyHeritage Deep Nostalgia",
+  WOMBO: "Wombo",
+  DEEP_ART_EFFECTS: "Deep Art Effects",
+  ROOP: "Roop/DeepFaceLab",
+  RUNWAY_ML: "Runway ML",
+
+  // AI Avatar
+  LENSA_AI: "Lensa AI",
+  READY_PLAYER_ME: "Ready Player Me",
+  ARTBREEDER: "Artbreeder",
+  DALL_E: "DALL-E (OpenAI)",
+  STARRY_AI: "Starry AI",
+  NIGHTCAFE: "NightCafe",
+  PIKA_LABS: "Pika Labs",
+  SUNO_AI: "Suno AI",
+
   OTHER: "Other",
 };
 
