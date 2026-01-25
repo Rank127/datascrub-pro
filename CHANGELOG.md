@@ -15,9 +15,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.23.0] - 2026-01-24
+## [1.23.0] - 2026-01-25
 
 ### Added
+- **Data Broker Removal Guides** (11 pages)
+  - Hub page at `/remove-from` listing all guides
+  - Individual guides with HowToSchema, FAQSchema, BreadcrumbSchema:
+    - `/remove-from/spokeo`
+    - `/remove-from/whitepages`
+    - `/remove-from/beenverified`
+    - `/remove-from/intelius`
+    - `/remove-from/truepeoplesearch`
+    - `/remove-from/radaris`
+    - `/remove-from/fastpeoplesearch`
+    - `/remove-from/mylife`
+    - `/remove-from/ussearch`
+    - `/remove-from/peoplefinder`
+
+- **Location-Based Landing Pages** (4 pages)
+  - `/data-removal-california` - CCPA rights and compliance
+  - `/data-removal-texas` - TDPSA rights
+  - `/data-removal-new-york` - SHIELD Act protection
+  - `/data-removal-florida` - Sunshine Law challenges
+
+- **Resource Pages** (2 pages)
+  - `/resources` - Privacy guides hub with FAQSchema
+  - `/testimonials` - Customer reviews with ReviewSchema (4.9/5 rating)
+
+- **New SEO Components**
+  - `BrokerRemovalTemplate` - Reusable template for broker removal guides
+  - `HowToSchema` - Structured data for step-by-step guides
+  - `ReviewSchema` - Structured data for testimonials with AggregateRating
+
 - **SEO Documentation** (`docs/SEO-GUIDE.md`)
   - Comprehensive SEO audit report and best practices
   - Technical SEO setup documentation
@@ -36,14 +65,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improves search engine navigation understanding
 
 ### Changed
+- Blog posts now auto-generate HowToSchema for "How to" articles
+- Sitemap expanded from 30 to 46 URLs
+- SEO cron job now monitors 30+ pages (including all new pages)
 - Auth layout now has `noindex` directive for login/register pages
 - Compare main page now includes OpenGraph metadata
-- Updated sitemap with 3 new comparison pages
 - Compare hub page now displays all 5 competitors
 
 ### Fixed
 - Missing OpenGraph images on compare main page
 - Auth pages (login/register) now properly excluded from indexing
+- CORS headers now applied to all API responses (not just OPTIONS)
 
 ---
 
