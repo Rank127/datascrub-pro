@@ -16,6 +16,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.21.0] - 2026-01-24
+
+### Added
+- **🎉 2,000+ SOURCES MILESTONE!**
+  - Total source directory: **2,084 sources** across **92 categories**
+  - Added 584 additional data brokers
+  - **19 AI & Deepfake Protection sources** (Enterprise)
+    - 10 AI Training datasets (OpenAI, Stability AI, LAION, etc.)
+    - 6 Facial Recognition databases (Clearview AI, PimEyes, etc.)
+    - 3 Voice Cloning services (ElevenLabs, Resemble AI, etc.)
+- **Google Analytics 4 event tracking**
+  - Track conversions: sign_up, login, scan_started, scan_completed
+  - Track engagement: removal_requested, profile_completed, view_pricing
+  - Begin checkout tracking for pricing page
+- **Daily link checker cron job**
+  - Automatically detects broken opt-out URLs
+  - Email alerts to admins for broken links
+
+### Changed
+- Updated all marketing pages to reflect 2,000+ sources
+- Updated compare pages (vs DeleteMe, vs Incogni) with new coverage stats
+- Updated blog posts and outreach templates with accurate numbers
+- Updated README and documentation with 2,000+ sources, 19 AI sources
+- Improved Manual Review page with grouped exposures by broker
+
+---
+
 ## [1.20.0] - 2026-01-23
 
 ### Added

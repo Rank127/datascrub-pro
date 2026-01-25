@@ -48,7 +48,7 @@ const faqs = [
   },
   {
     question: "Which service removes more data brokers?",
-    answer: "GhostMyData covers 50+ data brokers while DeleteMe covers approximately 40+ data brokers. Both services target major people-search sites like Spokeo, WhitePages, and BeenVerified.",
+    answer: "GhostMyData covers 2,000+ data brokers (plus 19 AI/deepfake protection sources) while DeleteMe covers approximately 40+ data brokers. GhostMyData has the most comprehensive coverage in the industry.",
   },
   {
     question: "Does DeleteMe have dark web monitoring?",
@@ -81,7 +81,7 @@ const comparisonData = [
   },
   {
     feature: "Data Brokers Covered",
-    ghostmydata: "50+",
+    ghostmydata: "2,000+ (plus 19 AI sources)",
     deleteme: "40+",
     winner: "ghostmydata",
   },
@@ -303,7 +303,7 @@ export default function CompareDeleteMePage() {
             "Free tier to try before you buy",
             "Dark web monitoring included",
             "Monthly billing option available",
-            "More data brokers covered (50+)",
+            "More data brokers covered (2,000+)",
             "Faster removal processing",
             "Real-time dashboard vs quarterly reports",
             "Larger family plans (5 profiles)",

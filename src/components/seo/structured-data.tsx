@@ -307,7 +307,7 @@ export function PricingSchema() {
           ratingValue: "5",
           bestRating: "5",
         },
-        reviewBody: "GhostMyData removed my data from over 40 data brokers. Highly recommend for anyone concerned about privacy.",
+        reviewBody: "GhostMyData removed my data from over 100 data brokers. With coverage of 2,000+ sources, they're the most comprehensive service I've found. Highly recommend for anyone concerned about privacy.",
       },
       {
         "@type": "Review",

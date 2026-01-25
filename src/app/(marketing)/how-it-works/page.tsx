@@ -15,7 +15,7 @@ import {
 export const metadata: Metadata = {
   title: "How It Works - 5-Step Data Removal Process",
   description:
-    "Learn how GhostMyData removes your personal data in 5 simple steps: Create profile, scan 50+ sources, review exposures, automated removal, and continuous monitoring.",
+    "Learn how GhostMyData removes your personal data in 5 simple steps: Create profile, scan 2,000+ sources, review exposures, automated removal, and continuous monitoring.",
   keywords: [
     "how data removal works",
     "data broker opt out process",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "How GhostMyData Works - 5-Step Data Removal",
     description:
-      "Our automated 5-step process finds and removes your data from 50+ sources with 98% success rate.",
+      "Our automated 5-step process finds and removes your data from 2,000+ sources with 98% success rate.",
     url: "https://ghostmydata.com/how-it-works",
     type: "website",
     images: [
@@ -65,12 +65,12 @@ const steps = [
     icon: Search,
     title: "Run a Comprehensive Scan",
     description:
-      "Our system searches across 50+ data sources including data brokers, breach databases, dark web forums, and social media platforms.",
+      "Our system searches across 2,000+ data sources including data brokers, breach databases, dark web forums, social media platforms, and 19 AI/deepfake protection sources.",
     details: [
-      "Data brokers (Spokeo, WhitePages, etc.)",
-      "Breach databases (Have I Been Pwned)",
+      "2,000+ data brokers (Spokeo, WhitePages, etc.)",
+      "Breach databases (Have I Been Pwned, LeakCheck)",
       "Dark web marketplaces and forums",
-      "Social media profiles",
+      "19 AI & facial recognition databases",
     ],
   },
   {

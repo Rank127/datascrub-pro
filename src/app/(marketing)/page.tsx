@@ -90,13 +90,13 @@ const dataSources = [
   { name: "Dark Web Forums", type: "Dark Web" },
   { name: "LinkedIn", type: "Social Media" },
   { name: "Facebook", type: "Social Media" },
-  { name: "And 50+ more...", type: "" },
+  { name: "And 2,000+ more...", type: "" },
 ];
 
 const faqs = [
   {
     question: "How does GhostMyData find my personal information?",
-    answer: "We scan over 50 data sources including people-search sites (Spokeo, WhitePages, BeenVerified), breach databases (Have I Been Pwned), and dark web monitoring services. Our automated system searches for your email addresses, phone numbers, names, and addresses across these sources.",
+    answer: "We scan over 2,000 data sources including people-search sites (Spokeo, WhitePages, BeenVerified), breach databases (Have I Been Pwned), dark web monitoring services, and 19 AI/deepfake protection sources. Our automated system searches for your email addresses, phone numbers, names, and addresses across these sources.",
   },
   {
     question: "How long does it take to remove my data?",
@@ -130,7 +130,7 @@ const faqs = [
 
 const stats = [
   { value: "200M+", label: "Data points scanned" },
-  { value: "50+", label: "Data sources" },
+  { value: "2,000+", label: "Data sources" },
   { value: "98%", label: "Removal success rate" },
   { value: "24/7", label: "Monitoring" },
 ];
@@ -305,7 +305,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            We Monitor 50+ Data Sources
+            We Monitor 2,000+ Data Sources
           </h2>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
             From major data brokers to breach databases and dark web forums.

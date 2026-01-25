@@ -218,7 +218,7 @@ export default function AIProtectionPage() {
                   Enterprise Feature
                 </h2>
                 <p className="text-slate-300 max-w-xl">
-                  AI & Deepfake Protection scans 18 sources including AI training datasets,
+                  AI & Deepfake Protection scans 19 sources including AI training datasets,
                   facial recognition databases, and voice cloning services to protect your
                   identity from unauthorized AI use.
                 </p>
