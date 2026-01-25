@@ -1,37 +1,37 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, X, ArrowRight, Shield, DollarSign, Clock, Zap } from "lucide-react";
+import { CheckCircle, ArrowRight, Shield, DollarSign, Zap, Database } from "lucide-react";
 import { FAQSchema, BreadcrumbSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {
-  title: "GhostMyData vs DeleteMe: Which Data Removal Service is Better? (2026)",
+  title: "GhostMyData vs Optery: Complete Comparison (2026)",
   description:
-    "Detailed comparison of GhostMyData and DeleteMe. Compare pricing, features, data broker coverage, and removal success rates to choose the best data removal service.",
+    "Compare GhostMyData vs Optery data removal services. See pricing, features, data broker coverage, and which service offers better privacy protection.",
   keywords: [
-    "ghostmydata vs deleteme",
-    "deleteme alternative",
-    "deleteme comparison",
+    "ghostmydata vs optery",
+    "optery alternative",
+    "optery comparison",
     "best data removal service",
+    "optery review",
     "data broker removal comparison",
-    "deleteme review",
-    "privacy service comparison",
+    "optery pricing",
   ],
   alternates: {
-    canonical: "https://ghostmydata.com/compare/deleteme",
+    canonical: "https://ghostmydata.com/compare/optery",
   },
   openGraph: {
-    title: "GhostMyData vs DeleteMe - Data Removal Service Comparison",
+    title: "GhostMyData vs Optery - Data Removal Comparison",
     description:
-      "Side-by-side comparison of GhostMyData and DeleteMe. Find out which data removal service offers better value.",
-    url: "https://ghostmydata.com/compare/deleteme",
+      "Detailed comparison of GhostMyData and Optery. Find out which privacy service is right for you.",
+    url: "https://ghostmydata.com/compare/optery",
     type: "article",
     images: [
       {
         url: "https://ghostmydata.com/og-image.png",
         width: 1200,
         height: 630,
-        alt: "GhostMyData vs DeleteMe Comparison",
+        alt: "GhostMyData vs Optery Comparison",
       },
     ],
   },
@@ -39,24 +39,24 @@ export const metadata: Metadata = {
 
 const faqs = [
   {
-    question: "Is GhostMyData better than DeleteMe?",
-    answer: "GhostMyData offers more features at a comparable price, including dark web monitoring, a free tier, and monthly billing options. DeleteMe has been operating longer (since 2011), but lacks modern features like dark web monitoring and requires annual billing.",
+    question: "Is GhostMyData better than Optery?",
+    answer: "GhostMyData offers more comprehensive protection with 2,000+ data brokers (plus 60 AI Shield sources), dark web monitoring, and breach alerts. Optery has a lower entry price but covers fewer brokers (370-635) and lacks dark web monitoring features.",
   },
   {
-    question: "How much does DeleteMe cost compared to GhostMyData?",
-    answer: "DeleteMe costs $129/year (no monthly option) for individual plans. GhostMyData offers a free tier, and paid plans starting at $11.99/month with both monthly and annual billing options.",
+    question: "How much does Optery cost compared to GhostMyData?",
+    answer: "Optery's Core plan starts at $39/year ($3.25/mo), while their Ultimate plan is $249/year. GhostMyData offers a free tier, with Pro at $11.99/month including more features like breach monitoring.",
   },
   {
-    question: "Which service removes more data brokers?",
-    answer: "GhostMyData covers 2,000+ data brokers (plus 60 AI Shield sources) while DeleteMe covers approximately 40+ data brokers. GhostMyData has the most comprehensive coverage in the industry.",
+    question: "Does Optery have dark web monitoring?",
+    answer: "No, Optery does not offer dark web monitoring at any tier. GhostMyData includes dark web monitoring in its Enterprise plan, alerting you when your data appears on dark web marketplaces.",
   },
   {
-    question: "Does DeleteMe have dark web monitoring?",
-    answer: "No, DeleteMe does not offer dark web monitoring. GhostMyData includes dark web monitoring in its Enterprise plan, alerting you when your data appears on dark web marketplaces and forums.",
+    question: "Which service has better data broker coverage?",
+    answer: "GhostMyData covers 2,000+ data brokers plus 60 AI Shield sources, while Optery covers 370-635 brokers depending on your plan. GhostMyData offers more comprehensive coverage.",
   },
   {
-    question: "Can I try these services before paying?",
-    answer: "GhostMyData offers a free tier that includes a comprehensive scan and manual removal guides. DeleteMe does not have a free tier, but offers a 30-day money-back guarantee.",
+    question: "Does Optery have a free tier?",
+    answer: "Optery offers a limited free tier for self-service removal guides. GhostMyData's free tier includes a comprehensive scan across 2,000+ sources with manual removal guides.",
   },
 ];
 
@@ -64,73 +64,61 @@ const comparisonData = [
   {
     feature: "Starting Price",
     ghostmydata: "Free (paid from $11.99/mo)",
-    deleteme: "$10.75/mo (billed annually)",
-    winner: "ghostmydata",
+    optery: "$3.25/mo (annual billing)",
+    winner: "optery",
   },
   {
     feature: "Free Tier",
-    ghostmydata: "Yes - includes scan + manual guides",
-    deleteme: "No",
-    winner: "ghostmydata",
-  },
-  {
-    feature: "Monthly Billing Option",
-    ghostmydata: "Yes",
-    deleteme: "No (annual only)",
+    ghostmydata: "Yes - full scan + guides",
+    optery: "Limited self-service",
     winner: "ghostmydata",
   },
   {
     feature: "Data Brokers Covered",
     ghostmydata: "2,000+ (plus 60 AI Shield sources)",
-    deleteme: "40+",
+    optery: "370-635 (varies by plan)",
     winner: "ghostmydata",
   },
   {
     feature: "Dark Web Monitoring",
-    ghostmydata: "Yes (Enterprise plan)",
-    deleteme: "No",
+    ghostmydata: "Yes (Enterprise)",
+    optery: "No",
     winner: "ghostmydata",
   },
   {
     feature: "Breach Monitoring",
     ghostmydata: "Yes (all plans)",
-    deleteme: "Limited",
+    optery: "No",
     winner: "ghostmydata",
   },
   {
     feature: "Family Plans",
-    ghostmydata: "Yes (up to 5 profiles)",
-    deleteme: "Yes (2 people)",
+    ghostmydata: "Yes (5 profiles)",
+    optery: "Business plans only",
     winner: "ghostmydata",
   },
   {
     feature: "Do Not Call Registration",
     ghostmydata: "Yes (Enterprise)",
-    deleteme: "No",
+    optery: "No",
     winner: "ghostmydata",
   },
   {
-    feature: "Removal Time",
-    ghostmydata: "1-7 days average",
-    deleteme: "7-14 days average",
-    winner: "ghostmydata",
+    feature: "Custom Removal Requests",
+    ghostmydata: "Yes (Enterprise)",
+    optery: "Yes (Ultimate tier)",
+    winner: "tie",
   },
   {
-    feature: "Privacy Reports",
-    ghostmydata: "Real-time dashboard",
-    deleteme: "Quarterly reports",
-    winner: "ghostmydata",
-  },
-  {
-    feature: "Company Founded",
-    ghostmydata: "2024",
-    deleteme: "2011",
-    winner: "deleteme",
+    feature: "Dashboard Quality",
+    ghostmydata: "Real-time with detailed tracking",
+    optery: "Before/after screenshots",
+    winner: "tie",
   },
   {
     feature: "Money-Back Guarantee",
     ghostmydata: "30 days",
-    deleteme: "30 days",
+    optery: "30 days",
     winner: "tie",
   },
 ];
@@ -138,10 +126,10 @@ const comparisonData = [
 const breadcrumbs = [
   { name: "Home", url: "https://ghostmydata.com" },
   { name: "Compare", url: "https://ghostmydata.com/compare" },
-  { name: "GhostMyData vs DeleteMe", url: "https://ghostmydata.com/compare/deleteme" },
+  { name: "GhostMyData vs Optery", url: "https://ghostmydata.com/compare/optery" },
 ];
 
-export default function CompareDeleteMePage() {
+export default function CompareOpteryPage() {
   return (
     <>
     <BreadcrumbSchema items={breadcrumbs} />
@@ -150,11 +138,11 @@ export default function CompareDeleteMePage() {
       {/* Header */}
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          GhostMyData vs DeleteMe
+          GhostMyData vs Optery
         </h1>
         <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-          A detailed comparison to help you choose the best data removal service
-          for your privacy needs.
+          Compare two data removal services to find the best protection
+          for your personal information.
         </p>
       </div>
 
@@ -165,13 +153,14 @@ export default function CompareDeleteMePage() {
           Quick Verdict
         </h2>
         <p className="text-slate-300 text-lg mb-4">
-          <strong className="text-white">GhostMyData</strong> offers more features at a lower price point,
-          including dark web monitoring and a free tier. <strong className="text-white">DeleteMe</strong> has
-          a longer track record but lacks modern features like dark web monitoring and requires annual billing.
+          <strong className="text-white">GhostMyData</strong> offers more comprehensive protection with
+          dark web monitoring, breach alerts, and 3x more data broker coverage.
+          <strong className="text-white"> Optery</strong> has a lower entry price point but lacks advanced
+          security features.
         </p>
         <p className="text-slate-400">
-          Choose GhostMyData for better value and comprehensive protection. Choose DeleteMe if you
-          prioritize company longevity over features.
+          Choose GhostMyData for complete privacy protection. Choose Optery if you
+          want the absolute cheapest option and only need basic data broker removal.
         </p>
       </div>
 
@@ -179,12 +168,12 @@ export default function CompareDeleteMePage() {
       <div className="grid md:grid-cols-3 gap-8 mb-16">
         <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
           <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
-            <DollarSign className="h-6 w-6 text-emerald-500" />
+            <Database className="h-6 w-6 text-emerald-500" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Better Pricing</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">More Coverage</h3>
           <p className="text-slate-400">
-            GhostMyData offers a free tier and monthly billing from $11.99/mo.
-            DeleteMe requires $129/year upfront (no monthly option).
+            GhostMyData covers 2,000+ data brokers plus 60 AI Shield sources.
+            Optery covers 370-635 depending on your plan tier.
           </p>
         </div>
 
@@ -192,21 +181,21 @@ export default function CompareDeleteMePage() {
           <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
             <Shield className="h-6 w-6 text-emerald-500" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">More Protection</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">Advanced Security</h3>
           <p className="text-slate-400">
             GhostMyData includes dark web monitoring and breach alerts.
-            DeleteMe focuses only on data broker removal.
+            Optery focuses only on data broker removal.
           </p>
         </div>
 
         <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
           <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
-            <Clock className="h-6 w-6 text-emerald-500" />
+            <DollarSign className="h-6 w-6 text-emerald-500" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Faster Removals</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">Better Value</h3>
           <p className="text-slate-400">
-            GhostMyData processes removals in 1-7 days on average.
-            DeleteMe typically takes 7-14 days for initial removals.
+            GhostMyData&apos;s free tier includes comprehensive scanning.
+            Optery&apos;s free tier is limited to self-service guides.
           </p>
         </div>
       </div>
@@ -214,7 +203,7 @@ export default function CompareDeleteMePage() {
       {/* Comparison Table */}
       <div className="mb-16">
         <h2 className="text-2xl font-bold text-white mb-8 text-center">
-          Feature-by-Feature Comparison
+          Feature Comparison
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
@@ -222,7 +211,7 @@ export default function CompareDeleteMePage() {
               <tr className="border-b border-slate-700">
                 <th className="text-left py-4 px-4 text-slate-400 font-medium">Feature</th>
                 <th className="text-center py-4 px-4 text-emerald-400 font-semibold">GhostMyData</th>
-                <th className="text-center py-4 px-4 text-slate-300 font-semibold">DeleteMe</th>
+                <th className="text-center py-4 px-4 text-slate-300 font-semibold">Optery</th>
               </tr>
             </thead>
             <tbody>
@@ -235,10 +224,10 @@ export default function CompareDeleteMePage() {
                       {row.ghostmydata}
                     </div>
                   </td>
-                  <td className={`py-4 px-4 text-center ${row.winner === "deleteme" ? "text-blue-400" : "text-slate-400"}`}>
+                  <td className={`py-4 px-4 text-center ${row.winner === "optery" ? "text-blue-400" : "text-slate-400"}`}>
                     <div className="flex items-center justify-center gap-2">
-                      {row.winner === "deleteme" && <CheckCircle className="h-4 w-4" />}
-                      {row.deleteme}
+                      {row.winner === "optery" && <CheckCircle className="h-4 w-4" />}
+                      {row.optery}
                     </div>
                   </td>
                 </tr>
@@ -250,7 +239,7 @@ export default function CompareDeleteMePage() {
 
       {/* Pricing Comparison */}
       <div className="mb-16">
-        <h2 className="text-2xl font-bold text-white mb-8 text-center">Pricing Comparison</h2>
+        <h2 className="text-2xl font-bold text-white mb-8 text-center">Pricing Breakdown</h2>
         <div className="grid md:grid-cols-2 gap-8">
           {/* GhostMyData */}
           <div className="p-8 bg-emerald-500/10 rounded-2xl border-2 border-emerald-500">
@@ -261,41 +250,43 @@ export default function CompareDeleteMePage() {
                 <span className="text-white font-semibold">$0</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
-                <span className="text-slate-300">Pro Plan (monthly)</span>
+                <span className="text-slate-300">Pro Plan</span>
                 <span className="text-white font-semibold">$11.99/mo</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
-                <span className="text-slate-300">Pro Plan (annual)</span>
-                <span className="text-white font-semibold">$95.88/yr</span>
-              </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-slate-300">Enterprise (with dark web)</span>
+                <span className="text-slate-300">Enterprise (dark web)</span>
                 <span className="text-white font-semibold">$29/mo</span>
               </div>
             </div>
+            <p className="text-emerald-400 text-sm mt-4">
+              Includes: Dark web monitoring, breach alerts, 2,000+ data brokers, 60 AI Shield sources
+            </p>
           </div>
 
-          {/* DeleteMe */}
+          {/* Optery */}
           <div className="p-8 bg-slate-800/50 rounded-2xl border border-slate-700">
-            <h3 className="text-2xl font-bold text-white mb-4">DeleteMe</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">Optery</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b border-slate-700">
-                <span className="text-slate-300">Free Plan</span>
-                <span className="text-slate-500">Not available</span>
+                <span className="text-slate-300">Free Basic</span>
+                <span className="text-white font-semibold">$0 (limited)</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-slate-700">
-                <span className="text-slate-300">Individual (monthly)</span>
-                <span className="text-slate-500">Not available</span>
+                <span className="text-slate-300">Core (370 sites)</span>
+                <span className="text-white font-semibold">$3.25/mo (annual)</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-slate-700">
-                <span className="text-slate-300">Individual (annual)</span>
-                <span className="text-white font-semibold">$129/yr</span>
+                <span className="text-slate-300">Extended (540 sites)</span>
+                <span className="text-white font-semibold">$12.42/mo (annual)</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-slate-300">Family (2 people)</span>
-                <span className="text-white font-semibold">$229/yr</span>
+                <span className="text-slate-300">Ultimate (635 sites)</span>
+                <span className="text-white font-semibold">$20.75/mo (annual)</span>
               </div>
             </div>
+            <p className="text-slate-500 text-sm mt-4">
+              Data broker removal only - no dark web or breach monitoring
+            </p>
           </div>
         </div>
       </div>
@@ -303,18 +294,18 @@ export default function CompareDeleteMePage() {
       {/* Why Choose GhostMyData */}
       <div className="mb-16">
         <h2 className="text-2xl font-bold text-white mb-8 text-center">
-          Why Choose GhostMyData Over DeleteMe
+          Why Choose GhostMyData Over Optery
         </h2>
         <div className="grid md:grid-cols-2 gap-6">
           {[
-            "Free tier to try before you buy",
             "Dark web monitoring included",
-            "Monthly billing option available",
-            "More data brokers covered (2,000+)",
-            "Faster removal processing",
-            "Real-time dashboard vs quarterly reports",
-            "Larger family plans (5 profiles)",
-            "Breach monitoring on all plans",
+            "Breach notification alerts",
+            "3x more data broker coverage (2,000+ vs 635)",
+            "AI Shield with 60 additional sources",
+            "Family plans for 5 profiles",
+            "Do Not Call Registry integration",
+            "Custom removal requests (Enterprise)",
+            "More comprehensive free tier",
           ].map((benefit) => (
             <div key={benefit} className="flex items-center gap-3 p-4 bg-slate-800/50 rounded-lg">
               <CheckCircle className="h-5 w-5 text-emerald-500 flex-shrink-0" />
@@ -324,24 +315,24 @@ export default function CompareDeleteMePage() {
         </div>
       </div>
 
-      {/* When to Choose DeleteMe */}
+      {/* When to Choose Optery */}
       <div className="mb-16 p-8 bg-slate-800/30 rounded-2xl border border-slate-700">
-        <h2 className="text-2xl font-bold text-white mb-4">When to Choose DeleteMe</h2>
+        <h2 className="text-2xl font-bold text-white mb-4">When to Choose Optery</h2>
         <p className="text-slate-400 mb-4">
-          DeleteMe might be the better choice if:
+          Optery might be the better choice if:
         </p>
         <ul className="space-y-2 text-slate-400">
           <li className="flex items-start gap-2">
-            <span className="text-slate-500">•</span>
-            You prioritize company longevity (DeleteMe has been operating since 2011)
+            <span className="text-slate-500">-</span>
+            Budget is your primary concern and $39/year is your limit
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-slate-500">•</span>
-            You prefer annual billing and don&apos;t mind the upfront cost
+            <span className="text-slate-500">-</span>
+            You only need basic data broker removal without advanced security
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-slate-500">•</span>
-            You don&apos;t need dark web monitoring features
+            <span className="text-slate-500">-</span>
+            You prefer their patented before/after screenshot system
           </li>
         </ul>
       </div>
@@ -369,11 +360,11 @@ export default function CompareDeleteMePage() {
       {/* CTA */}
       <div className="text-center p-8 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20">
         <h2 className="text-3xl font-bold text-white mb-4">
-          Ready to Try GhostMyData?
+          See What GhostMyData Can Do For You
         </h2>
         <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
-          Start with a free scan to see where your data is exposed.
-          No credit card required, no commitment.
+          Start with a free scan - no credit card required. See exactly where
+          your personal data is exposed before you decide.
         </p>
         <Link href="/register">
           <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-lg px-8">

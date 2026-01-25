@@ -5,16 +5,34 @@ import { ArrowRight, Shield, CheckCircle } from "lucide-react";
 export const metadata: Metadata = {
   title: "Compare Data Removal Services - GhostMyData vs Competitors",
   description:
-    "Compare GhostMyData with other data removal services like DeleteMe, Incogni, and more. Find the best privacy protection service for your needs.",
+    "Compare GhostMyData with other data removal services like DeleteMe, Incogni, Optery, and more. Find the best privacy protection service for your needs.",
   keywords: [
     "data removal service comparison",
     "best data removal service",
     "deleteme alternative",
     "incogni alternative",
+    "optery alternative",
+    "kanary alternative",
+    "privacy bee alternative",
     "privacy service comparison",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/compare",
+  },
+  openGraph: {
+    title: "Compare Data Removal Services - GhostMyData vs Competitors",
+    description:
+      "Compare GhostMyData with DeleteMe, Incogni, Optery, Kanary, and Privacy Bee. Find the best data removal service for your needs.",
+    url: "https://ghostmydata.com/compare",
+    type: "website",
+    images: [
+      {
+        url: "https://ghostmydata.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "GhostMyData Data Removal Service Comparison",
+      },
+    ],
   },
 };
 
@@ -39,6 +57,39 @@ const comparisons = [
       "Family plans available",
       "Free tier to try first",
       "Breach monitoring included",
+    ],
+  },
+  {
+    competitor: "Optery",
+    slug: "optery",
+    description: "Budget-focused with free tier",
+    advantages: [
+      "3x more data broker coverage",
+      "Dark web monitoring included",
+      "AI Shield with 60 sources",
+      "Better free tier features",
+    ],
+  },
+  {
+    competitor: "Kanary",
+    slug: "kanary",
+    description: "Mobile app focused service",
+    advantages: [
+      "6x more data broker coverage",
+      "Dark web monitoring included",
+      "Lower monthly pricing",
+      "Breach alerts on all plans",
+    ],
+  },
+  {
+    competitor: "Privacy Bee",
+    slug: "privacy-bee",
+    description: "Enterprise-focused with SOC 2 certification",
+    advantages: [
+      "Nearly 2x broker coverage",
+      "Free tier available",
+      "More affordable Enterprise",
+      "AI Shield with 60 sources",
     ],
   },
 ];

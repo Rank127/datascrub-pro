@@ -15,6 +15,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.23.0] - 2026-01-24
+
+### Added
+- **SEO Documentation** (`docs/SEO-GUIDE.md`)
+  - Comprehensive SEO audit report and best practices
+  - Technical SEO setup documentation
+  - Structured data implementation guide
+  - Keyword strategy and content optimization guidelines
+  - Comparison pages strategy and templates
+
+- **New Comparison Pages**
+  - GhostMyData vs Optery (`/compare/optery`)
+  - GhostMyData vs Kanary (`/compare/kanary`)
+  - GhostMyData vs Privacy Bee (`/compare/privacy-bee`)
+  - All pages include FAQSchema and BreadcrumbSchema
+
+- **BreadcrumbSchema** on all comparison pages
+  - Added to DeleteMe, Incogni, Optery, Kanary, Privacy Bee comparisons
+  - Improves search engine navigation understanding
+
+### Changed
+- Auth layout now has `noindex` directive for login/register pages
+- Compare main page now includes OpenGraph metadata
+- Updated sitemap with 3 new comparison pages
+- Compare hub page now displays all 5 competitors
+
+### Fixed
+- Missing OpenGraph images on compare main page
+- Auth pages (login/register) now properly excluded from indexing
+
+---
+
 ## [1.22.0] - 2026-01-24
 
 ### Added

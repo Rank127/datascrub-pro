@@ -1,37 +1,37 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, X, ArrowRight, Shield, DollarSign, Clock, Zap } from "lucide-react";
+import { CheckCircle, ArrowRight, Shield, Database, Zap, DollarSign } from "lucide-react";
 import { FAQSchema, BreadcrumbSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {
-  title: "GhostMyData vs DeleteMe: Which Data Removal Service is Better? (2026)",
+  title: "GhostMyData vs Privacy Bee: Complete Comparison (2026)",
   description:
-    "Detailed comparison of GhostMyData and DeleteMe. Compare pricing, features, data broker coverage, and removal success rates to choose the best data removal service.",
+    "Compare GhostMyData vs Privacy Bee data removal services. See pricing, data broker coverage, dark web monitoring, and which offers better value.",
   keywords: [
-    "ghostmydata vs deleteme",
-    "deleteme alternative",
-    "deleteme comparison",
+    "ghostmydata vs privacy bee",
+    "privacy bee alternative",
+    "privacy bee comparison",
     "best data removal service",
+    "privacy bee review",
     "data broker removal comparison",
-    "deleteme review",
-    "privacy service comparison",
+    "privacy bee pricing",
   ],
   alternates: {
-    canonical: "https://ghostmydata.com/compare/deleteme",
+    canonical: "https://ghostmydata.com/compare/privacy-bee",
   },
   openGraph: {
-    title: "GhostMyData vs DeleteMe - Data Removal Service Comparison",
+    title: "GhostMyData vs Privacy Bee - Data Removal Comparison",
     description:
-      "Side-by-side comparison of GhostMyData and DeleteMe. Find out which data removal service offers better value.",
-    url: "https://ghostmydata.com/compare/deleteme",
+      "Detailed comparison of GhostMyData and Privacy Bee. Find out which privacy service is right for you.",
+    url: "https://ghostmydata.com/compare/privacy-bee",
     type: "article",
     images: [
       {
         url: "https://ghostmydata.com/og-image.png",
         width: 1200,
         height: 630,
-        alt: "GhostMyData vs DeleteMe Comparison",
+        alt: "GhostMyData vs Privacy Bee Comparison",
       },
     ],
   },
@@ -39,24 +39,24 @@ export const metadata: Metadata = {
 
 const faqs = [
   {
-    question: "Is GhostMyData better than DeleteMe?",
-    answer: "GhostMyData offers more features at a comparable price, including dark web monitoring, a free tier, and monthly billing options. DeleteMe has been operating longer (since 2011), but lacks modern features like dark web monitoring and requires annual billing.",
+    question: "Is GhostMyData better than Privacy Bee?",
+    answer: "GhostMyData offers more data broker coverage (2,000+ vs 1,033) at a lower price point with additional AI Shield sources. Privacy Bee includes dark web monitoring in Pro tier while GhostMyData includes it in Enterprise. For overall value, GhostMyData is the better choice.",
   },
   {
-    question: "How much does DeleteMe cost compared to GhostMyData?",
-    answer: "DeleteMe costs $129/year (no monthly option) for individual plans. GhostMyData offers a free tier, and paid plans starting at $11.99/month with both monthly and annual billing options.",
+    question: "How much does Privacy Bee cost compared to GhostMyData?",
+    answer: "Privacy Bee Essentials costs ~$95/year, Pro is $197/year, and Signature is $799/year. GhostMyData offers a free tier, with Pro at $143.88/year and Enterprise at $359.88/year including more broker coverage.",
   },
   {
-    question: "Which service removes more data brokers?",
-    answer: "GhostMyData covers 2,000+ data brokers (plus 60 AI Shield sources) while DeleteMe covers approximately 40+ data brokers. GhostMyData has the most comprehensive coverage in the industry.",
+    question: "Which service covers more data brokers?",
+    answer: "GhostMyData covers 2,000+ data brokers plus 60 AI Shield sources. Privacy Bee covers 1,033 data brokers. GhostMyData offers nearly double the coverage.",
   },
   {
-    question: "Does DeleteMe have dark web monitoring?",
-    answer: "No, DeleteMe does not offer dark web monitoring. GhostMyData includes dark web monitoring in its Enterprise plan, alerting you when your data appears on dark web marketplaces and forums.",
+    question: "Does Privacy Bee have dark web monitoring?",
+    answer: "Yes, Privacy Bee includes dark web monitoring starting at their Pro tier ($197/year). GhostMyData includes dark web monitoring in the Enterprise plan ($359.88/year) but offers more broker coverage overall.",
   },
   {
-    question: "Can I try these services before paying?",
-    answer: "GhostMyData offers a free tier that includes a comprehensive scan and manual removal guides. DeleteMe does not have a free tier, but offers a 30-day money-back guarantee.",
+    question: "Which service offers better value?",
+    answer: "GhostMyData offers better value with a free tier, more data broker coverage (2,000+ vs 1,033), and lower starting prices. Privacy Bee charges more for fewer features at the entry level.",
   },
 ];
 
@@ -64,73 +64,61 @@ const comparisonData = [
   {
     feature: "Starting Price",
     ghostmydata: "Free (paid from $11.99/mo)",
-    deleteme: "$10.75/mo (billed annually)",
+    privacybee: "$8/mo (~$95/yr)",
     winner: "ghostmydata",
   },
   {
     feature: "Free Tier",
-    ghostmydata: "Yes - includes scan + manual guides",
-    deleteme: "No",
-    winner: "ghostmydata",
-  },
-  {
-    feature: "Monthly Billing Option",
-    ghostmydata: "Yes",
-    deleteme: "No (annual only)",
+    ghostmydata: "Yes - full scan",
+    privacybee: "Assessment only",
     winner: "ghostmydata",
   },
   {
     feature: "Data Brokers Covered",
     ghostmydata: "2,000+ (plus 60 AI Shield sources)",
-    deleteme: "40+",
+    privacybee: "1,033",
     winner: "ghostmydata",
   },
   {
     feature: "Dark Web Monitoring",
-    ghostmydata: "Yes (Enterprise plan)",
-    deleteme: "No",
-    winner: "ghostmydata",
+    ghostmydata: "Yes (Enterprise)",
+    privacybee: "Yes (Pro+)",
+    winner: "tie",
   },
   {
     feature: "Breach Monitoring",
     ghostmydata: "Yes (all plans)",
-    deleteme: "Limited",
+    privacybee: "Limited",
     winner: "ghostmydata",
   },
   {
     feature: "Family Plans",
-    ghostmydata: "Yes (up to 5 profiles)",
-    deleteme: "Yes (2 people)",
-    winner: "ghostmydata",
+    ghostmydata: "5 profiles",
+    privacybee: "Multi-user available",
+    winner: "tie",
   },
   {
     feature: "Do Not Call Registration",
     ghostmydata: "Yes (Enterprise)",
-    deleteme: "No",
+    privacybee: "No",
     winner: "ghostmydata",
   },
   {
-    feature: "Removal Time",
-    ghostmydata: "1-7 days average",
-    deleteme: "7-14 days average",
-    winner: "ghostmydata",
+    feature: "Custom Removals",
+    ghostmydata: "Yes (Enterprise)",
+    privacybee: "Unlimited (Pro+)",
+    winner: "tie",
   },
   {
-    feature: "Privacy Reports",
-    ghostmydata: "Real-time dashboard",
-    deleteme: "Quarterly reports",
-    winner: "ghostmydata",
+    feature: "SOC 2 Certified",
+    ghostmydata: "Compliant",
+    privacybee: "Type II",
+    winner: "privacybee",
   },
   {
-    feature: "Company Founded",
-    ghostmydata: "2024",
-    deleteme: "2011",
-    winner: "deleteme",
-  },
-  {
-    feature: "Money-Back Guarantee",
-    ghostmydata: "30 days",
-    deleteme: "30 days",
+    feature: "Company Location",
+    ghostmydata: "US-based",
+    privacybee: "US-based",
     winner: "tie",
   },
 ];
@@ -138,10 +126,10 @@ const comparisonData = [
 const breadcrumbs = [
   { name: "Home", url: "https://ghostmydata.com" },
   { name: "Compare", url: "https://ghostmydata.com/compare" },
-  { name: "GhostMyData vs DeleteMe", url: "https://ghostmydata.com/compare/deleteme" },
+  { name: "GhostMyData vs Privacy Bee", url: "https://ghostmydata.com/compare/privacy-bee" },
 ];
 
-export default function CompareDeleteMePage() {
+export default function ComparePrivacyBeePage() {
   return (
     <>
     <BreadcrumbSchema items={breadcrumbs} />
@@ -150,11 +138,11 @@ export default function CompareDeleteMePage() {
       {/* Header */}
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          GhostMyData vs DeleteMe
+          GhostMyData vs Privacy Bee
         </h1>
         <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-          A detailed comparison to help you choose the best data removal service
-          for your privacy needs.
+          Compare two comprehensive data removal services to find the best protection
+          for your personal information.
         </p>
       </div>
 
@@ -165,13 +153,14 @@ export default function CompareDeleteMePage() {
           Quick Verdict
         </h2>
         <p className="text-slate-300 text-lg mb-4">
-          <strong className="text-white">GhostMyData</strong> offers more features at a lower price point,
-          including dark web monitoring and a free tier. <strong className="text-white">DeleteMe</strong> has
-          a longer track record but lacks modern features like dark web monitoring and requires annual billing.
+          <strong className="text-white">GhostMyData</strong> offers nearly double the data broker coverage
+          (2,000+ vs 1,033) at a lower price point with a free tier.
+          <strong className="text-white"> Privacy Bee</strong> has SOC 2 Type II certification and white-glove
+          service options for premium customers.
         </p>
         <p className="text-slate-400">
-          Choose GhostMyData for better value and comprehensive protection. Choose DeleteMe if you
-          prioritize company longevity over features.
+          Choose GhostMyData for more coverage and better value. Choose Privacy Bee if you
+          prioritize SOC 2 Type II certification or need premium white-glove service.
         </p>
       </div>
 
@@ -179,12 +168,23 @@ export default function CompareDeleteMePage() {
       <div className="grid md:grid-cols-3 gap-8 mb-16">
         <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
           <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
+            <Database className="h-6 w-6 text-emerald-500" />
+          </div>
+          <h3 className="text-xl font-semibold text-white mb-2">More Coverage</h3>
+          <p className="text-slate-400">
+            GhostMyData covers 2,000+ data brokers plus 60 AI Shield sources.
+            Privacy Bee covers 1,033 data brokers.
+          </p>
+        </div>
+
+        <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+          <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
             <DollarSign className="h-6 w-6 text-emerald-500" />
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">Better Pricing</h3>
           <p className="text-slate-400">
-            GhostMyData offers a free tier and monthly billing from $11.99/mo.
-            DeleteMe requires $129/year upfront (no monthly option).
+            GhostMyData offers a free tier and lower entry pricing.
+            Privacy Bee starts at ~$95/year with no free option.
           </p>
         </div>
 
@@ -192,21 +192,10 @@ export default function CompareDeleteMePage() {
           <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
             <Shield className="h-6 w-6 text-emerald-500" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">More Protection</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">Compliance</h3>
           <p className="text-slate-400">
-            GhostMyData includes dark web monitoring and breach alerts.
-            DeleteMe focuses only on data broker removal.
-          </p>
-        </div>
-
-        <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
-          <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
-            <Clock className="h-6 w-6 text-emerald-500" />
-          </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Faster Removals</h3>
-          <p className="text-slate-400">
-            GhostMyData processes removals in 1-7 days on average.
-            DeleteMe typically takes 7-14 days for initial removals.
+            Privacy Bee has SOC 2 Type II certification.
+            Both services offer enterprise-grade security.
           </p>
         </div>
       </div>
@@ -214,7 +203,7 @@ export default function CompareDeleteMePage() {
       {/* Comparison Table */}
       <div className="mb-16">
         <h2 className="text-2xl font-bold text-white mb-8 text-center">
-          Feature-by-Feature Comparison
+          Feature Comparison
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
@@ -222,7 +211,7 @@ export default function CompareDeleteMePage() {
               <tr className="border-b border-slate-700">
                 <th className="text-left py-4 px-4 text-slate-400 font-medium">Feature</th>
                 <th className="text-center py-4 px-4 text-emerald-400 font-semibold">GhostMyData</th>
-                <th className="text-center py-4 px-4 text-slate-300 font-semibold">DeleteMe</th>
+                <th className="text-center py-4 px-4 text-slate-300 font-semibold">Privacy Bee</th>
               </tr>
             </thead>
             <tbody>
@@ -235,10 +224,10 @@ export default function CompareDeleteMePage() {
                       {row.ghostmydata}
                     </div>
                   </td>
-                  <td className={`py-4 px-4 text-center ${row.winner === "deleteme" ? "text-blue-400" : "text-slate-400"}`}>
+                  <td className={`py-4 px-4 text-center ${row.winner === "privacybee" ? "text-blue-400" : "text-slate-400"}`}>
                     <div className="flex items-center justify-center gap-2">
-                      {row.winner === "deleteme" && <CheckCircle className="h-4 w-4" />}
-                      {row.deleteme}
+                      {row.winner === "privacybee" && <CheckCircle className="h-4 w-4" />}
+                      {row.privacybee}
                     </div>
                   </td>
                 </tr>
@@ -250,7 +239,7 @@ export default function CompareDeleteMePage() {
 
       {/* Pricing Comparison */}
       <div className="mb-16">
-        <h2 className="text-2xl font-bold text-white mb-8 text-center">Pricing Comparison</h2>
+        <h2 className="text-2xl font-bold text-white mb-8 text-center">Pricing Breakdown</h2>
         <div className="grid md:grid-cols-2 gap-8">
           {/* GhostMyData */}
           <div className="p-8 bg-emerald-500/10 rounded-2xl border-2 border-emerald-500">
@@ -261,41 +250,43 @@ export default function CompareDeleteMePage() {
                 <span className="text-white font-semibold">$0</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
-                <span className="text-slate-300">Pro Plan (monthly)</span>
-                <span className="text-white font-semibold">$11.99/mo</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
-                <span className="text-slate-300">Pro Plan (annual)</span>
-                <span className="text-white font-semibold">$95.88/yr</span>
+                <span className="text-slate-300">Pro Plan</span>
+                <span className="text-white font-semibold">$11.99/mo ($143.88/yr)</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-slate-300">Enterprise (with dark web)</span>
-                <span className="text-white font-semibold">$29/mo</span>
+                <span className="text-slate-300">Enterprise (dark web)</span>
+                <span className="text-white font-semibold">$29/mo ($359.88/yr)</span>
               </div>
             </div>
+            <p className="text-emerald-400 text-sm mt-4">
+              Includes: 2,000+ data brokers, 60 AI Shield sources, breach alerts
+            </p>
           </div>
 
-          {/* DeleteMe */}
+          {/* Privacy Bee */}
           <div className="p-8 bg-slate-800/50 rounded-2xl border border-slate-700">
-            <h3 className="text-2xl font-bold text-white mb-4">DeleteMe</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">Privacy Bee</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b border-slate-700">
-                <span className="text-slate-300">Free Plan</span>
-                <span className="text-slate-500">Not available</span>
+                <span className="text-slate-300">Free Assessment</span>
+                <span className="text-white font-semibold">$0 (limited)</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-slate-700">
-                <span className="text-slate-300">Individual (monthly)</span>
-                <span className="text-slate-500">Not available</span>
+                <span className="text-slate-300">Essentials</span>
+                <span className="text-white font-semibold">$8/mo (~$95/yr)</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-slate-700">
-                <span className="text-slate-300">Individual (annual)</span>
-                <span className="text-white font-semibold">$129/yr</span>
+                <span className="text-slate-300">Pro (dark web)</span>
+                <span className="text-white font-semibold">$18/mo ($197/yr)</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-slate-300">Family (2 people)</span>
-                <span className="text-white font-semibold">$229/yr</span>
+                <span className="text-slate-300">Signature</span>
+                <span className="text-white font-semibold">$67/mo ($799/yr)</span>
               </div>
             </div>
+            <p className="text-slate-500 text-sm mt-4">
+              1,033 data brokers - dark web monitoring on Pro+
+            </p>
           </div>
         </div>
       </div>
@@ -303,18 +294,18 @@ export default function CompareDeleteMePage() {
       {/* Why Choose GhostMyData */}
       <div className="mb-16">
         <h2 className="text-2xl font-bold text-white mb-8 text-center">
-          Why Choose GhostMyData Over DeleteMe
+          Why Choose GhostMyData Over Privacy Bee
         </h2>
         <div className="grid md:grid-cols-2 gap-6">
           {[
-            "Free tier to try before you buy",
-            "Dark web monitoring included",
-            "Monthly billing option available",
-            "More data brokers covered (2,000+)",
-            "Faster removal processing",
-            "Real-time dashboard vs quarterly reports",
-            "Larger family plans (5 profiles)",
+            "Nearly 2x data broker coverage (2,000+ vs 1,033)",
+            "60 additional AI Shield sources",
+            "Free tier with full scan capability",
+            "Lower entry price ($11.99 vs $18 for comparable features)",
+            "Do Not Call Registry integration",
             "Breach monitoring on all plans",
+            "Family plan with 5 profiles",
+            "More affordable Enterprise tier",
           ].map((benefit) => (
             <div key={benefit} className="flex items-center gap-3 p-4 bg-slate-800/50 rounded-lg">
               <CheckCircle className="h-5 w-5 text-emerald-500 flex-shrink-0" />
@@ -324,24 +315,24 @@ export default function CompareDeleteMePage() {
         </div>
       </div>
 
-      {/* When to Choose DeleteMe */}
+      {/* When to Choose Privacy Bee */}
       <div className="mb-16 p-8 bg-slate-800/30 rounded-2xl border border-slate-700">
-        <h2 className="text-2xl font-bold text-white mb-4">When to Choose DeleteMe</h2>
+        <h2 className="text-2xl font-bold text-white mb-4">When to Choose Privacy Bee</h2>
         <p className="text-slate-400 mb-4">
-          DeleteMe might be the better choice if:
+          Privacy Bee might be the better choice if:
         </p>
         <ul className="space-y-2 text-slate-400">
           <li className="flex items-start gap-2">
-            <span className="text-slate-500">•</span>
-            You prioritize company longevity (DeleteMe has been operating since 2011)
+            <span className="text-slate-500">-</span>
+            You require SOC 2 Type II certification for compliance reasons
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-slate-500">•</span>
-            You prefer annual billing and don&apos;t mind the upfront cost
+            <span className="text-slate-500">-</span>
+            You need white-glove service with dedicated US-based analysts (Signature tier)
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-slate-500">•</span>
-            You don&apos;t need dark web monitoring features
+            <span className="text-slate-500">-</span>
+            You prefer their 181,000+ custom site database for niche removals
           </li>
         </ul>
       </div>
@@ -369,11 +360,11 @@ export default function CompareDeleteMePage() {
       {/* CTA */}
       <div className="text-center p-8 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20">
         <h2 className="text-3xl font-bold text-white mb-4">
-          Ready to Try GhostMyData?
+          See What GhostMyData Can Do For You
         </h2>
         <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
-          Start with a free scan to see where your data is exposed.
-          No credit card required, no commitment.
+          Start with a free scan - no credit card required. See exactly where
+          your personal data is exposed before you decide.
         </p>
         <Link href="/register">
           <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-lg px-8">

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, ArrowRight, Shield, DollarSign, Zap, Users } from "lucide-react";
-import { FAQSchema } from "@/components/seo/structured-data";
+import { FAQSchema, BreadcrumbSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {
   title: "GhostMyData vs Incogni: Complete Comparison (2026)",
@@ -129,9 +129,16 @@ const comparisonData = [
   },
 ];
 
+const breadcrumbs = [
+  { name: "Home", url: "https://ghostmydata.com" },
+  { name: "Compare", url: "https://ghostmydata.com/compare" },
+  { name: "GhostMyData vs Incogni", url: "https://ghostmydata.com/compare/incogni" },
+];
+
 export default function CompareIncogniPage() {
   return (
     <>
+    <BreadcrumbSchema items={breadcrumbs} />
     <FAQSchema faqs={faqs} />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
       {/* Header */}
