@@ -24,7 +24,7 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const isApiRoute = nextUrl.pathname.startsWith("/api");
   const hostname = req.headers.get("host") || "";
-  const isAdminSubdomain = hostname.startsWith("admin.");
+  const isAdminSubdomain = hostname.startsWith("admin.") || hostname.startsWith("192.168.");
 
   // Handle CORS preflight requests
   if (req.method === "OPTIONS" && isApiRoute) {
