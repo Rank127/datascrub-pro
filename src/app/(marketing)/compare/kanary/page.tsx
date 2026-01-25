@@ -256,7 +256,7 @@ export default function CompareKanaryPage() {
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-300">Enterprise (dark web)</span>
-                <span className="text-white font-semibold">$29/mo</span>
+                <span className="text-white font-semibold">$29.99/mo</span>
               </div>
             </div>
             <p className="text-emerald-400 text-sm mt-4">

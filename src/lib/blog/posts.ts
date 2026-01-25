@@ -1268,7 +1268,7 @@ With over 4,000 data brokers collecting your information, manual removal is impr
 
 ### GhostMyData
 
-**Pricing**: Free - $29/month
+**Pricing**: Free - $29.99/month
 
 **Pros**:
 - Free tier with basic scanning

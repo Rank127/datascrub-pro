@@ -270,7 +270,7 @@ export default function CompareDeleteMePage() {
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-300">Enterprise (with dark web)</span>
-                <span className="text-white font-semibold">$29/mo</span>
+                <span className="text-white font-semibold">$29.99/mo</span>
               </div>
             </div>
           </div>
