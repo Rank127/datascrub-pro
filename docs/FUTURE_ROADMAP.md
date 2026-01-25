@@ -26,6 +26,18 @@ This document outlines longer-term features and improvements planned for future 
 - ✅ New exposure alerts
 - ✅ Weekly privacy reports
 
+### Admin & Executive Features (v1.24.0)
+- ✅ CEO Executive Dashboard with 4 tabs:
+  - Finance: MRR, subscriptions by plan/status, churn rate, ARPU
+  - Analytics: User growth, exposures, removals, success rates, 12-month trends
+  - Operations: Queue sizes, system health, removal status breakdown
+  - Activities: Recent signups, scans, audit logs, top users
+- ✅ Role-based access control (ADMIN, LEGAL, SUPER_ADMIN)
+- ✅ PII masking for non-SUPER_ADMIN users
+- ✅ Audit logging for admin actions
+- ✅ Interactive charts using Recharts
+- ✅ Admin navigation section in sidebar
+
 ---
 
 ## Pending Features (Require Paid Services)
@@ -329,4 +341,4 @@ Based on competitor analysis (DeleteMe, Kanary, Privacy Duck):
 - Some features may require third-party partnerships or API access
 - Security and privacy compliance are non-negotiable for all features
 
-Last Updated: January 2026
+Last Updated: January 25, 2026

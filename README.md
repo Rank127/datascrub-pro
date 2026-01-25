@@ -35,6 +35,16 @@ Personal data removal service that helps users find and remove their personal in
 - Automated refund processing
 - Customer portal for subscription management
 
+### Admin Features
+- **Executive Dashboard** (`/dashboard/executive`)
+  - Finance: MRR, subscriptions, churn rate, ARPU
+  - Analytics: User growth, exposures, removals, success rates
+  - Operations: Queue sizes, system health, removal status
+  - Activities: Recent signups, scans, audit logs, top users
+- Role-based access control (ADMIN, LEGAL, SUPER_ADMIN)
+- User management and audit logging
+- PII masking for data protection
+
 ## Tech Stack
 
 - **Framework**: Next.js 16 with App Router
@@ -160,6 +170,11 @@ git push origin master
 - `GET /api/removals/status` - Removal request status
 - `GET /api/dashboard/stats` - Dashboard statistics
 - `GET /api/subscription` - Subscription info
+
+### Admin (requires ADMIN/LEGAL/SUPER_ADMIN role)
+- `GET /api/admin/executive-stats` - Executive dashboard metrics
+- `GET /api/admin/users` - User management
+- `GET /api/admin/audit-logs` - Audit log viewer
 
 ### Webhooks
 - `POST /api/stripe/webhook` - Stripe events

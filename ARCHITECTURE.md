@@ -96,7 +96,9 @@ src/
 │   │       ├── removals/         # Removal tracking
 │   │       ├── alerts/           # User alerts
 │   │       ├── reports/          # Privacy reports
-│   │       └── settings/         # User settings
+│   │       ├── settings/         # User settings
+│   │       ├── executive/        # Executive dashboard (Admin)
+│   │       └── admin/            # User management (Admin)
 │   │
 │   ├── api/                      # API Routes
 │   │   ├── auth/                 # NextAuth endpoints
@@ -105,6 +107,10 @@ src/
 │   │   ├── exposures/            # Exposure queries
 │   │   ├── whitelist/            # Whitelist operations
 │   │   ├── removals/             # Removal requests
+│   │   ├── admin/                # Admin APIs (role-protected)
+│   │   │   ├── executive-stats/  # Executive dashboard data
+│   │   │   ├── users/            # User management
+│   │   │   └── audit-logs/       # Audit log viewer
 │   │   ├── stripe/               # Payment webhooks
 │   │   └── cron/                 # Scheduled jobs
 │   │
@@ -117,6 +123,13 @@ src/
 ├── components/
 │   ├── ui/                       # shadcn/ui components
 │   ├── dashboard/                # Dashboard components
+│   │   └── executive/            # Executive dashboard components
+│   │       ├── finance-section   # MRR, subscriptions, churn
+│   │       ├── analytics-section # User/exposure metrics
+│   │       ├── operations-section# Queue and health metrics
+│   │       ├── user-activities   # Activity tables
+│   │       ├── metric-card       # Reusable KPI card
+│   │       └── trend-chart       # Recharts wrapper
 │   ├── forms/                    # Form components
 │   └── seo/                      # SEO components
 │
@@ -126,6 +139,8 @@ src/
 │   ├── email/                    # Email templates
 │   ├── encryption/               # PII encryption
 │   ├── stripe/                   # Stripe utilities
+│   ├── executive/                # Executive dashboard types
+│   ├── rbac/                     # Role-based access control
 │   ├── scanners/                 # Data source scanners
 │   │   ├── data-brokers/         # Broker integrations
 │   │   ├── breaches/             # Breach checkers
