@@ -420,7 +420,7 @@ export default function HomePage() {
                 {[
                   "Unlimited scans",
                   "Dark web monitoring",
-                  "AI threat detection",
+                  "AI & Deepfake Protection",
                   "Do Not Call registration",
                   "Family plan (5 profiles)",
                 ].map((feature) => (
