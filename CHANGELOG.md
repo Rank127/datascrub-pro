@@ -15,6 +15,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.25.0] - 2026-01-25
+
+### Added
+- **Standalone Admin Portal** (`/admin`)
+  - Dedicated admin entry point separate from customer dashboard
+  - `/admin/login` - Admin-only authentication page
+  - `/admin/dashboard` - Executive dashboard with full metrics
+  - `/admin` - Auto-redirects to login or dashboard based on auth status
+  - Clean, minimal interface without customer signup/registration links
+  - Designed for CEO and executive access
+
+### Changed
+- Updated middleware to handle admin routes separately
+- Admin routes redirect to `/admin/login` instead of customer login
+
+---
+
 ## [1.24.0] - 2026-01-25
 
 ### Added
