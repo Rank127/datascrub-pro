@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       tags: post.tags,
       images: [
         {
-          url: `https://ghostmydata.com/og/${post.slug}.png`,
+          url: "https://ghostmydata.com/og-image.png",
           width: 1200,
           height: 630,
           alt: post.title,
@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
-      images: [`https://ghostmydata.com/og/${post.slug}.png`],
+      images: ["https://ghostmydata.com/og-image.png"],
     },
   };
 }
@@ -123,7 +123,7 @@ export default async function BlogPostPage({ params }: Props) {
     "@type": "BlogPosting",
     headline: post.title,
     description: post.description,
-    image: `https://ghostmydata.com/og/${post.slug}.png`,
+    image: "https://ghostmydata.com/og-image.png",
     author: {
       "@type": "Organization",
       name: post.author,

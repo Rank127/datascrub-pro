@@ -11,6 +11,7 @@ import {
   Bell,
   CheckCircle,
 } from "lucide-react";
+import { FAQSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {
   title: "How It Works - 5-Step Data Removal Process",
@@ -132,8 +133,37 @@ const guarantees = [
   },
 ];
 
+const faqs = [
+  {
+    question: "How does GhostMyData find my personal information?",
+    answer: "GhostMyData scans over 2,000 data broker sites, breach databases, dark web forums, and 60 AI Shield sources using your provided information (name, email, phone, addresses). Our automated system searches these sources to identify where your data is exposed.",
+  },
+  {
+    question: "How long does the data removal process take?",
+    answer: "Initial scans complete within minutes. Removal requests are submitted immediately, but data brokers typically take 1-7 days to process. Some may take up to 45 days. We track all requests and send follow-ups automatically.",
+  },
+  {
+    question: "What information do I need to provide?",
+    answer: "At minimum, you need your name and email address. For comprehensive scanning, you can add phone numbers, current and past addresses, aliases, and maiden names. All data is encrypted with AES-256 encryption.",
+  },
+  {
+    question: "Is my data safe with GhostMyData?",
+    answer: "Yes. We use bank-level AES-256 encryption for all stored data. Your information is only used to search for and remove your exposures - we never sell or share your data. We're SOC 2 compliant.",
+  },
+  {
+    question: "What happens after my data is removed?",
+    answer: "We continue monitoring for new exposures. Data brokers often re-list information from public records, so continuous monitoring is essential. We'll alert you immediately if your data reappears and submit new removal requests.",
+  },
+  {
+    question: "Do I need technical knowledge to use GhostMyData?",
+    answer: "No. GhostMyData is designed for everyone. Simply create a profile, run a scan, and we handle everything else - from finding exposures to submitting removal requests and monitoring for new data.",
+  },
+];
+
 export default function HowItWorksPage() {
   return (
+    <>
+    <FAQSchema faqs={faqs} />
     <div>
       {/* Hero */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -263,6 +293,26 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <h2 className="text-3xl font-bold text-white text-center mb-12">
+          Frequently Asked Questions
+        </h2>
+        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          {faqs.map((faq) => (
+            <div
+              key={faq.question}
+              className="p-6 bg-slate-800/50 rounded-xl border border-slate-700"
+            >
+              <h3 className="text-lg font-semibold text-white mb-3">
+                {faq.question}
+              </h3>
+              <p className="text-slate-400 text-sm">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center">
@@ -282,5 +332,6 @@ export default function HowItWorksPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }
