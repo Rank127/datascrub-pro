@@ -110,6 +110,6 @@ export interface TopUser {
 // Plan pricing in cents for MRR calculation
 export const PLAN_PRICING = {
   FREE: 0,
-  PRO: 999, // $9.99
+  PRO: 1199, // $11.99
   ENTERPRISE: 2999, // $29.99
 } as const;

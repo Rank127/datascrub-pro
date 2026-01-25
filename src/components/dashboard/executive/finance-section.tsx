@@ -113,14 +113,14 @@ export function FinanceSection({ data }: FinanceSectionProps) {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-blue-400">Pro</span>
                 <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                  $9.99/mo
+                  $11.99/mo
                 </Badge>
               </div>
               <p className="text-2xl font-bold text-white">
                 {data.subscriptionsByPlan.PRO.toLocaleString()}
               </p>
               <p className="text-xs text-slate-500 mt-1">
-                ${((data.subscriptionsByPlan.PRO * 999) / 100).toLocaleString()}/mo revenue
+                ${((data.subscriptionsByPlan.PRO * 1199) / 100).toLocaleString()}/mo revenue
               </p>
             </div>
 

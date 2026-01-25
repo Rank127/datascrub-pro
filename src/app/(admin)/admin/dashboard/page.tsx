@@ -10,6 +10,7 @@ import { FinanceSection } from "@/components/dashboard/executive/finance-section
 import { AnalyticsSection } from "@/components/dashboard/executive/analytics-section";
 import { OperationsSection } from "@/components/dashboard/executive/operations-section";
 import { UserActivitiesSection } from "@/components/dashboard/executive/user-activities-section";
+import { IntegrationsSection } from "@/components/dashboard/integrations/integrations-section";
 import { ExecutiveStatsResponse } from "@/lib/executive/types";
 import {
   Loader2,
@@ -22,6 +23,7 @@ import {
   ShieldAlert,
   LogOut,
   Shield,
+  Plug,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -283,6 +285,13 @@ export default function AdminDashboardPage() {
                 <Users className="h-4 w-4" />
                 <span className="hidden sm:inline">Activities</span>
               </TabsTrigger>
+              <TabsTrigger
+                value="integrations"
+                className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 gap-2"
+              >
+                <Plug className="h-4 w-4" />
+                <span className="hidden sm:inline">Integrations</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="finance" className="mt-6">
@@ -299,6 +308,10 @@ export default function AdminDashboardPage() {
 
             <TabsContent value="activities" className="mt-6">
               <UserActivitiesSection data={data.activities} />
+            </TabsContent>
+
+            <TabsContent value="integrations" className="mt-6">
+              <IntegrationsSection />
             </TabsContent>
           </Tabs>
         </div>
