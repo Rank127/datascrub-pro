@@ -39,6 +39,8 @@ export default auth((req) => {
     nextUrl.pathname.startsWith("/reset-password");
 
   const isDashboardPage = nextUrl.pathname.startsWith("/dashboard");
+  const isAdminPage = nextUrl.pathname.startsWith("/admin");
+  const isAdminLoginPage = nextUrl.pathname === "/admin/login";
   const isApiAuthPage = nextUrl.pathname.startsWith("/api/auth");
   const isPublicApiPage = nextUrl.pathname.startsWith("/api/auth/register");
   const isBingVerify = nextUrl.pathname === "/api/bing-verify";
@@ -56,6 +58,16 @@ export default auth((req) => {
   // Redirect logged-in users away from auth pages
   if (isAuthPage && isLoggedIn) {
     return NextResponse.redirect(new URL("/dashboard", nextUrl));
+  }
+
+  // Handle admin routes separately
+  if (isAdminPage && !isAdminLoginPage && !isLoggedIn) {
+    return NextResponse.redirect(new URL("/admin/login", nextUrl));
+  }
+
+  // Redirect logged-in admin users away from admin login
+  if (isAdminLoginPage && isLoggedIn) {
+    return NextResponse.redirect(new URL("/admin/dashboard", nextUrl));
   }
 
   // Redirect non-logged-in users to login from dashboard
@@ -78,6 +90,7 @@ export default auth((req) => {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/admin/:path*",
     "/login",
     "/register",
     "/forgot-password",

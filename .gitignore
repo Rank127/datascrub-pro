@@ -55,3 +55,4 @@ prisma/dev.db-journal
 # Logs
 *.log
 OPERATIONS_GUIDE.md
+.env*.local
