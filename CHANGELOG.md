@@ -15,6 +15,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.24.0] - 2026-01-25
+
+### Added
+- **CEO Executive Dashboard** (`/dashboard/executive`)
+  - Comprehensive business metrics dashboard for admins
+  - Role-based access control (ADMIN, LEGAL, SUPER_ADMIN only)
+  - **Finance Tab**
+    - Monthly Recurring Revenue (MRR) with trend indicators
+    - Subscription breakdown by plan (Free/Pro/Enterprise)
+    - Subscription status distribution (Active/Canceled/Past Due)
+    - Churn rate and ARPU calculations
+    - Revenue trend charts
+  - **Analytics Tab**
+    - Total users with growth rate
+    - New users this month
+    - Total exposures found and removals completed
+    - Removal success rate and scan completion rate
+    - 12-month trend charts (users, exposures, removals)
+    - Platform performance summary
+  - **Operations Tab**
+    - Pending removal queue size
+    - In-progress removals count
+    - Manual action queue with health indicators
+    - Custom removal backlog (Enterprise)
+    - Average removal time metrics
+    - System health badges (scan/removal success rates)
+    - Removal status breakdown with progress bars
+  - **Activities Tab**
+    - Recent signups table (last 10 users)
+    - Recent scans table with status badges
+    - Top users by activity leaderboard
+    - Recent audit logs with action details
+  - Interactive charts using Recharts library
+  - PII masking for non-SUPER_ADMIN users
+  - Audit logging for dashboard access
+  - Refresh functionality with loading states
+
+- **Admin Navigation Section**
+  - Added "Executive Dashboard" link in sidebar
+  - Added "User Management" link in sidebar
+  - Visible only to authorized admin roles
+
+- **New API Endpoint** (`/api/admin/executive-stats`)
+  - Aggregates data from all business models
+  - Finance, analytics, operations, and activities metrics
+  - Secure role-based access with audit logging
+
+- **New Components**
+  - `MetricCard` - Reusable KPI card with trend indicator
+  - `TrendChart` - Recharts wrapper for line/area/bar charts
+  - `DonutChart` - Pie chart for distribution data
+  - `FinanceSection` - Financial metrics display
+  - `AnalyticsSection` - Platform analytics display
+  - `OperationsSection` - Operational queue metrics
+  - `UserActivitiesSection` - Activity tables and logs
+
+### Dependencies
+- Added `recharts` for data visualization
+
+---
+
 ## [1.23.0] - 2026-01-25
 
 ### Added
