@@ -422,6 +422,7 @@ export default function HomePage() {
                   "Dark web monitoring",
                   "AI & Deepfake Protection",
                   "Do Not Call registration",
+                  "Custom removal requests",
                   "Family plan (5 profiles)",
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-2 text-slate-300">

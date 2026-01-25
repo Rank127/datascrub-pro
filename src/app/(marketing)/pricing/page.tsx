@@ -90,6 +90,7 @@ const plans = [
       { text: "Do Not Call (DNC) registration", included: true },
       { text: "Family plan (5 profiles)", included: true },
       { text: "Dedicated support", included: true },
+      { text: "Custom removal requests", included: true },
       { text: "API access", included: true },
     ],
     cta: "Start Free Trial",
