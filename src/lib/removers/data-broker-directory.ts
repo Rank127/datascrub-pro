@@ -4332,13 +4332,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 30,
   },
-  DUNSANDBRADSREET: {
-    name: "Dun & Bradstreet",
-    optOutUrl: "https://www.dnb.com/utility-pages/privacy-policy.html",
-    privacyEmail: "privacy@dnb.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 30,
-  },
   HOOVERS_DNB: {
     name: "Hoovers (D&B)",
     optOutUrl: "https://www.hoovers.com/privacy",
@@ -4409,24 +4402,10 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 14,
   },
-  CONTACTOUT_B2B: {
-    name: "ContactOut",
-    optOutUrl: "https://contactout.com/optout",
-    privacyEmail: "privacy@contactout.com",
-    removalMethod: "FORM",
-    estimatedDays: 7,
-  },
   HUNTER_IO_B2B: {
     name: "Hunter.io",
     optOutUrl: "https://hunter.io/privacy-policy",
     privacyEmail: "privacy@hunter.io",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  VOILANORBERT_B2B: {
-    name: "VoilaNorbert",
-    optOutUrl: "https://www.voilanorbert.com/privacy",
-    privacyEmail: "privacy@voilanorbert.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
   },
@@ -4435,27 +4414,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     optOutUrl: "https://rocketreach.co/privacy",
     privacyEmail: "privacy@rocketreach.co",
     removalMethod: "FORM",
-    estimatedDays: 14,
-  },
-  SNOV_IO_B2B: {
-    name: "Snov.io",
-    optOutUrl: "https://snov.io/privacy-policy",
-    privacyEmail: "privacy@snov.io",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  UPLEAD_B2B: {
-    name: "UpLead",
-    optOutUrl: "https://www.uplead.com/privacy-policy/",
-    privacyEmail: "privacy@uplead.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  DATANYZE_B2B: {
-    name: "Datanyze",
-    optOutUrl: "https://www.datanyze.com/privacy-policy",
-    privacyEmail: "privacy@datanyze.com",
-    removalMethod: "EMAIL",
     estimatedDays: 14,
   },
   SALESINTEL: {
@@ -4501,13 +4459,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@nielseniq.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
-  },
-  LOTAME_DATA: {
-    name: "Lotame",
-    optOutUrl: "https://www.lotame.com/about-lotame/privacy/opt-out/",
-    privacyEmail: "privacy@lotame.com",
-    removalMethod: "FORM",
-    estimatedDays: 14,
   },
   COMSCORE_DATA: {
     name: "Comscore",
@@ -4611,13 +4562,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
 
   // Location & Geospatial Data
-  SAFEGRAPH_DATA: {
-    name: "SafeGraph",
-    optOutUrl: "https://www.safegraph.com/privacy-policy",
-    privacyEmail: "privacy@safegraph.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 30,
-  },
   PLACER_AI_LOCATION: {
     name: "Placer.ai",
     optOutUrl: "https://www.placer.ai/privacy-policy/",
@@ -4711,13 +4655,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "EMAIL",
     estimatedDays: 14,
   },
-  TOWERDATA: {
-    name: "TowerData",
-    optOutUrl: "https://www.towerdata.com/privacy-policy",
-    privacyEmail: "privacy@towerdata.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
   BIGDBM: {
     name: "BigDBM",
     optOutUrl: "https://bigdbm.com/privacy/",
@@ -4729,13 +4666,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     name: "ZeroBounce",
     optOutUrl: "https://www.zerobounce.net/privacy",
     privacyEmail: "privacy@zerobounce.net",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  NEVERBOUNCE_DATA: {
-    name: "NeverBounce",
-    optOutUrl: "https://neverbounce.com/privacy-policy",
-    privacyEmail: "privacy@neverbounce.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
   },
@@ -5115,13 +5045,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
 
   // Social Media Aggregators
-  SOCIAL_CATFISH_AGG: {
-    name: "Social Catfish",
-    optOutUrl: "https://socialcatfish.com/opt-out/",
-    privacyEmail: "privacy@socialcatfish.com",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-  },
   BRANDYOURSELF: {
     name: "BrandYourself",
     optOutUrl: "https://brandyourself.com/privacy-policy",
@@ -5291,13 +5214,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     name: "TrueLocal Australia",
     optOutUrl: "https://www.truelocal.com.au/privacy",
     privacyEmail: "privacy@truelocal.com.au",
-    removalMethod: "FORM",
-    estimatedDays: 30,
-  },
-  WHITEPAGES_NEWZEALAND: {
-    name: "White Pages New Zealand",
-    optOutUrl: "https://whitepages.co.nz/privacy",
-    privacyEmail: "privacy@whitepages.co.nz",
     removalMethod: "FORM",
     estimatedDays: 30,
   },
@@ -5475,13 +5391,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
 
   // Specialty Data Providers
-  DATALOGIX_ORACLE: {
-    name: "Datalogix (Oracle)",
-    optOutUrl: "https://www.oracle.com/legal/privacy/marketing-cloud-data-cloud-privacy-policy.html",
-    privacyEmail: "privacy@oracle.com",
-    removalMethod: "FORM",
-    estimatedDays: 30,
-  },
   MERKLE_DATA: {
     name: "Merkle Data",
     optOutUrl: "https://www.merkle.com/privacy",
@@ -6114,7 +6023,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   // Additional Genealogy & Historical Records
   GENEALOGYBANK_V2: { name: "GenealogyBank", optOutUrl: "https://genealogybank.com/privacy", removalMethod: "EMAIL", estimatedDays: 30 },
   FINDAGRAVE_DATA: { name: "FindAGrave", optOutUrl: "https://findagrave.com/privacy", removalMethod: "EMAIL", estimatedDays: 30 },
-  BILLIONGRAVES_DATA: { name: "BillionGraves", optOutUrl: "https://billiongraves.com/privacy", removalMethod: "EMAIL", estimatedDays: 30 },
   FAMILYSEARCH: { name: "FamilySearch", optOutUrl: "https://familysearch.org/privacy", removalMethod: "EMAIL", estimatedDays: 30 },
   WIKITREE: { name: "WikiTree", optOutUrl: "https://wikitree.com/privacy", removalMethod: "EMAIL", estimatedDays: 30 },
   GENI: { name: "Geni", optOutUrl: "https://geni.com/privacy", removalMethod: "EMAIL", estimatedDays: 30 },
@@ -9034,13 +8942,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@searchpeoplefree.com",
     removalMethod: "FORM",
     estimatedDays: 5,
-  },
-  PEOPLEFINDERPRO_V2: {
-    name: "PeopleFinderPro",
-    optOutUrl: "https://www.peoplefinderpro.com/optout",
-    privacyEmail: "privacy@peoplefinderpro.com",
-    removalMethod: "FORM",
-    estimatedDays: 7,
   },
   PEOPLESEARCHSITE: {
     name: "PeopleSearchSite",
@@ -12351,12 +12252,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     estimatedDays: 1,
     notes: "Ransomware leak site monitoring",
   },
-  BREACH_COMPILATION_MONITOR: {
-    name: "Breach Compilation Monitor",
-    removalMethod: "MONITOR",
-    estimatedDays: 1,
-    notes: "Large breach compilation tracking",
-  },
   FORUM_CREDENTIAL_SCRAPER: {
     name: "Forum Credential Scraper",
     removalMethod: "MONITOR",
@@ -12560,12 +12455,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "MONITOR",
     estimatedDays: 1,
     notes: "NFT theft incident tracking",
-  },
-  DEFI_EXPLOIT_MONITOR_V2: {
-    name: "DeFi Exploit Monitor",
-    removalMethod: "MONITOR",
-    estimatedDays: 1,
-    notes: "DeFi exploit tracking",
   },
   EXCHANGE_HACK_TRACKER: {
     name: "Exchange Hack Tracker",
