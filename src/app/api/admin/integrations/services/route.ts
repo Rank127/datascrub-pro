@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
-import { getEmailQuotaStatus } from "@/lib/email";
+import { getEmailQuotaStatus, getEmailQueueStatus } from "@/lib/email";
 import {
   ServicesIntegrationResponse,
   ResendServiceStatus,
@@ -51,8 +51,18 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
     return { status: "not_configured", message: "RESEND_API_KEY not set" };
   }
 
-  // Get our internal email quota tracking
+  // Get our internal email quota tracking and queue status
   const quotaStatus = getEmailQuotaStatus();
+  const queueStatus = await getEmailQueueStatus();
+
+  // Format queue info for response
+  const queueInfo = {
+    queued: queueStatus.queued,
+    processing: queueStatus.processing,
+    sent: queueStatus.sent,
+    failed: queueStatus.failed,
+    nextProcessAt: queueStatus.nextProcessAt?.toISOString() || null,
+  };
 
   try {
     // Try to verify the key by checking emails endpoint
@@ -75,10 +85,11 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
 
       return {
         status: "connected",
-        message: `Connected to Resend (${quotaStatus.sent} sent today)`,
+        message: `Connected to Resend (${quotaStatus.sent} sent today${queueStatus.queued > 0 ? `, ${queueStatus.queued} queued` : ''})`,
         monthlyLimit: 3000,
         monthlyUsed: emailsSent,
         rateLimit: calculateRateLimitHealth(actualSent, dailyLimit, "midnight UTC"),
+        queue: queueInfo,
       };
     } else if (response.status === 401) {
       // Check if it's a restricted key (send-only)
@@ -87,28 +98,32 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
         // Key is valid but restricted to sending - use internal tracking
         return {
           status: "connected",
-          message: `Send-only API key configured (${quotaStatus.sent}/${quotaStatus.limit} today)`,
+          message: `Send-only API key (${quotaStatus.sent}/${quotaStatus.limit} today${queueStatus.queued > 0 ? `, ${queueStatus.queued} queued` : ''})`,
           monthlyLimit: 3000,
           rateLimit: calculateRateLimitHealth(quotaStatus.sent, quotaStatus.limit, "midnight UTC"),
+          queue: queueInfo,
         };
       }
       return {
         status: "error",
         message: "Invalid API key",
+        queue: queueInfo,
       };
     } else {
       return {
         status: "error",
         message: `API returned ${response.status}`,
+        queue: queueInfo,
       };
     }
   } catch (error) {
     // Even if Resend API check fails, show our internal quota
     return {
       status: "connected",
-      message: `Resend configured (${quotaStatus.sent}/${quotaStatus.limit} today)`,
+      message: `Resend configured (${quotaStatus.sent}/${quotaStatus.limit} today${queueStatus.queued > 0 ? `, ${queueStatus.queued} queued` : ''})`,
       monthlyLimit: 3000,
       rateLimit: calculateRateLimitHealth(quotaStatus.sent, quotaStatus.limit, "midnight UTC"),
+      queue: queueInfo,
     };
   }
 }

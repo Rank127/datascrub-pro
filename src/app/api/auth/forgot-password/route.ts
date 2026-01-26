@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     const result = await sendPasswordResetEmail(email, token);
 
     if (!result.success) {
-      console.error("Failed to send reset email:", result.error);
+      console.error("Failed to send reset email:", "error" in result ? result.error : "Unknown error");
       // Still return success to prevent enumeration, but log the error
     }
 

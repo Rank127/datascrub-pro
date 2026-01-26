@@ -118,7 +118,7 @@ export async function GET(request: Request) {
           sentCount++;
         } else {
           errorCount++;
-          console.error(`Failed to send report to ${user.email}:`, result.error);
+          console.error(`Failed to send report to ${user.email}:`, "error" in result ? result.error : "Unknown error");
         }
       } catch (error) {
         errorCount++;

@@ -348,3 +348,39 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
 }
+
+// Email queue for rate-limited emails
+// Stores emails when daily quota is exceeded, processes when quota resets
+model EmailQueue {
+  id          String   @id @default(cuid())
+
+  // Email details
+  toEmail     String
+  subject     String
+  htmlContent String   @db.Text  // Store full HTML content
+
+  // Categorization
+  emailType   String   // CCPA_REMOVAL, USER_NOTIFICATION, BULK_SUMMARY, etc.
+  priority    Int      @default(5) // 1=highest, 10=lowest
+
+  // Context (for debugging/tracking)
+  userId      String?  // Associated user if applicable
+  context     String?  // JSON with additional context (e.g., removalRequestId)
+
+  // Status tracking
+  status      String   @default("QUEUED") // QUEUED, PROCESSING, SENT, FAILED
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(3)
+  lastError   String?
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  processAt   DateTime @default(now()) // When to attempt processing (for delayed sends)
+  sentAt      DateTime?
+
+  @@index([status])
+  @@index([processAt])
+  @@index([emailType])
+  @@index([userId])
+}

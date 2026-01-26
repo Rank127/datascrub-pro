@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { IntegrationCard, StatusIndicator } from "./integration-card";
-import { ServicesIntegrationResponse, RateLimitHealth } from "@/lib/integrations/types";
+import { ServicesIntegrationResponse, RateLimitHealth, EmailQueueInfo } from "@/lib/integrations/types";
 import {
   Plug,
   Mail,
@@ -22,6 +23,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface ServicesStatusProps {
   data: ServicesIntegrationResponse | null;
@@ -37,6 +39,8 @@ interface ServiceCardProps {
   credits?: number | string;
   creditsLabel?: string;
   rateLimit?: RateLimitHealth;
+  queue?: EmailQueueInfo;
+  onProcessQueue?: () => void;
 }
 
 const statusConfig = {
@@ -89,6 +93,8 @@ function ServiceCard({
   credits,
   creditsLabel,
   rateLimit,
+  queue,
+  onProcessQueue,
 }: ServiceCardProps) {
   const config = statusConfig[status];
   const StatusIcon = config.icon;
@@ -155,6 +161,33 @@ function ServiceCard({
           )}
         </div>
       )}
+
+      {/* Email Queue Info */}
+      {queue && queue.queued > 0 && (
+        <div className="mt-2 pt-2 border-t border-slate-700/50">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-amber-400 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {queue.queued} email{queue.queued !== 1 ? 's' : ''} queued
+            </span>
+            {onProcessQueue && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onProcessQueue}
+                className="h-6 px-2 text-xs text-amber-400 hover:text-amber-300"
+              >
+                Process Now
+              </Button>
+            )}
+          </div>
+          {queue.nextProcessAt && (
+            <p className="text-xs text-slate-500">
+              Auto-process: {new Date(queue.nextProcessAt).toLocaleString()}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -164,6 +197,31 @@ export function ServicesStatus({
   loading,
   onRefresh,
 }: ServicesStatusProps) {
+  const [processingQueue, setProcessingQueue] = useState(false);
+
+  const handleProcessQueue = async () => {
+    setProcessingQueue(true);
+    try {
+      const response = await fetch("/api/admin/email-queue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ limit: 20 }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        toast.success(`Processed ${result.sent} emails (${result.remaining} remaining)`);
+        onRefresh(); // Refresh to update stats
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to process queue");
+      }
+    } catch (error) {
+      toast.error("Failed to process email queue");
+    } finally {
+      setProcessingQueue(false);
+    }
+  };
   if (loading) {
     return (
       <IntegrationCard
@@ -222,6 +280,8 @@ export function ServicesStatus({
             status={data.resend.status}
             message={data.resend.message}
             rateLimit={data.resend.rateLimit}
+            queue={data.resend.queue}
+            onProcessQueue={data.resend.queue?.queued ? handleProcessQueue : undefined}
           />
 
           {/* HIBP */}

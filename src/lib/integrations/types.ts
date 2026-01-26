@@ -217,11 +217,20 @@ export interface ServiceStatus {
   rateLimit?: RateLimitHealth;
 }
 
+export interface EmailQueueInfo {
+  queued: number;
+  processing: number;
+  sent: number;
+  failed: number;
+  nextProcessAt: string | null;
+}
+
 export interface ResendServiceStatus extends ServiceStatus {
   recentEmailCount?: number;
   deliveryRate?: number;
   monthlyLimit?: number;
   monthlyUsed?: number;
+  queue?: EmailQueueInfo;
 }
 
 export interface HIBPServiceStatus extends Omit<ServiceStatus, 'rateLimit'> {

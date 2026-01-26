@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { prisma } from "@/lib/db";
 
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
@@ -70,8 +71,69 @@ function buttonHtml(text: string, url: string): string {
   `;
 }
 
-// Send email helper with quota tracking
-async function sendEmail(to: string, subject: string, html: string, skipQuotaCheck = false) {
+interface SendEmailOptions {
+  skipQuotaCheck?: boolean;
+  queueIfExceeded?: boolean;  // Queue email if quota exceeded instead of failing
+  emailType?: string;         // For queue categorization
+  userId?: string;            // Associated user
+  priority?: number;          // 1=highest, 10=lowest
+  context?: Record<string, unknown>;  // Additional context for debugging
+}
+
+// Queue an email for later sending
+async function queueEmail(
+  to: string,
+  subject: string,
+  html: string,
+  options: SendEmailOptions = {}
+): Promise<{ success: boolean; queued: boolean; queueId?: string }> {
+  try {
+    const queued = await prisma.emailQueue.create({
+      data: {
+        toEmail: to,
+        subject,
+        htmlContent: html,
+        emailType: options.emailType || "GENERAL",
+        priority: options.priority || 5,
+        userId: options.userId,
+        context: options.context ? JSON.stringify(options.context) : null,
+        status: "QUEUED",
+        // Process after midnight UTC when quota resets
+        processAt: getNextQuotaReset(),
+      },
+    });
+
+    console.log(`[Email] Queued email to ${to} (ID: ${queued.id}) - will process after quota reset`);
+    return { success: true, queued: true, queueId: queued.id };
+  } catch (error) {
+    console.error("[Email] Failed to queue email:", error);
+    return { success: false, queued: false };
+  }
+}
+
+// Get next quota reset time (midnight UTC)
+function getNextQuotaReset(): Date {
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  tomorrow.setUTCHours(0, 0, 0, 0);
+  return tomorrow;
+}
+
+// Send email helper with quota tracking and optional queueing
+async function sendEmail(
+  to: string,
+  subject: string,
+  html: string,
+  options: SendEmailOptions | boolean = {}
+) {
+  // Handle legacy boolean parameter (skipQuotaCheck)
+  if (typeof options === "boolean") {
+    options = { skipQuotaCheck: options };
+  }
+
+  const { skipQuotaCheck = false, queueIfExceeded = true, emailType, userId, priority, context } = options;
+
   if (!resend) {
     console.warn("Email service not configured - RESEND_API_KEY missing");
     return { success: false, error: "Email service not configured" };
@@ -79,7 +141,13 @@ async function sendEmail(to: string, subject: string, html: string, skipQuotaChe
 
   // Check quota (unless explicitly skipped for critical emails)
   if (!skipQuotaCheck && !canSendEmail()) {
-    console.warn(`[Email] Daily quota exceeded (${emailsSentToday}/${DAILY_EMAIL_LIMIT}). Skipping email to ${to}`);
+    console.warn(`[Email] Daily quota exceeded (${emailsSentToday}/${DAILY_EMAIL_LIMIT}).`);
+
+    // Queue the email if enabled
+    if (queueIfExceeded) {
+      return queueEmail(to, subject, html, { emailType, userId, priority, context });
+    }
+
     return { success: false, error: "Daily email quota exceeded", quotaExceeded: true };
   }
 
@@ -105,6 +173,122 @@ async function sendEmail(to: string, subject: string, html: string, skipQuotaChe
     console.error("Error sending email:", err);
     return { success: false, error: "Failed to send email" };
   }
+}
+
+// Process queued emails (call this from a cron job or API endpoint)
+export async function processEmailQueue(limit: number = 10): Promise<{
+  processed: number;
+  sent: number;
+  failed: number;
+  remaining: number;
+}> {
+  const stats = { processed: 0, sent: 0, failed: 0, remaining: 0 };
+
+  // Check if we have quota available
+  const quota = getEmailQuotaStatus();
+  if (quota.remaining <= 0) {
+    console.log("[Email Queue] No quota available, skipping queue processing");
+    const remaining = await prisma.emailQueue.count({ where: { status: "QUEUED" } });
+    return { ...stats, remaining };
+  }
+
+  // Get queued emails ready to process
+  const queuedEmails = await prisma.emailQueue.findMany({
+    where: {
+      status: "QUEUED",
+      processAt: { lte: new Date() },
+      attempts: { lt: 3 },
+    },
+    orderBy: [
+      { priority: "asc" },  // Higher priority first (lower number)
+      { createdAt: "asc" }, // Older first
+    ],
+    take: Math.min(limit, quota.remaining),
+  });
+
+  console.log(`[Email Queue] Processing ${queuedEmails.length} queued emails`);
+
+  for (const email of queuedEmails) {
+    stats.processed++;
+
+    // Update status to processing
+    await prisma.emailQueue.update({
+      where: { id: email.id },
+      data: { status: "PROCESSING", attempts: { increment: 1 } },
+    });
+
+    try {
+      // Send directly without queueing (to avoid infinite loop)
+      const result = await sendEmail(email.toEmail, email.subject, email.htmlContent, {
+        skipQuotaCheck: false,
+        queueIfExceeded: false, // Don't re-queue if this fails
+      });
+
+      if (result.success) {
+        await prisma.emailQueue.update({
+          where: { id: email.id },
+          data: { status: "SENT", sentAt: new Date() },
+        });
+        stats.sent++;
+      } else {
+        await prisma.emailQueue.update({
+          where: { id: email.id },
+          data: {
+            status: email.attempts >= 2 ? "FAILED" : "QUEUED",
+            lastError: "error" in result ? result.error : "Unknown error",
+          },
+        });
+        stats.failed++;
+      }
+    } catch (error) {
+      await prisma.emailQueue.update({
+        where: { id: email.id },
+        data: {
+          status: email.attempts >= 2 ? "FAILED" : "QUEUED",
+          lastError: error instanceof Error ? error.message : "Unknown error",
+        },
+      });
+      stats.failed++;
+    }
+
+    // Small delay between sends
+    await new Promise(resolve => setTimeout(resolve, 200));
+  }
+
+  // Get remaining count
+  stats.remaining = await prisma.emailQueue.count({ where: { status: "QUEUED" } });
+
+  console.log(`[Email Queue] Done: ${stats.sent} sent, ${stats.failed} failed, ${stats.remaining} remaining`);
+  return stats;
+}
+
+// Get queue status for dashboard
+export async function getEmailQueueStatus(): Promise<{
+  queued: number;
+  processing: number;
+  sent: number;
+  failed: number;
+  nextProcessAt: Date | null;
+}> {
+  const [queued, processing, sent, failed, nextEmail] = await Promise.all([
+    prisma.emailQueue.count({ where: { status: "QUEUED" } }),
+    prisma.emailQueue.count({ where: { status: "PROCESSING" } }),
+    prisma.emailQueue.count({ where: { status: "SENT" } }),
+    prisma.emailQueue.count({ where: { status: "FAILED" } }),
+    prisma.emailQueue.findFirst({
+      where: { status: "QUEUED" },
+      orderBy: { processAt: "asc" },
+      select: { processAt: true },
+    }),
+  ]);
+
+  return {
+    queued,
+    processing,
+    sent,
+    failed,
+    nextProcessAt: nextEmail?.processAt || null,
+  };
 }
 
 // Password Reset Email
