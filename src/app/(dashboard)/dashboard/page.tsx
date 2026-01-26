@@ -12,6 +12,8 @@ import { ProtectionScore } from "@/components/dashboard/protection-score";
 import { TimeSaved } from "@/components/dashboard/time-saved";
 import { BrokerProgress } from "@/components/dashboard/broker-progress";
 import { ProtectionChart } from "@/components/dashboard/protection-chart";
+import { RemovalProgressTracker } from "@/components/dashboard/removal-progress-tracker";
+import { RemovalWizard } from "@/components/dashboard/removal-wizard";
 import {
   AlertTriangle,
   Search,
@@ -118,6 +120,7 @@ export default function DashboardPage() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
+  const [showRemovalWizard, setShowRemovalWizard] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -403,6 +406,24 @@ export default function DashboardPage() {
       {/* Protection Progress Chart */}
       {stats.totalExposures > 0 && (
         <ProtectionChart />
+      )}
+
+      {/* Removal Progress Tracker - Shows when there are pending exposures */}
+      {!showRemovalWizard && stats.activeExposures > 0 && (
+        <RemovalProgressTracker
+          onStartWizard={() => setShowRemovalWizard(true)}
+        />
+      )}
+
+      {/* Removal Wizard - Full wizard mode */}
+      {showRemovalWizard && (
+        <RemovalWizard
+          onComplete={() => {
+            setShowRemovalWizard(false);
+            fetchDashboardData();
+          }}
+          onClose={() => setShowRemovalWizard(false)}
+        />
       )}
 
       {/* Pending Removals Progress */}

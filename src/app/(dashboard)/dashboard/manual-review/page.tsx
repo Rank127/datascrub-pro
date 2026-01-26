@@ -15,6 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ExposureCard } from "@/components/dashboard/exposure-card";
+import { RemovalProgressTracker } from "@/components/dashboard/removal-progress-tracker";
+import { RemovalWizard } from "@/components/dashboard/removal-wizard";
 import {
   MousePointerClick,
   Loader2,
@@ -28,6 +30,7 @@ import {
   ChevronDown,
   ChevronUp,
   AlertTriangle,
+  Zap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -123,6 +126,7 @@ export default function ManualReviewPage() {
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [stats, setStats] = useState({ total: 0, pending: 0, done: 0, brokers: 0 });
+  const [showRemovalWizard, setShowRemovalWizard] = useState(false);
 
   const toggleGroup = (source: string) => {
     setExpandedGroups(prev => {
@@ -369,6 +373,40 @@ export default function ManualReviewPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Removal Wizard or Progress Tracker */}
+      {showRemovalWizard ? (
+        <RemovalWizard
+          onComplete={() => {
+            setShowRemovalWizard(false);
+            fetchManualExposures();
+          }}
+          onClose={() => setShowRemovalWizard(false)}
+        />
+      ) : stats.pending > 0 && (
+        <Card className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border-emerald-500/30">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-start gap-3">
+                <Zap className="h-5 w-5 text-emerald-400 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-emerald-300">Quick Bulk Removal Available</h3>
+                  <p className="text-sm text-slate-400 mt-1">
+                    Use the Removal Wizard to submit all opt-out requests at once with smart broker consolidation.
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowRemovalWizard(true)}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                Start Wizard
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filters */}
       <Card className="bg-slate-800/50 border-slate-700">
