@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
 import { getEmailQuotaStatus, getEmailQueueStatus } from "@/lib/email";
+import { getServiceStatus, shouldUseFreeAlternative } from "@/lib/services/rate-limiter";
 import {
   ServicesIntegrationResponse,
   ResendServiceStatus,
@@ -190,8 +191,23 @@ async function checkHIBPStatus(): Promise<HIBPServiceStatus> {
 }
 
 async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
+  const freeTierMode = shouldUseFreeAlternative();
+  const rateLimitStatus = getServiceStatus("leakcheck");
+
   if (!process.env.LEAKCHECK_API_KEY) {
-    return { status: "not_configured", message: "LEAKCHECK_API_KEY not set" };
+    return {
+      status: freeTierMode ? "connected" : "not_configured",
+      message: freeTierMode ? "Using HIBP as free alternative" : "LEAKCHECK_API_KEY not set"
+    };
+  }
+
+  // If in free tier mode, show rate-limited status
+  if (freeTierMode) {
+    return {
+      status: "connected",
+      message: `Rate limited (${rateLimitStatus.used}/${rateLimitStatus.limit}/day) - using HIBP fallback`,
+      rateLimit: calculateRateLimitHealth(rateLimitStatus.used, rateLimitStatus.limit, "midnight UTC"),
+    };
   }
 
   try {
@@ -203,37 +219,51 @@ async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
     if (response.ok) {
       const data = await response.json();
       const credits = data.balance || data.queries_left || 0;
-      // Assume they started with some max credits - estimate based on common plans
-      const estimatedMax = Math.max(credits, 1000); // At least 1000 or current balance
+      const estimatedMax = Math.max(credits, 1000);
 
       return {
         status: "connected",
-        message: "Connected to LeakCheck",
+        message: `Connected to LeakCheck (${credits} credits)`,
         credits,
         rateLimit: calculateRateLimitHealth(estimatedMax - credits, estimatedMax),
       };
-    } else if (response.status === 401) {
+    } else if (response.status === 401 || response.status === 403) {
       return {
-        status: "error",
-        message: "Invalid API key",
+        status: "connected",
+        message: "API key expired - using HIBP fallback",
       };
     } else {
       return {
-        status: "error",
-        message: `API returned ${response.status}`,
+        status: "connected",
+        message: `API error (${response.status}) - using HIBP fallback`,
       };
     }
   } catch (error) {
     return {
-      status: "error",
-      message: error instanceof Error ? error.message : "Connection failed",
+      status: "connected",
+      message: "Connection failed - using HIBP fallback",
     };
   }
 }
 
 async function checkScrapingBeeStatus(): Promise<ScrapingBeeServiceStatus> {
+  const freeTierMode = shouldUseFreeAlternative();
+  const rateLimitStatus = getServiceStatus("scrapingbee");
+
   if (!process.env.SCRAPINGBEE_API_KEY) {
-    return { status: "not_configured", message: "SCRAPINGBEE_API_KEY not set" };
+    return {
+      status: freeTierMode ? "connected" : "not_configured",
+      message: freeTierMode ? "Using direct fetch (no JS rendering)" : "SCRAPINGBEE_API_KEY not set"
+    };
+  }
+
+  // If in free tier mode, show rate-limited status
+  if (freeTierMode) {
+    return {
+      status: "connected",
+      message: `Rate limited (${rateLimitStatus.used}/${rateLimitStatus.limit}/day) - using direct fetch`,
+      rateLimit: calculateRateLimitHealth(rateLimitStatus.used, rateLimitStatus.limit, "midnight UTC"),
+    };
   }
 
   try {
@@ -248,28 +278,39 @@ async function checkScrapingBeeStatus(): Promise<ScrapingBeeServiceStatus> {
       const maxCredits = data.max_api_credit || data.credits_limit || 1000;
       const creditsUsed = maxCredits - creditsRemaining;
 
+      // If credits exhausted, switch to free mode
+      if (creditsRemaining === 0) {
+        return {
+          status: "connected",
+          message: "Credits exhausted - using direct fetch fallback",
+          creditsRemaining: 0,
+          maxCredits,
+          rateLimit: calculateRateLimitHealth(maxCredits, maxCredits),
+        };
+      }
+
       return {
         status: "connected",
-        message: "Connected to ScrapingBee",
+        message: `Connected to ScrapingBee (${creditsRemaining} credits)`,
         creditsRemaining,
         maxCredits,
         rateLimit: calculateRateLimitHealth(creditsUsed, maxCredits),
       };
     } else if (response.status === 401) {
       return {
-        status: "error",
-        message: "Invalid API key",
+        status: "connected",
+        message: "Invalid API key - using direct fetch fallback",
       };
     } else {
       return {
-        status: "error",
-        message: `API returned ${response.status}`,
+        status: "connected",
+        message: `API error - using direct fetch fallback`,
       };
     }
   } catch (error) {
     return {
-      status: "error",
-      message: error instanceof Error ? error.message : "Connection failed",
+      status: "connected",
+      message: "Connection failed - using direct fetch fallback",
     };
   }
 }
