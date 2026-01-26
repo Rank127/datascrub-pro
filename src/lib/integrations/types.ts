@@ -143,12 +143,54 @@ export interface DatabaseTable {
   size: string;
 }
 
+export interface UsersByPlan {
+  free: number;
+  pro: number;
+  enterprise: number;
+  total: number;
+}
+
+export interface RemovalsByStatus {
+  pending: number;
+  inProgress: number;
+  completed: number;
+  failed: number;
+  total: number;
+}
+
+export interface ExposuresByStatus {
+  active: number;
+  removed: number;
+  total: number;
+}
+
+export interface ScansByStatus {
+  pending: number;
+  running: number;
+  completed: number;
+  failed: number;
+  total: number;
+}
+
+export interface DatabaseBusinessMetrics {
+  users: UsersByPlan;
+  removals: RemovalsByStatus;
+  exposures: ExposuresByStatus;
+  scans: ScansByStatus;
+  subscriptions: {
+    active: number;
+    canceled: number;
+    total: number;
+  };
+}
+
 export interface DatabaseIntegrationResponse {
   configured: boolean;
   tables: DatabaseTable[];
   totalSize: string;
   connectionStatus: "healthy" | "degraded" | "error";
   latencyMs: number;
+  businessMetrics?: DatabaseBusinessMetrics;
   error?: string;
 }
 
@@ -156,14 +198,26 @@ export interface DatabaseIntegrationResponse {
 // External Services Types
 // ============================================
 
+export interface RateLimitHealth {
+  status: "healthy" | "warning" | "critical";
+  used: number;
+  limit: number;
+  percentUsed: number;
+  resetAt?: string;
+  recommendation?: string;
+}
+
 export interface ServiceStatus {
   status: "connected" | "error" | "not_configured";
   message?: string;
+  rateLimit?: RateLimitHealth;
 }
 
 export interface ResendServiceStatus extends ServiceStatus {
   recentEmailCount?: number;
   deliveryRate?: number;
+  monthlyLimit?: number;
+  monthlyUsed?: number;
 }
 
 export interface HIBPServiceStatus extends ServiceStatus {

@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
-import { DatabaseIntegrationResponse, DatabaseTable } from "@/lib/integrations/types";
+import { DatabaseIntegrationResponse, DatabaseTable, DatabaseBusinessMetrics } from "@/lib/integrations/types";
 
 function getClientIP(request: Request): string | undefined {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -140,12 +140,131 @@ export async function GET(request: Request) {
     // Sort by row count descending
     tables.sort((a, b) => b.rowCount - a.rowCount);
 
+    // Get business metrics
+    const [
+      usersByPlan,
+      removalsByStatus,
+      exposuresByStatus,
+      scansByStatus,
+      subscriptionsByStatus,
+    ] = await Promise.all([
+      // Users by plan
+      prisma.user.groupBy({
+        by: ["plan"],
+        _count: { id: true },
+      }),
+      // Removals by status
+      prisma.removalRequest.groupBy({
+        by: ["status"],
+        _count: { id: true },
+      }),
+      // Exposures by status
+      prisma.exposure.groupBy({
+        by: ["status"],
+        _count: { id: true },
+      }),
+      // Scans by status
+      prisma.scan.groupBy({
+        by: ["status"],
+        _count: { id: true },
+      }),
+      // Subscriptions by status
+      prisma.subscription.groupBy({
+        by: ["status"],
+        _count: { id: true },
+      }),
+    ]);
+
+    // Process user counts by plan
+    const userCounts = {
+      free: 0,
+      pro: 0,
+      enterprise: 0,
+      total: 0,
+    };
+    for (const row of usersByPlan) {
+      const count = row._count.id;
+      userCounts.total += count;
+      if (row.plan === "FREE") userCounts.free = count;
+      else if (row.plan === "PRO") userCounts.pro = count;
+      else if (row.plan === "ENTERPRISE") userCounts.enterprise = count;
+    }
+
+    // Process removal counts by status
+    const removalCounts = {
+      pending: 0,
+      inProgress: 0,
+      completed: 0,
+      failed: 0,
+      total: 0,
+    };
+    for (const row of removalsByStatus) {
+      const count = row._count.id;
+      removalCounts.total += count;
+      if (row.status === "PENDING") removalCounts.pending = count;
+      else if (row.status === "IN_PROGRESS") removalCounts.inProgress = count;
+      else if (row.status === "COMPLETED") removalCounts.completed = count;
+      else if (row.status === "FAILED") removalCounts.failed = count;
+    }
+
+    // Process exposure counts by status
+    const exposureCounts = {
+      active: 0,
+      removed: 0,
+      total: 0,
+    };
+    for (const row of exposuresByStatus) {
+      const count = row._count.id;
+      exposureCounts.total += count;
+      if (row.status === "ACTIVE" || row.status === "FOUND") exposureCounts.active += count;
+      else if (row.status === "REMOVED") exposureCounts.removed = count;
+    }
+
+    // Process scan counts by status
+    const scanCounts = {
+      pending: 0,
+      running: 0,
+      completed: 0,
+      failed: 0,
+      total: 0,
+    };
+    for (const row of scansByStatus) {
+      const count = row._count.id;
+      scanCounts.total += count;
+      if (row.status === "PENDING") scanCounts.pending = count;
+      else if (row.status === "RUNNING") scanCounts.running = count;
+      else if (row.status === "COMPLETED") scanCounts.completed = count;
+      else if (row.status === "FAILED") scanCounts.failed = count;
+    }
+
+    // Process subscription counts
+    const subscriptionCounts = {
+      active: 0,
+      canceled: 0,
+      total: 0,
+    };
+    for (const row of subscriptionsByStatus) {
+      const count = row._count.id;
+      subscriptionCounts.total += count;
+      if (row.status === "active") subscriptionCounts.active = count;
+      else if (row.status === "canceled") subscriptionCounts.canceled = count;
+    }
+
+    const businessMetrics: DatabaseBusinessMetrics = {
+      users: userCounts,
+      removals: removalCounts,
+      exposures: exposureCounts,
+      scans: scanCounts,
+      subscriptions: subscriptionCounts,
+    };
+
     const response: DatabaseIntegrationResponse = {
       configured: true,
       tables,
       totalSize: formatBytes(totalSizeBytes),
       connectionStatus,
       latencyMs,
+      businessMetrics,
     };
 
     return NextResponse.json(response);

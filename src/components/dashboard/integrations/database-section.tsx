@@ -1,8 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { IntegrationCard, MetricDisplay } from "./integration-card";
 import { DatabaseIntegrationResponse } from "@/lib/integrations/types";
 import {
@@ -14,8 +21,25 @@ import {
   CheckCircle2,
   AlertCircle,
   XCircle,
+  Users,
+  Shield,
+  Search,
+  CreditCard,
+  Loader2,
+  Mail,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface UserDetails {
+  id: string;
+  email: string | null;
+  name: string | null;
+  plan: string;
+  createdAt: string;
+  scanCount: number;
+  exposureCount: number;
+}
 
 interface DatabaseSectionProps {
   data: DatabaseIntegrationResponse | null;
@@ -49,6 +73,36 @@ export function DatabaseSection({
   loading,
   onRefresh,
 }: DatabaseSectionProps) {
+  const [usersModalOpen, setUsersModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [users, setUsers] = useState<UserDetails[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
+  const handlePlanClick = async (plan: string) => {
+    setSelectedPlan(plan);
+    setUsersModalOpen(true);
+    setLoadingUsers(true);
+
+    try {
+      const response = await fetch(`/api/admin/integrations/database/users?plan=${plan}`);
+      const data = await response.json();
+      setUsers(data.users || []);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+      setUsers([]);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
   if (loading) {
     return (
       <IntegrationCard
@@ -137,6 +191,144 @@ export function DatabaseSection({
         </div>
       </IntegrationCard>
 
+      {/* Business Metrics */}
+      {data.businessMetrics && (
+        <Card className="bg-slate-900/50 border-slate-800">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium text-white flex items-center gap-2">
+              <Activity className="h-5 w-5 text-cyan-400" />
+              Business Metrics
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Users by Plan */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="h-4 w-4 text-blue-400" />
+                <span className="text-sm font-medium text-slate-300">Users by Plan</span>
+                <span className="text-xs text-slate-500 ml-1">(click to view)</span>
+                <Badge variant="outline" className="ml-auto">{data.businessMetrics.users.total} total</Badge>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => handlePlanClick("FREE")}
+                  className="p-3 bg-slate-800/50 rounded-lg text-center hover:bg-slate-700/50 transition-colors cursor-pointer"
+                >
+                  <p className="text-2xl font-bold text-slate-300">{data.businessMetrics.users.free}</p>
+                  <p className="text-xs text-slate-500">Free</p>
+                </button>
+                <button
+                  onClick={() => handlePlanClick("PRO")}
+                  className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center hover:bg-emerald-500/20 transition-colors cursor-pointer"
+                >
+                  <p className="text-2xl font-bold text-emerald-400">{data.businessMetrics.users.pro}</p>
+                  <p className="text-xs text-emerald-400/70">Pro</p>
+                </button>
+                <button
+                  onClick={() => handlePlanClick("ENTERPRISE")}
+                  className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-center hover:bg-purple-500/20 transition-colors cursor-pointer"
+                >
+                  <p className="text-2xl font-bold text-purple-400">{data.businessMetrics.users.enterprise}</p>
+                  <p className="text-xs text-purple-400/70">Enterprise</p>
+                </button>
+              </div>
+            </div>
+
+            {/* Exposures */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="h-4 w-4 text-red-400" />
+                <span className="text-sm font-medium text-slate-300">Exposures</span>
+                <Badge variant="outline" className="ml-auto">{data.businessMetrics.exposures.total.toLocaleString()} total</Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-red-400">{data.businessMetrics.exposures.active.toLocaleString()}</p>
+                  <p className="text-xs text-red-400/70">Active</p>
+                </div>
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-emerald-400">{data.businessMetrics.exposures.removed.toLocaleString()}</p>
+                  <p className="text-xs text-emerald-400/70">Removed</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Removal Requests */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="h-4 w-4 text-amber-400" />
+                <span className="text-sm font-medium text-slate-300">Removal Requests</span>
+                <Badge variant="outline" className="ml-auto">{data.businessMetrics.removals.total} total</Badge>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-center">
+                  <p className="text-xl font-bold text-amber-400">{data.businessMetrics.removals.pending}</p>
+                  <p className="text-xs text-amber-400/70">Pending</p>
+                </div>
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-center">
+                  <p className="text-xl font-bold text-blue-400">{data.businessMetrics.removals.inProgress}</p>
+                  <p className="text-xs text-blue-400/70">In Progress</p>
+                </div>
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center">
+                  <p className="text-xl font-bold text-emerald-400">{data.businessMetrics.removals.completed}</p>
+                  <p className="text-xs text-emerald-400/70">Completed</p>
+                </div>
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-center">
+                  <p className="text-xl font-bold text-red-400">{data.businessMetrics.removals.failed}</p>
+                  <p className="text-xs text-red-400/70">Failed</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Scans */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Search className="h-4 w-4 text-cyan-400" />
+                <span className="text-sm font-medium text-slate-300">Scans</span>
+                <Badge variant="outline" className="ml-auto">{data.businessMetrics.scans.total} total</Badge>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-center">
+                  <p className="text-xl font-bold text-amber-400">{data.businessMetrics.scans.pending}</p>
+                  <p className="text-xs text-amber-400/70">Pending</p>
+                </div>
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-center">
+                  <p className="text-xl font-bold text-blue-400">{data.businessMetrics.scans.running}</p>
+                  <p className="text-xs text-blue-400/70">Running</p>
+                </div>
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center">
+                  <p className="text-xl font-bold text-emerald-400">{data.businessMetrics.scans.completed}</p>
+                  <p className="text-xs text-emerald-400/70">Completed</p>
+                </div>
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-center">
+                  <p className="text-xl font-bold text-red-400">{data.businessMetrics.scans.failed}</p>
+                  <p className="text-xs text-red-400/70">Failed</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Subscriptions */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <CreditCard className="h-4 w-4 text-emerald-400" />
+                <span className="text-sm font-medium text-slate-300">Subscriptions</span>
+                <Badge variant="outline" className="ml-auto">{data.businessMetrics.subscriptions.total} total</Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-emerald-400">{data.businessMetrics.subscriptions.active}</p>
+                  <p className="text-xs text-emerald-400/70">Active</p>
+                </div>
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-red-400">{data.businessMetrics.subscriptions.canceled}</p>
+                  <p className="text-xs text-red-400/70">Canceled</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Full Table Stats */}
       <Card className="bg-slate-900/50 border-slate-800">
         <CardHeader>
@@ -171,6 +363,62 @@ export function DatabaseSection({
           </div>
         </CardContent>
       </Card>
+
+      {/* Users Modal */}
+      <Dialog open={usersModalOpen} onOpenChange={setUsersModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              {selectedPlan} Users
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {loadingUsers ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                <span className="ml-2 text-slate-400">Loading users...</span>
+              </div>
+            ) : users.length === 0 ? (
+              <p className="text-slate-500 text-center py-8">No users found</p>
+            ) : (
+              users.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-slate-500 flex-shrink-0" />
+                      <span className="text-sm text-white truncate">
+                        {user.email || "No email"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 mt-1 text-xs text-slate-500">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {formatDate(user.createdAt)}
+                      </span>
+                      <span>{user.scanCount} scans</span>
+                      <span>{user.exposureCount} exposures</span>
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "ml-2 flex-shrink-0",
+                      user.plan === "PRO" && "border-emerald-500/50 text-emerald-400",
+                      user.plan === "ENTERPRISE" && "border-purple-500/50 text-purple-400"
+                    )}
+                  >
+                    {user.plan}
+                  </Badge>
+                </div>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

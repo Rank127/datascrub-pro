@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { IntegrationCard, StatusIndicator } from "./integration-card";
-import { ServicesIntegrationResponse } from "@/lib/integrations/types";
+import { ServicesIntegrationResponse, RateLimitHealth } from "@/lib/integrations/types";
 import {
   Plug,
   Mail,
@@ -18,6 +18,8 @@ import {
   AlertCircle,
   Loader2,
   LucideIcon,
+  TrendingUp,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +36,7 @@ interface ServiceCardProps {
   message?: string;
   credits?: number | string;
   creditsLabel?: string;
+  rateLimit?: RateLimitHealth;
 }
 
 const statusConfig = {
@@ -60,6 +63,24 @@ const statusConfig = {
   },
 };
 
+const rateLimitConfig = {
+  healthy: {
+    color: "text-emerald-400",
+    bgColor: "bg-emerald-500",
+    label: "Healthy",
+  },
+  warning: {
+    color: "text-amber-400",
+    bgColor: "bg-amber-500",
+    label: "Warning",
+  },
+  critical: {
+    color: "text-red-400",
+    bgColor: "bg-red-500",
+    label: "Critical",
+  },
+};
+
 function ServiceCard({
   name,
   icon: Icon,
@@ -67,6 +88,7 @@ function ServiceCard({
   message,
   credits,
   creditsLabel,
+  rateLimit,
 }: ServiceCardProps) {
   const config = statusConfig[status];
   const StatusIcon = config.icon;
@@ -104,6 +126,33 @@ function ServiceCard({
               {typeof credits === "number" ? credits.toLocaleString() : credits}
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Rate Limit Health */}
+      {rateLimit && (
+        <div className="mt-2 pt-2 border-t border-slate-700/50">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-slate-500">Usage</span>
+            <span className={cn("text-xs font-medium", rateLimitConfig[rateLimit.status].color)}>
+              {rateLimit.percentUsed}%
+            </span>
+          </div>
+          {/* Progress bar */}
+          <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+            <div
+              className={cn("h-full rounded-full transition-all", rateLimitConfig[rateLimit.status].bgColor)}
+              style={{ width: `${Math.min(rateLimit.percentUsed, 100)}%` }}
+            />
+          </div>
+          {rateLimit.recommendation && (
+            <div className="mt-2 flex items-start gap-1.5">
+              <AlertTriangle className={cn("h-3 w-3 mt-0.5 flex-shrink-0", rateLimitConfig[rateLimit.status].color)} />
+              <p className={cn("text-xs", rateLimitConfig[rateLimit.status].color)}>
+                {rateLimit.recommendation}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -172,6 +221,7 @@ export function ServicesStatus({
             icon={Mail}
             status={data.resend.status}
             message={data.resend.message}
+            rateLimit={data.resend.rateLimit}
           />
 
           {/* HIBP */}
@@ -196,6 +246,7 @@ export function ServicesStatus({
             message={data.leakcheck.message}
             credits={data.leakcheck.credits}
             creditsLabel="API Credits"
+            rateLimit={data.leakcheck.rateLimit}
           />
 
           {/* ScrapingBee */}
@@ -214,6 +265,7 @@ export function ServicesStatus({
                 : undefined
             }
             creditsLabel="Credits"
+            rateLimit={data.scrapingbee.rateLimit}
           />
 
           {/* Redis */}

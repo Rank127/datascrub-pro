@@ -177,7 +177,9 @@ async function runReport(
       return null;
     }
 
-    return response.json();
+    const result = await response.json();
+    console.log("[GA] Raw API response:", JSON.stringify(result, null, 2));
+    return result;
   } catch (error) {
     console.error("[GA] Failed to run report:", error);
     return null;
@@ -188,7 +190,10 @@ async function getConfig(): Promise<GAConfig | null> {
   const propertyId = getPropertyId();
   const accessToken = await getAccessToken();
 
+  console.log("[GA] Using property ID:", propertyId);
+
   if (!propertyId || !accessToken) {
+    console.log("[GA] Missing config - propertyId:", !!propertyId, "accessToken:", !!accessToken);
     return null;
   }
 
@@ -202,23 +207,18 @@ export async function getPageViews(): Promise<GAPageViews | null> {
   if (!isGAConfigured()) return null;
 
   try {
-    const today = new Date().toISOString().split("T")[0];
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-
+    // Use GA4's relative date strings for better compatibility
     const [todayReport, weekReport, monthReport] = await Promise.all([
-      runReport([], ["screenPageViews"], [{ startDate: today, endDate: today }]),
-      runReport([], ["screenPageViews"], [
-        { startDate: weekAgo, endDate: today },
-      ]),
-      runReport([], ["screenPageViews"], [
-        { startDate: monthAgo, endDate: today },
-      ]),
+      runReport([], ["screenPageViews"], [{ startDate: "yesterday", endDate: "yesterday" }]),
+      runReport([], ["screenPageViews"], [{ startDate: "7daysAgo", endDate: "yesterday" }]),
+      runReport([], ["screenPageViews"], [{ startDate: "30daysAgo", endDate: "yesterday" }]),
     ]);
+
+    console.log("[GA] pageViews reports:", {
+      today: todayReport,
+      week: weekReport,
+      month: monthReport
+    });
 
     return {
       today: parseInt(todayReport?.rows?.[0]?.metricValues?.[0]?.value || "0"),
@@ -238,18 +238,11 @@ export async function getActiveUsers(): Promise<GAActiveUsers | null> {
   if (!isGAConfigured()) return null;
 
   try {
-    const today = new Date().toISOString().split("T")[0];
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-
+    // Use GA4's relative date strings
     const [dauReport, wauReport, mauReport] = await Promise.all([
-      runReport([], ["activeUsers"], [{ startDate: today, endDate: today }]),
-      runReport([], ["activeUsers"], [{ startDate: weekAgo, endDate: today }]),
-      runReport([], ["activeUsers"], [{ startDate: monthAgo, endDate: today }]),
+      runReport([], ["activeUsers"], [{ startDate: "yesterday", endDate: "yesterday" }]),
+      runReport([], ["activeUsers"], [{ startDate: "7daysAgo", endDate: "yesterday" }]),
+      runReport([], ["activeUsers"], [{ startDate: "30daysAgo", endDate: "yesterday" }]),
     ]);
 
     return {
@@ -270,15 +263,10 @@ export async function getTopPages(limit = 10): Promise<GATopPage[]> {
   if (!isGAConfigured()) return [];
 
   try {
-    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-    const today = new Date().toISOString().split("T")[0];
-
     const report = await runReport(
       ["pagePath"],
       ["screenPageViews"],
-      [{ startDate: monthAgo, endDate: today }]
+      [{ startDate: "30daysAgo", endDate: "yesterday" }]
     );
 
     if (!report?.rows) return [];
@@ -303,15 +291,10 @@ export async function getTrafficSources(): Promise<GATrafficSource[]> {
   if (!isGAConfigured()) return [];
 
   try {
-    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-    const today = new Date().toISOString().split("T")[0];
-
     const report = await runReport(
       ["sessionSource"],
       ["sessions"],
-      [{ startDate: monthAgo, endDate: today }]
+      [{ startDate: "30daysAgo", endDate: "yesterday" }]
     );
 
     if (!report?.rows) return [];
@@ -336,15 +319,10 @@ export async function getConversions(): Promise<GAConversion[]> {
   if (!isGAConfigured()) return [];
 
   try {
-    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-    const today = new Date().toISOString().split("T")[0];
-
     const report = await runReport(
       ["eventName"],
       ["eventCount"],
-      [{ startDate: monthAgo, endDate: today }]
+      [{ startDate: "30daysAgo", endDate: "yesterday" }]
     );
 
     if (!report?.rows) return [];

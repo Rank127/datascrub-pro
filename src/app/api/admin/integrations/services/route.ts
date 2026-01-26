@@ -10,7 +10,32 @@ import {
   LeakCheckServiceStatus,
   ScrapingBeeServiceStatus,
   RedisServiceStatus,
+  RateLimitHealth,
 } from "@/lib/integrations/types";
+
+function calculateRateLimitHealth(used: number, limit: number, resetAt?: string): RateLimitHealth {
+  const percentUsed = limit > 0 ? Math.round((used / limit) * 100) : 0;
+
+  let status: RateLimitHealth["status"] = "healthy";
+  let recommendation: string | undefined;
+
+  if (percentUsed >= 90) {
+    status = "critical";
+    recommendation = "Upgrade plan immediately - approaching rate limit";
+  } else if (percentUsed >= 75) {
+    status = "warning";
+    recommendation = "Consider upgrading plan - high usage";
+  }
+
+  return {
+    status,
+    used,
+    limit,
+    percentUsed,
+    resetAt,
+    recommendation,
+  };
+}
 
 function getClientIP(request: Request): string | undefined {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -26,17 +51,45 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
   }
 
   try {
-    // Check Resend API status by fetching domains
-    const response = await fetch("https://api.resend.com/domains", {
+    // Try to verify the key by checking emails endpoint
+    // Note: Many Resend API keys are restricted to sending only
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "GET",
       headers: {
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       },
     });
 
+    // Resend free tier: 100 emails/day, 3000/month
+    const dailyLimit = 100;
+    const monthlyLimit = 3000;
+
     if (response.ok) {
+      const data = await response.json();
+      const emailsSent = Array.isArray(data.data) ? data.data.length : 0;
+
       return {
         status: "connected",
         message: "Connected to Resend",
+        monthlyLimit,
+        monthlyUsed: emailsSent,
+        rateLimit: calculateRateLimitHealth(emailsSent, monthlyLimit),
+      };
+    } else if (response.status === 401) {
+      // Check if it's a restricted key (send-only)
+      const errorData = await response.json().catch(() => ({}));
+      if (errorData.name === "restricted_api_key") {
+        // Key is valid but restricted to sending - this is OK
+        return {
+          status: "connected",
+          message: "Send-only API key configured",
+          monthlyLimit,
+          rateLimit: calculateRateLimitHealth(0, monthlyLimit), // Can't check usage with restricted key
+        };
+      }
+      return {
+        status: "error",
+        message: "Invalid API key",
       };
     } else {
       return {
@@ -110,10 +163,15 @@ async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
 
     if (response.ok) {
       const data = await response.json();
+      const credits = data.balance || data.queries_left || 0;
+      // Assume they started with some max credits - estimate based on common plans
+      const estimatedMax = Math.max(credits, 1000); // At least 1000 or current balance
+
       return {
         status: "connected",
         message: "Connected to LeakCheck",
-        credits: data.balance || data.queries_left || 0,
+        credits,
+        rateLimit: calculateRateLimitHealth(estimatedMax - credits, estimatedMax),
       };
     } else if (response.status === 401) {
       return {
@@ -147,11 +205,16 @@ async function checkScrapingBeeStatus(): Promise<ScrapingBeeServiceStatus> {
 
     if (response.ok) {
       const data = await response.json();
+      const creditsRemaining = data.credits_remaining || data.api_credit || 0;
+      const maxCredits = data.max_api_credit || data.credits_limit || 1000;
+      const creditsUsed = maxCredits - creditsRemaining;
+
       return {
         status: "connected",
         message: "Connected to ScrapingBee",
-        creditsRemaining: data.credits_remaining || data.api_credit || 0,
-        maxCredits: data.max_api_credit || data.credits_limit || 0,
+        creditsRemaining,
+        maxCredits,
+        rateLimit: calculateRateLimitHealth(creditsUsed, maxCredits),
       };
     } else if (response.status === 401) {
       return {
@@ -266,6 +329,8 @@ export async function GET(request: Request) {
       scrapingbee,
       redis,
     };
+
+    console.log("[Services] Response:", JSON.stringify(response, null, 2));
 
     return NextResponse.json(response);
   } catch (error) {

@@ -79,6 +79,12 @@ export async function GET(request: Request) {
         getConversions(),
       ]);
 
+    // Debug logging
+    console.log("[GA Debug] pageViews:", JSON.stringify(pageViews));
+    console.log("[GA Debug] activeUsers:", JSON.stringify(activeUsers));
+    console.log("[GA Debug] topPages:", JSON.stringify(topPages));
+    console.log("[GA Debug] trafficSources:", JSON.stringify(trafficSources));
+
     const response: AnalyticsIntegrationResponse = {
       configured: true,
       pageViews: pageViews || undefined,

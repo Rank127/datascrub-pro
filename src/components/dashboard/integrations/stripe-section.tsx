@@ -24,12 +24,17 @@ interface StripeSectionProps {
 }
 
 function formatCurrency(cents: number): string {
+  const dollars = cents / 100;
+  // If amount rounds to zero, just show "$0" (avoid "-$0")
+  if (Math.abs(dollars) < 0.50) {
+    return "$0";
+  }
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(cents / 100);
+  }).format(dollars);
 }
 
 function formatDate(timestamp: number): string {

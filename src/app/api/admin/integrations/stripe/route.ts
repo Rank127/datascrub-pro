@@ -152,6 +152,8 @@ export async function GET(request: Request) {
       })),
     };
 
+    console.log("[Stripe] Response data:", JSON.stringify(response, null, 2));
+
     return NextResponse.json(response);
   } catch (error) {
     console.error("[Integrations/Stripe] Error:", error);
