@@ -53,16 +53,29 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
 
   // Get our internal email quota tracking and queue status
   const quotaStatus = getEmailQuotaStatus();
-  const queueStatus = await getEmailQueueStatus();
 
-  // Format queue info for response
-  const queueInfo = {
-    queued: queueStatus.queued,
-    processing: queueStatus.processing,
-    sent: queueStatus.sent,
-    failed: queueStatus.failed,
-    nextProcessAt: queueStatus.nextProcessAt?.toISOString() || null,
+  // Get queue status with error handling
+  let queueInfo = {
+    queued: 0,
+    processing: 0,
+    sent: 0,
+    failed: 0,
+    nextProcessAt: null as string | null,
   };
+
+  try {
+    const queueStatus = await getEmailQueueStatus();
+    queueInfo = {
+      queued: queueStatus.queued,
+      processing: queueStatus.processing,
+      sent: queueStatus.sent,
+      failed: queueStatus.failed,
+      nextProcessAt: queueStatus.nextProcessAt?.toISOString() || null,
+    };
+  } catch (error) {
+    console.error("[Services] Failed to get email queue status:", error);
+    // Continue with default queue info
+  }
 
   try {
     // Try to verify the key by checking emails endpoint

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,35 +9,31 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String
-  name          String?
-  plan          String    @default("FREE") // FREE, PRO, ENTERPRISE
-  role          String    @default("USER") // USER, SEO_MANAGER, SUPPORT, ADMIN, LEGAL, SUPER_ADMIN
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  // Notification Preferences
-  emailNotifications  Boolean @default(true)
-  newExposureAlerts   Boolean @default(true)
-  removalUpdates      Boolean @default(true)
-  weeklyReports       Boolean @default(true)
-  marketingEmails     Boolean @default(false)
-  reportFrequency     String  @default("weekly") // daily, weekly, monthly
-
-  // Relations
-  profiles        PersonalProfile[]
-  scans           Scan[]
-  exposures       Exposure[]
-  whitelists      Whitelist[]
-  removalRequests RemovalRequest[]
-  subscription    Subscription?
-  accounts        Account[]
-  sessions        Session[]
-  auditLogs       AuditLog[]      // Logs created by this user
+  id                 String            @id @default(cuid())
+  email              String            @unique
+  passwordHash       String
+  name               String?
+  plan               String            @default("FREE")
+  emailVerified      DateTime?
+  image              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  emailNotifications Boolean           @default(true)
+  marketingEmails    Boolean           @default(false)
+  newExposureAlerts  Boolean           @default(true)
+  removalUpdates     Boolean           @default(true)
+  reportFrequency    String            @default("weekly")
+  weeklyReports      Boolean           @default(true)
+  role               String            @default("USER")
+  accounts           Account[]
+  auditLogs          AuditLog[]
+  exposures          Exposure[]
+  profiles           PersonalProfile[]
+  removalRequests    RemovalRequest[]
+  scans              Scan[]
+  sessions           Session[]
+  subscription       Subscription?
+  whitelists         Whitelist[]
 }
 
 model Account {
@@ -56,8 +49,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -81,73 +73,57 @@ model VerificationToken {
 model PersonalProfile {
   id          String   @id @default(cuid())
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // PII Fields (encrypted at application level)
   fullName    String?
-  aliases     String?  // JSON string array of other names
-  emails      String?  // JSON string array
-  phones      String?  // JSON string array
-  addresses   String?  // JSON array of address objects
-  dateOfBirth String?  // Encrypted date string
-  ssnHash     String?  // Hashed, never stored plain
-  photoUrls   String?  // JSON string array
-  usernames   String?  // JSON string array
-
+  aliases     String?
+  emails      String?
+  phones      String?
+  addresses   String?
+  dateOfBirth String?
+  ssnHash     String?
+  photoUrls   String?
+  usernames   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Scan {
-  id             String   @id @default(cuid())
+  id             String     @id @default(cuid())
   userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status         String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, FAILED
-  type           String   // FULL, QUICK, MONITORING
-
-  // Results
-  exposuresFound Int      @default(0)
-  sourcesChecked Int      @default(0)
-  progress       Int      @default(0) // 0-100 percentage
-
+  status         String     @default("PENDING")
+  type           String
+  exposuresFound Int        @default(0)
+  sourcesChecked Int        @default(0)
+  progress       Int        @default(0)
   startedAt      DateTime?
   completedAt    DateTime?
-  createdAt      DateTime @default(now())
-
+  createdAt      DateTime   @default(now())
   exposures      Exposure[]
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Exposure {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  scanId        String?
-  scan          Scan?    @relation(fields: [scanId], references: [id])
-
-  source        String   // DataSource enum value
-  sourceUrl     String?  // URL where data was found
-  sourceName    String   // Human-readable source name
-
-  dataType      String   // ExposureType enum value
-  dataPreview   String?  // Masked preview of exposed data
-  severity      String   // LOW, MEDIUM, HIGH, CRITICAL
-
-  status        String   @default("ACTIVE") // ACTIVE, REMOVAL_PENDING, REMOVAL_IN_PROGRESS, REMOVED, WHITELISTED
-  isWhitelisted Boolean  @default(false)
-
-  // Manual action tracking (for exposures requiring user to manually opt out)
-  requiresManualAction  Boolean   @default(false)  // True if user must take manual action
-  manualActionTaken     Boolean   @default(false)  // True if user marked as done
-  manualActionTakenAt   DateTime?                  // When user marked as done
-
-  // Proof screenshot (captured when exposure is first found)
-  proofScreenshot       String?   // URL or base64 of screenshot showing the exposure
-  proofScreenshotAt     DateTime? // When the proof screenshot was captured
-
-  firstFoundAt  DateTime @default(now())
-  lastSeenAt    DateTime @default(now())
-
-  removalRequest RemovalRequest?
+  id                   String          @id @default(cuid())
+  userId               String
+  scanId               String?
+  source               String
+  sourceUrl            String?
+  sourceName           String
+  dataType             String
+  dataPreview          String?
+  severity             String
+  status               String          @default("ACTIVE")
+  isWhitelisted        Boolean         @default(false)
+  firstFoundAt         DateTime        @default(now())
+  lastSeenAt           DateTime        @default(now())
+  manualActionTaken    Boolean         @default(false)
+  manualActionTakenAt  DateTime?
+  requiresManualAction Boolean         @default(false)
+  proofScreenshot      String?
+  proofScreenshotAt    DateTime?
+  scan                 Scan?           @relation(fields: [scanId], references: [id])
+  user                 User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  removalRequest       RemovalRequest?
 
   @@index([userId])
   @@index([scanId])
@@ -157,155 +133,116 @@ model Exposure {
 model Whitelist {
   id         String   @id @default(cuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  source     String   // DataSource enum value
+  source     String
   sourceUrl  String?
   sourceName String
-  reason     String?  // Why user wants to keep this
-
+  reason     String?
   createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model RemovalRequest {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exposureId  String   @unique
-  exposure    Exposure @relation(fields: [exposureId], references: [id])
-
-  status      String   @default("PENDING") // PENDING, SUBMITTED, IN_PROGRESS, COMPLETED, FAILED, REQUIRES_MANUAL
-  method      String   // AUTO_FORM, AUTO_EMAIL, API, MANUAL_GUIDE
-
-  submittedAt DateTime?
-  completedAt DateTime?
-  attempts    Int      @default(0)
-  lastError   String?
-  notes       String?  // Additional notes or instructions
-
-  // Verification tracking
-  verifyAfter       DateTime?  // When to run verification scan
-  lastVerifiedAt    DateTime?  // Last verification attempt
-  verificationCount Int        @default(0) // Number of verification attempts
-
-  // Removal proof screenshots
-  beforeScreenshot      String?   // Screenshot before removal (copy from exposure or new capture)
-  beforeScreenshotAt    DateTime? // When before screenshot was captured
-  afterScreenshot       String?   // Screenshot after removal showing data is gone
-  afterScreenshotAt     DateTime? // When after screenshot was captured
-  formScreenshot        String?   // Screenshot of opt-out form submission (if applicable)
-  formScreenshotAt      DateTime? // When form screenshot was captured
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                 String    @id @default(cuid())
+  userId             String
+  exposureId         String    @unique
+  status             String    @default("PENDING")
+  method             String
+  submittedAt        DateTime?
+  completedAt        DateTime?
+  attempts           Int       @default(0)
+  lastError          String?
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  lastVerifiedAt     DateTime?
+  verificationCount  Int       @default(0)
+  verifyAfter        DateTime?
+  afterScreenshot    String?
+  afterScreenshotAt  DateTime?
+  beforeScreenshot   String?
+  beforeScreenshotAt DateTime?
+  formScreenshot     String?
+  formScreenshotAt   DateTime?
+  exposure           Exposure  @relation(fields: [exposureId], references: [id])
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([verifyAfter]) // For efficient cron queries
+  @@index([verifyAfter])
 }
 
 model Subscription {
-  id                   String    @id @default(cuid())
-  userId               String    @unique
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  stripeCustomerId     String?   @unique
-  stripeSubscriptionId String?   @unique
-  stripePriceId        String?
+  id                     String    @id @default(cuid())
+  userId                 String    @unique
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
   stripeCurrentPeriodEnd DateTime?
-
-  plan                 String    @default("FREE") // FREE, PRO, ENTERPRISE
-  status               String    @default("active") // active, canceled, past_due
-
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  plan                   String    @default("FREE")
+  status                 String    @default("active")
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Alert {
-  id          String   @id @default(cuid())
-  userId      String
-  type        String   // NEW_EXPOSURE, REMOVAL_COMPLETED, SCAN_COMPLETED
-  title       String
-  message     String
-  isRead      Boolean  @default(false)
-  metadata    String?  // JSON for additional data
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  metadata  String?
+  createdAt DateTime @default(now())
 
   @@index([userId])
 }
 
-// Do Not Call Registry registrations
 model DNCRegistration {
-  id            String   @id @default(cuid())
-  userId        String
-
-  // Phone number (encrypted)
-  phoneNumber   String   // Encrypted phone number
-  phoneHash     String   // Hash for deduplication
-
-  // Registration details
-  status        String   @default("PENDING") // PENDING, SUBMITTED, VERIFIED, FAILED
-  registeredAt  DateTime? // When successfully registered
-  verifiedAt    DateTime? // When last verified on registry
-  expiresAt     DateTime? // DNC registrations don't expire for cell phones, but do for landlines after 5 years
-
-  // Phone type affects expiration
-  phoneType     String   @default("UNKNOWN") // MOBILE, LANDLINE, VOIP, UNKNOWN
-
-  // Tracking
-  attempts      Int      @default(0)
-  lastError     String?
-  notes         String?
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String    @id @default(cuid())
+  userId       String
+  phoneNumber  String
+  phoneHash    String
+  status       String    @default("PENDING")
+  registeredAt DateTime?
+  verifiedAt   DateTime?
+  expiresAt    DateTime?
+  phoneType    String    @default("UNKNOWN")
+  attempts     Int       @default(0)
+  lastError    String?
+  notes        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@unique([userId, phoneHash])
   @@index([userId])
   @@index([status])
 }
 
-// Custom removal requests for Enterprise users
-// Allows users to submit URLs not in our standard database
 model CustomRemovalRequest {
-  id            String   @id @default(cuid())
-  userId        String
-
-  // The URL/site where user found their data
-  targetUrl     String
-  siteName      String?  // User-provided or auto-detected site name
-
-  // What data was found
-  dataType      String   // EMAIL, PHONE, NAME, ADDRESS, PHOTO, etc.
-  dataPreview   String?  // Description of what was found
-
-  // Status tracking
-  status        String   @default("PENDING") // PENDING, ASSIGNED, IN_PROGRESS, COMPLETED, REJECTED
-  priority      String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
-
-  // Assignment
-  assignedToId  String?  // Admin/support user handling this
-  assignedAt    DateTime?
-
-  // Notes and communication
-  userNotes     String?  // Notes from the user
-  internalNotes String?  // Internal notes (not shown to user)
-  resolution    String?  // How it was resolved (for completed requests)
-
-  // Tracking
-  attempts      Int      @default(0)
-  lastAttemptAt DateTime?
-  lastError     String?
-
-  // Proof screenshots
-  userScreenshot    String?   // Screenshot uploaded by user
-  beforeScreenshot  String?   // Screenshot before removal
-  afterScreenshot   String?   // Screenshot after removal
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  completedAt   DateTime?
+  id               String    @id @default(cuid())
+  userId           String
+  targetUrl        String
+  siteName         String?
+  dataType         String
+  dataPreview      String?
+  status           String    @default("PENDING")
+  priority         String    @default("NORMAL")
+  assignedToId     String?
+  assignedAt       DateTime?
+  userNotes        String?
+  internalNotes    String?
+  resolution       String?
+  attempts         Int       @default(0)
+  lastAttemptAt    DateTime?
+  lastError        String?
+  userScreenshot   String?
+  beforeScreenshot String?
+  afterScreenshot  String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  completedAt      DateTime?
 
   @@index([userId])
   @@index([status])
@@ -313,35 +250,23 @@ model CustomRemovalRequest {
   @@index([createdAt])
 }
 
-// Audit log for tracking all data access and modifications
 model AuditLog {
-  id            String   @id @default(cuid())
-
-  // Who performed the action
-  actorId       String
-  actor         User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
-  actorEmail    String   // Denormalized for quick reference
-  actorRole     String   // Role at time of action
-
-  // What action was performed
-  action        String   // VIEW_USER, VIEW_PII, UNMASK_PII, EXPORT_DATA, DELETE_USER, MODIFY_ROLE, etc.
-  resource      String   // users, profiles, exposures, etc.
-  resourceId    String?  // ID of the specific resource
-
-  // Target user (if action is on another user's data)
-  targetUserId  String?
-  targetEmail   String?  // Denormalized, masked
-
-  // Additional context
-  ipAddress     String?
-  userAgent     String?
-  details       String?  // JSON with additional context
-
-  // Result
-  success       Boolean  @default(true)
-  errorMessage  String?
-
-  createdAt     DateTime @default(now())
+  id           String   @id @default(cuid())
+  actorId      String
+  actorEmail   String
+  actorRole    String
+  action       String
+  resource     String
+  resourceId   String?
+  targetUserId String?
+  targetEmail  String?
+  ipAddress    String?
+  userAgent    String?
+  details      String?
+  success      Boolean  @default(true)
+  errorMessage String?
+  createdAt    DateTime @default(now())
+  actor        User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
 
   @@index([actorId])
   @@index([targetUserId])
@@ -349,34 +274,22 @@ model AuditLog {
   @@index([createdAt])
 }
 
-// Email queue for rate-limited emails
-// Stores emails when daily quota is exceeded, processes when quota resets
 model EmailQueue {
-  id          String   @id @default(cuid())
-
-  // Email details
+  id          String    @id @default(cuid())
   toEmail     String
   subject     String
-  htmlContent String   @db.Text  // Store full HTML content
-
-  // Categorization
-  emailType   String   // CCPA_REMOVAL, USER_NOTIFICATION, BULK_SUMMARY, etc.
-  priority    Int      @default(5) // 1=highest, 10=lowest
-
-  // Context (for debugging/tracking)
-  userId      String?  // Associated user if applicable
-  context     String?  // JSON with additional context (e.g., removalRequestId)
-
-  // Status tracking
-  status      String   @default("QUEUED") // QUEUED, PROCESSING, SENT, FAILED
-  attempts    Int      @default(0)
-  maxAttempts Int      @default(3)
+  htmlContent String
+  emailType   String
+  priority    Int       @default(5)
+  userId      String?
+  context     String?
+  status      String    @default("QUEUED")
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
   lastError   String?
-
-  // Timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  processAt   DateTime @default(now()) // When to attempt processing (for delayed sends)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  processAt   DateTime  @default(now())
   sentAt      DateTime?
 
   @@index([status])
