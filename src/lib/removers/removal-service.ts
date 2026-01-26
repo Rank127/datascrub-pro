@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { sendCCPARemovalRequest, sendRemovalUpdateEmail } from "@/lib/email";
-import { getDataBrokerInfo, getOptOutInstructions, type DataBrokerInfo } from "./data-broker-directory";
+import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, getConsolidationParent, type DataBrokerInfo } from "./data-broker-directory";
 import { calculateVerifyAfterDate } from "./verification-service";
 import type { RemovalMethod } from "@/lib/types";
 
@@ -423,10 +423,11 @@ function formatDataType(dataType: string): string {
 }
 
 // Mark removal as completed (for manual confirmation)
+// Now also handles consolidated removals - completing a parent broker marks subsidiaries as removed
 export async function markRemovalCompleted(
   removalRequestId: string,
   userId: string
-): Promise<boolean> {
+): Promise<{ success: boolean; consolidatedCount?: number }> {
   const request = await prisma.removalRequest.findFirst({
     where: {
       id: removalRequestId,
@@ -441,41 +442,109 @@ export async function markRemovalCompleted(
   });
 
   if (!request) {
-    return false;
+    return { success: false };
   }
 
-  await prisma.$transaction([
-    prisma.removalRequest.update({
+  const source = request.exposure.source;
+  const subsidiaries = getSubsidiaries(source);
+  const consolidatedSources = subsidiaries.length > 0 ? [source, ...subsidiaries] : [source];
+
+  // Find all exposures from this user that match the consolidated sources
+  const relatedExposures = await prisma.exposure.findMany({
+    where: {
+      userId,
+      source: { in: consolidatedSources },
+      status: { not: "REMOVED" }, // Not already removed
+    },
+    select: { id: true, source: true, sourceName: true },
+  });
+
+  // Collect subsidiary exposure IDs
+  const consolidatedExposureIds: string[] = [];
+  for (const exposure of relatedExposures) {
+    if (exposure.id !== request.exposureId) {
+      consolidatedExposureIds.push(exposure.id);
+    }
+  }
+
+  // Create alert message
+  const alertMessage = subsidiaries.length > 0
+    ? `Your data has been removed from ${request.exposure.sourceName} and ${consolidatedExposureIds.length} related sites.`
+    : `Your data has been removed from ${request.exposure.sourceName}.`;
+
+  // Use interactive transaction to handle multiple models
+  await prisma.$transaction(async (tx) => {
+    // Mark main removal as completed
+    await tx.removalRequest.update({
       where: { id: removalRequestId },
       data: {
         status: "COMPLETED",
         completedAt: new Date(),
+        notes: subsidiaries.length > 0
+          ? `Consolidated removal - also removed from: ${subsidiaries.join(", ")}`
+          : undefined,
       },
-    }),
-    prisma.exposure.update({
+    });
+
+    // Mark main exposure as removed
+    await tx.exposure.update({
       where: { id: request.exposureId },
       data: { status: "REMOVED" },
-    }),
-    prisma.alert.create({
+    });
+
+    // Mark all related subsidiary exposures as removed
+    for (const exposureId of consolidatedExposureIds) {
+      await tx.exposure.update({
+        where: { id: exposureId },
+        data: { status: "REMOVED" },
+      });
+    }
+
+    // Complete any pending removal requests for subsidiary exposures
+    if (consolidatedExposureIds.length > 0) {
+      await tx.removalRequest.updateMany({
+        where: {
+          exposureId: { in: consolidatedExposureIds },
+          status: { in: ["PENDING", "SUBMITTED", "IN_PROGRESS", "REQUIRES_MANUAL"] },
+        },
+        data: {
+          status: "COMPLETED",
+          completedAt: new Date(),
+          notes: `Auto-completed via consolidated removal from ${request.exposure.sourceName}`,
+        },
+      });
+    }
+
+    // Create alert
+    await tx.alert.create({
       data: {
         userId,
         type: "REMOVAL_COMPLETED",
         title: "Data Removed Successfully",
-        message: `Your data has been removed from ${request.exposure.sourceName}.`,
+        message: alertMessage,
       },
-    }),
-  ]);
+    });
+  });
 
   // Send completion email
   if (request.user.email) {
+    const emailMessage = subsidiaries.length > 0
+      ? `${request.exposure.sourceName} (plus ${consolidatedExposureIds.length} related sites)`
+      : request.exposure.sourceName;
+
     sendRemovalUpdateEmail(request.user.email, request.user.name || "", {
-      sourceName: request.exposure.sourceName,
+      sourceName: emailMessage,
       status: "COMPLETED",
       dataType: formatDataType(request.exposure.dataType),
     }).catch(console.error);
   }
 
-  return true;
+  console.log(`[Removal] Completed removal for ${source}, consolidated ${consolidatedExposureIds.length} subsidiary exposures`);
+
+  return {
+    success: true,
+    consolidatedCount: consolidatedExposureIds.length,
+  };
 }
 
 // ============================================

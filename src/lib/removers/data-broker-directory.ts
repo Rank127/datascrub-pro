@@ -14,6 +14,10 @@ export interface DataBrokerInfo {
   notes?: string;
   category?: SourceCategory; // Category for smart handling
   isRemovable?: boolean; // Explicit flag for non-removable sources
+  // Consolidation fields - for combining manual processes
+  consolidatesTo?: string; // Parent broker key - removing parent also removes this
+  subsidiaries?: string[]; // List of broker keys that get removed when this broker is opted out
+  parentCompany?: string; // Human-readable parent company name
 }
 
 export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
@@ -37,6 +41,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 5,
     notes: "May require phone verification",
+  
+    parentCompany: "WhitePages Inc",
+    subsidiaries: ["WHITEPAGES_PREMIUM","CALLER_ID"],
   },
   BEENVERIFIED: {
     name: "BeenVerified",
@@ -45,6 +52,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@beenverified.com",
     removalMethod: "BOTH",
     estimatedDays: 7,
+  
+    parentCompany: "BeenVerified Inc",
+    subsidiaries: ["NEIGHBORWHO","NUMBERVILLE","OWNERLY","PEOPLELOOKER"],
   },
   INTELIUS: {
     name: "Intelius",
@@ -53,6 +63,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@intelius.com",
     removalMethod: "BOTH",
     estimatedDays: 7,
+  
+    parentCompany: "PeopleConnect",
+    subsidiaries: ["ZABASEARCH","PUBLICRECORDS","ANYWHO","ADDRESSES","CLASSMATES","US_SEARCH","INSTANT_CHECKMATE","TRUTHFINDER"],
   },
   PEOPLEFINDER: {
     name: "PeopleFinder",
@@ -100,6 +113,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 30,
     notes: "May require extensive verification",
+  
+    parentCompany: "Pipl Inc",
+    subsidiaries: ["PIPL_UK","PIPL_INTERNATIONAL","PIPL_ENTERPRISE","PIPL_APAC","PIPL_DATA"],
   },
 
   // ==========================================
@@ -119,6 +135,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@peoplelooker.com",
     removalMethod: "FORM",
     estimatedDays: 7,
+  
+    consolidatesTo: "BEENVERIFIED",
   },
   PEOPLEFINDERS: {
     name: "PeopleFinders",
@@ -171,6 +189,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@addresses.com",
     removalMethod: "FORM",
     estimatedDays: 7,
+  
+    consolidatesTo: "INTELIUS",
   },
   ADVANCED_PEOPLE_SEARCH: {
     name: "Advanced People Search",
@@ -197,6 +217,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 14,
     notes: "Part of PeopleConnect network - requires account deletion",
+  
+    consolidatesTo: "INTELIUS",
   },
   REUNION: {
     name: "Reunion.com",
@@ -518,6 +540,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy.issues@thomsonreuters.com",
     removalMethod: "EMAIL",
     estimatedDays: 45,
+  
+    parentCompany: "Thomson Reuters",
+    subsidiaries: ["WESTLAW","CLEAR_TR"],
   },
 
   // ==========================================
@@ -666,6 +691,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 14,
     notes: "Requires email confirmation",
+  
+    consolidatesTo: "INTELIUS",
   },
   CHECKPEOPLE: {
     name: "CheckPeople",
@@ -719,6 +746,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@anywho.com",
     removalMethod: "FORM",
     estimatedDays: 5,
+  
+    consolidatesTo: "INTELIUS",
   },
   YELLOWPAGES: {
     name: "YellowPages",
@@ -800,6 +829,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@ownerly.com",
     removalMethod: "FORM",
     estimatedDays: 7,
+  
+    consolidatesTo: "BEENVERIFIED",
   },
   REHOLD: {
     name: "Rehold",
@@ -853,6 +884,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 30,
     notes: "B2B data broker - submit removal request with your email to opt out",
+  
+    parentCompany: "ZoomInfo Technologies",
+    subsidiaries: ["DISCOVERORG","DATANYZE","EVERSTRING"],
   },
   LUSHA: {
     name: "Lusha",
@@ -918,6 +952,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 30,
     notes: "One of the largest data brokers",
+  
+    parentCompany: "Acxiom (IPG)",
+    subsidiaries: ["ACXIOM_DATA","LIVERAMP","INFOBASE","ACXIOM_DIGITAL"],
   },
   ORACLE_DATACLOUD: {
     name: "Oracle Data Cloud",
@@ -926,6 +963,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 45,
     notes: "Use the Oracle Marketing Cloud opt-out status page to submit removal request",
+  
+    parentCompany: "Oracle Corporation",
+    subsidiaries: ["DATALOGIX","BLUEKAI","BLUEKAI_DATA","GRAPESHOT","MOAT"],
   },
   EPSILON: {
     name: "Epsilon",
@@ -934,6 +974,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 30,
     notes: "Use the Consumer Preference Center to opt out of marketing data",
+  
+    parentCompany: "Epsilon (Publicis)",
+    subsidiaries: ["EPSILON_DATA","CONVERSANT","ABACUS","EPSILON_TARGETING"],
   },
   EXPERIAN_MARKETING: {
     name: "Experian Marketing",
@@ -941,6 +984,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@experian.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    consolidatesTo: "EXPERIAN_CONSUMER",
   },
   EQUIFAX_MARKETING: {
     name: "Equifax Marketing",
@@ -949,6 +994,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 30,
     notes: "Use MyPrivacy portal to opt out of Equifax marketing",
+  
+    consolidatesTo: "EQUIFAX_CONSUMER",
   },
   LEXISNEXIS: {
     name: "LexisNexis",
@@ -957,6 +1004,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 30,
     notes: "Large data aggregator - comprehensive removal available",
+  
+    parentCompany: "LexisNexis Risk Solutions",
+    subsidiaries: ["ACCURINT","CHOICEPOINT","CHOICEPOINT_INSURANCE","EMAILAGE","COURTLINK_LN","LEXISNEXIS_RISK"],
   },
 
   // ==========================================
@@ -1580,6 +1630,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 7,
     notes: "Free people search - requires verification",
+  
+    consolidatesTo: "INTELIUS",
   },
   PEEKYOU: {
     name: "PeekYou",
@@ -1820,6 +1872,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@datanyze.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+  
+    consolidatesTo: "ZOOMINFO",
   },
   UPLEAD: {
     name: "UpLead",
@@ -1915,6 +1969,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@whitepages.com",
     removalMethod: "FORM",
     estimatedDays: 7,
+  
+    consolidatesTo: "WHITEPAGES",
   },
   PHONEBOOKS_COM: {
     name: "PhoneBooks.com",
@@ -1999,6 +2055,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 30,
     notes: "Major data broker for advertising - opt out of identity graph",
+  
+    consolidatesTo: "ACXIOM",
   },
   TAPAD: {
     name: "Tapad",
@@ -2034,6 +2092,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@oracle.com",
     removalMethod: "FORM",
     estimatedDays: 45,
+  
+    consolidatesTo: "ORACLE_DATACLOUD",
   },
   BLUEKAI: {
     name: "BlueKai (Oracle)",
@@ -2041,6 +2101,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@oracle.com",
     removalMethod: "FORM",
     estimatedDays: 45,
+  
+    consolidatesTo: "ORACLE_DATACLOUD",
   },
   INFOGROUP: {
     name: "Infogroup (Data.com)",
@@ -2055,6 +2117,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@transunion.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    consolidatesTo: "TRANSUNION_CONSUMER",
   },
   COMSCORE: {
     name: "comScore",
@@ -2105,6 +2169,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@experian.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    parentCompany: "Experian",
+    subsidiaries: ["EXPERIAN_MARKETING","RENTBUREAU","EXPERIAN_MARKETING_SKIP","EXPERIAN_INSURANCE","EXPERIAN_DARK_WEB"],
   },
   EQUIFAX_CONSUMER: {
     name: "Equifax Consumer",
@@ -2112,6 +2179,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@equifax.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    parentCompany: "Equifax",
+    subsidiaries: ["EQUIFAX","EQUIFAX_MARKETING","WORKNUMBER","TALX","EQUIFAX_INSURANCE"],
   },
   TRANSUNION_CONSUMER: {
     name: "TransUnion Consumer",
@@ -2119,6 +2189,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@transunion.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    parentCompany: "TransUnion",
+    subsidiaries: ["TRANSUNION","TRANSUNION_TRUELOOK","TRANSUNION_INSURANCE","TRANSUNION_DARK_WEB"],
   },
   CHEXSYSTEMS: {
     name: "ChexSystems",
@@ -2246,6 +2319,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 14,
     notes: "Canadian phone directory",
+  
+    parentCompany: "Yellow Pages Group (Canada)",
+    subsidiaries: ["CANADA411_CA","CANADA411_EXTENDED"],
   },
   UK_192: {
     name: "192.com (UK)",
@@ -2284,6 +2360,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@pipl.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    consolidatesTo: "PIPL",
   },
   FOREBEARS: {
     name: "Forebears",
@@ -2371,6 +2449,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@foursquare.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+  
+    parentCompany: "Foursquare Labs",
+    subsidiaries: ["PLACED_FOURSQUARE","FOURSQUARE_DATA","PILGRIM_SDK","FACTUAL"],
   },
   SAFEGRAPH: {
     name: "SafeGraph",
@@ -2620,6 +2701,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@numberville.com",
     removalMethod: "FORM",
     estimatedDays: 7,
+  
+    consolidatesTo: "BEENVERIFIED",
   },
   PHONEVALIDATOR: {
     name: "PhoneValidator",
@@ -2983,6 +3066,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@sensis.com.au",
     removalMethod: "FORM",
     estimatedDays: 14,
+  
+    parentCompany: "Sensis (Australia)",
+    subsidiaries: ["WHITEPAGES_AUSTRALIA","WHITEPAGES_AU_EXT"],
   },
   PAGESJAUNES: {
     name: "PagesJaunes (France)",
@@ -2990,6 +3076,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "cnil@solocal.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    parentCompany: "SoLocal Group",
+    subsidiaries: ["PAGESJAUNES_FR","PAGESJAUNES_FR_V2","PAGESBLANCHES_FR"],
   },
   DASTELEFONBUCH: {
     name: "DasTelefonbuch (Germany)",
@@ -2997,6 +3086,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "datenschutz@telefonbuch.de",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    parentCompany: "Deutsche Telekom Medien",
+    subsidiaries: ["DASTELEFONBUCH_DE","DASTELEFONBUCH_DE_V2","GELBESEITEN_DE"],
   },
   PAGINEBIANCHE: {
     name: "PagineBianche (Italy)",
@@ -3004,6 +3096,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@paginebianche.it",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    parentCompany: "Italiaonline",
+    subsidiaries: ["PAGINEBIANCHE_IT","PAGINEBIANCHE_IT_V2","PAGINEGIALLE_IT"],
   },
   GUIALOCAL: {
     name: "GuiaLocal (Spain)",
@@ -3030,6 +3125,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@verisk.com",
     removalMethod: "EMAIL",
     estimatedDays: 45,
+  
+    parentCompany: "Verisk Analytics",
+    subsidiaries: ["ISO_CLAIMS","VERISK_ISO","ARGUS"],
   },
   CLUE_REPORT: {
     name: "C.L.U.E. Report",
@@ -3045,6 +3143,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@verisk.com",
     removalMethod: "EMAIL",
     estimatedDays: 45,
+  
+    consolidatesTo: "VERISK",
   },
 
   // ==========================================
@@ -3275,6 +3375,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@searchpublicrecords.com",
     removalMethod: "FORM",
     estimatedDays: 7,
+  
+    consolidatesTo: "INTELIUS",
   },
 
   // ==========================================
@@ -3381,6 +3483,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@zoominfo.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    consolidatesTo: "ZOOMINFO",
   },
   DUNS_BRADSTREET: {
     name: "Dun & Bradstreet",
@@ -3388,6 +3492,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@dnb.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    parentCompany: "Dun & Bradstreet",
+    subsidiaries: ["DNB_HOOVERS","DNB_DATA","HOOVERS"],
   },
   HOOVERS: {
     name: "Hoovers (D&B)",
@@ -3395,6 +3502,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@dnb.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    consolidatesTo: "DUNS_BRADSTREET",
   },
   INSIDEVIEW: {
     name: "InsideView",
@@ -3554,6 +3663,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@pipl.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    consolidatesTo: "PIPL",
   },
   ZLOOKUP: {
     name: "ZLookup (India)",
@@ -3629,6 +3740,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 30,
     notes: "Rental payment history database",
+  
+    consolidatesTo: "EXPERIAN_CONSUMER",
   },
   CORELOGIC_RENTAL: {
     name: "CoreLogic Rental",
@@ -3636,6 +3749,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@corelogic.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    consolidatesTo: "CORELOGIC",
   },
   REALPAGE: {
     name: "RealPage",
@@ -3670,6 +3785,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 45,
     notes: "Employment and income verification database",
+  
+    consolidatesTo: "EQUIFAX_CONSUMER",
   },
   HIRERIGHT: {
     name: "HireRight",
@@ -4043,6 +4160,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@transunion.com",
     removalMethod: "FORM",
     estimatedDays: 45,
+  
+    consolidatesTo: "TRANSUNION_CONSUMER",
   },
   EQUIFAX_WORKFORCE: {
     name: "Equifax Workforce Solutions",
@@ -4057,6 +4176,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@experian.com",
     removalMethod: "FORM",
     estimatedDays: 45,
+  
+    consolidatesTo: "EXPERIAN_CONSUMER",
   },
   ACCURINT_LEXISNEXIS: {
     name: "Accurint (LexisNexis)",
@@ -4064,6 +4185,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@lexisnexis.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    parentCompany: "LexisNexis Risk Solutions",
+    subsidiaries: ["ACCURINT","CHOICEPOINT","CHOICEPOINT_INSURANCE","EMAILAGE","COURTLINK_LN","LEXISNEXIS_RISK"],
   },
   TRACERS_INFO: {
     name: "Tracers Information",
@@ -4194,6 +4318,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@verisk.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    consolidatesTo: "VERISK",
   },
   MIB_GROUP: {
     name: "MIB Group (Medical Info Bureau)",
@@ -4222,6 +4348,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@lexisnexis.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    consolidatesTo: "LEXISNEXIS",
   },
   TRANSUNION_INSURANCE: {
     name: "TransUnion Insurance Solutions",
@@ -4229,6 +4357,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@transunion.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    consolidatesTo: "TRANSUNION_CONSUMER",
   },
   EXPERIAN_INSURANCE: {
     name: "Experian Insurance Services",
@@ -4236,6 +4366,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@experian.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    consolidatesTo: "EXPERIAN_CONSUMER",
   },
   FENRIS_DIGITAL: {
     name: "Fenris Digital",
@@ -4445,6 +4577,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@epsilon.com",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    consolidatesTo: "EPSILON",
   },
   LIVERAMP_DATA: {
     name: "LiveRamp Data Services",
@@ -4545,6 +4679,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@foursquare.com",
     removalMethod: "FORM",
     estimatedDays: 14,
+  
+    parentCompany: "Foursquare Labs",
+    subsidiaries: ["PLACED_FOURSQUARE","FOURSQUARE_DATA","PILGRIM_SDK","FACTUAL"],
+  
+    consolidatesTo: "FOURSQUARE",
   },
   AFFINITY_SOLUTIONS: {
     name: "Affinity Solutions",
@@ -4640,6 +4779,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@pipl.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    consolidatesTo: "PIPL",
   },
   PEOPLEDATALABS: {
     name: "People Data Labs",
@@ -4682,6 +4823,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@emailage.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    consolidatesTo: "LEXISNEXIS",
   },
 
   // Financial & Alternative Credit Data
@@ -4842,6 +4985,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@lexisnexis.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    consolidatesTo: "LEXISNEXIS",
   },
   WESTLAW_COURT: {
     name: "Westlaw Court Records",
@@ -5188,6 +5333,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@pipl.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    consolidatesTo: "PIPL",
   },
   WHITEPAGES_AUSTRALIA: {
     name: "White Pages Australia",
@@ -5195,6 +5342,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@whitepages.com.au",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    consolidatesTo: "WHITEPAGES_AU",
   },
   YELLOWPAGES_AU: {
     name: "Yellow Pages Australia",
@@ -5202,6 +5351,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@sensis.com.au",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    parentCompany: "Sensis (Australia)",
+    subsidiaries: ["YELLOWPAGES_AU2","YELLOWPAGES_AU_EXT"],
   },
   LOCALSEARCH_AU: {
     name: "Localsearch Australia",
@@ -5950,12 +6102,22 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   CONSUMERDATA: { name: "ConsumerData", optOutUrl: "https://consumerdata.com/optout", removalMethod: "EMAIL", estimatedDays: 14 },
 
   // International - Europe Additional
-  PAGESJAUNES_FR: { name: "Pages Jaunes France", optOutUrl: "https://pagesjaunes.fr/privacy", removalMethod: "FORM", estimatedDays: 30 },
+  PAGESJAUNES_FR: { name: "Pages Jaunes France", optOutUrl: "https://pagesjaunes.fr/privacy", removalMethod: "FORM", estimatedDays: 30,
+    consolidatesTo: "PAGESJAUNES",
+  },
   PAGESBLANCHE_FR: { name: "Pages Blanches France", optOutUrl: "https://pagesblanches.fr/privacy", removalMethod: "FORM", estimatedDays: 30 },
-  DASTELEFONBUCH_DE: { name: "Das Telefonbuch Germany", optOutUrl: "https://dastelefonbuch.de/privacy", removalMethod: "FORM", estimatedDays: 30 },
-  GELBESEITEN_DE: { name: "Gelbe Seiten Germany", optOutUrl: "https://gelbeseiten.de/privacy", removalMethod: "FORM", estimatedDays: 30 },
-  PAGINEBIANCHE_IT: { name: "Pagine Bianche Italy", optOutUrl: "https://paginebianche.it/privacy", removalMethod: "FORM", estimatedDays: 30 },
-  PAGINEGIALLE_IT: { name: "Pagine Gialle Italy", optOutUrl: "https://paginegialle.it/privacy", removalMethod: "FORM", estimatedDays: 30 },
+  DASTELEFONBUCH_DE: { name: "Das Telefonbuch Germany", optOutUrl: "https://dastelefonbuch.de/privacy", removalMethod: "FORM", estimatedDays: 30,
+    consolidatesTo: "DASTELEFONBUCH",
+  },
+  GELBESEITEN_DE: { name: "Gelbe Seiten Germany", optOutUrl: "https://gelbeseiten.de/privacy", removalMethod: "FORM", estimatedDays: 30,
+    consolidatesTo: "DASTELEFONBUCH",
+  },
+  PAGINEBIANCHE_IT: { name: "Pagine Bianche Italy", optOutUrl: "https://paginebianche.it/privacy", removalMethod: "FORM", estimatedDays: 30,
+    consolidatesTo: "PAGINEBIANCHE",
+  },
+  PAGINEGIALLE_IT: { name: "Pagine Gialle Italy", optOutUrl: "https://paginegialle.it/privacy", removalMethod: "FORM", estimatedDays: 30,
+    consolidatesTo: "PAGINEBIANCHE",
+  },
   PAGINASAMARILLAS_ES: { name: "Paginas Amarillas Spain", optOutUrl: "https://paginasamarillas.es/privacy", removalMethod: "FORM", estimatedDays: 30 },
   PAGINASBLANCAS_ES: { name: "Paginas Blancas Spain", optOutUrl: "https://paginasblancas.es/privacy", removalMethod: "FORM", estimatedDays: 30 },
   GOUDENGIDS_NL: { name: "Gouden Gids Netherlands", optOutUrl: "https://goudengids.nl/privacy", removalMethod: "FORM", estimatedDays: 30 },
@@ -6004,7 +6166,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   YELLOWPAGES_LK: { name: "Yellow Pages Sri Lanka", optOutUrl: "https://yellowpages.lk/privacy", removalMethod: "FORM", estimatedDays: 30 },
 
   // International - Americas Additional
-  CANADA411_CA: { name: "Canada411", optOutUrl: "https://canada411.ca/privacy", removalMethod: "FORM", estimatedDays: 30 },
+  CANADA411_CA: { name: "Canada411", optOutUrl: "https://canada411.ca/privacy", removalMethod: "FORM", estimatedDays: 30,
+    consolidatesTo: "CANADA411",
+  },
   YELLOWPAGES_CANADA: { name: "Yellow Pages Canada", optOutUrl: "https://yellowpages.ca/privacy", removalMethod: "FORM", estimatedDays: 30 },
   WHITEPAGES_CA: { name: "White Pages Canada", optOutUrl: "https://whitepages.ca/privacy", removalMethod: "FORM", estimatedDays: 30 },
   PAGINASAMARILLAS_MEXICO: { name: "Paginas Amarillas Mexico", optOutUrl: "https://paginasamarillas.com.mx/privacy", removalMethod: "FORM", estimatedDays: 30 },
@@ -6039,7 +6203,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   // Additional Social Media & Public Records
   SOCIALSEARCHER: { name: "Social Searcher", optOutUrl: "https://social-searcher.com/privacy", removalMethod: "EMAIL", estimatedDays: 14 },
   SOCIALMENTION_DATA: { name: "Social Mention", optOutUrl: "https://socialmention.com/privacy", removalMethod: "EMAIL", estimatedDays: 14 },
-  PIPL_DATA: { name: "Pipl Data", optOutUrl: "https://pipl.com/privacy", removalMethod: "EMAIL", estimatedDays: 30 },
+  PIPL_DATA: { name: "Pipl Data", optOutUrl: "https://pipl.com/privacy", removalMethod: "EMAIL", estimatedDays: 30,
+    consolidatesTo: "PIPL",
+  },
   NAMECHK: { name: "Namechk", optOutUrl: "https://namechk.com/privacy", removalMethod: "EMAIL", estimatedDays: 14 },
   KNOWEM: { name: "KnowEm", optOutUrl: "https://knowem.com/privacy", removalMethod: "EMAIL", estimatedDays: 14 },
   CHECKUSERNAMES: { name: "CheckUsernames", optOutUrl: "https://checkusernames.com/privacy", removalMethod: "EMAIL", estimatedDays: 14 },
@@ -6049,7 +6215,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   PROFILESEARCHER: { name: "ProfileSearcher", optOutUrl: "https://profilesearcher.com/privacy", removalMethod: "EMAIL", estimatedDays: 14 },
 
   // Additional Marketing & Advertising
-  BLUEKAI_DATA: { name: "BlueKai (Oracle)", optOutUrl: "https://oracle.com/privacy", removalMethod: "FORM", estimatedDays: 30 },
+  BLUEKAI_DATA: { name: "BlueKai (Oracle)", optOutUrl: "https://oracle.com/privacy", removalMethod: "FORM", estimatedDays: 30,
+    consolidatesTo: "ORACLE_DATACLOUD",
+  },
   ADDTHIS_DATA: { name: "AddThis", optOutUrl: "https://addthis.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
   SHARETHIS_DATA: { name: "ShareThis", optOutUrl: "https://sharethis.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
   ADSENSE_DATA: { name: "Google AdSense", optOutUrl: "https://google.com/privacy", removalMethod: "FORM", estimatedDays: 30 },
@@ -6078,7 +6246,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   PERSONA_ID: { name: "Persona", optOutUrl: "https://withpersona.com/privacy", removalMethod: "EMAIL", estimatedDays: 30 },
 
   // Additional Location & Geospatial
-  FOURSQUARE_DATA: { name: "Foursquare", optOutUrl: "https://foursquare.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
+  FOURSQUARE_DATA: { name: "Foursquare", optOutUrl: "https://foursquare.com/privacy", removalMethod: "FORM", estimatedDays: 14,
+    consolidatesTo: "FOURSQUARE",
+  },
   FACTUAL_DATA: { name: "Factual", optOutUrl: "https://factual.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
   STREETLIGHT_DATA: { name: "StreetLight Data", optOutUrl: "https://streetlightdata.com/privacy", removalMethod: "EMAIL", estimatedDays: 21 },
   LOCATIONSCIENCES: { name: "Location Sciences", optOutUrl: "https://locationsciences.ai/privacy", removalMethod: "EMAIL", estimatedDays: 21 },
@@ -6086,7 +6256,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   BLUEDOT: { name: "Bluedot", optOutUrl: "https://bluedot.io/privacy", removalMethod: "EMAIL", estimatedDays: 21 },
   RADAR_LOCATION: { name: "Radar", optOutUrl: "https://radar.com/privacy", removalMethod: "EMAIL", estimatedDays: 21 },
   XTREMEPUSH: { name: "Xtremepush", optOutUrl: "https://xtremepush.com/privacy", removalMethod: "EMAIL", estimatedDays: 21 },
-  PILGRIM_SDK: { name: "Pilgrim SDK", optOutUrl: "https://foursquare.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
+  PILGRIM_SDK: { name: "Pilgrim SDK", optOutUrl: "https://foursquare.com/privacy", removalMethod: "FORM", estimatedDays: 14,
+    consolidatesTo: "FOURSQUARE",
+  },
   POIMAPPER: { name: "POI Mapper", optOutUrl: "https://poimapper.com/privacy", removalMethod: "EMAIL", estimatedDays: 21 },
 
   // Additional Vehicle & DMV Records
@@ -6225,7 +6397,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   SEARCHDATA_HUB: { name: "SearchDataHub", optOutUrl: "https://searchdatahub.com/optout", removalMethod: "FORM", estimatedDays: 14 },
 
   // Additional International - Oceania
-  YELLOWPAGES_AU2: { name: "YellowPages Australia 2", optOutUrl: "https://yellowpages.com.au/privacy", removalMethod: "FORM", estimatedDays: 30 },
+  YELLOWPAGES_AU2: { name: "YellowPages Australia 2", optOutUrl: "https://yellowpages.com.au/privacy", removalMethod: "FORM", estimatedDays: 30,
+    consolidatesTo: "YELLOWPAGES_AU",
+  },
   TRUELOCAL_AU2: { name: "TrueLocal Australia", optOutUrl: "https://truelocal.com.au/privacy", removalMethod: "FORM", estimatedDays: 30 },
   LOCALSEARCH_AU2: { name: "LocalSearch Australia", optOutUrl: "https://localsearch.com.au/privacy", removalMethod: "FORM", estimatedDays: 30 },
   STARTLOCAL_AU: { name: "StartLocal Australia", optOutUrl: "https://startlocal.com.au/privacy", removalMethod: "FORM", estimatedDays: 30 },
@@ -6830,6 +7004,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "MONITOR",
     estimatedDays: 1,
     notes: "Experian's dark web surveillance",
+  
+    consolidatesTo: "EXPERIAN_CONSUMER",
   },
   TRANSUNION_DARK_WEB: {
     name: "TransUnion Dark Web Monitoring",
@@ -6838,6 +7014,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "MONITOR",
     estimatedDays: 1,
     notes: "TransUnion's dark web monitoring",
+  
+    consolidatesTo: "TRANSUNION_CONSUMER",
   },
   EQUIFAX_DARK_WEB: {
     name: "Equifax Dark Web Monitoring",
@@ -9702,6 +9880,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "optout@addresspublicrecords.com",
     removalMethod: "FORM",
     estimatedDays: 7,
+  
+    consolidatesTo: "INTELIUS",
   },
   RESIDENTSINFO: {
     name: "ResidentsInfo",
@@ -10872,6 +11052,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@canada411.ca",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+  
+    consolidatesTo: "CANADA411",
   },
   PEOPLEFINDER_CA: {
     name: "PeopleFinder Canada",
@@ -10907,6 +11089,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@whitepages.com.au",
     removalMethod: "FORM",
     estimatedDays: 21,
+  
+    consolidatesTo: "WHITEPAGES_AU",
   },
   YELLOWPAGES_AU_EXT: {
     name: "YellowPages Australia Extended",
@@ -10914,6 +11098,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "optout@yellowpages.com.au",
     removalMethod: "EMAIL",
     estimatedDays: 21,
+  
+    consolidatesTo: "YELLOWPAGES_AU",
   },
   PEOPLEFINDER_AU: {
     name: "PeopleFinder Australia",
@@ -10942,6 +11128,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@pagesjaunes.fr",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    consolidatesTo: "PAGESJAUNES",
   },
   PAGESBLANCHES_FR: {
     name: "Pages Blanches France",
@@ -10949,6 +11137,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@pagesblanches.fr",
     removalMethod: "FORM",
     estimatedDays: 30,
+  
+    consolidatesTo: "PAGESJAUNES",
   },
   ANNUAIRE_FR: {
     name: "Annuaire France",
@@ -10963,6 +11153,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@dastelefonbuch.de",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    consolidatesTo: "DASTELEFONBUCH",
   },
   GELBESEITEN_DE_V2: {
     name: "Gelbe Seiten Germany",
@@ -10984,6 +11176,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@paginebianche.it",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+  
+    consolidatesTo: "PAGINEBIANCHE",
   },
   PAGINEGIALLE_IT_V2: {
     name: "Pagine Gialle Italy",
@@ -13246,7 +13440,111 @@ export function getOptOutInstructions(source: string): string {
     instructions += `\n\nNote: ${broker.notes}`;
   }
 
+  // Add consolidation info if this broker has subsidiaries
+  if (broker.subsidiaries && broker.subsidiaries.length > 0) {
+    const subNames = broker.subsidiaries
+      .map(key => DATA_BROKER_DIRECTORY[key]?.name || key)
+      .filter(Boolean);
+    instructions += `\n\n✓ BONUS: Opting out of ${broker.name} also removes your data from: ${subNames.join(", ")}`;
+  }
+
+  // Add info if this broker consolidates to a parent
+  if (broker.consolidatesTo) {
+    const parent = DATA_BROKER_DIRECTORY[broker.consolidatesTo];
+    if (parent) {
+      instructions += `\n\n💡 TIP: Instead of opting out here, opt out of ${parent.name} - it will remove your data from ${broker.name} and other related sites.`;
+    }
+  }
+
   return instructions;
+}
+
+// ============================================
+// CONSOLIDATION HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Get all subsidiary broker keys for a parent broker
+ * Returns empty array if broker has no subsidiaries
+ */
+export function getSubsidiaries(source: string): string[] {
+  const broker = DATA_BROKER_DIRECTORY[source];
+  return broker?.subsidiaries || [];
+}
+
+/**
+ * Get the parent broker key that this source consolidates to
+ * Returns null if this is a standalone broker or is itself a parent
+ */
+export function getConsolidationParent(source: string): string | null {
+  const broker = DATA_BROKER_DIRECTORY[source];
+  return broker?.consolidatesTo || null;
+}
+
+/**
+ * Get all brokers that would be removed when opting out of a parent broker
+ * This includes the parent itself and all its subsidiaries
+ */
+export function getConsolidatedBrokers(source: string): string[] {
+  const subsidiaries = getSubsidiaries(source);
+  return [source, ...subsidiaries];
+}
+
+/**
+ * Check if a broker is a subsidiary (has a parent it consolidates to)
+ */
+export function isSubsidiaryBroker(source: string): boolean {
+  return getConsolidationParent(source) !== null;
+}
+
+/**
+ * Check if a broker is a parent (has subsidiaries)
+ */
+export function isParentBroker(source: string): boolean {
+  return getSubsidiaries(source).length > 0;
+}
+
+/**
+ * Get consolidated opt-out instructions that shows what's covered
+ */
+export function getConsolidatedOptOutInstructions(source: string): {
+  parentKey: string;
+  parentName: string;
+  instructions: string;
+  coversCount: number;
+  coversList: string[];
+} | null {
+  // If this broker is a subsidiary, get parent instructions
+  const parentKey = getConsolidationParent(source);
+  if (parentKey) {
+    const parent = DATA_BROKER_DIRECTORY[parentKey];
+    if (parent) {
+      const subsidiaries = getSubsidiaries(parentKey);
+      const coversList = subsidiaries.map(key => DATA_BROKER_DIRECTORY[key]?.name || key);
+      return {
+        parentKey,
+        parentName: parent.name,
+        instructions: getOptOutInstructions(parentKey),
+        coversCount: subsidiaries.length + 1, // +1 for parent itself
+        coversList,
+      };
+    }
+  }
+
+  // If this broker is a parent, return its own info
+  const broker = DATA_BROKER_DIRECTORY[source];
+  if (broker && broker.subsidiaries && broker.subsidiaries.length > 0) {
+    const coversList = broker.subsidiaries.map(key => DATA_BROKER_DIRECTORY[key]?.name || key);
+    return {
+      parentKey: source,
+      parentName: broker.name,
+      instructions: getOptOutInstructions(source),
+      coversCount: broker.subsidiaries.length + 1,
+      coversList,
+    };
+  }
+
+  return null;
 }
 
 // Get brokers that support automated email removal
