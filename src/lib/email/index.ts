@@ -872,6 +872,89 @@ export async function sendCCPARemovalRequest(data: RemovalRequestEmail) {
   );
 }
 
+// Consolidated CCPA/GDPR Removal Request Email (for bulk removals - one email per broker)
+interface BulkRemovalRequestEmail {
+  toEmail: string;
+  brokerName: string;
+  fromName: string;
+  fromEmail: string;
+  exposures: Array<{
+    dataType: string;
+    sourceUrl?: string | null;
+  }>;
+}
+
+export async function sendBulkCCPARemovalRequest(data: BulkRemovalRequestEmail) {
+  // Dedupe data types
+  const uniqueDataTypes = [...new Set(data.exposures.map(e => e.dataType))];
+
+  // Get unique URLs (filter out null/undefined)
+  const uniqueUrls = [...new Set(data.exposures.map(e => e.sourceUrl).filter(Boolean))];
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+    </head>
+    <body style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;">
+      <p>To Whom It May Concern,</p>
+
+      <p>I am writing to exercise my rights under the California Consumer Privacy Act (CCPA) and/or the General Data Protection Regulation (GDPR) to request the deletion of <strong>all</strong> my personal information from your systems and any affiliated/subsidiary services.</p>
+
+      <p><strong>Request Details:</strong></p>
+      <ul>
+        <li><strong>Full Name:</strong> ${data.fromName}</li>
+        <li><strong>Email:</strong> ${data.fromEmail}</li>
+        <li><strong>Number of Records Found:</strong> ${data.exposures.length}</li>
+        <li><strong>Data Types to Remove:</strong>
+          <ul>
+            ${uniqueDataTypes.map(dt => `<li>${dt}</li>`).join('')}
+          </ul>
+        </li>
+        ${uniqueUrls.length > 0 ? `
+        <li><strong>Profile URLs (if applicable):</strong>
+          <ul>
+            ${uniqueUrls.slice(0, 10).map(url => `<li>${url}</li>`).join('')}
+            ${uniqueUrls.length > 10 ? `<li><em>...and ${uniqueUrls.length - 10} more records</em></li>` : ''}
+          </ul>
+        </li>
+        ` : ''}
+      </ul>
+
+      <p>Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. This includes all records across your platform(s) and any subsidiary or affiliated services that share data.</p>
+
+      <p><strong>Please delete ALL records associated with:</strong></p>
+      <ul>
+        <li>My name: ${data.fromName}</li>
+        <li>My email: ${data.fromEmail}</li>
+        <li>Any variations or associated records</li>
+      </ul>
+
+      <p>Please confirm receipt of this request and provide written confirmation once my data has been deleted. According to applicable regulations, you must respond to this request within 45 days (CCPA) or 30 days (GDPR).</p>
+
+      <p>If you require any additional information to verify my identity or process this request, please contact me at ${data.fromEmail}.</p>
+
+      <p>Thank you for your prompt attention to this matter.</p>
+
+      <p>Sincerely,<br>${data.fromName}</p>
+
+      <hr style="border: none; border-top: 1px solid #ccc; margin: 24px 0;">
+      <p style="font-size: 12px; color: #666;">
+        This request was sent via ${APP_NAME} on behalf of ${data.fromName}.<br>
+        For questions about this service, visit ${APP_URL}
+      </p>
+    </body>
+    </html>
+  `;
+
+  return sendEmail(
+    data.toEmail,
+    `Data Deletion Request - CCPA/GDPR - ${data.fromName} (${data.exposures.length} records)`,
+    html
+  );
+}
+
 // Bulk Removal Summary Email (sent to user after bulk removal)
 interface BulkRemovalSummary {
   totalProcessed: number;

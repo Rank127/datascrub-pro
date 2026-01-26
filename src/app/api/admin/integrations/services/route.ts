@@ -101,7 +101,7 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
 
       return {
         status: "connected",
-        message: `Connected to Resend (${quotaStatus.sent} sent today${queueStatus.queued > 0 ? `, ${queueStatus.queued} queued` : ''})`,
+        message: `Connected to Resend (${quotaStatus.sent} sent today${queueInfo.queued > 0 ? `, ${queueInfo.queued} queued` : ''})`,
         monthlyLimit: 3000,
         monthlyUsed: emailsSent,
         rateLimit: calculateRateLimitHealth(actualSent, dailyLimit, "midnight UTC"),
@@ -114,7 +114,7 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
         // Key is valid but restricted to sending - use internal tracking
         return {
           status: "connected",
-          message: `Send-only API key (${quotaStatus.sent}/${quotaStatus.limit} today${queueStatus.queued > 0 ? `, ${queueStatus.queued} queued` : ''})`,
+          message: `Send-only API key (${quotaStatus.sent}/${quotaStatus.limit} today${queueInfo.queued > 0 ? `, ${queueInfo.queued} queued` : ''})`,
           monthlyLimit: 3000,
           rateLimit: calculateRateLimitHealth(quotaStatus.sent, quotaStatus.limit, "midnight UTC"),
           queue: queueInfo,
@@ -136,7 +136,7 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
     // Even if Resend API check fails, show our internal quota
     return {
       status: "connected",
-      message: `Resend configured (${quotaStatus.sent}/${quotaStatus.limit} today${queueStatus.queued > 0 ? `, ${queueStatus.queued} queued` : ''})`,
+      message: `Resend configured (${quotaStatus.sent}/${quotaStatus.limit} today${queueInfo.queued > 0 ? `, ${queueInfo.queued} queued` : ''})`,
       monthlyLimit: 3000,
       rateLimit: calculateRateLimitHealth(quotaStatus.sent, quotaStatus.limit, "midnight UTC"),
       queue: queueInfo,

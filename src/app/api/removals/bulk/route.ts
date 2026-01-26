@@ -1,15 +1,33 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { executeRemoval } from "@/lib/removers/removal-service";
 import { getDataBrokerInfo, getSubsidiaries, isParentBroker } from "@/lib/removers/data-broker-directory";
-import { getEmailQuotaStatus, sendBulkRemovalSummaryEmail, canSendEmail } from "@/lib/email";
+import { getEmailQuotaStatus, sendBulkRemovalSummaryEmail, sendBulkCCPARemovalRequest, canSendEmail } from "@/lib/email";
 import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
 import { getEffectivePlan } from "@/lib/admin";
+import { calculateVerifyAfterDate } from "@/lib/removers/verification-service";
 
 // Max emails per bulk operation to avoid quota exhaustion
 const MAX_BULK_EMAILS = 80; // Leave buffer for other system emails
+
+// Format data type for display in emails
+function formatDataType(dataType: string): string {
+  const typeMap: Record<string, string> = {
+    EMAIL: "Email Address",
+    PHONE: "Phone Number",
+    NAME: "Full Name",
+    ADDRESS: "Physical Address",
+    DOB: "Date of Birth",
+    SSN: "Social Security Number",
+    PHOTO: "Photo/Image",
+    USERNAME: "Username",
+    FINANCIAL: "Financial Information",
+    COMBINED_PROFILE: "Combined Personal Profile",
+  };
+
+  return typeMap[dataType] || dataType;
+}
 
 const bulkRequestSchema = z.object({
   exposureIds: z.array(z.string()).optional(),
@@ -143,7 +161,51 @@ export async function POST(request: Request) {
       });
     }
 
-    // Process each exposure
+    // Get full exposure data for grouping
+    const fullExposures = await prisma.exposure.findMany({
+      where: {
+        id: { in: exposuresToProcess.map(e => e.id) },
+      },
+      select: {
+        id: true,
+        source: true,
+        sourceName: true,
+        dataType: true,
+        sourceUrl: true,
+      },
+    });
+
+    // Group exposures by broker privacy email for consolidated emails
+    const brokerGroups = new Map<string, {
+      brokerName: string;
+      privacyEmail: string;
+      exposures: typeof fullExposures;
+    }>();
+
+    const manualExposures: typeof fullExposures = [];
+
+    for (const exposure of fullExposures) {
+      const brokerInfo = getDataBrokerInfo(exposure.source);
+
+      if (brokerInfo?.privacyEmail) {
+        const key = brokerInfo.privacyEmail.toLowerCase();
+        if (!brokerGroups.has(key)) {
+          brokerGroups.set(key, {
+            brokerName: brokerInfo.name,
+            privacyEmail: brokerInfo.privacyEmail,
+            exposures: [],
+          });
+        }
+        brokerGroups.get(key)!.exposures.push(exposure);
+      } else {
+        // No known privacy email - requires manual removal
+        manualExposures.push(exposure);
+      }
+    }
+
+    console.log(`[Bulk Removal] Grouped into ${brokerGroups.size} broker emails + ${manualExposures.length} manual`);
+
+    // Process results
     const results: {
       exposureId: string;
       source: string;
@@ -160,165 +222,198 @@ export async function POST(request: Request) {
     let emailsSent = 0;
     const processedSources: string[] = [];
 
-    // Limit processing based on email quota
-    const maxToProcess = Math.min(exposuresToProcess.length, MAX_BULK_EMAILS, quotaStatus.remaining);
-    const exposuresToActuallyProcess = exposuresToProcess.slice(0, maxToProcess);
+    // Get user's profile for removal request details
+    const profile = await prisma.personalProfile.findFirst({
+      where: { userId },
+      select: { fullName: true },
+    });
+    const fullUserName = profile?.fullName || userName;
 
-    for (const exposure of exposuresToActuallyProcess) {
-      // Check if removal already exists
-      const existingRequest = await prisma.removalRequest.findUnique({
-        where: { exposureId: exposure.id },
-      });
-
-      if (existingRequest) {
-        results.push({
-          exposureId: exposure.id,
-          source: exposure.source,
-          sourceName: exposure.sourceName,
-          success: true,
-          message: "Already submitted",
-          consolidatedCount: 0,
-        });
-        continue;
-      }
-
-      try {
-        // Get subsidiaries for this broker
-        const subsidiaryKeys = getSubsidiaries(exposure.source);
-
-        // Find subsidiary exposures
-        let consolidatedExposures: { id: string; source: string; sourceName: string }[] = [];
-        if (subsidiaryKeys.length > 0) {
-          consolidatedExposures = await prisma.exposure.findMany({
-            where: {
-              userId,
-              source: { in: subsidiaryKeys },
-              isWhitelisted: false,
-              status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS"] },
-            },
-            select: { id: true, source: true, sourceName: true },
-          });
-        }
-
-        // Create removal request
-        const method = getRemovalMethod(exposure.source);
-        const removalRequest = await prisma.removalRequest.create({
-          data: {
-            userId,
-            exposureId: exposure.id,
-            method,
-            status: "PENDING",
-            notes: consolidatedExposures.length > 0
-              ? `Bulk removal - covers ${consolidatedExposures.length} subsidiary exposures`
-              : "Bulk removal request",
-          },
-        });
-
-        // Update exposure status and mark manual action as done
-        await prisma.exposure.update({
-          where: { id: exposure.id },
-          data: {
-            status: "REMOVAL_PENDING",
-            manualActionTaken: true,
-            manualActionTakenAt: new Date(),
-          },
-        });
-
-        // Handle subsidiary exposures
-        for (const subExposure of consolidatedExposures) {
-          const existingSub = await prisma.removalRequest.findUnique({
-            where: { exposureId: subExposure.id },
-          });
-
-          if (!existingSub) {
-            await prisma.removalRequest.create({
-              data: {
-                userId,
-                exposureId: subExposure.id,
-                method: "AUTO_EMAIL",
-                status: "PENDING",
-                notes: `Auto-created via bulk removal from ${exposure.sourceName}`,
-              },
-            });
-
-            await prisma.exposure.update({
-              where: { id: subExposure.id },
-              data: {
-                status: "REMOVAL_PENDING",
-                manualActionTaken: true,
-                manualActionTakenAt: new Date(),
-              },
-            });
-          }
-        }
-
-        // Check if we can still send emails
-        if (!canSendEmail()) {
+    // Process each broker group with ONE consolidated email
+    for (const [privacyEmail, group] of brokerGroups) {
+      // Check email quota before sending
+      if (!canSendEmail()) {
+        console.log("[Bulk Removal] Email quota exhausted, stopping");
+        for (const exposure of group.exposures) {
           results.push({
             exposureId: exposure.id,
             source: exposure.source,
             sourceName: exposure.sourceName,
             success: false,
-            message: "Daily email quota reached - will retry tomorrow",
+            message: "Daily email quota reached - queued for later",
             consolidatedCount: 0,
           });
-          break; // Stop processing more
+        }
+        failCount += group.exposures.length;
+        continue;
+      }
+
+      try {
+        // Create removal requests for all exposures in this group
+        for (const exposure of group.exposures) {
+          const existingRequest = await prisma.removalRequest.findUnique({
+            where: { exposureId: exposure.id },
+          });
+
+          if (!existingRequest) {
+            const method = getRemovalMethod(exposure.source);
+            await prisma.removalRequest.create({
+              data: {
+                userId,
+                exposureId: exposure.id,
+                method,
+                status: "PENDING",
+                notes: `Bulk removal - consolidated with ${group.exposures.length - 1} other exposures to ${group.brokerName}`,
+              },
+            });
+          }
+
+          await prisma.exposure.update({
+            where: { id: exposure.id },
+            data: {
+              status: "REMOVAL_PENDING",
+              manualActionTaken: true,
+              manualActionTakenAt: new Date(),
+            },
+          });
         }
 
-        // Execute the removal (skip user notification - we'll send summary at end)
-        const executionResult = await executeRemoval(removalRequest.id, userId, {
-          skipUserNotification: true,
+        // Send ONE consolidated CCPA email for all exposures to this broker
+        const emailResult = await sendBulkCCPARemovalRequest({
+          toEmail: group.privacyEmail,
+          brokerName: group.brokerName,
+          fromName: fullUserName,
+          fromEmail: userEmail!,
+          exposures: group.exposures.map(e => ({
+            dataType: formatDataType(e.dataType),
+            sourceUrl: e.sourceUrl,
+          })),
         });
 
-        results.push({
-          exposureId: exposure.id,
-          source: exposure.source,
-          sourceName: exposure.sourceName,
-          success: executionResult.success,
-          message: executionResult.message,
-          consolidatedCount: consolidatedExposures.length,
-        });
+        if (emailResult.success) {
+          // Mark all exposures in this group as submitted
+          const verifyAfter = calculateVerifyAfterDate(group.exposures[0].source);
 
-        totalProcessed++;
-        totalConsolidated += consolidatedExposures.length;
-        if (executionResult.success) {
-          successCount++;
+          await prisma.removalRequest.updateMany({
+            where: {
+              exposureId: { in: group.exposures.map(e => e.id) },
+            },
+            data: {
+              status: "SUBMITTED",
+              submittedAt: new Date(),
+              verifyAfter,
+            },
+          });
+
+          await prisma.exposure.updateMany({
+            where: {
+              id: { in: group.exposures.map(e => e.id) },
+            },
+            data: {
+              status: "REMOVAL_IN_PROGRESS",
+            },
+          });
+
           emailsSent++;
-          processedSources.push(exposure.sourceName);
+          successCount += group.exposures.length;
+          totalProcessed += group.exposures.length;
+          processedSources.push(group.brokerName);
+
+          for (const exposure of group.exposures) {
+            results.push({
+              exposureId: exposure.id,
+              source: exposure.source,
+              sourceName: exposure.sourceName,
+              success: true,
+              message: `Consolidated CCPA request sent to ${group.brokerName} (${group.exposures.length} records)`,
+              consolidatedCount: group.exposures.length - 1,
+            });
+          }
+
+          console.log(`[Bulk Removal] Sent consolidated email to ${group.brokerName} for ${group.exposures.length} exposures`);
         } else {
-          failCount++;
+          for (const exposure of group.exposures) {
+            results.push({
+              exposureId: exposure.id,
+              source: exposure.source,
+              sourceName: exposure.sourceName,
+              success: false,
+              message: `Failed to send email to ${group.brokerName}`,
+              consolidatedCount: 0,
+            });
+          }
+          failCount += group.exposures.length;
         }
 
-        // Small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Small delay between broker emails
+        await new Promise(resolve => setTimeout(resolve, 300));
 
       } catch (error) {
-        console.error(`Bulk removal error for ${exposure.source}:`, error);
-        results.push({
-          exposureId: exposure.id,
-          source: exposure.source,
-          sourceName: exposure.sourceName,
-          success: false,
-          message: error instanceof Error ? error.message : "Unknown error",
-          consolidatedCount: 0,
-        });
-        failCount++;
+        console.error(`Bulk removal error for ${group.brokerName}:`, error);
+        for (const exposure of group.exposures) {
+          results.push({
+            exposureId: exposure.id,
+            source: exposure.source,
+            sourceName: exposure.sourceName,
+            success: false,
+            message: error instanceof Error ? error.message : "Unknown error",
+            consolidatedCount: 0,
+          });
+        }
+        failCount += group.exposures.length;
       }
     }
 
-    // Send a single summary email to user instead of per-removal notifications
-    if (successCount > 0 && userEmail) {
+    // Handle manual exposures (no known privacy email)
+    for (const exposure of manualExposures) {
+      const existingRequest = await prisma.removalRequest.findUnique({
+        where: { exposureId: exposure.id },
+      });
+
+      if (!existingRequest) {
+        await prisma.removalRequest.create({
+          data: {
+            userId,
+            exposureId: exposure.id,
+            method: "MANUAL_GUIDE",
+            status: "REQUIRES_MANUAL",
+            notes: "No known privacy email - manual removal required",
+          },
+        });
+      }
+
+      await prisma.exposure.update({
+        where: { id: exposure.id },
+        data: {
+          status: "REMOVAL_PENDING",
+          manualActionTaken: true,
+          manualActionTakenAt: new Date(),
+        },
+      });
+
+      results.push({
+        exposureId: exposure.id,
+        source: exposure.source,
+        sourceName: exposure.sourceName,
+        success: true,
+        message: "Requires manual removal - no known privacy email",
+        consolidatedCount: 0,
+      });
+      totalProcessed++;
+    }
+
+    // Send a single summary email to user
+    if ((successCount > 0 || manualExposures.length > 0) && userEmail) {
       try {
         await sendBulkRemovalSummaryEmail(userEmail, userName, {
-          totalProcessed: successCount,
+          totalProcessed: successCount + manualExposures.length,
           successCount,
           failCount,
-          sources: processedSources,
+          sources: [...new Set(processedSources)], // Unique broker names
           consolidatedCount: totalConsolidated,
         });
       } catch (emailError) {
         console.error("Failed to send bulk removal summary email:", emailError);
-        // Don't fail the whole request if summary email fails
       }
     }
 
@@ -327,15 +422,16 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `Processed ${totalProcessed} parent brokers, consolidated ${totalConsolidated} subsidiaries`,
+      message: `Sent ${emailsSent} consolidated emails covering ${successCount} exposures`,
       summary: {
         totalProcessed,
-        totalConsolidated,
-        totalExposuresCovered: totalProcessed + totalConsolidated,
+        totalConsolidated: successCount, // How many exposures were covered by consolidated emails
+        totalExposuresCovered: successCount + manualExposures.length,
         successCount,
         failCount,
-        emailsSent,
-        skippedDueToQuota: exposuresToProcess.length - exposuresToActuallyProcess.length,
+        emailsSent, // Number of actual emails sent (much lower than exposures!)
+        manualRequired: manualExposures.length,
+        brokerEmailsSaved: successCount - emailsSent, // How many emails we saved by consolidating
       },
       emailQuota: finalQuotaStatus,
       results,
