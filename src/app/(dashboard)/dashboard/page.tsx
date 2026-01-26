@@ -8,6 +8,10 @@ import { Progress } from "@/components/ui/progress";
 import { RiskScore } from "@/components/dashboard/risk-score";
 import { ExposureCard } from "@/components/dashboard/exposure-card";
 import { UpgradeBanner } from "@/components/dashboard/upgrade-banner";
+import { ProtectionScore } from "@/components/dashboard/protection-score";
+import { TimeSaved } from "@/components/dashboard/time-saved";
+import { BrokerProgress } from "@/components/dashboard/broker-progress";
+import { ProtectionChart } from "@/components/dashboard/protection-chart";
 import {
   AlertTriangle,
   Search,
@@ -23,6 +27,7 @@ import {
   Scan,
   Mic,
   Lock,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -69,6 +74,23 @@ interface Exposure {
   firstFoundAt: string;
 }
 
+interface BrokerStat {
+  source: string;
+  sourceName: string;
+  exposureCount: number;
+  completedCount: number;
+  inProgressCount: number;
+  pendingCount: number;
+  status: string;
+  lastCompletedAt?: string;
+}
+
+interface TrendData {
+  current: number;
+  previous: number;
+  changePercent: number;
+}
+
 interface DashboardData {
   stats: DashboardStats;
   recentExposures: Exposure[];
@@ -78,6 +100,18 @@ interface DashboardData {
     socialMedia: RemovalProgress;
     aiProtection: RemovalProgress;
   };
+  // New metrics
+  protectionScore: number;
+  timeSaved: {
+    hours: number;
+    minutes: number;
+    estimatedValue: number;
+  };
+  trends: {
+    exposures: TrendData;
+    removals: TrendData;
+  };
+  brokerStats: BrokerStat[];
 }
 
 export default function DashboardPage() {
@@ -179,6 +213,15 @@ export default function DashboardPage() {
 
   const recentExposures = data?.recentExposures || [];
 
+  // New metrics with defaults
+  const protectionScore = data?.protectionScore ?? 100;
+  const timeSaved = data?.timeSaved || { hours: 0, minutes: 0, estimatedValue: 0 };
+  const trends = data?.trends || {
+    exposures: { current: 0, previous: 0, changePercent: 0 },
+    removals: { current: 0, previous: 0, changePercent: 0 },
+  };
+  const brokerStats = data?.brokerStats || [];
+
   return (
     <div className="space-y-6">
       {/* Welcome section */}
@@ -202,17 +245,45 @@ export default function DashboardPage() {
       {/* Upgrade Banner - shows for FREE users only */}
       <UpgradeBanner variant="card" />
 
-      {/* Risk Score and Stats */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6">
+      {/* Hero Metrics - Protection Score, Time Saved, Risk Score */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {/* Protection Score Card */}
+        <Link href="/dashboard/exposures">
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-emerald-500/50 transition-all cursor-pointer h-full">
+            <CardContent className="flex items-center justify-center py-6">
+              <ProtectionScore
+                score={protectionScore}
+                removed={stats.removedExposures}
+                total={stats.totalExposures}
+                size="md"
+              />
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Time Saved Card */}
+        <Card className="bg-slate-800/50 border-slate-700 h-full">
+          <CardContent className="flex items-center justify-center py-6">
+            <TimeSaved
+              hours={timeSaved.hours}
+              minutes={timeSaved.minutes}
+              estimatedValue={timeSaved.estimatedValue}
+            />
+          </CardContent>
+        </Card>
+
         {/* Risk Score Card */}
-        <Link href="/dashboard/exposures" className="md:col-span-2 lg:col-span-1">
+        <Link href="/dashboard/exposures?status=ACTIVE">
           <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-slate-600 transition-all cursor-pointer h-full">
             <CardContent className="flex items-center justify-center py-6">
               <RiskScore score={stats.riskScore} size="md" />
             </CardContent>
           </Card>
         </Link>
+      </div>
 
+      {/* Secondary Stats - Active, Submitted, Removed, Manual, Whitelisted */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {/* Active Exposures */}
         <Link href="/dashboard/exposures?status=ACTIVE">
           <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-orange-500/50 transition-all cursor-pointer h-full">
@@ -328,6 +399,11 @@ export default function DashboardPage() {
           </Card>
         </Link>
       </div>
+
+      {/* Protection Progress Chart */}
+      {stats.totalExposures > 0 && (
+        <ProtectionChart />
+      )}
 
       {/* Pending Removals Progress */}
       {(removalProgress.dataBrokers.total > 0 || removalProgress.breaches.total > 0 || removalProgress.socialMedia.total > 0) && (
@@ -500,6 +576,21 @@ export default function DashboardPage() {
                 Start Your First Scan
               </Button>
             </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Broker Status Progress */}
+      {brokerStats.length > 0 && (
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-white">Broker Status</CardTitle>
+            <CardDescription className="text-slate-400">
+              Progress by data broker
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <BrokerProgress brokers={brokerStats} />
           </CardContent>
         </Card>
       )}

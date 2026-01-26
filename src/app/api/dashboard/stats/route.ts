@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectivePlan } from "@/lib/admin";
+import { DataSourceNames } from "@/lib/types";
 
 // AI Protection source categories
 const AI_TRAINING_SOURCES = [
@@ -13,6 +14,10 @@ const FACIAL_RECOGNITION_SOURCES = [
 ];
 const VOICE_CLONING_SOURCES = ["ELEVENLABS", "RESEMBLE_AI", "MURF_AI"];
 const ALL_AI_SOURCES = [...AI_TRAINING_SOURCES, ...FACIAL_RECOGNITION_SOURCES, ...VOICE_CLONING_SOURCES];
+
+// Time estimates for manual removal (minutes)
+const MINUTES_PER_REMOVAL = 45;
+const HOURLY_VALUE = 15; // $15/hour value of time
 
 export async function GET() {
   try {
@@ -131,6 +136,163 @@ export async function GET() {
       }),
     ]);
 
+    // Calculate Protection Score (positive framing - opposite of risk)
+    // 100% protected = all exposures removed, 0% = none removed
+    const protectionScore = totalExposures > 0
+      ? Math.round((removedExposures / totalExposures) * 100)
+      : 100; // No exposures = fully protected
+
+    // Calculate Time Saved
+    const completedRemovals = await prisma.removalRequest.count({
+      where: { userId, status: "COMPLETED" },
+    });
+    const timeSavedMinutes = completedRemovals * MINUTES_PER_REMOVAL;
+    const timeSavedHours = Math.round(timeSavedMinutes / 60);
+    const timeSaved = {
+      hours: timeSavedHours,
+      minutes: timeSavedMinutes,
+      estimatedValue: Math.round(timeSavedHours * HOURLY_VALUE),
+    };
+
+    // Calculate Week-over-Week Trends
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
+    const [
+      currentWeekExposures,
+      previousWeekExposures,
+      currentWeekRemovals,
+      previousWeekRemovals,
+    ] = await Promise.all([
+      // Current week exposures found
+      prisma.exposure.count({
+        where: {
+          userId,
+          firstFoundAt: { gte: oneWeekAgo },
+        },
+      }),
+      // Previous week exposures found
+      prisma.exposure.count({
+        where: {
+          userId,
+          firstFoundAt: { gte: twoWeeksAgo, lt: oneWeekAgo },
+        },
+      }),
+      // Current week removals completed
+      prisma.removalRequest.count({
+        where: {
+          userId,
+          status: "COMPLETED",
+          completedAt: { gte: oneWeekAgo },
+        },
+      }),
+      // Previous week removals completed
+      prisma.removalRequest.count({
+        where: {
+          userId,
+          status: "COMPLETED",
+          completedAt: { gte: twoWeeksAgo, lt: oneWeekAgo },
+        },
+      }),
+    ]);
+
+    const calculateChange = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
+
+    const trends = {
+      exposures: {
+        current: currentWeekExposures,
+        previous: previousWeekExposures,
+        changePercent: calculateChange(currentWeekExposures, previousWeekExposures),
+      },
+      removals: {
+        current: currentWeekRemovals,
+        previous: previousWeekRemovals,
+        changePercent: calculateChange(currentWeekRemovals, previousWeekRemovals),
+      },
+    };
+
+    // Per-Broker Stats - group exposures and removals by source
+    const exposuresBySource = await prisma.exposure.groupBy({
+      by: ["source"],
+      where: { userId },
+      _count: { id: true },
+    });
+
+    const removalsBySource = await prisma.removalRequest.findMany({
+      where: { userId },
+      select: {
+        status: true,
+        completedAt: true,
+        submittedAt: true,
+        exposure: { select: { source: true } },
+      },
+    });
+
+    // Build broker stats
+    const brokerStatsMap = new Map<string, {
+      source: string;
+      sourceName: string;
+      exposureCount: number;
+      completedCount: number;
+      inProgressCount: number;
+      pendingCount: number;
+      status: string;
+      lastCompletedAt?: Date;
+    }>();
+
+    // Initialize with exposure counts
+    for (const exp of exposuresBySource) {
+      brokerStatsMap.set(exp.source, {
+        source: exp.source,
+        sourceName: DataSourceNames[exp.source as keyof typeof DataSourceNames] || exp.source,
+        exposureCount: exp._count.id,
+        completedCount: 0,
+        inProgressCount: 0,
+        pendingCount: 0,
+        status: "PENDING",
+      });
+    }
+
+    // Add removal counts
+    for (const removal of removalsBySource) {
+      const source = removal.exposure.source;
+      const stats = brokerStatsMap.get(source);
+      if (stats) {
+        if (removal.status === "COMPLETED") {
+          stats.completedCount++;
+          if (!stats.lastCompletedAt || (removal.completedAt && removal.completedAt > stats.lastCompletedAt)) {
+            stats.lastCompletedAt = removal.completedAt || undefined;
+          }
+        } else if (removal.status === "IN_PROGRESS" || removal.status === "SUBMITTED") {
+          stats.inProgressCount++;
+        } else if (removal.status === "PENDING") {
+          stats.pendingCount++;
+        }
+      }
+    }
+
+    // Calculate status for each broker
+    for (const stats of brokerStatsMap.values()) {
+      if (stats.completedCount === stats.exposureCount && stats.exposureCount > 0) {
+        stats.status = "COMPLETED";
+      } else if (stats.completedCount > 0) {
+        stats.status = "PARTIAL";
+      } else if (stats.inProgressCount > 0) {
+        stats.status = "IN_PROGRESS";
+      } else {
+        stats.status = "PENDING";
+      }
+    }
+
+    // Convert to array and sort by exposure count
+    const brokerStats = Array.from(brokerStatsMap.values())
+      .sort((a, b) => b.exposureCount - a.exposureCount)
+      .slice(0, 10); // Top 10 brokers
+
     // Calculate risk score based on exposures
     // Higher score = higher risk (more active exposures)
     let riskScore = 0;
@@ -218,6 +380,12 @@ export async function GET() {
         },
         userPlan,
       },
+      // NEW: Protection metrics
+      protectionScore,
+      timeSaved,
+      trends,
+      brokerStats,
+      // Existing
       recentExposures,
       removalProgress: {
         dataBrokers: calculateProgress(dataBrokerRemovals),
