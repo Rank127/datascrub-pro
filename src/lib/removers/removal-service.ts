@@ -53,7 +53,9 @@ export async function executeRemoval(
   const brokerInfo = getDataBrokerInfo(source);
 
   if (!brokerInfo) {
-    // Unknown source - provide manual instructions
+    // Unknown source - update status and provide manual instructions
+    await updateRemovalStatus(removalRequestId, "REQUIRES_MANUAL");
+
     return {
       success: true,
       method: "MANUAL_GUIDE",
