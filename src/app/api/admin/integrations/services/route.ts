@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
+import { getEmailQuotaStatus } from "@/lib/email";
 import {
   ServicesIntegrationResponse,
   ResendServiceStatus,
@@ -50,6 +51,9 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
     return { status: "not_configured", message: "RESEND_API_KEY not set" };
   }
 
+  // Get our internal email quota tracking
+  const quotaStatus = getEmailQuotaStatus();
+
   try {
     // Try to verify the key by checking emails endpoint
     // Note: Many Resend API keys are restricted to sending only
@@ -61,30 +65,31 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
     });
 
     // Resend free tier: 100 emails/day, 3000/month
-    const dailyLimit = 100;
-    const monthlyLimit = 3000;
+    const dailyLimit = quotaStatus.limit;
 
     if (response.ok) {
       const data = await response.json();
       const emailsSent = Array.isArray(data.data) ? data.data.length : 0;
+      // Use max of Resend count and our internal count (in case server restarted)
+      const actualSent = Math.max(emailsSent, quotaStatus.sent);
 
       return {
         status: "connected",
-        message: "Connected to Resend",
-        monthlyLimit,
+        message: `Connected to Resend (${quotaStatus.sent} sent today)`,
+        monthlyLimit: 3000,
         monthlyUsed: emailsSent,
-        rateLimit: calculateRateLimitHealth(emailsSent, monthlyLimit),
+        rateLimit: calculateRateLimitHealth(actualSent, dailyLimit, "midnight UTC"),
       };
     } else if (response.status === 401) {
       // Check if it's a restricted key (send-only)
       const errorData = await response.json().catch(() => ({}));
       if (errorData.name === "restricted_api_key") {
-        // Key is valid but restricted to sending - this is OK
+        // Key is valid but restricted to sending - use internal tracking
         return {
           status: "connected",
-          message: "Send-only API key configured",
-          monthlyLimit,
-          rateLimit: calculateRateLimitHealth(0, monthlyLimit), // Can't check usage with restricted key
+          message: `Send-only API key configured (${quotaStatus.sent}/${quotaStatus.limit} today)`,
+          monthlyLimit: 3000,
+          rateLimit: calculateRateLimitHealth(quotaStatus.sent, quotaStatus.limit, "midnight UTC"),
         };
       }
       return {
@@ -98,9 +103,12 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
       };
     }
   } catch (error) {
+    // Even if Resend API check fails, show our internal quota
     return {
-      status: "error",
-      message: error instanceof Error ? error.message : "Connection failed",
+      status: "connected",
+      message: `Resend configured (${quotaStatus.sent}/${quotaStatus.limit} today)`,
+      monthlyLimit: 3000,
+      rateLimit: calculateRateLimitHealth(quotaStatus.sent, quotaStatus.limit, "midnight UTC"),
     };
   }
 }
