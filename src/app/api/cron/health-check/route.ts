@@ -344,22 +344,51 @@ export async function GET(request: Request) {
     });
   }
 
-  // Test 10: Stuck Removal Requests (pending for more than 7 days)
+  // Test 10: Stuck Removal Requests (pending for more than 7 days) - AUTO-FIX
   try {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const stuckRemovals = await prisma.removalRequest.count({
+    const stuckRemovals = await prisma.removalRequest.findMany({
       where: {
         status: "PENDING",
         createdAt: { lt: sevenDaysAgo },
+        attempts: { lt: 3 }, // Only try if under attempt limit
       },
+      select: { id: true, userId: true },
+      take: 10, // Limit batch size for health check
     });
 
-    if (stuckRemovals > 0) {
+    if (stuckRemovals.length > 0) {
+      // Import and use the removal service to auto-process
+      const { executeRemoval } = await import("@/lib/removers/removal-service");
+
+      let processed = 0;
+      let successful = 0;
+
+      for (const removal of stuckRemovals) {
+        try {
+          const result = await executeRemoval(removal.id, removal.userId);
+          processed++;
+          if (result.success && result.method === "AUTO_EMAIL") {
+            successful++;
+          }
+        } catch (e) {
+          console.error(`[Health Check] Failed to process stuck removal ${removal.id}:`, e);
+        }
+      }
+
+      const totalStuck = await prisma.removalRequest.count({
+        where: {
+          status: "PENDING",
+          createdAt: { lt: sevenDaysAgo },
+        },
+      });
+
       tests.push({
         name: "Stuck Removal Requests",
-        status: "WARN",
-        message: `${stuckRemovals} removal requests pending for over 7 days`,
-        actionRequired: "Review and manually process stuck removals",
+        status: totalStuck > processed ? "WARN" : "PASS",
+        message: `Auto-processed ${processed} stuck removals (${successful} emails sent). ${totalStuck > processed ? `${totalStuck - processed} remaining.` : "All clear."}`,
+        autoFixed: processed > 0,
+        actionRequired: totalStuck > processed ? `${totalStuck - processed} stuck removals still need attention` : undefined,
       });
     } else {
       tests.push({

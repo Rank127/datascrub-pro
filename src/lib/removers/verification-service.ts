@@ -3,50 +3,96 @@ import { decrypt } from "@/lib/encryption/crypto";
 import { sendRemovalUpdateEmail } from "@/lib/email";
 import { LeakCheckScanner } from "@/lib/scanners/breaches/leakcheck";
 import { HaveIBeenPwnedScanner } from "@/lib/scanners/breaches/haveibeenpwned";
+import { getScannerBySource as getDataBrokerScanner } from "@/lib/scanners/data-brokers";
 import type { ScanInput, ScanResult, Scanner } from "@/lib/scanners/base-scanner";
 import { generateScreenshotUrl } from "@/lib/screenshots/screenshot-service";
 
 // Days to wait before verification based on source
+// These are based on actual broker processing times + buffer
 const VERIFICATION_DELAYS: Record<string, number> = {
-  // Data brokers - use their estimated days + buffer
+  // Fast data brokers (automated systems, 1-3 days processing)
+  TRUEPEOPLESEARCH: 3,
+  FASTPEOPLESEARCH: 3,
+  // Medium data brokers (5-10 days processing)
   SPOKEO: 7,
+  PEOPLEFINDER: 10,
   WHITEPAGES: 10,
+  // Slow data brokers (14+ days processing)
   BEENVERIFIED: 14,
   INTELIUS: 14,
-  PEOPLEFINDER: 10,
-  TRUEPEOPLESEARCH: 3,
-  RADARIS: 21,
-  FASTPEOPLESEARCH: 3,
   USSEARCH: 14,
+  RADARIS: 21,
   PIPL: 45,
-  // Breach databases - longer wait, data may persist
+  // Breach databases - these are monitoring only, but we verify if user changed password
   BREACH_DB: 45,
   HAVEIBEENPWNED: 45,
   DEHASHED: 30,
-  // Social media
+  // Social media - account deletion takes time
   LINKEDIN: 35,
   FACEBOOK: 35,
   TWITTER: 35,
   INSTAGRAM: 35,
-  // Default
+  // Default for unknown sources
   DEFAULT: 30,
 };
 
-// Maximum verification attempts before giving up
+// Maximum verification attempts before marking as failed
 const MAX_VERIFICATION_ATTEMPTS = 3;
 
-// Get scanner for a specific source
+// Adaptive retry delays based on attempt number (exponential backoff)
+const RETRY_DELAYS = [7, 14, 21]; // Days for attempt 1, 2, 3
+
+// Sources that support automated re-verification
+const VERIFIABLE_SOURCES = new Set([
+  // Breach databases
+  "BREACH_DB",
+  "HAVEIBEENPWNED",
+  "LEAKCHECK",
+  // Data brokers with scrapers
+  "SPOKEO",
+  "WHITEPAGES",
+  "BEENVERIFIED",
+  "TRUEPEOPLESEARCH",
+  "RADARIS",
+  "INTELIUS",
+  // Manual check scanners (can verify via search URL)
+  "FASTPEOPLESEARCH",
+  "PEOPLEFINDER",
+]);
+
+// Get scanner for a specific source - now includes data broker scanners!
 function getScannerForSource(source: string): Scanner | null {
+  // Breach scanners
   switch (source) {
     case "BREACH_DB":
+    case "LEAKCHECK":
       return new LeakCheckScanner();
     case "HAVEIBEENPWNED":
       return new HaveIBeenPwnedScanner();
-    // Data broker scanners would go here
-    // For now, we can't verify data brokers without re-scraping
-    default:
-      return null;
   }
+
+  // Try data broker scanner
+  const brokerScanner = getDataBrokerScanner(source);
+  if (brokerScanner) {
+    return brokerScanner;
+  }
+
+  return null;
+}
+
+// Calculate optimal retry delay based on source and attempt number
+function getRetryDelay(source: string, attemptNumber: number): number {
+  // Use exponential backoff, capped at the source's typical processing time
+  const baseDelay = RETRY_DELAYS[Math.min(attemptNumber, RETRY_DELAYS.length - 1)];
+  const sourceDelay = VERIFICATION_DELAYS[source] || VERIFICATION_DELAYS.DEFAULT;
+
+  // Don't retry more frequently than the source typically processes
+  return Math.max(baseDelay, Math.min(sourceDelay, 21));
+}
+
+// Check if a source can be automatically verified
+export function canVerifySource(source: string): boolean {
+  return VERIFIABLE_SOURCES.has(source);
 }
 
 // Calculate when verification should run
@@ -185,9 +231,10 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
       };
     }
 
-    // Schedule next verification attempt
+    // Schedule next verification attempt with adaptive delay
+    const retryDelay = getRetryDelay(removalRequest.exposure.source, removalRequest.verificationCount);
     const nextVerify = new Date();
-    nextVerify.setDate(nextVerify.getDate() + 14); // Check again in 2 weeks
+    nextVerify.setDate(nextVerify.getDate() + retryDelay);
 
     await prisma.removalRequest.update({
       where: { id: removalRequestId },
@@ -195,13 +242,14 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
         verifyAfter: nextVerify,
         lastVerifiedAt: new Date(),
         verificationCount: { increment: 1 },
+        notes: `No scanner available for ${removalRequest.exposure.source}. Will auto-complete after ${MAX_VERIFICATION_ATTEMPTS} attempts.`,
       },
     });
 
     return {
       success: true,
       status: "PENDING",
-      message: "Cannot verify automatically, scheduled for retry",
+      message: `Cannot verify automatically (${removalRequest.exposure.source}), scheduled retry in ${retryDelay} days`,
     };
   }
 
@@ -335,9 +383,10 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
         };
       }
 
-      // Schedule another verification
+      // Schedule another verification with adaptive delay
+      const retryDelay = getRetryDelay(removalRequest.exposure.source, removalRequest.verificationCount + 1);
       const nextVerify = new Date();
-      nextVerify.setDate(nextVerify.getDate() + 14); // Try again in 2 weeks
+      nextVerify.setDate(nextVerify.getDate() + retryDelay);
 
       await prisma.removalRequest.update({
         where: { id: removalRequestId },
@@ -345,13 +394,14 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
           verifyAfter: nextVerify,
           lastVerifiedAt: new Date(),
           verificationCount: { increment: 1 },
+          notes: `Data still present. Attempt ${removalRequest.verificationCount + 1}/${MAX_VERIFICATION_ATTEMPTS}. Next check in ${retryDelay} days.`,
         },
       });
 
       return {
         success: true,
         status: "PENDING",
-        message: "Data still found, scheduled for re-verification",
+        message: `Data still found, retry scheduled in ${retryDelay} days (attempt ${removalRequest.verificationCount + 1}/${MAX_VERIFICATION_ATTEMPTS})`,
       };
     }
   } catch (error) {
