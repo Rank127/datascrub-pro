@@ -181,6 +181,482 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
 
   // ==========================================
+  // ADDITIONAL PEOPLE SEARCH SITES (from competitor research)
+  // ==========================================
+  FOUR11: {
+    name: "411.com",
+    optOutUrl: "https://www.411.com/privacy",
+    privacyEmail: "privacy@411.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  CLASSMATES: {
+    name: "Classmates.com",
+    optOutUrl: "https://www.classmates.com/registration/mini/privacyPreferences",
+    privacyEmail: "privacy@classmates.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Part of PeopleConnect network - requires account deletion",
+  },
+  REUNION: {
+    name: "Reunion.com",
+    optOutUrl: "https://www.reunion.com/optout",
+    privacyEmail: "privacy@reunion.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  LOOKUPANYONE: {
+    name: "LookUpAnyone.com",
+    optOutUrl: "https://www.lookupanyone.com/optout",
+    privacyEmail: "privacy@lookupanyone.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  PEOPLELOOKUP: {
+    name: "PeopleLookup.com",
+    optOutUrl: "https://www.peoplelookup.com/optout",
+    privacyEmail: "privacy@peoplelookup.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  PEOPLESEARCHER: {
+    name: "PeopleSearcher.com",
+    optOutUrl: "https://www.peoplesearcher.com/optout",
+    privacyEmail: "privacy@peoplesearcher.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  PEOPLESEARCH123: {
+    name: "PeopleSearch123.com",
+    optOutUrl: "https://www.peoplesearch123.com/optout",
+    privacyEmail: "privacy@peoplesearch123.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  PEOPLECONNECT: {
+    name: "PeopleConnect.us",
+    optOutUrl: "https://www.peopleconnect.us/privacy",
+    privacyEmail: "privacy@peopleconnect.us",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+    notes: "Parent company of many people search sites",
+  },
+  PRIVATEEYE: {
+    name: "PrivateEye.com",
+    optOutUrl: "https://www.privateeye.com/optout",
+    privacyEmail: "privacy@privateeye.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  SPYFLY: {
+    name: "SpyFly.com",
+    optOutUrl: "https://www.spyfly.com/optout",
+    privacyEmail: "privacy@spyfly.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  REVERSEPHONE: {
+    name: "ReversePhone.com",
+    optOutUrl: "https://www.reversephone.com/optout",
+    privacyEmail: "privacy@reversephone.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  REVERSEPHONECHECK: {
+    name: "ReversePhoneCheck.com",
+    optOutUrl: "https://www.reversephonecheck.com/optout",
+    privacyEmail: "privacy@reversephonecheck.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  TRUEPEOPLESEARCH_NET: {
+    name: "TruePeopleSearch.net",
+    optOutUrl: "https://www.truepeoplesearch.net/removal",
+    privacyEmail: "privacy@truepeoplesearch.net",
+    removalMethod: "FORM",
+    estimatedDays: 3,
+    notes: "Different from TruePeopleSearch.com",
+  },
+  PUBLICRECORDSCENTER: {
+    name: "PublicRecordsCenter.org",
+    optOutUrl: "https://www.publicrecordscenter.org/optout",
+    privacyEmail: "privacy@publicrecordscenter.org",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  WHITEPAGESGO: {
+    name: "WhitePagesGo.com",
+    optOutUrl: "https://www.whitepagesgo.com/optout",
+    privacyEmail: "privacy@whitepagesgo.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  YELLOWBOOK: {
+    name: "YellowBook.com",
+    optOutUrl: "https://www.yellowbook.com/optout",
+    privacyEmail: "privacy@yellowbook.com",
+    removalMethod: "FORM",
+    estimatedDays: 10,
+  },
+  TELEPHONEDIRECTORIES: {
+    name: "TelephoneDirectories.us",
+    optOutUrl: "https://www.telephonedirectories.us/optout",
+    privacyEmail: "privacy@telephonedirectories.us",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  USA_OFFICIAL: {
+    name: "USA-Official.com",
+    optOutUrl: "https://www.usa-official.com/optout",
+    privacyEmail: "privacy@usa-official.com",
+    removalMethod: "FORM",
+    estimatedDays: 10,
+  },
+  USRECORDS: {
+    name: "USRecords.net",
+    optOutUrl: "https://www.usrecords.net/optout",
+    privacyEmail: "privacy@usrecords.net",
+    removalMethod: "FORM",
+    estimatedDays: 10,
+  },
+  AMERICANPHONEBOOK: {
+    name: "AmericanPhoneBook.com",
+    optOutUrl: "https://www.americanphonebook.com/optout",
+    privacyEmail: "privacy@americanphonebook.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  CALLERNAME: {
+    name: "CallerName.com",
+    optOutUrl: "https://callername.com/optout",
+    privacyEmail: "privacy@callername.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  PHONESBOOK: {
+    name: "PhonesBook.com",
+    optOutUrl: "https://www.phonesbook.com/optout",
+    privacyEmail: "privacy@phonesbook.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+
+  // ==========================================
+  // BACKGROUND CHECK SITES (expanded)
+  // ==========================================
+  ADVANCEDBACKGROUNDCHECKS: {
+    name: "AdvancedBackgroundChecks.com",
+    optOutUrl: "https://www.advancedbackgroundchecks.com/removal",
+    privacyEmail: "privacy@advancedbackgroundchecks.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  FASTBACKGROUNDCHECK: {
+    name: "FastBackgroundCheck.com",
+    optOutUrl: "https://www.fastbackgroundcheck.com/optout",
+    privacyEmail: "privacy@fastbackgroundcheck.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  CHECKTHEM: {
+    name: "CheckThem.com",
+    optOutUrl: "https://www.checkthem.com/optout",
+    privacyEmail: "privacy@checkthem.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  CHECKSECRETS: {
+    name: "CheckSecrets.com",
+    optOutUrl: "https://www.checksecrets.com/optout",
+    privacyEmail: "privacy@checksecrets.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  TRUEINTEL: {
+    name: "TrueIntel.com",
+    optOutUrl: "https://www.trueintel.com/optout",
+    privacyEmail: "privacy@trueintel.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+
+  // ==========================================
+  // ARREST RECORDS & MUGSHOT SITES
+  // ==========================================
+  FINDMUGSHOTS: {
+    name: "FindMugshots.com",
+    optOutUrl: "https://www.findmugshots.com/optout",
+    privacyEmail: "remove@findmugshots.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+    notes: "May require identity verification",
+  },
+  MUGSHOTLOOK: {
+    name: "MugshotLook.com",
+    optOutUrl: "https://www.mugshotlook.com/optout",
+    privacyEmail: "remove@mugshotlook.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  ARRESTWARRANT: {
+    name: "ArrestWarrant.org",
+    optOutUrl: "https://www.arrestwarrant.org/optout",
+    privacyEmail: "privacy@arrestwarrant.org",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  USWARRANTS: {
+    name: "USWarrants.org",
+    optOutUrl: "https://www.uswarrants.org/optout",
+    privacyEmail: "privacy@uswarrants.org",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  INMATESEARCHER: {
+    name: "InmatesSearcher.com",
+    optOutUrl: "https://www.inmatesearcher.com/optout",
+    privacyEmail: "privacy@inmatesearcher.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  OFFENDERRECORDS: {
+    name: "OffenderRecords.com",
+    optOutUrl: "https://www.offenderrecords.com/optout",
+    privacyEmail: "privacy@offenderrecords.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // COURT RECORDS SITES
+  // ==========================================
+  COURTCASEFINDER: {
+    name: "CourtCaseFinder.com",
+    optOutUrl: "https://www.courtcasefinder.com/optout",
+    privacyEmail: "privacy@courtcasefinder.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  COURTRECORDFINDER: {
+    name: "CourtRecordFinder.com",
+    optOutUrl: "https://www.courtrecordfinder.com/optout",
+    privacyEmail: "privacy@courtrecordfinder.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  COURTRECORDS_US: {
+    name: "CourtRecords.us",
+    optOutUrl: "https://www.courtrecords.us/optout",
+    privacyEmail: "privacy@courtrecords.us",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // B2B & PROFESSIONAL DATA SITES
+  // ==========================================
+  INDEED: {
+    name: "Indeed.com",
+    optOutUrl: "https://www.indeed.com/settings/account",
+    privacyEmail: "privacy@indeed.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "Requires account deletion through settings",
+  },
+  ZIPRECRUITER: {
+    name: "ZipRecruiter.com",
+    optOutUrl: "https://www.ziprecruiter.com/profile",
+    privacyEmail: "privacy@ziprecruiter.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  LADDERS: {
+    name: "TheLadders.com",
+    optOutUrl: "https://www.theladders.com/settings",
+    privacyEmail: "privacy@theladders.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+  OWLER: {
+    name: "Owler.com",
+    optOutUrl: "https://www.owler.com/optout",
+    privacyEmail: "privacy@owler.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  MUCK_RACK: {
+    name: "Muck Rack",
+    optOutUrl: "https://muckrack.com/settings",
+    privacyEmail: "privacy@muckrack.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  RATEMYPROFESSORS: {
+    name: "RateMyProfessors.com",
+    optOutUrl: "https://www.ratemyprofessors.com/account/settings",
+    privacyEmail: "privacy@ratemyprofessors.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  OPENCORPORATES: {
+    name: "OpenCorporates.com",
+    privacyEmail: "privacy@opencorporates.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "Public company data - removal may be limited",
+  },
+  BLOOMBERG: {
+    name: "Bloomberg",
+    optOutUrl: "https://www.bloomberg.com/feedback",
+    privacyEmail: "privacy@bloomberg.net",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  THOMSON_REUTERS: {
+    name: "Thomson Reuters",
+    optOutUrl: "https://www.thomsonreuters.com/en/privacy-statement.html",
+    privacyEmail: "privacy.issues@thomsonreuters.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 45,
+  },
+
+  // ==========================================
+  // HEALTH & MEDICAL DIRECTORIES
+  // ==========================================
+  WEBMD: {
+    name: "WebMD",
+    optOutUrl: "https://www.webmd.com/about-webmd-policies/privacy-policy",
+    privacyEmail: "privacy@webmd.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+  },
+  HEALTHLINE: {
+    name: "Healthline",
+    optOutUrl: "https://www.healthline.com/privacy-settings",
+    privacyEmail: "privacy@healthline.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+  },
+
+  // ==========================================
+  // REAL ESTATE & PROPERTY SITES
+  // ==========================================
+  APARTMENTS: {
+    name: "Apartments.com",
+    optOutUrl: "https://www.apartments.com/about/privacy",
+    privacyEmail: "privacy@apartments.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  ZUMPER: {
+    name: "Zumper.com",
+    optOutUrl: "https://www.zumper.com/settings",
+    privacyEmail: "privacy@zumper.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // WEDDING & EVENT SITES
+  // ==========================================
+  THEKNOT: {
+    name: "The Knot",
+    optOutUrl: "https://www.theknot.com/settings",
+    privacyEmail: "privacy@theknot.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  WEDDINGWIRE: {
+    name: "WeddingWire",
+    optOutUrl: "https://www.weddingwire.com/settings",
+    privacyEmail: "privacy@weddingwire.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+  ZOLA: {
+    name: "Zola.com",
+    optOutUrl: "https://www.zola.com/settings",
+    privacyEmail: "privacy@zola.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // OBITUARY & MEMORIAL SITES
+  // ==========================================
+  DIGNITY_MEMORIAL: {
+    name: "Dignity Memorial",
+    optOutUrl: "https://www.dignitymemorial.com/privacy",
+    privacyEmail: "privacy@dignitymemorial.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "Memorial content removal may require proof of relationship",
+  },
+  SYSOON: {
+    name: "Sysoon.com",
+    privacyEmail: "contact@sysoon.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+
+  // ==========================================
+  // SPECIALIZED SEARCH SITES
+  // ==========================================
+  FACECHECK_ID: {
+    name: "FaceCheck.ID",
+    optOutUrl: "https://facecheck.id/privacy",
+    privacyEmail: "privacy@facecheck.id",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    notes: "Facial recognition search - may require identity verification",
+  },
+  EPIEOS: {
+    name: "Epieos.com",
+    privacyEmail: "contact@epieos.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+    notes: "Email and phone OSINT tool",
+  },
+  BUMPER: {
+    name: "Bumper.com",
+    optOutUrl: "https://www.bumper.com/optout",
+    privacyEmail: "privacy@bumper.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    notes: "Vehicle history and owner search",
+  },
+  LICENSEPLATEDATA: {
+    name: "LicensePlateData.com",
+    optOutUrl: "https://www.licenseplatedata.com/optout",
+    privacyEmail: "privacy@licenseplatedata.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+  },
+  EMAILTRACER: {
+    name: "EmailTracer.com",
+    optOutUrl: "https://www.emailtracer.com/optout",
+    privacyEmail: "privacy@emailtracer.com",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+  },
+  DOMAINTOOLS: {
+    name: "DomainTools",
+    optOutUrl: "https://www.domaintools.com/privacy",
+    privacyEmail: "privacy@domaintools.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+    notes: "WHOIS and domain ownership data",
+  },
+  KIDSLIVESAFE: {
+    name: "KidsLiveSafe.com",
+    optOutUrl: "https://kidslivesafe.com/optout",
+    privacyEmail: "privacy@kidslivesafe.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Sex offender registry aggregator",
+  },
+
+  // ==========================================
   // BACKGROUND CHECK SITES
   // ==========================================
   TRUTHFINDER: {
@@ -1040,14 +1516,6 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 14,
     notes: "Face search engine - submit opt-out to remove your face from search results",
-  },
-  FACECHECK_ID: {
-    name: "FaceCheck.ID",
-    optOutUrl: "https://facecheck.id/fc/optout",
-    privacyEmail: "support@facecheck.id",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "Facial recognition search engine - opt out to prevent face matching",
   },
   SOCIAL_CATFISH: {
     name: "Social Catfish",
@@ -5864,7 +6332,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   MANTA_DATA: { name: "Manta", optOutUrl: "https://manta.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
   BIZAPEDIA: { name: "Bizapedia", optOutUrl: "https://bizapedia.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
   CORPORATIONWIKI: { name: "CorporationWiki", optOutUrl: "https://corporationwiki.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
-  OPENCORPORATES: { name: "OpenCorporates", optOutUrl: "https://opencorporates.com/privacy", removalMethod: "EMAIL", estimatedDays: 21 },
+  // OPENCORPORATES already defined above
   BUZZFILE: { name: "Buzzfile", optOutUrl: "https://buzzfile.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
   CORTERA: { name: "Cortera", optOutUrl: "https://cortera.com/privacy", removalMethod: "EMAIL", estimatedDays: 21 },
   INFOCIF: { name: "InfoCIF", optOutUrl: "https://infocif.es/privacy", removalMethod: "FORM", estimatedDays: 21 },
