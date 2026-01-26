@@ -123,12 +123,12 @@ function ExposuresPageContent() {
       const params = new URLSearchParams({ page: page.toString() });
       if (statusFilter !== "all") params.set("status", statusFilter);
       if (severityFilter !== "all") params.set("severity", severityFilter);
-      // Exclude manual review items by default - they have their own page now
-      if (manualActionFilter === "all") {
-        params.set("excludeManual", "true");
-      } else {
+      // Only filter by manual action if explicitly selected
+      if (manualActionFilter !== "all") {
         params.set("manualAction", manualActionFilter);
       }
+      // Note: We no longer exclude manual items by default since many exposures
+      // have requiresManualAction=true but can still be processed automatically
 
       const response = await fetch(`/api/exposures?${params}`);
       if (response.ok) {

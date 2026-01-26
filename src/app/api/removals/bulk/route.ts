@@ -188,10 +188,14 @@ export async function POST(request: Request) {
           },
         });
 
-        // Update exposure status
+        // Update exposure status and mark manual action as done
         await prisma.exposure.update({
           where: { id: exposure.id },
-          data: { status: "REMOVAL_PENDING" },
+          data: {
+            status: "REMOVAL_PENDING",
+            manualActionTaken: true,
+            manualActionTakenAt: new Date(),
+          },
         });
 
         // Handle subsidiary exposures
@@ -213,7 +217,11 @@ export async function POST(request: Request) {
 
             await prisma.exposure.update({
               where: { id: subExposure.id },
-              data: { status: "REMOVAL_PENDING" },
+              data: {
+                status: "REMOVAL_PENDING",
+                manualActionTaken: true,
+                manualActionTakenAt: new Date(),
+              },
             });
           }
         }
