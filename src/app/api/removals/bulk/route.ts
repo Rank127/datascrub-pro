@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getDataBrokerInfo, getSubsidiaries, isParentBroker } from "@/lib/removers/data-broker-directory";
+import { getDataBrokerInfo, getSubsidiaries, isParentBroker, getOptOutInstructions } from "@/lib/removers/data-broker-directory";
 import { getEmailQuotaStatus, sendBulkRemovalSummaryEmail, sendBulkCCPARemovalRequest, canSendEmail } from "@/lib/email";
 import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
@@ -364,11 +364,22 @@ export async function POST(request: Request) {
       }
     }
 
-    // Handle manual exposures (no known privacy email)
+    // Handle manual exposures (no known privacy email) and collect their info for the summary email
+    const manualRemovalDetails: Array<{
+      sourceName: string;
+      source: string;
+      optOutUrl?: string;
+      instructions?: string;
+    }> = [];
+
     for (const exposure of manualExposures) {
       const existingRequest = await prisma.removalRequest.findUnique({
         where: { exposureId: exposure.id },
       });
+
+      // Get broker info for opt-out URL and instructions
+      const brokerInfo = getDataBrokerInfo(exposure.source);
+      const instructions = getOptOutInstructions(exposure.source);
 
       if (!existingRequest) {
         await prisma.removalRequest.create({
@@ -377,7 +388,7 @@ export async function POST(request: Request) {
             exposureId: exposure.id,
             method: "MANUAL_GUIDE",
             status: "REQUIRES_MANUAL",
-            notes: "No known privacy email - manual removal required",
+            notes: instructions || "No known privacy email - manual removal required",
           },
         });
       }
@@ -391,6 +402,14 @@ export async function POST(request: Request) {
         },
       });
 
+      // Collect manual removal info for the summary email
+      manualRemovalDetails.push({
+        sourceName: exposure.sourceName,
+        source: exposure.source,
+        optOutUrl: brokerInfo?.optOutUrl,
+        instructions: instructions,
+      });
+
       results.push({
         exposureId: exposure.id,
         source: exposure.source,
@@ -402,15 +421,17 @@ export async function POST(request: Request) {
       totalProcessed++;
     }
 
-    // Send a single summary email to user
+    // Send a single summary email to user with ALL info (auto + manual)
     if ((successCount > 0 || manualExposures.length > 0) && userEmail) {
       try {
         await sendBulkRemovalSummaryEmail(userEmail, userName, {
           totalProcessed: successCount + manualExposures.length,
           successCount,
           failCount,
-          sources: [...new Set(processedSources)], // Unique broker names
+          sources: [...new Set(processedSources)], // Unique broker names for auto-submitted
           consolidatedCount: totalConsolidated,
+          manualRemovals: manualRemovalDetails, // All manual removal details
+          emailsSent,
         });
       } catch (emailError) {
         console.error("Failed to send bulk removal summary email:", emailError);

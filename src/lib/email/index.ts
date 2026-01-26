@@ -956,12 +956,21 @@ export async function sendBulkCCPARemovalRequest(data: BulkRemovalRequestEmail) 
 }
 
 // Bulk Removal Summary Email (sent to user after bulk removal)
+interface ManualRemovalInfo {
+  sourceName: string;
+  source: string;
+  optOutUrl?: string;
+  instructions?: string;
+}
+
 interface BulkRemovalSummary {
   totalProcessed: number;
   successCount: number;
   failCount: number;
   sources: string[];
   consolidatedCount: number;
+  manualRemovals?: ManualRemovalInfo[];
+  emailsSent?: number;
 }
 
 export async function sendBulkRemovalSummaryEmail(
@@ -969,6 +978,38 @@ export async function sendBulkRemovalSummaryEmail(
   name: string,
   summary: BulkRemovalSummary
 ) {
+  const manualRemovals = summary.manualRemovals || [];
+  const hasManualRemovals = manualRemovals.length > 0;
+
+  // Generate manual removal section if needed
+  const manualRemovalSection = hasManualRemovals ? `
+    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #334155;">
+      <h2 style="color: #f97316; margin-top: 0;">📋 Manual Removal Required (${manualRemovals.length} sites)</h2>
+      <p style="font-size: 14px; color: #94a3b8; margin-bottom: 16px;">
+        The following sites don't have automated removal. Use the links below to manually request removal:
+      </p>
+      <div style="background-color: #0f172a; border-radius: 8px; padding: 16px; margin: 16px 0;">
+        ${manualRemovals.slice(0, 50).map((m, i) => `
+          <div style="padding: 12px 0; ${i < manualRemovals.length - 1 ? 'border-bottom: 1px solid #334155;' : ''}">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #e2e8f0; font-weight: 600;">${i + 1}. ${m.sourceName}</span>
+              ${m.optOutUrl ? `<a href="${m.optOutUrl}" style="color: #10b981; text-decoration: none; font-size: 14px;">Opt-out Link →</a>` : ''}
+            </div>
+            ${m.instructions ? `<p style="color: #94a3b8; font-size: 13px; margin: 8px 0 0 0;">${m.instructions.substring(0, 200)}${m.instructions.length > 200 ? '...' : ''}</p>` : ''}
+          </div>
+        `).join('')}
+        ${manualRemovals.length > 50 ? `
+          <p style="color: #94a3b8; font-size: 14px; margin-top: 16px; text-align: center;">
+            ...and ${manualRemovals.length - 50} more. View all in your dashboard.
+          </p>
+        ` : ''}
+      </div>
+      <p style="font-size: 14px; color: #94a3b8;">
+        💡 <strong>Tip:</strong> Most sites process removal requests within 30-45 days. Keep this email for reference.
+      </p>
+    </div>
+  ` : '';
+
   const html = baseTemplate(`
     <h1 style="color: #10b981; margin-top: 0;">🚀 Bulk Removal Requests Submitted</h1>
     <p style="font-size: 16px; line-height: 1.6;">
@@ -980,43 +1021,50 @@ export async function sendBulkRemovalSummaryEmail(
     <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Total Requests</td>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Total Exposures</td>
           <td style="padding: 12px 0; color: #e2e8f0; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">${summary.totalProcessed}</td>
         </tr>
         <tr>
-          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Successfully Submitted</td>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Auto-Submitted (CCPA Emails)</td>
           <td style="padding: 12px 0; color: #10b981; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">${summary.successCount}</td>
         </tr>
-        ${summary.consolidatedCount > 0 ? `
+        ${summary.emailsSent !== undefined ? `
         <tr>
-          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Consolidated (Bonus)</td>
-          <td style="padding: 12px 0; color: #3b82f6; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">+${summary.consolidatedCount}</td>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Emails Sent to Brokers</td>
+          <td style="padding: 12px 0; color: #3b82f6; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">${summary.emailsSent}</td>
         </tr>
         ` : ''}
-        ${summary.failCount > 0 ? `
+        ${hasManualRemovals ? `
         <tr>
           <td style="padding: 12px 0; color: #94a3b8;">Requires Manual Action</td>
-          <td style="padding: 12px 0; color: #f97316; text-align: right; font-weight: 600;">${summary.failCount}</td>
+          <td style="padding: 12px 0; color: #f97316; text-align: right; font-weight: 600;">${manualRemovals.length}</td>
         </tr>
         ` : ''}
       </table>
     </div>
-    <p style="font-size: 16px; line-height: 1.6;"><strong>Sources included:</strong></p>
+    ${summary.sources.length > 0 ? `
+    <p style="font-size: 16px; line-height: 1.6;"><strong>✅ Auto-submitted to:</strong></p>
     <div style="background-color: #0f172a; border-radius: 8px; padding: 16px; margin: 24px 0;">
       <ul style="margin: 0; padding-left: 20px; color: #e2e8f0; line-height: 1.8;">
-        ${summary.sources.slice(0, 10).map(s => `<li>${s}</li>`).join('')}
-        ${summary.sources.length > 10 ? `<li>...and ${summary.sources.length - 10} more</li>` : ''}
+        ${summary.sources.slice(0, 20).map(s => `<li>${s}</li>`).join('')}
+        ${summary.sources.length > 20 ? `<li>...and ${summary.sources.length - 20} more</li>` : ''}
       </ul>
     </div>
     <p style="font-size: 16px; line-height: 1.6;">
-      Most data brokers are required to respond within 30-45 days. We'll monitor the status and notify you when removals are confirmed.
+      These brokers have received CCPA/GDPR removal requests and must respond within 30-45 days.
     </p>
-    ${buttonHtml("View Removal Status", `${APP_URL}/dashboard/removals`)}
+    ` : ''}
+    ${manualRemovalSection}
+    ${buttonHtml("View All Removals", `${APP_URL}/dashboard/removals`)}
   `);
+
+  const subjectParts = [];
+  if (summary.successCount > 0) subjectParts.push(`${summary.successCount} auto-submitted`);
+  if (hasManualRemovals) subjectParts.push(`${manualRemovals.length} manual`);
 
   return sendEmail(
     email,
-    `🚀 ${summary.successCount} Removal Requests Submitted`,
+    `🚀 Bulk Removal: ${subjectParts.join(', ') || 'Processed'}`,
     html
   );
 }
