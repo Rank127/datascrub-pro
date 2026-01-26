@@ -164,6 +164,7 @@ export interface ExposuresByStatus {
   removalInProgress: number;
   removed: number;
   whitelisted: number;
+  monitoring: number; // Non-removable sources (breach databases, dark web)
   total: number;
 }
 

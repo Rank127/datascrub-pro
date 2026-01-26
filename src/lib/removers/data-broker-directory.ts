@@ -1,14 +1,19 @@
 // Data broker contact information for removal requests
 // This directory contains opt-out URLs and contact emails for major data brokers
 
+export type RemovalMethod = "FORM" | "EMAIL" | "BOTH" | "MONITOR" | "NOT_REMOVABLE";
+export type SourceCategory = "DATA_BROKER" | "BREACH_DATABASE" | "SOCIAL_MEDIA" | "AI_SERVICE" | "DARK_WEB" | "OTHER";
+
 export interface DataBrokerInfo {
   name: string;
   optOutUrl?: string;
   optOutEmail?: string;
   privacyEmail?: string;
-  removalMethod: "FORM" | "EMAIL" | "BOTH" | "MONITOR";
-  estimatedDays: number; // Estimated time to process removal
+  removalMethod: RemovalMethod;
+  estimatedDays: number; // Estimated time to process removal, -1 for not removable
   notes?: string;
+  category?: SourceCategory; // Category for smart handling
+  isRemovable?: boolean; // Explicit flag for non-removable sources
 }
 
 export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
@@ -508,6 +513,33 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "EMAIL",
     estimatedDays: 21,
   },
+  // Generic breach database - data cannot be removed from historical breaches
+  BREACH_DB: {
+    name: "Historical Breach Database",
+    removalMethod: "NOT_REMOVABLE",
+    estimatedDays: -1,
+    category: "BREACH_DATABASE",
+    isRemovable: false,
+    notes: "This data comes from historical data breaches. The breach has already occurred and the data cannot be 'removed' from the breach itself. Focus on: changing compromised passwords, enabling 2FA, and monitoring for identity fraud.",
+  },
+  // Dark web forum exposures - monitoring only
+  DARK_WEB_FORUM: {
+    name: "Dark Web Forum",
+    removalMethod: "NOT_REMOVABLE",
+    estimatedDays: -1,
+    category: "DARK_WEB",
+    isRemovable: false,
+    notes: "Data found on dark web forums cannot be removed. Focus on: changing compromised credentials, enabling 2FA, monitoring for fraud, and considering credit freezes if sensitive data is exposed.",
+  },
+  // Paste site exposures - sometimes removable
+  PASTE_SITE: {
+    name: "Paste Site",
+    removalMethod: "MONITOR",
+    estimatedDays: -1,
+    category: "OTHER",
+    isRemovable: false,
+    notes: "Data on paste sites may be removed by the site owner, but copies often exist elsewhere. Focus on changing compromised credentials.",
+  },
 
   // ==========================================
   // SOCIAL MEDIA (Mostly Manual)
@@ -671,6 +703,323 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 30,
     notes: "Opt out of Amazon using your data for AI improvements",
+  },
+  ANTHROPIC: {
+    name: "Anthropic (Claude AI)",
+    optOutUrl: "https://support.anthropic.com/en/articles/privacy-requests",
+    privacyEmail: "privacy@anthropic.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+    notes: "Submit data deletion request via email or support portal",
+  },
+  X_AI: {
+    name: "xAI (Grok)",
+    privacyEmail: "privacy@x.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+    notes: "Contact privacy team for data deletion requests",
+  },
+  COHERE_AI: {
+    name: "Cohere AI",
+    privacyEmail: "privacy@cohere.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  HUGGINGFACE: {
+    name: "Hugging Face",
+    optOutUrl: "https://huggingface.co/settings/account",
+    privacyEmail: "privacy@huggingface.co",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    category: "AI_SERVICE",
+    notes: "Delete account or request data removal via settings",
+  },
+  DALL_E: {
+    name: "DALL-E (OpenAI)",
+    optOutUrl: "https://privacy.openai.com/",
+    privacyEmail: "privacy@openai.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+    notes: "Submit request through OpenAI privacy portal",
+  },
+  APPLE_AI: {
+    name: "Apple Intelligence",
+    optOutUrl: "https://www.apple.com/legal/privacy/contact/",
+    privacyEmail: "apple-privacy@apple.com",
+    removalMethod: "FORM",
+    estimatedDays: 45,
+    category: "AI_SERVICE",
+    notes: "Submit CCPA request through Apple privacy portal",
+  },
+  MICROSOFT_AI: {
+    name: "Microsoft AI/Copilot",
+    optOutUrl: "https://www.microsoft.com/en-us/concern/privacy",
+    privacyEmail: "privacy@microsoft.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  GOOGLE_IMAGES: {
+    name: "Google Images",
+    optOutUrl: "https://support.google.com/websearch/answer/4628134",
+    privacyEmail: "privacy@google.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    category: "AI_SERVICE",
+    notes: "Request image removal through Google's removal tool",
+  },
+  BING_IMAGES: {
+    name: "Bing Images",
+    optOutUrl: "https://www.bing.com/webmaster/tools/contentremoval",
+    privacyEmail: "privacy@microsoft.com",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    category: "AI_SERVICE",
+  },
+  REDDIT_AI: {
+    name: "Reddit AI Training",
+    optOutUrl: "https://www.reddit.com/settings/privacy",
+    privacyEmail: "privacy@reddit.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+    notes: "Opt out via privacy settings or delete account",
+  },
+  COMMON_CRAWL: {
+    name: "Common Crawl",
+    privacyEmail: "info@commoncrawl.org",
+    removalMethod: "EMAIL",
+    estimatedDays: 90,
+    category: "AI_SERVICE",
+    notes: "Historical web archive - new crawls may exclude requested domains",
+  },
+  // Additional AI Image/Video Services
+  SYNTHESIA: {
+    name: "Synthesia",
+    optOutUrl: "https://www.synthesia.io/privacy",
+    privacyEmail: "privacy@synthesia.io",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  HEYGEN: {
+    name: "HeyGen",
+    privacyEmail: "privacy@heygen.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  RUNWAY_ML: {
+    name: "Runway ML",
+    privacyEmail: "privacy@runwayml.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  PIKA_LABS: {
+    name: "Pika Labs",
+    privacyEmail: "privacy@pika.art",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  // Voice Cloning additions
+  LOVO_AI: {
+    name: "LOVO AI",
+    privacyEmail: "privacy@lovo.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  PLAY_HT: {
+    name: "Play.ht",
+    privacyEmail: "privacy@play.ht",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  SPEECHIFY: {
+    name: "Speechify",
+    privacyEmail: "privacy@speechify.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  DESCRIPT: {
+    name: "Descript",
+    privacyEmail: "privacy@descript.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  WELLSAID_LABS: {
+    name: "WellSaid Labs",
+    privacyEmail: "privacy@wellsaidlabs.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  COQUI_AI: {
+    name: "Coqui AI",
+    privacyEmail: "privacy@coqui.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  REPLICA_STUDIOS: {
+    name: "Replica Studios",
+    privacyEmail: "privacy@replicastudios.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  // Facial Recognition additions
+  AMAZON_REKOGNITION: {
+    name: "Amazon Rekognition",
+    privacyEmail: "aws-privacy@amazon.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+    notes: "Request data deletion from businesses using Rekognition",
+  },
+  FACE_PLUS_PLUS: {
+    name: "Face++",
+    privacyEmail: "privacy@megvii.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 45,
+    category: "AI_SERVICE",
+    notes: "China-based service - GDPR/CCPA requests may have limited effect",
+  },
+  KAIROS: {
+    name: "Kairos",
+    privacyEmail: "privacy@kairos.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  FINDFACE: {
+    name: "FindFace",
+    privacyEmail: "support@ntechlab.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 45,
+    category: "AI_SERVICE",
+    notes: "Russia-based service - removal may be difficult",
+  },
+  // Image manipulation apps
+  FACEAPP: {
+    name: "FaceApp",
+    privacyEmail: "privacy@faceapp.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+    notes: "Request deletion of stored photos via email",
+  },
+  REFACE: {
+    name: "Reface",
+    privacyEmail: "privacy@reface.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  LENSA_AI: {
+    name: "Lensa AI",
+    privacyEmail: "privacy@prisma-ai.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+    notes: "Delete account through app settings",
+  },
+  WOMBO: {
+    name: "WOMBO",
+    privacyEmail: "privacy@wombo.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  ARTBREEDER: {
+    name: "Artbreeder",
+    privacyEmail: "privacy@artbreeder.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+    category: "AI_SERVICE",
+  },
+  STARRY_AI: {
+    name: "Starry AI",
+    privacyEmail: "privacy@starryai.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  NIGHTCAFE: {
+    name: "NightCafe",
+    privacyEmail: "privacy@nightcafe.studio",
+    removalMethod: "EMAIL",
+    estimatedDays: 14,
+    category: "AI_SERVICE",
+  },
+  DEEP_ART_EFFECTS: {
+    name: "Deep Art Effects",
+    privacyEmail: "privacy@deeparteffects.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  // Video/Avatar AI
+  D_ID: {
+    name: "D-ID",
+    privacyEmail: "privacy@d-id.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  READY_PLAYER_ME: {
+    name: "Ready Player Me",
+    privacyEmail: "privacy@readyplayer.me",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  ROOP: {
+    name: "Roop (Deep Fake)",
+    removalMethod: "NOT_REMOVABLE",
+    estimatedDays: -1,
+    category: "AI_SERVICE",
+    isRemovable: false,
+    notes: "Open source deepfake tool - copies may exist anywhere. Focus on monitoring and legal action if misused.",
+  },
+  MYHERITAGE_DEEPNOSTALGIA: {
+    name: "MyHeritage Deep Nostalgia",
+    optOutUrl: "https://www.myheritage.com/privacy-options",
+    privacyEmail: "privacy@myheritage.com",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  SUNO_AI: {
+    name: "Suno AI",
+    privacyEmail: "privacy@suno.ai",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+    notes: "AI music generation service",
+  },
+  GETTY_AI: {
+    name: "Getty Images AI",
+    privacyEmail: "privacy@gettyimages.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
+  },
+  SHUTTERSTOCK_AI: {
+    name: "Shutterstock AI",
+    privacyEmail: "privacy@shutterstock.com",
+    removalMethod: "EMAIL",
+    estimatedDays: 30,
+    category: "AI_SERVICE",
   },
 
   // ==========================================
@@ -11943,7 +12292,10 @@ export const BROKER_CATEGORIES = {
     "DRAWBRIDGE", "CROSSWISE", "IQVIA", "ID5", "SHAREDID"
   ],
   BREACH_DATABASE: [
-    "HAVEIBEENPWNED", "DEHASHED", "LEAKCHECK", "SNUSBASE"
+    "HAVEIBEENPWNED", "DEHASHED", "LEAKCHECK", "SNUSBASE", "BREACH_DB"
+  ],
+  NON_REMOVABLE: [
+    "BREACH_DB", "DARK_WEB_FORUM", "PASTE_SITE", "ROOP"
   ],
   SOCIAL_MEDIA: [
     "LINKEDIN", "FACEBOOK", "TWITTER", "INSTAGRAM", "TIKTOK", "REDDIT",
@@ -11951,14 +12303,23 @@ export const BROKER_CATEGORIES = {
   ],
   AI_TRAINING: [
     "LAION_AI", "STABILITY_AI", "OPENAI", "MIDJOURNEY", "META_AI",
-    "GOOGLE_AI", "LINKEDIN_AI", "ADOBE_AI", "AMAZON_AI"
+    "GOOGLE_AI", "LINKEDIN_AI", "ADOBE_AI", "AMAZON_AI", "ANTHROPIC",
+    "X_AI", "COHERE_AI", "HUGGINGFACE", "DALL_E", "APPLE_AI", "MICROSOFT_AI",
+    "REDDIT_AI", "COMMON_CRAWL"
   ],
-  FACIAL_RECOGNITION: [
-    "CLEARVIEW_AI", "PIMEYES", "FACECHECK_ID", "SOCIAL_CATFISH",
-    "TINEYE", "YANDEX_IMAGES"
+  AI_IMAGE_VIDEO: [
+    "SYNTHESIA", "HEYGEN", "RUNWAY_ML", "PIKA_LABS", "D_ID", "READY_PLAYER_ME",
+    "MYHERITAGE_DEEPNOSTALGIA", "SUNO_AI", "GETTY_AI", "SHUTTERSTOCK_AI", "ROOP",
+    "FACEAPP", "REFACE", "LENSA_AI", "WOMBO", "ARTBREEDER", "STARRY_AI",
+    "NIGHTCAFE", "DEEP_ART_EFFECTS", "GOOGLE_IMAGES", "BING_IMAGES"
   ],
-  VOICE_CLONING: [
-    "ELEVENLABS", "RESEMBLE_AI", "MURF_AI"
+  AI_VOICE: [
+    "ELEVENLABS", "RESEMBLE_AI", "MURF_AI", "LOVO_AI", "PLAY_HT",
+    "SPEECHIFY", "DESCRIPT", "WELLSAID_LABS", "COQUI_AI", "REPLICA_STUDIOS"
+  ],
+  AI_FACIAL_RECOGNITION: [
+    "CLEARVIEW_AI", "PIMEYES", "FACECHECK_ID", "SOCIAL_CATFISH", "TINEYE",
+    "YANDEX_IMAGES", "AMAZON_REKOGNITION", "FACE_PLUS_PLUS", "KAIROS", "FINDFACE"
   ],
   TENANT_SCREENING: [
     "RENTBUREAU", "CORELOGIC_RENTAL", "REALPAGE", "ONSITE_RESIDENT", "TRANSUNION_RENTAL"

@@ -191,7 +191,7 @@ export async function GET(request: Request) {
     }
 
     // Process removal counts by status
-    // Actual statuses: PENDING, SUBMITTED, IN_PROGRESS, COMPLETED, FAILED, REQUIRES_MANUAL
+    // Actual statuses: PENDING, SUBMITTED, IN_PROGRESS, COMPLETED, FAILED, REQUIRES_MANUAL, ACKNOWLEDGED
     const removalCounts = {
       pending: 0,
       inProgress: 0,
@@ -206,18 +206,20 @@ export async function GET(request: Request) {
       else if (row.status === "SUBMITTED") removalCounts.inProgress += count;
       else if (row.status === "IN_PROGRESS") removalCounts.inProgress += count;
       else if (row.status === "COMPLETED") removalCounts.completed += count;
+      else if (row.status === "ACKNOWLEDGED") removalCounts.completed += count; // Non-removable sources - user informed
       else if (row.status === "FAILED") removalCounts.failed += count;
       else if (row.status === "REQUIRES_MANUAL") removalCounts.pending += count; // Manual = still pending action
     }
 
     // Process exposure counts by status
-    // Actual statuses: ACTIVE, REMOVAL_PENDING, REMOVAL_IN_PROGRESS, REMOVED, WHITELISTED
+    // Actual statuses: ACTIVE, REMOVAL_PENDING, REMOVAL_IN_PROGRESS, REMOVED, WHITELISTED, MONITORING
     const exposureCounts = {
       active: 0,
       removalPending: 0,
       removalInProgress: 0,
       removed: 0,
       whitelisted: 0,
+      monitoring: 0,
       total: 0,
     };
     for (const row of exposuresByStatus) {
@@ -228,6 +230,7 @@ export async function GET(request: Request) {
       else if (row.status === "REMOVAL_IN_PROGRESS") exposureCounts.removalInProgress += count;
       else if (row.status === "REMOVED") exposureCounts.removed += count;
       else if (row.status === "WHITELISTED") exposureCounts.whitelisted += count;
+      else if (row.status === "MONITORING") exposureCounts.monitoring += count; // Non-removable - monitoring only
     }
 
     // Process scan counts by status

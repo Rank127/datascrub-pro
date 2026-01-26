@@ -241,7 +241,7 @@ export function DatabaseSection({
                 <span className="text-sm font-medium text-slate-300">Exposures</span>
                 <Badge variant="outline" className="ml-auto">{data.businessMetrics.exposures.total.toLocaleString()} total</Badge>
               </div>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-6 gap-2">
                 <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-center">
                   <p className="text-xl font-bold text-red-400">{data.businessMetrics.exposures.active.toLocaleString()}</p>
                   <p className="text-xs text-red-400/70">Active</p>
@@ -257,6 +257,10 @@ export function DatabaseSection({
                 <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center">
                   <p className="text-xl font-bold text-emerald-400">{data.businessMetrics.exposures.removed.toLocaleString()}</p>
                   <p className="text-xs text-emerald-400/70">Removed</p>
+                </div>
+                <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-center">
+                  <p className="text-xl font-bold text-purple-400">{(data.businessMetrics.exposures.monitoring || 0).toLocaleString()}</p>
+                  <p className="text-xs text-purple-400/70">Monitoring</p>
                 </div>
                 <div className="p-3 bg-slate-500/10 border border-slate-500/20 rounded-lg text-center">
                   <p className="text-xl font-bold text-slate-400">{(data.businessMetrics.exposures.whitelisted || 0).toLocaleString()}</p>

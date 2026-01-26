@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { sendCCPARemovalRequest, sendRemovalUpdateEmail } from "@/lib/email";
-import { getDataBrokerInfo, getOptOutInstructions } from "./data-broker-directory";
+import { getDataBrokerInfo, getOptOutInstructions, type DataBrokerInfo } from "./data-broker-directory";
 import { calculateVerifyAfterDate } from "./verification-service";
 import type { RemovalMethod } from "@/lib/types";
 
@@ -9,6 +9,87 @@ interface RemovalExecutionResult {
   method: RemovalMethod;
   message: string;
   instructions?: string;
+  isNonRemovable?: boolean; // Flag for breach databases, dark web sources
+}
+
+// Try to extract a privacy email from a domain
+function extractPrivacyEmailFromDomain(sourceUrl?: string | null): string | null {
+  if (!sourceUrl) return null;
+
+  try {
+    const url = new URL(sourceUrl);
+    const domain = url.hostname.replace(/^www\./, "");
+    // Common privacy email patterns
+    return `privacy@${domain}`;
+  } catch {
+    return null;
+  }
+}
+
+// Check if source is a breach/monitoring source that can't be removed
+function isNonRemovableSource(source: string, brokerInfo?: DataBrokerInfo | null): boolean {
+  // Check broker info flag first
+  if (brokerInfo?.isRemovable === false) return true;
+  if (brokerInfo?.removalMethod === "NOT_REMOVABLE") return true;
+
+  // Check source name patterns for breach databases
+  const nonRemovablePatterns = [
+    /breach/i,
+    /leak/i,
+    /dark_?web/i,
+    /paste_?site/i,
+    /stealer/i,
+    /ransomware/i,
+    /underground/i,
+    /carding/i,
+    /forum_?monitor/i,
+    /market_?monitor/i,
+  ];
+
+  return nonRemovablePatterns.some(pattern => pattern.test(source));
+}
+
+// Generate appropriate instructions for non-removable sources
+function getNonRemovableInstructions(source: string, brokerInfo?: DataBrokerInfo | null): string {
+  if (brokerInfo?.notes) {
+    return brokerInfo.notes;
+  }
+
+  const sourceUpper = source.toUpperCase();
+
+  if (sourceUpper.includes("BREACH") || sourceUpper.includes("PWNED")) {
+    return `This data was exposed in a historical data breach. The breach has already occurred and the leaked data cannot be "removed" from existence.
+
+What you SHOULD do:
+1. Change any passwords that may have been exposed
+2. Enable two-factor authentication (2FA) on all accounts
+3. Monitor your accounts for suspicious activity
+4. Consider placing a credit freeze if sensitive data was exposed
+5. Be alert for phishing attempts using your leaked information`;
+  }
+
+  if (sourceUpper.includes("DARK") || sourceUpper.includes("FORUM") || sourceUpper.includes("MARKET")) {
+    return `This data was found on the dark web. Data on underground forums and marketplaces cannot be removed through normal channels.
+
+What you SHOULD do:
+1. Immediately change all compromised credentials
+2. Enable two-factor authentication everywhere
+3. Place credit freezes with Equifax, Experian, and TransUnion
+4. Monitor your bank and credit accounts closely
+5. Consider identity theft protection services
+6. Report to identitytheft.gov if identity fraud occurs`;
+  }
+
+  if (sourceUpper.includes("PASTE")) {
+    return `This data was found on a paste site. While the specific paste may be removed, copies likely exist elsewhere.
+
+What you SHOULD do:
+1. Change any exposed credentials immediately
+2. Enable two-factor authentication
+3. Monitor for unauthorized account access`;
+  }
+
+  return `This source type is classified as monitoring-only. The data cannot be directly removed through standard opt-out procedures. Focus on securing your accounts and monitoring for misuse.`;
 }
 
 // Execute a removal request
@@ -48,12 +129,73 @@ export async function executeRemoval(
   const userEmail = removalRequest.user.email;
   const source = removalRequest.exposure.source;
   const dataType = removalRequest.exposure.dataType;
+  const sourceUrl = removalRequest.exposure.sourceUrl;
 
   // Get data broker info
   const brokerInfo = getDataBrokerInfo(source);
 
+  // Check if this is a non-removable source (breach database, dark web, etc.)
+  if (isNonRemovableSource(source, brokerInfo)) {
+    // Mark as "acknowledged" - user is informed but removal isn't possible
+    await updateRemovalStatus(removalRequestId, "ACKNOWLEDGED");
+
+    const instructions = getNonRemovableInstructions(source, brokerInfo);
+
+    // Save instructions to the removal request
+    await prisma.removalRequest.update({
+      where: { id: removalRequestId },
+      data: { notes: instructions },
+    });
+
+    return {
+      success: true,
+      method: "MANUAL_GUIDE",
+      message: brokerInfo?.name
+        ? `${brokerInfo.name}: Data cannot be removed from historical breaches or dark web sources.`
+        : `This data cannot be removed - it originates from a breach or dark web source.`,
+      instructions,
+      isNonRemovable: true,
+    };
+  }
+
   if (!brokerInfo) {
-    // Unknown source - update status and provide manual instructions
+    // Unknown source - try to send automated CCPA email using extracted domain
+    const fallbackEmail = extractPrivacyEmailFromDomain(sourceUrl);
+
+    if (fallbackEmail) {
+      console.log(`[Removal] Unknown source ${source}, attempting CCPA email to ${fallbackEmail}`);
+
+      try {
+        const result = await sendCCPARemovalRequest({
+          toEmail: fallbackEmail,
+          fromName: userName,
+          fromEmail: userEmail,
+          dataTypes: [formatDataType(dataType)],
+          sourceUrl: sourceUrl || undefined,
+        });
+
+        if (result.success) {
+          await updateRemovalStatus(removalRequestId, "SUBMITTED");
+
+          // Notify user
+          await sendRemovalUpdateEmail(userEmail, userName, {
+            sourceName: source,
+            status: "SUBMITTED",
+            dataType: formatDataType(dataType),
+          });
+
+          return {
+            success: true,
+            method: "AUTO_EMAIL",
+            message: `CCPA/GDPR removal request sent to ${fallbackEmail}. Note: This is an unknown source and removal is not guaranteed.`,
+          };
+        }
+      } catch (error) {
+        console.error(`[Removal] Failed to send CCPA email to ${fallbackEmail}:`, error);
+      }
+    }
+
+    // Fall back to manual instructions
     await updateRemovalStatus(removalRequestId, "REQUIRES_MANUAL");
 
     return {
@@ -212,6 +354,7 @@ async function updateRemovalStatus(
     COMPLETED: "REMOVED",
     FAILED: "ACTIVE",
     REQUIRES_MANUAL: "REMOVAL_PENDING",
+    ACKNOWLEDGED: "MONITORING", // Non-removable sources - user informed, monitoring only
   };
 
   const removalRequest = await prisma.removalRequest.findUnique({
