@@ -64,7 +64,9 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
   };
 
   try {
+    console.log("[Services] Getting email queue status...");
     const queueStatus = await getEmailQueueStatus();
+    console.log("[Services] Queue status:", queueStatus);
     queueInfo = {
       queued: queueStatus.queued,
       processing: queueStatus.processing,
@@ -74,6 +76,7 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
     };
   } catch (error) {
     console.error("[Services] Failed to get email queue status:", error);
+    console.error("[Services] Error details:", error instanceof Error ? error.stack : String(error));
     // Continue with default queue info
   }
 
@@ -349,14 +352,31 @@ export async function GET(request: Request) {
       details: { integration: "services" },
     });
 
-    // Check all services in parallel
+    // Check all services in parallel with error handling
+    console.log("[Services] Checking all services...");
     const [resend, hibp, leakcheck, scrapingbee, redis] = await Promise.all([
-      checkResendStatus(),
-      checkHIBPStatus(),
-      checkLeakCheckStatus(),
-      checkScrapingBeeStatus(),
-      checkRedisStatus(),
+      checkResendStatus().catch(e => {
+        console.error("[Services] checkResendStatus failed:", e);
+        return { status: "error" as const, message: "Failed to check Resend status" };
+      }),
+      checkHIBPStatus().catch(e => {
+        console.error("[Services] checkHIBPStatus failed:", e);
+        return { status: "error" as const, message: "Failed to check HIBP status" };
+      }),
+      checkLeakCheckStatus().catch(e => {
+        console.error("[Services] checkLeakCheckStatus failed:", e);
+        return { status: "error" as const, message: "Failed to check LeakCheck status" };
+      }),
+      checkScrapingBeeStatus().catch(e => {
+        console.error("[Services] checkScrapingBeeStatus failed:", e);
+        return { status: "error" as const, message: "Failed to check ScrapingBee status" };
+      }),
+      checkRedisStatus().catch(e => {
+        console.error("[Services] checkRedisStatus failed:", e);
+        return { status: "error" as const, message: "Failed to check Redis status" };
+      }),
     ]);
+    console.log("[Services] All checks completed");
 
     const response: ServicesIntegrationResponse = {
       resend,
