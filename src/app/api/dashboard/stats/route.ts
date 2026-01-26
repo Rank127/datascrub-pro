@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectivePlan } from "@/lib/admin";
 import { DataSourceNames } from "@/lib/types";
+import { getSubsidiaries, getConsolidationParent, isParentBroker, getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 
 // AI Protection source categories
 const AI_TRAINING_SOURCES = [
@@ -232,7 +233,7 @@ export async function GET() {
       },
     });
 
-    // Build broker stats
+    // Build broker stats with consolidation info
     const brokerStatsMap = new Map<string, {
       source: string;
       sourceName: string;
@@ -242,10 +243,20 @@ export async function GET() {
       pendingCount: number;
       status: string;
       lastCompletedAt?: Date;
+      // Consolidation fields
+      isParent: boolean;
+      subsidiaryCount: number;
+      subsidiaries: string[];
+      consolidatesTo: string | null;
+      parentName: string | null;
     }>();
 
-    // Initialize with exposure counts
+    // Initialize with exposure counts and consolidation info
     for (const exp of exposuresBySource) {
+      const subsidiaries = getSubsidiaries(exp.source);
+      const consolidatesTo = getConsolidationParent(exp.source);
+      const parentBrokerInfo = consolidatesTo ? getDataBrokerInfo(consolidatesTo) : null;
+
       brokerStatsMap.set(exp.source, {
         source: exp.source,
         sourceName: DataSourceNames[exp.source as keyof typeof DataSourceNames] || exp.source,
@@ -254,6 +265,12 @@ export async function GET() {
         inProgressCount: 0,
         pendingCount: 0,
         status: "PENDING",
+        // Consolidation info
+        isParent: subsidiaries.length > 0,
+        subsidiaryCount: subsidiaries.length,
+        subsidiaries,
+        consolidatesTo,
+        parentName: parentBrokerInfo?.name || null,
       });
     }
 

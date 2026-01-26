@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { executeRemoval } from "@/lib/removers/removal-service";
-import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
+import { getDataBrokerInfo, getSubsidiaries, getConsolidationParent, isParentBroker } from "@/lib/removers/data-broker-directory";
 import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
 import { isAdmin, getEffectivePlan } from "@/lib/admin";
@@ -148,21 +148,73 @@ export async function POST(request: Request) {
     // Determine removal method
     const method = getRemovalMethod(exposure.source);
 
-    // Create removal request
+    // Check if this is a parent broker with subsidiaries
+    const subsidiaryKeys = getSubsidiaries(exposure.source);
+    const isParent = subsidiaryKeys.length > 0;
+
+    // Find all subsidiary exposures for this user that can be consolidated
+    let consolidatedExposures: { id: string; source: string; sourceName: string }[] = [];
+    if (isParent) {
+      consolidatedExposures = await prisma.exposure.findMany({
+        where: {
+          userId: session.user.id,
+          source: { in: subsidiaryKeys },
+          isWhitelisted: false,
+          status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS"] },
+        },
+        select: { id: true, source: true, sourceName: true },
+      });
+    }
+
+    // Create removal request for the main exposure
     const removalRequest = await prisma.removalRequest.create({
       data: {
         userId: session.user.id,
         exposureId,
         method,
         status: "PENDING",
+        notes: consolidatedExposures.length > 0
+          ? `Consolidated removal - covers ${consolidatedExposures.length} subsidiary exposures`
+          : undefined,
       },
     });
 
-    // Update exposure status
+    // Update main exposure status
     await prisma.exposure.update({
       where: { id: exposureId },
       data: { status: "REMOVAL_PENDING" },
     });
+
+    // Handle consolidated subsidiary exposures
+    const consolidatedRequests: string[] = [];
+    if (consolidatedExposures.length > 0) {
+      for (const subExposure of consolidatedExposures) {
+        // Check if removal already exists for this subsidiary
+        const existingSub = await prisma.removalRequest.findUnique({
+          where: { exposureId: subExposure.id },
+        });
+
+        if (!existingSub) {
+          // Create linked removal request for subsidiary
+          const subRequest = await prisma.removalRequest.create({
+            data: {
+              userId: session.user.id,
+              exposureId: subExposure.id,
+              method: "AUTO_EMAIL", // Subsidiaries use parent's opt-out
+              status: "PENDING",
+              notes: `Auto-created via consolidated removal from ${exposure.sourceName}. Will be completed when parent removal is confirmed.`,
+            },
+          });
+          consolidatedRequests.push(subRequest.id);
+
+          // Update subsidiary exposure status
+          await prisma.exposure.update({
+            where: { id: subExposure.id },
+            data: { status: "REMOVAL_PENDING" },
+          });
+        }
+      }
+    }
 
     // Execute the removal (send emails, provide instructions)
     const executionResult = await executeRemoval(
@@ -175,12 +227,24 @@ export async function POST(request: Request) {
       where: { id: removalRequest.id },
     });
 
+    // Build response message
+    let message = executionResult.message;
+    if (consolidatedExposures.length > 0) {
+      const subNames = consolidatedExposures.map(e => e.sourceName).slice(0, 5).join(", ");
+      const moreCount = consolidatedExposures.length > 5 ? ` and ${consolidatedExposures.length - 5} more` : "";
+      message += `\n\n✓ BONUS: This removal also covers ${consolidatedExposures.length} related sites: ${subNames}${moreCount}`;
+    }
+
     return NextResponse.json({
       request: updatedRequest,
-      message: executionResult.message,
+      message,
       method: executionResult.method,
       instructions: executionResult.instructions,
       success: executionResult.success,
+      consolidated: {
+        count: consolidatedExposures.length,
+        exposures: consolidatedExposures.map(e => ({ source: e.source, name: e.sourceName })),
+      },
     });
   } catch (error) {
     console.error("Removal request error:", error);
