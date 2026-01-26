@@ -3,9 +3,13 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { executeRemoval } from "@/lib/removers/removal-service";
 import { getDataBrokerInfo, getSubsidiaries, isParentBroker } from "@/lib/removers/data-broker-directory";
+import { getEmailQuotaStatus, sendBulkRemovalSummaryEmail, canSendEmail } from "@/lib/email";
 import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
 import { getEffectivePlan } from "@/lib/admin";
+
+// Max emails per bulk operation to avoid quota exhaustion
+const MAX_BULK_EMAILS = 80; // Leave buffer for other system emails
 
 const bulkRequestSchema = z.object({
   exposureIds: z.array(z.string()).optional(),
@@ -65,6 +69,22 @@ export async function POST(request: Request) {
         { status: 403 }
       );
     }
+
+    // Check email quota before processing
+    const quotaStatus = getEmailQuotaStatus();
+    if (quotaStatus.remaining < 5) {
+      return NextResponse.json(
+        {
+          error: "Daily email quota nearly exhausted. Try again tomorrow.",
+          quotaStatus,
+        },
+        { status: 429 }
+      );
+    }
+
+    // Get user info for summary email
+    const userName = session.user.name || user?.email?.split("@")[0] || "User";
+    const userEmail = user?.email || session.user.email;
 
     // Get exposures to process based on mode
     let exposuresToProcess: { id: string; source: string; sourceName: string }[] = [];
@@ -137,8 +157,14 @@ export async function POST(request: Request) {
     let totalConsolidated = 0;
     let successCount = 0;
     let failCount = 0;
+    let emailsSent = 0;
+    const processedSources: string[] = [];
 
-    for (const exposure of exposuresToProcess) {
+    // Limit processing based on email quota
+    const maxToProcess = Math.min(exposuresToProcess.length, MAX_BULK_EMAILS, quotaStatus.remaining);
+    const exposuresToActuallyProcess = exposuresToProcess.slice(0, maxToProcess);
+
+    for (const exposure of exposuresToActuallyProcess) {
       // Check if removal already exists
       const existingRequest = await prisma.removalRequest.findUnique({
         where: { exposureId: exposure.id },
@@ -226,8 +252,23 @@ export async function POST(request: Request) {
           }
         }
 
-        // Execute the removal
-        const executionResult = await executeRemoval(removalRequest.id, userId);
+        // Check if we can still send emails
+        if (!canSendEmail()) {
+          results.push({
+            exposureId: exposure.id,
+            source: exposure.source,
+            sourceName: exposure.sourceName,
+            success: false,
+            message: "Daily email quota reached - will retry tomorrow",
+            consolidatedCount: 0,
+          });
+          break; // Stop processing more
+        }
+
+        // Execute the removal (skip user notification - we'll send summary at end)
+        const executionResult = await executeRemoval(removalRequest.id, userId, {
+          skipUserNotification: true,
+        });
 
         results.push({
           exposureId: exposure.id,
@@ -242,6 +283,8 @@ export async function POST(request: Request) {
         totalConsolidated += consolidatedExposures.length;
         if (executionResult.success) {
           successCount++;
+          emailsSent++;
+          processedSources.push(exposure.sourceName);
         } else {
           failCount++;
         }
@@ -263,6 +306,25 @@ export async function POST(request: Request) {
       }
     }
 
+    // Send a single summary email to user instead of per-removal notifications
+    if (successCount > 0 && userEmail) {
+      try {
+        await sendBulkRemovalSummaryEmail(userEmail, userName, {
+          totalProcessed: successCount,
+          successCount,
+          failCount,
+          sources: processedSources,
+          consolidatedCount: totalConsolidated,
+        });
+      } catch (emailError) {
+        console.error("Failed to send bulk removal summary email:", emailError);
+        // Don't fail the whole request if summary email fails
+      }
+    }
+
+    // Get updated quota status
+    const finalQuotaStatus = getEmailQuotaStatus();
+
     return NextResponse.json({
       success: true,
       message: `Processed ${totalProcessed} parent brokers, consolidated ${totalConsolidated} subsidiaries`,
@@ -272,7 +334,10 @@ export async function POST(request: Request) {
         totalExposuresCovered: totalProcessed + totalConsolidated,
         successCount,
         failCount,
+        emailsSent,
+        skippedDueToQuota: exposuresToProcess.length - exposuresToActuallyProcess.length,
       },
+      emailQuota: finalQuotaStatus,
       results,
     });
 
@@ -329,6 +394,9 @@ export async function GET(request: Request) {
     const totalExposures = pendingExposures.length;
     const actionsSaved = totalExposures - actionsNeeded;
 
+    // Get email quota status
+    const quotaStatus = getEmailQuotaStatus();
+
     return NextResponse.json({
       totalPendingExposures: totalExposures,
       parentBrokers: parentBrokers.length,
@@ -337,6 +405,8 @@ export async function GET(request: Request) {
       actionsNeeded,
       actionsSaved,
       savingsPercent: totalExposures > 0 ? Math.round((actionsSaved / totalExposures) * 100) : 0,
+      emailQuota: quotaStatus,
+      canProcessToday: Math.min(actionsNeeded, quotaStatus.remaining, MAX_BULK_EMAILS),
       preview: {
         parents: parentBrokers.map(e => ({
           source: e.source,

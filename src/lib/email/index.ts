@@ -5,6 +5,34 @@ const resend = process.env.RESEND_API_KEY
   : null;
 
 const APP_NAME = (process.env.NEXT_PUBLIC_APP_NAME || "GhostMyData").replace(/[\r\n]/g, "").trim();
+
+// Daily email quota tracking (resets at midnight UTC)
+const DAILY_EMAIL_LIMIT = parseInt(process.env.DAILY_EMAIL_LIMIT || "90"); // Leave buffer below Resend's 100
+let emailsSentToday = 0;
+let lastResetDate = new Date().toDateString();
+
+function checkAndResetDailyCounter() {
+  const today = new Date().toDateString();
+  if (today !== lastResetDate) {
+    emailsSentToday = 0;
+    lastResetDate = today;
+  }
+}
+
+export function getEmailQuotaStatus() {
+  checkAndResetDailyCounter();
+  return {
+    sent: emailsSentToday,
+    limit: DAILY_EMAIL_LIMIT,
+    remaining: Math.max(0, DAILY_EMAIL_LIMIT - emailsSentToday),
+    percentUsed: Math.round((emailsSentToday / DAILY_EMAIL_LIMIT) * 100),
+  };
+}
+
+export function canSendEmail(): boolean {
+  checkAndResetDailyCounter();
+  return emailsSentToday < DAILY_EMAIL_LIMIT;
+}
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH_URL || "https://ghostmydata.com";
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || `${APP_NAME} <onboarding@resend.dev>`;
 
@@ -42,11 +70,17 @@ function buttonHtml(text: string, url: string): string {
   `;
 }
 
-// Send email helper
-async function sendEmail(to: string, subject: string, html: string) {
+// Send email helper with quota tracking
+async function sendEmail(to: string, subject: string, html: string, skipQuotaCheck = false) {
   if (!resend) {
     console.warn("Email service not configured - RESEND_API_KEY missing");
     return { success: false, error: "Email service not configured" };
+  }
+
+  // Check quota (unless explicitly skipped for critical emails)
+  if (!skipQuotaCheck && !canSendEmail()) {
+    console.warn(`[Email] Daily quota exceeded (${emailsSentToday}/${DAILY_EMAIL_LIMIT}). Skipping email to ${to}`);
+    return { success: false, error: "Daily email quota exceeded", quotaExceeded: true };
   }
 
   try {
@@ -61,6 +95,10 @@ async function sendEmail(to: string, subject: string, html: string) {
       console.error("Failed to send email:", error);
       return { success: false, error: error.message };
     }
+
+    // Track successful send
+    emailsSentToday++;
+    console.log(`[Email] Sent to ${to} (${emailsSentToday}/${DAILY_EMAIL_LIMIT} today)`);
 
     return { success: true };
   } catch (err) {
@@ -646,6 +684,72 @@ export async function sendCCPARemovalRequest(data: RemovalRequestEmail) {
   return sendEmail(
     data.toEmail,
     `Data Deletion Request - CCPA/GDPR - ${data.fromName}`,
+    html
+  );
+}
+
+// Bulk Removal Summary Email (sent to user after bulk removal)
+interface BulkRemovalSummary {
+  totalProcessed: number;
+  successCount: number;
+  failCount: number;
+  sources: string[];
+  consolidatedCount: number;
+}
+
+export async function sendBulkRemovalSummaryEmail(
+  email: string,
+  name: string,
+  summary: BulkRemovalSummary
+) {
+  const html = baseTemplate(`
+    <h1 style="color: #10b981; margin-top: 0;">🚀 Bulk Removal Requests Submitted</h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Your bulk data removal request has been processed. Here's a summary:
+    </p>
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Total Requests</td>
+          <td style="padding: 12px 0; color: #e2e8f0; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">${summary.totalProcessed}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Successfully Submitted</td>
+          <td style="padding: 12px 0; color: #10b981; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">${summary.successCount}</td>
+        </tr>
+        ${summary.consolidatedCount > 0 ? `
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Consolidated (Bonus)</td>
+          <td style="padding: 12px 0; color: #3b82f6; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">+${summary.consolidatedCount}</td>
+        </tr>
+        ` : ''}
+        ${summary.failCount > 0 ? `
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8;">Requires Manual Action</td>
+          <td style="padding: 12px 0; color: #f97316; text-align: right; font-weight: 600;">${summary.failCount}</td>
+        </tr>
+        ` : ''}
+      </table>
+    </div>
+    <p style="font-size: 16px; line-height: 1.6;"><strong>Sources included:</strong></p>
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <ul style="margin: 0; padding-left: 20px; color: #e2e8f0; line-height: 1.8;">
+        ${summary.sources.slice(0, 10).map(s => `<li>${s}</li>`).join('')}
+        ${summary.sources.length > 10 ? `<li>...and ${summary.sources.length - 10} more</li>` : ''}
+      </ul>
+    </div>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Most data brokers are required to respond within 30-45 days. We'll monitor the status and notify you when removals are confirmed.
+    </p>
+    ${buttonHtml("View Removal Status", `${APP_URL}/dashboard/removals`)}
+  `);
+
+  return sendEmail(
+    email,
+    `🚀 ${summary.successCount} Removal Requests Submitted`,
     html
   );
 }

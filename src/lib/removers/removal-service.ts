@@ -126,11 +126,17 @@ What you SHOULD do:
   return `This source type is classified as monitoring-only. The data cannot be directly removed through standard opt-out procedures. Focus on securing your accounts and monitoring for misuse.`;
 }
 
+interface ExecuteRemovalOptions {
+  skipUserNotification?: boolean; // Skip sending notification email to user (for bulk operations)
+}
+
 // Execute a removal request
 export async function executeRemoval(
   removalRequestId: string,
-  userId: string
+  userId: string,
+  options: ExecuteRemovalOptions = {}
 ): Promise<RemovalExecutionResult> {
+  const { skipUserNotification = false } = options;
   // Get the removal request with exposure and user details
   const removalRequest = await prisma.removalRequest.findUnique({
     where: { id: removalRequestId },
@@ -211,12 +217,14 @@ export async function executeRemoval(
         if (result.success) {
           await updateRemovalStatus(removalRequestId, "SUBMITTED");
 
-          // Notify user
-          await sendRemovalUpdateEmail(userEmail, userName, {
-            sourceName: source,
-            status: "SUBMITTED",
-            dataType: formatDataType(dataType),
-          });
+          // Notify user (unless skipped for bulk operations)
+          if (!skipUserNotification) {
+            await sendRemovalUpdateEmail(userEmail, userName, {
+              sourceName: source,
+              status: "SUBMITTED",
+              dataType: formatDataType(dataType),
+            });
+          }
 
           return {
             success: true,
@@ -260,12 +268,14 @@ export async function executeRemoval(
             // Update removal request status
             await updateRemovalStatus(removalRequestId, "SUBMITTED");
 
-            // Send notification to user
-            await sendRemovalUpdateEmail(userEmail, userName, {
-              sourceName: brokerInfo.name,
-              status: "SUBMITTED",
-              dataType: formatDataType(dataType),
-            });
+            // Send notification to user (unless skipped for bulk operations)
+            if (!skipUserNotification) {
+              await sendRemovalUpdateEmail(userEmail, userName, {
+                sourceName: brokerInfo.name,
+                status: "SUBMITTED",
+                dataType: formatDataType(dataType),
+              });
+            }
 
             return {
               success: true,
