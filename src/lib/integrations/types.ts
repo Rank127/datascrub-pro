@@ -160,7 +160,10 @@ export interface RemovalsByStatus {
 
 export interface ExposuresByStatus {
   active: number;
+  removalPending: number;
+  removalInProgress: number;
   removed: number;
+  whitelisted: number;
   total: number;
 }
 
@@ -220,7 +223,7 @@ export interface ResendServiceStatus extends ServiceStatus {
   monthlyUsed?: number;
 }
 
-export interface HIBPServiceStatus extends ServiceStatus {
+export interface HIBPServiceStatus extends Omit<ServiceStatus, 'rateLimit'> {
   rateLimit?: {
     remaining: number;
     resetAt: string;
