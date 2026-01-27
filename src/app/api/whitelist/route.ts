@@ -26,12 +26,19 @@ export async function GET() {
   }
 }
 
-const addSchema = z.object({
-  source: z.string(),
-  sourceUrl: z.string().optional(),
-  sourceName: z.string(),
-  reason: z.string().optional(),
-});
+// Support both exposureId (from dashboard) and direct source/sourceName
+const addSchema = z.union([
+  z.object({
+    exposureId: z.string(),
+    reason: z.string().optional(),
+  }),
+  z.object({
+    source: z.string(),
+    sourceUrl: z.string().optional(),
+    sourceName: z.string(),
+    reason: z.string().optional(),
+  }),
+]);
 
 export async function POST(request: Request) {
   try {
@@ -46,19 +53,51 @@ export async function POST(request: Request) {
 
     if (!result.success) {
       return NextResponse.json(
-        { error: "Invalid request" },
+        { error: "Invalid request", details: result.error.errors },
         { status: 400 }
       );
     }
 
     const data = result.data;
+    let source: string;
+    let sourceName: string;
+    let sourceUrl: string | null = null;
+    let reason: string | null = null;
+
+    // Handle exposureId format (from dashboard)
+    if ("exposureId" in data) {
+      const exposure = await prisma.exposure.findFirst({
+        where: {
+          id: data.exposureId,
+          userId: session.user.id,
+        },
+      });
+
+      if (!exposure) {
+        return NextResponse.json(
+          { error: "Exposure not found" },
+          { status: 404 }
+        );
+      }
+
+      source = exposure.source;
+      sourceName = exposure.sourceName;
+      sourceUrl = exposure.sourceUrl;
+      reason = data.reason || null;
+    } else {
+      // Handle direct source/sourceName format
+      source = data.source;
+      sourceName = data.sourceName;
+      sourceUrl = data.sourceUrl || null;
+      reason = data.reason || null;
+    }
 
     // Check if already whitelisted
     const existing = await prisma.whitelist.findFirst({
       where: {
         userId: session.user.id,
-        source: data.source,
-        sourceName: data.sourceName,
+        source,
+        sourceName,
       },
     });
 
@@ -73,10 +112,10 @@ export async function POST(request: Request) {
     const whitelist = await prisma.whitelist.create({
       data: {
         userId: session.user.id,
-        source: data.source,
-        sourceUrl: data.sourceUrl || null,
-        sourceName: data.sourceName,
-        reason: data.reason || null,
+        source,
+        sourceUrl,
+        sourceName,
+        reason,
       },
     });
 
@@ -84,8 +123,8 @@ export async function POST(request: Request) {
     await prisma.exposure.updateMany({
       where: {
         userId: session.user.id,
-        source: data.source,
-        sourceName: data.sourceName,
+        source,
+        sourceName,
         isWhitelisted: false,
       },
       data: {
@@ -104,10 +143,6 @@ export async function POST(request: Request) {
   }
 }
 
-const deleteSchema = z.object({
-  id: z.string(),
-});
-
 export async function DELETE(request: Request) {
   try {
     const session = await auth();
@@ -116,27 +151,99 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const result = deleteSchema.safeParse(body);
+    // Support both query param (exposureId) and body (id)
+    const url = new URL(request.url);
+    const exposureId = url.searchParams.get("exposureId");
+    const whitelistId = url.searchParams.get("id");
 
-    if (!result.success) {
-      return NextResponse.json(
-        { error: "Invalid request" },
-        { status: 400 }
-      );
+    let source: string;
+    let sourceName: string;
+    let whitelistToDelete: { id: string } | null = null;
+
+    if (exposureId) {
+      // Find exposure and its whitelist entry
+      const exposure = await prisma.exposure.findFirst({
+        where: {
+          id: exposureId,
+          userId: session.user.id,
+        },
+      });
+
+      if (!exposure) {
+        return NextResponse.json(
+          { error: "Exposure not found" },
+          { status: 404 }
+        );
+      }
+
+      source = exposure.source;
+      sourceName = exposure.sourceName;
+
+      // Find the whitelist entry
+      whitelistToDelete = await prisma.whitelist.findFirst({
+        where: {
+          userId: session.user.id,
+          source,
+          sourceName,
+        },
+        select: { id: true },
+      });
+    } else if (whitelistId) {
+      // Direct whitelist ID
+      const whitelist = await prisma.whitelist.findFirst({
+        where: {
+          id: whitelistId,
+          userId: session.user.id,
+        },
+      });
+
+      if (!whitelist) {
+        return NextResponse.json(
+          { error: "Whitelist entry not found" },
+          { status: 404 }
+        );
+      }
+
+      source = whitelist.source;
+      sourceName = whitelist.sourceName;
+      whitelistToDelete = { id: whitelist.id };
+    } else {
+      // Try parsing body for legacy support
+      try {
+        const body = await request.json();
+        if (body.id) {
+          const whitelist = await prisma.whitelist.findFirst({
+            where: {
+              id: body.id,
+              userId: session.user.id,
+            },
+          });
+
+          if (!whitelist) {
+            return NextResponse.json(
+              { error: "Whitelist entry not found" },
+              { status: 404 }
+            );
+          }
+
+          source = whitelist.source;
+          sourceName = whitelist.sourceName;
+          whitelistToDelete = { id: whitelist.id };
+        } else {
+          return NextResponse.json(
+            { error: "Missing exposureId or id parameter" },
+            { status: 400 }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { error: "Missing exposureId or id parameter" },
+          { status: 400 }
+        );
+      }
     }
 
-    const { id } = result.data;
-
-    // Get the whitelist entry first
-    const whitelist = await prisma.whitelist.findFirst({
-      where: {
-        id,
-        userId: session.user.id,
-      },
-    });
-
-    if (!whitelist) {
+    if (!whitelistToDelete) {
       return NextResponse.json(
         { error: "Whitelist entry not found" },
         { status: 404 }
@@ -145,15 +252,15 @@ export async function DELETE(request: Request) {
 
     // Delete whitelist entry
     await prisma.whitelist.delete({
-      where: { id },
+      where: { id: whitelistToDelete.id },
     });
 
     // Update matching exposures back to active
     await prisma.exposure.updateMany({
       where: {
         userId: session.user.id,
-        source: whitelist.source,
-        sourceName: whitelist.sourceName,
+        source,
+        sourceName,
         isWhitelisted: true,
       },
       data: {

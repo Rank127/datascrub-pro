@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { sendCCPARemovalRequest, sendRemovalUpdateEmail } from "@/lib/email";
+import { sendCCPARemovalRequest, sendRemovalUpdateEmail, sendRemovalStatusDigestEmail } from "@/lib/email";
 import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, getConsolidationParent, type DataBrokerInfo } from "./data-broker-directory";
 import { calculateVerifyAfterDate } from "./verification-service";
 import type { RemovalMethod } from "@/lib/types";
@@ -583,8 +583,10 @@ export async function getPendingRemovalsForAutomation(limit: number = 50): Promi
  * Returns true if retry was successful
  */
 export async function retryFailedRemoval(
-  removalRequestId: string
-): Promise<{ success: boolean; message: string }> {
+  removalRequestId: string,
+  options: { skipUserNotification?: boolean } = {}
+): Promise<{ success: boolean; message: string; updateInfo?: { userId: string; userEmail: string; userName: string; sourceName: string; source: string; dataType: string } }> {
+  const { skipUserNotification = false } = options;
   const request = await prisma.removalRequest.findUnique({
     where: { id: removalRequestId },
     include: {
@@ -656,16 +658,26 @@ export async function retryFailedRemoval(
           data: { status: "REMOVAL_IN_PROGRESS" },
         });
 
-        // Notify user
-        await sendRemovalUpdateEmail(userEmail, userName, {
-          sourceName: request.exposure.sourceName,
-          status: "SUBMITTED",
-          dataType: formatDataType(request.exposure.dataType),
-        }).catch(console.error);
+        // Notify user (unless batching)
+        if (!skipUserNotification) {
+          await sendRemovalUpdateEmail(userEmail, userName, {
+            sourceName: request.exposure.sourceName,
+            status: "SUBMITTED",
+            dataType: formatDataType(request.exposure.dataType),
+          }).catch(console.error);
+        }
 
         return {
           success: true,
           message: `Retry successful - CCPA request sent to ${candidateEmail}`,
+          updateInfo: {
+            userId: request.userId,
+            userEmail: userEmail,
+            userName,
+            sourceName: request.exposure.sourceName,
+            source: request.exposure.source,
+            dataType: request.exposure.dataType,
+          },
         };
       }
     } catch (error) {
@@ -698,8 +710,16 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
   successful: number;
   failed: number;
   skipped: number;
+  emailsSent: number;
 }> {
-  const stats = { processed: 0, successful: 0, failed: 0, skipped: 0 };
+  const stats = { processed: 0, successful: 0, failed: 0, skipped: 0, emailsSent: 0 };
+
+  // Collect updates per user for batched digest emails
+  const userUpdates = new Map<string, {
+    email: string;
+    name: string;
+    submitted: Array<{ sourceName: string; source: string; dataType: string }>;
+  }>();
 
   const pendingIds = await getPendingRemovalsForAutomation(limit);
   console.log(`[Batch Removal] Processing ${pendingIds.length} pending removals`);
@@ -707,7 +727,10 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
   for (const id of pendingIds) {
     const request = await prisma.removalRequest.findUnique({
       where: { id },
-      include: { exposure: true },
+      include: {
+        exposure: true,
+        user: { select: { email: true, name: true } },
+      },
     });
 
     if (!request) {
@@ -732,11 +755,28 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
     }
 
     try {
-      const result = await executeRemoval(id, request.userId);
+      // Skip individual notifications - we'll send digest at the end
+      const result = await executeRemoval(id, request.userId, { skipUserNotification: true });
       stats.processed++;
 
       if (result.success && result.method === "AUTO_EMAIL") {
         stats.successful++;
+
+        // Collect update for digest email
+        if (request.user.email) {
+          if (!userUpdates.has(request.userId)) {
+            userUpdates.set(request.userId, {
+              email: request.user.email,
+              name: request.user.name || "",
+              submitted: [],
+            });
+          }
+          userUpdates.get(request.userId)!.submitted.push({
+            sourceName: request.exposure.sourceName,
+            source: request.exposure.source,
+            dataType: request.exposure.dataType,
+          });
+        }
       } else if (result.method === "MANUAL_GUIDE") {
         stats.skipped++; // Requires manual action
       } else {
@@ -751,7 +791,29 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
 
-  console.log(`[Batch Removal] Complete: ${stats.successful} successful, ${stats.failed} failed, ${stats.skipped} skipped`);
+  // Send ONE digest email per user with all their submitted removals
+  console.log(`[Batch Removal] Sending digest emails to ${userUpdates.size} users`);
+  for (const [userId, userData] of userUpdates) {
+    if (userData.submitted.length > 0) {
+      try {
+        await sendRemovalStatusDigestEmail(userData.email, userData.name, {
+          completed: [],
+          inProgress: [],
+          submitted: userData.submitted.map(s => ({
+            ...s,
+            status: "SUBMITTED" as const,
+          })),
+          failed: [],
+        });
+        stats.emailsSent++;
+        console.log(`[Batch Removal] Sent digest to ${userData.email}: ${userData.submitted.length} submitted`);
+      } catch (error) {
+        console.error(`[Batch Removal] Failed to send digest to ${userData.email}:`, error);
+      }
+    }
+  }
+
+  console.log(`[Batch Removal] Complete: ${stats.successful} successful, ${stats.failed} failed, ${stats.skipped} skipped, ${stats.emailsSent} emails`);
   return stats;
 }
 
@@ -762,8 +824,16 @@ export async function retryFailedRemovalsBatch(limit: number = 20): Promise<{
   processed: number;
   retried: number;
   stillFailed: number;
+  emailsSent: number;
 }> {
-  const stats = { processed: 0, retried: 0, stillFailed: 0 };
+  const stats = { processed: 0, retried: 0, stillFailed: 0, emailsSent: 0 };
+
+  // Collect updates per user for batched digest emails
+  const userUpdates = new Map<string, {
+    email: string;
+    name: string;
+    submitted: Array<{ sourceName: string; source: string; dataType: string }>;
+  }>();
 
   const failedRemovals = await prisma.removalRequest.findMany({
     where: {
@@ -792,10 +862,27 @@ export async function retryFailedRemovalsBatch(limit: number = 20): Promise<{
     }
 
     stats.processed++;
-    const result = await retryFailedRemoval(removal.id);
+    const result = await retryFailedRemoval(removal.id, { skipUserNotification: true });
 
     if (result.success) {
       stats.retried++;
+
+      // Collect update for digest email
+      if (result.updateInfo?.userEmail) {
+        const { userId, userEmail, userName } = result.updateInfo;
+        if (!userUpdates.has(userId)) {
+          userUpdates.set(userId, {
+            email: userEmail,
+            name: userName,
+            submitted: [],
+          });
+        }
+        userUpdates.get(userId)!.submitted.push({
+          sourceName: result.updateInfo.sourceName,
+          source: result.updateInfo.source,
+          dataType: result.updateInfo.dataType,
+        });
+      }
     } else {
       stats.stillFailed++;
     }
@@ -804,7 +891,29 @@ export async function retryFailedRemovalsBatch(limit: number = 20): Promise<{
     await new Promise(resolve => setTimeout(resolve, 3000));
   }
 
-  console.log(`[Retry Batch] Complete: ${stats.retried} retried, ${stats.stillFailed} still failed`);
+  // Send ONE digest email per user with all their retried removals
+  console.log(`[Retry Batch] Sending digest emails to ${userUpdates.size} users`);
+  for (const [userId, userData] of userUpdates) {
+    if (userData.submitted.length > 0) {
+      try {
+        await sendRemovalStatusDigestEmail(userData.email, userData.name, {
+          completed: [],
+          inProgress: [],
+          submitted: userData.submitted.map(s => ({
+            ...s,
+            status: "SUBMITTED" as const,
+          })),
+          failed: [],
+        });
+        stats.emailsSent++;
+        console.log(`[Retry Batch] Sent digest to ${userData.email}: ${userData.submitted.length} retried`);
+      } catch (error) {
+        console.error(`[Retry Batch] Failed to send digest to ${userData.email}:`, error);
+      }
+    }
+  }
+
+  console.log(`[Retry Batch] Complete: ${stats.retried} retried, ${stats.stillFailed} still failed, ${stats.emailsSent} emails`);
   return stats;
 }
 

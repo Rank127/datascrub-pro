@@ -265,15 +265,17 @@ export default function DashboardPage() {
         </Link>
 
         {/* Time Saved Card */}
-        <Card className="bg-slate-800/50 border-slate-700 h-full">
-          <CardContent className="flex items-center justify-center py-6">
-            <TimeSaved
-              hours={timeSaved.hours}
-              minutes={timeSaved.minutes}
-              estimatedValue={timeSaved.estimatedValue}
-            />
-          </CardContent>
-        </Card>
+        <Link href="/dashboard/removals">
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-blue-500/50 transition-all cursor-pointer h-full">
+            <CardContent className="flex items-center justify-center py-6">
+              <TimeSaved
+                hours={timeSaved.hours}
+                minutes={timeSaved.minutes}
+                estimatedValue={timeSaved.estimatedValue}
+              />
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Risk Score Card */}
         <Link href="/dashboard/exposures?status=ACTIVE">

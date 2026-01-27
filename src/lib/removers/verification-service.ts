@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption/crypto";
-import { sendRemovalUpdateEmail } from "@/lib/email";
+import { sendRemovalStatusDigestEmail } from "@/lib/email";
 import { LeakCheckScanner } from "@/lib/scanners/breaches/leakcheck";
 import { HaveIBeenPwnedScanner } from "@/lib/scanners/breaches/haveibeenpwned";
 import { getScannerBySource as getDataBrokerScanner } from "@/lib/scanners/data-brokers";
@@ -323,23 +323,19 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
         }),
       ]);
 
-      // Send email notification
-      if (removalRequest.user.email) {
-        await sendRemovalUpdateEmail(
-          removalRequest.user.email,
-          removalRequest.user.name || "",
-          {
-            sourceName: removalRequest.exposure.sourceName,
-            status: "COMPLETED",
-            dataType: removalRequest.exposure.dataType,
-          }
-        ).catch(console.error);
-      }
-
+      // Return update info for batched email (sent by runVerificationBatch)
       return {
         success: true,
-        status: "COMPLETED",
+        status: "COMPLETED" as const,
         message: "Exposure verified as removed",
+        updateInfo: {
+          userId: removalRequest.user.id,
+          userEmail: removalRequest.user.email,
+          userName: removalRequest.user.name || "",
+          sourceName: removalRequest.exposure.sourceName,
+          source: removalRequest.exposure.source,
+          dataType: removalRequest.exposure.dataType,
+        },
       };
     } else {
       // Exposure still exists
@@ -363,23 +359,19 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
           }),
         ]);
 
-        // Send failure notification
-        if (removalRequest.user.email) {
-          await sendRemovalUpdateEmail(
-            removalRequest.user.email,
-            removalRequest.user.name || "",
-            {
-              sourceName: removalRequest.exposure.sourceName,
-              status: "FAILED",
-              dataType: removalRequest.exposure.dataType,
-            }
-          ).catch(console.error);
-        }
-
+        // Return update info for batched email (sent by runVerificationBatch)
         return {
           success: false,
-          status: "FAILED",
+          status: "FAILED" as const,
           message: "Data still found after maximum verification attempts",
+          updateInfo: {
+            userId: removalRequest.user.id,
+            userEmail: removalRequest.user.email,
+            userName: removalRequest.user.name || "",
+            sourceName: removalRequest.exposure.sourceName,
+            source: removalRequest.exposure.source,
+            dataType: removalRequest.exposure.dataType,
+          },
         };
       }
 
@@ -447,13 +439,31 @@ export async function getRemovalsDueForVerification(limit: number = 50): Promise
 }
 
 // Run verification for all due removal requests
+interface UserUpdateInfo {
+  userId: string;
+  userEmail: string | null;
+  userName: string;
+  sourceName: string;
+  source: string;
+  dataType: string;
+}
+
 export async function runVerificationBatch(): Promise<{
   processed: number;
   completed: number;
   failed: number;
   pending: number;
+  emailsSent: number;
 }> {
-  const stats = { processed: 0, completed: 0, failed: 0, pending: 0 };
+  const stats = { processed: 0, completed: 0, failed: 0, pending: 0, emailsSent: 0 };
+
+  // Collect updates per user for batched emails
+  const userUpdates = new Map<string, {
+    email: string;
+    name: string;
+    completed: UserUpdateInfo[];
+    failed: UserUpdateInfo[];
+  }>();
 
   const removalIds = await getRemovalsDueForVerification();
   console.log(`[Verification] Found ${removalIds.length} removals due for verification`);
@@ -474,9 +484,57 @@ export async function runVerificationBatch(): Promise<{
         break;
     }
 
+    // Collect update info for batched email (COMPLETED and FAILED only)
+    if (result.updateInfo && (result.status === "COMPLETED" || result.status === "FAILED")) {
+      const { userId, userEmail, userName } = result.updateInfo;
+      if (userEmail) {
+        if (!userUpdates.has(userId)) {
+          userUpdates.set(userId, {
+            email: userEmail,
+            name: userName,
+            completed: [],
+            failed: [],
+          });
+        }
+        const userUpdate = userUpdates.get(userId)!;
+        if (result.status === "COMPLETED") {
+          userUpdate.completed.push(result.updateInfo);
+        } else {
+          userUpdate.failed.push(result.updateInfo);
+        }
+      }
+    }
+
     // Longer delay between verifications to avoid rate limiting (15 seconds)
     // This is especially important for LeakCheck which has strict rate limits
     await new Promise(resolve => setTimeout(resolve, 15000));
+  }
+
+  // Send ONE digest email per user with all their updates
+  console.log(`[Verification] Sending digest emails to ${userUpdates.size} users`);
+  for (const [userId, userData] of userUpdates) {
+    try {
+      await sendRemovalStatusDigestEmail(userData.email, userData.name, {
+        completed: userData.completed.map(u => ({
+          sourceName: u.sourceName,
+          source: u.source,
+          dataType: u.dataType,
+          status: "COMPLETED" as const,
+        })),
+        inProgress: [],
+        submitted: [],
+        failed: userData.failed.map(u => ({
+          sourceName: u.sourceName,
+          source: u.source,
+          dataType: u.dataType,
+          status: "FAILED" as const,
+        })),
+      });
+      stats.emailsSent++;
+      console.log(`[Verification] Sent digest to ${userData.email}: ${userData.completed.length} completed, ${userData.failed.length} failed`);
+    } catch (error) {
+      console.error(`[Verification] Failed to send digest to ${userData.email}:`, error);
+    }
   }
 
   return stats;

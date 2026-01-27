@@ -1168,3 +1168,175 @@ export async function sendServiceAlertEmail(
     { skipQuotaCheck: true } // Admin alerts should always go through
   );
 }
+
+// ==========================================
+// Consolidated Removal Status Digest Email
+// ==========================================
+
+interface RemovalStatusUpdate {
+  sourceName: string;
+  source: string;
+  dataType: string;
+  status: "SUBMITTED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
+  updatedAt?: Date;
+}
+
+interface RemovalDigestData {
+  completed: RemovalStatusUpdate[];
+  inProgress: RemovalStatusUpdate[];
+  submitted: RemovalStatusUpdate[];
+  failed: RemovalStatusUpdate[];
+}
+
+export async function sendRemovalStatusDigestEmail(
+  email: string,
+  name: string,
+  digest: RemovalDigestData
+) {
+  const totalUpdates =
+    digest.completed.length +
+    digest.inProgress.length +
+    digest.submitted.length +
+    digest.failed.length;
+
+  if (totalUpdates === 0) {
+    return { success: true, skipped: true, message: "No updates to send" };
+  }
+
+  // Build sections for each status type
+  const buildStatusSection = (
+    title: string,
+    icon: string,
+    color: string,
+    items: RemovalStatusUpdate[]
+  ) => {
+    if (items.length === 0) return "";
+
+    const itemsList = items
+      .slice(0, 20) // Limit to 20 items per section
+      .map(
+        (item) => `
+        <tr>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #334155; color: #e2e8f0;">
+            ${item.sourceName}
+          </td>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #334155; color: #94a3b8; text-align: right;">
+            ${item.dataType}
+          </td>
+        </tr>
+      `
+      )
+      .join("");
+
+    const moreText =
+      items.length > 20 ? `<p style="color: #64748b; font-size: 12px;">...and ${items.length - 20} more</p>` : "";
+
+    return `
+      <div style="margin: 24px 0;">
+        <h3 style="color: ${color}; margin-bottom: 12px; font-size: 16px;">
+          ${icon} ${title} (${items.length})
+        </h3>
+        <table style="width: 100%; border-collapse: collapse; background-color: #0f172a; border-radius: 8px; overflow: hidden;">
+          <thead>
+            <tr style="background-color: #1e293b;">
+              <th style="padding: 10px 12px; text-align: left; color: #94a3b8; font-weight: 500;">Source</th>
+              <th style="padding: 10px 12px; text-align: right; color: #94a3b8; font-weight: 500;">Data Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsList}
+          </tbody>
+        </table>
+        ${moreText}
+      </div>
+    `;
+  };
+
+  const completedSection = buildStatusSection(
+    "Successfully Removed",
+    "✅",
+    "#10b981",
+    digest.completed
+  );
+  const inProgressSection = buildStatusSection(
+    "In Progress",
+    "⏳",
+    "#f97316",
+    digest.inProgress
+  );
+  const submittedSection = buildStatusSection(
+    "Submitted",
+    "📤",
+    "#3b82f6",
+    digest.submitted
+  );
+  const failedSection = buildStatusSection(
+    "Requires Attention",
+    "⚠️",
+    "#ef4444",
+    digest.failed
+  );
+
+  // Summary stats
+  const summaryHtml = `
+    <div style="display: flex; justify-content: space-around; margin: 24px 0; text-align: center;">
+      ${digest.completed.length > 0 ? `
+        <div style="padding: 16px;">
+          <div style="font-size: 32px; font-weight: bold; color: #10b981;">${digest.completed.length}</div>
+          <div style="font-size: 12px; color: #94a3b8;">Removed</div>
+        </div>
+      ` : ""}
+      ${digest.inProgress.length > 0 ? `
+        <div style="padding: 16px;">
+          <div style="font-size: 32px; font-weight: bold; color: #f97316;">${digest.inProgress.length}</div>
+          <div style="font-size: 12px; color: #94a3b8;">In Progress</div>
+        </div>
+      ` : ""}
+      ${digest.submitted.length > 0 ? `
+        <div style="padding: 16px;">
+          <div style="font-size: 32px; font-weight: bold; color: #3b82f6;">${digest.submitted.length}</div>
+          <div style="font-size: 12px; color: #94a3b8;">Submitted</div>
+        </div>
+      ` : ""}
+      ${digest.failed.length > 0 ? `
+        <div style="padding: 16px;">
+          <div style="font-size: 32px; font-weight: bold; color: #ef4444;">${digest.failed.length}</div>
+          <div style="font-size: 12px; color: #94a3b8;">Need Action</div>
+        </div>
+      ` : ""}
+    </div>
+  `;
+
+  const html = baseTemplate(`
+    <h1 style="color: #10b981; margin-top: 0; text-align: center;">
+      📊 Removal Status Update
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6; text-align: center; color: #94a3b8;">
+      Hi ${name || "there"}, here's a summary of your data removal progress.
+    </p>
+    ${summaryHtml}
+    ${completedSection}
+    ${inProgressSection}
+    ${submittedSection}
+    ${failedSection}
+    ${buttonHtml("View All Removals", `${APP_URL}/dashboard/removals`)}
+    <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 24px;">
+      Data brokers typically process removal requests within 30-45 days.
+    </p>
+  `);
+
+  // Generate subject line based on most significant update
+  let subject = "📊 Removal Status Update";
+  if (digest.completed.length > 0) {
+    subject = `✅ ${digest.completed.length} removal${digest.completed.length > 1 ? "s" : ""} completed`;
+    if (digest.inProgress.length > 0 || digest.submitted.length > 0) {
+      subject += `, ${digest.inProgress.length + digest.submitted.length} in progress`;
+    }
+  } else if (digest.failed.length > 0) {
+    subject = `⚠️ ${digest.failed.length} removal${digest.failed.length > 1 ? "s" : ""} need attention`;
+  } else if (digest.inProgress.length > 0) {
+    subject = `⏳ ${digest.inProgress.length} removal${digest.inProgress.length > 1 ? "s" : ""} in progress`;
+  }
+
+  return sendEmail(email, subject, html);
+}

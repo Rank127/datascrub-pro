@@ -34,6 +34,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("finance");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -195,9 +196,12 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Quick Stats */}
+          {/* Quick Stats - Interactive cards that switch tabs */}
           <div className="grid gap-4 md:grid-cols-4">
-            <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/20">
+            <Card
+              className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40 cursor-pointer transition-all"
+              onClick={() => setActiveTab("finance")}
+            >
               <CardContent className="p-4 flex items-center gap-4">
                 <div className="p-3 bg-emerald-500/20 rounded-lg">
                   <DollarSign className="h-6 w-6 text-emerald-400" />
@@ -211,7 +215,10 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
+            <Card
+              className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20 hover:border-blue-500/40 cursor-pointer transition-all"
+              onClick={() => setActiveTab("activities")}
+            >
               <CardContent className="p-4 flex items-center gap-4">
                 <div className="p-3 bg-blue-500/20 rounded-lg">
                   <Users className="h-6 w-6 text-blue-400" />
@@ -225,7 +232,10 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/20">
+            <Card
+              className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/20 hover:border-amber-500/40 cursor-pointer transition-all"
+              onClick={() => setActiveTab("analytics")}
+            >
               <CardContent className="p-4 flex items-center gap-4">
                 <div className="p-3 bg-amber-500/20 rounded-lg">
                   <BarChart3 className="h-6 w-6 text-amber-400" />
@@ -239,7 +249,10 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20">
+            <Card
+              className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20 hover:border-purple-500/40 cursor-pointer transition-all"
+              onClick={() => setActiveTab("operations")}
+            >
               <CardContent className="p-4 flex items-center gap-4">
                 <div className="p-3 bg-purple-500/20 rounded-lg">
                   <Settings className="h-6 w-6 text-purple-400" />
@@ -255,7 +268,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="finance" className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="bg-slate-800/50 border border-slate-700 p-1">
               <TabsTrigger
                 value="finance"
