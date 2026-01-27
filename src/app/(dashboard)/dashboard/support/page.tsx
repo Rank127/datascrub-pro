@@ -146,6 +146,14 @@ export default function SupportPage() {
     fetchComments(ticket.id);
   };
 
+  // Get browser and device info for debugging
+  const getBrowserInfo = () => {
+    if (typeof window === "undefined") return "";
+    const ua = navigator.userAgent;
+    const screenSize = `${window.screen.width}x${window.screen.height}`;
+    return `${ua} | Screen: ${screenSize}`;
+  };
+
   const handleCreateTicket = async () => {
     if (!newTicketForm.subject.trim() || !newTicketForm.description.trim()) {
       toast.error("Please fill in all fields");
@@ -154,14 +162,22 @@ export default function SupportPage() {
 
     try {
       setSubmittingTicket(true);
+
+      // Collect browser info and current page for debugging
+      const ticketData = {
+        ...newTicketForm,
+        browserInfo: getBrowserInfo(),
+        pageUrl: typeof window !== "undefined" ? window.location.href : "",
+      };
+
       const response = await fetch("/api/support/tickets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTicketForm),
+        body: JSON.stringify(ticketData),
       });
 
       if (response.ok) {
-        toast.success("Support ticket created");
+        toast.success("Support ticket created - we'll get back to you soon!");
         setShowNewTicket(false);
         setNewTicketForm({ type: "OTHER", subject: "", description: "" });
         fetchTickets();

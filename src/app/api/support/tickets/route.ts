@@ -17,6 +17,9 @@ const createTicketSchema = z.object({
   subject: z.string().min(5, "Subject must be at least 5 characters").max(200),
   description: z.string().min(20, "Description must be at least 20 characters").max(5000),
   priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional(),
+  // Browser/device info for debugging
+  browserInfo: z.string().max(500).optional(),
+  pageUrl: z.string().max(500).optional(),
   // Optional linked records
   scanId: z.string().optional(),
   exposureId: z.string().optional(),
@@ -109,6 +112,8 @@ export async function POST(request: NextRequest) {
       scanId: data.scanId,
       exposureId: data.exposureId,
       removalRequestId: data.removalRequestId,
+      browserInfo: data.browserInfo,
+      pageUrl: data.pageUrl,
     });
 
     // Send confirmation email (non-blocking)

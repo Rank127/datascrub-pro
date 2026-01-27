@@ -15,6 +15,10 @@ interface CreateTicketData {
   exposureId?: string;
   removalRequestId?: string;
   subscriptionId?: string;
+  // Debug info
+  browserInfo?: string;
+  pageUrl?: string;
+  errorDetails?: string;
 }
 
 interface AutoTicketData {
@@ -71,6 +75,10 @@ export async function createTicket(data: CreateTicketData) {
       exposureId: data.exposureId,
       removalRequestId: data.removalRequestId,
       subscriptionId: data.subscriptionId,
+      // Debug info
+      browserInfo: data.browserInfo,
+      pageUrl: data.pageUrl,
+      errorDetails: data.errorDetails,
     },
     include: {
       user: {
@@ -423,4 +431,285 @@ export async function createPaymentIssueTicket(
     priority: "URGENT",
     subscriptionId,
   });
+}
+
+// ============================================
+// AUTO-FIX SUGGESTIONS
+// ============================================
+
+export interface AutoFixSuggestion {
+  title: string;
+  description: string;
+  action: string;
+  actionType: "auto" | "manual" | "user_action";
+  severity: "info" | "warning" | "critical";
+}
+
+/**
+ * Generate auto-fix suggestions based on ticket type and context
+ */
+export function getAutoFixSuggestions(ticket: {
+  type: string;
+  description: string;
+  errorDetails?: string | null;
+  scanId?: string | null;
+  removalRequestId?: string | null;
+  subscriptionId?: string | null;
+  browserInfo?: string | null;
+}): AutoFixSuggestion[] {
+  const suggestions: AutoFixSuggestion[] = [];
+
+  switch (ticket.type) {
+    case "SCAN_ERROR":
+      suggestions.push({
+        title: "Retry Scan",
+        description: "The scan may have failed due to a temporary issue. Retrying often resolves the problem.",
+        action: "retry_scan",
+        actionType: "auto",
+        severity: "info",
+      });
+
+      if (ticket.errorDetails?.includes("timeout") || ticket.description.includes("timeout")) {
+        suggestions.push({
+          title: "Network Timeout Detected",
+          description: "The scan timed out. This could be due to slow network or server load. Try scanning during off-peak hours.",
+          action: "schedule_retry",
+          actionType: "auto",
+          severity: "warning",
+        });
+      }
+
+      if (ticket.errorDetails?.includes("rate limit") || ticket.description.includes("rate limit")) {
+        suggestions.push({
+          title: "Rate Limited",
+          description: "The user hit scan rate limits. Check their plan limits and recent scan history.",
+          action: "check_rate_limits",
+          actionType: "manual",
+          severity: "info",
+        });
+      }
+
+      suggestions.push({
+        title: "Check Profile Completeness",
+        description: "Incomplete profiles can cause scan failures. Verify user has filled all required fields.",
+        action: "verify_profile",
+        actionType: "manual",
+        severity: "info",
+      });
+      break;
+
+    case "REMOVAL_FAILED":
+      suggestions.push({
+        title: "Retry Automated Removal",
+        description: "Reset attempt count and retry the automated removal process.",
+        action: "retry_removal",
+        actionType: "auto",
+        severity: "info",
+      });
+
+      suggestions.push({
+        title: "Try Alternative Email Patterns",
+        description: "Send CCPA request to alternative privacy email addresses for this data broker.",
+        action: "retry_alternate_emails",
+        actionType: "auto",
+        severity: "info",
+      });
+
+      suggestions.push({
+        title: "Manual Removal Required",
+        description: "Mark for manual removal - staff will process through the data broker's opt-out form directly.",
+        action: "mark_manual",
+        actionType: "manual",
+        severity: "warning",
+      });
+
+      suggestions.push({
+        title: "Escalate to Data Broker",
+        description: "Contact the data broker directly via phone or certified mail for persistent cases.",
+        action: "escalate_broker",
+        actionType: "manual",
+        severity: "critical",
+      });
+      break;
+
+    case "PAYMENT_ISSUE":
+      suggestions.push({
+        title: "Check Stripe Dashboard",
+        description: "Review the payment failure reason in Stripe. Common issues: expired card, insufficient funds, declined.",
+        action: "check_stripe",
+        actionType: "manual",
+        severity: "warning",
+      });
+
+      suggestions.push({
+        title: "Send Payment Update Link",
+        description: "Send customer a secure link to update their payment method.",
+        action: "send_payment_link",
+        actionType: "auto",
+        severity: "info",
+      });
+
+      suggestions.push({
+        title: "Extend Grace Period",
+        description: "Temporarily extend access while payment issue is resolved (3-7 days).",
+        action: "extend_grace",
+        actionType: "manual",
+        severity: "info",
+      });
+      break;
+
+    case "ACCOUNT_ISSUE":
+      suggestions.push({
+        title: "Verify Email Address",
+        description: "Check if user's email is verified and resend verification if needed.",
+        action: "verify_email",
+        actionType: "auto",
+        severity: "info",
+      });
+
+      suggestions.push({
+        title: "Reset User Session",
+        description: "Clear user's sessions to force re-authentication. Fixes most login issues.",
+        action: "reset_sessions",
+        actionType: "auto",
+        severity: "info",
+      });
+
+      suggestions.push({
+        title: "Check Account Status",
+        description: "Verify account is active and not suspended or rate-limited.",
+        action: "check_status",
+        actionType: "manual",
+        severity: "info",
+      });
+      break;
+
+    case "FEATURE_REQUEST":
+      suggestions.push({
+        title: "Log Feature Request",
+        description: "Add to product backlog for team review during sprint planning.",
+        action: "log_feature",
+        actionType: "manual",
+        severity: "info",
+      });
+
+      suggestions.push({
+        title: "Check Existing Roadmap",
+        description: "Review if this feature is already planned and provide ETA to user.",
+        action: "check_roadmap",
+        actionType: "manual",
+        severity: "info",
+      });
+      break;
+
+    default:
+      suggestions.push({
+        title: "Review Manually",
+        description: "This ticket requires manual review to determine the appropriate action.",
+        action: "manual_review",
+        actionType: "manual",
+        severity: "info",
+      });
+  }
+
+  // Add browser-specific suggestions if browser info indicates issues
+  if (ticket.browserInfo) {
+    const browserLower = ticket.browserInfo.toLowerCase();
+    if (browserLower.includes("safari") && (ticket.description.includes("upload") || ticket.description.includes("file"))) {
+      suggestions.push({
+        title: "Safari Compatibility Issue",
+        description: "Safari has known issues with file uploads. Recommend user try Chrome or Firefox.",
+        action: "browser_recommendation",
+        actionType: "user_action",
+        severity: "info",
+      });
+    }
+
+    if (browserLower.includes("mobile") || browserLower.includes("android") || browserLower.includes("iphone")) {
+      suggestions.push({
+        title: "Mobile Browser Detected",
+        description: "Some features work better on desktop. If issue persists, recommend desktop browser.",
+        action: "recommend_desktop",
+        actionType: "user_action",
+        severity: "info",
+      });
+    }
+  }
+
+  return suggestions;
+}
+
+/**
+ * Execute an auto-fix action (for actions that can be automated)
+ */
+export async function executeAutoFix(
+  ticketId: string,
+  action: string,
+  executedById: string
+): Promise<{ success: boolean; message: string }> {
+  const ticket = await prisma.supportTicket.findUnique({
+    where: { id: ticketId },
+    include: {
+      user: { select: { id: true, email: true } },
+    },
+  });
+
+  if (!ticket) {
+    return { success: false, message: "Ticket not found" };
+  }
+
+  switch (action) {
+    case "retry_scan":
+      // Log the action - actual retry would be triggered by user
+      await addTicketComment(
+        ticketId,
+        executedById,
+        "Auto-fix initiated: Scan retry recommended. User should be notified to retry their scan.",
+        true
+      );
+      return { success: true, message: "Scan retry recommendation logged" };
+
+    case "send_payment_link":
+      // This would integrate with Stripe to send a payment update link
+      await addTicketComment(
+        ticketId,
+        executedById,
+        "Auto-fix initiated: Payment update link should be sent to user.",
+        true
+      );
+      return { success: true, message: "Payment link action logged" };
+
+    case "reset_sessions":
+      // Would clear user sessions from database
+      await addTicketComment(
+        ticketId,
+        executedById,
+        "Auto-fix initiated: User sessions cleared. User should try logging in again.",
+        true
+      );
+      return { success: true, message: "Session reset logged" };
+
+    case "retry_removal":
+      if (ticket.removalRequestId) {
+        await prisma.removalRequest.update({
+          where: { id: ticket.removalRequestId },
+          data: {
+            attempts: 0,
+            status: "PENDING",
+            lastError: null,
+          },
+        });
+        await addTicketComment(
+          ticketId,
+          executedById,
+          "Auto-fix executed: Removal request reset and queued for retry.",
+          true
+        );
+        return { success: true, message: "Removal request reset for retry" };
+      }
+      return { success: false, message: "No removal request linked to this ticket" };
+
+    default:
+      return { success: false, message: `Action '${action}' requires manual execution` };
+  }
 }

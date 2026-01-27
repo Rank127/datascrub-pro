@@ -50,6 +50,10 @@ interface Ticket {
   lastActivityAt: string;
   createdAt: string;
   updatedAt: string;
+  // Debug info
+  browserInfo: string | null;
+  pageUrl: string | null;
+  errorDetails: string | null;
   user: {
     id: string;
     email: string | null;

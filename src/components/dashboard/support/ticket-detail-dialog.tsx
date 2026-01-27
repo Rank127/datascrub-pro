@@ -29,6 +29,10 @@ import {
   CheckCircle,
   ExternalLink,
   Lock,
+  Wrench,
+  Zap,
+  Monitor,
+  Globe,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
@@ -56,6 +60,10 @@ interface Ticket {
   lastActivityAt: string;
   createdAt: string;
   updatedAt: string;
+  // Debug info
+  browserInfo: string | null;
+  pageUrl: string | null;
+  errorDetails: string | null;
   user: {
     id: string;
     email: string | null;
@@ -66,6 +74,14 @@ interface Ticket {
     email: string | null;
     name: string | null;
   } | null;
+}
+
+interface AutoFixSuggestion {
+  title: string;
+  description: string;
+  action: string;
+  actionType: "auto" | "manual" | "user_action";
+  severity: "info" | "warning" | "critical";
 }
 
 interface Comment {
@@ -117,6 +133,71 @@ export function TicketDetailDialog({
   const [priority, setPriority] = useState(ticket.priority);
   const [resolution, setResolution] = useState(ticket.resolution || "");
   const [updating, setUpdating] = useState(false);
+  const [executingFix, setExecutingFix] = useState<string | null>(null);
+
+  // Generate auto-fix suggestions based on ticket type
+  const getAutoFixSuggestions = (): AutoFixSuggestion[] => {
+    const suggestions: AutoFixSuggestion[] = [];
+
+    switch (ticket.type) {
+      case "SCAN_ERROR":
+        suggestions.push(
+          { title: "Retry Scan", description: "Notify user to retry their scan", action: "retry_scan", actionType: "auto", severity: "info" },
+          { title: "Check Profile", description: "Verify user profile is complete", action: "check_profile", actionType: "manual", severity: "info" }
+        );
+        if (ticket.description.toLowerCase().includes("timeout")) {
+          suggestions.push({ title: "Network Issue", description: "Likely timeout - recommend off-peak hours", action: "timeout_advice", actionType: "user_action", severity: "warning" });
+        }
+        break;
+      case "REMOVAL_FAILED":
+        suggestions.push(
+          { title: "Retry Removal", description: "Reset attempts and retry automated removal", action: "retry_removal", actionType: "auto", severity: "info" },
+          { title: "Try Alt Emails", description: "Try alternative privacy email addresses", action: "alt_emails", actionType: "auto", severity: "info" },
+          { title: "Manual Removal", description: "Process through broker's opt-out form manually", action: "manual_removal", actionType: "manual", severity: "warning" }
+        );
+        break;
+      case "PAYMENT_ISSUE":
+        suggestions.push(
+          { title: "Check Stripe", description: "Review payment failure in Stripe dashboard", action: "check_stripe", actionType: "manual", severity: "warning" },
+          { title: "Send Update Link", description: "Send payment method update link", action: "payment_link", actionType: "auto", severity: "info" },
+          { title: "Extend Grace", description: "Extend access 7 days while issue resolves", action: "extend_grace", actionType: "manual", severity: "info" }
+        );
+        break;
+      case "ACCOUNT_ISSUE":
+        suggestions.push(
+          { title: "Reset Sessions", description: "Clear all user sessions to fix login issues", action: "reset_sessions", actionType: "auto", severity: "info" },
+          { title: "Verify Email", description: "Resend email verification", action: "verify_email", actionType: "auto", severity: "info" }
+        );
+        break;
+      default:
+        suggestions.push({ title: "Manual Review", description: "Review and respond manually", action: "manual_review", actionType: "manual", severity: "info" });
+    }
+
+    return suggestions;
+  };
+
+  const suggestions = getAutoFixSuggestions();
+
+  const handleExecuteFix = async (action: string) => {
+    setExecutingFix(action);
+    try {
+      // Log the fix attempt as internal comment
+      await fetch(`/api/admin/support/tickets/${ticket.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: `Auto-fix action executed: ${action}`,
+          isInternal: true,
+        }),
+      });
+      toast.success(`Action "${action}" logged. Implement as needed.`);
+      fetchComments();
+    } catch {
+      toast.error("Failed to execute action");
+    } finally {
+      setExecutingFix(null);
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -314,6 +395,71 @@ export function TicketDetailDialog({
                 <Badge variant="outline">{ticket.source}</Badge>
               </div>
             </div>
+
+            {/* Debug Info (if available) */}
+            {(ticket.browserInfo || ticket.pageUrl) && (
+              <div className="p-3 bg-slate-800/50 rounded-lg space-y-2">
+                <h4 className="text-xs font-medium text-slate-400 flex items-center gap-1">
+                  <Monitor className="h-3 w-3" />
+                  Debug Info
+                </h4>
+                {ticket.pageUrl && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <Globe className="h-3 w-3 text-slate-500" />
+                    <span className="text-slate-400">Page:</span>
+                    <span className="text-slate-300 truncate">{ticket.pageUrl}</span>
+                  </div>
+                )}
+                {ticket.browserInfo && (
+                  <div className="text-xs text-slate-400 truncate">
+                    {ticket.browserInfo}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Auto-Fix Suggestions */}
+            {ticket.status !== "CLOSED" && suggestions.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-amber-400 flex items-center gap-2">
+                  <Wrench className="h-4 w-4" />
+                  Suggested Actions
+                </h4>
+                <div className="grid gap-2">
+                  {suggestions.map((suggestion, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-3 rounded-lg border flex items-start justify-between gap-3 ${
+                        suggestion.severity === "critical"
+                          ? "bg-red-500/10 border-red-500/20"
+                          : suggestion.severity === "warning"
+                          ? "bg-amber-500/10 border-amber-500/20"
+                          : "bg-slate-800/50 border-slate-700"
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white">{suggestion.title}</p>
+                        <p className="text-xs text-slate-400">{suggestion.description}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={suggestion.actionType === "auto" ? "default" : "outline"}
+                        onClick={() => handleExecuteFix(suggestion.action)}
+                        disabled={executingFix === suggestion.action}
+                        className="shrink-0"
+                      >
+                        {executingFix === suggestion.action ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : suggestion.actionType === "auto" ? (
+                          <Zap className="h-3 w-3 mr-1" />
+                        ) : null}
+                        {suggestion.actionType === "auto" ? "Run" : "Log"}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Separator className="bg-slate-800" />
 

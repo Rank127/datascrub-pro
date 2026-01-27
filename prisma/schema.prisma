@@ -315,6 +315,10 @@ model SupportTicket {
   subject          String
   description      String
   source           String          @default("USER") // USER, SYSTEM, ADMIN
+  attachments      String?         // JSON array of attachment URLs (screenshots, logs)
+  browserInfo      String?         // User's browser/device info for debugging
+  pageUrl          String?         // URL where error occurred
+  errorDetails     String?         // Technical error details (stack trace, error code)
 
   // Linked records (for context)
   scanId           String?
