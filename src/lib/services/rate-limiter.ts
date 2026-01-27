@@ -359,11 +359,18 @@ const leakCheckCredits: LeakCheckCredits = {
 // LeakCheck lifetime limit (400 queries total, never renews)
 const LEAKCHECK_LIFETIME_LIMIT = parseInt(process.env.LEAKCHECK_LIFETIME_LIMIT || "400");
 
+// LeakCheck rate limit: 3 requests per second
+const LEAKCHECK_RPS_LIMIT = 3;
+const LEAKCHECK_MIN_DELAY_MS = Math.ceil(1000 / LEAKCHECK_RPS_LIMIT); // ~334ms between requests
+
 // Warning at 80% (320 queries used)
 const LEAKCHECK_WARNING_THRESHOLD = 0.8;
 
 // Critical at 95% (380 queries used) - be very conservative
 const LEAKCHECK_CRITICAL_THRESHOLD = 0.95;
+
+// Track last request time for RPS limiting
+let leakCheckLastRequestAt = 0;
 
 /**
  * Update LeakCheck credits from API
@@ -374,10 +381,24 @@ export function updateLeakCheckApiCredits(creditsRemaining: number): void {
 }
 
 /**
- * Record LeakCheck query usage
+ * Get wait time before next LeakCheck request (3 RPS limit)
+ */
+export function getLeakCheckWaitTime(): number {
+  const now = Date.now();
+  const timeSinceLastRequest = now - leakCheckLastRequestAt;
+
+  if (timeSinceLastRequest < LEAKCHECK_MIN_DELAY_MS) {
+    return LEAKCHECK_MIN_DELAY_MS - timeSinceLastRequest;
+  }
+  return 0;
+}
+
+/**
+ * Record LeakCheck query usage (both lifetime and RPS tracking)
  */
 export function recordLeakCheckUsage(): void {
   leakCheckCredits.used++;
+  leakCheckLastRequestAt = Date.now();
   if (leakCheckCredits.apiCreditsRemaining !== null && leakCheckCredits.apiCreditsRemaining > 0) {
     leakCheckCredits.apiCreditsRemaining--;
   }

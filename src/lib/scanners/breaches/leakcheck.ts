@@ -1,5 +1,6 @@
 import { BaseScanner, type ScanInput, type ScanResult } from "../base-scanner";
 import type { DataSource, Severity } from "@/lib/types";
+import { canUseLeakCheck, recordLeakCheckUsage, getLeakCheckWaitTime, getLeakCheckStatus } from "@/lib/services/rate-limiter";
 
 /**
  * LeakCheck API v2 Response
@@ -30,30 +31,32 @@ interface LeakCheckResponse {
 
 /**
  * Global rate limiting queue for LeakCheck API
- * Ensures we don't exceed API rate limits across all instances
- * This is a singleton to share rate limiting across all scanner instances
+ * - 3 requests per second (RPS) limit
+ * - 400 lifetime queries (tracked by rate-limiter.ts)
+ * Uses the centralized rate limiter for tracking
  */
 class RateLimitQueue {
   private static instance: RateLimitQueue;
   private queue: Array<() => Promise<void>> = [];
   private processing = false;
-  private lastRequest = 0;
-  private minDelay: number;
 
-  private constructor(requestsPerMinute: number = 10) {
-    // Calculate minimum delay between requests (be conservative - 6 req/min = 10s between)
-    this.minDelay = Math.ceil(60000 / requestsPerMinute);
-  }
+  private constructor() {}
 
   static getInstance(): RateLimitQueue {
     if (!RateLimitQueue.instance) {
-      // Conservative rate: 6 requests per minute to avoid hitting limits during test scans
-      RateLimitQueue.instance = new RateLimitQueue(6);
+      RateLimitQueue.instance = new RateLimitQueue();
     }
     return RateLimitQueue.instance;
   }
 
   async add<T>(fn: () => Promise<T>): Promise<T> {
+    // Check lifetime limit before adding to queue
+    const canUse = canUseLeakCheck();
+    if (!canUse.allowed) {
+      console.warn(`[LeakCheck] ${canUse.reason}`);
+      throw new Error(canUse.reason || "LeakCheck queries exhausted");
+    }
+
     return new Promise((resolve, reject) => {
       this.queue.push(async () => {
         try {
@@ -72,16 +75,16 @@ class RateLimitQueue {
     this.processing = true;
 
     while (this.queue.length > 0) {
-      const now = Date.now();
-      const timeSinceLastRequest = now - this.lastRequest;
-
-      if (timeSinceLastRequest < this.minDelay) {
-        await this.delay(this.minDelay - timeSinceLastRequest);
+      // Use centralized rate limiter for 3 RPS timing
+      const waitTime = getLeakCheckWaitTime();
+      if (waitTime > 0) {
+        await this.delay(waitTime);
       }
 
       const task = this.queue.shift();
       if (task) {
-        this.lastRequest = Date.now();
+        // Record usage (tracks both RPS timing and lifetime count)
+        recordLeakCheckUsage();
         await task();
       }
     }
@@ -137,7 +140,15 @@ export class LeakCheckScanner extends BaseScanner {
       return this.scanPublicApi(input);
     }
 
-    console.log("[LeakCheck] Using paid API v2 with rate limiting");
+    // Check lifetime limit before starting
+    const canUse = canUseLeakCheck();
+    if (!canUse.allowed) {
+      console.warn(`[LeakCheck] Skipping scan: ${canUse.reason}`);
+      return results;
+    }
+
+    const status = getLeakCheckStatus();
+    console.log(`[LeakCheck] Using paid API v2 (${status.queriesRemaining}/${status.lifetimeLimit} queries remaining - lifetime plan)`);
 
     // Check emails
     if (input.emails?.length) {
