@@ -134,6 +134,55 @@ export interface AnalyticsIntegrationResponse {
 }
 
 // ============================================
+// Bing Webmaster Tools Integration Types
+// ============================================
+
+export interface BingSearchQuery {
+  query: string;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  position: number;
+}
+
+export interface BingPageStats {
+  url: string;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  position: number;
+}
+
+export interface BingCrawlStats {
+  crawledPages: number;
+  crawlErrors: number;
+  inIndex: number;
+  blockedByRobots: number;
+}
+
+export interface BingBacklink {
+  sourceUrl: string;
+  anchorText: string;
+}
+
+export interface BingSearchPerformance {
+  clicks: number;
+  impressions: number;
+  averageCtr: number;
+  averagePosition: number;
+}
+
+export interface BingIntegrationResponse {
+  configured: boolean;
+  searchPerformance?: BingSearchPerformance;
+  topQueries: BingSearchQuery[];
+  topPages: BingPageStats[];
+  crawlStats?: BingCrawlStats;
+  recentBacklinks: BingBacklink[];
+  error?: string;
+}
+
+// ============================================
 // Database Integration Types
 // ============================================
 
@@ -269,12 +318,14 @@ export interface IntegrationsState {
   vercel: VercelIntegrationResponse | null;
   stripe: StripeIntegrationResponse | null;
   analytics: AnalyticsIntegrationResponse | null;
+  bing: BingIntegrationResponse | null;
   database: DatabaseIntegrationResponse | null;
   services: ServicesIntegrationResponse | null;
   loading: {
     vercel: boolean;
     stripe: boolean;
     analytics: boolean;
+    bing: boolean;
     database: boolean;
     services: boolean;
   };
@@ -282,6 +333,7 @@ export interface IntegrationsState {
     vercel: string | null;
     stripe: string | null;
     analytics: string | null;
+    bing: string | null;
     database: string | null;
     services: string | null;
   };

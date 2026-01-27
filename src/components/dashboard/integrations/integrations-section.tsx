@@ -5,12 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VercelSection } from "./vercel-section";
 import { StripeSection } from "./stripe-section";
 import { AnalyticsSection } from "./analytics-section";
+import { BingSection } from "./bing-section";
 import { DatabaseSection } from "./database-section";
 import { ServicesStatus } from "./services-status";
 import {
   VercelIntegrationResponse,
   StripeIntegrationResponse,
   AnalyticsIntegrationResponse,
+  BingIntegrationResponse,
   DatabaseIntegrationResponse,
   ServicesIntegrationResponse,
 } from "@/lib/integrations/types";
@@ -18,6 +20,7 @@ import {
   Cloud,
   CreditCard,
   BarChart3,
+  Search,
   Database,
   Plug,
 } from "lucide-react";
@@ -27,6 +30,7 @@ interface IntegrationsData {
   vercel: VercelIntegrationResponse | null;
   stripe: StripeIntegrationResponse | null;
   analytics: AnalyticsIntegrationResponse | null;
+  bing: BingIntegrationResponse | null;
   database: DatabaseIntegrationResponse | null;
   services: ServicesIntegrationResponse | null;
 }
@@ -35,6 +39,7 @@ interface LoadingState {
   vercel: boolean;
   stripe: boolean;
   analytics: boolean;
+  bing: boolean;
   database: boolean;
   services: boolean;
 }
@@ -44,6 +49,7 @@ export function IntegrationsSection() {
     vercel: null,
     stripe: null,
     analytics: null,
+    bing: null,
     database: null,
     services: null,
   });
@@ -52,6 +58,7 @@ export function IntegrationsSection() {
     vercel: true,
     stripe: true,
     analytics: true,
+    bing: true,
     database: true,
     services: true,
   });
@@ -97,6 +104,7 @@ export function IntegrationsSection() {
     fetchIntegration("vercel");
     fetchIntegration("stripe");
     fetchIntegration("analytics");
+    fetchIntegration("bing");
     fetchIntegration("database");
     fetchIntegration("services");
   }, [fetchIntegration]);
@@ -136,6 +144,13 @@ export function IntegrationsSection() {
             <span className="hidden sm:inline">Analytics</span>
           </TabsTrigger>
           <TabsTrigger
+            value="bing"
+            className="data-[state=active]:bg-teal-500/20 data-[state=active]:text-teal-400 gap-2"
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline">Bing</span>
+          </TabsTrigger>
+          <TabsTrigger
             value="database"
             className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 gap-2"
           >
@@ -172,6 +187,14 @@ export function IntegrationsSection() {
             data={data.analytics}
             loading={loading.analytics}
             onRefresh={() => refreshIntegration("analytics")}
+          />
+        </TabsContent>
+
+        <TabsContent value="bing" className="mt-6">
+          <BingSection
+            data={data.bing}
+            loading={loading.bing}
+            onRefresh={() => refreshIntegration("bing")}
           />
         </TabsContent>
 
