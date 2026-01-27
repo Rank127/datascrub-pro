@@ -1,0 +1,92 @@
+CORPORATE PLANS PRICING SUMMARY
+Tier,Price Per User (Monthly),Price Per User (Annual),Minimum Seats,Maximum Seats,Data Broker Coverage
+Team,$15,$180,5,25,400+
+Business,$25,$300,10,100,600+
+Enterprise,$40,$480,25,500+,750+
+Executive Protection,$199,$2388,1 (add-on),N/A,1000+
+
+VOLUME DISCOUNTS (Enterprise Only)
+Seats,Discount
+25-99,0%
+100-249,10%
+250-499,15%
+500+,20%
+
+ANNUAL COST EXAMPLES
+Tier,5 Users,10 Users,25 Users,50 Users,100 Users,250 Users,500 Users
+Team,$900,$1800,$4500,N/A,N/A,N/A,N/A
+Business,N/A,$3000,$7500,$15000,$30000,N/A,N/A
+Enterprise,N/A,N/A,$12000,$24000,$43200,$102000,$192000
+
+FEATURE COMPARISON
+Feature,Team,Business,Enterprise,Executive Protection
+Price Per User Monthly,$15,$25,$40,$199
+Minimum Seats,5,10,25,1 (add-on)
+Data Broker Coverage,400+,600+,750+,1000+
+Scan Frequency,Weekly,Daily,Continuous,Continuous + Manual
+Custom Removals Per Month,5,20,Unlimited,Unlimited
+API Access,No,Read-only,Full,Full
+SSO/SAML,No,Yes,Yes,Yes
+SCIM Provisioning,No,No,Yes,Yes
+Dark Web Monitoring,No,Yes,Advanced,Deep Dive
+AI Shield (Deepfake),No,No,Yes,Yes
+Do Not Call Registry,No,Yes,Yes,Yes
+Compliance Reports,No,Basic (GDPR/CCPA),Full (SOC2/GDPR/CCPA/HIPAA),Full
+Dedicated CSM,No,No,Yes,Yes
+SLA,None,48hr response,99.9% uptime + 24hr response,1hr response
+Support,Email (business hours),Email + Phone (business hours),24/7 Priority,Concierge
+Executive Profiles Included,0,5,20,Self
+Family Coverage,No,No,Add-on ($10/user),Included (spouse + 4 dependents)
+
+COMPETITOR PRICING COMPARISON
+Competitor,Individual Annual,Corporate Per User Annual,Broker Coverage,Notes
+GhostMyData (current),FREE/$143.88/$359.88,N/A,60+,Current consumer pricing
+DeleteMe,$129-$329,$129-$229,750+,Pioneer since 2010
+Incogni,$95.88-$275.88,$199 (Ironwall),420+,Deloitte audited
+Optery,$0-$249,Custom,635+,Screenshot verification
+Kanary,$179.88,Custom,300+,Threat-model approach
+Privacy Duck,$499-$999,$999 (VIP),300+,Premium human analysts
+Aura,$108-$384,Custom,140-200+,All-in-one suite
+IDShield,$179-$420,Custom,Varies,Licensed PIs
+
+MARKET DATA
+Metric,Value
+Market Size 2024,$1.68 billion
+Projected Size 2033,$7.99 billion
+Growth Rate (CAGR),18.2%
+Adults Concerned About Privacy,85%
+Adults Using Data Removal Services,6%
+Average Consumer Spend Monthly,$15-$20
+Average Consumer Spend Annual,$120-$150
+
+REVENUE PROJECTIONS - CONSERVATIVE (Year 1)
+Tier,Customers,Avg Seats,Monthly Revenue,Annual Revenue
+Team,15,8,$1800,$21600
+Business,8,25,$5000,$60000
+Enterprise,2,50,$4000,$48000
+Total,25,N/A,$10800,$129600
+
+REVENUE PROJECTIONS - MODERATE (Year 1)
+Tier,Customers,Avg Seats,Monthly Revenue,Annual Revenue
+Team,40,10,$6000,$72000
+Business,20,35,$17500,$210000
+Enterprise,5,75,$15000,$180000
+Executive,10,1,$1990,$23880
+Total,75,N/A,$40490,$485880
+
+REVENUE PROJECTIONS - AGGRESSIVE (Year 1)
+Tier,Customers,Avg Seats,Monthly Revenue,Annual Revenue
+Team,80,12,$14400,$172800
+Business,50,40,$50000,$600000
+Enterprise,15,100,$54000,$648000
+Executive,30,1,$5970,$71640
+Total,175,N/A,$124370,$1492440
+
+TARGET INDUSTRIES
+Industry,Reason,Best Tier
+Legal,Sensitive client data,Business/Enterprise
+Healthcare,HIPAA compliance,Enterprise
+Financial Services,SOX and PCI compliance,Enterprise
+Technology,Employee privacy programs,Business
+Government,Public records sensitivity,Enterprise
+Education,Student and faculty protection,Team/Business
