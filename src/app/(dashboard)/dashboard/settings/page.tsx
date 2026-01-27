@@ -28,6 +28,9 @@ import {
   ExternalLink,
   CheckCircle,
   XCircle,
+  Smartphone,
+  Phone,
+  Trash2,
 } from "lucide-react";
 
 interface SubscriptionData {
@@ -66,6 +69,22 @@ function SettingsContent() {
   const [marketingEmails, setMarketingEmails] = useState(false);
   const [reportFrequency, setReportFrequency] = useState("weekly");
   const [notificationLoading, setNotificationLoading] = useState(false);
+
+  // SMS notification settings
+  const [smsConfigured, setSmsConfigured] = useState(false);
+  const [smsAvailable, setSmsAvailable] = useState(false);
+  const [smsPlan, setSmsPlan] = useState<string>("FREE");
+  const [smsNotifications, setSmsNotifications] = useState(false);
+  const [smsPhone, setSmsPhone] = useState<string | null>(null);
+  const [smsPhoneVerified, setSmsPhoneVerified] = useState(false);
+  const [smsExposureAlerts, setSmsExposureAlerts] = useState(true);
+  const [smsRemovalUpdates, setSmsRemovalUpdates] = useState(true);
+  const [smsBreachAlerts, setSmsBreachAlerts] = useState(true);
+  const [smsLoading, setSmsLoading] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verificationPending, setVerificationPending] = useState(false);
+  const [pendingPhone, setPendingPhone] = useState<string | null>(null);
 
   // Fetch notification preferences
   const fetchNotificationPrefs = async () => {
@@ -113,6 +132,134 @@ function SettingsContent() {
     }
   };
 
+  // Fetch SMS settings
+  const fetchSmsSettings = async () => {
+    try {
+      const response = await fetch("/api/user/sms");
+      if (response.ok) {
+        const data = await response.json();
+        setSmsConfigured(data.smsConfigured ?? false);
+        setSmsAvailable(data.smsAvailable ?? false);
+        setSmsPlan(data.plan ?? "FREE");
+        setSmsNotifications(data.smsNotifications ?? false);
+        setSmsPhone(data.smsPhone);
+        setSmsPhoneVerified(data.smsPhoneVerified ?? false);
+        setSmsExposureAlerts(data.smsExposureAlerts ?? true);
+        setSmsRemovalUpdates(data.smsRemovalUpdates ?? true);
+        setSmsBreachAlerts(data.smsBreachAlerts ?? true);
+      }
+    } catch (error) {
+      console.error("Failed to fetch SMS settings:", error);
+    }
+  };
+
+  // Save SMS preferences
+  const handleSaveSmsPreferences = async () => {
+    setSmsLoading(true);
+    try {
+      const response = await fetch("/api/user/sms", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          smsNotifications,
+          smsExposureAlerts,
+          smsRemovalUpdates,
+          smsBreachAlerts,
+        }),
+      });
+      if (response.ok) {
+        setMessage({ type: "success", text: "SMS preferences saved!" });
+      } else {
+        setMessage({ type: "error", text: "Failed to save SMS preferences." });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to save SMS preferences." });
+    } finally {
+      setSmsLoading(false);
+    }
+  };
+
+  // Send verification code to phone
+  const handleSendVerification = async () => {
+    if (!phoneInput.trim()) {
+      setMessage({ type: "error", text: "Please enter a phone number." });
+      return;
+    }
+    setSmsLoading(true);
+    try {
+      const response = await fetch("/api/user/sms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: phoneInput }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setVerificationPending(true);
+        setPendingPhone(data.phone);
+        setMessage({ type: "success", text: "Verification code sent! Check your phone." });
+      } else {
+        setMessage({ type: "error", text: data.error || "Failed to send verification code." });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to send verification code." });
+    } finally {
+      setSmsLoading(false);
+    }
+  };
+
+  // Verify the code
+  const handleVerifyCode = async () => {
+    if (!verificationCode.trim() || verificationCode.length !== 6) {
+      setMessage({ type: "error", text: "Please enter a 6-digit verification code." });
+      return;
+    }
+    setSmsLoading(true);
+    try {
+      const response = await fetch("/api/user/sms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", code: verificationCode }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setVerificationPending(false);
+        setVerificationCode("");
+        setPhoneInput("");
+        setPendingPhone(null);
+        fetchSmsSettings();
+        setMessage({ type: "success", text: "Phone number verified successfully!" });
+      } else {
+        setMessage({ type: "error", text: data.error || "Invalid verification code." });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to verify code." });
+    } finally {
+      setSmsLoading(false);
+    }
+  };
+
+  // Remove phone number
+  const handleRemovePhone = async () => {
+    setSmsLoading(true);
+    try {
+      const response = await fetch("/api/user/sms", {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setSmsPhone(null);
+        setSmsPhoneVerified(false);
+        setSmsNotifications(false);
+        setMessage({ type: "success", text: "Phone number removed." });
+      } else {
+        setMessage({ type: "error", text: "Failed to remove phone number." });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to remove phone number." });
+    } finally {
+      setSmsLoading(false);
+    }
+  };
+
   // Check for success/canceled URL params from Stripe redirect
   useEffect(() => {
     if (searchParams.get("success") === "true") {
@@ -140,6 +287,7 @@ function SettingsContent() {
   useEffect(() => {
     fetchSubscription();
     fetchNotificationPrefs();
+    fetchSmsSettings();
   }, []);
 
   const handleSaveAccount = async () => {
@@ -473,6 +621,270 @@ function SettingsContent() {
               )}
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* SMS Notifications */}
+      <Card className="bg-slate-800/50 border-slate-700">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Smartphone className="h-5 w-5 text-emerald-500" />
+                SMS Notifications
+                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 ml-2">
+                  Enterprise
+                </Badge>
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Get instant text alerts for critical updates
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Show upgrade prompt for non-Enterprise users */}
+          {smsPlan !== "ENTERPRISE" ? (
+            <div className="p-6 bg-gradient-to-br from-purple-500/10 to-emerald-500/10 border border-purple-500/30 rounded-lg">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-purple-500/20 rounded-lg">
+                  <Smartphone className="h-6 w-6 text-purple-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-white font-semibold mb-2">
+                    Upgrade to Enterprise for SMS Alerts
+                  </h3>
+                  <p className="text-slate-400 text-sm mb-4">
+                    Get instant text notifications for critical security events:
+                  </p>
+                  <ul className="space-y-2 mb-4">
+                    <li className="flex items-center gap-2 text-sm text-slate-300">
+                      <Check className="h-4 w-4 text-emerald-500" />
+                      Real-time exposure alerts
+                    </li>
+                    <li className="flex items-center gap-2 text-sm text-slate-300">
+                      <Check className="h-4 w-4 text-emerald-500" />
+                      Removal completion notifications
+                    </li>
+                    <li className="flex items-center gap-2 text-sm text-slate-300">
+                      <Check className="h-4 w-4 text-emerald-500" />
+                      Urgent data breach alerts
+                    </li>
+                  </ul>
+                  <Button
+                    onClick={() => handleUpgrade("ENTERPRISE")}
+                    className="bg-gradient-to-r from-purple-600 to-emerald-600 hover:from-purple-700 hover:to-emerald-700"
+                    disabled={upgradeLoading === "ENTERPRISE"}
+                  >
+                    {upgradeLoading === "ENTERPRISE" ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Crown className="h-4 w-4 mr-2" />
+                    )}
+                    Upgrade to Enterprise
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : !smsConfigured ? (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+              <p className="text-amber-300 text-sm">
+                SMS notifications are being set up. Contact support if this persists.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Phone Number Management */}
+              {smsPhoneVerified && smsPhone ? (
+                <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Phone className="h-5 w-5 text-emerald-500" />
+                      <div>
+                        <p className="text-white font-medium">{smsPhone}</p>
+                        <p className="text-sm text-emerald-400">Verified</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemovePhone}
+                      disabled={smsLoading}
+                      className="border-red-500/50 text-red-400 hover:bg-red-500/20"
+                    >
+                      {smsLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Remove
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              ) : verificationPending ? (
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <p className="text-blue-300 text-sm mb-3">
+                      We sent a verification code to {pendingPhone}. Enter it below:
+                    </p>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter 6-digit code"
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        className="bg-slate-700/50 border-slate-600 text-white max-w-[200px]"
+                        maxLength={6}
+                      />
+                      <Button
+                        onClick={handleVerifyCode}
+                        className="bg-emerald-600 hover:bg-emerald-700"
+                        disabled={smsLoading || verificationCode.length !== 6}
+                      >
+                        {smsLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Verify"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => {
+                      setVerificationPending(false);
+                      setVerificationCode("");
+                      setPendingPhone(null);
+                    }}
+                    className="text-slate-400"
+                  >
+                    Cancel and try different number
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-slate-200">Add Phone Number</Label>
+                    <p className="text-sm text-slate-500">
+                      Enter your phone number to receive SMS alerts
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="+1 (555) 123-4567"
+                      value={phoneInput}
+                      onChange={(e) => setPhoneInput(e.target.value)}
+                      className="bg-slate-700/50 border-slate-600 text-white max-w-[250px]"
+                    />
+                    <Button
+                      onClick={handleSendVerification}
+                      className="bg-emerald-600 hover:bg-emerald-700"
+                      disabled={smsLoading || !phoneInput.trim()}
+                    >
+                      {smsLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Send Code"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* SMS Preferences (only show if phone verified) */}
+              {smsPhoneVerified && (
+                <>
+                  <Separator className="bg-slate-700" />
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-slate-200">SMS Notifications</Label>
+                      <p className="text-sm text-slate-500">
+                        Enable or disable all SMS notifications
+                      </p>
+                    </div>
+                    <Checkbox
+                      checked={smsNotifications}
+                      onCheckedChange={(checked) =>
+                        setSmsNotifications(checked as boolean)
+                      }
+                      className="border-slate-600 data-[state=checked]:bg-emerald-600"
+                    />
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-slate-200">Exposure Alerts</Label>
+                        <p className="text-sm text-slate-500">
+                          Get texted when new exposures are found
+                        </p>
+                      </div>
+                      <Checkbox
+                        checked={smsExposureAlerts}
+                        onCheckedChange={(checked) =>
+                          setSmsExposureAlerts(checked as boolean)
+                        }
+                        disabled={!smsNotifications}
+                        className="border-slate-600 data-[state=checked]:bg-emerald-600"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-slate-200">Removal Updates</Label>
+                        <p className="text-sm text-slate-500">
+                          Get texted when removals complete
+                        </p>
+                      </div>
+                      <Checkbox
+                        checked={smsRemovalUpdates}
+                        onCheckedChange={(checked) =>
+                          setSmsRemovalUpdates(checked as boolean)
+                        }
+                        disabled={!smsNotifications}
+                        className="border-slate-600 data-[state=checked]:bg-emerald-600"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-slate-200">Breach Alerts</Label>
+                        <p className="text-sm text-slate-500">
+                          Urgent texts for data breaches (recommended)
+                        </p>
+                      </div>
+                      <Checkbox
+                        checked={smsBreachAlerts}
+                        onCheckedChange={(checked) =>
+                          setSmsBreachAlerts(checked as boolean)
+                        }
+                        disabled={!smsNotifications}
+                        className="border-slate-600 data-[state=checked]:bg-emerald-600"
+                      />
+                    </div>
+                  </div>
+                  <div className="pt-4">
+                    <Button
+                      onClick={handleSaveSmsPreferences}
+                      className="bg-emerald-600 hover:bg-emerald-700"
+                      disabled={smsLoading}
+                    >
+                      {smsLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Save SMS Preferences
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
 

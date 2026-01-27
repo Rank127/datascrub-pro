@@ -24,6 +24,13 @@ model User {
   removalUpdates         Boolean           @default(true)
   reportFrequency        String            @default("weekly")
   weeklyReports          Boolean           @default(true)
+  // SMS notifications
+  smsNotifications       Boolean           @default(false)
+  smsPhone               String?           // Verified phone for SMS alerts
+  smsPhoneVerified       Boolean           @default(false)
+  smsExposureAlerts      Boolean           @default(true)
+  smsRemovalUpdates      Boolean           @default(true)
+  smsBreachAlerts        Boolean           @default(true)
   role                   String            @default("USER")
   lastExposureDigestSent DateTime?
   lastScanAt             DateTime?

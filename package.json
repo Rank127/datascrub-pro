@@ -43,6 +43,7 @@
     "sonner": "^2.0.7",
     "stripe": "^20.2.0",
     "tailwind-merge": "^3.4.0",
+    "twilio": "^5.12.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {
