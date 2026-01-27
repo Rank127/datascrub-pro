@@ -37,10 +37,17 @@ export class ScanOrchestrator {
   private initializeScanners(options: ScanOptions) {
     const { type, userPlan } = options;
 
-    // Always include breach scanners
+    // HIBP for all users (breach scanning)
     this.scanners.push(new HaveIBeenPwnedScanner());
-    this.scanners.push(new LeakCheckScanner()); // Free API - breach databases
-    this.scanners.push(new DehashedScanner()); // Paid API - dark web dumps (optional)
+
+    // LeakCheck only for Enterprise (limited lifetime queries - 400 total)
+    if (userPlan === "ENTERPRISE") {
+      console.log("[ScanOrchestrator] Adding LeakCheck Scanner (Enterprise feature - 400 lifetime queries)");
+      this.scanners.push(new LeakCheckScanner());
+    }
+
+    // Dehashed - optional paid API for dark web dumps
+    this.scanners.push(new DehashedScanner());
 
     // Quick scan only checks breaches
     if (type === "QUICK") {
