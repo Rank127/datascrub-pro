@@ -87,6 +87,40 @@ export async function POST(request: Request) {
       );
     }
 
+    // Check for existing IN_PROGRESS scan to prevent concurrent scans
+    const existingInProgressScan = await prisma.scan.findFirst({
+      where: {
+        userId: session.user.id,
+        status: "IN_PROGRESS",
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (existingInProgressScan) {
+      // Check if it's been running for more than 5 minutes (likely stuck)
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      if (existingInProgressScan.createdAt < fiveMinutesAgo) {
+        // Mark the stuck scan as FAILED
+        await prisma.scan.update({
+          where: { id: existingInProgressScan.id },
+          data: {
+            status: "FAILED",
+            completedAt: new Date(),
+          },
+        });
+        console.log(`[Scan] Marked stuck scan ${existingInProgressScan.id} as FAILED`);
+      } else {
+        // Recent scan still in progress
+        return NextResponse.json(
+          {
+            error: "A scan is already in progress. Please wait for it to complete.",
+            existingScanId: existingInProgressScan.id,
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     // Get user's profile
     const profile = await prisma.personalProfile.findFirst({
       where: { userId: session.user.id },
@@ -267,6 +301,36 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Scan error:", error);
+
+    // Try to mark any in-progress scan as failed for this user
+    // We need to get the session again since we might have failed before scan creation
+    try {
+      const session = await auth();
+      if (session?.user?.id) {
+        // Find the most recent IN_PROGRESS scan and mark it as FAILED
+        const failedScan = await prisma.scan.findFirst({
+          where: {
+            userId: session.user.id,
+            status: "IN_PROGRESS",
+          },
+          orderBy: { createdAt: "desc" },
+        });
+
+        if (failedScan) {
+          await prisma.scan.update({
+            where: { id: failedScan.id },
+            data: {
+              status: "FAILED",
+              completedAt: new Date(),
+            },
+          });
+          console.log(`[Scan] Marked scan ${failedScan.id} as FAILED due to error`);
+        }
+      }
+    } catch (cleanupError) {
+      console.error("Failed to cleanup scan status:", cleanupError);
+    }
+
     return NextResponse.json(
       { error: "Scan failed. Please try again." },
       { status: 500 }
