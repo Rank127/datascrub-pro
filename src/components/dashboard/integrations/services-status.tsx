@@ -99,12 +99,20 @@ function ServiceCard({
   const config = statusConfig[status];
   const StatusIcon = config.icon;
 
+  // Override styling if rate limit is critical (80%+)
+  const isRateLimitCritical = rateLimit?.status === "critical";
+  const isRateLimitWarning = rateLimit?.status === "warning";
+
   return (
     <div
       className={cn(
         "p-4 rounded-lg border",
-        config.bgColor,
-        config.borderColor
+        isRateLimitCritical
+          ? "bg-red-500/10 border-red-500/40 ring-1 ring-red-500/20"
+          : isRateLimitWarning
+            ? "bg-amber-500/10 border-amber-500/30"
+            : config.bgColor,
+        !isRateLimitCritical && !isRateLimitWarning && config.borderColor
       )}
     >
       <div className="flex items-start justify-between mb-3">
@@ -119,7 +127,14 @@ function ServiceCard({
             )}
           </div>
         </div>
-        <StatusIcon className={cn("h-5 w-5", config.color)} />
+        <div className="flex items-center gap-2">
+          {isRateLimitCritical && (
+            <span className="text-[10px] font-semibold bg-red-500 text-white px-1.5 py-0.5 rounded uppercase">
+              Upgrade
+            </span>
+          )}
+          <StatusIcon className={cn("h-5 w-5", isRateLimitCritical ? "text-red-400" : config.color)} />
+        </div>
       </div>
 
       {credits !== undefined && (

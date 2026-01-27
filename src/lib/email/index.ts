@@ -1068,3 +1068,103 @@ export async function sendBulkRemovalSummaryEmail(
     html
   );
 }
+
+// ==========================================
+// Admin Service Alert Emails
+// ==========================================
+
+interface ServiceAlertData {
+  serviceName: string;
+  percentUsed: number;
+  used: number;
+  limit: number;
+  status: "warning" | "critical";
+  recommendation?: string;
+}
+
+// Track which alerts have been sent today to avoid spam
+const alertsSentToday: Record<string, string> = {}; // service -> date
+
+function shouldSendAlert(serviceName: string): boolean {
+  const today = new Date().toDateString();
+  if (alertsSentToday[serviceName] === today) {
+    return false; // Already sent today
+  }
+  alertsSentToday[serviceName] = today;
+  return true;
+}
+
+export async function sendServiceAlertEmail(
+  adminEmail: string,
+  alerts: ServiceAlertData[]
+) {
+  // Filter to only critical alerts we haven't sent today
+  const newCriticalAlerts = alerts.filter(
+    (a) => a.status === "critical" && shouldSendAlert(a.serviceName)
+  );
+
+  if (newCriticalAlerts.length === 0) {
+    return { success: true, skipped: true, message: "No new alerts to send" };
+  }
+
+  const alertRows = newCriticalAlerts
+    .map(
+      (alert) => `
+      <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #334155; color: #e2e8f0;">
+          <strong>${alert.serviceName}</strong>
+        </td>
+        <td style="padding: 12px; border-bottom: 1px solid #334155; text-align: center;">
+          <span style="color: ${alert.status === "critical" ? "#ef4444" : "#f59e0b"}; font-weight: bold;">
+            ${alert.percentUsed}%
+          </span>
+        </td>
+        <td style="padding: 12px; border-bottom: 1px solid #334155; color: #94a3b8;">
+          ${alert.used.toLocaleString()} / ${alert.limit.toLocaleString()}
+        </td>
+        <td style="padding: 12px; border-bottom: 1px solid #334155; color: #f59e0b;">
+          ${alert.recommendation || "Consider upgrading"}
+        </td>
+      </tr>
+    `
+    )
+    .join("");
+
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="display: inline-block; padding: 12px; background-color: #ef4444; border-radius: 50%;">
+        <span style="font-size: 32px;">⚠️</span>
+      </div>
+    </div>
+    <h1 style="color: #ef4444; font-size: 24px; margin-bottom: 16px; text-align: center;">
+      Service Usage Alert
+    </h1>
+    <p style="font-size: 16px; color: #94a3b8; margin-bottom: 24px; text-align: center;">
+      ${newCriticalAlerts.length} service${newCriticalAlerts.length > 1 ? "s have" : " has"} reached 80%+ usage
+    </p>
+    <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
+      <thead>
+        <tr style="background-color: #334155;">
+          <th style="padding: 12px; text-align: left; color: #e2e8f0;">Service</th>
+          <th style="padding: 12px; text-align: center; color: #e2e8f0;">Usage</th>
+          <th style="padding: 12px; text-align: left; color: #e2e8f0;">Count</th>
+          <th style="padding: 12px; text-align: left; color: #e2e8f0;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${alertRows}
+      </tbody>
+    </table>
+    <p style="font-size: 14px; color: #64748b; margin-top: 24px;">
+      These services are approaching their limits. Consider upgrading to avoid service interruptions.
+    </p>
+    ${buttonHtml("View Integrations Dashboard", `${APP_URL}/admin/dashboard/integrations`)}
+  `);
+
+  return sendEmail(
+    adminEmail,
+    `⚠️ Service Alert: ${newCriticalAlerts.length} service${newCriticalAlerts.length > 1 ? "s" : ""} at ${Math.max(...newCriticalAlerts.map((a) => a.percentUsed))}% usage`,
+    html,
+    { skipQuotaCheck: true } // Admin alerts should always go through
+  );
+}

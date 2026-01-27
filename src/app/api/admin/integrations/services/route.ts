@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
-import { getEmailQuotaStatus, getEmailQueueStatus } from "@/lib/email";
+import { getEmailQuotaStatus, getEmailQueueStatus, sendServiceAlertEmail } from "@/lib/email";
 import { getServiceStatus, shouldUseFreeAlternative } from "@/lib/services/rate-limiter";
 import {
   ServicesIntegrationResponse,
@@ -21,10 +21,10 @@ function calculateRateLimitHealth(used: number, limit: number, resetAt?: string)
   let status: RateLimitHealth["status"] = "healthy";
   let recommendation: string | undefined;
 
-  if (percentUsed >= 90) {
+  if (percentUsed >= 80) {
     status = "critical";
-    recommendation = "Upgrade plan immediately - approaching rate limit";
-  } else if (percentUsed >= 75) {
+    recommendation = "Time to upgrade - limit nearly exhausted";
+  } else if (percentUsed >= 60) {
     status = "warning";
     recommendation = "Consider upgrading plan - high usage";
   }
@@ -450,6 +450,47 @@ export async function GET(request: Request) {
     };
 
     console.log("[Services] Response:", JSON.stringify(response, null, 2));
+
+    // Check for critical rate limits and send admin alert
+    const criticalAlerts: Array<{
+      serviceName: string;
+      percentUsed: number;
+      used: number;
+      limit: number;
+      status: "warning" | "critical";
+      recommendation?: string;
+    }> = [];
+
+    const servicesWithLimits = [
+      { name: "Resend (Email)", data: resend },
+      { name: "LeakCheck", data: leakcheck },
+      { name: "ScrapingBee", data: scrapingbee },
+      { name: "Redis / Upstash", data: redis },
+    ];
+
+    for (const service of servicesWithLimits) {
+      if (service.data.rateLimit?.status === "critical") {
+        criticalAlerts.push({
+          serviceName: service.name,
+          percentUsed: service.data.rateLimit.percentUsed,
+          used: service.data.rateLimit.used,
+          limit: service.data.rateLimit.limit,
+          status: "critical",
+          recommendation: service.data.rateLimit.recommendation,
+        });
+      }
+    }
+
+    // Send alert email if there are critical services
+    if (criticalAlerts.length > 0) {
+      const adminEmail = process.env.ADMIN_EMAILS?.split(",")[0]?.trim();
+      if (adminEmail) {
+        console.log("[Services] Sending alert for critical services:", criticalAlerts.map(a => a.serviceName));
+        sendServiceAlertEmail(adminEmail, criticalAlerts).catch((err) => {
+          console.error("[Services] Failed to send alert email:", err);
+        });
+      }
+    }
 
     return NextResponse.json(response);
   } catch (error) {
