@@ -441,6 +441,19 @@ export default function SupportPage() {
                     </div>
                   </div>
 
+                  {/* Auto-close warning for resolved tickets */}
+                  {selectedTicket.status === "RESOLVED" && (
+                    <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                      <p className="text-sm text-amber-400 flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        <span>
+                          <strong>This ticket will automatically close in 24 hours.</strong>{" "}
+                          Reply below if you need further assistance.
+                        </span>
+                      </p>
+                    </div>
+                  )}
+
                   {/* Resolution */}
                   {selectedTicket.resolution && (
                     <div className="space-y-2">
@@ -451,12 +464,6 @@ export default function SupportPage() {
                       <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-white">
                         {selectedTicket.resolution}
                       </div>
-                      {selectedTicket.status === "RESOLVED" && (
-                        <p className="text-xs text-slate-400 flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          This ticket will automatically close in 24 hours. Reply if you need further assistance.
-                        </p>
-                      )}
                     </div>
                   )}
 
