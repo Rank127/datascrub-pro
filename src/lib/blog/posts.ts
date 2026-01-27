@@ -88,7 +88,7 @@ After a week, search for yourself on Spokeo again to confirm your listing has be
 
 Manually removing yourself from every data broker is time-consuming and requires constant vigilance. GhostMyData automates this process:
 
-- **One-click removal** from 2,000+ data brokers including Spokeo
+- **One-click removal** from 2,100+ data brokers including Spokeo
 - **Continuous monitoring** to catch re-listings
 - **Automated opt-out submissions** on your behalf
 - **Progress tracking** for all removal requests
@@ -314,7 +314,7 @@ A data broker (also called an information broker or data vendor) is a company th
 
 - **4,000+** data broker companies operate in the US alone
 - **$200+ billion** annual industry revenue
-- **Average person** has their data on 50+ data broker sites (we scan 2,000+)
+- **Average person** has their data on 50+ data broker sites (we scan 2,100+)
 - **1,500+ data points** collected per person on average
 
 ## How Data Brokers Collect Your Information
@@ -421,7 +421,7 @@ Vermont, Nevada, and other states have data broker regulations requiring registr
 
 ### Automated Removal with GhostMyData
 1. Sign up and enter your information once
-2. We scan 2,000+ data brokers automatically
+2. We scan 2,100+ data brokers automatically
 3. We submit removal requests on your behalf
 4. We monitor for re-listings continuously
 5. You stay protected without the hassle
@@ -839,7 +839,7 @@ TruePeopleSearch doesn't require email verification or phone calls, making it on
 
 ## Complete Your Privacy Protection
 
-TruePeopleSearch is just one of 2,000+ data brokers exposing your information. GhostMyData removes you from all of them:
+TruePeopleSearch is just one of 2,100+ data brokers exposing your information. GhostMyData removes you from all of them:
 
 - Automatic removal from all major people-search sites
 - Continuous monitoring for re-listings
@@ -1139,7 +1139,7 @@ Data brokers are goldmines for identity thieves. They provide:
 - Relatives' names
 - And much more...
 
-**Action**: Use GhostMyData to automatically remove your information from 2,000+ data brokers.
+**Action**: Use GhostMyData to automatically remove your information from 2,100+ data brokers.
 
 ### 2. Use Unique Passwords Everywhere
 

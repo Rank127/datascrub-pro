@@ -24,7 +24,7 @@ export {
 // Legacy mock scanner (kept for testing/development)
 export { MockDataBrokerScanner } from "./mock-broker-scanner";
 
-// All brokers scanner - generates check links for ALL 2,000+ brokers
+// All brokers scanner - generates check links for ALL 2,100+ brokers
 export { AllBrokersScanner, createAllBrokersScanner } from "./all-brokers-scanner";
 
 import { SpokeoScanner } from "./spokeo-scanner";
@@ -59,7 +59,7 @@ export function createRealBrokerScanners(): Scanner[] {
     new RadarisScanner(),
     new InteliusScanner(),
     createPeopleFinderManualScanner(), // Manual check - advanced bot protection
-    // All remaining 2,000+ brokers from the directory
+    // All remaining 2,100+ brokers from the directory
     createAllBrokersScanner(),
   ];
 }

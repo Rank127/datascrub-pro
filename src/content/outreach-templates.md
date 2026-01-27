@@ -38,7 +38,7 @@ Hi [Name],
 I came across your helpful resource page on [topic, e.g., "online privacy tools"] and wanted to suggest an addition your readers might find valuable.
 
 GhostMyData (https://ghostmydata.com) is a data removal service that helps people:
-- Find their personal data on 2,000+ data broker sites
+- Find their personal data on 2,100+ data broker sites
 - Automatically submit opt-out requests
 - Monitor for new data exposures
 
@@ -132,7 +132,7 @@ I noticed your article ranking the best data removal services and wanted to intr
 **Why GhostMyData stands out**:
 - **Free tier** - Users can scan for free (most competitors don't offer this)
 - **Dark web monitoring** - Included in Enterprise plan
-- **2,000+ data brokers** - Industry-leading coverage (plus 60 AI Shield sources)
+- **2,100+ data brokers** - Industry-leading coverage (plus 60 AI Shield sources)
 - **Modern dashboard** - Real-time progress tracking
 
 We'd be happy to provide you with a review account so you can test the service yourself.
@@ -175,17 +175,17 @@ GhostMyData
 **FOR IMMEDIATE RELEASE**
 
 **GhostMyData Launches Free Personal Data Removal Service**
-*New service helps consumers find and remove personal information from 2,000+ data broker sites*
+*New service helps consumers find and remove personal information from 2,100+ data broker sites*
 
 [City, Date] – GhostMyData today announced the launch of its personal data removal service, offering consumers a free way to discover where their personal information is exposed online.
 
-With over 4,000 data brokers collecting and selling personal information, most Americans appear on dozens of people-search sites without their knowledge. GhostMyData scans 2,000+ data sources to identify exposures and automates the removal process.
+With over 4,000 data brokers collecting and selling personal information, most Americans appear on dozens of people-search sites without their knowledge. GhostMyData scans 2,100+ data sources to identify exposures and automates the removal process.
 
 "Everyone deserves to control their personal data," said [Founder Name], founder of GhostMyData. "We built this service to make privacy protection accessible to everyone, starting with a completely free scan."
 
 **Key Features**:
 - Free privacy scan (no credit card required)
-- Automated removal requests to 2,000+ data brokers
+- Automated removal requests to 2,100+ data brokers
 - Dark web monitoring for compromised credentials
 - CCPA and GDPR compliant removal requests
 

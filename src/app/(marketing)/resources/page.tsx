@@ -258,7 +258,7 @@ export default function ResourcesPage() {
               Ready to Protect Your Privacy?
             </h2>
             <p className="text-gray-300 mb-8">
-              Let GhostMyData automatically remove your information from 200+ data
+              Let GhostMyData automatically remove your information from 2,100+ data
               broker sites while you focus on what matters.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

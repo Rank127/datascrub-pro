@@ -84,7 +84,7 @@ export function BrokerRemovalTemplate({ broker }: { broker: BrokerInfo }) {
         <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6 mb-12">
           <h2 className="text-xl font-bold text-white mb-3">Skip the Manual Process</h2>
           <p className="text-slate-400 mb-4">
-            GhostMyData automatically removes your data from {broker.name} and 2,000+ other data brokers.
+            GhostMyData automatically removes your data from {broker.name} and 2,100+ other data brokers.
             One-click removal, continuous monitoring, 98% success rate.
           </p>
           <Link href="/register">
@@ -192,7 +192,7 @@ export function BrokerRemovalTemplate({ broker }: { broker: BrokerInfo }) {
         {/* CTA */}
         <div className="text-center p-8 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Remove Your Data from {broker.name} + 2,000 More Sites
+            Remove Your Data from {broker.name} + 2,100+ More Sites
           </h2>
           <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
             Manual removal is time-consuming and requires constant vigilance.

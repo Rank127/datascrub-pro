@@ -170,7 +170,7 @@ This report analyzes 8 major competitors, compares them to GhostMyData's current
 
 | Feature | GhostMyData | Industry Standard |
 |---------|-------------|-------------------|
-| **Data Broker Directory** | 2,270+ brokers | 200-750 typical |
+| **Data Broker Directory** | 2,145+ brokers | 200-750 typical |
 | **Scanner Coverage** | 60+ sources | 200-420 typical |
 | **AI Protection** | ✅ 50+ AI sources | Rare (premium feature) |
 | **Screenshot Proof** | ✅ Before/after/form | Optery only |
@@ -339,11 +339,11 @@ This report analyzes 8 major competitors, compares them to GhostMyData's current
 > "Remove your personal data from data brokers and protect your privacy"
 
 ### Recommended Positioning
-> "The most comprehensive AI-age privacy protection — 2,270+ data brokers, AI deepfake defense, and dark web monitoring in one platform"
+> "The most comprehensive AI-age privacy protection — 2,145+ data brokers, AI deepfake defense, and dark web monitoring in one platform"
 
 ### Key Differentiators to Emphasize
 
-1. **Largest broker coverage** (2,270+ vs industry 200-750)
+1. **Largest broker coverage** (2,145+ vs industry 200-750)
 2. **AI Shield** (unique in market — deepfake, voice cloning, facial recognition)
 3. **Screenshot proof system** (only Optery has this)
 4. **Dark web monitoring** (enterprise feature competitors charge extra for)
@@ -356,7 +356,7 @@ This report analyzes 8 major competitors, compares them to GhostMyData's current
 | Privacy-conscious individuals | "Know exactly where your data is and take it back" |
 | Parents/families | "Protect your family from identity theft and AI deepfakes" |
 | High-profile individuals | "Executive-level privacy protection with AI Shield" |
-| Tech-savvy users | "2,270+ data broker coverage — more than any competitor" |
+| Tech-savvy users | "2,145+ data broker coverage — more than any competitor" |
 | Enterprise/HR | "Protect your employees' personal data at scale" |
 
 ---
@@ -367,7 +367,7 @@ This report analyzes 8 major competitors, compares them to GhostMyData's current
 |---------|-------------|----------|---------|--------|--------|------|----------|
 | Free tier | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | Free trial | ❌ | ❌ | 30-day MBG | Free tier | 14-day | 14-day | Varies |
-| Data brokers | 2,270+ | 750+ | 420+ | 370-635 | 300+ | 200+ | 19 |
+| Data brokers | 2,145+ | 750+ | 420+ | 370-635 | 300+ | 200+ | 19 |
 | AI protection | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Dark web | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
 | Mobile app | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
@@ -382,7 +382,7 @@ This report analyzes 8 major competitors, compares them to GhostMyData's current
 
 ## Conclusion
 
-GhostMyData has strong technical foundations with the **largest data broker directory (2,270+)** and **unique AI Shield protection**. However, to compete effectively, the focus should be on:
+GhostMyData has strong technical foundations with the **largest data broker directory (2,145+)** and **unique AI Shield protection**. However, to compete effectively, the focus should be on:
 
 1. **Reducing friction** — Free trial, improved onboarding
 2. **Building trust** — Third-party verification, transparency reports
