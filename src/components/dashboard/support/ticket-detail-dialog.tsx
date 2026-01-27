@@ -136,37 +136,46 @@ export function TicketDetailDialog({
   const [executingFix, setExecutingFix] = useState<string | null>(null);
 
   // Generate auto-fix suggestions based on ticket type
+  // Action names must match executeAutoFix in ticket-service.ts
   const getAutoFixSuggestions = (): AutoFixSuggestion[] => {
     const suggestions: AutoFixSuggestion[] = [];
 
     switch (ticket.type) {
       case "SCAN_ERROR":
         suggestions.push(
-          { title: "Retry Scan", description: "Notify user to retry their scan", action: "retry_scan", actionType: "auto", severity: "info" },
-          { title: "Check Profile", description: "Verify user profile is complete", action: "check_profile", actionType: "manual", severity: "info" }
+          { title: "Retry Scan", description: "Reset scan status so user can retry", action: "retry_scan", actionType: "auto", severity: "info" },
+          { title: "Verify Profile", description: "Check user profile data for accuracy", action: "verify_profile", actionType: "manual", severity: "info" }
         );
         if (ticket.description.toLowerCase().includes("timeout")) {
-          suggestions.push({ title: "Network Issue", description: "Likely timeout - recommend off-peak hours", action: "timeout_advice", actionType: "user_action", severity: "warning" });
+          suggestions.push({ title: "Schedule Off-Peak", description: "Schedule retry during off-peak hours", action: "schedule_retry", actionType: "auto", severity: "warning" });
         }
         break;
       case "REMOVAL_FAILED":
         suggestions.push(
-          { title: "Retry Removal", description: "Reset attempts and retry automated removal", action: "retry_removal", actionType: "auto", severity: "info" },
-          { title: "Try Alt Emails", description: "Try alternative privacy email addresses", action: "alt_emails", actionType: "auto", severity: "info" },
-          { title: "Manual Removal", description: "Process through broker's opt-out form manually", action: "manual_removal", actionType: "manual", severity: "warning" }
+          { title: "Retry Removal", description: "Reset attempts and queue for retry", action: "retry_removal", actionType: "auto", severity: "info" },
+          { title: "Try Alt Emails", description: "Try alternative email variations", action: "retry_alternate_emails", actionType: "auto", severity: "info" },
+          { title: "Mark Manual", description: "Flag for manual processing", action: "mark_manual", actionType: "manual", severity: "warning" },
+          { title: "Escalate", description: "Escalate to legal for CCPA/GDPR request", action: "escalate_broker", actionType: "manual", severity: "critical" }
         );
         break;
       case "PAYMENT_ISSUE":
         suggestions.push(
-          { title: "Check Stripe", description: "Review payment failure in Stripe dashboard", action: "check_stripe", actionType: "manual", severity: "warning" },
-          { title: "Send Update Link", description: "Send payment method update link", action: "payment_link", actionType: "auto", severity: "info" },
+          { title: "Check Stripe", description: "Open Stripe dashboard for this customer", action: "check_stripe", actionType: "manual", severity: "warning" },
+          { title: "Send Update Link", description: "Send payment method update link to user", action: "send_payment_link", actionType: "auto", severity: "info" },
           { title: "Extend Grace", description: "Extend access 7 days while issue resolves", action: "extend_grace", actionType: "manual", severity: "info" }
         );
         break;
       case "ACCOUNT_ISSUE":
         suggestions.push(
-          { title: "Reset Sessions", description: "Clear all user sessions to fix login issues", action: "reset_sessions", actionType: "auto", severity: "info" },
-          { title: "Verify Email", description: "Resend email verification", action: "verify_email", actionType: "auto", severity: "info" }
+          { title: "Reset Sessions", description: "Clear all sessions to fix login issues", action: "reset_sessions", actionType: "auto", severity: "info" },
+          { title: "Verify Email", description: "Resend email verification link", action: "verify_email", actionType: "auto", severity: "info" },
+          { title: "Check Status", description: "Review full account status", action: "check_status", actionType: "manual", severity: "info" }
+        );
+        break;
+      case "FEATURE_REQUEST":
+        suggestions.push(
+          { title: "Log Feature", description: "Add to product backlog", action: "log_feature", actionType: "manual", severity: "info" },
+          { title: "Check Roadmap", description: "Check if already planned", action: "check_roadmap", actionType: "manual", severity: "info" }
         );
         break;
       default:
@@ -178,20 +187,29 @@ export function TicketDetailDialog({
 
   const suggestions = getAutoFixSuggestions();
 
-  const handleExecuteFix = async (action: string) => {
+  const handleExecuteFix = async (action: string, suggestion: AutoFixSuggestion) => {
     setExecutingFix(action);
     try {
-      // Log the fix attempt as internal comment
-      await fetch(`/api/admin/support/tickets/${ticket.id}/comments`, {
+      const response = await fetch(`/api/admin/support/tickets/${ticket.id}/execute-fix`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: `Auto-fix action executed: ${action}`,
-          isInternal: true,
-        }),
+        body: JSON.stringify({ action }),
       });
-      toast.success(`Action "${action}" logged. Implement as needed.`);
-      fetchComments();
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast.success(result.message || `${suggestion.title} completed`);
+
+        // Handle special actions that return URLs
+        if (result.data?.url && result.data?.openInNewTab) {
+          window.open(result.data.url, "_blank");
+        }
+
+        fetchComments();
+      } else {
+        toast.error(result.message || "Action failed");
+      }
     } catch {
       toast.error("Failed to execute action");
     } finally {
@@ -444,7 +462,7 @@ export function TicketDetailDialog({
                       <Button
                         size="sm"
                         variant={suggestion.actionType === "auto" ? "default" : "outline"}
-                        onClick={() => handleExecuteFix(suggestion.action)}
+                        onClick={() => handleExecuteFix(suggestion.action, suggestion)}
                         disabled={executingFix === suggestion.action}
                         className="shrink-0"
                       >

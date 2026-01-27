@@ -47,7 +47,9 @@ export type AuditAction =
   | "CREATE_SUPPORT_TICKET"
   | "UPDATE_SUPPORT_TICKET"
   | "RESPOND_TO_TICKET"
-  | "SEND_USER_EMAIL";
+  | "SEND_USER_EMAIL"
+  | "ADD_TICKET_COMMENT"
+  | "EXECUTE_AUTO_FIX";
 
 export interface AuditLogEntry {
   actorId: string;

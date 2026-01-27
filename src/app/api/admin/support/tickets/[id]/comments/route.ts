@@ -4,12 +4,6 @@ import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
 import { z } from "zod";
-import { addTicketComment } from "@/lib/support/ticket-service";
-
-const createCommentSchema = z.object({
-  content: z.string().min(1, "Comment cannot be empty").max(5000),
-  isInternal: z.boolean().optional().default(false),
-});
 
 function getClientIP(request: Request): string | undefined {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -19,8 +13,13 @@ function getClientIP(request: Request): string | undefined {
   return undefined;
 }
 
+const createCommentSchema = z.object({
+  content: z.string().min(1, "Comment cannot be empty").max(5000),
+  isInternal: z.boolean().optional().default(false),
+});
+
 /**
- * GET /api/admin/support/tickets/[id]/comments - Get all ticket comments (including internal)
+ * GET /api/admin/support/tickets/[id]/comments - Get comments for a ticket
  */
 export async function GET(
   request: NextRequest,
@@ -44,7 +43,6 @@ export async function GET(
 
     const role = getEffectiveRole(currentUser.email, currentUser.role);
 
-    // Only support staff and above can access admin comments endpoint
     if (!["SUPPORT", "ADMIN", "LEGAL", "SUPER_ADMIN"].includes(role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -54,20 +52,19 @@ export async function GET(
     // Verify ticket exists
     const ticket = await prisma.supportTicket.findUnique({
       where: { id },
-      select: { id: true, userId: true },
+      select: { id: true },
     });
 
     if (!ticket) {
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
-    // Get all comments including internal notes
     const comments = await prisma.ticketComment.findMany({
       where: { ticketId: id },
       orderBy: { createdAt: "asc" },
       include: {
         author: {
-          select: { id: true, name: true, email: true, role: true },
+          select: { id: true, name: true, email: true },
         },
       },
     });
@@ -83,7 +80,7 @@ export async function GET(
 }
 
 /**
- * POST /api/admin/support/tickets/[id]/comments - Add a comment (can be internal)
+ * POST /api/admin/support/tickets/[id]/comments - Add a comment to a ticket
  */
 export async function POST(
   request: NextRequest,
@@ -98,7 +95,7 @@ export async function POST(
 
     const currentUser = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { email: true, role: true },
+      select: { email: true, role: true, name: true },
     });
 
     if (!currentUser) {
@@ -116,7 +113,7 @@ export async function POST(
     // Verify ticket exists
     const ticket = await prisma.supportTicket.findUnique({
       where: { id },
-      select: { id: true, userId: true, status: true, ticketNumber: true },
+      select: { id: true, ticketNumber: true, userId: true },
     });
 
     if (!ticket) {
@@ -133,39 +130,50 @@ export async function POST(
       );
     }
 
-    const comment = await addTicketComment(
-      id,
-      session.user.id,
-      result.data.content,
-      result.data.isInternal
-    );
+    const { content, isInternal } = result.data;
+
+    // Create the comment
+    const comment = await prisma.ticketComment.create({
+      data: {
+        ticketId: id,
+        authorId: session.user.id,
+        content,
+        isInternal,
+      },
+      include: {
+        author: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    });
+
+    // Update ticket's last activity
+    await prisma.supportTicket.update({
+      where: { id },
+      data: { lastActivityAt: new Date() },
+    });
 
     // Log the action
     await logAudit({
       actorId: session.user.id,
       actorEmail: currentUser.email || "",
       actorRole: role,
-      action: "RESPOND_TO_TICKET",
+      action: "ADD_TICKET_COMMENT",
       resource: "support_tickets",
       resourceId: id,
       targetUserId: ticket.userId,
-      details: {
-        ticketNumber: ticket.ticketNumber,
-        isInternal: result.data.isInternal,
-      },
       ipAddress: getClientIP(request),
       userAgent: request.headers.get("user-agent") || undefined,
+      details: {
+        ticketNumber: ticket.ticketNumber,
+        isInternal,
+        contentPreview: content.substring(0, 100),
+      },
     });
 
     return NextResponse.json({
       success: true,
-      comment: {
-        id: comment.id,
-        content: comment.content,
-        isInternal: comment.isInternal,
-        createdAt: comment.createdAt,
-        author: comment.author,
-      },
+      comment,
     });
   } catch (error) {
     console.error("[Admin Support API] Error adding comment:", error);
