@@ -97,6 +97,12 @@ export default function SupportPage() {
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch with date formatting
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // New ticket form state
   const [newTicketForm, setNewTicketForm] = useState({
@@ -432,7 +438,7 @@ export default function SupportPage() {
                   {/* Original Description */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-slate-500" suppressHydrationWarning>
                         Submitted {format(new Date(selectedTicket.createdAt), "MMM d, yyyy h:mm a")}
                       </span>
                     </div>
@@ -502,10 +508,10 @@ export default function SupportPage() {
                                   "You"
                                 )}
                               </span>
-                              <span className="text-xs text-slate-500">
-                                {formatDistanceToNow(new Date(comment.createdAt), {
+                              <span className="text-xs text-slate-500" suppressHydrationWarning>
+                                {mounted ? formatDistanceToNow(new Date(comment.createdAt), {
                                   addSuffix: true,
-                                })}
+                                }) : ""}
                               </span>
                             </div>
                             <p className="text-sm text-slate-300 whitespace-pre-wrap">
@@ -601,7 +607,7 @@ function TicketRow({
           <Badge className={`${statusConfig.bg} ${statusConfig.text} text-xs`}>
             {statusConfig.label}
           </Badge>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-500" suppressHydrationWarning>
             {formatDistanceToNow(new Date(ticket.lastActivityAt), {
               addSuffix: true,
             })}
