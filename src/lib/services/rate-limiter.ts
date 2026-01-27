@@ -322,9 +322,13 @@ export function getScrapingBeeStatus(): {
 }
 
 export function canUseService(service: string): boolean {
+  // LeakCheck has lifetime limit, not daily
+  if (service.toLowerCase() === "leakcheck") {
+    return canUseLeakCheck().allowed;
+  }
+
   const limits: Record<string, number> = {
     hibp: parseInt(process.env.HIBP_DAILY_LIMIT || "50"),
-    leakcheck: parseInt(process.env.LEAKCHECK_DAILY_LIMIT || "50"),
     scrapingbee: parseInt(process.env.SCRAPINGBEE_DAILY_LIMIT || "100"),
     resend: parseInt(process.env.DAILY_EMAIL_LIMIT || "90"),
   };
@@ -334,6 +338,99 @@ export function canUseService(service: string): boolean {
 
   const currentUsage = getUsage(service.toLowerCase());
   return currentUsage.count < limit;
+}
+
+// ============================================
+// LeakCheck Lifetime Credit Management
+// ============================================
+
+interface LeakCheckCredits {
+  used: number;
+  apiCreditsRemaining: number | null;
+  lastCheckedAt: number;
+}
+
+const leakCheckCredits: LeakCheckCredits = {
+  used: 0,
+  apiCreditsRemaining: null,
+  lastCheckedAt: 0,
+};
+
+// LeakCheck lifetime limit (400 queries total, never renews)
+const LEAKCHECK_LIFETIME_LIMIT = parseInt(process.env.LEAKCHECK_LIFETIME_LIMIT || "400");
+
+// Warning at 80% (320 queries used)
+const LEAKCHECK_WARNING_THRESHOLD = 0.8;
+
+// Critical at 95% (380 queries used) - be very conservative
+const LEAKCHECK_CRITICAL_THRESHOLD = 0.95;
+
+/**
+ * Update LeakCheck credits from API
+ */
+export function updateLeakCheckApiCredits(creditsRemaining: number): void {
+  leakCheckCredits.apiCreditsRemaining = creditsRemaining;
+  leakCheckCredits.lastCheckedAt = Date.now();
+}
+
+/**
+ * Record LeakCheck query usage
+ */
+export function recordLeakCheckUsage(): void {
+  leakCheckCredits.used++;
+  if (leakCheckCredits.apiCreditsRemaining !== null && leakCheckCredits.apiCreditsRemaining > 0) {
+    leakCheckCredits.apiCreditsRemaining--;
+  }
+}
+
+/**
+ * Check if LeakCheck can be used
+ */
+export function canUseLeakCheck(): { allowed: boolean; reason?: string } {
+  // If we have API data, use it
+  if (leakCheckCredits.apiCreditsRemaining !== null) {
+    if (leakCheckCredits.apiCreditsRemaining <= 0) {
+      return { allowed: false, reason: "Lifetime queries exhausted" };
+    }
+    const percentUsed = (LEAKCHECK_LIFETIME_LIMIT - leakCheckCredits.apiCreditsRemaining) / LEAKCHECK_LIFETIME_LIMIT;
+    if (percentUsed >= LEAKCHECK_CRITICAL_THRESHOLD) {
+      return { allowed: false, reason: "Conserving remaining lifetime queries" };
+    }
+  }
+
+  return { allowed: true };
+}
+
+/**
+ * Get LeakCheck status for dashboard
+ */
+export function getLeakCheckStatus(): {
+  queriesUsed: number;
+  queriesRemaining: number;
+  lifetimeLimit: number;
+  percentUsed: number;
+  status: "healthy" | "warning" | "critical";
+  apiCreditsRemaining: number | null;
+} {
+  const remaining = leakCheckCredits.apiCreditsRemaining ?? (LEAKCHECK_LIFETIME_LIMIT - leakCheckCredits.used);
+  const used = LEAKCHECK_LIFETIME_LIMIT - remaining;
+  const percentUsed = Math.round((used / LEAKCHECK_LIFETIME_LIMIT) * 100);
+
+  let status: "healthy" | "warning" | "critical" = "healthy";
+  if (percentUsed >= LEAKCHECK_CRITICAL_THRESHOLD * 100) {
+    status = "critical";
+  } else if (percentUsed >= LEAKCHECK_WARNING_THRESHOLD * 100) {
+    status = "warning";
+  }
+
+  return {
+    queriesUsed: used,
+    queriesRemaining: remaining,
+    lifetimeLimit: LEAKCHECK_LIFETIME_LIMIT,
+    percentUsed,
+    status,
+    apiCreditsRemaining: leakCheckCredits.apiCreditsRemaining,
+  };
 }
 
 export function shouldUseFreeAlternative(): boolean {

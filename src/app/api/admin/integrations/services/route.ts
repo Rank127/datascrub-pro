@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
 import { getEmailQuotaStatus, getEmailQueueStatus, sendServiceAlertEmail } from "@/lib/email";
-import { getServiceStatus, shouldUseFreeAlternative, getHIBPRateLimitStatus, getScrapingBeeStatus, updateScrapingBeeApiCredits } from "@/lib/services/rate-limiter";
+import { getServiceStatus, shouldUseFreeAlternative, getHIBPRateLimitStatus, getScrapingBeeStatus, updateScrapingBeeApiCredits, getLeakCheckStatus, updateLeakCheckApiCredits } from "@/lib/services/rate-limiter";
 import {
   ServicesIntegrationResponse,
   ResendServiceStatus,
@@ -258,7 +258,7 @@ async function checkHIBPStatus(): Promise<HIBPServiceStatus> {
 
 async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
   const freeTierMode = shouldUseFreeAlternative();
-  const rateLimitStatus = getServiceStatus("leakcheck");
+  const internalStatus = getLeakCheckStatus();
 
   if (!process.env.LEAKCHECK_API_KEY) {
     return {
@@ -267,47 +267,100 @@ async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
     };
   }
 
-  // If in free tier mode, show rate-limited status
+  // If in free tier mode, show status
   if (freeTierMode) {
     return {
       status: "connected",
-      message: `Rate limited (${rateLimitStatus.used}/${rateLimitStatus.limit}/day) - using HIBP fallback`,
-      rateLimit: calculateRateLimitHealth(rateLimitStatus.used, rateLimitStatus.limit, "midnight UTC"),
+      message: `Free tier mode - using HIBP fallback`,
+      rateLimit: {
+        status: internalStatus.status,
+        used: internalStatus.queriesUsed,
+        limit: internalStatus.lifetimeLimit,
+        percentUsed: internalStatus.percentUsed,
+        resetAt: "lifetime (never resets)",
+      },
     };
   }
 
   try {
-    // Check LeakCheck API status
+    // Check LeakCheck API balance
     const response = await fetch(
       `https://leakcheck.io/api/v2/balance?key=${process.env.LEAKCHECK_API_KEY}`
     );
 
     if (response.ok) {
       const data = await response.json();
-      const credits = data.balance || data.queries_left || 0;
-      const estimatedMax = Math.max(credits, 1000);
+      // LeakCheck returns: queries_left or balance
+      const queriesRemaining = data.queries_left ?? data.balance ?? 0;
+      const lifetimeLimit = internalStatus.lifetimeLimit; // 400 for lifetime plan
+      const queriesUsed = lifetimeLimit - queriesRemaining;
+      const percentUsed = Math.round((queriesUsed / lifetimeLimit) * 100);
+
+      // Sync with internal tracking
+      updateLeakCheckApiCredits(queriesRemaining);
+
+      // Determine status
+      let status: RateLimitHealth["status"] = "healthy";
+      let recommendation: string | undefined;
+
+      if (queriesRemaining <= 0) {
+        status = "critical";
+        recommendation = "Lifetime queries exhausted - using HIBP fallback";
+      } else if (percentUsed >= 95) {
+        status = "critical";
+        recommendation = `Only ${queriesRemaining} queries left (lifetime plan - no renewal)`;
+      } else if (percentUsed >= 80) {
+        status = "warning";
+        recommendation = `${queriesRemaining} queries remaining (lifetime - conserve usage)`;
+      }
 
       return {
         status: "connected",
-        message: `Connected to LeakCheck (${credits} credits)`,
-        credits,
-        rateLimit: calculateRateLimitHealth(estimatedMax - credits, estimatedMax),
+        message: queriesRemaining <= 0
+          ? "Lifetime queries exhausted - using HIBP"
+          : `LeakCheck (${queriesRemaining}/${lifetimeLimit} lifetime)`,
+        credits: queriesRemaining,
+        rateLimit: {
+          status,
+          used: queriesUsed,
+          limit: lifetimeLimit,
+          percentUsed,
+          resetAt: "lifetime (never resets)",
+          recommendation,
+        },
       };
     } else if (response.status === 401 || response.status === 403) {
       return {
-        status: "connected",
-        message: "API key expired - using HIBP fallback",
+        status: "error",
+        message: "Invalid API key",
       };
     } else {
+      // Use internal tracking on API error
       return {
         status: "connected",
-        message: `API error (${response.status}) - using HIBP fallback`,
+        message: `~${internalStatus.queriesRemaining} queries left (API unavailable)`,
+        credits: internalStatus.queriesRemaining,
+        rateLimit: {
+          status: internalStatus.status,
+          used: internalStatus.queriesUsed,
+          limit: internalStatus.lifetimeLimit,
+          percentUsed: internalStatus.percentUsed,
+          resetAt: "lifetime (never resets)",
+        },
       };
     }
   } catch (error) {
     return {
       status: "connected",
-      message: "Connection failed - using HIBP fallback",
+      message: `~${internalStatus.queriesRemaining} queries left (API error)`,
+      credits: internalStatus.queriesRemaining,
+      rateLimit: {
+        status: internalStatus.status,
+        used: internalStatus.queriesUsed,
+        limit: internalStatus.lifetimeLimit,
+        percentUsed: internalStatus.percentUsed,
+        resetAt: "lifetime (never resets)",
+      },
     };
   }
 }
