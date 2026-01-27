@@ -132,14 +132,14 @@ export function TicketList({
           </CardTitle>
           <div className="flex flex-wrap gap-2">
             <Select
-              value={filters.status}
-              onValueChange={(value) => onFilterChange("status", value)}
+              value={filters.status || "all"}
+              onValueChange={(value) => onFilterChange("status", value === "all" ? "" : value)}
             >
               <SelectTrigger className="w-[140px] bg-slate-800 border-slate-700">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="OPEN">Open</SelectItem>
                 <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
                 <SelectItem value="WAITING_USER">Waiting User</SelectItem>
@@ -149,14 +149,14 @@ export function TicketList({
             </Select>
 
             <Select
-              value={filters.priority}
-              onValueChange={(value) => onFilterChange("priority", value)}
+              value={filters.priority || "all"}
+              onValueChange={(value) => onFilterChange("priority", value === "all" ? "" : value)}
             >
               <SelectTrigger className="w-[140px] bg-slate-800 border-slate-700">
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Priority</SelectItem>
+                <SelectItem value="all">All Priority</SelectItem>
                 <SelectItem value="URGENT">Urgent</SelectItem>
                 <SelectItem value="HIGH">High</SelectItem>
                 <SelectItem value="NORMAL">Normal</SelectItem>
@@ -165,14 +165,14 @@ export function TicketList({
             </Select>
 
             <Select
-              value={filters.type}
-              onValueChange={(value) => onFilterChange("type", value)}
+              value={filters.type || "all"}
+              onValueChange={(value) => onFilterChange("type", value === "all" ? "" : value)}
             >
               <SelectTrigger className="w-[160px] bg-slate-800 border-slate-700">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="SCAN_ERROR">Scan Error</SelectItem>
                 <SelectItem value="REMOVAL_FAILED">Removal Failed</SelectItem>
                 <SelectItem value="PAYMENT_ISSUE">Payment Issue</SelectItem>
