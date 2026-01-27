@@ -11,6 +11,7 @@ import { AnalyticsSection } from "@/components/dashboard/executive/analytics-sec
 import { OperationsSection } from "@/components/dashboard/executive/operations-section";
 import { UserActivitiesSection } from "@/components/dashboard/executive/user-activities-section";
 import { IntegrationsSection } from "@/components/dashboard/integrations/integrations-section";
+import { SupportSection } from "@/components/dashboard/support/support-section";
 import { ExecutiveStatsResponse } from "@/lib/executive/types";
 import {
   Loader2,
@@ -24,6 +25,7 @@ import {
   LogOut,
   Shield,
   Plug,
+  Headphones,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -305,6 +307,13 @@ export default function AdminDashboardPage() {
                 <Plug className="h-4 w-4" />
                 <span className="hidden sm:inline">Integrations</span>
               </TabsTrigger>
+              <TabsTrigger
+                value="support"
+                className="data-[state=active]:bg-rose-500/20 data-[state=active]:text-rose-400 gap-2"
+              >
+                <Headphones className="h-4 w-4" />
+                <span className="hidden sm:inline">Support</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="finance" className="mt-6">
@@ -325,6 +334,10 @@ export default function AdminDashboardPage() {
 
             <TabsContent value="integrations" className="mt-6">
               <IntegrationsSection />
+            </TabsContent>
+
+            <TabsContent value="support" className="mt-6">
+              <SupportSection />
             </TabsContent>
           </Tabs>
         </div>

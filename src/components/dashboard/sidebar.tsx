@@ -21,6 +21,7 @@ import {
   MousePointerClick,
   TrendingUp,
   Users,
+  Headphones,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ const navigation = [
   { name: "Removals", href: "/dashboard/removals", icon: Trash2 },
   { name: "AI Shield", href: "/dashboard/ai-protection", icon: Bot },
   { name: "Alerts", href: "/dashboard/alerts", icon: Bell },
+  { name: "Support", href: "/dashboard/support", icon: Headphones },
   { name: "Reports", href: "/dashboard/reports", icon: FileText },
   { name: "Do Not Call", href: "/dashboard/dnc", icon: PhoneOff },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },

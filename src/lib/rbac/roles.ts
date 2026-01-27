@@ -40,7 +40,8 @@ export type Permission =
   // Support actions
   | "respond_to_tickets"
   | "escalate_issues"
-  | "send_user_emails";
+  | "send_user_emails"
+  | "manage_support_tickets";
 
 // Permission matrix by role
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
@@ -63,6 +64,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "respond_to_tickets",
     "escalate_issues",
     "send_user_emails",
+    "manage_support_tickets",
   ],
 
   ADMIN: [
@@ -76,6 +78,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "respond_to_tickets",
     "escalate_issues",
     "send_user_emails",
+    "manage_support_tickets",
     "view_analytics",
     "view_audit_logs",
   ],
@@ -115,6 +118,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "respond_to_tickets",
     "escalate_issues",
     "send_user_emails",
+    "manage_support_tickets",
   ],
 };
 

@@ -9,33 +9,38 @@ datasource db {
 }
 
 model User {
-  id                 String            @id @default(cuid())
-  email              String            @unique
-  passwordHash       String
-  name               String?
-  plan               String            @default("FREE")
-  emailVerified      DateTime?
-  image              String?
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-  emailNotifications Boolean           @default(true)
-  marketingEmails    Boolean           @default(false)
-  newExposureAlerts  Boolean           @default(true)
-  removalUpdates     Boolean           @default(true)
-  reportFrequency    String            @default("weekly")
-  weeklyReports      Boolean           @default(true)
-  role               String            @default("USER")
-  lastScanAt             DateTime?
+  id                     String            @id @default(cuid())
+  email                  String            @unique
+  passwordHash           String
+  name                   String?
+  plan                   String            @default("FREE")
+  emailVerified          DateTime?
+  image                  String?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  emailNotifications     Boolean           @default(true)
+  marketingEmails        Boolean           @default(false)
+  newExposureAlerts      Boolean           @default(true)
+  removalUpdates         Boolean           @default(true)
+  reportFrequency        String            @default("weekly")
+  weeklyReports          Boolean           @default(true)
+  role                   String            @default("USER")
   lastExposureDigestSent DateTime?
-  accounts           Account[]
-  auditLogs          AuditLog[]
-  exposures          Exposure[]
-  profiles           PersonalProfile[]
-  removalRequests    RemovalRequest[]
-  scans              Scan[]
-  sessions           Session[]
-  subscription       Subscription?
-  whitelists         Whitelist[]
+  lastScanAt             DateTime?
+  accounts               Account[]
+  auditLogs              AuditLog[]
+  exposures              Exposure[]
+  profiles               PersonalProfile[]
+  removalRequests        RemovalRequest[]
+  scans                  Scan[]
+  sessions               Session[]
+  subscription           Subscription?
+  whitelists             Whitelist[]
+  // Support tickets
+  tickets                SupportTicket[]   @relation("UserTickets")
+  assignedTickets        SupportTicket[]   @relation("AssignedTickets")
+  resolvedTickets        SupportTicket[]   @relation("ResolvedTickets")
+  ticketComments         TicketComment[]
 }
 
 model Account {
@@ -298,4 +303,61 @@ model EmailQueue {
   @@index([processAt])
   @@index([emailType])
   @@index([userId])
+}
+
+model SupportTicket {
+  id               String          @id @default(cuid())
+  ticketNumber     String          @unique
+  userId           String
+  type             String          // SCAN_ERROR, REMOVAL_FAILED, PAYMENT_ISSUE, ACCOUNT_ISSUE, FEATURE_REQUEST, OTHER
+  status           String          @default("OPEN") // OPEN, IN_PROGRESS, WAITING_USER, RESOLVED, CLOSED
+  priority         String          @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  subject          String
+  description      String
+  source           String          @default("USER") // USER, SYSTEM, ADMIN
+
+  // Linked records (for context)
+  scanId           String?
+  exposureId       String?
+  removalRequestId String?
+  subscriptionId   String?
+
+  // Assignment & Resolution
+  assignedToId     String?
+  assignedAt       DateTime?
+  resolution       String?
+  resolvedAt       DateTime?
+  resolvedById     String?
+  internalNotes    String?
+  lastActivityAt   DateTime        @default(now())
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  user             User            @relation("UserTickets", fields: [userId], references: [id], onDelete: Cascade)
+  assignedTo       User?           @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
+  resolvedBy       User?           @relation("ResolvedTickets", fields: [resolvedById], references: [id], onDelete: SetNull)
+  comments         TicketComment[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([assignedToId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model TicketComment {
+  id        String        @id @default(cuid())
+  ticketId  String
+  authorId  String
+  content   String
+  isInternal Boolean      @default(false) // Hidden from user, visible to staff only
+  createdAt DateTime      @default(now())
+
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
 }

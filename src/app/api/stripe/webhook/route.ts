@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
 import { stripe, getPlanFromPriceId } from "@/lib/stripe";
 import { sendSubscriptionEmail, sendRefundConfirmationEmail } from "@/lib/email";
+import { createPaymentIssueTicket } from "@/lib/support/ticket-service";
 import Stripe from "stripe";
 
 export async function POST(request: Request) {
@@ -273,6 +274,17 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
       },
     }),
   ]);
+
+  // Create support ticket for payment failure (non-blocking)
+  const failureReason = invoice.last_finalization_error?.message ||
+                        invoice.status_transitions?.finalized_at ? "Payment declined" : "Unknown error";
+  createPaymentIssueTicket(
+    subscription.userId,
+    subscription.id,
+    failureReason
+  ).catch((ticketError) => {
+    console.error("[Stripe Webhook] Failed to create support ticket:", ticketError);
+  });
 }
 
 async function handleRefund(charge: Stripe.Charge) {

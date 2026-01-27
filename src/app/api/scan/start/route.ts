@@ -12,6 +12,7 @@ import type { Plan, ScanType } from "@/lib/types";
 import { z } from "zod";
 import { isAdmin, getEffectivePlan } from "@/lib/admin";
 import { generateScreenshotUrl } from "@/lib/screenshots/screenshot-service";
+import { createScanErrorTicket } from "@/lib/support/ticket-service";
 
 // Allow longer execution time for scans (Vercel Pro: up to 300s)
 export const maxDuration = 120; // 2 minutes should be enough with parallel scanning
@@ -325,6 +326,16 @@ export async function POST(request: Request) {
             },
           });
           console.log(`[Scan] Marked scan ${failedScan.id} as FAILED due to error`);
+
+          // Create support ticket for the scan error
+          const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+          createScanErrorTicket(
+            session.user.id,
+            failedScan.id,
+            errorMessage
+          ).catch((ticketError) => {
+            console.error("[Scan] Failed to create support ticket:", ticketError);
+          });
         }
       }
     } catch (cleanupError) {

@@ -42,6 +42,10 @@ export type AuditAction =
 
   // Support actions
   | "VIEW_SUPPORT_TICKET"
+  | "VIEW_SUPPORT_TICKETS"
+  | "VIEW_SUPPORT_STATS"
+  | "CREATE_SUPPORT_TICKET"
+  | "UPDATE_SUPPORT_TICKET"
   | "RESPOND_TO_TICKET"
   | "SEND_USER_EMAIL";
 

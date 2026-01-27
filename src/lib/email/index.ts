@@ -1494,3 +1494,249 @@ export async function sendFreeUserExposureDigest(
     }
   );
 }
+
+// ==========================================
+// SUPPORT TICKET EMAIL TEMPLATES
+// ==========================================
+
+interface TicketEmailData {
+  ticketNumber: string;
+  subject: string;
+  type?: string;
+  description?: string;
+  resolution?: string;
+}
+
+/**
+ * Send email when user submits a support ticket
+ */
+export async function sendTicketCreatedEmail(
+  email: string,
+  name: string,
+  ticket: TicketEmailData
+) {
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 48px;">🎫</span>
+    </div>
+    <h1 style="color: #10b981; margin-top: 0; text-align: center;">
+      Support Ticket Created
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      We've received your support request and created ticket <strong style="color: #10b981;">${ticket.ticketNumber}</strong>.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #334155;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Ticket Number:</td>
+          <td style="padding: 12px 0; color: #10b981; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">${ticket.ticketNumber}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Subject:</td>
+          <td style="padding: 12px 0; color: #e2e8f0; text-align: right; border-bottom: 1px solid #334155;">${ticket.subject}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8;">Type:</td>
+          <td style="padding: 12px 0; color: #e2e8f0; text-align: right;">${(ticket.type || "OTHER").replace(/_/g, " ")}</td>
+        </tr>
+      </table>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6;">
+      Our support team will review your request and respond as soon as possible.
+      You can view and track your ticket status in your dashboard.
+    </p>
+
+    ${buttonHtml("View Ticket Status", `${APP_URL}/dashboard/support`)}
+
+    <p style="font-size: 14px; color: #94a3b8; text-align: center;">
+      Typical response time: 24-48 hours for non-urgent issues.
+    </p>
+  `);
+
+  return sendEmail(
+    email,
+    `🎫 Ticket Created: ${ticket.ticketNumber}`,
+    html,
+    {
+      emailType: "TICKET_CREATED",
+      queueIfExceeded: true,
+      priority: 4,
+    }
+  );
+}
+
+/**
+ * Send email when a support ticket is resolved
+ */
+export async function sendTicketResolvedEmail(
+  email: string,
+  name: string,
+  ticket: TicketEmailData
+) {
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 48px;">✅</span>
+    </div>
+    <h1 style="color: #10b981; margin-top: 0; text-align: center;">
+      Your Support Ticket Has Been Resolved
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Great news! Your support ticket <strong style="color: #10b981;">${ticket.ticketNumber}</strong> has been resolved.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #334155;">
+      <p style="margin: 0 0 12px 0; font-weight: 600; color: #10b981;">Subject:</p>
+      <p style="margin: 0 0 20px 0; color: #e2e8f0;">${ticket.subject}</p>
+      <p style="margin: 0 0 12px 0; font-weight: 600; color: #10b981;">Resolution:</p>
+      <p style="margin: 0; color: #e2e8f0; white-space: pre-wrap;">${ticket.resolution || "Issue has been resolved."}</p>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6;">
+      If this doesn't fully address your issue, you can reply to this ticket or create a new one.
+    </p>
+
+    ${buttonHtml("View Ticket", `${APP_URL}/dashboard/support`)}
+
+    <p style="font-size: 14px; color: #94a3b8; text-align: center;">
+      Thank you for using ${APP_NAME}!
+    </p>
+  `);
+
+  return sendEmail(
+    email,
+    `✅ Ticket Resolved: ${ticket.ticketNumber}`,
+    html,
+    {
+      emailType: "TICKET_RESOLVED",
+      queueIfExceeded: true,
+      priority: 4,
+    }
+  );
+}
+
+/**
+ * Send email when a system-generated ticket is created (auto-detected issue)
+ */
+export async function sendSystemTicketNotification(
+  email: string,
+  name: string,
+  ticket: TicketEmailData
+) {
+  const typeMessages: Record<string, string> = {
+    SCAN_ERROR: "We encountered an issue during your recent scan",
+    REMOVAL_FAILED: "A data removal request needs attention",
+    PAYMENT_ISSUE: "There's an issue with your payment",
+  };
+
+  const message = typeMessages[ticket.type || "OTHER"] || "We noticed an issue with your account";
+
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 48px;">⚠️</span>
+    </div>
+    <h1 style="color: #f97316; margin-top: 0; text-align: center;">
+      We're Looking Into an Issue
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      ${message}. We've automatically created support ticket <strong style="color: #f97316;">${ticket.ticketNumber}</strong> to track this.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #f97316;">
+      <p style="margin: 0 0 8px 0; color: #94a3b8; font-size: 14px;">Issue Type:</p>
+      <p style="margin: 0 0 16px 0; color: #f97316; font-weight: 600;">${(ticket.type || "OTHER").replace(/_/g, " ")}</p>
+      <p style="margin: 0 0 8px 0; color: #94a3b8; font-size: 14px;">Details:</p>
+      <p style="margin: 0; color: #e2e8f0;">${ticket.description || "Our team is investigating this issue."}</p>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6;">
+      Our team is already working on this. You don't need to take any action unless you want to provide additional information.
+    </p>
+
+    ${buttonHtml("View Ticket", `${APP_URL}/dashboard/support`)}
+
+    <p style="font-size: 14px; color: #94a3b8; text-align: center;">
+      We'll notify you when this issue is resolved.
+    </p>
+  `);
+
+  return sendEmail(
+    email,
+    `⚠️ Issue Detected: ${ticket.ticketNumber}`,
+    html,
+    {
+      emailType: "SYSTEM_TICKET",
+      queueIfExceeded: true,
+      priority: 2, // Higher priority for system issues
+    }
+  );
+}
+
+/**
+ * Send email when ticket status changes
+ */
+export async function sendTicketStatusUpdateEmail(
+  email: string,
+  name: string,
+  ticket: TicketEmailData & { status: string; comment?: string }
+) {
+  const statusText: Record<string, string> = {
+    IN_PROGRESS: "is now being worked on",
+    WAITING_USER: "needs your response",
+    RESOLVED: "has been resolved",
+  };
+
+  const statusMessage = statusText[ticket.status] || "has been updated";
+
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 48px;">📋</span>
+    </div>
+    <h1 style="color: #3b82f6; margin-top: 0; text-align: center;">
+      Ticket Update: ${ticket.ticketNumber}
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Your support ticket <strong style="color: #3b82f6;">${ticket.ticketNumber}</strong> ${statusMessage}.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #334155;">
+      <p style="margin: 0 0 8px 0; color: #94a3b8; font-size: 14px;">Subject:</p>
+      <p style="margin: 0 0 16px 0; color: #e2e8f0; font-weight: 600;">${ticket.subject}</p>
+      <p style="margin: 0 0 8px 0; color: #94a3b8; font-size: 14px;">New Status:</p>
+      <p style="margin: 0; color: #3b82f6; font-weight: 600;">${ticket.status.replace(/_/g, " ")}</p>
+    </div>
+
+    ${ticket.comment ? `
+      <div style="background-color: #1e293b; border-left: 4px solid #10b981; padding: 16px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+        <p style="margin: 0 0 8px 0; color: #10b981; font-weight: 600;">Support Response:</p>
+        <p style="margin: 0; color: #e2e8f0; white-space: pre-wrap;">${ticket.comment}</p>
+      </div>
+    ` : ""}
+
+    ${buttonHtml("View Ticket", `${APP_URL}/dashboard/support`)}
+  `);
+
+  return sendEmail(
+    email,
+    `📋 Update: ${ticket.ticketNumber} - ${ticket.status.replace(/_/g, " ")}`,
+    html,
+    {
+      emailType: "TICKET_UPDATE",
+      queueIfExceeded: true,
+      priority: 4,
+    }
+  );
+}

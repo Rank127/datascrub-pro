@@ -3,6 +3,9 @@ import { sendCCPARemovalRequest, sendRemovalUpdateEmail, sendRemovalStatusDigest
 import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, getConsolidationParent, type DataBrokerInfo } from "./data-broker-directory";
 import { calculateVerifyAfterDate } from "./verification-service";
 import type { RemovalMethod } from "@/lib/types";
+import { createRemovalFailedTicket } from "@/lib/support/ticket-service";
+
+const MAX_REMOVAL_ATTEMPTS = 5;
 
 interface RemovalExecutionResult {
   success: boolean;
@@ -356,10 +359,14 @@ async function updateRemovalStatus(
   status: string,
   error?: string
 ) {
-  // Get current request to determine source for verification scheduling
+  // Get current request to determine source for verification scheduling and check attempts
   const currentRequest = await prisma.removalRequest.findUnique({
     where: { id: requestId },
-    include: { exposure: { select: { source: true } } },
+    select: {
+      attempts: true,
+      userId: true,
+      exposure: { select: { id: true, source: true, sourceName: true } },
+    },
   });
 
   const data: {
@@ -410,6 +417,24 @@ async function updateRemovalStatus(
     await prisma.exposure.update({
       where: { id: removalRequest.exposureId },
       data: { status: statusMap[status] },
+    });
+  }
+
+  // Create support ticket if removal has failed after max attempts
+  if (
+    status === "FAILED" &&
+    currentRequest &&
+    currentRequest.attempts + 1 >= MAX_REMOVAL_ATTEMPTS
+  ) {
+    console.log(`[Removal] Max attempts reached for ${requestId}, creating support ticket`);
+    createRemovalFailedTicket(
+      currentRequest.userId,
+      requestId,
+      currentRequest.exposure.id,
+      currentRequest.exposure.sourceName,
+      error || "Max retry attempts exceeded"
+    ).catch((ticketError) => {
+      console.error("[Removal] Failed to create support ticket:", ticketError);
     });
   }
 }

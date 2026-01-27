@@ -392,3 +392,72 @@ export const ExposureStatusColors: Record<ExposureStatus, string> = {
   REMOVED: "bg-green-100 text-green-800",
   WHITELISTED: "bg-gray-100 text-gray-800",
 };
+
+// ==========================================
+// SUPPORT TICKET TYPES
+// ==========================================
+
+// Ticket Type
+export const TicketType = {
+  SCAN_ERROR: "SCAN_ERROR",
+  REMOVAL_FAILED: "REMOVAL_FAILED",
+  PAYMENT_ISSUE: "PAYMENT_ISSUE",
+  ACCOUNT_ISSUE: "ACCOUNT_ISSUE",
+  FEATURE_REQUEST: "FEATURE_REQUEST",
+  OTHER: "OTHER",
+} as const;
+export type TicketType = (typeof TicketType)[keyof typeof TicketType];
+
+// Ticket Status
+export const TicketStatus = {
+  OPEN: "OPEN",
+  IN_PROGRESS: "IN_PROGRESS",
+  WAITING_USER: "WAITING_USER",
+  RESOLVED: "RESOLVED",
+  CLOSED: "CLOSED",
+} as const;
+export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus];
+
+// Ticket Priority
+export const TicketPriority = {
+  LOW: "LOW",
+  NORMAL: "NORMAL",
+  HIGH: "HIGH",
+  URGENT: "URGENT",
+} as const;
+export type TicketPriority = (typeof TicketPriority)[keyof typeof TicketPriority];
+
+// Ticket Source
+export const TicketSource = {
+  USER: "USER",
+  SYSTEM: "SYSTEM",
+  ADMIN: "ADMIN",
+} as const;
+export type TicketSource = (typeof TicketSource)[keyof typeof TicketSource];
+
+// Ticket type display names
+export const TicketTypeNames: Record<TicketType, string> = {
+  SCAN_ERROR: "Scan Error",
+  REMOVAL_FAILED: "Removal Failed",
+  PAYMENT_ISSUE: "Payment Issue",
+  ACCOUNT_ISSUE: "Account Issue",
+  FEATURE_REQUEST: "Feature Request",
+  OTHER: "Other",
+};
+
+// Ticket status colors
+export const TicketStatusColors: Record<TicketStatus, string> = {
+  OPEN: "bg-blue-100 text-blue-800",
+  IN_PROGRESS: "bg-amber-100 text-amber-800",
+  WAITING_USER: "bg-purple-100 text-purple-800",
+  RESOLVED: "bg-green-100 text-green-800",
+  CLOSED: "bg-gray-100 text-gray-800",
+};
+
+// Ticket priority colors
+export const TicketPriorityColors: Record<TicketPriority, string> = {
+  LOW: "bg-gray-100 text-gray-600",
+  NORMAL: "bg-blue-100 text-blue-700",
+  HIGH: "bg-orange-100 text-orange-700",
+  URGENT: "bg-red-100 text-red-700",
+};
