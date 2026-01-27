@@ -204,9 +204,9 @@ export function SupportSection() {
           />
           <MetricCard
             title="Avg Resolution"
-            value={`${stats.avgResolutionHours.toFixed(1)}h`}
+            value={`${(stats.avgResolutionHours ?? 0).toFixed(1)}h`}
             icon={Clock}
-            variant={stats.avgResolutionHours < 24 ? "success" : stats.avgResolutionHours < 48 ? "warning" : "danger"}
+            variant={(stats.avgResolutionHours ?? 0) < 24 ? "success" : (stats.avgResolutionHours ?? 0) < 48 ? "warning" : "danger"}
             subtitle="Time to resolve"
           />
         </div>

@@ -264,6 +264,7 @@ export async function getTicketStats() {
   const [
     openTickets,
     inProgressTickets,
+    waitingUserTickets,
     urgentTickets,
     resolvedToday,
     ticketsByType,
@@ -279,6 +280,11 @@ export async function getTicketStats() {
     // In progress tickets
     prisma.supportTicket.count({
       where: { status: "IN_PROGRESS" },
+    }),
+
+    // Waiting on user response
+    prisma.supportTicket.count({
+      where: { status: "WAITING_USER" },
     }),
 
     // Urgent tickets (URGENT priority and not resolved)
@@ -365,9 +371,10 @@ export async function getTicketStats() {
   return {
     openTickets,
     inProgressTickets,
+    waitingUserTickets,
     urgentTickets,
     resolvedToday,
-    avgResolutionTime: avgHours,
+    avgResolutionHours: avgHours,
     ticketsByType: typeStats,
     ticketsByStatus: statusStats,
     recentTickets,
