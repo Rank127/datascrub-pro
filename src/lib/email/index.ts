@@ -1599,8 +1599,14 @@ export async function sendTicketResolvedEmail(
       <p style="margin: 0; color: #e2e8f0; white-space: pre-wrap;">${ticket.resolution || "Issue has been resolved."}</p>
     </div>
 
+    <div style="background-color: #1e293b; border-radius: 8px; padding: 16px; margin: 24px 0; border-left: 4px solid #f59e0b;">
+      <p style="margin: 0; font-size: 14px; color: #fbbf24;">
+        ⏰ <strong>Note:</strong> This ticket will automatically close in 24 hours. If you need further assistance, please reply before then.
+      </p>
+    </div>
+
     <p style="font-size: 16px; line-height: 1.6;">
-      If this doesn't fully address your issue, you can reply to this ticket or create a new one.
+      If this doesn't fully address your issue, you can reply to this ticket or create a new support request.
     </p>
 
     ${buttonHtml("View Ticket", `${APP_URL}/dashboard/support`)}
