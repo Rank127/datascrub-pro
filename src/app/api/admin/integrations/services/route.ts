@@ -163,18 +163,28 @@ async function checkHIBPStatus(): Promise<HIBPServiceStatus> {
     );
 
     if (response.ok) {
+      const remaining = parseInt(response.headers.get("x-ratelimit-remaining") || "0");
+      // HIBP rate limit is typically 10 requests/minute for paid API
+      const limit = parseInt(response.headers.get("x-ratelimit-limit") || "10");
+      const resetAt = response.headers.get("x-ratelimit-reset") || "";
+      const used = limit - remaining;
+
       return {
         status: "connected",
-        message: "Connected to HIBP",
-        rateLimit: {
-          remaining: parseInt(response.headers.get("x-ratelimit-remaining") || "0"),
-          resetAt: response.headers.get("x-ratelimit-reset") || "",
-        },
+        message: `Connected to HIBP (${remaining}/${limit} remaining)`,
+        rateLimit: calculateRateLimitHealth(used, limit, resetAt),
       };
     } else if (response.status === 401) {
       return {
         status: "error",
         message: "Invalid API key",
+      };
+    } else if (response.status === 429) {
+      // Rate limited - show as critical
+      return {
+        status: "connected",
+        message: "HIBP rate limited - wait for reset",
+        rateLimit: calculateRateLimitHealth(10, 10, "1 minute"),
       };
     } else {
       return {

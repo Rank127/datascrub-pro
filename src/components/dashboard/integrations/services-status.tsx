@@ -305,12 +305,7 @@ export function ServicesStatus({
             icon={Shield}
             status={data.hibp.status}
             message={data.hibp.message}
-            credits={
-              data.hibp.rateLimit?.remaining !== undefined
-                ? `${data.hibp.rateLimit.remaining} remaining`
-                : undefined
-            }
-            creditsLabel="Rate Limit"
+            rateLimit={data.hibp.rateLimit}
           />
 
           {/* LeakCheck */}

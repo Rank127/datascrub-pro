@@ -233,11 +233,8 @@ export interface ResendServiceStatus extends ServiceStatus {
   queue?: EmailQueueInfo;
 }
 
-export interface HIBPServiceStatus extends Omit<ServiceStatus, 'rateLimit'> {
-  rateLimit?: {
-    remaining: number;
-    resetAt: string;
-  };
+export interface HIBPServiceStatus extends ServiceStatus {
+  // HIBP uses standard RateLimitHealth now
 }
 
 export interface LeakCheckServiceStatus extends ServiceStatus {
