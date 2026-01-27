@@ -340,9 +340,10 @@ async function checkScrapingBeeStatus(): Promise<ScrapingBeeServiceStatus> {
 
     if (response.ok) {
       const data = await response.json();
-      const apiCreditsRemaining = data.credits_remaining || data.api_credit || 0;
-      const maxCredits = data.max_api_credit || data.credits_limit || internalStatus.monthlyLimit;
-      const creditsUsed = maxCredits - apiCreditsRemaining;
+      // ScrapingBee API returns: max_api_credit, used_api_credit
+      const maxCredits = data.max_api_credit || internalStatus.monthlyLimit;
+      const creditsUsed = data.used_api_credit || 0;
+      const apiCreditsRemaining = maxCredits - creditsUsed;
 
       // Sync API data with our internal tracking
       updateScrapingBeeApiCredits(apiCreditsRemaining);
