@@ -1,0 +1,179 @@
+GHOSTMYDATA INFRASTRUCTURE COSTS - MINIMUM TO MAXIMUM
+Service,Free/Hobby,Starter,Growth,Scale,Enterprise,Notes
+
+HOSTING - VERCEL
+Plan Name,Hobby,Pro,Pro+,Pro++,Enterprise,
+Monthly Base,$0,$20/user,$20/user,$20/user,Custom ($2K+/mo),
+Typical Monthly (with usage),$0,$20-50,$100-200,$300-500,$2000+,Usage: edge requests + functions + bandwidth
+Annual Cost,$0,$240-600,$1200-2400,$3600-6000,$24000+,
+Users Included,1,1,5,10,Unlimited,
+Concurrent Builds,1,1,1,3,Custom,
+Bandwidth,100GB,1TB,1TB,1TB,Custom,
+Serverless Function Duration,10s,60s,60s,60s,900s,
+Support,Community,Email,Email,Email,Dedicated,
+
+DATABASE - SUPABASE
+Plan Name,Free,Pro,Pro,Team,Enterprise,
+Monthly Base,$0,$25,$25,$599,Custom,
+Typical Monthly (with usage),$0,$35-75,$75-150,$599-800,$1000+,Usage varies by storage/MAUs
+Annual Cost,$0,$420-900,$900-1800,$7188-9600,$12000+,
+Database Storage,500MB,8GB,8GB,8GB,Custom,+ $0.125/GB overage
+Monthly Active Users,50K,100K,100K,100K,Unlimited,+ $0.00325/MAU overage
+File Storage,1GB,100GB,100GB,100GB,Custom,
+Bandwidth (Egress),2GB,250GB,250GB,250GB,Custom,
+Backups,None,7 days,7 days,14 days,Custom,
+Support,Community,Email,Email,Priority,Dedicated,
+Pauses After Inactivity,7 days,Never,Never,Never,Never,
+
+EMAIL - RESEND
+Plan Name,Free,Pro,Scale,Scale+,Enterprise,
+Monthly Cost,$0,$20,$90,$90+,Custom,
+Emails/Month,3000,50000,100000,100000+,3M+,
+Cost Per Additional 1K,N/A,$0.40,$0.90,$0.90,Negotiated,
+Annual Cost,$0,$240,$1080,$1080+,Custom,
+Dedicated IP,No,No,$40/mo add-on,$40/mo add-on,Included,
+Data Retention,1 day,3 days,7 days,7 days,30+ days,
+Support,Community,Email,Email,Priority,Dedicated,
+
+REDIS/QUEUES - UPSTASH
+Plan Name,Free,Pay-as-you-go,Fixed 1GB,Fixed 5GB,Fixed 50GB,
+Monthly Cost,$0,$0-10,$20,$60,$300,Max $120/mo for PAYG
+Storage,256MB,10GB max,1GB,5GB,50GB,
+Daily Requests,100K,Unlimited,Unlimited,Unlimited,Unlimited,
+Cost Per 100K Requests,Free,$0.20,$0,$0,$0,
+Annual Cost,$0,$0-120,$240,$720,$3600,
+Multi-Region,No,2x cost,Included,Included,Included,
+
+WEB SCRAPING - SCRAPINGBEE
+Plan Name,Free Trial,Freelance,Startup,Business,Business+,
+Monthly Cost,$0,$49,$99,$249,$599,
+API Credits,1000 (once),250000,1000000,3000000,8000000,
+Effective Pages (JS rendering),200,50000,200000,600000,1600000,5 credits per JS request
+Concurrent Requests,1,5,10,50,100,
+Annual Cost,$0,$588,$1188,$2988,$7188,
+Support,Community,Email,Email,Priority,Dedicated + Account Mgr,
+
+BREACH DATABASE - HAVEIBEENPWNED
+Plan Name,N/A,HIBP API,HIBP API,HIBP API,HIBP API,Same pricing all tiers
+Monthly Cost,$0,$3.50,$3.50,$3.50,$3.50,Flat rate
+Annual Cost,$0,$42,$42,$42,$42,
+Rate Limit,N/A,10/min,10/min,10/min,Negotiable,
+
+BREACH DATABASE - LEAKCHECK
+Plan Name,Free (Public API),Monthly,Monthly,Enterprise,Enterprise,
+Monthly Cost,$0,$9.99,$9.99,$100,$100+,
+Records Access,Limited,7B+,7B+,7B+,Full access,
+API Rate,3 req/sec,3 req/sec,3 req/sec,Higher,Custom,
+Annual Cost,$0,$120,$120,$1200,$1200+,
+Commercial Use,Public API only,Yes,Yes,Yes,Yes,
+
+PAYMENTS - STRIPE
+Transaction Fee,2.9% + $0.30,2.9% + $0.30,2.9% + $0.30,2.9% + $0.30,Negotiable,Per successful charge
+International Fee,+1.5%,+1.5%,+1.5%,+1.5%,Negotiable,Cross-border transactions
+Currency Conversion,+1%,+1%,+1%,+1%,Negotiable,
+Dispute Fee,$15,$15,$15,$15,$15,+ $15 counter fee
+ACH Fee,0.8% (max $5),0.8% (max $5),0.8% (max $5),0.8% (max $5),Negotiable,
+Monthly Platform Fee,$0,$0,$0,$0,$0,No monthly fees
+Volume Discount Threshold,N/A,N/A,N/A,$100K/mo,$100K/mo,Contact for custom rates
+
+MONTHLY TOTAL BY SCALE
+Scale,Minimum,Typical,Maximum,Notes
+Solo/MVP (Free Tiers),$0,$0,$50,Free tiers only + minimal usage
+Startup (100 users),$98,$175,$300,Pro tiers + light usage
+Growth (1K users),$200,$400,$700,Pro tiers + moderate usage
+Scale (10K users),$500,$1000,$2000,Higher tiers + significant usage
+Enterprise (100K+ users),$2000,$5000,$15000+,Enterprise tiers + custom pricing
+
+ANNUAL TOTAL BY SCALE
+Scale,Minimum,Typical,Maximum,Notes
+Solo/MVP,$0,$0,$600,
+Startup,$1176,$2100,$3600,
+Growth,$2400,$4800,$8400,
+Scale,$6000,$12000,$24000,
+Enterprise,$24000,$60000,$180000+,
+
+DETAILED BREAKDOWN BY SCALE
+
+SOLO/MVP (0-100 users)
+Service,Plan,Monthly,Annual
+Vercel,Hobby,$0,$0
+Supabase,Free,$0,$0
+Resend,Free,$0,$0
+Upstash,Free,$0,$0
+ScrapingBee,Free Trial,$0,$0
+HIBP,None,$0,$0
+LeakCheck,Free,$0,$0
+Stripe,Pay-per-use,~$0-50,~$0-600
+TOTAL,,$0-50,$0-600
+
+STARTUP (100-500 users)
+Service,Plan,Monthly,Annual
+Vercel,Pro (1 user),$20,$240
+Supabase,Pro,$35,$420
+Resend,Pro,$20,$240
+Upstash,Pay-as-you-go,$5,$60
+ScrapingBee,Freelance,$49,$588
+HIBP,API,$3.50,$42
+LeakCheck,Monthly,$9.99,$120
+Stripe,2.9%+$0.30,~$50-100,~$600-1200
+TOTAL,,$193-243,$2310-2910
+
+GROWTH (500-5K users)
+Service,Plan,Monthly,Annual
+Vercel,Pro (2 users),$40,$480
+Supabase,Pro (higher usage),$75,$900
+Resend,Scale,$90,$1080
+Upstash,Fixed 1GB,$20,$240
+ScrapingBee,Startup,$99,$1188
+HIBP,API,$3.50,$42
+LeakCheck,Monthly,$9.99,$120
+Stripe,2.9%+$0.30,~$200-500,~$2400-6000
+TOTAL,,$537-837,$6450-10050
+
+SCALE (5K-50K users)
+Service,Plan,Monthly,Annual
+Vercel,Pro (5 users),$100,$1200
+Supabase,Pro (high usage),$150,$1800
+Resend,Scale+,$130,$1560
+Upstash,Fixed 5GB,$60,$720
+ScrapingBee,Business,$249,$2988
+HIBP,API,$3.50,$42
+LeakCheck,Enterprise,$100,$1200
+Stripe,2.9%+$0.30,~$1000-3000,~$12000-36000
+TOTAL,,$1793-3793,$21510-45510
+
+ENTERPRISE (50K+ users)
+Service,Plan,Monthly,Annual
+Vercel,Enterprise,$2000+,$24000+
+Supabase,Team/Enterprise,$599+,$7188+
+Resend,Enterprise,$500+,$6000+
+Upstash,Fixed 50GB,$300,$3600
+ScrapingBee,Business+,$599,$7188
+HIBP,API (bulk),$3.50+,$42+
+LeakCheck,Enterprise,$100+,$1200+
+Stripe,Negotiated,~$5000-20000,~$60000-240000
+TOTAL,,$9102-23602+,$109218-289218+
+
+STRIPE REVENUE PROJECTION VS FEES
+Monthly Revenue,$1000,$5000,$10000,$50000,$100000
+Stripe Fees (2.9%+$0.30),$32,$150,$295,$1480,$2930
+Net After Fees,$968,$4850,$9705,$48520,$97070
+Fee Percentage,3.2%,3.0%,2.95%,2.96%,2.93%
+
+COST AS % OF REVENUE (excluding Stripe)
+Monthly Revenue,Infrastructure Cost,% of Revenue,Notes
+$1000,$193,19.3%,Startup tier - high overhead
+$5000,$337,6.7%,Growth tier - improving margins
+$10000,$537,5.4%,Scale tier - good margins
+$50000,$1293,2.6%,Scale tier - excellent margins
+$100000,$2102,2.1%,Enterprise tier - optimal margins
+
+SOURCES
+Vercel,https://vercel.com/pricing,
+Supabase,https://supabase.com/pricing,
+Resend,https://resend.com/pricing,
+Upstash,https://upstash.com/pricing/redis,
+ScrapingBee,https://www.scrapingbee.com/pricing/,
+HIBP,https://haveibeenpwned.com/API/Key,
+LeakCheck,https://leakcheck.io/,
+Stripe,https://stripe.com/pricing,
