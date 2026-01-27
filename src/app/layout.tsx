@@ -8,6 +8,7 @@ import {
   ServiceSchema,
 } from "@/components/seo/structured-data";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { MicrosoftClarity } from "@/components/analytics/microsoft-clarity";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -145,6 +146,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-white`}
       >
         <GoogleAnalytics />
+        <MicrosoftClarity />
         {children}
         <Toaster />
       </body>
