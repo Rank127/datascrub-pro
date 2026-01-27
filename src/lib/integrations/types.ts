@@ -252,6 +252,8 @@ export interface ScrapingBeeServiceStatus extends ServiceStatus {
 export interface RedisServiceStatus extends ServiceStatus {
   queueSizes?: Record<string, number>;
   totalJobs?: number;
+  keysCount?: number;
+  maxStorage?: string;
 }
 
 export interface ServicesIntegrationResponse {

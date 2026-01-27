@@ -340,6 +340,7 @@ export function ServicesStatus({
                 : undefined
             }
             creditsLabel="Queue Jobs"
+            rateLimit={data.redis.rateLimit}
           />
         </div>
       </IntegrationCard>

@@ -326,7 +326,8 @@ async function checkRedisStatus(): Promise<RedisServiceStatus> {
   try {
     // If using Upstash REST API
     if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-      const response = await fetch(
+      // Ping to check connection
+      const pingResponse = await fetch(
         `${process.env.UPSTASH_REDIS_REST_URL}/ping`,
         {
           headers: {
@@ -335,10 +336,31 @@ async function checkRedisStatus(): Promise<RedisServiceStatus> {
         }
       );
 
-      if (response.ok) {
+      if (pingResponse.ok) {
+        // Get DBSIZE for usage info
+        const dbsizeResponse = await fetch(
+          `${process.env.UPSTASH_REDIS_REST_URL}/dbsize`,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+            },
+          }
+        );
+
+        let keysCount = 0;
+        if (dbsizeResponse.ok) {
+          const dbsizeData = await dbsizeResponse.json();
+          keysCount = dbsizeData.result || 0;
+        }
+
+        // Upstash free tier: 10K commands/day, 256MB storage
+        const maxKeys = 10000; // Estimate based on typical usage
+        const dailyCommandLimit = 10000;
+
         return {
           status: "connected",
-          message: "Connected to Upstash Redis",
+          message: `Connected to Upstash Redis (${keysCount} keys)`,
+          rateLimit: calculateRateLimitHealth(keysCount, maxKeys, "256MB max storage"),
         };
       }
     }
