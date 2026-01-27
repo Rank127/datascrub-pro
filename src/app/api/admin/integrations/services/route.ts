@@ -205,9 +205,19 @@ async function checkHIBPStatus(): Promise<HIBPServiceStatus> {
       const limit = apiLimit;
       const used = limit - remaining;
 
+      // Format message based on usage
+      let message = "HIBP connected";
+      if (remaining === limit) {
+        message = `HIBP connected (${limit} req/min available)`;
+      } else if (remaining === 0) {
+        message = `HIBP rate limited - resets in ${internalStatus.secondsUntilReset}s`;
+      } else {
+        message = `HIBP connected (${remaining} of ${limit} req/min left)`;
+      }
+
       return {
         status: "connected",
-        message: `HIBP connected (${remaining}/${limit}/min)`,
+        message,
         rateLimit: calculateHIBPRateLimitHealth(used, limit, internalStatus.secondsUntilReset),
       };
     } else if (response.status === 401) {
