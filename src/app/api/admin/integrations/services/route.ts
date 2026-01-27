@@ -469,14 +469,15 @@ export async function GET(request: Request) {
     ];
 
     for (const service of servicesWithLimits) {
-      if (service.data.rateLimit?.status === "critical") {
+      const rateLimit = "rateLimit" in service.data ? service.data.rateLimit : undefined;
+      if (rateLimit?.status === "critical") {
         criticalAlerts.push({
           serviceName: service.name,
-          percentUsed: service.data.rateLimit.percentUsed,
-          used: service.data.rateLimit.used,
-          limit: service.data.rateLimit.limit,
+          percentUsed: rateLimit.percentUsed,
+          used: rateLimit.used,
+          limit: rateLimit.limit,
           status: "critical",
-          recommendation: service.data.rateLimit.recommendation,
+          recommendation: rateLimit.recommendation,
         });
       }
     }

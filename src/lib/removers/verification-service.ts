@@ -169,10 +169,20 @@ function exposureStillExists(
 }
 
 // Verify a single removal request
+interface VerificationUpdateInfo {
+  userId: string;
+  userEmail: string | null;
+  userName: string;
+  sourceName: string;
+  source: string;
+  dataType: string;
+}
+
 export async function verifyRemovalRequest(removalRequestId: string): Promise<{
   success: boolean;
   status: "COMPLETED" | "FAILED" | "PENDING";
   message: string;
+  updateInfo?: VerificationUpdateInfo;
 }> {
   // Get the removal request with exposure and user info
   const removalRequest = await prisma.removalRequest.findUnique({
