@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
 import { getEmailQuotaStatus, getEmailQueueStatus, sendServiceAlertEmail } from "@/lib/email";
-import { getServiceStatus, shouldUseFreeAlternative } from "@/lib/services/rate-limiter";
+import { getServiceStatus, shouldUseFreeAlternative, getHIBPRateLimitStatus } from "@/lib/services/rate-limiter";
 import {
   ServicesIntegrationResponse,
   ResendServiceStatus,
@@ -35,6 +35,36 @@ function calculateRateLimitHealth(used: number, limit: number, resetAt?: string)
     limit,
     percentUsed,
     resetAt,
+    recommendation,
+  };
+}
+
+/**
+ * HIBP-specific rate limit health calculation
+ * Uses different thresholds and messaging since it's a per-MINUTE limit that resets quickly
+ */
+function calculateHIBPRateLimitHealth(used: number, limit: number, secondsUntilReset: number): RateLimitHealth {
+  const percentUsed = limit > 0 ? Math.round((used / limit) * 100) : 0;
+
+  let status: RateLimitHealth["status"] = "healthy";
+  let recommendation: string | undefined;
+
+  // For per-minute limits, only show critical when fully exhausted
+  // Warning at 80% since it resets every minute anyway
+  if (percentUsed >= 100) {
+    status = "critical";
+    recommendation = `Rate limited - resets in ${secondsUntilReset}s`;
+  } else if (percentUsed >= 80) {
+    status = "warning";
+    recommendation = `${limit - used} requests left this minute`;
+  }
+
+  return {
+    status,
+    used,
+    limit,
+    percentUsed,
+    resetAt: `${secondsUntilReset}s`,
     recommendation,
   };
 }
@@ -150,6 +180,9 @@ async function checkHIBPStatus(): Promise<HIBPServiceStatus> {
     return { status: "not_configured", message: "HIBP_API_KEY not set" };
   }
 
+  // Get our internal rate limit tracking
+  const internalStatus = getHIBPRateLimitStatus();
+
   try {
     // Check HIBP API status with a simple breach lookup
     const response = await fetch(
@@ -163,16 +196,19 @@ async function checkHIBPStatus(): Promise<HIBPServiceStatus> {
     );
 
     if (response.ok) {
-      const remaining = parseInt(response.headers.get("x-ratelimit-remaining") || "0");
-      // HIBP rate limit is typically 10 requests/minute for paid API
-      const limit = parseInt(response.headers.get("x-ratelimit-limit") || "10");
-      const resetAt = response.headers.get("x-ratelimit-reset") || "";
+      // Get rate limit from HIBP headers
+      const apiRemaining = parseInt(response.headers.get("x-ratelimit-remaining") || "10");
+      const apiLimit = parseInt(response.headers.get("x-ratelimit-limit") || "10");
+
+      // Use the lower of API remaining vs our internal tracking
+      const remaining = Math.min(apiRemaining, internalStatus.remaining);
+      const limit = apiLimit;
       const used = limit - remaining;
 
       return {
         status: "connected",
-        message: `Connected to HIBP (${remaining}/${limit} remaining)`,
-        rateLimit: calculateRateLimitHealth(used, limit, resetAt),
+        message: `HIBP connected (${remaining}/${limit}/min)`,
+        rateLimit: calculateHIBPRateLimitHealth(used, limit, internalStatus.secondsUntilReset),
       };
     } else if (response.status === 401) {
       return {
@@ -180,11 +216,15 @@ async function checkHIBPStatus(): Promise<HIBPServiceStatus> {
         message: "Invalid API key",
       };
     } else if (response.status === 429) {
-      // Rate limited - show as critical
+      // Rate limited - use internal tracking
       return {
         status: "connected",
-        message: "HIBP rate limited - wait for reset",
-        rateLimit: calculateRateLimitHealth(10, 10, "1 minute"),
+        message: `HIBP rate limited - resets in ${internalStatus.secondsUntilReset}s`,
+        rateLimit: calculateHIBPRateLimitHealth(
+          internalStatus.maxPerMinute,
+          internalStatus.maxPerMinute,
+          internalStatus.secondsUntilReset
+        ),
       };
     } else {
       return {
@@ -193,9 +233,15 @@ async function checkHIBPStatus(): Promise<HIBPServiceStatus> {
       };
     }
   } catch (error) {
+    // Even on error, show our internal tracking
     return {
       status: "error",
       message: error instanceof Error ? error.message : "Connection failed",
+      rateLimit: calculateHIBPRateLimitHealth(
+        internalStatus.requestsThisMinute,
+        internalStatus.maxPerMinute,
+        internalStatus.secondsUntilReset
+      ),
     };
   }
 }

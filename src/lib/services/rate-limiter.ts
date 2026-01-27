@@ -1,6 +1,7 @@
 /**
  * Simple in-memory rate limiter for external API services
- * Tracks daily usage and provides fallback recommendations
+ * Tracks daily usage and per-minute usage (for HIBP)
+ * Provides fallback recommendations and queue management
  */
 
 interface ServiceUsage {
@@ -8,10 +9,26 @@ interface ServiceUsage {
   resetDate: string;
 }
 
+interface MinuteUsage {
+  count: number;
+  minuteKey: string;
+  lastRequestAt: number;
+}
+
 const usage: Record<string, ServiceUsage> = {};
+const minuteUsage: Record<string, MinuteUsage> = {};
+
+// HIBP rate limit: 10 requests per minute
+const HIBP_REQUESTS_PER_MINUTE = parseInt(process.env.HIBP_RATE_LIMIT || "10");
+const HIBP_MIN_DELAY_MS = 6100; // 6.1 seconds between requests (safe margin)
 
 function getTodayKey(): string {
   return new Date().toDateString();
+}
+
+function getMinuteKey(): string {
+  const now = new Date();
+  return `${now.getMinutes()}`;
 }
 
 function getUsage(service: string): ServiceUsage {
@@ -20,6 +37,83 @@ function getUsage(service: string): ServiceUsage {
     usage[service] = { count: 0, resetDate: today };
   }
   return usage[service];
+}
+
+function getMinuteUsage(service: string): MinuteUsage {
+  const minuteKey = getMinuteKey();
+  if (!minuteUsage[service] || minuteUsage[service].minuteKey !== minuteKey) {
+    minuteUsage[service] = { count: 0, minuteKey, lastRequestAt: 0 };
+  }
+  return minuteUsage[service];
+}
+
+/**
+ * HIBP-specific rate limiting
+ * Returns the number of milliseconds to wait before making the next request
+ */
+export function getHIBPWaitTime(): number {
+  const minute = getMinuteUsage("hibp");
+  const now = Date.now();
+
+  // If we've hit the per-minute limit, calculate wait time until next minute
+  if (minute.count >= HIBP_REQUESTS_PER_MINUTE) {
+    const secondsUntilReset = 60 - new Date().getSeconds();
+    return secondsUntilReset * 1000;
+  }
+
+  // Enforce minimum delay between requests (6.1 seconds)
+  if (minute.lastRequestAt > 0) {
+    const timeSinceLastRequest = now - minute.lastRequestAt;
+    if (timeSinceLastRequest < HIBP_MIN_DELAY_MS) {
+      return HIBP_MIN_DELAY_MS - timeSinceLastRequest;
+    }
+  }
+
+  return 0;
+}
+
+/**
+ * Record a HIBP request and return whether it was allowed
+ */
+export function recordHIBPRequest(): boolean {
+  const minute = getMinuteUsage("hibp");
+
+  if (minute.count >= HIBP_REQUESTS_PER_MINUTE) {
+    return false;
+  }
+
+  minute.count++;
+  minute.lastRequestAt = Date.now();
+
+  // Also increment daily usage
+  incrementUsage("hibp");
+
+  return true;
+}
+
+/**
+ * Get HIBP rate limit status for display
+ */
+export function getHIBPRateLimitStatus(): {
+  requestsThisMinute: number;
+  maxPerMinute: number;
+  remaining: number;
+  percentUsed: number;
+  secondsUntilReset: number;
+  canMakeRequest: boolean;
+} {
+  const minute = getMinuteUsage("hibp");
+  const remaining = Math.max(0, HIBP_REQUESTS_PER_MINUTE - minute.count);
+  const secondsUntilReset = 60 - new Date().getSeconds();
+
+  return {
+    requestsThisMinute: minute.count,
+    maxPerMinute: HIBP_REQUESTS_PER_MINUTE,
+    remaining,
+    percentUsed: Math.round((minute.count / HIBP_REQUESTS_PER_MINUTE) * 100),
+    secondsUntilReset,
+    canMakeRequest: minute.count < HIBP_REQUESTS_PER_MINUTE,
+  };
 }
 
 export function incrementUsage(service: string): void {

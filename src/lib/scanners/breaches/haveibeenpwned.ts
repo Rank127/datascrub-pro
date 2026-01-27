@@ -1,5 +1,6 @@
 import { BaseScanner, type ScanInput, type ScanResult } from "../base-scanner";
 import { DataSourceNames } from "@/lib/types";
+import { getHIBPWaitTime, recordHIBPRequest, canUseService } from "@/lib/services/rate-limiter";
 
 interface BreachData {
   Name: string;
@@ -40,11 +41,26 @@ export class HaveIBeenPwnedScanner extends BaseScanner {
       return results;
     }
 
+    // Check daily limit before starting
+    if (!canUseService("hibp")) {
+      console.warn("HIBP daily limit reached, skipping scan");
+      return results;
+    }
+
     for (const email of input.emails) {
       try {
-        // HIBP rate limit: 10 requests per minute, add delay between requests
-        if (input.emails.indexOf(email) > 0) {
-          await this.delay(6100); // 6.1 seconds between requests to stay under rate limit
+        // Smart rate limiting: wait if needed based on per-minute tracking
+        const waitTime = getHIBPWaitTime();
+        if (waitTime > 0) {
+          console.log(`[HIBP] Rate limit: waiting ${Math.ceil(waitTime / 1000)}s before next request`);
+          await this.delay(waitTime);
+        }
+
+        // Record this request in the rate limiter
+        if (!recordHIBPRequest()) {
+          console.warn("[HIBP] Request blocked by rate limiter, waiting for reset");
+          await this.delay(60000); // Wait a minute and try again
+          recordHIBPRequest();
         }
 
         const breaches = await this.fetchBreaches(email);
