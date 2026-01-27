@@ -80,6 +80,7 @@ export function SupportSection() {
     priority: "",
     type: "",
   });
+  const [activeCard, setActiveCard] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
@@ -138,6 +139,19 @@ export function SupportSection() {
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
     setPagination((prev) => ({ ...prev, page: 1 }));
+    setActiveCard(null); // Clear card selection when manually filtering
+  };
+
+  const handleCardClick = (cardId: string, filterKey: string, filterValue: string) => {
+    if (activeCard === cardId) {
+      // Clicking active card clears the filter
+      setActiveCard(null);
+      setFilters({ status: "", priority: "", type: "" });
+    } else {
+      setActiveCard(cardId);
+      setFilters({ status: "", priority: "", type: "", [filterKey]: filterValue });
+    }
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
   const handleTicketUpdated = () => {
@@ -171,7 +185,7 @@ export function SupportSection() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - Click to filter */}
       {stats && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <MetricCard
@@ -179,28 +193,36 @@ export function SupportSection() {
             value={stats.openTickets}
             icon={Inbox}
             variant={stats.openTickets > 20 ? "warning" : "default"}
-            subtitle="Awaiting response"
+            subtitle="Click to view"
+            onClick={() => handleCardClick("open", "status", "OPEN")}
+            active={activeCard === "open"}
           />
           <MetricCard
             title="In Progress"
             value={stats.inProgressTickets}
             icon={Clock}
             variant="info"
-            subtitle="Being handled"
+            subtitle="Click to view"
+            onClick={() => handleCardClick("progress", "status", "IN_PROGRESS")}
+            active={activeCard === "progress"}
           />
           <MetricCard
             title="Urgent"
             value={stats.urgentTickets}
             icon={AlertTriangle}
             variant={stats.urgentTickets > 0 ? "danger" : "default"}
-            subtitle="High priority"
+            subtitle="Click to view"
+            onClick={() => handleCardClick("urgent", "priority", "URGENT")}
+            active={activeCard === "urgent"}
           />
           <MetricCard
             title="Resolved Today"
             value={stats.resolvedToday}
             icon={CheckCircle}
             variant="success"
-            subtitle="Closed tickets"
+            subtitle="Click to view"
+            onClick={() => handleCardClick("resolved", "status", "RESOLVED")}
+            active={activeCard === "resolved"}
           />
           <MetricCard
             title="Avg Resolution"

@@ -966,3 +966,153 @@ export async function executeAutoFix(
       return { success: true, message: `Action "${action}" logged` };
   }
 }
+
+/**
+ * Auto-resolve actions by ticket type
+ */
+const AUTO_RESOLVE_ACTIONS: Record<string, string[]> = {
+  SCAN_ERROR: ["retry_scan"],
+  REMOVAL_FAILED: ["retry_removal", "retry_alternate_emails"],
+  PAYMENT_ISSUE: ["send_payment_link"],
+  ACCOUNT_ISSUE: ["reset_sessions", "verify_email"],
+};
+
+/**
+ * Attempt to auto-resolve a ticket
+ * Returns true if resolved, false if needs manual intervention
+ */
+export async function tryAutoResolve(
+  ticketId: string,
+  systemUserId: string
+): Promise<{ resolved: boolean; message: string; actionsAttempted: string[] }> {
+  const ticket = await prisma.supportTicket.findUnique({
+    where: { id: ticketId },
+    include: { user: { select: { email: true } } },
+  });
+
+  if (!ticket) {
+    return { resolved: false, message: "Ticket not found", actionsAttempted: [] };
+  }
+
+  // Get auto-resolve actions for this ticket type
+  const actions = AUTO_RESOLVE_ACTIONS[ticket.type] || [];
+  const actionsAttempted: string[] = [];
+  let allSucceeded = true;
+  let requiresManual = false;
+
+  for (const action of actions) {
+    const result = await executeAutoFix(ticketId, action, systemUserId);
+    actionsAttempted.push(action);
+
+    if (!result.success) {
+      allSucceeded = false;
+      // Check if this action specifically needs manual intervention
+      if (result.message.includes("manual") || result.message.includes("not found") || result.message.includes("No ")) {
+        requiresManual = true;
+      }
+    }
+  }
+
+  // If all actions succeeded and we have actions to try, consider it resolved
+  if (allSucceeded && actionsAttempted.length > 0) {
+    await addTicketComment(
+      ticketId,
+      systemUserId,
+      `Auto-resolve completed successfully. Actions: ${actionsAttempted.join(", ")}`,
+      true
+    );
+
+    // Update ticket status to show it's being auto-resolved
+    await prisma.supportTicket.update({
+      where: { id: ticketId },
+      data: {
+        status: "IN_PROGRESS",
+        internalNotes: `Auto-resolve attempted: ${actionsAttempted.join(", ")}`,
+        lastActivityAt: new Date(),
+      },
+    });
+
+    return {
+      resolved: true,
+      message: "Auto-resolve actions completed",
+      actionsAttempted,
+    };
+  }
+
+  // If manual intervention is needed, update status
+  if (requiresManual || actionsAttempted.length === 0) {
+    await addTicketComment(
+      ticketId,
+      systemUserId,
+      `Auto-resolve requires manual intervention. Actions attempted: ${actionsAttempted.join(", ") || "none available"}`,
+      true
+    );
+
+    await prisma.supportTicket.update({
+      where: { id: ticketId },
+      data: {
+        status: "OPEN", // Back to Ops queue
+        priority: ticket.priority === "LOW" ? "NORMAL" : ticket.priority, // Bump priority
+        internalNotes: `Needs manual review. Auto-resolve attempted: ${actionsAttempted.join(", ") || "none"}`,
+        lastActivityAt: new Date(),
+      },
+    });
+
+    return {
+      resolved: false,
+      message: "Requires manual intervention - returned to Ops queue",
+      actionsAttempted,
+    };
+  }
+
+  return {
+    resolved: false,
+    message: "Auto-resolve partially completed",
+    actionsAttempted,
+  };
+}
+
+/**
+ * Assign ticket to Ops queue (unassign and set to OPEN)
+ */
+export async function returnToOpsQueue(
+  ticketId: string,
+  reason: string,
+  actorId: string
+): Promise<void> {
+  await prisma.supportTicket.update({
+    where: { id: ticketId },
+    data: {
+      status: "OPEN",
+      assignedToId: null,
+      assignedAt: null,
+      lastActivityAt: new Date(),
+    },
+  });
+
+  await addTicketComment(
+    ticketId,
+    actorId,
+    `Returned to Ops queue: ${reason}`,
+    true
+  );
+}
+
+/**
+ * Get tickets in Ops queue (unassigned, open tickets)
+ */
+export async function getOpsQueue() {
+  return prisma.supportTicket.findMany({
+    where: {
+      status: "OPEN",
+      assignedToId: null,
+    },
+    orderBy: [
+      { priority: "desc" },
+      { createdAt: "asc" },
+    ],
+    include: {
+      user: { select: { email: true, name: true } },
+    },
+  });
+}

@@ -134,6 +134,35 @@ export function TicketDetailDialog({
   const [resolution, setResolution] = useState(ticket.resolution || "");
   const [updating, setUpdating] = useState(false);
   const [executingFix, setExecutingFix] = useState<string | null>(null);
+  const [autoResolving, setAutoResolving] = useState(false);
+
+  const handleAutoResolve = async () => {
+    setAutoResolving(true);
+    try {
+      const response = await fetch(`/api/admin/support/tickets/${ticket.id}/auto-resolve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        if (result.resolved) {
+          toast.success(`Auto-resolve completed: ${result.actionsAttempted.join(", ")}`);
+        } else {
+          toast.warning(result.message || "Auto-resolve needs manual intervention");
+        }
+        fetchComments();
+        onUpdated();
+      } else {
+        toast.error(result.error || "Auto-resolve failed");
+      }
+    } catch {
+      toast.error("Failed to auto-resolve");
+    } finally {
+      setAutoResolving(false);
+    }
+  };
 
   // Generate auto-fix suggestions based on ticket type
   // Action names must match executeAutoFix in ticket-service.ts
@@ -691,6 +720,22 @@ export function TicketDetailDialog({
                     {updating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                     Update Ticket
                   </Button>
+
+                  {ticket.status !== "RESOLVED" && (
+                    <Button
+                      onClick={handleAutoResolve}
+                      disabled={autoResolving || updating}
+                      variant="outline"
+                      className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                    >
+                      {autoResolving ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Zap className="h-4 w-4 mr-2" />
+                      )}
+                      Auto-Resolve
+                    </Button>
+                  )}
 
                   {ticket.status !== "RESOLVED" && resolution && (
                     <Button

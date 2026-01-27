@@ -15,6 +15,8 @@ interface MetricCardProps {
   };
   variant?: "default" | "success" | "warning" | "danger" | "info";
   format?: "number" | "currency" | "percentage";
+  onClick?: () => void;
+  active?: boolean;
 }
 
 const variantStyles = {
@@ -41,6 +43,8 @@ export function MetricCard({
   trend,
   variant = "default",
   format = "number",
+  onClick,
+  active,
 }: MetricCardProps) {
   const formattedValue = () => {
     if (typeof value === "string") return value;
@@ -61,7 +65,14 @@ export function MetricCard({
   };
 
   return (
-    <Card className="bg-slate-900/50 border-slate-800 hover:border-slate-700 transition-colors">
+    <Card
+      className={cn(
+        "bg-slate-900/50 border-slate-800 hover:border-slate-700 transition-colors",
+        onClick && "cursor-pointer hover:bg-slate-800/50",
+        active && "ring-2 ring-emerald-500 border-emerald-500"
+      )}
+      onClick={onClick}
+    >
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
