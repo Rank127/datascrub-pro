@@ -303,10 +303,27 @@ export default function DashboardPage() {
                 {stats.activeExposures}
               </div>
               <div className="flex items-center text-xs text-slate-500">
-                {stats.activeExposures > 0 ? (
+                {trends.exposures.changePercent !== 0 ? (
+                  // For exposures: decreasing is good (green), increasing is bad (red)
+                  trends.exposures.changePercent < 0 ? (
+                    <>
+                      <TrendingDown className="mr-1 h-3 w-3 text-emerald-400" />
+                      <span className="text-emerald-400">
+                        {Math.abs(trends.exposures.changePercent)}% fewer this week
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <TrendingUp className="mr-1 h-3 w-3 text-red-400" />
+                      <span className="text-red-400">
+                        +{trends.exposures.changePercent}% vs last week
+                      </span>
+                    </>
+                  )
+                ) : stats.activeExposures > 0 ? (
                   <>
-                    <TrendingUp className="mr-1 h-3 w-3 text-red-400" />
-                    <span className="text-red-400">Needs attention</span>
+                    <AlertTriangle className="mr-1 h-3 w-3 text-orange-400" />
+                    <span className="text-orange-400">Needs attention</span>
                   </>
                 ) : (
                   <>
@@ -354,9 +371,27 @@ export default function DashboardPage() {
               <div className="text-2xl font-bold text-white">
                 {stats.removedExposures}
               </div>
-              <div className="flex items-center text-xs text-emerald-400">
-                <TrendingDown className="mr-1 h-3 w-3" />
-                {stats.removedExposures > 0 ? "Protected" : "No removals yet"}
+              <div className="flex items-center text-xs">
+                {trends.removals.changePercent > 0 ? (
+                  // For removals: increasing is good (more removed this week)
+                  <>
+                    <TrendingUp className="mr-1 h-3 w-3 text-emerald-400" />
+                    <span className="text-emerald-400">
+                      +{trends.removals.changePercent}% this week
+                    </span>
+                  </>
+                ) : trends.removals.current > 0 ? (
+                  <>
+                    <TrendingDown className="mr-1 h-3 w-3 text-emerald-400" />
+                    <span className="text-emerald-400">
+                      {trends.removals.current} this week
+                    </span>
+                  </>
+                ) : stats.removedExposures > 0 ? (
+                  <span className="text-emerald-400">Protected</span>
+                ) : (
+                  <span className="text-slate-500">No removals yet</span>
+                )}
               </div>
             </CardContent>
           </Card>
