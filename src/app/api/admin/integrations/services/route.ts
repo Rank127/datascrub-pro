@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
 import { getEmailQuotaStatus, getEmailQueueStatus, sendServiceAlertEmail } from "@/lib/email";
-import { getServiceStatus, shouldUseFreeAlternative, getHIBPRateLimitStatus } from "@/lib/services/rate-limiter";
+import { getServiceStatus, shouldUseFreeAlternative, getHIBPRateLimitStatus, getScrapingBeeStatus, updateScrapingBeeApiCredits } from "@/lib/services/rate-limiter";
 import {
   ServicesIntegrationResponse,
   ResendServiceStatus,
@@ -304,7 +304,7 @@ async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
 
 async function checkScrapingBeeStatus(): Promise<ScrapingBeeServiceStatus> {
   const freeTierMode = shouldUseFreeAlternative();
-  const rateLimitStatus = getServiceStatus("scrapingbee");
+  const internalStatus = getScrapingBeeStatus();
 
   if (!process.env.SCRAPINGBEE_API_KEY) {
     return {
@@ -317,56 +317,98 @@ async function checkScrapingBeeStatus(): Promise<ScrapingBeeServiceStatus> {
   if (freeTierMode) {
     return {
       status: "connected",
-      message: `Rate limited (${rateLimitStatus.used}/${rateLimitStatus.limit}/day) - using direct fetch`,
-      rateLimit: calculateRateLimitHealth(rateLimitStatus.used, rateLimitStatus.limit, "midnight UTC"),
+      message: `Free tier mode - using direct fetch`,
+      rateLimit: calculateRateLimitHealth(internalStatus.creditsUsed, internalStatus.monthlyLimit, "month end"),
     };
   }
 
   try {
-    // Check ScrapingBee usage
+    // Check ScrapingBee usage API
     const response = await fetch(
       `https://app.scrapingbee.com/api/v1/usage?api_key=${process.env.SCRAPINGBEE_API_KEY}`
     );
 
     if (response.ok) {
       const data = await response.json();
-      const creditsRemaining = data.credits_remaining || data.api_credit || 0;
-      const maxCredits = data.max_api_credit || data.credits_limit || 1000;
-      const creditsUsed = maxCredits - creditsRemaining;
+      const apiCreditsRemaining = data.credits_remaining || data.api_credit || 0;
+      const maxCredits = data.max_api_credit || data.credits_limit || internalStatus.monthlyLimit;
+      const creditsUsed = maxCredits - apiCreditsRemaining;
 
-      // If credits exhausted, switch to free mode
-      if (creditsRemaining === 0) {
-        return {
-          status: "connected",
-          message: "Credits exhausted - using direct fetch fallback",
-          creditsRemaining: 0,
-          maxCredits,
-          rateLimit: calculateRateLimitHealth(maxCredits, maxCredits),
-        };
+      // Sync API data with our internal tracking
+      updateScrapingBeeApiCredits(apiCreditsRemaining);
+
+      // Determine if using fallback
+      const usingFallback = internalStatus.shouldUseFallback || apiCreditsRemaining <= 0;
+
+      // Calculate status based on percentage used
+      let status: RateLimitHealth["status"] = "healthy";
+      let recommendation: string | undefined;
+
+      const percentUsed = Math.round((creditsUsed / maxCredits) * 100);
+
+      if (percentUsed >= 95 || apiCreditsRemaining <= 0) {
+        status = "critical";
+        recommendation = usingFallback
+          ? "Credits exhausted - using direct fetch fallback (no JS rendering)"
+          : "Credits nearly exhausted - will switch to fallback soon";
+      } else if (percentUsed >= 80) {
+        status = "warning";
+        recommendation = `${apiCreditsRemaining.toLocaleString()} credits remaining this month`;
       }
+
+      const creditCosts = `JS: 5 | Premium+JS: 25 | Stealth+JS: 100`;
 
       return {
         status: "connected",
-        message: `Connected to ScrapingBee (${creditsRemaining} credits)`,
-        creditsRemaining,
+        message: usingFallback
+          ? `ScrapingBee exhausted - using direct fetch`
+          : `${apiCreditsRemaining.toLocaleString()}/${maxCredits.toLocaleString()} credits/mo`,
+        creditsRemaining: apiCreditsRemaining,
         maxCredits,
-        rateLimit: calculateRateLimitHealth(creditsUsed, maxCredits),
+        rateLimit: {
+          status,
+          used: creditsUsed,
+          limit: maxCredits,
+          percentUsed,
+          resetAt: "month end",
+          recommendation: recommendation || creditCosts,
+        },
       };
     } else if (response.status === 401) {
       return {
-        status: "connected",
-        message: "Invalid API key - using direct fetch fallback",
+        status: "error",
+        message: "Invalid API key",
       };
     } else {
+      // Use internal tracking if API fails
       return {
         status: "connected",
-        message: `API error - using direct fetch fallback`,
+        message: `~${internalStatus.creditsRemaining.toLocaleString()} credits remaining (API unavailable)`,
+        creditsRemaining: internalStatus.creditsRemaining,
+        maxCredits: internalStatus.monthlyLimit,
+        rateLimit: {
+          status: internalStatus.status,
+          used: internalStatus.creditsUsed,
+          limit: internalStatus.monthlyLimit,
+          percentUsed: internalStatus.percentUsed,
+          resetAt: "month end",
+        },
       };
     }
   } catch (error) {
+    // Use internal tracking on error
     return {
       status: "connected",
-      message: "Connection failed - using direct fetch fallback",
+      message: `~${internalStatus.creditsRemaining.toLocaleString()} credits remaining (API error)`,
+      creditsRemaining: internalStatus.creditsRemaining,
+      maxCredits: internalStatus.monthlyLimit,
+      rateLimit: {
+        status: internalStatus.status,
+        used: internalStatus.creditsUsed,
+        limit: internalStatus.monthlyLimit,
+        percentUsed: internalStatus.percentUsed,
+        resetAt: "month end",
+      },
     };
   }
 }

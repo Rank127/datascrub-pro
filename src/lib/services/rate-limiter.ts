@@ -116,13 +116,209 @@ export function getHIBPRateLimitStatus(): {
   };
 }
 
-export function incrementUsage(service: string): void {
+export function incrementUsage(service: string, count: number = 1): void {
   const serviceUsage = getUsage(service);
-  serviceUsage.count++;
+  serviceUsage.count += count;
 }
 
 export function getServiceUsage(service: string): number {
   return getUsage(service).count;
+}
+
+// ============================================
+// ScrapingBee Monthly Credit Management
+// ============================================
+
+interface ScrapingBeeCredits {
+  used: number;
+  monthKey: string;
+  lastCheckedAt: number;
+  apiCreditsRemaining: number | null; // From API check
+}
+
+const scrapingBeeCredits: ScrapingBeeCredits = {
+  used: 0,
+  monthKey: "",
+  lastCheckedAt: 0,
+  apiCreditsRemaining: null,
+};
+
+// Credit costs based on ScrapingBee pricing
+const SCRAPINGBEE_CREDITS = {
+  BASIC: 1,           // No JS, no proxy
+  JS_RENDERING: 5,    // With JavaScript rendering
+  PREMIUM_NO_JS: 10,  // Premium proxy without JS
+  PREMIUM_WITH_JS: 25, // Premium proxy with JS rendering
+  STEALTH_NO_JS: 75,  // Stealth proxy without JS (estimate)
+  STEALTH_WITH_JS: 100, // Stealth proxy with JS (estimate)
+};
+
+// Monthly limit from plan (250,000 credits)
+const SCRAPINGBEE_MONTHLY_LIMIT = parseInt(process.env.SCRAPINGBEE_MONTHLY_LIMIT || "250000");
+
+// Warning threshold (80% = 200,000 credits)
+const SCRAPINGBEE_WARNING_THRESHOLD = 0.8;
+
+// Critical threshold (95% = 237,500 credits) - start using fallback
+const SCRAPINGBEE_CRITICAL_THRESHOLD = 0.95;
+
+function getMonthKey(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function getScrapingBeeCreditsState(): ScrapingBeeCredits {
+  const monthKey = getMonthKey();
+  if (scrapingBeeCredits.monthKey !== monthKey) {
+    // New month - reset counters
+    scrapingBeeCredits.used = 0;
+    scrapingBeeCredits.monthKey = monthKey;
+    scrapingBeeCredits.apiCreditsRemaining = null;
+    console.log(`[ScrapingBee] New month ${monthKey}, credits reset`);
+  }
+  return scrapingBeeCredits;
+}
+
+/**
+ * Calculate credit cost for a ScrapingBee request based on options
+ */
+export function calculateScrapingBeeCost(options: {
+  renderJs?: boolean;
+  premiumProxy?: boolean;
+  stealthProxy?: boolean;
+}): number {
+  const { renderJs = true, premiumProxy = false, stealthProxy = false } = options;
+
+  if (stealthProxy) {
+    return renderJs ? SCRAPINGBEE_CREDITS.STEALTH_WITH_JS : SCRAPINGBEE_CREDITS.STEALTH_NO_JS;
+  }
+  if (premiumProxy) {
+    return renderJs ? SCRAPINGBEE_CREDITS.PREMIUM_WITH_JS : SCRAPINGBEE_CREDITS.PREMIUM_NO_JS;
+  }
+  if (renderJs) {
+    return SCRAPINGBEE_CREDITS.JS_RENDERING;
+  }
+  return SCRAPINGBEE_CREDITS.BASIC;
+}
+
+/**
+ * Record ScrapingBee credits used
+ */
+export function recordScrapingBeeUsage(credits: number): void {
+  const state = getScrapingBeeCreditsState();
+  state.used += credits;
+  console.log(`[ScrapingBee] Used ${credits} credits (total this month: ${state.used}/${SCRAPINGBEE_MONTHLY_LIMIT})`);
+}
+
+/**
+ * Update API credits from ScrapingBee usage endpoint
+ */
+export function updateScrapingBeeApiCredits(creditsRemaining: number): void {
+  const state = getScrapingBeeCreditsState();
+  state.apiCreditsRemaining = creditsRemaining;
+  state.lastCheckedAt = Date.now();
+}
+
+/**
+ * Check if ScrapingBee has enough credits for a request
+ */
+export function canUseScrapingBee(options: {
+  renderJs?: boolean;
+  premiumProxy?: boolean;
+  stealthProxy?: boolean;
+} = {}): { allowed: boolean; reason?: string; creditsNeeded: number } {
+  const state = getScrapingBeeCreditsState();
+  const creditsNeeded = calculateScrapingBeeCost(options);
+
+  // If we have API data, use that as source of truth
+  if (state.apiCreditsRemaining !== null) {
+    if (state.apiCreditsRemaining < creditsNeeded) {
+      return {
+        allowed: false,
+        reason: `Insufficient credits (need ${creditsNeeded}, have ${state.apiCreditsRemaining})`,
+        creditsNeeded,
+      };
+    }
+  }
+
+  // Check against our internal tracking
+  const estimatedRemaining = SCRAPINGBEE_MONTHLY_LIMIT - state.used;
+  const percentUsed = state.used / SCRAPINGBEE_MONTHLY_LIMIT;
+
+  // If at critical threshold, deny non-essential requests
+  if (percentUsed >= SCRAPINGBEE_CRITICAL_THRESHOLD) {
+    return {
+      allowed: false,
+      reason: `Monthly credits nearly exhausted (${Math.round(percentUsed * 100)}% used)`,
+      creditsNeeded,
+    };
+  }
+
+  if (estimatedRemaining < creditsNeeded) {
+    return {
+      allowed: false,
+      reason: `Insufficient credits (need ${creditsNeeded}, ~${estimatedRemaining} remaining)`,
+      creditsNeeded,
+    };
+  }
+
+  return { allowed: true, creditsNeeded };
+}
+
+/**
+ * Should use direct fetch fallback instead of ScrapingBee?
+ */
+export function shouldUseScrapingBeeFallback(): boolean {
+  const state = getScrapingBeeCreditsState();
+  const percentUsed = state.used / SCRAPINGBEE_MONTHLY_LIMIT;
+
+  // Use fallback if at critical threshold
+  if (percentUsed >= SCRAPINGBEE_CRITICAL_THRESHOLD) {
+    return true;
+  }
+
+  // Use fallback if API reports no credits
+  if (state.apiCreditsRemaining !== null && state.apiCreditsRemaining <= 0) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Get ScrapingBee credit status for dashboard
+ */
+export function getScrapingBeeStatus(): {
+  creditsUsed: number;
+  creditsRemaining: number;
+  monthlyLimit: number;
+  percentUsed: number;
+  status: "healthy" | "warning" | "critical";
+  shouldUseFallback: boolean;
+  apiCreditsRemaining: number | null;
+  costBreakdown: typeof SCRAPINGBEE_CREDITS;
+} {
+  const state = getScrapingBeeCreditsState();
+  const creditsRemaining = state.apiCreditsRemaining ?? (SCRAPINGBEE_MONTHLY_LIMIT - state.used);
+  const percentUsed = Math.round(((SCRAPINGBEE_MONTHLY_LIMIT - creditsRemaining) / SCRAPINGBEE_MONTHLY_LIMIT) * 100);
+
+  let status: "healthy" | "warning" | "critical" = "healthy";
+  if (percentUsed >= SCRAPINGBEE_CRITICAL_THRESHOLD * 100) {
+    status = "critical";
+  } else if (percentUsed >= SCRAPINGBEE_WARNING_THRESHOLD * 100) {
+    status = "warning";
+  }
+
+  return {
+    creditsUsed: state.used,
+    creditsRemaining,
+    monthlyLimit: SCRAPINGBEE_MONTHLY_LIMIT,
+    percentUsed,
+    status,
+    shouldUseFallback: shouldUseScrapingBeeFallback(),
+    apiCreditsRemaining: state.apiCreditsRemaining,
+    costBreakdown: SCRAPINGBEE_CREDITS,
+  };
 }
 
 export function canUseService(service: string): boolean {

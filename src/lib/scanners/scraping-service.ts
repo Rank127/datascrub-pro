@@ -2,21 +2,31 @@
  * Scraping Service
  *
  * Provides reliable web scraping with:
- * - JavaScript rendering
+ * - JavaScript rendering (5 credits)
  * - Bot detection bypass
- * - Proxy rotation
+ * - Proxy rotation (premium: 10-25 credits, stealth: 75-100 credits)
  * - CAPTCHA handling
+ * - Smart credit management with monthly limits
  *
- * Uses ScrapingBee API (or falls back to direct fetch)
+ * Uses ScrapingBee API (or falls back to direct fetch when credits exhausted)
  */
 
-interface ScrapingOptions {
+import {
+  canUseScrapingBee,
+  calculateScrapingBeeCost,
+  recordScrapingBeeUsage,
+  shouldUseScrapingBeeFallback,
+  getScrapingBeeStatus,
+} from "@/lib/services/rate-limiter";
+
+export interface ScrapingOptions {
   renderJs?: boolean;
   premiumProxy?: boolean;
   stealthProxy?: boolean; // Most expensive but best for anti-bot sites
   countryCode?: string;
   waitForSelector?: string;
   timeout?: number;
+  forceFallback?: boolean; // Force direct fetch even if ScrapingBee is available
 }
 
 interface ScrapingResult {
@@ -64,10 +74,25 @@ async function fetchWithScrapingBee(
     throw new Error("SCRAPINGBEE_API_KEY not configured");
   }
 
+  // Check if we have enough credits
+  const creditCheck = canUseScrapingBee(options);
+  if (!creditCheck.allowed) {
+    console.warn(`[ScrapingService] ScrapingBee blocked: ${creditCheck.reason}`);
+    return {
+      success: false,
+      html: "",
+      statusCode: 402, // Payment Required
+      error: creditCheck.reason,
+    };
+  }
+
+  const creditCost = creditCheck.creditsNeeded;
+  const renderJs = options.renderJs !== false;
+
   const params = new URLSearchParams({
     api_key: apiKey,
     url: url,
-    render_js: options.renderJs !== false ? "true" : "false",
+    render_js: renderJs ? "true" : "false",
   });
 
   // Stealth proxy is most expensive but best for anti-bot sites
@@ -89,7 +114,7 @@ async function fetchWithScrapingBee(
 
   const scrapingUrl = `https://app.scrapingbee.com/api/v1/?${params.toString()}`;
 
-  console.log(`[ScrapingService] Fetching via ScrapingBee: ${url}`);
+  console.log(`[ScrapingService] Fetching via ScrapingBee: ${url} (cost: ${creditCost} credits)`);
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), options.timeout || 30000);
@@ -184,7 +209,9 @@ async function fetchWithScrapingBee(
       };
     }
 
-    console.log(`[ScrapingService] ScrapingBee success: ${html.length} bytes, resolved=${resolvedUrl}`);
+    // Record successful credit usage
+    recordScrapingBeeUsage(creditCost);
+    console.log(`[ScrapingService] ScrapingBee success: ${html.length} bytes, resolved=${resolvedUrl}, credits used: ${creditCost}`);
 
     return {
       success: true,
@@ -279,11 +306,30 @@ async function fetchDirect(
 
 /**
  * Main scraping function - uses ScrapingBee if available, falls back to direct fetch
+ *
+ * Automatically falls back to direct fetch when:
+ * - ScrapingBee is not configured
+ * - Monthly credits are exhausted (95%+ used)
+ * - forceFallback option is set
+ * - ScrapingBee returns a server error
  */
 export async function scrapeUrl(
   url: string,
   options: ScrapingOptions = {}
 ): Promise<ScrapingResult> {
+  // Force fallback if requested
+  if (options.forceFallback) {
+    console.log(`[ScrapingService] Forced fallback to direct fetch for: ${url}`);
+    return fetchDirect(url, options);
+  }
+
+  // Check if we should use fallback due to credit exhaustion
+  if (shouldUseScrapingBeeFallback()) {
+    const status = getScrapingBeeStatus();
+    console.warn(`[ScrapingService] Using fallback - ScrapingBee credits ${status.percentUsed}% used (${status.creditsRemaining} remaining)`);
+    return fetchDirect(url, options);
+  }
+
   // Try ScrapingBee first if configured
   if (isScrapingServiceEnabled()) {
     const result = await fetchWithScrapingBee(url, options);
@@ -297,6 +343,12 @@ export async function scrapeUrl(
 
     // Check if this was a ScrapingBee API error vs target site error
     console.warn(`[ScrapingService] ScrapingBee failed: status=${result.statusCode}, error=${result.error}`);
+
+    // 402 means we ran out of credits - use fallback
+    if (result.statusCode === 402) {
+      console.warn(`[ScrapingService] Credits exhausted, falling back to direct fetch`);
+      return fetchDirect(url, options);
+    }
 
     // Don't fall back for 4xx client errors - these indicate real problems
     // (e.g., blocked URL, invalid request, etc.)
@@ -312,6 +364,11 @@ export async function scrapeUrl(
   // Fall back to direct fetch
   return fetchDirect(url, options);
 }
+
+/**
+ * Get current ScrapingBee credit status (for external use)
+ */
+export { getScrapingBeeStatus } from "@/lib/services/rate-limiter";
 
 /**
  * Scrape multiple URLs in parallel with rate limiting
