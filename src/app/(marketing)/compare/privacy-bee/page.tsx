@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "Is GhostMyData better than Privacy Bee?",
-    answer: "GhostMyData offers more data broker coverage (2,000+ vs 1,033) at a lower price point with additional AI Shield sources. Privacy Bee includes dark web monitoring in Pro tier while GhostMyData includes it in Enterprise. For overall value, GhostMyData is the better choice.",
+    answer: "GhostMyData offers more data broker coverage (2,100+ vs 1,033) at a lower price point with additional AI Shield sources. Privacy Bee includes dark web monitoring in Pro tier while GhostMyData includes it in Enterprise. For overall value, GhostMyData is the better choice.",
   },
   {
     question: "How much does Privacy Bee cost compared to GhostMyData?",
@@ -48,7 +48,7 @@ const faqs = [
   },
   {
     question: "Which service covers more data brokers?",
-    answer: "GhostMyData covers 2,000+ data brokers plus 60 AI Shield sources. Privacy Bee covers 1,033 data brokers. GhostMyData offers nearly double the coverage.",
+    answer: "GhostMyData covers 2,100+ data brokers plus 60 AI Shield sources. Privacy Bee covers 1,033 data brokers. GhostMyData offers nearly double the coverage.",
   },
   {
     question: "Does Privacy Bee have dark web monitoring?",
@@ -56,7 +56,7 @@ const faqs = [
   },
   {
     question: "Which service offers better value?",
-    answer: "GhostMyData offers better value with a free tier, more data broker coverage (2,000+ vs 1,033), and lower starting prices. Privacy Bee charges more for fewer features at the entry level.",
+    answer: "GhostMyData offers better value with a free tier, more data broker coverage (2,100+ vs 1,033), and lower starting prices. Privacy Bee charges more for fewer features at the entry level.",
   },
 ];
 
@@ -75,7 +75,7 @@ const comparisonData = [
   },
   {
     feature: "Data Brokers Covered",
-    ghostmydata: "2,000+ (plus 60 AI Shield sources)",
+    ghostmydata: "2,100+ (plus 60 AI Shield sources)",
     privacybee: "1,033",
     winner: "ghostmydata",
   },
@@ -154,7 +154,7 @@ export default function ComparePrivacyBeePage() {
         </h2>
         <p className="text-slate-300 text-lg mb-4">
           <strong className="text-white">GhostMyData</strong> offers nearly double the data broker coverage
-          (2,000+ vs 1,033) at a lower price point with a free tier.
+          (2,100+ vs 1,033) at a lower price point with a free tier.
           <strong className="text-white"> Privacy Bee</strong> has SOC 2 Type II certification and white-glove
           service options for premium customers.
         </p>
@@ -172,7 +172,7 @@ export default function ComparePrivacyBeePage() {
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">More Coverage</h3>
           <p className="text-slate-400">
-            GhostMyData covers 2,000+ data brokers plus 60 AI Shield sources.
+            GhostMyData covers 2,100+ data brokers plus 60 AI Shield sources.
             Privacy Bee covers 1,033 data brokers.
           </p>
         </div>
@@ -259,7 +259,7 @@ export default function ComparePrivacyBeePage() {
               </div>
             </div>
             <p className="text-emerald-400 text-sm mt-4">
-              Includes: 2,000+ data brokers, 60 AI Shield sources, breach alerts
+              Includes: 2,100+ data brokers, 60 AI Shield sources, breach alerts
             </p>
           </div>
 
@@ -298,7 +298,7 @@ export default function ComparePrivacyBeePage() {
         </h2>
         <div className="grid md:grid-cols-2 gap-6">
           {[
-            "Nearly 2x data broker coverage (2,000+ vs 1,033)",
+            "Nearly 2x data broker coverage (2,100+ vs 1,033)",
             "60 additional AI Shield sources",
             "Free tier with full scan capability",
             "Lower entry price ($11.99 vs $18 for comparable features)",

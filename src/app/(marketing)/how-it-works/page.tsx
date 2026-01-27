@@ -16,7 +16,7 @@ import { FAQSchema } from "@/components/seo/structured-data";
 export const metadata: Metadata = {
   title: "How It Works - 5-Step Data Removal Process",
   description:
-    "Learn how GhostMyData removes your personal data in 5 simple steps: Create profile, scan 2,000+ sources, review exposures, automated removal, and continuous monitoring.",
+    "Learn how GhostMyData removes your personal data in 5 simple steps: Create profile, scan 2,100+ sources, review exposures, automated removal, and continuous monitoring.",
   keywords: [
     "how data removal works",
     "data broker opt out process",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "How GhostMyData Works - 5-Step Data Removal",
     description:
-      "Our automated 5-step process finds and removes your data from 2,000+ sources with 98% success rate.",
+      "Our automated 5-step process finds and removes your data from 2,100+ sources with 98% success rate.",
     url: "https://ghostmydata.com/how-it-works",
     type: "website",
     images: [
@@ -66,9 +66,9 @@ const steps = [
     icon: Search,
     title: "Run a Comprehensive Scan",
     description:
-      "Our system searches across 2,000+ data sources including data brokers, breach databases, dark web forums, social media platforms, and 60 AI Shield sources.",
+      "Our system searches across 2,100+ data sources including data brokers, breach databases, dark web forums, social media platforms, and 60 AI Shield sources.",
     details: [
-      "2,000+ data brokers (Spokeo, WhitePages, etc.)",
+      "2,100+ data brokers (Spokeo, WhitePages, etc.)",
       "Breach databases (Have I Been Pwned, LeakCheck)",
       "Dark web marketplaces and forums",
       "60 AI Shield sources (5 categories)",
@@ -136,7 +136,7 @@ const guarantees = [
 const faqs = [
   {
     question: "How does GhostMyData find my personal information?",
-    answer: "GhostMyData scans over 2,000 data broker sites, breach databases, dark web forums, and 60 AI Shield sources using your provided information (name, email, phone, addresses). Our automated system searches these sources to identify where your data is exposed.",
+    answer: "GhostMyData scans over 2,100 data broker sites, breach databases, dark web forums, and 60 AI Shield sources using your provided information (name, email, phone, addresses). Our automated system searches these sources to identify where your data is exposed.",
   },
   {
     question: "How long does the data removal process take?",

@@ -132,7 +132,7 @@ export default function RemoveFromPage() {
         </h2>
         <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
           Instead of manually opting out of each site, let GhostMyData automatically
-          remove your data from 2,000+ data brokers with one click.
+          remove your data from 2,100+ data brokers with one click.
         </p>
         <Link href="/register">
           <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700">

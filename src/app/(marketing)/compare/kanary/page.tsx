@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "Is GhostMyData better than Kanary?",
-    answer: "GhostMyData offers more comprehensive protection with 2,000+ data brokers (plus 60 AI Shield sources), dark web monitoring, and breach alerts. Kanary covers only 310 brokers but has a mobile app. For overall protection, GhostMyData is the better choice.",
+    answer: "GhostMyData offers more comprehensive protection with 2,100+ data brokers (plus 60 AI Shield sources), dark web monitoring, and breach alerts. Kanary covers only 310 brokers but has a mobile app. For overall protection, GhostMyData is the better choice.",
   },
   {
     question: "How much does Kanary cost compared to GhostMyData?",
@@ -53,7 +53,7 @@ const faqs = [
   },
   {
     question: "Which service covers more data brokers?",
-    answer: "GhostMyData covers 2,000+ data brokers plus 60 AI Shield sources, while Kanary covers 310 brokers (209 automated, 101 with guides). GhostMyData offers significantly more coverage.",
+    answer: "GhostMyData covers 2,100+ data brokers plus 60 AI Shield sources, while Kanary covers 310 brokers (209 automated, 101 with guides). GhostMyData offers significantly more coverage.",
   },
   {
     question: "Does Kanary have dark web monitoring?",
@@ -76,7 +76,7 @@ const comparisonData = [
   },
   {
     feature: "Data Brokers Covered",
-    ghostmydata: "2,000+ (plus 60 AI Shield sources)",
+    ghostmydata: "2,100+ (plus 60 AI Shield sources)",
     kanary: "310 (209 automated)",
     winner: "ghostmydata",
   },
@@ -260,7 +260,7 @@ export default function CompareKanaryPage() {
               </div>
             </div>
             <p className="text-emerald-400 text-sm mt-4">
-              Includes: Dark web monitoring, breach alerts, 2,000+ data brokers, 60 AI Shield sources
+              Includes: Dark web monitoring, breach alerts, 2,100+ data brokers, 60 AI Shield sources
             </p>
           </div>
 
@@ -301,7 +301,7 @@ export default function CompareKanaryPage() {
           {[
             "Dark web monitoring included",
             "Breach notification alerts",
-            "6x more data broker coverage (2,000+ vs 310)",
+            "6x more data broker coverage (2,100+ vs 310)",
             "AI Shield with 60 additional sources",
             "Free tier with full scan capability",
             "Do Not Call Registry integration",

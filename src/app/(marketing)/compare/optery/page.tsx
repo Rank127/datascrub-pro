@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "Is GhostMyData better than Optery?",
-    answer: "GhostMyData offers more comprehensive protection with 2,000+ data brokers (plus 60 AI Shield sources), dark web monitoring, and breach alerts. Optery has a lower entry price but covers fewer brokers (370-635) and lacks dark web monitoring features.",
+    answer: "GhostMyData offers more comprehensive protection with 2,100+ data brokers (plus 60 AI Shield sources), dark web monitoring, and breach alerts. Optery has a lower entry price but covers fewer brokers (370-635) and lacks dark web monitoring features.",
   },
   {
     question: "How much does Optery cost compared to GhostMyData?",
@@ -52,11 +52,11 @@ const faqs = [
   },
   {
     question: "Which service has better data broker coverage?",
-    answer: "GhostMyData covers 2,000+ data brokers plus 60 AI Shield sources, while Optery covers 370-635 brokers depending on your plan. GhostMyData offers more comprehensive coverage.",
+    answer: "GhostMyData covers 2,100+ data brokers plus 60 AI Shield sources, while Optery covers 370-635 brokers depending on your plan. GhostMyData offers more comprehensive coverage.",
   },
   {
     question: "Does Optery have a free tier?",
-    answer: "Optery offers a limited free tier for self-service removal guides. GhostMyData's free tier includes a comprehensive scan across 2,000+ sources with manual removal guides.",
+    answer: "Optery offers a limited free tier for self-service removal guides. GhostMyData's free tier includes a comprehensive scan across 2,100+ sources with manual removal guides.",
   },
 ];
 
@@ -75,7 +75,7 @@ const comparisonData = [
   },
   {
     feature: "Data Brokers Covered",
-    ghostmydata: "2,000+ (plus 60 AI Shield sources)",
+    ghostmydata: "2,100+ (plus 60 AI Shield sources)",
     optery: "370-635 (varies by plan)",
     winner: "ghostmydata",
   },
@@ -172,7 +172,7 @@ export default function CompareOpteryPage() {
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">More Coverage</h3>
           <p className="text-slate-400">
-            GhostMyData covers 2,000+ data brokers plus 60 AI Shield sources.
+            GhostMyData covers 2,100+ data brokers plus 60 AI Shield sources.
             Optery covers 370-635 depending on your plan tier.
           </p>
         </div>
@@ -259,7 +259,7 @@ export default function CompareOpteryPage() {
               </div>
             </div>
             <p className="text-emerald-400 text-sm mt-4">
-              Includes: Dark web monitoring, breach alerts, 2,000+ data brokers, 60 AI Shield sources
+              Includes: Dark web monitoring, breach alerts, 2,100+ data brokers, 60 AI Shield sources
             </p>
           </div>
 
@@ -300,7 +300,7 @@ export default function CompareOpteryPage() {
           {[
             "Dark web monitoring included",
             "Breach notification alerts",
-            "3x more data broker coverage (2,000+ vs 635)",
+            "3x more data broker coverage (2,100+ vs 635)",
             "AI Shield with 60 additional sources",
             "Family plans for 5 profiles",
             "Do Not Call Registry integration",

@@ -45,7 +45,7 @@ const comparisons = [
       "GhostMyData has a free tier",
       "Dark web monitoring included",
       "Monthly billing option",
-      "2,000+ vs 40+ data brokers",
+      "2,100+ vs 40+ data brokers",
     ],
   },
   {
