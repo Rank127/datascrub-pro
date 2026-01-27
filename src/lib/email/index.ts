@@ -1340,3 +1340,157 @@ export async function sendRemovalStatusDigestEmail(
 
   return sendEmail(email, subject, html);
 }
+
+// ==========================================
+// Free User Exposure Digest (with Upgrade CTA)
+// ==========================================
+
+interface FreeUserExposureDigestData {
+  totalExposures: number;
+  criticalExposures: number;
+  highExposures: number;
+  mediumExposures: number;
+  topSources: string[];
+  dataTypesExposed: string[];
+  estimatedTimeToRemove: number; // in hours
+  lastScanDate: Date | null;
+}
+
+export async function sendFreeUserExposureDigest(
+  email: string,
+  name: string,
+  data: FreeUserExposureDigestData
+) {
+  const urgencyColor = data.criticalExposures > 0
+    ? "#ef4444"
+    : data.highExposures > 0
+    ? "#f97316"
+    : "#eab308";
+
+  const urgencyText = data.criticalExposures > 0
+    ? `${data.criticalExposures} critical`
+    : data.highExposures > 0
+    ? `${data.highExposures} high-risk`
+    : `${data.mediumExposures} medium-risk`;
+
+  const lastScanText = data.lastScanDate
+    ? data.lastScanDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : "Unknown";
+
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 48px;">🔍</span>
+    </div>
+    <h1 style="color: ${urgencyColor}; margin-top: 0; text-align: center;">
+      Your Personal Data is Exposed
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6; text-align: center; color: #94a3b8;">
+      Hi ${name || "there"}, we found your information on <strong style="color: #e2e8f0;">${data.totalExposures} data broker sites</strong>.
+    </p>
+
+    <!-- Exposure Stats -->
+    <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #334155;">
+      <div style="display: flex; justify-content: space-around; text-align: center; flex-wrap: wrap;">
+        <div style="padding: 12px; min-width: 80px;">
+          <div style="font-size: 36px; font-weight: bold; color: ${urgencyColor};">${data.totalExposures}</div>
+          <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Total Exposures</div>
+        </div>
+        <div style="padding: 12px; min-width: 80px;">
+          <div style="font-size: 36px; font-weight: bold; color: #ef4444;">${data.criticalExposures}</div>
+          <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Critical</div>
+        </div>
+        <div style="padding: 12px; min-width: 80px;">
+          <div style="font-size: 36px; font-weight: bold; color: #f97316;">${data.highExposures}</div>
+          <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">High Risk</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What's Exposed -->
+    <div style="margin: 24px 0;">
+      <h3 style="color: #e2e8f0; margin-bottom: 12px;">What's being shared about you:</h3>
+      <div style="background-color: #0f172a; border-radius: 8px; padding: 16px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          ${data.dataTypesExposed.slice(0, 8).map(dt => `
+            <span style="background-color: #334155; color: #e2e8f0; padding: 6px 12px; border-radius: 16px; font-size: 13px;">
+              ${dt}
+            </span>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Sources -->
+    <div style="margin: 24px 0;">
+      <h3 style="color: #e2e8f0; margin-bottom: 12px;">Found on these sites:</h3>
+      <div style="background-color: #0f172a; border-radius: 8px; padding: 16px;">
+        <ul style="margin: 0; padding-left: 20px; color: #94a3b8; line-height: 1.8;">
+          ${data.topSources.slice(0, 6).map(source => `<li>${source}</li>`).join('')}
+          ${data.topSources.length > 6 ? `<li style="color: #64748b;">...and ${data.topSources.length - 6} more sites</li>` : ''}
+        </ul>
+      </div>
+    </div>
+
+    <!-- The Risk -->
+    <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <h3 style="color: #ef4444; margin: 0 0 12px 0;">Why this matters:</h3>
+      <ul style="margin: 0; padding-left: 20px; color: #e2e8f0; line-height: 1.8; font-size: 14px;">
+        <li>Scammers and telemarketers buy this data</li>
+        <li>Identity thieves use it to impersonate you</li>
+        <li>Data brokers sell your info to anyone who pays</li>
+        <li>Your exposed data never goes away on its own</li>
+      </ul>
+    </div>
+
+    <!-- Time to Remove Manually -->
+    <div style="background-color: #1e293b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
+      <p style="margin: 0 0 8px 0; color: #94a3b8; font-size: 14px;">Removing this manually would take approximately:</p>
+      <p style="margin: 0; color: #f97316; font-size: 32px; font-weight: bold;">${data.estimatedTimeToRemove}+ hours</p>
+      <p style="margin: 8px 0 0 0; color: #64748b; font-size: 12px;">of tedious opt-out forms and follow-up emails</p>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align: center; margin: 32px 0;">
+      <p style="color: #10b981; font-size: 18px; font-weight: 600; margin-bottom: 16px;">
+        Let us handle it for you.
+      </p>
+      <a href="${APP_URL}/pricing" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 16px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
+        Upgrade to PRO - $11.99/mo
+      </a>
+      <p style="margin-top: 12px; color: #64748b; font-size: 12px;">
+        Automated removals • Weekly monitoring • Priority support
+      </p>
+    </div>
+
+    <!-- Free Options -->
+    <div style="border-top: 1px solid #334155; padding-top: 24px; margin-top: 24px;">
+      <p style="color: #94a3b8; font-size: 14px; text-align: center; margin-bottom: 16px;">
+        Not ready to upgrade? You can still:
+      </p>
+      <div style="text-align: center;">
+        <a href="${APP_URL}/dashboard/exposures" style="color: #10b981; text-decoration: none; font-size: 14px;">
+          View your exposures →
+        </a>
+        <span style="color: #334155; margin: 0 12px;">|</span>
+        <a href="${APP_URL}/dashboard/scan" style="color: #10b981; text-decoration: none; font-size: 14px;">
+          Run another scan →
+        </a>
+      </div>
+    </div>
+
+    <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 24px;">
+      Last scan: ${lastScanText}
+    </p>
+  `);
+
+  return sendEmail(
+    email,
+    `⚠️ Alert: ${data.totalExposures} Data Exposures Found (${urgencyText})`,
+    html,
+    {
+      emailType: "FREE_USER_DIGEST",
+      queueIfExceeded: true,
+      priority: 3, // Medium-high priority
+    }
+  );
+}

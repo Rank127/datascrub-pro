@@ -25,6 +25,8 @@ model User {
   reportFrequency    String            @default("weekly")
   weeklyReports      Boolean           @default(true)
   role               String            @default("USER")
+  lastScanAt             DateTime?
+  lastExposureDigestSent DateTime?
   accounts           Account[]
   auditLogs          AuditLog[]
   exposures          Exposure[]

@@ -214,17 +214,24 @@ export async function POST(request: Request) {
 
     console.log(`[Scan] New: ${exposures.length}, Updated: ${updatedExposureIds.length}, Skipped: ${scanResults.length - newExposures.length - updatedExposureIds.length}`);
 
-    // Update scan record
-    await prisma.scan.update({
-      where: { id: scan.id },
-      data: {
-        status: "COMPLETED",
-        completedAt: new Date(),
-        exposuresFound: exposures.length,
-        sourcesChecked: orchestrator.getSourcesCheckedCount(),
-        progress: 100,
-      },
-    });
+    // Update scan record and user's lastScanAt
+    const completedAt = new Date();
+    await Promise.all([
+      prisma.scan.update({
+        where: { id: scan.id },
+        data: {
+          status: "COMPLETED",
+          completedAt,
+          exposuresFound: exposures.length,
+          sourcesChecked: orchestrator.getSourcesCheckedCount(),
+          progress: 100,
+        },
+      }),
+      prisma.user.update({
+        where: { id: session.user.id },
+        data: { lastScanAt: completedAt },
+      }),
+    ]);
 
     // Send exposure alert email if exposures found (non-blocking)
     if (exposures.length > 0 && session.user.email) {
