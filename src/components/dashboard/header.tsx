@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Bell, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,12 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   const { data: session } = useSession();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch with Radix UI dropdown IDs
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const initials = session?.user?.name
     ?.split(" ")
@@ -55,45 +62,55 @@ export function Header({ onMenuClick }: HeaderProps) {
           </Button>
         </Link>
 
-        {/* User menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || ""} />
-                <AvatarFallback className="bg-emerald-500/10 text-emerald-500">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none text-white">
-                  {session?.user?.name}
-                </p>
-                <p className="text-xs leading-none text-slate-400">
-                  {session?.user?.email}
-                </p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-slate-700" />
-            <DropdownMenuItem asChild className="text-slate-300 focus:bg-slate-700 focus:text-white">
-              <Link href="/dashboard/profile">My Profile</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="text-slate-300 focus:bg-slate-700 focus:text-white">
-              <Link href="/dashboard/settings">Settings</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-slate-700" />
-            <DropdownMenuItem
-              className="text-slate-300 focus:bg-slate-700 focus:text-white cursor-pointer"
-              onClick={() => signOut({ callbackUrl: "/" })}
-            >
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* User menu - only render after mount to prevent Radix ID hydration mismatch */}
+        {mounted ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || ""} />
+                  <AvatarFallback className="bg-emerald-500/10 text-emerald-500">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none text-white">
+                    {session?.user?.name}
+                  </p>
+                  <p className="text-xs leading-none text-slate-400">
+                    {session?.user?.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-slate-700" />
+              <DropdownMenuItem asChild className="text-slate-300 focus:bg-slate-700 focus:text-white">
+                <Link href="/dashboard/profile">My Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="text-slate-300 focus:bg-slate-700 focus:text-white">
+                <Link href="/dashboard/settings">Settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-slate-700" />
+              <DropdownMenuItem
+                className="text-slate-300 focus:bg-slate-700 focus:text-white cursor-pointer"
+                onClick={() => signOut({ callbackUrl: "/" })}
+              >
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <Avatar className="h-10 w-10">
+              <AvatarFallback className="bg-emerald-500/10 text-emerald-500">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        )}
       </div>
     </header>
   );
