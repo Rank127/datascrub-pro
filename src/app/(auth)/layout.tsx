@@ -1,15 +1,6 @@
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  robots: {
-    index: false,
-    follow: false,
-    googleBot: {
-      index: false,
-      follow: false,
-    },
-  },
-};
+import { SessionProvider } from "next-auth/react";
 
 export default function AuthLayout({
   children,
@@ -17,8 +8,10 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="w-full max-w-md px-4">{children}</div>
-    </div>
+    <SessionProvider>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="w-full max-w-md px-4">{children}</div>
+      </div>
+    </SessionProvider>
   );
 }
