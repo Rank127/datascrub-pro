@@ -63,14 +63,73 @@ export async function sendSMS(
 }
 
 /**
- * Send verification code for phone number verification
+ * Send verification code using Twilio Verify (bypasses carrier filtering)
  */
 export async function sendVerificationCode(
   phone: string,
-  code: string
+  _code?: string // Ignored - Twilio Verify generates its own code
 ): Promise<SMSResult> {
-  const body = `${APP_NAME}: Your verification code is ${code}. This code expires in 10 minutes.`;
-  return sendSMS(phone, body);
+  const client = getClient();
+  const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
+
+  if (!client) {
+    return { success: false, error: "Twilio not configured" };
+  }
+
+  if (!verifyServiceSid) {
+    // Fallback to regular SMS if Verify not configured
+    const body = `${APP_NAME}: Your verification code is ${_code}. This code expires in 10 minutes.`;
+    return sendSMS(phone, body);
+  }
+
+  try {
+    const verification = await client.verify.v2
+      .services(verifyServiceSid)
+      .verifications.create({ to: phone, channel: "sms" });
+
+    console.log(`[SMS] Verify sent to ${phone}: ${verification.sid}`);
+    return { success: true, messageId: verification.sid };
+  } catch (error) {
+    console.error("[SMS] Verify failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+/**
+ * Check verification code using Twilio Verify
+ */
+export async function checkVerificationCode(
+  phone: string,
+  code: string
+): Promise<{ success: boolean; valid: boolean; error?: string }> {
+  const client = getClient();
+  const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
+
+  if (!client || !verifyServiceSid) {
+    return { success: false, valid: false, error: "Twilio Verify not configured" };
+  }
+
+  try {
+    const verificationCheck = await client.verify.v2
+      .services(verifyServiceSid)
+      .verificationChecks.create({ to: phone, code });
+
+    console.log(`[SMS] Verify check for ${phone}: ${verificationCheck.status}`);
+    return {
+      success: true,
+      valid: verificationCheck.status === "approved"
+    };
+  } catch (error) {
+    console.error("[SMS] Verify check failed:", error);
+    return {
+      success: false,
+      valid: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
 }
 
 /**

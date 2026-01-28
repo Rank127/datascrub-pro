@@ -3,13 +3,14 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import {
   sendVerificationCode,
+  checkVerificationCode,
   formatPhoneE164,
   isValidPhoneNumber,
   isSMSConfigured,
 } from "@/lib/sms";
 
-// Store verification codes in memory (in production, use Redis)
-const verificationCodes = new Map<string, { code: string; expires: Date; phone: string }>();
+// Store pending phone numbers for verification (Twilio Verify handles the codes)
+const pendingVerifications = new Map<string, { phone: string; expires: Date }>();
 
 /**
  * GET /api/user/sms - Get SMS settings
@@ -40,6 +41,8 @@ export async function GET() {
     }
 
     const isEnterprise = user.plan === "ENTERPRISE";
+
+    console.log("[SMS API] User plan:", user.plan, "isEnterprise:", isEnterprise);
 
     return NextResponse.json({
       ...user,
@@ -152,24 +155,34 @@ export async function POST(request: NextRequest) {
     // Handle verification code submission
     if (action === "verify") {
       const { code } = body;
-      const stored = verificationCodes.get(session.user.id);
+      const pending = pendingVerifications.get(session.user.id);
 
-      if (!stored) {
+      if (!pending) {
         return NextResponse.json(
           { error: "No verification pending. Please request a new code." },
           { status: 400 }
         );
       }
 
-      if (new Date() > stored.expires) {
-        verificationCodes.delete(session.user.id);
+      if (new Date() > pending.expires) {
+        pendingVerifications.delete(session.user.id);
         return NextResponse.json(
           { error: "Code expired. Please request a new code." },
           { status: 400 }
         );
       }
 
-      if (stored.code !== code) {
+      // Verify code with Twilio Verify
+      const verifyResult = await checkVerificationCode(pending.phone, code);
+
+      if (!verifyResult.success) {
+        return NextResponse.json(
+          { error: verifyResult.error || "Verification failed" },
+          { status: 500 }
+        );
+      }
+
+      if (!verifyResult.valid) {
         return NextResponse.json(
           { error: "Invalid verification code" },
           { status: 400 }
@@ -180,13 +193,13 @@ export async function POST(request: NextRequest) {
       await prisma.user.update({
         where: { id: session.user.id },
         data: {
-          smsPhone: stored.phone,
+          smsPhone: pending.phone,
           smsPhoneVerified: true,
           smsNotifications: true,
         },
       });
 
-      verificationCodes.delete(session.user.id);
+      pendingVerifications.delete(session.user.id);
 
       return NextResponse.json({
         success: true,
@@ -211,26 +224,21 @@ export async function POST(request: NextRequest) {
 
     const formattedPhone = formatPhoneE164(phone);
 
-    // Generate 6-digit verification code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Store code with 10-minute expiration
-    verificationCodes.set(session.user.id, {
-      code,
-      expires: new Date(Date.now() + 10 * 60 * 1000),
-      phone: formattedPhone,
-    });
-
-    // Send verification SMS
-    const result = await sendVerificationCode(formattedPhone, code);
+    // Send verification via Twilio Verify
+    const result = await sendVerificationCode(formattedPhone);
 
     if (!result.success) {
-      verificationCodes.delete(session.user.id);
       return NextResponse.json(
         { error: result.error || "Failed to send verification code" },
         { status: 500 }
       );
     }
+
+    // Store pending verification with 10-minute expiration
+    pendingVerifications.set(session.user.id, {
+      phone: formattedPhone,
+      expires: new Date(Date.now() + 10 * 60 * 1000),
+    });
 
     return NextResponse.json({
       success: true,
