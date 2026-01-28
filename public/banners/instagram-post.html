@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GhostMyData Instagram Post</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .banner {
+      width: 1080px;
+      height: 1080px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      z-index: 1;
+      text-align: center;
+      padding: 60px;
+    }
+
+    .shield svg {
+      width: 180px;
+      height: 216px;
+    }
+
+    .brand {
+      font-size: 72px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -1px;
+    }
+
+    .tagline {
+      font-size: 36px;
+      color: #94a3b8;
+      font-weight: 400;
+      line-height: 1.4;
+      max-width: 800px;
+    }
+
+    .url {
+      font-size: 32px;
+      color: #10b981;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <div class="content">
+      <div class="shield">
+        <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 5 L90 20 L90 55 C90 85 50 115 50 115 C50 115 10 85 10 55 L10 20 L50 5Z"
+                stroke="#10b981" stroke-width="4" fill="none"/>
+          <path d="M30 60 L45 75 L70 45"
+                stroke="#10b981" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="brand">GhostMyData</div>
+      <div class="tagline">Remove Your Personal Data From The Internet</div>
+      <div class="url">ghostmydata.com</div>
+    </div>
+  </div>
+</body>
+</html>
