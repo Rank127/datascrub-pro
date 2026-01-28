@@ -1746,3 +1746,179 @@ export async function sendTicketStatusUpdateEmail(
     }
   );
 }
+
+// ==========================================
+// FAMILY PLAN EMAIL TEMPLATES
+// ==========================================
+
+/**
+ * Send family plan invitation email
+ */
+export async function sendFamilyInvitationEmail(
+  email: string,
+  token: string,
+  ownerName: string,
+  familyName: string | null
+) {
+  const inviteUrl = `${APP_URL}/family/join/${token}`;
+  const familyDisplayName = familyName || `${ownerName}'s family`;
+
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 48px;">👨‍👩‍👧‍👦</span>
+    </div>
+    <h1 style="color: #10b981; margin-top: 0; text-align: center;">
+      You're Invited to Join a Family Plan
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi there,
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      <strong>${ownerName}</strong> has invited you to join their ${APP_NAME} Enterprise family plan.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #334155;">
+      <p style="margin: 0 0 16px 0; color: #10b981; font-weight: 600; font-size: 18px;">
+        What you'll get:
+      </p>
+      <ul style="margin: 0; padding-left: 20px; color: #e2e8f0; line-height: 1.8;">
+        <li>Unlimited privacy scans</li>
+        <li>Automatic data removal from 400+ sites</li>
+        <li>Dark web monitoring</li>
+        <li>Daily monitoring for new exposures</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6;">
+      Click the button below to accept the invitation and set up your account.
+    </p>
+
+    ${buttonHtml("Accept Invitation", inviteUrl)}
+
+    <div style="background-color: #1e293b; border-radius: 8px; padding: 16px; margin: 24px 0; border-left: 4px solid #f59e0b;">
+      <p style="margin: 0; font-size: 14px; color: #fbbf24;">
+        ⏰ This invitation expires in 7 days.
+      </p>
+    </div>
+
+    <p style="font-size: 14px; color: #94a3b8; text-align: center;">
+      If you weren't expecting this invitation, you can safely ignore this email.
+    </p>
+  `);
+
+  return sendEmail(
+    email,
+    `👨‍👩‍👧‍👦 ${ownerName} invited you to their ${APP_NAME} Family Plan`,
+    html,
+    {
+      emailType: "FAMILY_INVITATION",
+      queueIfExceeded: true,
+      priority: 2,
+    }
+  );
+}
+
+/**
+ * Send notification to family owner when a member joins
+ */
+export async function sendFamilyMemberJoinedEmail(
+  ownerEmail: string,
+  ownerName: string | null,
+  memberName: string
+) {
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 48px;">🎉</span>
+    </div>
+    <h1 style="color: #10b981; margin-top: 0; text-align: center;">
+      New Family Member Joined!
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${ownerName || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Great news! <strong>${memberName}</strong> has accepted your invitation and joined your ${APP_NAME} family plan.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #10b981; text-align: center;">
+      <p style="margin: 0 0 8px 0; color: #94a3b8; font-size: 14px;">New family member:</p>
+      <p style="margin: 0; color: #10b981; font-size: 24px; font-weight: 600;">${memberName}</p>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6;">
+      They now have full access to all Enterprise features and can start scanning for data exposures immediately.
+    </p>
+
+    ${buttonHtml("View Family Members", `${APP_URL}/dashboard/settings`)}
+
+    <p style="font-size: 14px; color: #94a3b8; text-align: center;">
+      You can manage your family plan members in Settings.
+    </p>
+  `);
+
+  return sendEmail(
+    ownerEmail,
+    `🎉 ${memberName} joined your ${APP_NAME} Family Plan`,
+    html,
+    {
+      emailType: "FAMILY_MEMBER_JOINED",
+      queueIfExceeded: true,
+      priority: 4,
+    }
+  );
+}
+
+/**
+ * Send notification when a family member is removed
+ */
+export async function sendFamilyMemberRemovedEmail(
+  memberEmail: string,
+  memberName: string | null,
+  ownerName: string | null
+) {
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 48px;">👋</span>
+    </div>
+    <h1 style="color: #f97316; margin-top: 0; text-align: center;">
+      Family Plan Access Changed
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${memberName || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      You've been removed from ${ownerName ? `${ownerName}'s` : "the"} ${APP_NAME} family plan.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #334155;">
+      <p style="margin: 0 0 16px 0; color: #e2e8f0; font-weight: 600;">What this means:</p>
+      <ul style="margin: 0; padding-left: 20px; color: #94a3b8; line-height: 1.8;">
+        <li>Your account is now on the Free plan</li>
+        <li>Your scan history and data are preserved</li>
+        <li>You can upgrade to your own subscription anytime</li>
+      </ul>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6;">
+      Want to continue protecting your privacy? Upgrade to PRO or Enterprise for unlimited scans and automatic removals.
+    </p>
+
+    ${buttonHtml("View Upgrade Options", `${APP_URL}/pricing`)}
+
+    <p style="font-size: 14px; color: #94a3b8; text-align: center;">
+      If you have questions, please contact our support team.
+    </p>
+  `);
+
+  return sendEmail(
+    memberEmail,
+    `👋 Your ${APP_NAME} Family Plan Access Has Changed`,
+    html,
+    {
+      emailType: "FAMILY_MEMBER_REMOVED",
+      queueIfExceeded: true,
+      priority: 4,
+    }
+  );
+}

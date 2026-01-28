@@ -48,6 +48,10 @@ model User {
   assignedTickets        SupportTicket[]   @relation("AssignedTickets")
   resolvedTickets        SupportTicket[]   @relation("ResolvedTickets")
   ticketComments         TicketComment[]
+  // Family Plan
+  ownedFamilyGroup       FamilyGroup?      @relation("FamilyOwner")
+  familyMembership       FamilyMember?
+  sentFamilyInvites      FamilyInvitation[] @relation("SentFamilyInvitations")
 }
 
 model Account {
@@ -371,4 +375,53 @@ model TicketComment {
   author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([ticketId])
+}
+
+// ==========================================
+// FAMILY PLAN (Enterprise Feature)
+// ==========================================
+
+model FamilyGroup {
+  id          String             @id @default(cuid())
+  ownerId     String             @unique
+  name        String?
+  maxMembers  Int                @default(5)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  owner       User               @relation("FamilyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members     FamilyMember[]
+  invitations FamilyInvitation[]
+}
+
+model FamilyMember {
+  id            String      @id @default(cuid())
+  familyGroupId String
+  userId        String      @unique
+  role          String      @default("MEMBER") // OWNER or MEMBER
+  joinedAt      DateTime    @default(now())
+
+  familyGroup   FamilyGroup @relation(fields: [familyGroupId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyGroupId])
+}
+
+model FamilyInvitation {
+  id            String      @id @default(cuid())
+  familyGroupId String
+  email         String
+  token         String      @unique
+  status        String      @default("PENDING") // PENDING, ACCEPTED, EXPIRED, CANCELLED
+  invitedById   String
+  expiresAt     DateTime
+  createdAt     DateTime    @default(now())
+  acceptedAt    DateTime?
+
+  familyGroup   FamilyGroup @relation(fields: [familyGroupId], references: [id], onDelete: Cascade)
+  invitedBy     User        @relation("SentFamilyInvitations", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@unique([familyGroupId, email])
+  @@index([token])
+  @@index([email])
 }

@@ -32,6 +32,7 @@ import {
   Phone,
   Trash2,
 } from "lucide-react";
+import { FamilySection } from "@/components/dashboard/family";
 
 interface SubscriptionData {
   plan: string;
@@ -1035,6 +1036,9 @@ function SettingsContent() {
           )}
         </CardContent>
       </Card>
+
+      {/* Family Plan */}
+      <FamilySection />
 
       {/* Security */}
       <Card className="bg-slate-800/50 border-slate-700">
