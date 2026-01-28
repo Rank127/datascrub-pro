@@ -19,3 +19,29 @@
 **Estimated Cost:** ~$6/month + ~$0.0079/SMS
 
 **Trigger:** Enable when Enterprise user count reaches 10+
+
+## Calendly Enterprise Demo Integration (Future)
+
+**Status:** Deferred until Corporate Plan is built
+
+**Features:**
+- Embed "Book a Demo" for Enterprise leads
+- Sales call scheduling
+- Customer onboarding calls
+
+**Trigger:** After Corporate Plan launch
+
+---
+
+## AI Support Chatbot & Smart Ticketing (Future)
+
+**Status:** Deferred
+
+**Features:**
+- Claude/OpenAI powered support chatbot
+- Auto-categorize tickets
+- Smart response suggestions for agents
+- Knowledge base integration
+
+**Trigger:** When support volume increases
+
