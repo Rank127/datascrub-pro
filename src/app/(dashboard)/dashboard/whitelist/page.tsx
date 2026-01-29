@@ -32,10 +32,10 @@ import {
 import {
   Shield,
   Plus,
-  Trash2,
   Loader2,
   ExternalLink,
   ListChecks,
+  ShieldOff,
 } from "lucide-react";
 import { DataSourceNames, type DataSource } from "@/lib/types";
 
@@ -336,12 +336,14 @@ export default function WhitelistPage() {
                       </Button>
                     )}
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-slate-400 hover:text-red-400"
+                      variant="outline"
+                      size="sm"
+                      className="text-slate-400 border-slate-600 hover:text-orange-400 hover:border-orange-400/50"
                       onClick={() => handleDelete(item.id)}
+                      title="Remove from whitelist - this item will become active again"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <ShieldOff className="h-4 w-4 mr-1" />
+                      Unprotect
                     </Button>
                   </div>
                 </div>
