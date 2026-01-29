@@ -299,3 +299,53 @@ Agent actions are logged:
 
 - Manager review emails for flagged items
 - SEO agent alerts for low scores (<70)
+
+---
+
+## Real-Time Dashboard Updates
+
+The platform uses React Query for polling-based real-time updates.
+
+### Setup
+
+**Provider:** `/src/lib/query-provider.tsx`
+- Wraps app in `QueryClientProvider`
+- Default stale time: 10 seconds
+- Refetch on window focus enabled
+
+### Available Hooks
+
+**Location:** `/src/hooks/`
+
+| Hook | Purpose | Polling Interval |
+|------|---------|------------------|
+| `useAlerts()` | User alerts | 30 seconds |
+| `useAdminTickets()` | Admin ticket list | 20 seconds |
+| `useTicketStats()` | Ticket statistics | 30 seconds |
+| `useUserTickets()` | User's own tickets | 30 seconds |
+
+### Toast Notifications
+
+Hooks automatically show toast notifications for:
+- New tickets (admin)
+- Ticket status changes
+- New responses on tickets
+- New alerts
+
+### Usage Example
+
+```typescript
+import { useAlerts, useAdminTickets } from "@/hooks";
+
+function Dashboard() {
+  const { alerts, unreadCount } = useAlerts();
+  const { tickets, total } = useAdminTickets({ status: "OPEN" });
+
+  return (
+    <div>
+      <span>Unread: {unreadCount}</span>
+      <span>Open tickets: {total}</span>
+    </div>
+  );
+}
+```

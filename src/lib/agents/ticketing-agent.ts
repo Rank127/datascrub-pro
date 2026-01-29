@@ -90,6 +90,37 @@ interface TicketContext {
     createdAt: Date;
   }>;
   newComment?: string;
+  // Intelligent context
+  userHistory?: UserHistory;
+  similarTickets?: SimilarTicket[];
+  sentiment?: SentimentAnalysis;
+}
+
+interface UserHistory {
+  accountAge: number; // days
+  totalTickets: number;
+  resolvedTickets: number;
+  averageResolutionTime: number; // hours
+  totalScans: number;
+  totalExposures: number;
+  removalsCompleted: number;
+  isVIP: boolean; // Enterprise or long-term customer
+  lastInteraction: Date | null;
+}
+
+interface SimilarTicket {
+  ticketNumber: string;
+  type: string;
+  subject: string;
+  resolution: string | null;
+  wasAutoResolved: boolean;
+}
+
+interface SentimentAnalysis {
+  score: number; // -1 to 1 (negative to positive)
+  urgency: "low" | "medium" | "high" | "critical";
+  frustration: boolean;
+  keywords: string[];
 }
 
 interface AgentResponse {
@@ -100,6 +131,184 @@ interface AgentResponse {
   needsHumanReview: boolean;
   internalNote: string;
   managerReviewItems: string[]; // Items flagged for manager attention
+}
+
+// Sentiment keywords for analysis
+const NEGATIVE_KEYWORDS = [
+  "frustrated", "angry", "terrible", "awful", "worst", "unacceptable",
+  "ridiculous", "scam", "fraud", "lawsuit", "attorney", "lawyer",
+  "refund", "cancel", "disappointed", "furious", "outraged", "incompetent"
+];
+
+const URGENCY_KEYWORDS = [
+  "urgent", "asap", "immediately", "emergency", "critical", "deadline",
+  "today", "now", "help", "please help", "desperate"
+];
+
+/**
+ * Get user history for intelligent context
+ */
+async function getUserHistory(userId: string): Promise<UserHistory> {
+  try {
+    const [user, tickets, scans, exposures, removals] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { createdAt: true, plan: true },
+      }),
+      prisma.supportTicket.findMany({
+        where: { userId },
+        select: { status: true, resolvedAt: true, createdAt: true },
+      }),
+      prisma.scan.count({ where: { profile: { userId } } }),
+      prisma.exposure.count({ where: { profile: { userId } } }),
+      prisma.removalRequest.count({
+        where: { exposure: { profile: { userId } }, status: "COMPLETED" },
+      }),
+    ]);
+
+    const resolvedTickets = tickets.filter((t) => t.status === "RESOLVED" || t.status === "CLOSED");
+    const avgResolutionTime = resolvedTickets.length > 0
+      ? resolvedTickets
+          .filter((t) => t.resolvedAt)
+          .reduce((sum, t) => {
+            const diff = t.resolvedAt!.getTime() - t.createdAt.getTime();
+            return sum + diff / (1000 * 60 * 60); // hours
+          }, 0) / resolvedTickets.length
+      : 0;
+
+    const accountAge = user
+      ? Math.floor((Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
+
+    const lastTicket = tickets.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+
+    return {
+      accountAge,
+      totalTickets: tickets.length,
+      resolvedTickets: resolvedTickets.length,
+      averageResolutionTime: avgResolutionTime,
+      totalScans: scans,
+      totalExposures: exposures,
+      removalsCompleted: removals,
+      isVIP: user?.plan === "ENTERPRISE" || accountAge > 180, // Enterprise or 6+ months
+      lastInteraction: lastTicket?.createdAt || null,
+    };
+  } catch (error) {
+    console.error("Failed to get user history:", error);
+    return {
+      accountAge: 0,
+      totalTickets: 0,
+      resolvedTickets: 0,
+      averageResolutionTime: 0,
+      totalScans: 0,
+      totalExposures: 0,
+      removalsCompleted: 0,
+      isVIP: false,
+      lastInteraction: null,
+    };
+  }
+}
+
+/**
+ * Find similar resolved tickets for context
+ */
+async function findSimilarTickets(type: string, subject: string): Promise<SimilarTicket[]> {
+  try {
+    // Find resolved tickets of same type
+    const tickets = await prisma.supportTicket.findMany({
+      where: {
+        type,
+        status: { in: ["RESOLVED", "CLOSED"] },
+        resolution: { not: null },
+      },
+      select: {
+        ticketNumber: true,
+        type: true,
+        subject: true,
+        resolution: true,
+        comments: {
+          where: { content: { contains: "auto-resolved" } },
+          select: { id: true },
+        },
+      },
+      orderBy: { resolvedAt: "desc" },
+      take: 5,
+    });
+
+    return tickets.map((t) => ({
+      ticketNumber: t.ticketNumber,
+      type: t.type,
+      subject: t.subject,
+      resolution: t.resolution,
+      wasAutoResolved: t.comments.length > 0,
+    }));
+  } catch (error) {
+    console.error("Failed to find similar tickets:", error);
+    return [];
+  }
+}
+
+/**
+ * Analyze sentiment of ticket text
+ */
+function analyzeSentiment(text: string): SentimentAnalysis {
+  const lowerText = text.toLowerCase();
+
+  // Count negative keywords
+  const negativeCount = NEGATIVE_KEYWORDS.filter((kw) => lowerText.includes(kw)).length;
+  const urgencyCount = URGENCY_KEYWORDS.filter((kw) => lowerText.includes(kw)).length;
+
+  // Check for frustration indicators
+  const hasExclamation = (text.match(/!/g) || []).length > 2;
+  const hasAllCaps = /[A-Z]{5,}/.test(text);
+  const hasFrustration = negativeCount > 0 || hasExclamation || hasAllCaps;
+
+  // Calculate sentiment score (-1 to 1)
+  let score = 0;
+  if (negativeCount > 3) score = -1;
+  else if (negativeCount > 1) score = -0.5;
+  else if (negativeCount === 1) score = -0.2;
+  else if (lowerText.includes("thank")) score = 0.3;
+  else score = 0;
+
+  // Determine urgency
+  let urgency: "low" | "medium" | "high" | "critical" = "low";
+  if (urgencyCount > 2 || lowerText.includes("lawsuit") || lowerText.includes("attorney")) {
+    urgency = "critical";
+  } else if (urgencyCount > 0 || negativeCount > 2) {
+    urgency = "high";
+  } else if (negativeCount > 0 || hasExclamation) {
+    urgency = "medium";
+  }
+
+  // Extract keywords found
+  const keywords = [
+    ...NEGATIVE_KEYWORDS.filter((kw) => lowerText.includes(kw)),
+    ...URGENCY_KEYWORDS.filter((kw) => lowerText.includes(kw)),
+  ];
+
+  return { score, urgency, frustration: hasFrustration, keywords };
+}
+
+/**
+ * Enrich ticket context with intelligent data
+ */
+async function enrichContext(context: TicketContext, userId: string): Promise<TicketContext> {
+  const [userHistory, similarTickets] = await Promise.all([
+    getUserHistory(userId),
+    findSimilarTickets(context.type, context.subject),
+  ]);
+
+  const sentiment = analyzeSentiment(
+    `${context.subject} ${context.description} ${context.newComment || ""}`
+  );
+
+  return {
+    ...context,
+    userHistory,
+    similarTickets,
+    sentiment,
+  };
 }
 
 /**
@@ -170,6 +379,58 @@ USER INFO:
 - Plan: ${context.userPlan}
 `;
 
+  // Add intelligent context if available
+  if (context.userHistory) {
+    const h = context.userHistory;
+    message += `
+USER HISTORY (IMPORTANT - adjust response accordingly):
+- Account age: ${h.accountAge} days
+- VIP status: ${h.isVIP ? "YES - prioritize this user" : "No"}
+- Previous tickets: ${h.totalTickets} (${h.resolvedTickets} resolved)
+- Avg resolution time: ${h.averageResolutionTime.toFixed(1)} hours
+- Total scans: ${h.totalScans}
+- Exposures found: ${h.totalExposures}
+- Removals completed: ${h.removalsCompleted}
+`;
+    if (h.isVIP) {
+      message += `NOTE: This is a VIP customer. Provide premium support with extra care and urgency.\n`;
+    }
+    if (h.totalTickets > 3) {
+      message += `NOTE: Returning customer with multiple tickets. Reference their history positively.\n`;
+    }
+  }
+
+  // Add sentiment analysis
+  if (context.sentiment) {
+    const s = context.sentiment;
+    message += `
+SENTIMENT ANALYSIS:
+- Overall sentiment: ${s.score < 0 ? "Negative" : s.score > 0 ? "Positive" : "Neutral"} (${s.score.toFixed(1)})
+- Urgency level: ${s.urgency.toUpperCase()}
+- Frustration detected: ${s.frustration ? "YES - be extra empathetic" : "No"}
+${s.keywords.length > 0 ? `- Keywords detected: ${s.keywords.join(", ")}` : ""}
+`;
+    if (s.frustration) {
+      message += `IMPORTANT: User appears frustrated. Lead with empathy, acknowledge their concern, and assure prompt resolution.\n`;
+    }
+    if (s.urgency === "critical") {
+      message += `CRITICAL: This may need immediate human escalation. Flag for manager review.\n`;
+    }
+  }
+
+  // Add similar resolved tickets for reference
+  if (context.similarTickets && context.similarTickets.length > 0) {
+    message += `
+SIMILAR RESOLVED TICKETS (use as reference for consistent responses):
+`;
+    context.similarTickets.slice(0, 3).forEach((t, i) => {
+      message += `${i + 1}. ${t.ticketNumber}: ${t.subject}
+   Resolution: ${t.resolution?.substring(0, 200)}...
+   Auto-resolved: ${t.wasAutoResolved ? "Yes" : "No"}
+`;
+    });
+  }
+
   if (context.errorDetails) {
     message += `\nERROR DETAILS:\n${context.errorDetails}\n`;
   }
@@ -201,7 +462,7 @@ ${context.linkedRemoval.brokerName ? `- Data Broker: ${context.linkedRemoval.bro
     message += `\nNEW USER MESSAGE:\n${context.newComment}\n`;
   }
 
-  message += `\nPlease analyze and respond with JSON as specified.`;
+  message += `\nPlease analyze and respond with JSON as specified. Consider user history, sentiment, and similar tickets when formulating your response.`;
 
   return message;
 }
@@ -258,8 +519,8 @@ export async function processNewTicket(ticketId: string): Promise<{
       return { success: false, autoResolved: false, message: "Ticket not found" };
     }
 
-    // Build context for AI
-    const context: TicketContext = {
+    // Build base context for AI
+    const baseContext: TicketContext = {
       id: ticket.id,
       ticketNumber: ticket.ticketNumber,
       type: ticket.type,
@@ -286,7 +547,10 @@ export async function processNewTicket(ticketId: string): Promise<{
       })),
     };
 
-    // Get AI analysis
+    // Enrich context with intelligent data (user history, similar tickets, sentiment)
+    const context = await enrichContext(baseContext, ticket.userId);
+
+    // Get AI analysis with full context
     const analysis = await analyzeTicket(context);
 
     // Build internal note with manager review items
@@ -446,8 +710,8 @@ export async function processNewComment(
       return { success: false, responded: false, message: "Ticket is closed" };
     }
 
-    // Build context with new comment
-    const context: TicketContext = {
+    // Build base context with new comment
+    const baseContext: TicketContext = {
       id: ticket.id,
       ticketNumber: ticket.ticketNumber,
       type: ticket.type,
@@ -477,7 +741,10 @@ export async function processNewComment(
       newComment: commentContent,
     };
 
-    // Get AI analysis
+    // Enrich context with intelligent data (user history, similar tickets, sentiment)
+    const context = await enrichContext(baseContext, ticket.userId);
+
+    // Get AI analysis with full context
     const analysis = await analyzeTicket(context);
 
     // Build internal note with manager review items
