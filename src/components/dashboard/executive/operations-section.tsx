@@ -6,11 +6,13 @@ import { MetricCard } from "./metric-card";
 import { TrendChart } from "./trend-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -36,6 +38,8 @@ import {
   TrendingUp,
   BarChart3,
   Scan,
+  Zap,
+  Play,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -60,31 +64,86 @@ interface UserWithExposures {
     pending: number;
     inProgress: number;
   };
+  removalStats?: {
+    total: number;
+    submitted: number;
+    inProgress: number;
+    completed: number;
+    failed: number;
+    manual: number;
+  };
+}
+
+type DialogType = "all" | "new" | "submitted" | "completed" | null;
+
+interface AutomationResult {
+  success: boolean;
+  dryRun: boolean;
+  summary: {
+    totalManual: number;
+    canAutomate: number;
+    cannotAutomate: number;
+    updated: number;
+  };
+  sourceBreakdown: { source: string; canAutomate: number; cannotAutomate: number }[];
 }
 
 export function OperationsSection({ data, platform }: OperationsSectionProps) {
-  const [showUsersDialog, setShowUsersDialog] = useState(false);
+  const [dialogType, setDialogType] = useState<DialogType>(null);
   const [users, setUsers] = useState<UserWithExposures[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [showAutomationDialog, setShowAutomationDialog] = useState(false);
+  const [automationLoading, setAutomationLoading] = useState(false);
+  const [automationResult, setAutomationResult] = useState<AutomationResult | null>(null);
+  const [automationExecuting, setAutomationExecuting] = useState(false);
 
   useEffect(() => {
-    if (showUsersDialog) {
-      fetchUsersWithExposures();
+    if (dialogType) {
+      fetchUsersWithExposures(dialogType);
     }
-  }, [showUsersDialog]);
+  }, [dialogType]);
 
-  const fetchUsersWithExposures = async () => {
+  const fetchUsersWithExposures = async (type: DialogType) => {
+    if (!type) return;
     setLoadingUsers(true);
     try {
-      const response = await fetch("/api/admin/users?limit=100&includeExposureStats=true");
+      let url = "/api/admin/users?limit=100&includeExposureStats=true&includeRemovalStats=true";
+
+      if (type === "new") {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        url += `&createdAfter=${startOfMonth.toISOString()}`;
+      } else if (type === "submitted") {
+        url += "&hasSubmittedRemovals=true";
+      } else if (type === "completed") {
+        url += "&hasCompletedRemovals=true";
+      }
+
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch users");
       const result = await response.json();
 
       // Sort by plan: ENTERPRISE > PRO > FREE
       const planOrder: Record<string, number> = { ENTERPRISE: 0, PRO: 1, FREE: 2 };
-      const sortedUsers = (result.users || []).sort((a: UserWithExposures, b: UserWithExposures) => {
+      let sortedUsers = (result.users || []).sort((a: UserWithExposures, b: UserWithExposures) => {
         return (planOrder[a.plan] ?? 3) - (planOrder[b.plan] ?? 3);
       });
+
+      // For submitted/completed, sort by relevant count descending
+      if (type === "submitted") {
+        sortedUsers = sortedUsers.sort((a: UserWithExposures, b: UserWithExposures) => {
+          const aCount = a.removalStats?.submitted ?? 0;
+          const bCount = b.removalStats?.submitted ?? 0;
+          return bCount - aCount;
+        });
+      } else if (type === "completed") {
+        sortedUsers = sortedUsers.sort((a: UserWithExposures, b: UserWithExposures) => {
+          const aCount = a.removalStats?.completed ?? 0;
+          const bCount = b.removalStats?.completed ?? 0;
+          return bCount - aCount;
+        });
+      }
 
       setUsers(sortedUsers);
     } catch {
@@ -92,6 +151,55 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
       setUsers([]);
     } finally {
       setLoadingUsers(false);
+    }
+  };
+
+  const previewAutomation = async () => {
+    setAutomationLoading(true);
+    setAutomationResult(null);
+    try {
+      const response = await fetch("/api/admin/reprocess-manual-removals?dryRun=true", {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to preview automation");
+      const result = await response.json();
+      setAutomationResult(result);
+    } catch {
+      toast.error("Failed to preview automation");
+    } finally {
+      setAutomationLoading(false);
+    }
+  };
+
+  const executeAutomation = async () => {
+    setAutomationExecuting(true);
+    try {
+      const response = await fetch("/api/admin/reprocess-manual-removals", {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to execute automation");
+      const result = await response.json();
+      setAutomationResult(result);
+      toast.success(`Successfully converted ${result.summary.updated} manual removals to automated!`);
+    } catch {
+      toast.error("Failed to execute automation");
+    } finally {
+      setAutomationExecuting(false);
+    }
+  };
+
+  const handleOpenAutomation = () => {
+    setShowAutomationDialog(true);
+    previewAutomation();
+  };
+
+  const getDialogTitle = () => {
+    switch (dialogType) {
+      case "all": return "All Users by Plan";
+      case "new": return "New Users This Month";
+      case "submitted": return "Users with Submitted Removals";
+      case "completed": return "Users with Completed Removals";
+      default: return "Users";
     }
   };
   const getHealthBadge = (rate: number) => {
@@ -103,7 +211,8 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
     return <Badge className="bg-red-500/20 text-red-400">Critical</Badge>;
   };
 
-  const totalRemovals = Object.values(data.removalsByStatus).reduce((a, b) => a + b, 0);
+  const totalRemovalRequests = Object.values(data.removalsByStatus).reduce((a, b) => a + b, 0);
+  const completedRemovals = data.removalsByStatus["COMPLETED"] || 0;
 
   return (
     <div className="space-y-6">
@@ -127,25 +236,28 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
                 value: platform.userGrowthRate,
                 isPositive: platform.userGrowthRate >= 0,
               }}
-              onClick={() => setShowUsersDialog(true)}
+              onClick={() => setDialogType("all")}
             />
             <MetricCard
               title="New Users This Month"
               value={platform.newUsersThisMonth}
               icon={TrendingUp}
               variant="success"
+              onClick={() => setDialogType("new")}
             />
             <MetricCard
-              title="Total Exposures Found"
-              value={platform.totalExposures}
+              title="Removals Submitted"
+              value={totalRemovalRequests}
               icon={Eye}
               variant="warning"
+              onClick={() => setDialogType("submitted")}
             />
             <MetricCard
               title="Removals Completed"
-              value={platform.totalRemovals}
+              value={completedRemovals}
               icon={Shield}
               variant="success"
+              onClick={() => setDialogType("completed")}
             />
           </div>
 
@@ -226,13 +338,26 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
           variant="info"
           subtitle="Currently processing"
         />
-        <MetricCard
-          title="Manual Action Queue"
-          value={data.manualActionQueue}
-          icon={AlertTriangle}
-          variant={data.manualActionQueue > 50 ? "danger" : data.manualActionQueue > 20 ? "warning" : "default"}
-          subtitle="Requires human review"
-        />
+        <div className="relative">
+          <MetricCard
+            title="Manual Action Queue"
+            value={data.manualActionQueue}
+            icon={AlertTriangle}
+            variant={data.manualActionQueue > 50 ? "danger" : data.manualActionQueue > 20 ? "warning" : "default"}
+            subtitle="Requires human review"
+          />
+          {data.manualActionQueue > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="absolute bottom-2 right-2 gap-1 text-xs h-7 bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
+              onClick={handleOpenAutomation}
+            >
+              <Zap className="h-3 w-3" />
+              Automate
+            </Button>
+          )}
+        </div>
         <MetricCard
           title="Custom Requests"
           value={data.customRemovalBacklog}
@@ -319,7 +444,7 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
                     <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                       <div
                         className={`h-full bg-${config.color}-500 rounded-full transition-all`}
-                        style={{ width: `${totalRemovals > 0 ? (count / totalRemovals) * 100 : 0}%` }}
+                        style={{ width: `${totalRemovalRequests > 0 ? (count / totalRemovalRequests) * 100 : 0}%` }}
                       />
                     </div>
                   </div>
@@ -355,12 +480,12 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
       )}
 
       {/* Users Dialog */}
-      <Dialog open={showUsersDialog} onOpenChange={setShowUsersDialog}>
+      <Dialog open={dialogType !== null} onOpenChange={(open) => !open && setDialogType(null)}>
         <DialogContent className="bg-slate-900 border-slate-700 max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Users className="h-5 w-5 text-blue-400" />
-              All Users by Plan
+              {getDialogTitle()}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-auto">
@@ -377,10 +502,23 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
                     <TableHead className="text-slate-400">Email</TableHead>
                     <TableHead className="text-slate-400">Name</TableHead>
                     <TableHead className="text-slate-400">Plan</TableHead>
-                    <TableHead className="text-slate-400 text-center">Total Exposures</TableHead>
-                    <TableHead className="text-slate-400 text-center">Removed</TableHead>
-                    <TableHead className="text-slate-400 text-center">Pending</TableHead>
-                    <TableHead className="text-slate-400 text-center">In Progress</TableHead>
+                    {(dialogType === "submitted" || dialogType === "completed") ? (
+                      <>
+                        <TableHead className="text-slate-400 text-center">Total</TableHead>
+                        <TableHead className="text-slate-400 text-center">Submitted</TableHead>
+                        <TableHead className="text-slate-400 text-center">In Progress</TableHead>
+                        <TableHead className="text-slate-400 text-center">Completed</TableHead>
+                        <TableHead className="text-slate-400 text-center">Manual</TableHead>
+                        <TableHead className="text-slate-400 text-center">Failed</TableHead>
+                      </>
+                    ) : (
+                      <>
+                        <TableHead className="text-slate-400 text-center">Total Exposures</TableHead>
+                        <TableHead className="text-slate-400 text-center">Removed</TableHead>
+                        <TableHead className="text-slate-400 text-center">Pending</TableHead>
+                        <TableHead className="text-slate-400 text-center">In Progress</TableHead>
+                      </>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -401,24 +539,159 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
                           {user.plan}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-center text-slate-300">
-                        {user.exposureStats?.total ?? user._count?.exposures ?? 0}
-                      </TableCell>
-                      <TableCell className="text-center text-emerald-400">
-                        {user.exposureStats?.removed ?? 0}
-                      </TableCell>
-                      <TableCell className="text-center text-amber-400">
-                        {user.exposureStats?.pending ?? 0}
-                      </TableCell>
-                      <TableCell className="text-center text-blue-400">
-                        {user.exposureStats?.inProgress ?? 0}
-                      </TableCell>
+                      {(dialogType === "submitted" || dialogType === "completed") ? (
+                        <>
+                          <TableCell className="text-center text-slate-300">
+                            {user.removalStats?.total ?? 0}
+                          </TableCell>
+                          <TableCell className="text-center text-amber-400">
+                            {user.removalStats?.submitted ?? 0}
+                          </TableCell>
+                          <TableCell className="text-center text-blue-400">
+                            {user.removalStats?.inProgress ?? 0}
+                          </TableCell>
+                          <TableCell className="text-center text-emerald-400">
+                            {user.removalStats?.completed ?? 0}
+                          </TableCell>
+                          <TableCell className="text-center text-orange-400">
+                            {user.removalStats?.manual ?? 0}
+                          </TableCell>
+                          <TableCell className="text-center text-red-400">
+                            {user.removalStats?.failed ?? 0}
+                          </TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell className="text-center text-slate-300">
+                            {user.exposureStats?.total ?? user._count?.exposures ?? 0}
+                          </TableCell>
+                          <TableCell className="text-center text-emerald-400">
+                            {user.exposureStats?.removed ?? 0}
+                          </TableCell>
+                          <TableCell className="text-center text-amber-400">
+                            {user.exposureStats?.pending ?? 0}
+                          </TableCell>
+                          <TableCell className="text-center text-blue-400">
+                            {user.exposureStats?.inProgress ?? 0}
+                          </TableCell>
+                        </>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Automation Dialog */}
+      <Dialog open={showAutomationDialog} onOpenChange={setShowAutomationDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Zap className="h-5 w-5 text-amber-400" />
+              Automate Manual Removals
+            </DialogTitle>
+          </DialogHeader>
+
+          {automationLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+              <span className="ml-2 text-slate-400">Analyzing manual removals...</span>
+            </div>
+          ) : automationResult ? (
+            <div className="space-y-4">
+              {/* Summary */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-slate-800/50 rounded-lg">
+                  <p className="text-slate-400 text-sm">Total Manual</p>
+                  <p className="text-2xl font-bold text-white">{automationResult.summary.totalManual}</p>
+                </div>
+                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                  <p className="text-emerald-400 text-sm">Can Automate</p>
+                  <p className="text-2xl font-bold text-emerald-400">{automationResult.summary.canAutomate}</p>
+                </div>
+              </div>
+
+              {automationResult.summary.canAutomate > 0 ? (
+                <>
+                  <p className="text-slate-400 text-sm">
+                    {automationResult.dryRun ? (
+                      <>
+                        <span className="text-emerald-400 font-medium">{automationResult.summary.canAutomate}</span> manual removals can be converted to automated email opt-outs.
+                        Click &quot;Execute Automation&quot; to process them.
+                      </>
+                    ) : (
+                      <>
+                        Successfully converted <span className="text-emerald-400 font-medium">{automationResult.summary.updated}</span> manual removals to automated!
+                        They will be processed in the next cron run.
+                      </>
+                    )}
+                  </p>
+
+                  {/* Source Breakdown */}
+                  {automationResult.sourceBreakdown.length > 0 && (
+                    <div className="max-h-48 overflow-y-auto">
+                      <p className="text-sm text-slate-400 mb-2">Sources that can be automated:</p>
+                      <div className="space-y-1">
+                        {automationResult.sourceBreakdown
+                          .filter(s => s.canAutomate > 0)
+                          .slice(0, 20)
+                          .map((source) => (
+                            <div key={source.source} className="flex justify-between text-sm">
+                              <span className="text-slate-300">{source.source}</span>
+                              <span className="text-emerald-400">{source.canAutomate}</span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-slate-400 text-sm">
+                  No manual removals can be automated at this time. The remaining removals are from sources without known privacy email addresses.
+                </p>
+              )}
+
+              {automationResult.summary.cannotAutomate > 0 && (
+                <p className="text-xs text-slate-500">
+                  {automationResult.summary.cannotAutomate} removals cannot be automated (unknown sources or form-only brokers).
+                </p>
+              )}
+            </div>
+          ) : null}
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowAutomationDialog(false)}
+            >
+              Cancel
+            </Button>
+            {automationResult?.dryRun && automationResult.summary.canAutomate > 0 && (
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700 gap-2"
+                onClick={executeAutomation}
+                disabled={automationExecuting}
+              >
+                {automationExecuting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
+                Execute Automation ({automationResult.summary.canAutomate})
+              </Button>
+            )}
+            {automationResult && !automationResult.dryRun && (
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => setShowAutomationDialog(false)}
+              >
+                Done
+              </Button>
+            )}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

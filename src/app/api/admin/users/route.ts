@@ -35,8 +35,33 @@ export async function GET(request: Request) {
     const planFilter = searchParams.get("plan") || "";
     const createdAfter = searchParams.get("createdAfter") || "";
     const includeExposureStats = searchParams.get("includeExposureStats") === "true";
+    const includeRemovalStats = searchParams.get("includeRemovalStats") === "true";
+    const hasSubmittedRemovals = searchParams.get("hasSubmittedRemovals") === "true";
+    const hasCompletedRemovals = searchParams.get("hasCompletedRemovals") === "true";
 
     const where: Record<string, unknown> = {};
+
+    // Filter for users with submitted removals
+    if (hasSubmittedRemovals) {
+      where.exposures = {
+        some: {
+          removalRequest: {
+            isNot: null
+          }
+        }
+      };
+    }
+
+    // Filter for users with completed removals
+    if (hasCompletedRemovals) {
+      where.exposures = {
+        some: {
+          removalRequest: {
+            status: "COMPLETED"
+          }
+        }
+      };
+    }
 
     if (search) {
       where.OR = [
@@ -115,6 +140,69 @@ export async function GET(request: Request) {
       usersWithExposureStats = users.map(user => ({
         ...user,
         exposureStats: statsMap[user.id] || { total: 0, removed: 0, pending: 0, inProgress: 0 },
+      }));
+    }
+
+    // If removal stats requested, fetch detailed removal data per user
+    if (includeRemovalStats && usersWithExposureStats.length > 0) {
+      const userIds = usersWithExposureStats.map(u => u.id);
+
+      // Get removal request counts by status for each user (via their exposures)
+      const removalStats = await prisma.removalRequest.groupBy({
+        by: ["status"],
+        where: {
+          exposure: {
+            userId: { in: userIds }
+          }
+        },
+        _count: true,
+      });
+
+      // Get per-user removal stats
+      const userRemovalStats = await prisma.removalRequest.findMany({
+        where: {
+          exposure: {
+            userId: { in: userIds }
+          }
+        },
+        select: {
+          status: true,
+          exposure: {
+            select: {
+              userId: true
+            }
+          }
+        }
+      });
+
+      // Build a map of userId -> removal stats
+      const removalStatsMap: Record<string, { total: number; submitted: number; inProgress: number; completed: number; failed: number; manual: number }> = {};
+
+      userRemovalStats.forEach(removal => {
+        const userId = removal.exposure.userId;
+        if (!removalStatsMap[userId]) {
+          removalStatsMap[userId] = { total: 0, submitted: 0, inProgress: 0, completed: 0, failed: 0, manual: 0 };
+        }
+        removalStatsMap[userId].total++;
+
+        // Map actual database statuses to display categories
+        const status = removal.status;
+        if (status === "PENDING" || status === "SUBMITTED") {
+          removalStatsMap[userId].submitted++;
+        } else if (status === "ACKNOWLEDGED" || status === "IN_PROGRESS") {
+          removalStatsMap[userId].inProgress++;
+        } else if (status === "COMPLETED" || status === "VERIFIED_REMOVED") {
+          removalStatsMap[userId].completed++;
+        } else if (status === "FAILED") {
+          removalStatsMap[userId].failed++;
+        } else if (status === "REQUIRES_MANUAL") {
+          removalStatsMap[userId].manual++;
+        }
+      });
+
+      usersWithExposureStats = usersWithExposureStats.map(user => ({
+        ...user,
+        removalStats: removalStatsMap[user.id] || { total: 0, submitted: 0, inProgress: 0, completed: 0, failed: 0, manual: 0 },
       }));
     }
 
