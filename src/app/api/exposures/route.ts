@@ -84,15 +84,39 @@ export async function GET(request: Request) {
       _count: true,
     });
 
-    // Get manual action stats and removal stats
-    const [manualActionStats, manualActionDone, totalRemovalRequests] = await Promise.all([
-      prisma.exposure.aggregate({
-        where: { userId: session.user.id, requiresManualAction: true },
-        _count: true,
+    // AI sources to exclude from manual review stats (handled in AI Protection page)
+    const AI_SOURCES = [
+      "SPAWNING_AI", "LAION_AI", "STABILITY_AI", "OPENAI", "MIDJOURNEY", "META_AI",
+      "GOOGLE_AI", "LINKEDIN_AI", "ADOBE_AI", "AMAZON_AI",
+      "CLEARVIEW_AI", "PIMEYES", "FACECHECK_ID", "SOCIAL_CATFISH", "TINEYE", "YANDEX_IMAGES",
+      "ELEVENLABS", "RESEMBLE_AI", "MURF_AI",
+    ];
+
+    // Get manual action stats and removal stats (excluding AI sources for manual review)
+    const [manualActionStats, manualActionDone, manualBrokers, totalRemovalRequests] = await Promise.all([
+      prisma.exposure.count({
+        where: {
+          userId: session.user.id,
+          requiresManualAction: true,
+          source: { notIn: AI_SOURCES },
+        },
       }),
-      prisma.exposure.aggregate({
-        where: { userId: session.user.id, requiresManualAction: true, manualActionTaken: true },
-        _count: true,
+      prisma.exposure.count({
+        where: {
+          userId: session.user.id,
+          requiresManualAction: true,
+          manualActionTaken: true,
+          source: { notIn: AI_SOURCES },
+        },
+      }),
+      // Count unique brokers for manual review
+      prisma.exposure.groupBy({
+        by: ["source"],
+        where: {
+          userId: session.user.id,
+          requiresManualAction: true,
+          source: { notIn: AI_SOURCES },
+        },
       }),
       prisma.removalRequest.count({
         where: { userId: session.user.id },
@@ -115,9 +139,10 @@ export async function GET(request: Request) {
           severityStats.map((s) => [s.severity, s._count])
         ),
         manualAction: {
-          total: manualActionStats._count,
-          done: manualActionDone._count,
-          pending: manualActionStats._count - manualActionDone._count,
+          total: manualActionStats,
+          done: manualActionDone,
+          pending: manualActionStats - manualActionDone,
+          brokers: manualBrokers.length, // Unique broker count
         },
         totalRemovalRequests,
       },

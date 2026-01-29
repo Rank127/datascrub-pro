@@ -165,18 +165,12 @@ export default function ManualReviewPage() {
         setGroupedExposures(grouped);
         setTotalPages(data.pagination.totalPages);
 
-        // Calculate stats excluding AI sources
-        const allManualItems = data.exposures.filter(
-          (e: ManualExposure) => e.requiresManualAction && !AI_SOURCES.includes(e.source)
-        );
-        const pendingCount = allManualItems.filter((e: ManualExposure) => !e.manualActionTaken).length;
-        const doneCount = allManualItems.filter((e: ManualExposure) => e.manualActionTaken).length;
-        const uniqueBrokers = new Set(allManualItems.map((e: ManualExposure) => e.source)).size;
+        // Use API stats (calculated server-side across ALL items, not just current page)
         setStats({
-          total: allManualItems.length,
-          pending: pendingCount,
-          done: doneCount,
-          brokers: uniqueBrokers,
+          total: data.stats.manualAction.total,
+          pending: data.stats.manualAction.pending,
+          done: data.stats.manualAction.done,
+          brokers: data.stats.manualAction.brokers,
         });
       }
     } catch (error) {
