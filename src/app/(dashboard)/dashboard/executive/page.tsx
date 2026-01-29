@@ -151,122 +151,63 @@ export default function ExecutiveDashboardPage() {
         </div>
       </div>
 
-      {/* Quick Stats Summary */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/20">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-emerald-500/20 rounded-lg">
-              <DollarSign className="h-6 w-6 text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Monthly Revenue</p>
-              <p className="text-xl font-bold text-white">
-                ${(data.finance.mrr / 100).toLocaleString()}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-blue-500/20 rounded-lg">
-              <Users className="h-6 w-6 text-blue-400" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Total Users</p>
-              <p className="text-xl font-bold text-white">
-                {data.analytics.totalUsers.toLocaleString()}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/20">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-amber-500/20 rounded-lg">
-              <BarChart3 className="h-6 w-6 text-amber-400" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Exposures Found</p>
-              <p className="text-xl font-bold text-white">
-                {data.analytics.totalExposures.toLocaleString()}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-purple-500/20 rounded-lg">
-              <Settings className="h-6 w-6 text-purple-400" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Pending Queue</p>
-              <p className="text-xl font-bold text-white">
-                {(data.operations.pendingRemovalRequests + data.operations.manualActionQueue).toLocaleString()}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Main Tabs */}
       <Tabs defaultValue={defaultTab} className="space-y-6">
-        <TabsList className="bg-slate-800/50 border border-slate-700 p-1">
+        <TabsList className="bg-slate-800/50 border border-slate-700 p-1.5 h-auto flex-wrap">
           <TabsTrigger
             value="finance"
-            className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 gap-2"
+            className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-300 data-[state=active]:border-emerald-500/50 data-[state=active]:border hover:bg-emerald-500/10 hover:text-emerald-400 transition-all"
           >
-            <DollarSign className="h-4 w-4" />
-            <span className="hidden sm:inline">Finance</span>
+            <DollarSign className="h-5 w-5" />
+            <span>Finance</span>
           </TabsTrigger>
           <TabsTrigger
             value="analytics"
-            className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 gap-2"
+            className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 data-[state=active]:border-blue-500/50 data-[state=active]:border hover:bg-blue-500/10 hover:text-blue-400 transition-all"
           >
-            <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">Analytics</span>
+            <BarChart3 className="h-5 w-5" />
+            <span>Analytics</span>
           </TabsTrigger>
           <TabsTrigger
             value="operations"
-            className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 gap-2"
+            className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-amber-500/30 data-[state=active]:text-amber-300 data-[state=active]:border-amber-500/50 data-[state=active]:border hover:bg-amber-500/10 hover:text-amber-400 transition-all"
           >
-            <Settings className="h-4 w-4" />
-            <span className="hidden sm:inline">Operations</span>
+            <Settings className="h-5 w-5" />
+            <span>Operations</span>
           </TabsTrigger>
           <TabsTrigger
             value="activities"
-            className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 gap-2"
+            className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-300 data-[state=active]:border-purple-500/50 data-[state=active]:border hover:bg-purple-500/10 hover:text-purple-400 transition-all"
           >
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">Activities</span>
+            <Users className="h-5 w-5" />
+            <span>Activities</span>
           </TabsTrigger>
           <TabsTrigger
             value="users"
-            className="data-[state=active]:bg-pink-500/20 data-[state=active]:text-pink-400 gap-2"
+            className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-pink-500/30 data-[state=active]:text-pink-300 data-[state=active]:border-pink-500/50 data-[state=active]:border hover:bg-pink-500/10 hover:text-pink-400 transition-all"
           >
-            <UserCog className="h-4 w-4" />
-            <span className="hidden sm:inline">Users</span>
+            <UserCog className="h-5 w-5" />
+            <span>Users</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="finance" className="mt-6">
+        <TabsContent value="finance" className="mt-6 p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
           <FinanceSection data={data.finance} />
         </TabsContent>
 
-        <TabsContent value="analytics" className="mt-6">
+        <TabsContent value="analytics" className="mt-6 p-4 rounded-lg border border-blue-500/20 bg-blue-500/5">
           <AnalyticsSection data={data.analytics} />
         </TabsContent>
 
-        <TabsContent value="operations" className="mt-6">
-          <OperationsSection data={data.operations} />
+        <TabsContent value="operations" className="mt-6 p-4 rounded-lg border border-amber-500/20 bg-amber-500/5">
+          <OperationsSection data={data.operations} platform={data.platform} />
         </TabsContent>
 
-        <TabsContent value="activities" className="mt-6">
+        <TabsContent value="activities" className="mt-6 p-4 rounded-lg border border-purple-500/20 bg-purple-500/5">
           <UserActivitiesSection data={data.activities} />
         </TabsContent>
 
-        <TabsContent value="users" className="mt-6">
+        <TabsContent value="users" className="mt-6 p-4 rounded-lg border border-pink-500/20 bg-pink-500/5">
           <UserManagementSection />
         </TabsContent>
       </Tabs>

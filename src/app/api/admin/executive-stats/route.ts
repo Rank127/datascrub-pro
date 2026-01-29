@@ -4,15 +4,29 @@ import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
 import { maskEmail } from "@/lib/rbac/pii-masking";
+import { getStripe } from "@/lib/stripe";
 import {
   ExecutiveStatsResponse,
   FinanceMetrics,
-  AnalyticsMetrics,
+  WebAnalyticsMetrics,
+  PlatformMetrics,
   OperationsMetrics,
   ActivitiesMetrics,
   TrendDataPoint,
-  PLAN_PRICING,
 } from "@/lib/executive/types";
+import {
+  isGAConfigured,
+  getPageViews,
+  getActiveUsers,
+  getTopPages,
+  getTrafficSources,
+} from "@/lib/integrations/google-analytics";
+import {
+  isBingConfigured,
+  getSearchPerformance,
+  getQueryStats,
+  getCrawlStats,
+} from "@/lib/integrations/bing-webmaster";
 
 // Helper to get client IP
 function getClientIP(request: Request): string | undefined {
@@ -27,12 +41,6 @@ function getClientIP(request: Request): string | undefined {
 function getStartOfMonth(): Date {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), 1);
-}
-
-// Helper to get start of last month
-function getStartOfLastMonth(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth() - 1, 1);
 }
 
 // Helper to get date N days ago
@@ -86,11 +94,13 @@ export async function GET(request: Request) {
       analytics,
       operations,
       activities,
+      platform,
     ] = await Promise.all([
       getFinanceMetrics(),
-      getAnalyticsMetrics(),
+      getWebAnalyticsMetrics(),
       getOperationsMetrics(),
       getActivitiesMetrics(isSuperAdmin),
+      getPlatformMetrics(),
     ]);
 
     const response: ExecutiveStatsResponse = {
@@ -98,6 +108,7 @@ export async function GET(request: Request) {
       analytics,
       operations,
       activities,
+      platform,
       generatedAt: new Date().toISOString(),
     };
 
@@ -113,99 +124,244 @@ export async function GET(request: Request) {
 
 async function getFinanceMetrics(): Promise<FinanceMetrics> {
   const startOfMonth = getStartOfMonth();
-  const startOfLastMonth = getStartOfLastMonth();
 
-  // Get subscription counts by plan
-  const subscriptionsByPlan = await prisma.user.groupBy({
-    by: ["plan"],
-    _count: true,
-  });
+  try {
+    const stripe = getStripe();
 
-  const planCounts = {
-    FREE: 0,
-    PRO: 0,
-    ENTERPRISE: 0,
-  };
-
-  subscriptionsByPlan.forEach((item) => {
-    if (item.plan in planCounts) {
-      planCounts[item.plan as keyof typeof planCounts] = item._count;
-    }
-  });
-
-  // Get subscription status counts
-  const subscriptionStatuses = await prisma.subscription.groupBy({
-    by: ["status"],
-    _count: true,
-  });
-
-  let activeSubscriptions = 0;
-  let canceledSubscriptions = 0;
-  let pastDueSubscriptions = 0;
-
-  subscriptionStatuses.forEach((item) => {
-    if (item.status === "active") activeSubscriptions = item._count;
-    else if (item.status === "canceled") canceledSubscriptions = item._count;
-    else if (item.status === "past_due") pastDueSubscriptions = item._count;
-  });
-
-  // New subscriptions this month
-  const newSubscriptionsThisMonth = await prisma.subscription.count({
-    where: {
-      createdAt: { gte: startOfMonth },
+    // Fetch all active subscriptions from Stripe to calculate MRR
+    const activeSubscriptions = await stripe.subscriptions.list({
       status: "active",
-    },
-  });
+      limit: 100,
+      expand: ["data.items.data.price"],
+    });
 
-  // Calculate MRR
-  const mrr = (planCounts.PRO * PLAN_PRICING.PRO) + (planCounts.ENTERPRISE * PLAN_PRICING.ENTERPRISE);
+    // Calculate MRR from active subscriptions
+    let mrr = 0;
+    const planCounts = { FREE: 0, PRO: 0, ENTERPRISE: 0 };
 
-  // Calculate last month MRR for growth
-  const lastMonthPro = await prisma.user.count({
-    where: {
-      plan: "PRO",
-      createdAt: { lt: startOfMonth },
-    },
-  });
-  const lastMonthEnterprise = await prisma.user.count({
-    where: {
-      plan: "ENTERPRISE",
-      createdAt: { lt: startOfMonth },
-    },
-  });
-  const lastMonthMrr = (lastMonthPro * PLAN_PRICING.PRO) + (lastMonthEnterprise * PLAN_PRICING.ENTERPRISE);
-  const mrrGrowth = lastMonthMrr > 0 ? ((mrr - lastMonthMrr) / lastMonthMrr) * 100 : 0;
+    for (const sub of activeSubscriptions.data) {
+      for (const item of sub.items.data) {
+        const price = item.price;
+        if (price.recurring) {
+          // Convert to monthly if yearly
+          let monthlyAmount = price.unit_amount || 0;
+          if (price.recurring.interval === "year") {
+            monthlyAmount = Math.round(monthlyAmount / 12);
+          }
+          mrr += monthlyAmount;
 
-  // Churn rate (canceled this month / active at start of month)
-  const canceledThisMonth = await prisma.subscription.count({
-    where: {
+          // Count by plan based on price
+          const priceId = price.id;
+          if (priceId.includes("pro") || (price.unit_amount && price.unit_amount <= 1500)) {
+            planCounts.PRO++;
+          } else if (priceId.includes("enterprise") || (price.unit_amount && price.unit_amount > 1500)) {
+            planCounts.ENTERPRISE++;
+          }
+        }
+      }
+    }
+
+    // Get subscription counts by status from Stripe
+    const [canceledSubs, pastDueSubs] = await Promise.all([
+      stripe.subscriptions.list({ status: "canceled", limit: 100 }),
+      stripe.subscriptions.list({ status: "past_due", limit: 100 }),
+    ]);
+
+    const canceledCount = canceledSubs.data.length;
+    const pastDueCount = pastDueSubs.data.length;
+
+    // For accurate counts, use list with pagination or use Stripe's count if available
+    // Here we'll fetch actual counts
+    let totalActive = 0;
+    let hasMore = true;
+    let startingAfter: string | undefined;
+
+    while (hasMore) {
+      const batch = await stripe.subscriptions.list({
+        status: "active",
+        limit: 100,
+        starting_after: startingAfter,
+      });
+      totalActive += batch.data.length;
+      hasMore = batch.has_more;
+      if (batch.data.length > 0) {
+        startingAfter = batch.data[batch.data.length - 1].id;
+      }
+    }
+
+    // New subscriptions this month
+    const startOfMonthTimestamp = Math.floor(startOfMonth.getTime() / 1000);
+    const newSubsThisMonth = await stripe.subscriptions.list({
+      status: "active",
+      created: { gte: startOfMonthTimestamp },
+      limit: 100,
+    });
+    const newSubscriptionsThisMonth = newSubsThisMonth.data.length;
+
+    // Get last month's MRR for growth calculation
+    // We'll estimate based on subscriptions that existed before this month
+    const lastMonthSubs = await stripe.subscriptions.list({
+      status: "active",
+      created: { lt: startOfMonthTimestamp },
+      limit: 100,
+      expand: ["data.items.data.price"],
+    });
+
+    let lastMonthMrr = 0;
+    for (const sub of lastMonthSubs.data) {
+      for (const item of sub.items.data) {
+        const price = item.price;
+        if (price.recurring) {
+          let monthlyAmount = price.unit_amount || 0;
+          if (price.recurring.interval === "year") {
+            monthlyAmount = Math.round(monthlyAmount / 12);
+          }
+          lastMonthMrr += monthlyAmount;
+        }
+      }
+    }
+
+    const mrrGrowth = lastMonthMrr > 0 ? ((mrr - lastMonthMrr) / lastMonthMrr) * 100 : 0;
+
+    // Churn: subscriptions canceled this month
+    // Stripe doesn't filter by canceled_at, so we fetch recent cancellations and filter
+    const recentCancellations = await stripe.subscriptions.list({
       status: "canceled",
-      updatedAt: { gte: startOfMonth },
-    },
-  });
-  const activeAtStartOfMonth = activeSubscriptions + canceledThisMonth;
-  const churnRate = activeAtStartOfMonth > 0 ? (canceledThisMonth / activeAtStartOfMonth) * 100 : 0;
+      limit: 100,
+    });
 
-  // ARPU
-  const totalPaidUsers = planCounts.PRO + planCounts.ENTERPRISE;
-  const arpu = totalPaidUsers > 0 ? mrr / totalPaidUsers : 0;
+    // Filter to only those canceled this month
+    const canceledThisMonthCount = recentCancellations.data.filter(sub => {
+      if (!sub.canceled_at) return false;
+      return sub.canceled_at >= startOfMonthTimestamp;
+    }).length;
+
+    const activeAtStartOfMonth = totalActive + canceledThisMonthCount;
+    const churnRate = activeAtStartOfMonth > 0 ? (canceledThisMonthCount / activeAtStartOfMonth) * 100 : 0;
+
+    // ARPU
+    const totalPaidUsers = totalActive;
+    const arpu = totalPaidUsers > 0 ? Math.round(mrr / totalPaidUsers) : 0;
+
+    // Get FREE users from database (users without active Stripe subscription)
+    const totalUsers = await prisma.user.count();
+    planCounts.FREE = Math.max(0, totalUsers - planCounts.PRO - planCounts.ENTERPRISE);
+
+    return {
+      mrr,
+      mrrGrowth: Math.round(mrrGrowth * 100) / 100,
+      subscriptionsByPlan: planCounts,
+      activeSubscriptions: totalActive,
+      canceledSubscriptions: canceledCount,
+      pastDueSubscriptions: pastDueCount,
+      newSubscriptionsThisMonth,
+      churnRate: Math.round(churnRate * 100) / 100,
+      arpu,
+    };
+  } catch (error) {
+    console.error("[Finance Metrics] Stripe error, falling back to database:", error);
+
+    // Fallback to database-based calculation if Stripe fails
+    const subscriptionsByPlan = await prisma.user.groupBy({
+      by: ["plan"],
+      _count: true,
+    });
+
+    const planCounts = { FREE: 0, PRO: 0, ENTERPRISE: 0 };
+    subscriptionsByPlan.forEach((item) => {
+      if (item.plan in planCounts) {
+        planCounts[item.plan as keyof typeof planCounts] = item._count;
+      }
+    });
+
+    // Use hardcoded prices as fallback
+    const FALLBACK_PRICES = { PRO: 1199, ENTERPRISE: 2999 };
+    const mrr = (planCounts.PRO * FALLBACK_PRICES.PRO) + (planCounts.ENTERPRISE * FALLBACK_PRICES.ENTERPRISE);
+    const totalPaidUsers = planCounts.PRO + planCounts.ENTERPRISE;
+
+    return {
+      mrr,
+      mrrGrowth: 0,
+      subscriptionsByPlan: planCounts,
+      activeSubscriptions: totalPaidUsers,
+      canceledSubscriptions: 0,
+      pastDueSubscriptions: 0,
+      newSubscriptionsThisMonth: 0,
+      churnRate: 0,
+      arpu: totalPaidUsers > 0 ? Math.round(mrr / totalPaidUsers) : 0,
+    };
+  }
+}
+
+async function getWebAnalyticsMetrics(): Promise<WebAnalyticsMetrics> {
+  // Fetch Google Analytics data
+  const gaConfigured = isGAConfigured();
+  let gaPageViews = null;
+  let gaActiveUsers = null;
+  let gaTopPages: { path: string; views: number }[] = [];
+  let gaTrafficSources: { source: string; sessions: number }[] = [];
+
+  if (gaConfigured) {
+    try {
+      const [pageViews, activeUsers, topPages, trafficSources] = await Promise.all([
+        getPageViews(),
+        getActiveUsers(),
+        getTopPages(10),
+        getTrafficSources(),
+      ]);
+      gaPageViews = pageViews;
+      gaActiveUsers = activeUsers;
+      gaTopPages = topPages;
+      gaTrafficSources = trafficSources;
+    } catch (error) {
+      console.error("[Web Analytics] GA fetch error:", error);
+    }
+  }
+
+  // Fetch Bing data
+  const bingConfigured = isBingConfigured();
+  let bingSearchPerformance = null;
+  let bingTopQueries: { query: string; impressions: number; clicks: number; ctr: number; position: number }[] = [];
+  let bingCrawlStats = null;
+
+  if (bingConfigured) {
+    try {
+      const [searchPerf, queries, crawl] = await Promise.all([
+        getSearchPerformance(),
+        getQueryStats(),
+        getCrawlStats(),
+      ]);
+      bingSearchPerformance = searchPerf;
+      bingTopQueries = queries;
+      bingCrawlStats = crawl ? {
+        crawledPages: crawl.crawledPages,
+        crawlErrors: crawl.crawlErrors,
+        inIndex: crawl.inIndex,
+      } : null;
+    } catch (error) {
+      console.error("[Web Analytics] Bing fetch error:", error);
+    }
+  }
 
   return {
-    mrr,
-    mrrGrowth: Math.round(mrrGrowth * 100) / 100,
-    subscriptionsByPlan: planCounts,
-    activeSubscriptions,
-    canceledSubscriptions,
-    pastDueSubscriptions,
-    newSubscriptionsThisMonth,
-    churnRate: Math.round(churnRate * 100) / 100,
-    arpu: Math.round(arpu),
+    googleAnalytics: {
+      configured: gaConfigured,
+      pageViews: gaPageViews || undefined,
+      activeUsers: gaActiveUsers || undefined,
+      topPages: gaTopPages,
+      trafficSources: gaTrafficSources,
+    },
+    bing: {
+      configured: bingConfigured,
+      searchPerformance: bingSearchPerformance || undefined,
+      topQueries: bingTopQueries,
+      crawlStats: bingCrawlStats || undefined,
+    },
   };
 }
 
-async function getAnalyticsMetrics(): Promise<AnalyticsMetrics> {
+async function getPlatformMetrics(): Promise<PlatformMetrics> {
   const startOfMonth = getStartOfMonth();
-  const startOfLastMonth = getStartOfLastMonth();
 
   // Total counts
   const [totalUsers, totalExposures, totalRemovals, completedRemovals, completedScans, totalScans] = await Promise.all([
@@ -254,15 +410,6 @@ async function getAnalyticsMetrics(): Promise<AnalyticsMetrics> {
 async function getTrends(): Promise<{ users: TrendDataPoint[]; exposures: TrendDataPoint[]; removals: TrendDataPoint[] }> {
   const twelveMonthsAgo = new Date();
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-
-  // User trends by month
-  const userTrends = await prisma.user.groupBy({
-    by: ["createdAt"],
-    _count: true,
-    where: {
-      createdAt: { gte: twelveMonthsAgo },
-    },
-  });
 
   // Aggregate by month
   const usersByMonth: Record<string, number> = {};

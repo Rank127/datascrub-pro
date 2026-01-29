@@ -32,6 +32,9 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const search = searchParams.get("search") || "";
     const roleFilter = searchParams.get("role") || "";
+    const planFilter = searchParams.get("plan") || "";
+    const createdAfter = searchParams.get("createdAfter") || "";
+    const includeExposureStats = searchParams.get("includeExposureStats") === "true";
 
     const where: Record<string, unknown> = {};
 
@@ -44,6 +47,14 @@ export async function GET(request: Request) {
 
     if (roleFilter) {
       where.role = roleFilter;
+    }
+
+    if (planFilter) {
+      where.plan = planFilter;
+    }
+
+    if (createdAfter) {
+      where.createdAt = { gte: new Date(createdAfter) };
     }
 
     const [users, total] = await Promise.all([
@@ -71,6 +82,42 @@ export async function GET(request: Request) {
       prisma.user.count({ where }),
     ]);
 
+    // If exposure stats requested, fetch detailed exposure data per user
+    let usersWithExposureStats = users;
+    if (includeExposureStats && users.length > 0) {
+      const userIds = users.map(u => u.id);
+
+      // Get exposure counts by status for each user
+      const exposureStats = await prisma.exposure.groupBy({
+        by: ["userId", "status"],
+        where: { userId: { in: userIds } },
+        _count: true,
+      });
+
+      // Build a map of userId -> stats
+      const statsMap: Record<string, { total: number; removed: number; pending: number; inProgress: number }> = {};
+
+      exposureStats.forEach(stat => {
+        if (!statsMap[stat.userId]) {
+          statsMap[stat.userId] = { total: 0, removed: 0, pending: 0, inProgress: 0 };
+        }
+        statsMap[stat.userId].total += stat._count;
+
+        if (stat.status === "REMOVED" || stat.status === "VERIFIED_REMOVED") {
+          statsMap[stat.userId].removed += stat._count;
+        } else if (stat.status === "ACTIVE" || stat.status === "NEW") {
+          statsMap[stat.userId].pending += stat._count;
+        } else if (stat.status === "REMOVAL_IN_PROGRESS" || stat.status === "REMOVAL_PENDING") {
+          statsMap[stat.userId].inProgress += stat._count;
+        }
+      });
+
+      usersWithExposureStats = users.map(user => ({
+        ...user,
+        exposureStats: statsMap[user.id] || { total: 0, removed: 0, pending: 0, inProgress: 0 },
+      }));
+    }
+
     // Log the data access
     await logDataAccess(
       { id: session.user.id, email: currentUser?.email || "", role },
@@ -84,7 +131,7 @@ export async function GET(request: Request) {
     // Mask PII based on role
     const canSeeFullPII = checkPermission(currentUser?.email, currentUser?.role, "view_full_pii");
 
-    const maskedUsers = users.map(user => {
+    const maskedUsers = usersWithExposureStats.map(user => {
       if (canSeeFullPII || user.id === session.user.id) {
         return user;
       }

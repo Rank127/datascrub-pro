@@ -2,9 +2,10 @@
 
 export interface ExecutiveStatsResponse {
   finance: FinanceMetrics;
-  analytics: AnalyticsMetrics;
+  analytics: WebAnalyticsMetrics;
   operations: OperationsMetrics;
   activities: ActivitiesMetrics;
+  platform: PlatformMetrics; // User/exposure/removal trends
   generatedAt: string;
 }
 
@@ -24,7 +25,8 @@ export interface FinanceMetrics {
   arpu: number; // Average Revenue Per User in cents
 }
 
-export interface AnalyticsMetrics {
+// Platform metrics (users, exposures, removals) - moved to Operations
+export interface PlatformMetrics {
   totalUsers: number;
   newUsersThisMonth: number;
   userGrowthRate: number; // Percentage
@@ -39,6 +41,43 @@ export interface AnalyticsMetrics {
     removals: TrendDataPoint[];
   };
 }
+
+// Web Analytics (Google Analytics + Bing)
+export interface WebAnalyticsMetrics {
+  googleAnalytics: {
+    configured: boolean;
+    pageViews?: {
+      today: number;
+      week: number;
+      month: number;
+    };
+    activeUsers?: {
+      dau: number;
+      wau: number;
+      mau: number;
+    };
+    topPages: { path: string; views: number }[];
+    trafficSources: { source: string; sessions: number }[];
+  };
+  bing: {
+    configured: boolean;
+    searchPerformance?: {
+      clicks: number;
+      impressions: number;
+      averageCtr: number;
+      averagePosition: number;
+    };
+    topQueries: { query: string; impressions: number; clicks: number; ctr: number; position: number }[];
+    crawlStats?: {
+      crawledPages: number;
+      crawlErrors: number;
+      inIndex: number;
+    };
+  };
+}
+
+// Legacy alias for backwards compatibility
+export type AnalyticsMetrics = WebAnalyticsMetrics;
 
 export interface OperationsMetrics {
   pendingRemovalRequests: number;

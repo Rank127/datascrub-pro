@@ -1,145 +1,334 @@
 "use client";
 
-import { AnalyticsMetrics } from "@/lib/executive/types";
-import { MetricCard } from "./metric-card";
-import { TrendChart } from "./trend-chart";
+import { WebAnalyticsMetrics } from "@/lib/executive/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
-  Users,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Eye,
-  Shield,
-  CheckCircle,
-  Scan,
+  Users,
+  Globe,
+  Search,
+  MousePointerClick,
   TrendingUp,
+  AlertCircle,
+  CheckCircle,
   BarChart3,
+  ExternalLink,
 } from "lucide-react";
 
 interface AnalyticsSectionProps {
-  data: AnalyticsMetrics;
+  data: WebAnalyticsMetrics;
 }
 
 export function AnalyticsSection({ data }: AnalyticsSectionProps) {
-  return (
-    <div className="space-y-6">
-      {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total Users"
-          value={data.totalUsers}
-          icon={Users}
-          variant="info"
-          trend={{
-            value: data.userGrowthRate,
-            isPositive: data.userGrowthRate >= 0,
-          }}
-        />
-        <MetricCard
-          title="New Users This Month"
-          value={data.newUsersThisMonth}
-          icon={TrendingUp}
-          variant="success"
-        />
-        <MetricCard
-          title="Total Exposures Found"
-          value={data.totalExposures}
-          icon={Eye}
-          variant="warning"
-        />
-        <MetricCard
-          title="Removals Completed"
-          value={data.totalRemovals}
-          icon={Shield}
-          variant="success"
-        />
-      </div>
+  const MetricCard = ({
+    title,
+    value,
+    subtitle,
+    icon: Icon,
+    variant = "default",
+  }: {
+    title: string;
+    value: number | string;
+    subtitle?: string;
+    icon: React.ElementType;
+    variant?: "default" | "success" | "warning" | "info";
+  }) => {
+    const variantStyles = {
+      default: "from-slate-500/10 to-slate-500/5 border-slate-500/20",
+      success: "from-emerald-500/10 to-emerald-500/5 border-emerald-500/20",
+      warning: "from-amber-500/10 to-amber-500/5 border-amber-500/20",
+      info: "from-blue-500/10 to-blue-500/5 border-blue-500/20",
+    };
 
-      {/* Performance Metrics */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard
-          title="Removal Success Rate"
-          value={data.removalSuccessRate}
-          format="percentage"
-          icon={CheckCircle}
-          variant={data.removalSuccessRate >= 90 ? "success" : data.removalSuccessRate >= 70 ? "warning" : "danger"}
-        />
-        <MetricCard
-          title="Scan Completion Rate"
-          value={data.scanCompletionRate}
-          format="percentage"
-          icon={Scan}
-          variant={data.scanCompletionRate >= 95 ? "success" : data.scanCompletionRate >= 80 ? "warning" : "danger"}
-        />
-        <MetricCard
-          title="Avg Exposures Per User"
-          value={data.avgExposuresPerUser.toFixed(1)}
-          icon={BarChart3}
-          variant="default"
-        />
-      </div>
+    const iconStyles = {
+      default: "bg-slate-500/20 text-slate-400",
+      success: "bg-emerald-500/20 text-emerald-400",
+      warning: "bg-amber-500/20 text-amber-400",
+      info: "bg-blue-500/20 text-blue-400",
+    };
 
-      {/* Trend Charts */}
-      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
-        <TrendChart
-          title="User Growth (12 Months)"
-          data={data.trends.users}
-          color="blue"
-          type="area"
-          height={200}
-        />
-        <TrendChart
-          title="Exposures Found (12 Months)"
-          data={data.trends.exposures}
-          color="amber"
-          type="area"
-          height={200}
-        />
-        <TrendChart
-          title="Removals Completed (12 Months)"
-          data={data.trends.removals}
-          color="emerald"
-          type="area"
-          height={200}
-        />
-      </div>
+    const displayValue = typeof value === "number" ? value.toLocaleString() : value;
 
-      {/* Summary Card */}
-      <Card className="bg-slate-900/50 border-slate-800">
-        <CardHeader>
-          <CardTitle className="text-lg font-medium text-white flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-emerald-400" />
-            Platform Performance Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <div className="text-center p-4 bg-slate-800/50 rounded-lg">
-              <p className="text-3xl font-bold text-blue-400">
-                {data.userGrowthRate >= 0 ? "+" : ""}
-                {data.userGrowthRate.toFixed(1)}%
-              </p>
-              <p className="text-sm text-slate-400 mt-1">User Growth</p>
+    return (
+      <Card className={`bg-gradient-to-br ${variantStyles[variant]}`}>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${iconStyles[variant]}`}>
+              <Icon className="h-5 w-5" />
             </div>
-            <div className="text-center p-4 bg-slate-800/50 rounded-lg">
-              <p className="text-3xl font-bold text-emerald-400">
-                {data.removalSuccessRate.toFixed(0)}%
-              </p>
-              <p className="text-sm text-slate-400 mt-1">Removal Success</p>
-            </div>
-            <div className="text-center p-4 bg-slate-800/50 rounded-lg">
-              <p className="text-3xl font-bold text-amber-400">
-                {data.avgExposuresPerUser.toFixed(1)}
-              </p>
-              <p className="text-sm text-slate-400 mt-1">Avg Exposures/User</p>
-            </div>
-            <div className="text-center p-4 bg-slate-800/50 rounded-lg">
-              <p className="text-3xl font-bold text-purple-400">
-                {((data.totalRemovals / Math.max(data.totalExposures, 1)) * 100).toFixed(0)}%
-              </p>
-              <p className="text-sm text-slate-400 mt-1">Exposure Resolution</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-slate-400 truncate">{title}</p>
+              <p className="text-xl font-bold text-white">{displayValue}</p>
+              {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
             </div>
           </div>
         </CardContent>
       </Card>
+    );
+  };
+
+  const NotConfigured = ({ service }: { service: string }) => (
+    <Card className="bg-slate-900/50 border-slate-800">
+      <CardContent className="p-8 text-center">
+        <AlertCircle className="h-12 w-12 text-slate-500 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-white mb-2">{service} Not Configured</h3>
+        <p className="text-slate-400 text-sm">
+          Configure your {service} integration to see analytics data here.
+        </p>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="space-y-8">
+      {/* Google Analytics Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-blue-500/20 rounded-lg">
+            <BarChart3 className="h-5 w-5 text-blue-400" />
+          </div>
+          <h2 className="text-lg font-semibold text-white">Google Analytics</h2>
+          {data.googleAnalytics.configured ? (
+            <Badge className="bg-emerald-500/20 text-emerald-400">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Connected
+            </Badge>
+          ) : (
+            <Badge className="bg-slate-500/20 text-slate-400">Not Configured</Badge>
+          )}
+        </div>
+
+        {!data.googleAnalytics.configured ? (
+          <NotConfigured service="Google Analytics" />
+        ) : (
+          <>
+            {/* Page Views */}
+            {data.googleAnalytics.pageViews && (
+              <div className="grid gap-4 md:grid-cols-3">
+                <MetricCard
+                  title="Page Views (Yesterday)"
+                  value={data.googleAnalytics.pageViews.today}
+                  icon={Eye}
+                  variant="info"
+                />
+                <MetricCard
+                  title="Page Views (7 Days)"
+                  value={data.googleAnalytics.pageViews.week}
+                  icon={Eye}
+                  variant="info"
+                />
+                <MetricCard
+                  title="Page Views (30 Days)"
+                  value={data.googleAnalytics.pageViews.month}
+                  icon={Eye}
+                  variant="info"
+                />
+              </div>
+            )}
+
+            {/* Active Users */}
+            {data.googleAnalytics.activeUsers && (
+              <div className="grid gap-4 md:grid-cols-3">
+                <MetricCard
+                  title="Daily Active Users"
+                  value={data.googleAnalytics.activeUsers.dau}
+                  subtitle="DAU"
+                  icon={Users}
+                  variant="success"
+                />
+                <MetricCard
+                  title="Weekly Active Users"
+                  value={data.googleAnalytics.activeUsers.wau}
+                  subtitle="WAU"
+                  icon={Users}
+                  variant="success"
+                />
+                <MetricCard
+                  title="Monthly Active Users"
+                  value={data.googleAnalytics.activeUsers.mau}
+                  subtitle="MAU"
+                  icon={Users}
+                  variant="success"
+                />
+              </div>
+            )}
+
+            {/* Top Pages & Traffic Sources */}
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Top Pages */}
+              <Card className="bg-slate-900/50 border-slate-800">
+                <CardHeader>
+                  <CardTitle className="text-md font-medium text-white flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-blue-400" />
+                    Top Pages (30 Days)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {data.googleAnalytics.topPages.length === 0 ? (
+                    <p className="text-slate-400 text-sm text-center py-4">No data available</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {data.googleAnalytics.topPages.slice(0, 8).map((page, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-slate-800/50 rounded">
+                          <span className="text-sm text-slate-300 truncate flex-1 mr-2">{page.path}</span>
+                          <span className="text-sm font-medium text-white">{page.views.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Traffic Sources */}
+              <Card className="bg-slate-900/50 border-slate-800">
+                <CardHeader>
+                  <CardTitle className="text-md font-medium text-white flex items-center gap-2">
+                    <ExternalLink className="h-4 w-4 text-emerald-400" />
+                    Traffic Sources (30 Days)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {data.googleAnalytics.trafficSources.length === 0 ? (
+                    <p className="text-slate-400 text-sm text-center py-4">No data available</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {data.googleAnalytics.trafficSources.slice(0, 8).map((source, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-slate-800/50 rounded">
+                          <span className="text-sm text-slate-300 capitalize">{source.source}</span>
+                          <span className="text-sm font-medium text-white">{source.sessions.toLocaleString()} sessions</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Bing Webmaster Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-amber-500/20 rounded-lg">
+            <Search className="h-5 w-5 text-amber-400" />
+          </div>
+          <h2 className="text-lg font-semibold text-white">Bing Webmaster Tools</h2>
+          {data.bing.configured ? (
+            <Badge className="bg-emerald-500/20 text-emerald-400">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Connected
+            </Badge>
+          ) : (
+            <Badge className="bg-slate-500/20 text-slate-400">Not Configured</Badge>
+          )}
+        </div>
+
+        {!data.bing.configured ? (
+          <NotConfigured service="Bing Webmaster Tools" />
+        ) : (
+          <>
+            {/* Search Performance */}
+            {data.bing.searchPerformance && (
+              <div className="grid gap-4 md:grid-cols-4">
+                <MetricCard
+                  title="Total Clicks"
+                  value={data.bing.searchPerformance.clicks}
+                  icon={MousePointerClick}
+                  variant="success"
+                />
+                <MetricCard
+                  title="Total Impressions"
+                  value={data.bing.searchPerformance.impressions}
+                  icon={Eye}
+                  variant="info"
+                />
+                <MetricCard
+                  title="Average CTR"
+                  value={`${data.bing.searchPerformance.averageCtr.toFixed(2)}%`}
+                  icon={TrendingUp}
+                  variant="warning"
+                />
+                <MetricCard
+                  title="Average Position"
+                  value={data.bing.searchPerformance.averagePosition.toFixed(1)}
+                  icon={BarChart3}
+                  variant="default"
+                />
+              </div>
+            )}
+
+            {/* Crawl Stats */}
+            {data.bing.crawlStats && (
+              <div className="grid gap-4 md:grid-cols-3">
+                <MetricCard
+                  title="Crawled Pages"
+                  value={data.bing.crawlStats.crawledPages}
+                  icon={Globe}
+                  variant="info"
+                />
+                <MetricCard
+                  title="Pages in Index"
+                  value={data.bing.crawlStats.inIndex}
+                  icon={CheckCircle}
+                  variant="success"
+                />
+                <MetricCard
+                  title="Crawl Errors"
+                  value={data.bing.crawlStats.crawlErrors}
+                  icon={AlertCircle}
+                  variant={data.bing.crawlStats.crawlErrors > 0 ? "warning" : "default"}
+                />
+              </div>
+            )}
+
+            {/* Top Search Queries */}
+            {data.bing.topQueries.length > 0 && (
+              <Card className="bg-slate-900/50 border-slate-800">
+                <CardHeader>
+                  <CardTitle className="text-md font-medium text-white flex items-center gap-2">
+                    <Search className="h-4 w-4 text-amber-400" />
+                    Top Search Queries
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-slate-800">
+                        <TableHead className="text-slate-400">Query</TableHead>
+                        <TableHead className="text-slate-400 text-right">Impressions</TableHead>
+                        <TableHead className="text-slate-400 text-right">Clicks</TableHead>
+                        <TableHead className="text-slate-400 text-right">CTR</TableHead>
+                        <TableHead className="text-slate-400 text-right">Position</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data.bing.topQueries.slice(0, 10).map((query, index) => (
+                        <TableRow key={index} className="border-slate-800">
+                          <TableCell className="text-white">{query.query}</TableCell>
+                          <TableCell className="text-slate-300 text-right">{query.impressions.toLocaleString()}</TableCell>
+                          <TableCell className="text-slate-300 text-right">{query.clicks.toLocaleString()}</TableCell>
+                          <TableCell className="text-slate-300 text-right">{query.ctr.toFixed(2)}%</TableCell>
+                          <TableCell className="text-slate-300 text-right">{query.position.toFixed(1)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

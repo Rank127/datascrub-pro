@@ -199,24 +199,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Quick Stats - Interactive cards that switch tabs */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card
-              className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40 cursor-pointer transition-all"
-              onClick={() => setActiveTab("finance")}
-            >
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="p-3 bg-emerald-500/20 rounded-lg">
-                  <DollarSign className="h-6 w-6 text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400">Monthly Revenue</p>
-                  <p className="text-xl font-bold text-white">
-                    ${(data.finance.mrr / 100).toLocaleString()}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
+          <div className="grid gap-4 md:grid-cols-3">
             <Card
               className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20 hover:border-blue-500/40 cursor-pointer transition-all"
               onClick={() => setActiveTab("activities")}
@@ -228,7 +211,7 @@ export default function AdminDashboardPage() {
                 <div>
                   <p className="text-xs text-slate-400">Total Users</p>
                   <p className="text-xl font-bold text-white">
-                    {data.analytics.totalUsers.toLocaleString()}
+                    {data.platform.totalUsers.toLocaleString()}
                   </p>
                 </div>
               </CardContent>
@@ -245,7 +228,7 @@ export default function AdminDashboardPage() {
                 <div>
                   <p className="text-xs text-slate-400">Exposures Found</p>
                   <p className="text-xl font-bold text-white">
-                    {data.analytics.totalExposures.toLocaleString()}
+                    {data.platform.totalExposures.toLocaleString()}
                   </p>
                 </div>
               </CardContent>
