@@ -30,6 +30,10 @@ import {
   Trash2,
   ShieldCheck,
   SendHorizontal,
+  HelpCircle,
+  ShieldAlert,
+  Building2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trackRemovalRequested } from "@/components/analytics/google-analytics";
@@ -76,6 +80,7 @@ function ExposuresPageContent() {
   const [severityFilter, setSeverityFilter] = useState<string>(
     searchParams.get("severity") || "all"
   );
+  const [showHelp, setShowHelp] = useState(false);
 
   // Get only actionable exposures (active, not whitelisted)
   const actionableExposures = exposures.filter(
@@ -328,11 +333,22 @@ function ExposuresPageContent() {
       {/* Filters */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-slate-400" />
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Filters
-            </CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-slate-400" />
+              <CardTitle className="text-sm font-medium text-slate-300">
+                Filters
+              </CardTitle>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-slate-400 hover:text-white"
+              onClick={() => setShowHelp(!showHelp)}
+            >
+              <HelpCircle className="h-4 w-4 mr-1" />
+              {showHelp ? "Hide Help" : "Help"}
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -345,12 +361,12 @@ function ExposuresPageContent() {
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="REMOVAL_PENDING">Removal Pending</SelectItem>
+                  <SelectItem value="ACTIVE">Active (Needs Action)</SelectItem>
+                  <SelectItem value="REMOVAL_PENDING">Pending (Request Sent)</SelectItem>
                   <SelectItem value="REMOVAL_IN_PROGRESS">In Progress</SelectItem>
-                  <SelectItem value="REMOVED">Removed</SelectItem>
-                  <SelectItem value="WHITELISTED">Whitelisted</SelectItem>
-                  <SelectItem value="MONITORING">Monitoring (Breaches)</SelectItem>
+                  <SelectItem value="REMOVED">Removed (Success)</SelectItem>
+                  <SelectItem value="WHITELISTED">Whitelisted (Kept)</SelectItem>
+                  <SelectItem value="MONITORING">Breach Alert</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -372,6 +388,101 @@ function ExposuresPageContent() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Help Section */}
+      {showHelp && (
+        <Card className="bg-slate-800/50 border-slate-700 border-blue-500/30">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <HelpCircle className="h-5 w-5 text-blue-400" />
+                <CardTitle className="text-white">Understanding Your Exposures</CardTitle>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-slate-400 hover:text-white"
+                onClick={() => setShowHelp(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Data Brokers vs Breaches */}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="p-4 bg-emerald-900/20 border border-emerald-700/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <Building2 className="h-5 w-5 text-emerald-400" />
+                  <h3 className="font-semibold text-emerald-400">Data Brokers</h3>
+                </div>
+                <p className="text-sm text-slate-300 mb-3">
+                  Companies like Spokeo, WhitePages, and BeenVerified that <strong>actively collect and sell</strong> your personal information.
+                </p>
+                <ul className="text-sm text-slate-400 space-y-1">
+                  <li>• They control their database</li>
+                  <li>• CCPA/GDPR laws require them to delete on request</li>
+                  <li>• GhostMyData sends automated opt-out requests</li>
+                  <li>• <span className="text-emerald-400">Can be removed</span> - click "Remove" button</li>
+                </ul>
+              </div>
+              <div className="p-4 bg-purple-900/20 border border-purple-700/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldAlert className="h-5 w-5 text-purple-400" />
+                  <h3 className="font-semibold text-purple-400">Data Breaches (HIBP)</h3>
+                </div>
+                <p className="text-sm text-slate-300 mb-3">
+                  Security incidents where hackers <strong>stole data</strong> from companies like Deezer, LinkedIn, or Epik.
+                </p>
+                <ul className="text-sm text-slate-400 space-y-1">
+                  <li>• The data was stolen and leaked online</li>
+                  <li>• Exists on hacker forums, dark web, torrents</li>
+                  <li>• The original company can't "remove" it</li>
+                  <li>• <span className="text-purple-400">Cannot be removed</span> - take protective action instead</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* What to do for breaches */}
+            <div className="p-4 bg-slate-700/30 rounded-lg">
+              <h3 className="font-semibold text-white mb-2">What to Do for Breach Alerts</h3>
+              <div className="grid gap-2 md:grid-cols-2 text-sm text-slate-300">
+                <div>1. <strong>Change passwords</strong> for affected accounts</div>
+                <div>2. <strong>Enable 2FA</strong> (two-factor authentication)</div>
+                <div>3. <strong>Monitor accounts</strong> for suspicious activity</div>
+                <div>4. <strong>Consider credit freeze</strong> if SSN was exposed</div>
+              </div>
+            </div>
+
+            {/* Status explanations */}
+            <div>
+              <h3 className="font-semibold text-white mb-3">Status Meanings</h3>
+              <div className="grid gap-2 text-sm">
+                <div className="flex items-center gap-3">
+                  <span className="px-2 py-0.5 bg-red-100 text-red-800 rounded text-xs font-medium">ACTIVE</span>
+                  <span className="text-slate-300">Needs action - you can request removal or whitelist</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">PENDING</span>
+                  <span className="text-slate-300">Opt-out request sent, waiting for broker (up to 45 days)</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs font-medium">REMOVED</span>
+                  <span className="text-slate-300">Successfully removed from this data broker</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="px-2 py-0.5 bg-gray-100 text-gray-800 rounded text-xs font-medium">WHITELISTED</span>
+                  <span className="text-slate-300">You chose to keep this listing</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="px-2 py-0.5 bg-purple-100 text-purple-800 rounded text-xs font-medium">BREACH ALERT</span>
+                  <span className="text-slate-300">Data breach - cannot be removed, take protective action</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Bulk Actions Bar */}
       {someSelected && (
