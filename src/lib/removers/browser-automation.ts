@@ -1,22 +1,21 @@
 /**
  * Browser Automation Service for Form-Based Opt-Outs
  *
- * STATUS: FUTURE RELEASE - Requires paid Browserless.io subscription
- *
  * This service handles automated form submissions for data broker opt-outs.
- * Currently provides manual opt-out instructions as the default behavior.
  *
- * When BROWSERLESS_API_KEY is configured, it can automate form submissions
- * for data brokers that don't require CAPTCHA.
+ * Requirements:
+ * - BROWSERLESS_API_KEY: For browser automation ($50/month for 10,000 sessions)
+ * - TWOCAPTCHA_API_KEY: For CAPTCHA solving (~$3 per 1000 CAPTCHAs)
  *
- * Browserless.io Pricing (as of 2026):
- * - Free tier: 1,000 sessions/month
- * - Paid plans start at $50/month for 10,000 sessions
- *
- * For now, all opt-outs use manual instructions or CCPA/GDPR email requests.
+ * Supports:
+ * - Simple forms (no CAPTCHA)
+ * - reCAPTCHA v2/v3
+ * - hCaptcha
+ * - Image CAPTCHAs
  */
 
 import { DATA_BROKER_DIRECTORY, type DataBrokerInfo } from "./data-broker-directory";
+import { solveCaptcha, isCaptchaSolverEnabled, type CaptchaType } from "./captcha-solver";
 
 // Browser automation result
 export interface AutomationResult {
@@ -50,6 +49,8 @@ const FORM_CONFIGS: Record<string, {
   submitButton: string;
   confirmationIndicator: string;
   requiresCaptcha: boolean;
+  captchaType?: CaptchaType;
+  captchaSiteKey?: string;
   notes?: string;
 }> = {
   TRUEPEOPLESEARCH: {
@@ -81,6 +82,8 @@ const FORM_CONFIGS: Record<string, {
     submitButton: "button[type='submit'], .submit-btn",
     confirmationIndicator: ".confirmation, .success",
     requiresCaptcha: true,
+    captchaType: "recaptcha_v2",
+    captchaSiteKey: "6LcJpRgTAAAAAHXTqG3_fvGnf7rvLrGb5CIqTfJK",
     notes: "Requires email verification after submission",
   },
   WHITEPAGES: {
@@ -93,6 +96,8 @@ const FORM_CONFIGS: Record<string, {
     submitButton: "button[type='submit']",
     confirmationIndicator: ".success, .confirmation",
     requiresCaptcha: true,
+    captchaType: "recaptcha_v2",
+    captchaSiteKey: "6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-",
     notes: "May require phone verification",
   },
   BEENVERIFIED: {
@@ -103,6 +108,8 @@ const FORM_CONFIGS: Record<string, {
     submitButton: "button[type='submit']",
     confirmationIndicator: ".success",
     requiresCaptcha: true,
+    captchaType: "recaptcha_v2",
+    captchaSiteKey: "6LfF1dcZAAAAADq_P7WHVAsB6nRhCYZm1vHxuicc",
   },
   RADARIS: {
     url: "https://radaris.com/control/privacy",
@@ -113,6 +120,8 @@ const FORM_CONFIGS: Record<string, {
     submitButton: "button[type='submit']",
     confirmationIndicator: ".success",
     requiresCaptcha: true,
+    captchaType: "recaptcha_v2",
+    captchaSiteKey: "6LcmrUMUAAAAAJlYG-LN_3smS_uu3p-w9G6ZBaU7",
     notes: "Complex multi-step process",
   },
   FAMILYTREENOW: {
@@ -186,25 +195,60 @@ async function executeBrowserlessForm(
     };
   }
 
+  // Handle CAPTCHA if required
+  let captchaToken: string | undefined;
+
   if (formConfig.requiresCaptcha) {
-    return {
-      success: false,
-      method: "MANUAL_REQUIRED",
-      message: `${brokerKey} requires CAPTCHA - manual submission needed`,
-      nextSteps: [
-        `Visit ${formConfig.url}`,
-        "Complete the opt-out form manually",
-        "Solve the CAPTCHA",
-        "Submit and save confirmation",
-      ],
-    };
+    if (!isCaptchaSolverEnabled()) {
+      return {
+        success: false,
+        method: "MANUAL_REQUIRED",
+        message: `${brokerKey} requires CAPTCHA - solver not configured`,
+        nextSteps: [
+          "Set TWOCAPTCHA_API_KEY in environment, or:",
+          `Visit ${formConfig.url}`,
+          "Complete the opt-out form manually",
+          "Solve the CAPTCHA",
+          "Submit and save confirmation",
+        ],
+      };
+    }
+
+    if (!formConfig.captchaType || !formConfig.captchaSiteKey) {
+      return {
+        success: false,
+        method: "MANUAL_REQUIRED",
+        message: `${brokerKey} CAPTCHA configuration incomplete`,
+        nextSteps: [`Visit ${formConfig.url}`, "Complete manually"],
+      };
+    }
+
+    console.log(`[Automation] Solving ${formConfig.captchaType} CAPTCHA for ${brokerKey}...`);
+
+    const captchaResult = await solveCaptcha({
+      type: formConfig.captchaType,
+      siteKey: formConfig.captchaSiteKey,
+      pageUrl: formConfig.url,
+    });
+
+    if (!captchaResult.success || !captchaResult.solution) {
+      return {
+        success: false,
+        method: "MANUAL_REQUIRED",
+        message: `CAPTCHA solving failed: ${captchaResult.error}`,
+        nextSteps: [`Visit ${formConfig.url}`, "Complete manually"],
+      };
+    }
+
+    captchaToken = captchaResult.solution;
+    console.log(`[Automation] CAPTCHA solved in ${captchaResult.solveTime}s`);
   }
 
   try {
     // Browserless function to fill and submit the form
     const browserlessCode = `
       module.exports = async ({ page, context }) => {
-        const { url, fields, submitButton, confirmationIndicator, formData } = context;
+        const { url, fields, submitButton, confirmationIndicator, formData, captchaToken, captchaType } = context;
 
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
@@ -222,6 +266,38 @@ async function executeBrowserlessForm(
         if (fields.phone && formData.phone) {
           await page.waitForSelector(fields.phone, { timeout: 5000 }).catch(() => null);
           await page.type(fields.phone, formData.phone);
+        }
+
+        // Inject CAPTCHA token if solved
+        if (captchaToken) {
+          if (captchaType === 'recaptcha_v2' || captchaType === 'recaptcha_v2_invisible' || captchaType === 'recaptcha_v3') {
+            // Inject reCAPTCHA token
+            await page.evaluate((token) => {
+              const textarea = document.getElementById('g-recaptcha-response');
+              if (textarea) {
+                textarea.innerHTML = token;
+                textarea.value = token;
+              }
+              // Also try hidden input
+              const input = document.querySelector('input[name="g-recaptcha-response"]');
+              if (input) input.value = token;
+              // Trigger callback if exists
+              if (window.grecaptcha && window.grecaptcha.getResponse) {
+                try { window.___grecaptcha_cfg.clients[0].K.K.callback(token); } catch(e) {}
+              }
+            }, captchaToken);
+          } else if (captchaType === 'hcaptcha') {
+            // Inject hCaptcha token
+            await page.evaluate((token) => {
+              const textarea = document.querySelector('textarea[name="h-captcha-response"]');
+              if (textarea) {
+                textarea.innerHTML = token;
+                textarea.value = token;
+              }
+              const input = document.querySelector('input[name="h-captcha-response"]');
+              if (input) input.value = token;
+            }, captchaToken);
+          }
         }
 
         // Click submit button
@@ -258,6 +334,8 @@ async function executeBrowserlessForm(
           submitButton: formConfig.submitButton,
           confirmationIndicator: formConfig.confirmationIndicator,
           formData,
+          captchaToken,
+          captchaType: formConfig.captchaType,
         },
       }),
     });
