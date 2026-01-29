@@ -638,7 +638,7 @@ export default function ManualReviewPage() {
                             : "border-amber-500/50 text-amber-400"
                         }
                       >
-                        {group.pendingCount === 0 ? "Reviewed" : `${group.pendingCount} to check`}
+                        {group.pendingCount === 0 ? "Reviewed" : "Pending"}
                       </Badge>
                       <Badge
                         variant="outline"
