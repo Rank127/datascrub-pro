@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { sendCCPARemovalRequest, sendRemovalUpdateEmail, sendRemovalStatusDigestEmail } from "@/lib/email";
 import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, getConsolidationParent, type DataBrokerInfo } from "./data-broker-directory";
 import { calculateVerifyAfterDate } from "./verification-service";
+import { attemptAutomatedOptOut, isAutomationEnabled } from "./browser-automation";
 import type { RemovalMethod } from "@/lib/types";
 import { createRemovalFailedTicket } from "@/lib/support/ticket-service";
 
@@ -267,8 +268,63 @@ export async function executeRemoval(
       }
 
       case "AUTO_FORM": {
-        // For form-based removals, we provide the URL and instructions
-        // (Actual form automation would require browser automation/puppeteer)
+        // Try browser automation if configured
+        if (isAutomationEnabled()) {
+          // Get full profile for form data
+          const fullProfile = await prisma.personalProfile.findFirst({
+            where: { userId },
+            select: {
+              fullName: true,
+              phones: true,
+              addresses: true,
+            },
+          });
+
+          // Parse phone (first one if multiple)
+          const phone = fullProfile?.phones?.split(",")[0]?.trim();
+
+          // Parse address (first one if multiple)
+          const addressParts = fullProfile?.addresses?.split(",")[0]?.trim().split(" ");
+          const address = addressParts?.slice(0, -3).join(" "); // Street address
+          const city = addressParts?.slice(-3, -2)[0];
+          const stateZip = addressParts?.slice(-2);
+          const state = stateZip?.[0];
+          const zipCode = stateZip?.[1];
+
+          const automationResult = await attemptAutomatedOptOut(source, {
+            name: userName,
+            email: userEmail,
+            phone,
+            address,
+            city,
+            state,
+            zipCode,
+            profileUrl: sourceUrl || undefined,
+          });
+
+          if (automationResult.success) {
+            await updateRemovalStatus(removalRequestId, "SUBMITTED");
+
+            if (!skipUserNotification) {
+              await sendRemovalUpdateEmail(userEmail, userName, {
+                sourceName: brokerInfo.name,
+                status: "SUBMITTED",
+                dataType: formatDataType(dataType),
+              });
+            }
+
+            return {
+              success: true,
+              method: "AUTO_FORM",
+              message: `Form submitted automatically for ${brokerInfo.name}`,
+            };
+          }
+
+          // Automation failed or not available for this broker
+          console.log(`[Removal] Browser automation failed for ${source}: ${automationResult.message}`);
+        }
+
+        // Fall back to manual instructions
         await updateRemovalStatus(removalRequestId, "REQUIRES_MANUAL");
 
         return {
