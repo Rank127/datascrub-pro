@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ExposureCard } from "@/components/dashboard/exposure-card";
 import { RemovalProgressTracker } from "@/components/dashboard/removal-progress-tracker";
 import { RemovalWizard } from "@/components/dashboard/removal-wizard";
@@ -31,6 +32,7 @@ import {
   ChevronUp,
   AlertTriangle,
   Zap,
+  ShieldCheck,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -127,6 +129,93 @@ export default function ManualReviewPage() {
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [stats, setStats] = useState({ brokers: 0, pending: 0, done: 0 });
   const [showRemovalWizard, setShowRemovalWizard] = useState(false);
+  const [selectedBrokers, setSelectedBrokers] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
+
+  // Get actionable brokers (those with pending items)
+  const actionableBrokers = groupedExposures.filter(g => g.pendingCount > 0);
+  const allSelected = actionableBrokers.length > 0 &&
+    actionableBrokers.every(g => selectedBrokers.has(g.source));
+
+  const toggleSelectBroker = (source: string) => {
+    setSelectedBrokers(prev => {
+      const next = new Set(prev);
+      if (next.has(source)) {
+        next.delete(source);
+      } else {
+        next.add(source);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedBrokers(new Set());
+    } else {
+      setSelectedBrokers(new Set(actionableBrokers.map(g => g.source)));
+    }
+  };
+
+  const handleBulkWhitelist = async () => {
+    if (selectedBrokers.size === 0) return;
+    setBulkLoading(true);
+    try {
+      // Get all exposure IDs for selected brokers
+      const exposureIds = exposures
+        .filter(e => selectedBrokers.has(e.source))
+        .map(e => e.id);
+
+      // Whitelist all exposures
+      await Promise.all(
+        exposureIds.map(id =>
+          fetch("/api/exposures", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ exposureId: id, action: "whitelist" }),
+          })
+        )
+      );
+
+      toast.success(`Whitelisted ${selectedBrokers.size} site(s)`);
+      setSelectedBrokers(new Set());
+      fetchManualExposures();
+    } catch (error) {
+      toast.error("Failed to whitelist sites");
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleBulkMarkDone = async () => {
+    if (selectedBrokers.size === 0) return;
+    setBulkLoading(true);
+    try {
+      // Get all pending exposure IDs for selected brokers
+      const exposureIds = exposures
+        .filter(e => selectedBrokers.has(e.source) && !e.manualActionTaken)
+        .map(e => e.id);
+
+      // Mark all as done
+      await Promise.all(
+        exposureIds.map(id =>
+          fetch("/api/exposures", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ exposureId: id, action: "markDone" }),
+          })
+        )
+      );
+
+      toast.success(`Marked ${selectedBrokers.size} site(s) as reviewed`);
+      setSelectedBrokers(new Set());
+      fetchManualExposures();
+    } catch (error) {
+      toast.error("Failed to mark sites as reviewed");
+    } finally {
+      setBulkLoading(false);
+    }
+  };
 
   const toggleGroup = (source: string) => {
     setExpandedGroups(prev => {
@@ -423,6 +512,59 @@ export default function ManualReviewPage() {
         </CardContent>
       </Card>
 
+      {/* Bulk Actions Bar */}
+      {selectedBrokers.size > 0 && (
+        <Card className="bg-emerald-900/30 border-emerald-700/50">
+          <CardContent className="py-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-emerald-300">
+                {selectedBrokers.size} site{selectedBrokers.size !== 1 ? "s" : ""} selected
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-emerald-600 text-emerald-300 hover:bg-emerald-700/50"
+                  onClick={handleBulkMarkDone}
+                  disabled={bulkLoading}
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-1" />
+                  Mark Reviewed
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                  onClick={handleBulkWhitelist}
+                  disabled={bulkLoading}
+                >
+                  <ShieldCheck className="h-4 w-4 mr-1" />
+                  Whitelist Selected
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Select All Header */}
+      {!loading && actionableBrokers.length > 0 && (
+        <div className="flex items-center justify-end gap-2">
+          <Checkbox
+            id="select-all"
+            checked={allSelected}
+            onCheckedChange={toggleSelectAll}
+            className="border-slate-500 data-[state=checked]:bg-emerald-600"
+          />
+          <label
+            htmlFor="select-all"
+            className="text-sm text-slate-400 cursor-pointer"
+          >
+            Select All ({actionableBrokers.length})
+          </label>
+        </div>
+      )}
+
       {/* Exposures List */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
@@ -462,10 +604,25 @@ export default function ManualReviewPage() {
               <CardContent className="py-4">
                 {/* Broker Header - Always visible */}
                 <div
-                  className="flex items-start justify-between gap-4 cursor-pointer"
-                  onClick={() => group.totalCount > 1 && toggleGroup(group.source)}
+                  className="flex items-start gap-4"
                 >
-                  <div className="flex-1">
+                  {/* Checkbox for bulk selection */}
+                  {group.pendingCount > 0 && (
+                    <div className="pt-1">
+                      <Checkbox
+                        checked={selectedBrokers.has(group.source)}
+                        onCheckedChange={() => toggleSelectBroker(group.source)}
+                        className="border-slate-500 data-[state=checked]:bg-emerald-600"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  )}
+                  {group.pendingCount === 0 && <div className="w-4" />}
+
+                  <div
+                    className="flex-1 cursor-pointer"
+                    onClick={() => group.totalCount > 1 && toggleGroup(group.source)}
+                  >
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <h3 className="font-medium text-white">{group.sourceName}</h3>
                       {group.totalCount > 1 && (
@@ -531,16 +688,18 @@ export default function ManualReviewPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     {group.pendingCount > 0 && (
                       <Button
                         size="sm"
                         className="bg-emerald-600 hover:bg-emerald-700"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           // Mark all pending as done
                           group.exposures
-                            .filter(e => !e.manualActionTaken)
-                            .forEach(e => handleMarkDone(e.id));
+                            .filter(exp => !exp.manualActionTaken)
+                            .forEach(exp => handleMarkDone(exp.id));
                         }}
                       >
                         <CheckCircle2 className="h-4 w-4 mr-1" />
