@@ -378,7 +378,7 @@ function SettingsContent() {
         "Priority support",
       ],
       current: currentPlan === "PRO",
-      recommended: true,
+      recommended: currentPlan === "FREE", // Only recommend Pro to Free users
       sale: true,
     },
     {
@@ -393,6 +393,7 @@ function SettingsContent() {
         "API access",
       ],
       current: currentPlan === "ENTERPRISE",
+      recommended: currentPlan === "PRO", // Recommend Enterprise to Pro users
       sale: true,
     },
   ];
@@ -1059,7 +1060,11 @@ function SettingsContent() {
                 Update your account password
               </p>
             </div>
-            <Button variant="outline" className="border-slate-600">
+            <Button
+              variant="outline"
+              className="border-slate-600"
+              onClick={() => setMessage({ type: "error", text: "Password change coming soon. Contact support@ghostmydata.com to reset your password." })}
+            >
               Change
             </Button>
           </div>
@@ -1070,7 +1075,11 @@ function SettingsContent() {
                 Add an extra layer of security to your account
               </p>
             </div>
-            <Button variant="outline" className="border-slate-600">
+            <Button
+              variant="outline"
+              className="border-slate-600"
+              onClick={() => setMessage({ type: "error", text: "Two-factor authentication coming soon. We're working on adding this security feature." })}
+            >
               Enable
             </Button>
           </div>
@@ -1081,7 +1090,15 @@ function SettingsContent() {
                 Permanently delete your account and all data
               </p>
             </div>
-            <Button variant="outline" className="border-red-500/50 text-red-400 hover:bg-red-500/20">
+            <Button
+              variant="outline"
+              className="border-red-500/50 text-red-400 hover:bg-red-500/20"
+              onClick={() => {
+                if (window.confirm("Are you sure you want to delete your account? This action cannot be undone. Please email support@ghostmydata.com to proceed with account deletion.")) {
+                  window.location.href = `mailto:support@ghostmydata.com?subject=Account%20Deletion%20Request&body=Hi%20GhostMyData%20Support%2C%0A%0AI%20would%20like%20to%20delete%20my%20account.%0A%0AAccount%20Email%3A%20${encodeURIComponent(email)}%0A%0AThank%20you.`;
+                }
+              }}
+            >
               Delete
             </Button>
           </div>
