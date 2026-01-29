@@ -993,6 +993,9 @@ function SettingsContent() {
                   ))}
                 </ul>
                 {!plan.current && plan.name !== "FREE" && (
+                  // Only show upgrade button if this plan is higher than current plan
+                  (currentPlan === "FREE" || (currentPlan === "PRO" && plan.name === "ENTERPRISE"))
+                ) && (
                   <Button
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
                     size="sm"
