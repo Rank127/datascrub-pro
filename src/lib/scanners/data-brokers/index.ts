@@ -47,6 +47,11 @@ import type { Scanner } from "../base-scanner";
  * Note: FastPeopleSearch and PeopleFinders use manual check scanners
  * because they have advanced bot protection that blocks scraping.
  * These return a link for the user to check manually.
+ *
+ * IMPORTANT: We removed AllBrokersScanner because it was generating 2,100+
+ * "potential exposure" items for every broker in the directory, overwhelming
+ * users with manual review tasks for sites they may not even be listed on.
+ * Only confirmed exposures from actual scans should be shown.
  */
 export function createRealBrokerScanners(): Scanner[] {
   return [
@@ -59,8 +64,8 @@ export function createRealBrokerScanners(): Scanner[] {
     new RadarisScanner(),
     new InteliusScanner(),
     createPeopleFinderManualScanner(), // Manual check - advanced bot protection
-    // All remaining 2,100+ brokers from the directory
-    createAllBrokersScanner(),
+    // NOTE: AllBrokersScanner removed - it created fake "potential" exposures
+    // for 2,100+ brokers without confirming user is actually listed
   ];
 }
 

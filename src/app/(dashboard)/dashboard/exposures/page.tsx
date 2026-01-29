@@ -89,9 +89,10 @@ function ExposuresPageContent() {
     searchParams.get("manualAction") || "all"
   );
 
-  // Get only actionable exposures (not already removed or whitelisted)
+  // Get only actionable exposures (active, not whitelisted, NOT manual action)
+  // Manual action items require user to visit external site - can't be auto-removed
   const actionableExposures = exposures.filter(
-    (e) => e.status === "ACTIVE" && !e.isWhitelisted
+    (e) => e.status === "ACTIVE" && !e.isWhitelisted && !e.requiresManualAction
   );
   const allSelected = actionableExposures.length > 0 &&
     actionableExposures.every((e) => selectedIds.has(e.id));

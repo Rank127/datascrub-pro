@@ -101,7 +101,8 @@ export function ExposureCard({
   clickable = false,
 }: ExposureCardProps) {
   const displayName = sourceName || DataSourceNames[source] || source;
-  const canSelect = status === "ACTIVE" && !isWhitelisted;
+  // Can only select for bulk removal if: active, not whitelisted, and NOT manual action
+  const canSelect = status === "ACTIVE" && !isWhitelisted && !requiresManualAction;
 
   // Build the link URL based on the exposure type
   const getFilterUrl = () => {
