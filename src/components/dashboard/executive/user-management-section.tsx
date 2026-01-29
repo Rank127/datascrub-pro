@@ -190,12 +190,12 @@ export function UserManagementSection() {
                 className="pl-10 bg-slate-800 border-slate-700"
               />
             </div>
-            <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v); setPage(1); }}>
+            <Select value={roleFilter || "all"} onValueChange={(v) => { setRoleFilter(v === "all" ? "" : v); setPage(1); }}>
               <SelectTrigger className="w-48 bg-slate-800 border-slate-700">
                 <SelectValue placeholder="All roles" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Roles</SelectItem>
+                <SelectItem value="all">All Roles</SelectItem>
                 <SelectItem value="USER">User</SelectItem>
                 <SelectItem value="SEO_MANAGER">SEO Manager</SelectItem>
                 <SelectItem value="SUPPORT">Support</SelectItem>
