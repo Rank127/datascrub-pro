@@ -33,6 +33,9 @@ import {
   HandHelping,
   Camera,
   Image as ImageIcon,
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import Link from "next/link";
 import { DataSourceNames, type DataSource, type Severity } from "@/lib/types";
@@ -71,36 +74,48 @@ interface RemovalRequest {
 
 const statusConfig: Record<
   string,
-  { label: string; color: string; icon: typeof CheckCircle }
+  { label: string; description: string; color: string; icon: typeof CheckCircle }
 > = {
   PENDING: {
-    label: "Pending",
+    label: "Queued",
+    description: "Request created, opt-out email will be sent soon",
     color: "bg-slate-500/20 text-slate-400",
     icon: Clock,
   },
   SUBMITTED: {
-    label: "Submitted",
+    label: "Email Sent",
+    description: "Opt-out request emailed to broker, waiting for response (up to 45 days)",
     color: "bg-blue-500/20 text-blue-400",
     icon: Mail,
   },
   IN_PROGRESS: {
-    label: "In Progress",
+    label: "Processing",
+    description: "Broker acknowledged request, removal in progress",
     color: "bg-yellow-500/20 text-yellow-400",
     icon: RefreshCw,
   },
   COMPLETED: {
-    label: "Completed",
+    label: "Removed",
+    description: "Verified: your data has been removed from this broker",
     color: "bg-emerald-500/20 text-emerald-400",
     icon: CheckCircle,
   },
   FAILED: {
     label: "Failed",
+    description: "Request failed - will retry automatically",
     color: "bg-red-500/20 text-red-400",
     icon: XCircle,
   },
   REQUIRES_MANUAL: {
-    label: "Manual Action Required",
+    label: "Manual Required",
+    description: "This broker requires manual action on their website",
     color: "bg-orange-500/20 text-orange-400",
+    icon: AlertCircle,
+  },
+  ACKNOWLEDGED: {
+    label: "Breach Alert",
+    description: "Data breach - cannot be removed, only monitored",
+    color: "bg-purple-500/20 text-purple-400",
     icon: AlertCircle,
   },
 };
@@ -243,6 +258,7 @@ export default function RemovalsPage() {
   const [stats, setStats] = useState<Record<string, number>>({});
   const [manualAction, setManualAction] = useState<ManualActionStats>({ total: 0, done: 0, pending: 0 });
   const [loading, setLoading] = useState(true);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     fetchRemovals();
@@ -345,6 +361,64 @@ export default function RemovalsPage() {
         </CardContent>
       </Card>
 
+      {/* Help Section */}
+      <Card className="bg-slate-800/50 border-slate-700">
+        <CardHeader className="pb-3">
+          <button
+            onClick={() => setShowHelp(!showHelp)}
+            className="flex items-center justify-between w-full text-left"
+          >
+            <div className="flex items-center gap-2">
+              <HelpCircle className="h-5 w-5 text-blue-400" />
+              <CardTitle className="text-white">How Removals Work</CardTitle>
+            </div>
+            {showHelp ? (
+              <ChevronUp className="h-5 w-5 text-slate-400" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-slate-400" />
+            )}
+          </button>
+        </CardHeader>
+        {showHelp && (
+          <CardContent className="pt-0 space-y-4">
+            {/* Status Explanations */}
+            <div className="grid gap-3 text-sm">
+              <div className="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
+                <Clock className="h-5 w-5 text-slate-400 mt-0.5" />
+                <div>
+                  <span className="font-medium text-slate-300">Queued</span>
+                  <p className="text-slate-400">Request created. Opt-out email will be sent automatically.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
+                <Mail className="h-5 w-5 text-blue-400 mt-0.5" />
+                <div>
+                  <span className="font-medium text-blue-300">Email Sent</span>
+                  <p className="text-slate-400">CCPA/GDPR opt-out email sent to the data broker. They have 45 days to comply.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
+                <CheckCircle className="h-5 w-5 text-emerald-400 mt-0.5" />
+                <div>
+                  <span className="font-medium text-emerald-300">Removed</span>
+                  <p className="text-slate-400">Verified! Our system re-scanned the broker and confirmed your data is gone.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Proof Screenshots */}
+            <div className="p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg">
+              <h4 className="font-medium text-blue-300 mb-2">About Proof Screenshots</h4>
+              <ul className="text-sm text-slate-400 space-y-1">
+                <li>• <strong>Before:</strong> Screenshot taken when we first found your data</li>
+                <li>• <strong>After:</strong> Screenshot taken when we verify it&apos;s removed (may take days/weeks)</li>
+                <li>• <strong>View Proof:</strong> Only shows if screenshots are available (not all sources support this)</li>
+              </ul>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
       {/* Removal List */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
@@ -355,7 +429,7 @@ export default function RemovalsPage() {
                 All Removal Requests
               </CardTitle>
               <CardDescription className="text-slate-400">
-                Click on a request to view details
+                Hover over status badges for details
               </CardDescription>
             </div>
             <Button
@@ -407,7 +481,8 @@ export default function RemovalsPage() {
                             </span>
                             <Badge
                               variant="outline"
-                              className={config.color + " border-0"}
+                              className={config.color + " border-0 cursor-help"}
+                              title={config.description}
                             >
                               {config.label}
                             </Badge>
