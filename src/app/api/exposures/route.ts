@@ -52,10 +52,19 @@ export async function GET(request: Request) {
       where.manualActionTaken = true;
     }
 
-    const [exposures, total] = await Promise.all([
+    // Status priority: ACTIVE first (needs action), then in-progress, then completed
+    const statusPriority: Record<string, number> = {
+      ACTIVE: 0,           // Needs action - top
+      REMOVAL_PENDING: 1,  // In progress
+      REMOVAL_FAILED: 2,   // Needs attention
+      REMOVED: 3,          // Completed - bottom
+      WHITELISTED: 4,      // User chose to keep - bottom
+    };
+
+    const [rawExposures, total] = await Promise.all([
       prisma.exposure.findMany({
         where,
-        orderBy: [{ severity: "desc" }, { firstFoundAt: "desc" }],
+        orderBy: [{ firstFoundAt: "desc" }],
         skip: (page - 1) * limit,
         take: limit,
         include: {
@@ -70,6 +79,28 @@ export async function GET(request: Request) {
       }),
       prisma.exposure.count({ where }),
     ]);
+
+    // Sort: action needed on top, removal in progress at bottom
+    // Secondary sort by severity (HIGH first), then by date
+    const severityPriority: Record<string, number> = {
+      CRITICAL: 0,
+      HIGH: 1,
+      MEDIUM: 2,
+      LOW: 3,
+    };
+
+    const exposures = rawExposures.sort((a, b) => {
+      // First by status priority (ACTIVE on top)
+      const statusDiff = (statusPriority[a.status] ?? 5) - (statusPriority[b.status] ?? 5);
+      if (statusDiff !== 0) return statusDiff;
+
+      // Within same status, sort by severity (HIGH first)
+      const sevDiff = (severityPriority[a.severity] ?? 5) - (severityPriority[b.severity] ?? 5);
+      if (sevDiff !== 0) return sevDiff;
+
+      // Finally by date (newest first)
+      return new Date(b.firstFoundAt).getTime() - new Date(a.firstFoundAt).getTime();
+    });
 
     // Get stats
     const stats = await prisma.exposure.groupBy({
