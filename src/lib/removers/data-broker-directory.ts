@@ -36,12 +36,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   WHITEPAGES: {
     name: "WhitePages",
     optOutUrl: "https://www.whitepages.com/suppression-requests",
-    optOutEmail: "support@whitepages.com",
-    privacyEmail: "privacy@whitepages.com",
-    removalMethod: "BOTH",
+    // Email bounces - use web form only
+    removalMethod: "FORM",
     estimatedDays: 5,
-    notes: "May require phone verification",
-  
+    notes: "Use web form - email addresses bounce. May require phone verification.",
+
     parentCompany: "WhitePages Inc",
     subsidiaries: ["WHITEPAGES_PREMIUM","CALLER_ID"],
   },
@@ -59,20 +58,21 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   INTELIUS: {
     name: "Intelius",
     optOutUrl: "https://www.intelius.com/optout",
-    optOutEmail: "privacy@intelius.com",
-    privacyEmail: "privacy@intelius.com",
-    removalMethod: "BOTH",
+    // Email bounces - use web form only
+    removalMethod: "FORM",
     estimatedDays: 7,
-  
+    notes: "Use web form - email addresses bounce.",
+
     parentCompany: "PeopleConnect",
     subsidiaries: ["ZABASEARCH","PUBLICRECORDS","ANYWHO","ADDRESSES","CLASSMATES","US_SEARCH","INSTANT_CHECKMATE","TRUTHFINDER"],
   },
   PEOPLEFINDER: {
     name: "PeopleFinder",
     optOutUrl: "https://www.peoplefinder.com/optout",
-    privacyEmail: "privacy@peoplefinder.com",
+    // Email bounces repeatedly - form only
     removalMethod: "FORM",
     estimatedDays: 5,
+    notes: "Use web form - email addresses bounce.",
   },
   TRUEPEOPLESEARCH: {
     name: "TruePeopleSearch",
@@ -752,16 +752,17 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   YELLOWPAGES: {
     name: "YellowPages",
     optOutUrl: "https://www.yellowpages.com/members/suppression",
-    privacyEmail: "privacy@yellowpages.com",
-    removalMethod: "BOTH",
+    // Email bounces - use web form only
+    removalMethod: "FORM",
     estimatedDays: 14,
-    notes: "Use the suppression request form to remove personal listings",
+    notes: "Use web form - email addresses bounce.",
   },
   INFOSPACE: {
     name: "InfoSpace",
-    privacyEmail: "privacy@infospace.com",
-    removalMethod: "EMAIL",
+    // Email bounces - requires manual contact
+    removalMethod: "FORM",
     estimatedDays: 14,
+    notes: "Email bounces - check website for current removal options.",
   },
   NUWBER: {
     name: "Nuwber",
@@ -1089,10 +1090,10 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   TWITTER: {
     name: "Twitter/X",
     optOutUrl: "https://twitter.com/settings/deactivate",
-    privacyEmail: "privacy@twitter.com",
+    // Email bounces - account settings only
     removalMethod: "FORM",
     estimatedDays: 30,
-    notes: "Deactivation required before permanent deletion",
+    notes: "Use account settings - email addresses bounce. Deactivation required before permanent deletion.",
   },
   INSTAGRAM: {
     name: "Instagram",
@@ -1118,17 +1119,18 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   PINTEREST: {
     name: "Pinterest",
     optOutUrl: "https://www.pinterest.com/settings/privacy/",
-    privacyEmail: "privacy@pinterest.com",
+    // Email bounces - use account settings
     removalMethod: "FORM",
     estimatedDays: 30,
+    notes: "Use account settings - email addresses bounce.",
   },
   YOUTUBE: {
     name: "YouTube",
     optOutUrl: "https://support.google.com/accounts/answer/32046",
-    privacyEmail: "privacy@google.com",
+    // Email bounces - use Google account settings
     removalMethod: "FORM",
     estimatedDays: 30,
-    notes: "Requires deleting Google account or removing YouTube data specifically",
+    notes: "Use Google account settings - email addresses bounce. Requires deleting Google account or removing YouTube data specifically.",
   },
   SNAPCHAT: {
     name: "Snapchat",
@@ -1185,10 +1187,10 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   MIDJOURNEY: {
     name: "Midjourney",
     optOutUrl: "https://docs.midjourney.com/docs/terms-of-service",
-    privacyEmail: "privacy@midjourney.com",
-    removalMethod: "EMAIL",
+    // Email bounces - contact via Discord or support
+    removalMethod: "FORM",
     estimatedDays: 45,
-    notes: "Contact support to opt out of image training",
+    notes: "Email bounces - contact support via Discord to opt out of image training.",
   },
   META_AI: {
     name: "Meta AI",
@@ -1201,10 +1203,10 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   GOOGLE_AI: {
     name: "Google AI Training",
     optOutUrl: "https://myaccount.google.com/data-and-privacy",
-    privacyEmail: "privacy@google.com",
+    // Email bounces - use account settings only
     removalMethod: "FORM",
     estimatedDays: 30,
-    notes: "Manage AI training settings in Google account privacy settings",
+    notes: "Use Google account settings - email addresses bounce. Manage AI training settings in privacy settings.",
   },
   LINKEDIN_AI: {
     name: "LinkedIn AI Training",

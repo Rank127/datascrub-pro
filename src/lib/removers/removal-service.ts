@@ -204,51 +204,16 @@ export async function executeRemoval(
   }
 
   if (!brokerInfo) {
-    // Unknown source - try to send automated CCPA email using extracted domain
-    const fallbackEmail = extractPrivacyEmailFromDomain(sourceUrl);
+    // Unknown source - don't send guessed emails (they often bounce)
+    // Mark as REQUIRES_MANUAL and provide generic instructions
+    console.log(`[Removal] Unknown source ${source}, marking as requires manual`);
 
-    if (fallbackEmail) {
-      console.log(`[Removal] Unknown source ${source}, attempting CCPA email to ${fallbackEmail}`);
-
-      try {
-        const result = await sendCCPARemovalRequest({
-          toEmail: fallbackEmail,
-          fromName: userName,
-          fromEmail: userEmail,
-          dataTypes: [formatDataType(dataType)],
-          sourceUrl: sourceUrl || undefined,
-        });
-
-        if (result.success) {
-          await updateRemovalStatus(removalRequestId, "SUBMITTED");
-
-          // Notify user (unless skipped for bulk operations)
-          if (!skipUserNotification) {
-            await sendRemovalUpdateEmail(userEmail, userName, {
-              sourceName: source,
-              status: "SUBMITTED",
-              dataType: formatDataType(dataType),
-            });
-          }
-
-          return {
-            success: true,
-            method: "AUTO_EMAIL",
-            message: `CCPA/GDPR removal request sent to ${fallbackEmail}. Note: This is an unknown source and removal is not guaranteed.`,
-          };
-        }
-      } catch (error) {
-        console.error(`[Removal] Failed to send CCPA email to ${fallbackEmail}:`, error);
-      }
-    }
-
-    // Fall back to manual instructions
     await updateRemovalStatus(removalRequestId, "REQUIRES_MANUAL");
 
     return {
       success: true,
       method: "MANUAL_GUIDE",
-      message: "Please contact the source directly to request data removal.",
+      message: "Unknown source - please contact them directly to request data removal.",
       instructions: getOptOutInstructions(source),
     };
   }
@@ -260,7 +225,9 @@ export async function executeRemoval(
     switch (method) {
       case "AUTO_EMAIL": {
         // Send CCPA/GDPR removal request email
-        if (brokerInfo.privacyEmail) {
+        // Only send if broker supports email AND has a valid privacyEmail
+        const supportsEmail = brokerInfo.removalMethod === "EMAIL" || brokerInfo.removalMethod === "BOTH";
+        if (supportsEmail && brokerInfo.privacyEmail) {
           const result = await sendCCPARemovalRequest({
             toEmail: brokerInfo.privacyEmail,
             fromName: userName,
@@ -825,12 +792,30 @@ export async function retryFailedRemoval(
   const userEmail = request.user.email;
   const brokerInfo = getDataBrokerInfo(request.exposure.source);
 
-  // Try alternative email patterns
-  const emailCandidates = extractPrivacyEmailsFromDomain(request.exposure.sourceUrl);
+  // Check if broker supports email-based removal
+  const supportsEmail = !brokerInfo || brokerInfo.removalMethod === "EMAIL" || brokerInfo.removalMethod === "BOTH";
+  if (!supportsEmail) {
+    return {
+      success: false,
+      message: `${brokerInfo?.name || request.exposure.source} only supports form-based removal, not email.`,
+    };
+  }
 
-  // Add broker privacy email if available and not already tried
-  if (brokerInfo?.privacyEmail && !emailCandidates.includes(brokerInfo.privacyEmail)) {
-    emailCandidates.unshift(brokerInfo.privacyEmail);
+  // Build email candidates list - only use broker's privacyEmail if available
+  // Don't generate guessed emails that might bounce
+  const emailCandidates: string[] = [];
+
+  // Add broker privacy email if available
+  if (brokerInfo?.privacyEmail) {
+    emailCandidates.push(brokerInfo.privacyEmail);
+  }
+
+  // If no valid email candidates, can't retry via email
+  if (emailCandidates.length === 0) {
+    return {
+      success: false,
+      message: `No valid privacy email for ${request.exposure.source} - requires manual removal.`,
+    };
   }
 
   // Track which emails we've tried
