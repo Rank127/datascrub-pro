@@ -198,27 +198,30 @@ export function ExposureCard({
               </Button>
             )}
 
+            {/* Whitelist button - show for all active non-whitelisted items */}
             {!isWhitelisted && status === "ACTIVE" && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-slate-400 hover:text-emerald-500"
-                  onClick={onWhitelist}
-                  title="Add to whitelist"
-                >
-                  <ListChecks className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-slate-400 hover:text-red-500"
-                  onClick={onRemove}
-                  title="Request removal"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-slate-400 hover:text-emerald-500"
+                onClick={onWhitelist}
+                title="Add to whitelist"
+              >
+                <ListChecks className="h-4 w-4" />
+              </Button>
+            )}
+
+            {/* Remove button - only show for items we can auto-remove (NOT manual action) */}
+            {!isWhitelisted && status === "ACTIVE" && !requiresManualAction && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-slate-400 hover:text-red-500"
+                onClick={onRemove}
+                title="Request removal"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             )}
 
             {isWhitelisted && (
