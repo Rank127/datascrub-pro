@@ -16,13 +16,14 @@ const anthropic = new Anthropic({
 });
 
 // System prompt for the ticketing agent
-const TICKETING_AGENT_PROMPT = `You are a helpful customer support agent for GhostMyData, a privacy protection service that helps users remove their personal data from data broker websites.
+const TICKETING_AGENT_PROMPT = `You are a professional customer support representative for GhostMyData, a leading privacy protection service that helps users remove their personal data from data broker websites.
 
 Your role is to:
 1. Understand the user's issue from their ticket description
-2. Provide helpful, empathetic responses
-3. Offer solutions when possible
-4. Know when to escalate to human support
+2. Provide professional, courteous, and helpful responses
+3. Offer solutions and reassurance
+4. Protect the company's reputation at all times
+5. Flag important issues for management review
 
 Key information about GhostMyData:
 - We scan data broker sites to find user's exposed personal information
@@ -32,27 +33,34 @@ Key information about GhostMyData:
 - Users can track removal status in their dashboard
 
 Common issues and solutions:
-1. SCAN_ERROR: Usually temporary - recommend retrying in a few hours or trying a different browser
-2. REMOVAL_FAILED: Data brokers can be slow - we'll keep trying automatically
-3. PAYMENT_ISSUE: Direct to billing portal or suggest updating payment method
-4. ACCOUNT_ISSUE: Password resets via email, contact support for locked accounts
-5. FEATURE_REQUEST: Thank them and note we'll consider it
+1. SCAN_ERROR: "We're experiencing high demand. Our team is actively optimizing performance. Please try again shortly."
+2. REMOVAL_FAILED: "Data brokers have varying response times. We're persistently working on your behalf and will continue our efforts."
+3. PAYMENT_ISSUE: Direct to billing portal with helpful guidance
+4. ACCOUNT_ISSUE: Offer password reset assistance via email
+5. FEATURE_REQUEST: "Thank you for this valuable feedback! We're always looking to improve and your suggestion has been noted for our product team."
 
-Response guidelines:
-- Be concise but helpful (2-4 sentences for simple issues, more for complex)
-- Use a friendly, professional tone
-- Never promise specific timeframes for removals
-- If unsure, recommend contacting support@ghostmydata.com
-- Don't share technical implementation details
+CRITICAL RESPONSE GUIDELINES:
+- ALWAYS maintain a professional, positive, and courteous tone
+- NEVER speak negatively about GhostMyData or acknowledge shortcomings directly
+- NEVER say features are "missing" or "not available" - instead say "currently being enhanced" or "on our roadmap"
+- NEVER blame the system or company for issues - frame as "we're working to improve" or "we appreciate your patience"
+- For bugs/errors: "We're aware and our technical team is prioritizing this"
+- For missing features: "This is valuable feedback that we've shared with our product team for consideration"
+- For delays: "We appreciate your patience as we work diligently on your request"
+- Always thank users for their patience and for choosing GhostMyData
+- End responses positively with confidence in resolution
+- If unsure, recommend contacting support@ghostmydata.com for personalized assistance
+- Don't share technical implementation details or internal processes
 
 Return your response as JSON with this structure:
 {
   "canAutoResolve": boolean,  // true if this can be resolved without human intervention
-  "response": string,         // the message to send to the user
+  "response": string,         // the professional message to send to the user
   "suggestedActions": string[], // internal actions to take (e.g., "retry_scan", "escalate")
   "priority": "LOW" | "NORMAL" | "HIGH" | "URGENT", // suggested priority adjustment
   "needsHumanReview": boolean, // true if a human should review before sending
-  "internalNote": string      // note for support staff (not visible to user)
+  "internalNote": string,     // note for support staff (not visible to user)
+  "managerReviewItems": string[] // items that need manager attention (feature gaps, complaints, bugs, trends)
 }`;
 
 interface TicketContext {
@@ -91,6 +99,7 @@ interface AgentResponse {
   priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
   needsHumanReview: boolean;
   internalNote: string;
+  managerReviewItems: string[]; // Items flagged for manager attention
 }
 
 /**
@@ -137,6 +146,7 @@ export async function analyzeTicket(context: TicketContext): Promise<AgentRespon
       priority: "NORMAL",
       needsHumanReview: true,
       internalNote: `AI agent failed to process: ${error instanceof Error ? error.message : "Unknown error"}`,
+      managerReviewItems: [],
     };
   }
 }
@@ -279,15 +289,27 @@ export async function processNewTicket(ticketId: string): Promise<{
     // Get AI analysis
     const analysis = await analyzeTicket(context);
 
+    // Build internal note with manager review items
+    let internalContent = `[AI AGENT ANALYSIS]\n${analysis.internalNote}\nSuggested actions: ${analysis.suggestedActions.join(", ")}`;
+
+    if (analysis.managerReviewItems && analysis.managerReviewItems.length > 0) {
+      internalContent += `\n\n[MANAGER REVIEW REQUIRED]\n${analysis.managerReviewItems.map((item, i) => `${i + 1}. ${item}`).join("\n")}`;
+    }
+
     // Log the analysis as internal note
     await prisma.ticketComment.create({
       data: {
         ticketId: ticket.id,
         authorId: ticket.userId, // System comment attributed to system
-        content: `[AI AGENT ANALYSIS]\n${analysis.internalNote}\nSuggested actions: ${analysis.suggestedActions.join(", ")}`,
+        content: internalContent,
         isInternal: true,
       },
     });
+
+    // If there are manager review items, flag for manager attention
+    if (analysis.managerReviewItems && analysis.managerReviewItems.length > 0) {
+      await logManagerReviewItems(ticket.id, ticket.ticketNumber, analysis.managerReviewItems);
+    }
 
     // Update priority if suggested
     if (analysis.priority !== ticket.priority) {
@@ -458,15 +480,27 @@ export async function processNewComment(
     // Get AI analysis
     const analysis = await analyzeTicket(context);
 
+    // Build internal note with manager review items
+    let commentAnalysisContent = `[AI AGENT ANALYSIS - User Comment]\n${analysis.internalNote}`;
+
+    if (analysis.managerReviewItems && analysis.managerReviewItems.length > 0) {
+      commentAnalysisContent += `\n\n[MANAGER REVIEW REQUIRED]\n${analysis.managerReviewItems.map((item, i) => `${i + 1}. ${item}`).join("\n")}`;
+    }
+
     // Log analysis
     await prisma.ticketComment.create({
       data: {
         ticketId: ticket.id,
         authorId: ticket.userId,
-        content: `[AI AGENT ANALYSIS - User Comment]\n${analysis.internalNote}`,
+        content: commentAnalysisContent,
         isInternal: true,
       },
     });
+
+    // If there are manager review items, flag for manager attention
+    if (analysis.managerReviewItems && analysis.managerReviewItems.length > 0) {
+      await logManagerReviewItems(ticket.id, ticket.ticketNumber, analysis.managerReviewItems);
+    }
 
     // Update ticket status if it was waiting for user
     if (ticket.status === "WAITING_USER") {
@@ -565,6 +599,119 @@ async function sendTicketResponseEmail(
   } catch (error) {
     console.error("Failed to send ticket response email:", error);
   }
+}
+
+/**
+ * Log items that need manager review
+ * Creates a record in the database for managers to review
+ */
+async function logManagerReviewItems(
+  ticketId: string,
+  ticketNumber: string,
+  items: string[]
+): Promise<void> {
+  try {
+    // Create a manager review record
+    // This could be a separate table, but for now we'll use a high-visibility internal comment
+    // and also send an email notification to admins
+
+    const reviewContent = `[MANAGER REVIEW QUEUE]
+Ticket: ${ticketNumber}
+Date: ${new Date().toISOString()}
+
+Items requiring attention:
+${items.map((item, i) => `${i + 1}. ${item}`).join("\n")}
+
+Please review and take appropriate action.`;
+
+    // Add to a manager review queue comment
+    await prisma.ticketComment.create({
+      data: {
+        ticketId,
+        authorId: (await prisma.user.findFirst({ where: { role: "ADMIN" } }))?.id || ticketId,
+        content: reviewContent,
+        isInternal: true,
+      },
+    });
+
+    // Send email to admins (non-blocking)
+    try {
+      const { Resend } = await import("resend");
+      const resend = new Resend(process.env.RESEND_API_KEY);
+
+      const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
+      if (adminEmails.length > 0) {
+        await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL || "noreply@ghostmydata.com",
+          to: adminEmails,
+          subject: `[Manager Review] Ticket ${ticketNumber} - Action Required`,
+          html: `
+            <h2>Manager Review Required</h2>
+            <p><strong>Ticket:</strong> ${ticketNumber}</p>
+            <h3>Items Requiring Attention:</h3>
+            <ul>
+              ${items.map((item) => `<li>${item}</li>`).join("")}
+            </ul>
+            <p>Please review the ticket in the admin dashboard.</p>
+          `,
+        });
+      }
+    } catch (emailError) {
+      console.error("Failed to send manager review email:", emailError);
+    }
+
+    console.log(`[Ticketing Agent] Manager review items logged for ticket ${ticketNumber}:`, items);
+  } catch (error) {
+    console.error("Failed to log manager review items:", error);
+  }
+}
+
+/**
+ * Get manager review items for dashboard
+ */
+export async function getManagerReviewItems(): Promise<
+  Array<{
+    ticketId: string;
+    ticketNumber: string;
+    items: string[];
+    createdAt: Date;
+  }>
+> {
+  const comments = await prisma.ticketComment.findMany({
+    where: {
+      content: {
+        startsWith: "[MANAGER REVIEW QUEUE]",
+      },
+      isInternal: true,
+    },
+    include: {
+      ticket: {
+        select: {
+          id: true,
+          ticketNumber: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
+
+  return comments.map((c) => {
+    // Parse items from the comment content
+    const itemsMatch = c.content.match(/Items requiring attention:\n([\s\S]*?)(?:\n\nPlease|$)/);
+    const itemsText = itemsMatch ? itemsMatch[1] : "";
+    const items = itemsText
+      .split("\n")
+      .filter((line) => line.match(/^\d+\./))
+      .map((line) => line.replace(/^\d+\.\s*/, "").trim());
+
+    return {
+      ticketId: c.ticket.id,
+      ticketNumber: c.ticket.ticketNumber,
+      items,
+      createdAt: c.createdAt,
+    };
+  });
 }
 
 /**

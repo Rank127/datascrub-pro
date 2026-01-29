@@ -9,4 +9,5 @@ export {
   processNewTicket,
   processNewComment,
   getAgentStats,
+  getManagerReviewItems,
 } from "./ticketing-agent";
