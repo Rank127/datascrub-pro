@@ -662,70 +662,129 @@ async function getLastSubmissionTimeByBroker(): Promise<Map<string, Date>> {
   return lastSubmissionByBroker;
 }
 
+// Severity priority for round-robin selection (lower = higher priority)
+const SEVERITY_PRIORITY: Record<string, number> = {
+  CRITICAL: 0,
+  HIGH: 1,
+  MEDIUM: 2,
+  LOW: 3,
+};
+
 /**
  * Get all pending removals that can be automatically processed
- * Respects per-broker daily limits and spacing requirements
+ * Uses severity-weighted round-robin for optimal distribution:
+ * - Round-robin across brokers (maximizes diversity)
+ * - Within each broker, prioritizes by severity (CRITICAL first)
+ * - Respects per-broker daily limits and spacing requirements
  */
 export async function getPendingRemovalsForAutomation(limit: number = 50): Promise<string[]> {
   // Get current broker submission counts for today
   const brokerCounts = await getTodaysBrokerSubmissionCounts();
   const lastSubmissionByBroker = await getLastSubmissionTimeByBroker();
+  const now = new Date();
 
-  // Get all pending removals with their broker source
+  // Get all pending removals with their broker source and severity
   const pendingRemovals = await prisma.removalRequest.findMany({
     where: {
       status: "PENDING",
       attempts: { lt: 3 }, // Haven't exceeded retry limit
     },
     include: {
-      exposure: { select: { source: true } },
+      exposure: { select: { source: true, severity: true } },
     },
     orderBy: { createdAt: "asc" },
   });
 
-  console.log(`[Automation] Found ${pendingRemovals.length} pending removals, checking broker limits...`);
+  console.log(`[Automation] Found ${pendingRemovals.length} pending removals, applying severity-weighted round-robin...`);
 
-  // Filter and limit per broker
-  const selectedIds: string[] = [];
-  const batchBrokerCounts = new Map<string, number>(); // Track counts within this batch
-  const now = new Date();
+  // Group by broker, then sort each group by severity
+  const brokerQueues = new Map<string, Array<{ id: string; severity: string }>>();
+  const skippedBrokers = new Set<string>(); // Brokers that hit limits
 
   for (const removal of pendingRemovals) {
-    if (selectedIds.length >= limit) break;
-
     const source = removal.exposure.source;
-    const todayCount = (brokerCounts.get(source) || 0) + (batchBrokerCounts.get(source) || 0);
 
-    // Check per-broker daily limit
+    // Check if broker already hit daily limit (before adding to queue)
+    const todayCount = brokerCounts.get(source) || 0;
     if (todayCount >= MAX_REQUESTS_PER_BROKER_PER_DAY) {
-      console.log(`[Automation] Skipping ${source} - already at daily limit (${todayCount}/${MAX_REQUESTS_PER_BROKER_PER_DAY})`);
+      if (!skippedBrokers.has(source)) {
+        console.log(`[Automation] Broker ${source} at daily limit (${todayCount}/${MAX_REQUESTS_PER_BROKER_PER_DAY})`);
+        skippedBrokers.add(source);
+      }
       continue;
     }
 
-    // Check spacing requirement
-    const lastSubmission = lastSubmissionByBroker.get(source);
-    if (lastSubmission) {
-      const minutesSinceLastSubmission = (now.getTime() - lastSubmission.getTime()) / (1000 * 60);
-      if (minutesSinceLastSubmission < MIN_MINUTES_BETWEEN_SAME_BROKER) {
-        console.log(`[Automation] Skipping ${source} - last submission ${Math.round(minutesSinceLastSubmission)}m ago (need ${MIN_MINUTES_BETWEEN_SAME_BROKER}m)`);
-        continue;
+    // Check spacing requirement (only for first request to this broker in batch)
+    if (!brokerQueues.has(source)) {
+      const lastSubmission = lastSubmissionByBroker.get(source);
+      if (lastSubmission) {
+        const minutesSinceLastSubmission = (now.getTime() - lastSubmission.getTime()) / (1000 * 60);
+        if (minutesSinceLastSubmission < MIN_MINUTES_BETWEEN_SAME_BROKER) {
+          console.log(`[Automation] Broker ${source} needs spacing (${Math.round(minutesSinceLastSubmission)}m/${MIN_MINUTES_BETWEEN_SAME_BROKER}m)`);
+          skippedBrokers.add(source);
+          continue;
+        }
       }
     }
 
-    // This removal is eligible
-    selectedIds.push(removal.id);
-    batchBrokerCounts.set(source, (batchBrokerCounts.get(source) || 0) + 1);
-
-    // Update last submission tracking for this batch (approximate)
-    lastSubmissionByBroker.set(source, now);
+    // Add to broker queue
+    if (!brokerQueues.has(source)) {
+      brokerQueues.set(source, []);
+    }
+    brokerQueues.get(source)!.push({
+      id: removal.id,
+      severity: removal.exposure.severity,
+    });
   }
 
-  // Log broker distribution
+  // Sort each broker queue by severity (CRITICAL first)
+  for (const [source, queue] of brokerQueues) {
+    queue.sort((a, b) => {
+      const priorityA = SEVERITY_PRIORITY[a.severity] ?? 4;
+      const priorityB = SEVERITY_PRIORITY[b.severity] ?? 4;
+      return priorityA - priorityB;
+    });
+  }
+
+  console.log(`[Automation] ${brokerQueues.size} brokers with pending requests, ${skippedBrokers.size} brokers skipped (limits)`);
+
+  // Round-robin selection across brokers
+  const selectedIds: string[] = [];
+  const batchBrokerCounts = new Map<string, number>();
+  const brokerList = Array.from(brokerQueues.keys());
+  let brokerIndex = 0;
+  let emptyRounds = 0;
+
+  while (selectedIds.length < limit && emptyRounds < brokerList.length) {
+    const source = brokerList[brokerIndex];
+    const queue = brokerQueues.get(source)!;
+
+    // Check if this broker can accept more in this batch
+    const batchCount = batchBrokerCounts.get(source) || 0;
+    const todayCount = brokerCounts.get(source) || 0;
+    const totalCount = batchCount + todayCount;
+
+    if (queue.length > 0 && totalCount < MAX_REQUESTS_PER_BROKER_PER_DAY) {
+      // Pick the highest severity request from this broker
+      const request = queue.shift()!;
+      selectedIds.push(request.id);
+      batchBrokerCounts.set(source, batchCount + 1);
+      emptyRounds = 0; // Reset empty counter
+    } else {
+      emptyRounds++; // This broker had nothing to offer
+    }
+
+    // Move to next broker (round-robin)
+    brokerIndex = (brokerIndex + 1) % brokerList.length;
+  }
+
+  // Log broker distribution with severity info
   if (batchBrokerCounts.size > 0) {
     const distribution = Array.from(batchBrokerCounts.entries())
-      .map(([source, count]) => `${source}: ${count}`)
+      .sort((a, b) => b[1] - a[1]) // Sort by count descending
+      .map(([source, count]) => `${source}:${count}`)
       .join(", ");
-    console.log(`[Automation] Selected ${selectedIds.length} removals across brokers: ${distribution}`);
+    console.log(`[Automation] Selected ${selectedIds.length} removals (round-robin): ${distribution}`);
   }
 
   return selectedIds;
