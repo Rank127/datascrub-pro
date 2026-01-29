@@ -367,6 +367,56 @@ curl -X POST "https://ghostmydata.com/api/cron/seo-agent" \
 2. Manual reset via database if needed
 3. Check for external service outages
 
+---
+
+## 12. AI Ticketing Agent
+
+**Location:** `/src/lib/agents/ticketing-agent.ts`
+**Trigger:** Automatic (on ticket creation and user comments)
+**Method:** Event-driven (not cron)
+
+**Purpose:**
+AI-powered ticket analysis and response system using Claude.
+
+**What it does:**
+1. Analyzes new tickets when created
+2. Reviews user comments on existing tickets
+3. Generates appropriate responses
+4. Auto-resolves simple issues
+5. Flags complex issues for human review
+6. Adjusts ticket priority based on content
+
+**Trigger Points:**
+- `POST /api/support/tickets` - New ticket creation
+- `POST /api/support/tickets/[id]/comments` - User comment added
+
+**Response Types:**
+- **Auto-resolve:** Simple issues resolved automatically with AI response
+- **Draft response:** Complex issues get AI draft for human review
+- **Escalate:** Critical issues flagged for immediate human attention
+
+**Environment Variables:**
+- `ANTHROPIC_API_KEY` - Claude API access (required)
+
+**AI Model:** Claude Sonnet 4
+
+**Behavior:**
+```
+User creates ticket
+    ↓
+AI analyzes ticket content
+    ↓
+┌─── Can auto-resolve? ───┐
+│                         │
+Yes                       No
+│                         │
+Send response            Save draft
+Mark RESOLVED            Flag for review
+Email user               Adjust priority
+```
+
+---
+
 ## Configuration (vercel.json)
 
 ```json

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { createTicket } from "@/lib/support/ticket-service";
 import { sendTicketCreatedEmail } from "@/lib/email";
+import { processNewTicket } from "@/lib/agents/ticketing-agent";
 
 const createTicketSchema = z.object({
   type: z.enum([
@@ -128,6 +129,11 @@ export async function POST(request: NextRequest) {
         }
       ).catch(console.error);
     }
+
+    // Trigger AI ticketing agent to analyze and respond (non-blocking)
+    processNewTicket(ticket.id).catch((error) => {
+      console.error("[Support API] Ticketing agent error:", error);
+    });
 
     return NextResponse.json({
       success: true,

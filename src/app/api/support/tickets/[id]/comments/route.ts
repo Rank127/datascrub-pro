@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { addTicketComment } from "@/lib/support/ticket-service";
+import { processNewComment } from "@/lib/agents/ticketing-agent";
 
 const createCommentSchema = z.object({
   content: z.string().min(1, "Comment cannot be empty").max(5000),
@@ -116,6 +117,11 @@ export async function POST(
       result.data.content,
       false // Not internal - user comments are always visible
     );
+
+    // Trigger AI ticketing agent to analyze and respond to user comment (non-blocking)
+    processNewComment(id, result.data.content).catch((error) => {
+      console.error("[Support API] Ticketing agent error on comment:", error);
+    });
 
     return NextResponse.json({
       success: true,
