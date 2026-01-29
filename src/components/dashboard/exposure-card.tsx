@@ -83,24 +83,6 @@ const statusDisplayNames: Record<string, string> = {
   MONITORING: "BREACH ALERT", // More descriptive than "MONITORING"
 };
 
-// Status descriptions for tooltips
-const statusDescriptions: Record<string, string> = {
-  ACTIVE: "Action needed: Click 'Remove' to send opt-out request to this data broker, or 'Whitelist' to keep it.",
-  REMOVAL_PENDING: "Opt-out request sent to data broker. They have 45 days to comply under CCPA/GDPR.",
-  REMOVAL_IN_PROGRESS: "Data broker acknowledged request. Removal is being processed.",
-  REMOVED: "Success! Your data has been removed from this data broker.",
-  WHITELISTED: "You chose to keep this listing. No removal request will be sent.",
-  MONITORING: "BREACH ALERT: Your data was exposed in a security breach. The data was stolen and cannot be 'removed' - it exists on hacker forums. Action: Change passwords, enable 2FA, monitor for identity theft.",
-};
-
-// Severity descriptions for tooltips
-const severityDescriptions: Record<string, string> = {
-  CRITICAL: "Extremely sensitive data exposed (SSN, financial info). Immediate action required.",
-  HIGH: "Sensitive personal data exposed. Action recommended within 24-48 hours.",
-  MEDIUM: "Personal data exposed. Review and take action when possible.",
-  LOW: "Basic information exposed. Lower risk but still worth addressing.",
-};
-
 export function ExposureCard({
   id,
   source,
@@ -157,15 +139,13 @@ export function ExposureCard({
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <Badge
                 variant="outline"
-                className={cn(SeverityColors[severity], "border-0 cursor-help")}
-                title={severityDescriptions[severity] || severity}
+                className={cn(SeverityColors[severity], "border-0")}
               >
                 {severity}
               </Badge>
               <Badge
                 variant="outline"
-                className={cn(ExposureStatusColors[status], "border-0 cursor-help")}
-                title={statusDescriptions[status] || status}
+                className={cn(ExposureStatusColors[status], "border-0")}
               >
                 {statusDisplayNames[status] || status.replace(/_/g, " ")}
               </Badge>
@@ -197,7 +177,7 @@ export function ExposureCard({
                 size="icon"
                 className="text-slate-400 hover:text-white"
                 asChild
-                title="View source: Open the original website where your data was found"
+                title="View source"
               >
                 <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4" />
@@ -212,7 +192,7 @@ export function ExposureCard({
                 size="icon"
                 className="text-slate-400 hover:text-emerald-500"
                 onClick={onWhitelist}
-                title="Whitelist: Keep this listing and don't request removal"
+                title="Whitelist"
               >
                 <ListChecks className="h-4 w-4" />
               </Button>
@@ -225,7 +205,7 @@ export function ExposureCard({
                 size="icon"
                 className="text-slate-400 hover:text-red-500"
                 onClick={onRemove}
-                title="Remove: Send CCPA/GDPR opt-out request to this data broker"
+                title="Request removal"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -237,7 +217,7 @@ export function ExposureCard({
                 size="sm"
                 className="text-emerald-500 border-emerald-500/50 hover:bg-emerald-500/10 hover:text-orange-400 hover:border-orange-400/50"
                 onClick={onUnwhitelist}
-                title="Remove from whitelist: Make this exposure active again so you can request removal"
+                title="Remove from whitelist"
               >
                 <Shield className="h-4 w-4 mr-1" />
                 Undo

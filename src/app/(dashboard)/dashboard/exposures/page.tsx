@@ -60,6 +60,7 @@ interface Exposure {
 interface ExposureStats {
   byStatus: Record<string, number>;
   bySeverity: Record<string, number>;
+  activeBySeverity: Record<string, number>; // Only ACTIVE items needing action
   totalRemovalRequests: number;
 }
 
@@ -296,17 +297,17 @@ function ExposuresPageContent() {
         <Card className="bg-slate-800/50 border-slate-700">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold text-red-400">
-              {stats?.bySeverity?.CRITICAL || 0}
+              {stats?.activeBySeverity?.CRITICAL || 0}
             </div>
-            <p className="text-sm text-slate-400">Critical</p>
+            <p className="text-sm text-slate-400">Critical to Fix</p>
           </CardContent>
         </Card>
         <Card className="bg-slate-800/50 border-slate-700">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold text-orange-400">
-              {stats?.bySeverity?.HIGH || 0}
+              {stats?.activeBySeverity?.HIGH || 0}
             </div>
-            <p className="text-sm text-slate-400">High Risk</p>
+            <p className="text-sm text-slate-400">High to Fix</p>
           </CardContent>
         </Card>
         <Card className="bg-slate-800/50 border-slate-700">

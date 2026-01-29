@@ -129,6 +129,14 @@ export async function GET(request: Request) {
       _count: true,
     });
 
+    // Get severity stats for ACTIVE items only (action needed)
+    // This shows users what still needs attention, not total historical count
+    const activeSeverityStats = await prisma.exposure.groupBy({
+      by: ["severity"],
+      where: { userId: session.user.id, status: "ACTIVE" },
+      _count: true,
+    });
+
     // AI sources to exclude from manual review stats (handled in AI Protection page)
     const AI_SOURCES = [
       "SPAWNING_AI", "LAION_AI", "STABILITY_AI", "OPENAI", "MIDJOURNEY", "META_AI",
@@ -186,6 +194,10 @@ export async function GET(request: Request) {
         ),
         bySeverity: Object.fromEntries(
           severityStats.map((s) => [s.severity, s._count])
+        ),
+        // Severity counts for ACTIVE items only (what still needs action)
+        activeBySeverity: Object.fromEntries(
+          activeSeverityStats.map((s) => [s.severity, s._count])
         ),
         manualAction: {
           // Broker-centric stats (what user actually needs to act on)
