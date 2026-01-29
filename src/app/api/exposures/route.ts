@@ -93,23 +93,9 @@ export async function GET(request: Request) {
     ];
 
     // Get manual action stats and removal stats (excluding AI sources for manual review)
-    const [manualActionStats, manualActionDone, manualBrokers, totalRemovalRequests] = await Promise.all([
-      prisma.exposure.count({
-        where: {
-          userId: session.user.id,
-          requiresManualAction: true,
-          source: { notIn: AI_SOURCES },
-        },
-      }),
-      prisma.exposure.count({
-        where: {
-          userId: session.user.id,
-          requiresManualAction: true,
-          manualActionTaken: true,
-          source: { notIn: AI_SOURCES },
-        },
-      }),
-      // Count unique brokers for manual review
+    // Stats are BROKER-CENTRIC (sites to visit) not exposure-centric
+    const [manualExposuresByBroker, totalRemovalRequests] = await Promise.all([
+      // Get all manual exposures grouped by broker with pending/done counts
       prisma.exposure.groupBy({
         by: ["source"],
         where: {
@@ -117,11 +103,29 @@ export async function GET(request: Request) {
           requiresManualAction: true,
           source: { notIn: AI_SOURCES },
         },
+        _count: { _all: true },
       }),
       prisma.removalRequest.count({
         where: { userId: session.user.id },
       }),
     ]);
+
+    // Get pending counts per broker
+    const pendingByBroker = await prisma.exposure.groupBy({
+      by: ["source"],
+      where: {
+        userId: session.user.id,
+        requiresManualAction: true,
+        manualActionTaken: false,
+        source: { notIn: AI_SOURCES },
+      },
+      _count: { _all: true },
+    });
+
+    const pendingBrokerSet = new Set(pendingByBroker.map(b => b.source));
+    const totalBrokers = manualExposuresByBroker.length;
+    const brokersPending = pendingBrokerSet.size;
+    const brokersReviewed = totalBrokers - brokersPending;
 
     return NextResponse.json({
       exposures,
@@ -139,10 +143,10 @@ export async function GET(request: Request) {
           severityStats.map((s) => [s.severity, s._count])
         ),
         manualAction: {
-          total: manualActionStats,
-          done: manualActionDone,
-          pending: manualActionStats - manualActionDone,
-          brokers: manualBrokers.length, // Unique broker count
+          // Broker-centric stats (what user actually needs to act on)
+          brokers: totalBrokers,           // Total unique sites
+          pending: brokersPending,          // Sites with pending reviews
+          done: brokersReviewed,            // Sites fully reviewed
         },
         totalRemovalRequests,
       },

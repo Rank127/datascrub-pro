@@ -125,7 +125,7 @@ export default function ManualReviewPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
-  const [stats, setStats] = useState({ total: 0, pending: 0, done: 0, brokers: 0 });
+  const [stats, setStats] = useState({ brokers: 0, pending: 0, done: 0 });
   const [showRemovalWizard, setShowRemovalWizard] = useState(false);
 
   const toggleGroup = (source: string) => {
@@ -165,12 +165,11 @@ export default function ManualReviewPage() {
         setGroupedExposures(grouped);
         setTotalPages(data.pagination.totalPages);
 
-        // Use API stats (calculated server-side across ALL items, not just current page)
+        // Use API stats (broker-centric, calculated server-side)
         setStats({
-          total: data.stats.manualAction.total,
+          brokers: data.stats.manualAction.brokers,
           pending: data.stats.manualAction.pending,
           done: data.stats.manualAction.done,
-          brokers: data.stats.manualAction.brokers,
         });
       }
     } catch (error) {
@@ -306,24 +305,15 @@ export default function ManualReviewPage() {
         </Link>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Stats Cards - Broker-centric (sites to visit, not individual exposures) */}
+      <div className="grid gap-4 md:grid-cols-3">
         <Card className="bg-slate-800/50 border-slate-700">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
               <MousePointerClick className="h-5 w-5 text-amber-400" />
               <div className="text-2xl font-bold text-white">{stats.brokers}</div>
             </div>
-            <p className="text-sm text-slate-400">Sites to Review</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-slate-400" />
-              <div className="text-2xl font-bold text-white">{stats.total}</div>
-            </div>
-            <p className="text-sm text-slate-400">Total Exposures</p>
+            <p className="text-sm text-slate-400">Total Sites</p>
           </CardContent>
         </Card>
         <Card className="bg-slate-800/50 border-slate-700 border-amber-500/30">
@@ -332,7 +322,7 @@ export default function ManualReviewPage() {
               <Clock className="h-5 w-5 text-amber-400" />
               <div className="text-2xl font-bold text-amber-400">{stats.pending}</div>
             </div>
-            <p className="text-sm text-slate-400">Pending Review</p>
+            <p className="text-sm text-slate-400">Sites Pending</p>
           </CardContent>
         </Card>
         <Card className="bg-slate-800/50 border-slate-700 border-emerald-500/30">
@@ -341,7 +331,7 @@ export default function ManualReviewPage() {
               <CheckCircle2 className="h-5 w-5 text-emerald-400" />
               <div className="text-2xl font-bold text-emerald-400">{stats.done}</div>
             </div>
-            <p className="text-sm text-slate-400">Reviewed</p>
+            <p className="text-sm text-slate-400">Sites Reviewed</p>
           </CardContent>
         </Card>
       </div>
