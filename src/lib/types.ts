@@ -174,6 +174,7 @@ export const ExposureStatus = {
   REMOVAL_IN_PROGRESS: "REMOVAL_IN_PROGRESS",
   REMOVED: "REMOVED",
   WHITELISTED: "WHITELISTED",
+  MONITORING: "MONITORING", // Breach data - can't be removed, just monitored
 } as const;
 export type ExposureStatus = (typeof ExposureStatus)[keyof typeof ExposureStatus];
 
@@ -391,6 +392,7 @@ export const ExposureStatusColors: Record<ExposureStatus, string> = {
   REMOVAL_IN_PROGRESS: "bg-blue-100 text-blue-800",
   REMOVED: "bg-green-100 text-green-800",
   WHITELISTED: "bg-gray-100 text-gray-800",
+  MONITORING: "bg-purple-100 text-purple-800", // Breach data - being monitored
 };
 
 // ==========================================

@@ -52,12 +52,14 @@ export async function GET(request: Request) {
       where.manualActionTaken = true;
     }
 
-    // Status priority: ACTIVE first (needs action), then in-progress, then completed
+    // Status priority: ACTIVE first (needs action), then in-progress, then completed/monitoring
     const statusPriority: Record<string, number> = {
       ACTIVE: 0,           // Needs action - top
       REMOVAL_PENDING: 1,  // In progress
+      REMOVAL_IN_PROGRESS: 1, // In progress
       REMOVAL_FAILED: 2,   // Needs attention
       REMOVED: 3,          // Completed - bottom
+      MONITORING: 3,       // Breach data - can't be removed, just monitored
       WHITELISTED: 4,      // User chose to keep - bottom
     };
 
