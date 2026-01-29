@@ -7,12 +7,17 @@ import {
 
 /**
  * Cron job to automatically process pending and retry failed removals
- * Schedule: Daily at 10 AM UTC (after verify-removals at 8 AM)
+ * Schedule: 3x daily at 6 AM, 2 PM, 10 PM UTC
  *
  * This job:
  * 1. Processes pending removal requests (sends CCPA emails)
  * 2. Retries failed removals with alternative email patterns
  * 3. Returns automation statistics
+ *
+ * Rate limiting for Resend (100 emails/day free tier):
+ * - 25 pending + 5 retries = 30 broker emails per batch
+ * - 3 batches/day = 90 broker emails
+ * - Plus ~10 user digest emails = ~100 total
  */
 export async function POST(request: Request) {
   try {
@@ -27,13 +32,13 @@ export async function POST(request: Request) {
     console.log("[Cron: Process Removals] Starting automated removal processing...");
     const startTime = Date.now();
 
-    // Step 1: Process pending removals
+    // Step 1: Process pending removals (25 per batch × 3 batches/day = 75 emails)
     console.log("[Cron: Process Removals] Processing pending removals...");
-    const pendingResults = await processPendingRemovalsBatch(30);
+    const pendingResults = await processPendingRemovalsBatch(25);
 
-    // Step 2: Retry failed removals
+    // Step 2: Retry failed removals (5 per batch × 3 batches/day = 15 emails)
     console.log("[Cron: Process Removals] Retrying failed removals...");
-    const retryResults = await retryFailedRemovalsBatch(20);
+    const retryResults = await retryFailedRemovalsBatch(5);
 
     // Step 3: Get automation stats
     const stats = await getAutomationStats();
