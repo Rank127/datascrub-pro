@@ -350,6 +350,7 @@ function ExposuresPageContent() {
                   <SelectItem value="REMOVAL_IN_PROGRESS">In Progress</SelectItem>
                   <SelectItem value="REMOVED">Removed</SelectItem>
                   <SelectItem value="WHITELISTED">Whitelisted</SelectItem>
+                  <SelectItem value="MONITORING">Monitoring (Breaches)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

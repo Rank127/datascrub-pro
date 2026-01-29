@@ -73,6 +73,16 @@ const dataTypeIcons: Record<ExposureType, string> = {
   BIOMETRIC: "fingerprint",
 };
 
+// Status descriptions for tooltips
+const statusDescriptions: Record<string, string> = {
+  ACTIVE: "This exposure needs action - you can request removal or whitelist it",
+  REMOVAL_PENDING: "Opt-out request has been submitted, waiting for broker to process",
+  REMOVAL_IN_PROGRESS: "Removal is being processed by the data broker",
+  REMOVED: "Successfully removed from this data broker",
+  WHITELISTED: "You chose to keep this exposure - no removal will be attempted",
+  MONITORING: "Data breach exposure - cannot be removed, only monitored. Change your passwords and enable 2FA.",
+};
+
 export function ExposureCard({
   id,
   source,
@@ -135,7 +145,8 @@ export function ExposureCard({
               </Badge>
               <Badge
                 variant="outline"
-                className={cn(ExposureStatusColors[status], "border-0")}
+                className={cn(ExposureStatusColors[status], "border-0 cursor-help")}
+                title={statusDescriptions[status] || status}
               >
                 {status.replace(/_/g, " ")}
               </Badge>

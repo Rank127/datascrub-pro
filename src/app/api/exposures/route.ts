@@ -52,57 +52,69 @@ export async function GET(request: Request) {
       where.manualActionTaken = true;
     }
 
-    // Status priority: ACTIVE first (needs action), then in-progress, then completed/monitoring
-    const statusPriority: Record<string, number> = {
-      ACTIVE: 0,           // Needs action - top
-      REMOVAL_PENDING: 1,  // In progress
-      REMOVAL_IN_PROGRESS: 1, // In progress
-      REMOVAL_FAILED: 2,   // Needs attention
-      REMOVED: 3,          // Completed - bottom
-      MONITORING: 3,       // Breach data - can't be removed, just monitored
-      WHITELISTED: 4,      // User chose to keep - bottom
-    };
+    // Build WHERE clause conditions for raw query
+    const conditions: string[] = [`"userId" = '${session.user.id}'`];
+    if (status) conditions.push(`"status" = '${status}'`);
+    if (severity) conditions.push(`"severity" = '${severity}'`);
+    if (source) conditions.push(`"source" = '${source}'`);
+    if (excludeManual) conditions.push(`"requiresManualAction" = false`);
+    if (manualAction === "required" || manualAction === "all") {
+      conditions.push(`"requiresManualAction" = true`);
+    } else if (manualAction === "pending") {
+      conditions.push(`"requiresManualAction" = true`);
+      conditions.push(`"manualActionTaken" = false`);
+    } else if (manualAction === "done") {
+      conditions.push(`"requiresManualAction" = true`);
+      conditions.push(`"manualActionTaken" = true`);
+    }
+    const whereClause = conditions.join(" AND ");
 
-    const [rawExposures, total] = await Promise.all([
-      prisma.exposure.findMany({
-        where,
-        orderBy: [{ firstFoundAt: "desc" }],
-        skip: (page - 1) * limit,
-        take: limit,
-        include: {
-          removalRequest: {
-            select: {
-              id: true,
-              status: true,
-              method: true,
-            },
+    // Use raw SQL to sort by status priority, severity, then date - BEFORE pagination
+    // This ensures sorting works across all pages, not just per-page
+    const exposureIds = await prisma.$queryRawUnsafe<{ id: string }[]>(`
+      SELECT id FROM "Exposure"
+      WHERE ${whereClause}
+      ORDER BY
+        CASE status
+          WHEN 'ACTIVE' THEN 0
+          WHEN 'REMOVAL_PENDING' THEN 1
+          WHEN 'REMOVAL_IN_PROGRESS' THEN 1
+          WHEN 'REMOVAL_FAILED' THEN 2
+          WHEN 'REMOVED' THEN 3
+          WHEN 'MONITORING' THEN 3
+          WHEN 'WHITELISTED' THEN 4
+          ELSE 5
+        END ASC,
+        CASE severity
+          WHEN 'CRITICAL' THEN 0
+          WHEN 'HIGH' THEN 1
+          WHEN 'MEDIUM' THEN 2
+          WHEN 'LOW' THEN 3
+          ELSE 4
+        END ASC,
+        "firstFoundAt" DESC
+      LIMIT ${limit} OFFSET ${(page - 1) * limit}
+    `);
+
+    const total = await prisma.exposure.count({ where });
+
+    // Fetch full exposure data with relations, maintaining order
+    const orderedIds = exposureIds.map(e => e.id);
+    const exposuresUnordered = await prisma.exposure.findMany({
+      where: { id: { in: orderedIds } },
+      include: {
+        removalRequest: {
+          select: {
+            id: true,
+            status: true,
+            method: true,
           },
         },
-      }),
-      prisma.exposure.count({ where }),
-    ]);
-
-    // Sort: action needed on top, removal in progress at bottom
-    // Secondary sort by severity (HIGH first), then by date
-    const severityPriority: Record<string, number> = {
-      CRITICAL: 0,
-      HIGH: 1,
-      MEDIUM: 2,
-      LOW: 3,
-    };
-
-    const exposures = rawExposures.sort((a, b) => {
-      // First by status priority (ACTIVE on top)
-      const statusDiff = (statusPriority[a.status] ?? 5) - (statusPriority[b.status] ?? 5);
-      if (statusDiff !== 0) return statusDiff;
-
-      // Within same status, sort by severity (HIGH first)
-      const sevDiff = (severityPriority[a.severity] ?? 5) - (severityPriority[b.severity] ?? 5);
-      if (sevDiff !== 0) return sevDiff;
-
-      // Finally by date (newest first)
-      return new Date(b.firstFoundAt).getTime() - new Date(a.firstFoundAt).getTime();
+      },
     });
+
+    // Restore the sorted order from the raw query
+    const exposures = orderedIds.map(id => exposuresUnordered.find(e => e.id === id)!).filter(Boolean);
 
     // Get stats
     const stats = await prisma.exposure.groupBy({
