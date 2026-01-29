@@ -6,6 +6,8 @@ import type { RemovalMethod } from "@/lib/types";
 import { createRemovalFailedTicket } from "@/lib/support/ticket-service";
 
 const MAX_REMOVAL_ATTEMPTS = 5;
+const MAX_REQUESTS_PER_BROKER_PER_DAY = 10; // Limit requests to any single broker per day
+const MIN_MINUTES_BETWEEN_SAME_BROKER = 30; // Space requests to same broker
 
 interface RemovalExecutionResult {
   success: boolean;
@@ -587,20 +589,146 @@ export async function markRemovalCompleted(
 // ============================================
 
 /**
+ * Get today's submission counts by broker source
+ * Used to enforce per-broker daily rate limits
+ */
+async function getTodaysBrokerSubmissionCounts(): Promise<Map<string, number>> {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const submissions = await prisma.removalRequest.groupBy({
+    by: ["exposureId"],
+    where: {
+      status: "SUBMITTED",
+      submittedAt: { gte: today },
+    },
+    _count: { id: true },
+  });
+
+  // Get the exposure sources for these submissions
+  if (submissions.length === 0) {
+    return new Map();
+  }
+
+  const exposureIds = submissions.map(s => s.exposureId);
+  const exposures = await prisma.exposure.findMany({
+    where: { id: { in: exposureIds } },
+    select: { id: true, source: true },
+  });
+
+  // Build a map of exposureId -> source
+  const exposureSourceMap = new Map<string, string>();
+  for (const exp of exposures) {
+    exposureSourceMap.set(exp.id, exp.source);
+  }
+
+  // Count submissions per broker source
+  const brokerCounts = new Map<string, number>();
+  for (const sub of submissions) {
+    const source = exposureSourceMap.get(sub.exposureId);
+    if (source) {
+      brokerCounts.set(source, (brokerCounts.get(source) || 0) + sub._count.id);
+    }
+  }
+
+  return brokerCounts;
+}
+
+/**
+ * Get the last submission time for each broker source (for spacing requests)
+ */
+async function getLastSubmissionTimeByBroker(): Promise<Map<string, Date>> {
+  const recentSubmissions = await prisma.removalRequest.findMany({
+    where: {
+      status: "SUBMITTED",
+      submittedAt: {
+        gte: new Date(Date.now() - MIN_MINUTES_BETWEEN_SAME_BROKER * 60 * 1000),
+      },
+    },
+    include: {
+      exposure: { select: { source: true } },
+    },
+    orderBy: { submittedAt: "desc" },
+  });
+
+  const lastSubmissionByBroker = new Map<string, Date>();
+  for (const sub of recentSubmissions) {
+    const source = sub.exposure.source;
+    if (!lastSubmissionByBroker.has(source) && sub.submittedAt) {
+      lastSubmissionByBroker.set(source, sub.submittedAt);
+    }
+  }
+
+  return lastSubmissionByBroker;
+}
+
+/**
  * Get all pending removals that can be automatically processed
+ * Respects per-broker daily limits and spacing requirements
  */
 export async function getPendingRemovalsForAutomation(limit: number = 50): Promise<string[]> {
-  const removals = await prisma.removalRequest.findMany({
+  // Get current broker submission counts for today
+  const brokerCounts = await getTodaysBrokerSubmissionCounts();
+  const lastSubmissionByBroker = await getLastSubmissionTimeByBroker();
+
+  // Get all pending removals with their broker source
+  const pendingRemovals = await prisma.removalRequest.findMany({
     where: {
       status: "PENDING",
       attempts: { lt: 3 }, // Haven't exceeded retry limit
     },
-    select: { id: true },
-    take: limit,
+    include: {
+      exposure: { select: { source: true } },
+    },
     orderBy: { createdAt: "asc" },
   });
 
-  return removals.map(r => r.id);
+  console.log(`[Automation] Found ${pendingRemovals.length} pending removals, checking broker limits...`);
+
+  // Filter and limit per broker
+  const selectedIds: string[] = [];
+  const batchBrokerCounts = new Map<string, number>(); // Track counts within this batch
+  const now = new Date();
+
+  for (const removal of pendingRemovals) {
+    if (selectedIds.length >= limit) break;
+
+    const source = removal.exposure.source;
+    const todayCount = (brokerCounts.get(source) || 0) + (batchBrokerCounts.get(source) || 0);
+
+    // Check per-broker daily limit
+    if (todayCount >= MAX_REQUESTS_PER_BROKER_PER_DAY) {
+      console.log(`[Automation] Skipping ${source} - already at daily limit (${todayCount}/${MAX_REQUESTS_PER_BROKER_PER_DAY})`);
+      continue;
+    }
+
+    // Check spacing requirement
+    const lastSubmission = lastSubmissionByBroker.get(source);
+    if (lastSubmission) {
+      const minutesSinceLastSubmission = (now.getTime() - lastSubmission.getTime()) / (1000 * 60);
+      if (minutesSinceLastSubmission < MIN_MINUTES_BETWEEN_SAME_BROKER) {
+        console.log(`[Automation] Skipping ${source} - last submission ${Math.round(minutesSinceLastSubmission)}m ago (need ${MIN_MINUTES_BETWEEN_SAME_BROKER}m)`);
+        continue;
+      }
+    }
+
+    // This removal is eligible
+    selectedIds.push(removal.id);
+    batchBrokerCounts.set(source, (batchBrokerCounts.get(source) || 0) + 1);
+
+    // Update last submission tracking for this batch (approximate)
+    lastSubmissionByBroker.set(source, now);
+  }
+
+  // Log broker distribution
+  if (batchBrokerCounts.size > 0) {
+    const distribution = Array.from(batchBrokerCounts.entries())
+      .map(([source, count]) => `${source}: ${count}`)
+      .join(", ");
+    console.log(`[Automation] Selected ${selectedIds.length} removals across brokers: ${distribution}`);
+  }
+
+  return selectedIds;
 }
 
 /**
@@ -728,6 +856,7 @@ export async function retryFailedRemoval(
 
 /**
  * Process a batch of pending removals
+ * Respects per-broker daily limits (max 10/broker/day) and spacing (30min between same broker)
  * Returns summary of results
  */
 export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
@@ -736,8 +865,16 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
   failed: number;
   skipped: number;
   emailsSent: number;
+  brokerDistribution: Record<string, number>;
 }> {
-  const stats = { processed: 0, successful: 0, failed: 0, skipped: 0, emailsSent: 0 };
+  const stats = {
+    processed: 0,
+    successful: 0,
+    failed: 0,
+    skipped: 0,
+    emailsSent: 0,
+    brokerDistribution: {} as Record<string, number>,
+  };
 
   // Collect updates per user for batched digest emails
   const userUpdates = new Map<string, {
@@ -786,6 +923,10 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
 
       if (result.success && result.method === "AUTO_EMAIL") {
         stats.successful++;
+
+        // Track broker distribution
+        const source = request.exposure.source;
+        stats.brokerDistribution[source] = (stats.brokerDistribution[source] || 0) + 1;
 
         // Collect update for digest email
         if (request.user.email) {
@@ -838,20 +979,26 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
     }
   }
 
-  console.log(`[Batch Removal] Complete: ${stats.successful} successful, ${stats.failed} failed, ${stats.skipped} skipped, ${stats.emailsSent} emails`);
+  const brokerDist = Object.entries(stats.brokerDistribution).map(([b, c]) => `${b}:${c}`).join(", ");
+  console.log(`[Batch Removal] Complete: ${stats.successful} successful, ${stats.failed} failed, ${stats.skipped} skipped, ${stats.emailsSent} digest emails`);
+  if (brokerDist) {
+    console.log(`[Batch Removal] Broker distribution: ${brokerDist}`);
+  }
   return stats;
 }
 
 /**
  * Auto-retry all failed removals that haven't exceeded retry limit
+ * Respects per-broker daily limits
  */
 export async function retryFailedRemovalsBatch(limit: number = 20): Promise<{
   processed: number;
   retried: number;
   stillFailed: number;
   emailsSent: number;
+  skippedDueToLimit: number;
 }> {
-  const stats = { processed: 0, retried: 0, stillFailed: 0, emailsSent: 0 };
+  const stats = { processed: 0, retried: 0, stillFailed: 0, emailsSent: 0, skippedDueToLimit: 0 };
 
   // Collect updates per user for batched digest emails
   const userUpdates = new Map<string, {
@@ -859,6 +1006,10 @@ export async function retryFailedRemovalsBatch(limit: number = 20): Promise<{
     name: string;
     submitted: Array<{ sourceName: string; source: string; dataType: string }>;
   }>();
+
+  // Get current broker submission counts for today
+  const brokerCounts = await getTodaysBrokerSubmissionCounts();
+  const batchBrokerCounts = new Map<string, number>();
 
   const failedRemovals = await prisma.removalRequest.findMany({
     where: {
@@ -868,16 +1019,23 @@ export async function retryFailedRemovalsBatch(limit: number = 20): Promise<{
     include: {
       exposure: { select: { source: true, sourceUrl: true } },
     },
-    take: limit,
+    take: limit * 2, // Fetch more since some may be skipped
     orderBy: { createdAt: "asc" },
   });
 
-  console.log(`[Retry Batch] Processing ${failedRemovals.length} failed removals`);
+  console.log(`[Retry Batch] Found ${failedRemovals.length} failed removals, checking broker limits...`);
+
+  let processedCount = 0;
 
   for (const removal of failedRemovals) {
+    // Stop if we've processed enough
+    if (processedCount >= limit) break;
+
+    const source = removal.exposure.source;
+
     // Skip non-removable sources
-    const brokerInfo = getDataBrokerInfo(removal.exposure.source);
-    if (isNonRemovableSource(removal.exposure.source, brokerInfo)) {
+    const brokerInfo = getDataBrokerInfo(source);
+    if (isNonRemovableSource(source, brokerInfo)) {
       continue;
     }
 
@@ -886,11 +1044,23 @@ export async function retryFailedRemovalsBatch(limit: number = 20): Promise<{
       continue;
     }
 
+    // Check per-broker daily limit
+    const todayCount = (brokerCounts.get(source) || 0) + (batchBrokerCounts.get(source) || 0);
+    if (todayCount >= MAX_REQUESTS_PER_BROKER_PER_DAY) {
+      console.log(`[Retry Batch] Skipping ${source} - already at daily limit (${todayCount}/${MAX_REQUESTS_PER_BROKER_PER_DAY})`);
+      stats.skippedDueToLimit++;
+      continue;
+    }
+
     stats.processed++;
+    processedCount++;
     const result = await retryFailedRemoval(removal.id, { skipUserNotification: true });
 
     if (result.success) {
       stats.retried++;
+
+      // Track broker count for this batch
+      batchBrokerCounts.set(source, (batchBrokerCounts.get(source) || 0) + 1);
 
       // Collect update for digest email
       if (result.updateInfo?.userEmail) {
@@ -938,7 +1108,7 @@ export async function retryFailedRemovalsBatch(limit: number = 20): Promise<{
     }
   }
 
-  console.log(`[Retry Batch] Complete: ${stats.retried} retried, ${stats.stillFailed} still failed, ${stats.emailsSent} emails`);
+  console.log(`[Retry Batch] Complete: ${stats.retried} retried, ${stats.stillFailed} still failed, ${stats.skippedDueToLimit} skipped (broker limit), ${stats.emailsSent} emails`);
   return stats;
 }
 

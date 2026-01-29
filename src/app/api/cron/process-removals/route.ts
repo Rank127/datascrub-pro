@@ -14,10 +14,16 @@ import {
  * 2. Retries failed removals with alternative email patterns
  * 3. Returns automation statistics
  *
- * Rate limiting for Resend (100 emails/day free tier):
- * - 25 pending + 5 retries = 30 broker emails per batch
- * - 3 batches/day = 90 broker emails
- * - Plus ~10 user digest emails = ~100 total
+ * Rate limiting:
+ * - Resend API: 100 emails/day free tier
+ *   - 25 pending + 5 retries = 30 broker emails per batch
+ *   - 3 batches/day = 90 broker emails
+ *   - Plus ~10 user digest emails = ~100 total
+ *
+ * - Per-broker limits (to avoid being flagged as spam):
+ *   - Max 10 requests per broker per day
+ *   - Min 30 minutes between requests to same broker
+ *   - Requests distributed across multiple brokers per batch
  */
 export async function POST(request: Request) {
   try {
@@ -53,11 +59,17 @@ export async function POST(request: Request) {
         successful: pendingResults.successful,
         failed: pendingResults.failed,
         skipped: pendingResults.skipped,
+        brokerDistribution: pendingResults.brokerDistribution,
       },
       retries: {
         processed: retryResults.processed,
         retried: retryResults.retried,
         stillFailed: retryResults.stillFailed,
+        skippedDueToLimit: retryResults.skippedDueToLimit,
+      },
+      rateLimiting: {
+        maxPerBrokerPerDay: 10,
+        minMinutesBetweenSameBroker: 30,
       },
       automationStats: {
         total: stats.totalRemovals,
