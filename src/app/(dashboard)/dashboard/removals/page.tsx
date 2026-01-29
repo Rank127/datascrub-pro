@@ -107,8 +107,8 @@ const statusConfig: Record<
     icon: XCircle,
   },
   REQUIRES_MANUAL: {
-    label: "Manual Required",
-    description: "This broker requires manual action on their website",
+    label: "Form Required",
+    description: "This broker only accepts opt-out via their website form - click 'Open Opt-Out Form' below",
     color: "bg-orange-500/20 text-orange-400",
     icon: AlertCircle,
   },
@@ -398,6 +398,13 @@ export default function RemovalsPage() {
                 </div>
               </div>
               <div className="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-orange-400 mt-0.5" />
+                <div>
+                  <span className="font-medium text-orange-300">Manual Required</span>
+                  <p className="text-slate-400">This broker only accepts removals via their website form. Click &quot;Open Opt-Out Form&quot; to complete the removal yourself.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
                 <CheckCircle className="h-5 w-5 text-emerald-400 mt-0.5" />
                 <div>
                   <span className="font-medium text-emerald-300">Removed</span>
@@ -542,48 +549,49 @@ export default function RemovalsPage() {
                     )}
 
                     {removal.status === "REQUIRES_MANUAL" && (
-                      <div className="p-3 bg-orange-500/10 rounded-lg">
-                        <p className="text-sm text-orange-400 mb-2">
-                          This source requires manual action. Follow these steps:
-                        </p>
-                        <ol className="text-sm text-slate-400 list-decimal list-inside space-y-2">
-                          <li>
-                            Visit the opt-out page:{" "}
-                            {removal.optOutUrl ? (
+                      <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-orange-400 mb-1">
+                              Form-Based Removal Required
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              This broker only accepts removals through their website form, not email.
+                            </p>
+                          </div>
+                          {removal.optOutUrl && (
+                            <Button
+                              size="sm"
+                              className="bg-orange-600 hover:bg-orange-700 text-white shrink-0"
+                              asChild
+                            >
                               <a
                                 href={removal.optOutUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-emerald-400 hover:text-emerald-300 underline inline-flex items-center gap-1"
                               >
-                                {removal.exposure.sourceName} Opt-Out
-                                <ExternalLink className="h-3 w-3" />
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                Open Opt-Out Form
                               </a>
-                            ) : (
-                              <span>Search for &quot;{removal.exposure.sourceName} opt out&quot;</span>
+                            </Button>
+                          )}
+                        </div>
+
+                        <div className="mt-3 pt-3 border-t border-orange-500/20">
+                          <p className="text-xs text-slate-400 mb-2">Steps to complete:</p>
+                          <ol className="text-xs text-slate-400 list-decimal list-inside space-y-1">
+                            <li>Click the button above to open the opt-out form</li>
+                            <li>Search for your name/info and locate your record</li>
+                            <li>Submit the removal request</li>
+                            {removal.estimatedDays && (
+                              <li>Wait up to {removal.estimatedDays} days for processing</li>
                             )}
-                          </li>
-                          <li>Find the opt-out or privacy settings</li>
-                          <li>Submit a removal request with your information</li>
-                          <li>
-                            Mark as complete once you&apos;ve submitted the
-                            request
-                          </li>
-                        </ol>
-                        {removal.optOutEmail && (
+                          </ol>
+                        </div>
+
+                        {!removal.optOutUrl && (
                           <p className="text-xs text-slate-500 mt-2">
-                            Or email:{" "}
-                            <a
-                              href={`mailto:${removal.optOutEmail}`}
-                              className="text-emerald-400 hover:text-emerald-300 underline"
-                            >
-                              {removal.optOutEmail}
-                            </a>
-                          </p>
-                        )}
-                        {removal.estimatedDays && (
-                          <p className="text-xs text-slate-500 mt-1">
-                            Estimated processing time: {removal.estimatedDays} days
+                            Search for &quot;{removal.exposure.sourceName} opt out&quot; to find the removal form.
                           </p>
                         )}
                       </div>
