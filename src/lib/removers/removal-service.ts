@@ -6,8 +6,8 @@ import type { RemovalMethod } from "@/lib/types";
 import { createRemovalFailedTicket } from "@/lib/support/ticket-service";
 
 const MAX_REMOVAL_ATTEMPTS = 5;
-const MAX_REQUESTS_PER_BROKER_PER_DAY = 10; // Limit requests to any single broker per day
-const MIN_MINUTES_BETWEEN_SAME_BROKER = 30; // Space requests to same broker
+const MAX_REQUESTS_PER_BROKER_PER_DAY = 25; // Limit requests to any single broker per day (avoid spam flags)
+const MIN_MINUTES_BETWEEN_SAME_BROKER = 15; // Space requests to same broker (minutes)
 
 interface RemovalExecutionResult {
   success: boolean;

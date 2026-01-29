@@ -7,23 +7,23 @@ import {
 
 /**
  * Cron job to automatically process pending and retry failed removals
- * Schedule: 3x daily at 6 AM, 2 PM, 10 PM UTC
+ * Schedule: 6x daily (every 4 hours) at 2, 6, 10, 14, 18, 22 UTC
  *
  * This job:
  * 1. Processes pending removal requests (sends CCPA emails)
  * 2. Retries failed removals with alternative email patterns
  * 3. Returns automation statistics
  *
- * Rate limiting:
- * - Resend API: 100 emails/day free tier
- *   - 25 pending + 5 retries = 30 broker emails per batch
- *   - 3 batches/day = 90 broker emails
- *   - Plus ~10 user digest emails = ~100 total
+ * Rate limiting (Resend Pro: 50,000/month):
+ * - 100 pending + 25 retries = 125 broker emails per batch
+ * - 6 batches/day = 750 broker emails/day
+ * - Plus user digest emails = ~800-900 total/day
+ * - Monthly: ~25,000 emails (well under 50k limit)
  *
- * - Per-broker limits (to avoid being flagged as spam):
- *   - Max 10 requests per broker per day
- *   - Min 30 minutes between requests to same broker
- *   - Requests distributed across multiple brokers per batch
+ * Per-broker limits (to avoid being flagged as spam):
+ * - Max 25 requests per broker per day
+ * - Min 15 minutes between requests to same broker
+ * - Severity-weighted round-robin distribution across brokers
  */
 export async function POST(request: Request) {
   try {
@@ -38,13 +38,13 @@ export async function POST(request: Request) {
     console.log("[Cron: Process Removals] Starting automated removal processing...");
     const startTime = Date.now();
 
-    // Step 1: Process pending removals (25 per batch × 3 batches/day = 75 emails)
+    // Step 1: Process pending removals (100 per batch × 6 batches/day = 600 emails)
     console.log("[Cron: Process Removals] Processing pending removals...");
-    const pendingResults = await processPendingRemovalsBatch(25);
+    const pendingResults = await processPendingRemovalsBatch(100);
 
-    // Step 2: Retry failed removals (5 per batch × 3 batches/day = 15 emails)
+    // Step 2: Retry failed removals (25 per batch × 6 batches/day = 150 emails)
     console.log("[Cron: Process Removals] Retrying failed removals...");
-    const retryResults = await retryFailedRemovalsBatch(5);
+    const retryResults = await retryFailedRemovalsBatch(25);
 
     // Step 3: Get automation stats
     const stats = await getAutomationStats();
@@ -68,8 +68,10 @@ export async function POST(request: Request) {
         skippedDueToLimit: retryResults.skippedDueToLimit,
       },
       rateLimiting: {
-        maxPerBrokerPerDay: 10,
-        minMinutesBetweenSameBroker: 30,
+        maxPerBrokerPerDay: 25,
+        minMinutesBetweenSameBroker: 15,
+        batchSize: { pending: 100, retries: 25 },
+        dailyBatches: 6,
       },
       automationStats: {
         total: stats.totalRemovals,
