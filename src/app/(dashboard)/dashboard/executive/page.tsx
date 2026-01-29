@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,22 +10,29 @@ import { FinanceSection } from "@/components/dashboard/executive/finance-section
 import { AnalyticsSection } from "@/components/dashboard/executive/analytics-section";
 import { OperationsSection } from "@/components/dashboard/executive/operations-section";
 import { UserActivitiesSection } from "@/components/dashboard/executive/user-activities-section";
+import { UserManagementSection } from "@/components/dashboard/executive/user-management-section";
 import { ExecutiveStatsResponse } from "@/lib/executive/types";
 import {
   Loader2,
   TrendingUp,
-  AlertTriangle,
   RefreshCw,
   DollarSign,
   BarChart3,
   Settings,
   Users,
+  UserCog,
   ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ExecutiveDashboardPage() {
-  const { data: session } = useSession();
+  useSession(); // Ensure user is authenticated
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const defaultTab = ["finance", "analytics", "operations", "activities", "users"].includes(tabParam || "")
+    ? tabParam!
+    : "finance";
+
   const [data, setData] = useState<ExecutiveStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -120,10 +128,10 @@ export default function ExecutiveDashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <TrendingUp className="h-7 w-7 text-emerald-500" />
-            Executive Dashboard
+            Admin Dashboard
           </h1>
           <p className="text-slate-400 mt-1">
-            Business metrics, analytics, and platform overview
+            Business metrics, analytics, and user management
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -203,7 +211,7 @@ export default function ExecutiveDashboardPage() {
       </div>
 
       {/* Main Tabs */}
-      <Tabs defaultValue="finance" className="space-y-6">
+      <Tabs defaultValue={defaultTab} className="space-y-6">
         <TabsList className="bg-slate-800/50 border border-slate-700 p-1">
           <TabsTrigger
             value="finance"
@@ -233,6 +241,13 @@ export default function ExecutiveDashboardPage() {
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Activities</span>
           </TabsTrigger>
+          <TabsTrigger
+            value="users"
+            className="data-[state=active]:bg-pink-500/20 data-[state=active]:text-pink-400 gap-2"
+          >
+            <UserCog className="h-4 w-4" />
+            <span className="hidden sm:inline">Users</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="finance" className="mt-6">
@@ -249,6 +264,10 @@ export default function ExecutiveDashboardPage() {
 
         <TabsContent value="activities" className="mt-6">
           <UserActivitiesSection data={data.activities} />
+        </TabsContent>
+
+        <TabsContent value="users" className="mt-6">
+          <UserManagementSection />
         </TabsContent>
       </Tabs>
     </div>
