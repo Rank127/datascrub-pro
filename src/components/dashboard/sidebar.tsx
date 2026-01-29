@@ -119,7 +119,7 @@ export function Sidebar() {
       </nav>
 
       {/* Upgrade Banner - shows for FREE users only */}
-      <UpgradeBanner variant="sidebar" />
+      <UpgradeBanner />
 
       {/* User section */}
       <div className="border-t border-slate-800 p-4">
