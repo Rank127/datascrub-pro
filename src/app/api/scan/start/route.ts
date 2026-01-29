@@ -213,6 +213,7 @@ export async function POST(request: Request) {
     }
 
     // Create only NEW exposures (with proof screenshots for URLs)
+    // For "manual check required" items, we auto-create proactive opt-out requests
     const exposures = await Promise.all(
       newExposures.map((result) => {
         // Generate proof screenshot URL if we have a source URL
@@ -225,6 +226,8 @@ export async function POST(request: Request) {
           }
         }
 
+        const isProactiveOptOut = result.rawData?.manualCheckRequired === true;
+
         return prisma.exposure.create({
           data: {
             userId: session.user.id,
@@ -235,10 +238,11 @@ export async function POST(request: Request) {
             dataType: result.dataType,
             dataPreview: result.dataPreview || null,
             severity: result.severity,
-            status: "ACTIVE",
+            // Proactive opt-outs go straight to REMOVAL_PENDING
+            status: isProactiveOptOut ? "REMOVAL_PENDING" : "ACTIVE",
             isWhitelisted: false,
-            // Mark as requiring manual action if it's a check link (not auto-scraped)
-            requiresManualAction: result.rawData?.manualCheckRequired === true,
+            // No longer require manual action - we handle it automatically
+            requiresManualAction: false,
             // Proof screenshot (captured on-demand when URL is accessed)
             proofScreenshot,
             proofScreenshotAt: proofScreenshot ? new Date() : null,
@@ -246,6 +250,32 @@ export async function POST(request: Request) {
         });
       })
     );
+
+    // Create proactive opt-out removal requests for items that would have been "manual review"
+    const proactiveOptOuts = newExposures.filter(r => r.rawData?.manualCheckRequired === true);
+    if (proactiveOptOuts.length > 0) {
+      const exposureMap = new Map(exposures.map(e => [`${e.source}:${e.sourceName}`, e]));
+
+      await Promise.all(
+        proactiveOptOuts.map((result) => {
+          const exposure = exposureMap.get(`${result.source}:${result.sourceName}`);
+          if (!exposure) return Promise.resolve();
+
+          return prisma.removalRequest.create({
+            data: {
+              userId: session.user.id,
+              exposureId: exposure.id,
+              status: "PENDING",
+              method: result.rawData?.privacyEmail ? "EMAIL" : "FORM",
+              isProactive: true, // Mark as proactive opt-out
+              notes: `Proactive opt-out request. ${result.rawData?.optOutInstructions || ''}`,
+            },
+          });
+        })
+      );
+
+      console.log(`[Scan] Created ${proactiveOptOuts.length} proactive opt-out requests`);
+    }
 
     console.log(`[Scan] New: ${exposures.length}, Updated: ${updatedExposureIds.length}, Skipped: ${scanResults.length - newExposures.length - updatedExposureIds.length}`);
 

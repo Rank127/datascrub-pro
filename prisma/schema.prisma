@@ -167,6 +167,7 @@ model RemovalRequest {
   exposureId         String    @unique
   status             String    @default("PENDING")
   method             String
+  isProactive        Boolean   @default(false) // Proactive opt-out (not confirmed exposure)
   submittedAt        DateTime?
   completedAt        DateTime?
   attempts           Int       @default(0)
