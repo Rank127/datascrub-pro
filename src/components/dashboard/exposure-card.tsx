@@ -14,7 +14,7 @@ import {
   type ExposureStatus,
   type ExposureType,
 } from "@/lib/types";
-import { ExternalLink, Shield, Trash2, ListChecks, CheckCircle2, CircleDashed, HandHelping } from "lucide-react";
+import { ExternalLink, Shield, Trash2, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ExposureCardProps {
@@ -28,13 +28,9 @@ interface ExposureCardProps {
   status: ExposureStatus;
   isWhitelisted: boolean;
   firstFoundAt: Date;
-  requiresManualAction?: boolean;
-  manualActionTaken?: boolean;
   onWhitelist?: () => void;
   onUnwhitelist?: () => void;
   onRemove?: () => void;
-  onMarkDone?: () => void;
-  onMarkUndone?: () => void;
   selected?: boolean;
   onSelect?: (id: string) => void;
   showCheckbox?: boolean;
@@ -88,27 +84,20 @@ export function ExposureCard({
   status,
   isWhitelisted,
   firstFoundAt,
-  requiresManualAction,
-  manualActionTaken,
   onWhitelist,
   onUnwhitelist,
   onRemove,
-  onMarkDone,
-  onMarkUndone,
   selected,
   onSelect,
   showCheckbox = false,
   clickable = false,
 }: ExposureCardProps) {
   const displayName = sourceName || DataSourceNames[source] || source;
-  // Can only select for bulk removal if: active, not whitelisted, and NOT manual action
-  const canSelect = status === "ACTIVE" && !isWhitelisted && !requiresManualAction;
+  // Can only select for bulk removal if: active and not whitelisted
+  const canSelect = status === "ACTIVE" && !isWhitelisted;
 
   // Build the link URL based on the exposure type
   const getFilterUrl = () => {
-    if (requiresManualAction) {
-      return "/dashboard/manual-review";
-    }
     const params = new URLSearchParams();
     if (severity) params.set("severity", severity);
     if (status) params.set("status", status);
@@ -150,20 +139,6 @@ export function ExposureCard({
               >
                 {status.replace(/_/g, " ")}
               </Badge>
-              {requiresManualAction && (
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "border-0",
-                    manualActionTaken
-                      ? "bg-emerald-900/50 text-emerald-300"
-                      : "bg-amber-900/50 text-amber-300"
-                  )}
-                >
-                  <HandHelping className="h-3 w-3 mr-1" />
-                  {manualActionTaken ? "Done" : "Manual Action"}
-                </Badge>
-              )}
             </div>
 
             <h3 className="font-medium text-white truncate">
@@ -212,8 +187,8 @@ export function ExposureCard({
               </Button>
             )}
 
-            {/* Remove button - only show for items we can auto-remove (NOT manual action) */}
-            {!isWhitelisted && status === "ACTIVE" && !requiresManualAction && (
+            {/* Remove button - request opt-out from broker */}
+            {!isWhitelisted && status === "ACTIVE" && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -238,31 +213,6 @@ export function ExposureCard({
               </Button>
             )}
 
-            {requiresManualAction && !manualActionTaken && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-amber-400 border-amber-500/50 hover:bg-amber-500/10 hover:text-emerald-400 hover:border-emerald-400/50"
-                onClick={onMarkDone}
-                title="Mark as done"
-              >
-                <CheckCircle2 className="h-4 w-4 mr-1" />
-                Mark Done
-              </Button>
-            )}
-
-            {requiresManualAction && manualActionTaken && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-emerald-400 border-emerald-500/50 hover:bg-emerald-500/10 hover:text-amber-400 hover:border-amber-400/50"
-                onClick={onMarkUndone}
-                title="Mark as not done"
-              >
-                <CircleDashed className="h-4 w-4 mr-1" />
-                Undo Done
-              </Button>
-            )}
           </div>
         </div>
       </CardContent>

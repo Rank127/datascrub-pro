@@ -29,7 +29,6 @@ import {
   ChevronRight,
   Trash2,
   ShieldCheck,
-  HandHelping,
   SendHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -47,9 +46,6 @@ interface Exposure {
   status: ExposureStatus;
   isWhitelisted: boolean;
   firstFoundAt: string;
-  requiresManualAction: boolean;
-  manualActionTaken: boolean;
-  manualActionTakenAt: string | null;
   removalRequest?: {
     id: string;
     status: string;
@@ -60,11 +56,6 @@ interface Exposure {
 interface ExposureStats {
   byStatus: Record<string, number>;
   bySeverity: Record<string, number>;
-  manualAction: {
-    total: number;
-    done: number;
-    pending: number;
-  };
   totalRemovalRequests: number;
 }
 
@@ -85,14 +76,10 @@ function ExposuresPageContent() {
   const [severityFilter, setSeverityFilter] = useState<string>(
     searchParams.get("severity") || "all"
   );
-  const [manualActionFilter, setManualActionFilter] = useState<string>(
-    searchParams.get("manualAction") || "all"
-  );
 
-  // Get only actionable exposures (active, not whitelisted, NOT manual action)
-  // Manual action items require user to visit external site - can't be auto-removed
+  // Get only actionable exposures (active, not whitelisted)
   const actionableExposures = exposures.filter(
-    (e) => e.status === "ACTIVE" && !e.isWhitelisted && !e.requiresManualAction
+    (e) => e.status === "ACTIVE" && !e.isWhitelisted
   );
   const allSelected = actionableExposures.length > 0 &&
     actionableExposures.every((e) => selectedIds.has(e.id));
@@ -124,13 +111,6 @@ function ExposuresPageContent() {
       const params = new URLSearchParams({ page: page.toString() });
       if (statusFilter !== "all") params.set("status", statusFilter);
       if (severityFilter !== "all") params.set("severity", severityFilter);
-      // Only filter by manual action if explicitly selected
-      if (manualActionFilter !== "all") {
-        params.set("manualAction", manualActionFilter);
-      }
-      // Note: We no longer exclude manual items by default since many exposures
-      // have requiresManualAction=true but can still be processed automatically
-
       const response = await fetch(`/api/exposures?${params}`);
       if (response.ok) {
         const data = await response.json();
@@ -143,7 +123,7 @@ function ExposuresPageContent() {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, severityFilter, manualActionFilter]);
+  }, [page, statusFilter, severityFilter]);
 
   useEffect(() => {
     fetchExposures();
@@ -178,40 +158,6 @@ function ExposuresPageContent() {
       }
     } catch (error) {
       console.error("Failed to unwhitelist:", error);
-    }
-  };
-
-  const handleMarkDone = async (exposureId: string) => {
-    try {
-      const response = await fetch("/api/exposures", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ exposureId, action: "markDone" }),
-      });
-
-      if (response.ok) {
-        toast.success("Marked as done");
-        fetchExposures();
-      }
-    } catch (error) {
-      console.error("Failed to mark as done:", error);
-      toast.error("Failed to mark as done");
-    }
-  };
-
-  const handleMarkUndone = async (exposureId: string) => {
-    try {
-      const response = await fetch("/api/exposures", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ exposureId, action: "markUndone" }),
-      });
-
-      if (response.ok) {
-        fetchExposures();
-      }
-    } catch (error) {
-      console.error("Failed to mark as undone:", error);
     }
   };
 
@@ -377,19 +323,6 @@ function ExposuresPageContent() {
             <p className="text-sm text-slate-400">Removed</p>
           </CardContent>
         </Card>
-        <Link href="/dashboard/manual-review">
-          <Card className="bg-slate-800/50 border-slate-700 border-amber-700/50 hover:bg-slate-800/70 cursor-pointer transition-colors">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2">
-                <HandHelping className="h-5 w-5 text-amber-400" />
-                <div className="text-2xl font-bold text-amber-400">
-                  {stats?.manualAction?.pending || 0}
-                </div>
-              </div>
-              <p className="text-sm text-slate-400">Manual Review →</p>
-            </CardContent>
-          </Card>
-        </Link>
       </div>
 
       {/* Filters */}
@@ -533,13 +466,9 @@ function ExposuresPageContent() {
                   status={exposure.status}
                   isWhitelisted={exposure.isWhitelisted}
                   firstFoundAt={new Date(exposure.firstFoundAt)}
-                  requiresManualAction={exposure.requiresManualAction}
-                  manualActionTaken={exposure.manualActionTaken}
                   onWhitelist={() => handleWhitelist(exposure.id)}
                   onUnwhitelist={() => handleUnwhitelist(exposure.id)}
                   onRemove={() => handleRemove(exposure.id)}
-                  onMarkDone={() => handleMarkDone(exposure.id)}
-                  onMarkUndone={() => handleMarkUndone(exposure.id)}
                   showCheckbox={true}
                   selected={selectedIds.has(exposure.id)}
                   onSelect={toggleSelect}

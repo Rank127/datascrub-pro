@@ -28,7 +28,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
-import { trackRemovalRequested, trackManualReviewCompleted } from "@/components/analytics/google-analytics";
+import { trackRemovalRequested } from "@/components/analytics/google-analytics";
 import type { DataSource, Severity, ExposureStatus, ExposureType } from "@/lib/types";
 
 // AI Protection source categories
@@ -52,8 +52,6 @@ interface AIExposure {
   status: ExposureStatus;
   isWhitelisted: boolean;
   firstFoundAt: string;
-  requiresManualAction: boolean;
-  manualActionTaken: boolean;
 }
 
 interface AIStats {
@@ -151,33 +149,6 @@ export default function AIProtectionPage() {
       }
     } catch (error) {
       toast.error("Failed to submit opt-out request");
-    }
-  };
-
-  const handleMarkDone = async (exposureId: string) => {
-    try {
-      const allExposures = [
-        ...(data?.exposures.aiTraining || []),
-        ...(data?.exposures.facialRecognition || []),
-        ...(data?.exposures.voiceCloning || []),
-      ];
-      const exposure = allExposures.find(e => e.id === exposureId);
-      const response = await fetch("/api/exposures", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ exposureId, action: "markDone" }),
-      });
-
-      if (response.ok) {
-        // Track AI manual review completion
-        if (exposure) {
-          trackManualReviewCompleted(exposure.sourceName);
-        }
-        toast.success("Marked as done");
-        fetchAIProtectionData();
-      }
-    } catch (error) {
-      toast.error("Failed to mark as done");
     }
   };
 
@@ -510,10 +481,7 @@ export default function AIProtectionPage() {
                   status={exposure.status}
                   isWhitelisted={exposure.isWhitelisted}
                   firstFoundAt={new Date(exposure.firstFoundAt)}
-                  requiresManualAction={exposure.requiresManualAction}
-                  manualActionTaken={exposure.manualActionTaken}
                   onRemove={() => handleOptOut(exposure.id)}
-                  onMarkDone={() => handleMarkDone(exposure.id)}
                 />
               ))}
             </div>
@@ -551,10 +519,7 @@ export default function AIProtectionPage() {
                       status={exposure.status}
                       isWhitelisted={exposure.isWhitelisted}
                       firstFoundAt={new Date(exposure.firstFoundAt)}
-                      requiresManualAction={exposure.requiresManualAction}
-                      manualActionTaken={exposure.manualActionTaken}
                       onRemove={() => handleOptOut(exposure.id)}
-                      onMarkDone={() => handleMarkDone(exposure.id)}
                     />
                   ))}
                 </div>
@@ -594,10 +559,7 @@ export default function AIProtectionPage() {
                       status={exposure.status}
                       isWhitelisted={exposure.isWhitelisted}
                       firstFoundAt={new Date(exposure.firstFoundAt)}
-                      requiresManualAction={exposure.requiresManualAction}
-                      manualActionTaken={exposure.manualActionTaken}
                       onRemove={() => handleOptOut(exposure.id)}
-                      onMarkDone={() => handleMarkDone(exposure.id)}
                     />
                   ))}
                 </div>
@@ -637,10 +599,7 @@ export default function AIProtectionPage() {
                       status={exposure.status}
                       isWhitelisted={exposure.isWhitelisted}
                       firstFoundAt={new Date(exposure.firstFoundAt)}
-                      requiresManualAction={exposure.requiresManualAction}
-                      manualActionTaken={exposure.manualActionTaken}
                       onRemove={() => handleOptOut(exposure.id)}
-                      onMarkDone={() => handleMarkDone(exposure.id)}
                     />
                   ))}
                 </div>
