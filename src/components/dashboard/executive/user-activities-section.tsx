@@ -699,34 +699,38 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
                 <div className="bg-slate-800/50 rounded-lg p-3">
                   <p className="text-xs text-slate-400 mb-1">Action</p>
                   <Badge variant="outline" className="text-xs">
-                    {selectedItem.action.replace(/_/g, " ")}
+                    {selectedItem.action?.replace(/_/g, " ") || "—"}
                   </Badge>
                 </div>
                 <div className="bg-slate-800/50 rounded-lg p-3">
                   <p className="text-xs text-slate-400 mb-1">Status</p>
-                  {selectedItem.success ? (
-                    <div className="flex items-center gap-1 text-emerald-400">
-                      <CheckCircle className="h-4 w-4" />
-                      <span className="text-sm">Success</span>
-                    </div>
+                  {selectedItem.success !== undefined ? (
+                    selectedItem.success ? (
+                      <div className="flex items-center gap-1 text-emerald-400">
+                        <CheckCircle className="h-4 w-4" />
+                        <span className="text-sm">Success</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-red-400">
+                        <XCircle className="h-4 w-4" />
+                        <span className="text-sm">Failed</span>
+                      </div>
+                    )
                   ) : (
-                    <div className="flex items-center gap-1 text-red-400">
-                      <XCircle className="h-4 w-4" />
-                      <span className="text-sm">Failed</span>
-                    </div>
+                    <span className="text-sm text-slate-400">—</span>
                   )}
                 </div>
               </div>
 
               <div className="bg-slate-800/50 rounded-lg p-3">
                 <p className="text-xs text-slate-400 mb-1">Actor</p>
-                <p className="text-sm text-white">{selectedItem.actorEmail}</p>
+                <p className="text-sm text-white">{selectedItem.actorEmail || "—"}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-800/50 rounded-lg p-3">
                   <p className="text-xs text-slate-400 mb-1">Resource</p>
-                  <p className="text-sm text-white">{selectedItem.resource}</p>
+                  <p className="text-sm text-white">{selectedItem.resource || "—"}</p>
                 </div>
                 <div className="bg-slate-800/50 rounded-lg p-3">
                   <p className="text-xs text-slate-400 mb-1">Target</p>
