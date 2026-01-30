@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { sendCCPARemovalRequest, sendRemovalUpdateEmail, sendRemovalStatusDigestEmail } from "@/lib/email";
+import { sendCCPARemovalRequest, sendRemovalStatusDigestEmail, queueRemovalStatusUpdate } from "@/lib/email";
 import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, getConsolidationParent, type DataBrokerInfo } from "./data-broker-directory";
 import { calculateVerifyAfterDate } from "./verification-service";
 import { attemptAutomatedOptOut, isAutomationEnabled } from "./browser-automation";
@@ -241,10 +241,11 @@ export async function executeRemoval(
             // Update removal request status
             await updateRemovalStatus(removalRequestId, "SUBMITTED");
 
-            // Send notification to user (unless skipped for bulk operations)
+            // Queue notification for daily digest (unless skipped for bulk operations)
             if (!skipUserNotification) {
-              await sendRemovalUpdateEmail(userEmail, userName, {
+              await queueRemovalStatusUpdate(userId, {
                 sourceName: brokerInfo.name,
+                source: source,
                 status: "SUBMITTED",
                 dataType: formatDataType(dataType),
               });
@@ -306,8 +307,9 @@ export async function executeRemoval(
             await updateRemovalStatus(removalRequestId, "SUBMITTED");
 
             if (!skipUserNotification) {
-              await sendRemovalUpdateEmail(userEmail, userName, {
+              await queueRemovalStatusUpdate(userId, {
                 sourceName: brokerInfo.name,
+                source: source,
                 status: "SUBMITTED",
                 dataType: formatDataType(dataType),
               });
@@ -586,18 +588,17 @@ export async function markRemovalCompleted(
     });
   });
 
-  // Send completion email
-  if (request.user.email) {
-    const emailMessage = subsidiaries.length > 0
-      ? `${request.exposure.sourceName} (plus ${consolidatedExposureIds.length} related sites)`
-      : request.exposure.sourceName;
+  // Queue completion notification for daily digest
+  const emailMessage = subsidiaries.length > 0
+    ? `${request.exposure.sourceName} (plus ${consolidatedExposureIds.length} related sites)`
+    : request.exposure.sourceName;
 
-    sendRemovalUpdateEmail(request.user.email, request.user.name || "", {
-      sourceName: emailMessage,
-      status: "COMPLETED",
-      dataType: formatDataType(request.exposure.dataType),
-    }).catch(console.error);
-  }
+  queueRemovalStatusUpdate(userId, {
+    sourceName: emailMessage,
+    source: source,
+    status: "COMPLETED",
+    dataType: formatDataType(request.exposure.dataType),
+  }).catch(console.error);
 
   console.log(`[Removal] Completed removal for ${source}, consolidated ${consolidatedExposureIds.length} subsidiary exposures`);
 
@@ -911,10 +912,11 @@ export async function retryFailedRemoval(
           data: { status: "REMOVAL_IN_PROGRESS" },
         });
 
-        // Notify user (unless batching)
+        // Queue notification for daily digest (unless batching)
         if (!skipUserNotification) {
-          await sendRemovalUpdateEmail(userEmail, userName, {
+          await queueRemovalStatusUpdate(request.userId, {
             sourceName: request.exposure.sourceName,
+            source: request.exposure.source,
             status: "SUBMITTED",
             dataType: formatDataType(request.exposure.dataType),
           }).catch(console.error);

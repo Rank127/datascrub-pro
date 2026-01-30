@@ -2030,3 +2030,225 @@ export async function sendFamilyMemberRemovedEmail(
     }
   );
 }
+
+// ==========================================
+// Batched Removal Status Updates (Preference-Aware)
+// ==========================================
+
+/**
+ * Queue a removal status update for daily digest email.
+ * Checks user's removalUpdates preference before queueing.
+ * Updates are batched and sent once daily instead of immediately.
+ *
+ * @returns true if queued, false if user has disabled removal updates
+ */
+export async function queueRemovalStatusUpdate(
+  userId: string,
+  update: {
+    sourceName: string;
+    source: string;
+    dataType: string;
+    status: "SUBMITTED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
+  }
+): Promise<{ queued: boolean; reason?: string }> {
+  // Get user with notification preferences
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      email: true,
+      name: true,
+      emailNotifications: true,
+      removalUpdates: true,
+    },
+  });
+
+  if (!user) {
+    return { queued: false, reason: "User not found" };
+  }
+
+  // Check if user has disabled email notifications entirely
+  if (!user.emailNotifications) {
+    console.log(`[Email] Skipping removal update for ${userId} - email notifications disabled`);
+    return { queued: false, reason: "Email notifications disabled" };
+  }
+
+  // Check if user has disabled removal status updates specifically
+  if (!user.removalUpdates) {
+    console.log(`[Email] Skipping removal update for ${userId} - removal updates disabled`);
+    return { queued: false, reason: "Removal updates disabled" };
+  }
+
+  // Queue the update in EmailQueue with special type for batching
+  await prisma.emailQueue.create({
+    data: {
+      toEmail: user.email,
+      subject: `Removal Update: ${update.sourceName}`, // Will be replaced by digest subject
+      htmlContent: "", // Will be replaced by digest content
+      emailType: "REMOVAL_STATUS_PENDING", // Special type for pending batch
+      priority: 6, // Lower priority than critical emails
+      userId: userId,
+      context: JSON.stringify({
+        userName: user.name || "",
+        update: update,
+        queuedAt: new Date().toISOString(),
+      }),
+      status: "QUEUED",
+      processAt: new Date(), // Will be processed by daily digest cron
+    },
+  });
+
+  console.log(`[Email] Queued removal update for ${user.email}: ${update.sourceName} - ${update.status}`);
+  return { queued: true };
+}
+
+/**
+ * Process all pending removal status updates and send batched digest emails.
+ * Should be called once daily by a cron job.
+ * Groups updates by user and sends one digest email per user.
+ *
+ * @returns Statistics about processed updates
+ */
+export async function processPendingRemovalDigests(): Promise<{
+  usersProcessed: number;
+  emailsSent: number;
+  updatesProcessed: number;
+  errors: number;
+}> {
+  const stats = { usersProcessed: 0, emailsSent: 0, updatesProcessed: 0, errors: 0 };
+
+  // Get all pending removal status updates
+  const pendingUpdates = await prisma.emailQueue.findMany({
+    where: {
+      emailType: "REMOVAL_STATUS_PENDING",
+      status: "QUEUED",
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  if (pendingUpdates.length === 0) {
+    console.log("[Email Digest] No pending removal updates to process");
+    return stats;
+  }
+
+  console.log(`[Email Digest] Processing ${pendingUpdates.length} pending removal updates`);
+
+  // Group updates by user
+  const userUpdates = new Map<string, {
+    email: string;
+    name: string;
+    updates: Array<{
+      sourceName: string;
+      source: string;
+      dataType: string;
+      status: "SUBMITTED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
+    }>;
+    queueIds: string[];
+  }>();
+
+  for (const queueItem of pendingUpdates) {
+    if (!queueItem.userId || !queueItem.context) continue;
+
+    try {
+      const context = JSON.parse(queueItem.context);
+      const userId = queueItem.userId;
+
+      if (!userUpdates.has(userId)) {
+        userUpdates.set(userId, {
+          email: queueItem.toEmail,
+          name: context.userName || "",
+          updates: [],
+          queueIds: [],
+        });
+      }
+
+      userUpdates.get(userId)!.updates.push(context.update);
+      userUpdates.get(userId)!.queueIds.push(queueItem.id);
+      stats.updatesProcessed++;
+    } catch (error) {
+      console.error(`[Email Digest] Error parsing queue item ${queueItem.id}:`, error);
+      stats.errors++;
+    }
+  }
+
+  console.log(`[Email Digest] Grouped updates for ${userUpdates.size} users`);
+
+  // Send digest email to each user
+  for (const [userId, data] of userUpdates) {
+    try {
+      // Re-check user preferences (they may have changed)
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { emailNotifications: true, removalUpdates: true },
+      });
+
+      if (!user?.emailNotifications || !user?.removalUpdates) {
+        console.log(`[Email Digest] Skipping user ${userId} - notifications now disabled`);
+        // Mark as sent (skipped) to clear the queue
+        await prisma.emailQueue.updateMany({
+          where: { id: { in: data.queueIds } },
+          data: { status: "SENT", sentAt: new Date() },
+        });
+        continue;
+      }
+
+      // Organize updates by status
+      const digest: RemovalDigestData = {
+        completed: [],
+        inProgress: [],
+        submitted: [],
+        failed: [],
+      };
+
+      for (const update of data.updates) {
+        const item = {
+          sourceName: update.sourceName,
+          source: update.source,
+          dataType: update.dataType,
+          status: update.status,
+        };
+
+        switch (update.status) {
+          case "COMPLETED":
+            digest.completed.push(item);
+            break;
+          case "IN_PROGRESS":
+            digest.inProgress.push(item);
+            break;
+          case "SUBMITTED":
+            digest.submitted.push(item);
+            break;
+          case "FAILED":
+            digest.failed.push(item);
+            break;
+        }
+      }
+
+      // Send the digest email
+      const result = await sendRemovalStatusDigestEmail(data.email, data.name, digest);
+
+      if (result.success) {
+        stats.emailsSent++;
+        // Mark queue items as sent
+        await prisma.emailQueue.updateMany({
+          where: { id: { in: data.queueIds } },
+          data: { status: "SENT", sentAt: new Date() },
+        });
+        console.log(`[Email Digest] Sent digest to ${data.email}: ${data.updates.length} updates`);
+      } else {
+        stats.errors++;
+        console.error(`[Email Digest] Failed to send to ${data.email}:`, result);
+      }
+
+      stats.usersProcessed++;
+
+      // Small delay between sends
+      await new Promise(resolve => setTimeout(resolve, 200));
+    } catch (error) {
+      console.error(`[Email Digest] Error processing user ${userId}:`, error);
+      stats.errors++;
+    }
+  }
+
+  console.log(`[Email Digest] Complete: ${stats.emailsSent} emails sent to ${stats.usersProcessed} users, ${stats.updatesProcessed} updates processed, ${stats.errors} errors`);
+  return stats;
+}
