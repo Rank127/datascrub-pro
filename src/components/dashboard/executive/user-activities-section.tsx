@@ -1,9 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { ActivitiesMetrics } from "@/lib/executive/types";
 import { MetricCard } from "./metric-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -16,20 +25,28 @@ import {
   Users,
   UserPlus,
   Scan,
-  Shield,
   Activity,
-  Clock,
   CheckCircle,
   XCircle,
   Eye,
   Trophy,
+  ExternalLink,
+  Mail,
+  Calendar,
+  BarChart3,
+  FileText,
 } from "lucide-react";
 
 interface UserActivitiesSectionProps {
   data: ActivitiesMetrics;
 }
 
+type DialogType = "activeUsers7" | "activeUsers30" | "signup" | "scan" | "user" | "auditLog" | null;
+
 export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
+  const [dialogType, setDialogType] = useState<DialogType>(null);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleString("en-US", {
@@ -64,6 +81,26 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
     }
   };
 
+  const handleUserClick = (user: any) => {
+    setSelectedItem(user);
+    setDialogType("user");
+  };
+
+  const handleScanClick = (scan: any) => {
+    setSelectedItem(scan);
+    setDialogType("scan");
+  };
+
+  const handleAuditLogClick = (log: any) => {
+    setSelectedItem(log);
+    setDialogType("auditLog");
+  };
+
+  const closeDialog = () => {
+    setDialogType(null);
+    setSelectedItem(null);
+  };
+
   return (
     <div className="space-y-6">
       {/* Activity Metrics */}
@@ -73,12 +110,16 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
           value={data.activeUsersLast7Days}
           icon={Users}
           variant="success"
+          onClick={() => setDialogType("activeUsers7")}
+          active={dialogType === "activeUsers7"}
         />
         <MetricCard
           title="Active Users (30 days)"
           value={data.activeUsersLast30Days}
           icon={Activity}
           variant="info"
+          onClick={() => setDialogType("activeUsers30")}
+          active={dialogType === "activeUsers30"}
         />
         <MetricCard
           title="Recent Signups"
@@ -86,6 +127,8 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
           icon={UserPlus}
           variant="success"
           subtitle="Last 10 users"
+          onClick={() => setDialogType("signup")}
+          active={dialogType === "signup"}
         />
         <MetricCard
           title="Recent Scans"
@@ -93,6 +136,8 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
           icon={Scan}
           variant="info"
           subtitle="Last 10 scans"
+          onClick={() => setDialogType("scan")}
+          active={dialogType === "scan"}
         />
       </div>
 
@@ -117,7 +162,11 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
                 </TableHeader>
                 <TableBody>
                   {data.recentSignups.map((user) => (
-                    <TableRow key={user.id} className="border-slate-800">
+                    <TableRow
+                      key={user.id}
+                      className="border-slate-800 cursor-pointer hover:bg-slate-800/50 transition-colors"
+                      onClick={() => handleUserClick(user)}
+                    >
                       <TableCell>
                         <div>
                           <p className="text-white font-medium">{user.name || "—"}</p>
@@ -157,7 +206,11 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
                 </TableHeader>
                 <TableBody>
                   {data.recentScans.map((scan) => (
-                    <TableRow key={scan.id} className="border-slate-800">
+                    <TableRow
+                      key={scan.id}
+                      className="border-slate-800 cursor-pointer hover:bg-slate-800/50 transition-colors"
+                      onClick={() => handleScanClick(scan)}
+                    >
                       <TableCell className="text-slate-400 text-sm">
                         {scan.userEmail}
                       </TableCell>
@@ -202,7 +255,11 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
               </TableHeader>
               <TableBody>
                 {data.topUsersByActivity.map((user, index) => (
-                  <TableRow key={user.id} className="border-slate-800">
+                  <TableRow
+                    key={user.id}
+                    className="border-slate-800 cursor-pointer hover:bg-slate-800/50 transition-colors"
+                    onClick={() => handleUserClick(user)}
+                  >
                     <TableCell>
                       <span className={`font-bold ${index < 3 ? "text-amber-400" : "text-slate-500"}`}>
                         {index + 1}
@@ -255,7 +312,11 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
               </TableHeader>
               <TableBody>
                 {data.recentAuditLogs.map((log) => (
-                  <TableRow key={log.id} className="border-slate-800">
+                  <TableRow
+                    key={log.id}
+                    className="border-slate-800 cursor-pointer hover:bg-slate-800/50 transition-colors"
+                    onClick={() => handleAuditLogClick(log)}
+                  >
                     <TableCell className="text-slate-400 text-sm">
                       {log.actorEmail}
                     </TableCell>
@@ -287,6 +348,283 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Active Users Dialog */}
+      <Dialog open={dialogType === "activeUsers7" || dialogType === "activeUsers30"} onOpenChange={closeDialog}>
+        <DialogContent className="bg-slate-900 border-slate-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Users className="h-5 w-5 text-emerald-400" />
+              {dialogType === "activeUsers7" ? "Active Users (7 Days)" : "Active Users (30 Days)"}
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Users who have logged in or performed actions in the selected period.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-slate-800/50 rounded-lg p-4 text-center">
+                <p className="text-3xl font-bold text-white">
+                  {dialogType === "activeUsers7" ? data.activeUsersLast7Days : data.activeUsersLast30Days}
+                </p>
+                <p className="text-sm text-slate-400">Active Users</p>
+              </div>
+              <div className="bg-slate-800/50 rounded-lg p-4 text-center">
+                <p className="text-3xl font-bold text-emerald-400">
+                  {data.topUsersByActivity.length}
+                </p>
+                <p className="text-sm text-slate-400">Top Performers</p>
+              </div>
+            </div>
+            <div className="text-sm text-slate-500">
+              <p>Activity includes: logins, scans, profile updates, and removal requests.</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Detail Dialog */}
+      <Dialog open={dialogType === "user" && selectedItem !== null} onOpenChange={closeDialog}>
+        <DialogContent className="bg-slate-900 border-slate-800 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-emerald-400" />
+              User Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedItem && (
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-lg font-bold text-white">
+                    {(selectedItem.name || selectedItem.email || "?").charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-lg font-medium text-white">{selectedItem.name || "No name"}</p>
+                  <p className="text-sm text-slate-400">{selectedItem.email}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <p className="text-xs text-slate-400 mb-1">Plan</p>
+                  {getPlanBadge(selectedItem.plan)}
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <p className="text-xs text-slate-400 mb-1">Joined</p>
+                  <p className="text-sm text-white">
+                    {selectedItem.createdAt ? formatDate(selectedItem.createdAt) : "—"}
+                  </p>
+                </div>
+                {selectedItem.scansCount !== undefined && (
+                  <div className="bg-slate-800/50 rounded-lg p-3">
+                    <p className="text-xs text-slate-400 mb-1">Scans</p>
+                    <p className="text-lg font-bold text-blue-400">{selectedItem.scansCount}</p>
+                  </div>
+                )}
+                {selectedItem.exposuresCount !== undefined && (
+                  <div className="bg-slate-800/50 rounded-lg p-3">
+                    <p className="text-xs text-slate-400 mb-1">Exposures Found</p>
+                    <p className="text-lg font-bold text-amber-400">{selectedItem.exposuresCount}</p>
+                  </div>
+                )}
+              </div>
+
+              {selectedItem.lastActive && (
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <p className="text-xs text-slate-400 mb-1">Last Active</p>
+                  <p className="text-sm text-white">{formatDate(selectedItem.lastActive)}</p>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-slate-700 hover:bg-slate-800"
+                  onClick={() => {
+                    window.location.href = `mailto:${selectedItem.email}`;
+                  }}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Email User
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-slate-700 hover:bg-slate-800"
+                  onClick={() => {
+                    window.location.href = `/dashboard/executive?tab=users&search=${encodeURIComponent(selectedItem.email)}`;
+                    closeDialog();
+                  }}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Manage User
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Scan Detail Dialog */}
+      <Dialog open={dialogType === "scan" && selectedItem !== null} onOpenChange={closeDialog}>
+        <DialogContent className="bg-slate-900 border-slate-800 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Scan className="h-5 w-5 text-blue-400" />
+              Scan Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedItem && (
+            <div className="space-y-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <p className="text-xs text-slate-400 mb-1">Status</p>
+                  {getStatusBadge(selectedItem.status)}
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <p className="text-xs text-slate-400 mb-1">Exposures Found</p>
+                  <p className="text-lg font-bold text-amber-400">{selectedItem.exposuresFound}</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-800/50 rounded-lg p-3">
+                <p className="text-xs text-slate-400 mb-1">User</p>
+                <p className="text-sm text-white">{selectedItem.userEmail}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <p className="text-xs text-slate-400 mb-1">Started</p>
+                  <p className="text-sm text-white">{formatDate(selectedItem.createdAt)}</p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <p className="text-xs text-slate-400 mb-1">Scan ID</p>
+                  <p className="text-xs text-slate-400 font-mono">{selectedItem.id.slice(0, 8)}...</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-slate-700 hover:bg-slate-800"
+                  onClick={() => {
+                    window.location.href = `mailto:${selectedItem.userEmail}`;
+                  }}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Contact User
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Audit Log Detail Dialog */}
+      <Dialog open={dialogType === "auditLog" && selectedItem !== null} onOpenChange={closeDialog}>
+        <DialogContent className="bg-slate-900 border-slate-800 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <FileText className="h-5 w-5 text-purple-400" />
+              Audit Log Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedItem && (
+            <div className="space-y-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <p className="text-xs text-slate-400 mb-1">Action</p>
+                  <Badge variant="outline" className="text-xs">
+                    {selectedItem.action.replace(/_/g, " ")}
+                  </Badge>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <p className="text-xs text-slate-400 mb-1">Status</p>
+                  {selectedItem.success ? (
+                    <div className="flex items-center gap-1 text-emerald-400">
+                      <CheckCircle className="h-4 w-4" />
+                      <span className="text-sm">Success</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-red-400">
+                      <XCircle className="h-4 w-4" />
+                      <span className="text-sm">Failed</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-slate-800/50 rounded-lg p-3">
+                <p className="text-xs text-slate-400 mb-1">Actor</p>
+                <p className="text-sm text-white">{selectedItem.actorEmail}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <p className="text-xs text-slate-400 mb-1">Resource</p>
+                  <p className="text-sm text-white">{selectedItem.resource}</p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <p className="text-xs text-slate-400 mb-1">Target</p>
+                  <p className="text-sm text-white">{selectedItem.targetEmail || "—"}</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-800/50 rounded-lg p-3">
+                <p className="text-xs text-slate-400 mb-1">Timestamp</p>
+                <p className="text-sm text-white">{formatDate(selectedItem.createdAt)}</p>
+              </div>
+
+              <div className="bg-slate-800/50 rounded-lg p-3">
+                <p className="text-xs text-slate-400 mb-1">Log ID</p>
+                <p className="text-xs text-slate-400 font-mono">{selectedItem.id}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Signups Summary Dialog */}
+      <Dialog open={dialogType === "signup"} onOpenChange={closeDialog}>
+        <DialogContent className="bg-slate-900 border-slate-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-emerald-400" />
+              Recent Signups Summary
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Overview of the last {data.recentSignups.length} user registrations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-slate-800/50 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-white">{data.recentSignups.length}</p>
+                <p className="text-xs text-slate-400">Total</p>
+              </div>
+              <div className="bg-slate-800/50 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-blue-400">
+                  {data.recentSignups.filter(u => u.plan === "PRO").length}
+                </p>
+                <p className="text-xs text-slate-400">Pro</p>
+              </div>
+              <div className="bg-slate-800/50 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-emerald-400">
+                  {data.recentSignups.filter(u => u.plan === "ENTERPRISE").length}
+                </p>
+                <p className="text-xs text-slate-400">Enterprise</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-500">
+              Click on individual users in the table below for more details.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
