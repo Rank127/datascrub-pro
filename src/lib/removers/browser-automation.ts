@@ -157,10 +157,18 @@ const FORM_CONFIGS: Record<string, {
 };
 
 // Browserless.io configuration
+// FREE TIER: 1,000 units/month, 1 concurrent, 1 min max session
+// Set BROWSERLESS_DRY_RUN=true to simulate without using units
 interface BrowserlessConfig {
   apiKey: string;
   endpoint: string;
+  dryRun: boolean;
 }
+
+// Track usage to warn when approaching limits
+let browserlessUnitsUsed = 0;
+const BROWSERLESS_MONTHLY_LIMIT = 1000;
+const BROWSERLESS_WARNING_THRESHOLD = 800;
 
 function getBrowserlessConfig(): BrowserlessConfig | null {
   const apiKey = process.env.BROWSERLESS_API_KEY;
@@ -168,7 +176,52 @@ function getBrowserlessConfig(): BrowserlessConfig | null {
 
   return {
     apiKey,
-    endpoint: process.env.BROWSERLESS_ENDPOINT || "https://chrome.browserless.io",
+    endpoint: process.env.BROWSERLESS_ENDPOINT || "https://production-sfo.browserless.io",
+    dryRun: process.env.BROWSERLESS_DRY_RUN === "true",
+  };
+}
+
+/**
+ * Check if a broker can be automated (no blockers)
+ * Use this to pre-check before attempting automation
+ */
+export function canAutomateBroker(brokerKey: string): {
+  canAutomate: boolean;
+  reason?: string;
+} {
+  const formConfig = FORM_CONFIGS[brokerKey];
+
+  if (!formConfig) {
+    return { canAutomate: false, reason: "No form configuration" };
+  }
+
+  if (formConfig.hasCloudflare) {
+    return { canAutomate: false, reason: "Cloudflare bot protection" };
+  }
+
+  if (formConfig.requiresCaptcha && !isCaptchaSolverEnabled()) {
+    return { canAutomate: false, reason: "Requires CAPTCHA, solver not configured" };
+  }
+
+  return { canAutomate: true };
+}
+
+/**
+ * Get current Browserless usage stats
+ */
+export function getBrowserlessUsage(): {
+  unitsUsed: number;
+  limit: number;
+  remaining: number;
+  warningThreshold: number;
+  nearLimit: boolean;
+} {
+  return {
+    unitsUsed: browserlessUnitsUsed,
+    limit: BROWSERLESS_MONTHLY_LIMIT,
+    remaining: BROWSERLESS_MONTHLY_LIMIT - browserlessUnitsUsed,
+    warningThreshold: BROWSERLESS_WARNING_THRESHOLD,
+    nearLimit: browserlessUnitsUsed >= BROWSERLESS_WARNING_THRESHOLD,
   };
 }
 
@@ -206,7 +259,7 @@ async function executeBrowserlessForm(
     };
   }
 
-  // Check for Cloudflare bot protection
+  // Check for Cloudflare bot protection (no API call needed)
   if (formConfig.hasCloudflare) {
     return {
       success: false,
@@ -217,6 +270,37 @@ async function executeBrowserlessForm(
         `Visit ${formConfig.url} manually to submit opt-out`,
         "Or use email-based CCPA/GDPR request instead (recommended)",
       ],
+    };
+  }
+
+  // Check usage limits before making API call
+  const usage = getBrowserlessUsage();
+  if (usage.remaining <= 0) {
+    return {
+      success: false,
+      method: "MANUAL_REQUIRED",
+      message: `Browserless monthly limit reached (${usage.limit} units)`,
+      nextSteps: [
+        "Wait for monthly reset or upgrade plan",
+        `Visit ${formConfig.url} manually to submit opt-out`,
+      ],
+    };
+  }
+
+  if (usage.nearLimit) {
+    console.warn(`[Browserless] WARNING: ${usage.remaining} units remaining this month`);
+  }
+
+  // Dry-run mode - simulate without using API units
+  if (config.dryRun) {
+    console.log(`[Browserless] DRY-RUN: Would submit form for ${brokerKey}`);
+    console.log(`[Browserless] DRY-RUN: URL: ${formConfig.url}`);
+    console.log(`[Browserless] DRY-RUN: Fields: ${Object.keys(formConfig.fields).join(", ")}`);
+    return {
+      success: false,
+      method: "DRY_RUN",
+      message: `DRY-RUN: Form submission simulated for ${brokerKey}`,
+      nextSteps: ["Set BROWSERLESS_DRY_RUN=false to enable real submissions"],
     };
   }
 
@@ -359,6 +443,10 @@ export default async function ({ page, context }) {
         },
       }),
     });
+
+    // Track unit usage (each API call uses 1 unit)
+    browserlessUnitsUsed++;
+    console.log(`[Browserless] API call made. Units used this session: ${browserlessUnitsUsed}`);
 
     if (!response.ok) {
       const error = await response.text();
