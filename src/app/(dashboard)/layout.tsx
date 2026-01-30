@@ -4,7 +4,7 @@ import { useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 export default function DashboardLayout({
   children,
@@ -24,6 +24,7 @@ export default function DashboardLayout({
         {/* Mobile sidebar */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetContent side="left" className="w-64 p-0 bg-slate-900 border-slate-800">
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
             <Sidebar />
           </SheetContent>
         </Sheet>
