@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,7 +27,20 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+// Wrapper component to handle Suspense boundary for useSearchParams
 export default function ExecutiveDashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-cyan-500" />
+      </div>
+    }>
+      <ExecutiveDashboardContent />
+    </Suspense>
+  );
+}
+
+function ExecutiveDashboardContent() {
   useSession(); // Ensure user is authenticated
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
