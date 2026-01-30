@@ -87,6 +87,10 @@ function SettingsContent() {
   const [verificationPending, setVerificationPending] = useState(false);
   const [pendingPhone, setPendingPhone] = useState<string | null>(null);
 
+  // Security section inline messages
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [twoFactorMessage, setTwoFactorMessage] = useState<string | null>(null);
+
   // Fetch notification preferences
   const fetchNotificationPrefs = async () => {
     try {
@@ -1056,35 +1060,63 @@ function SettingsContent() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg">
-            <div>
-              <h4 className="font-medium text-white">Change Password</h4>
-              <p className="text-sm text-slate-400">
-                Update your account password
-              </p>
+          <div className="p-4 bg-slate-700/30 rounded-lg space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-white">Change Password</h4>
+                <p className="text-sm text-slate-400">
+                  Update your account password
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="border-slate-600"
+                onClick={() => setPasswordMessage("Password change coming soon. Contact support@ghostmydata.com to reset your password.")}
+              >
+                Change
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              className="border-slate-600"
-              onClick={() => setMessage({ type: "error", text: "Password change coming soon. Contact support@ghostmydata.com to reset your password." })}
-            >
-              Change
-            </Button>
+            {passwordMessage && (
+              <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-300 text-sm">
+                <XCircle className="h-4 w-4 shrink-0" />
+                <span>{passwordMessage}</span>
+                <button
+                  onClick={() => setPasswordMessage(null)}
+                  className="ml-auto text-xs underline hover:no-underline"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
           </div>
-          <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg">
-            <div>
-              <h4 className="font-medium text-white">Two-Factor Authentication</h4>
-              <p className="text-sm text-slate-400">
-                Add an extra layer of security to your account
-              </p>
+          <div className="p-4 bg-slate-700/30 rounded-lg space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-white">Two-Factor Authentication</h4>
+                <p className="text-sm text-slate-400">
+                  Add an extra layer of security to your account
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="border-slate-600"
+                onClick={() => setTwoFactorMessage("Two-factor authentication coming soon. We're working on adding this security feature.")}
+              >
+                Enable
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              className="border-slate-600"
-              onClick={() => setMessage({ type: "error", text: "Two-factor authentication coming soon. We're working on adding this security feature." })}
-            >
-              Enable
-            </Button>
+            {twoFactorMessage && (
+              <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-300 text-sm">
+                <XCircle className="h-4 w-4 shrink-0" />
+                <span>{twoFactorMessage}</span>
+                <button
+                  onClick={() => setTwoFactorMessage(null)}
+                  className="ml-auto text-xs underline hover:no-underline"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
           </div>
           <div className="flex items-center justify-between p-4 bg-red-500/10 rounded-lg">
             <div>
