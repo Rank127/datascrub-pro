@@ -22,6 +22,7 @@ import {
   Shield,
   Globe,
   AlertTriangle,
+  Crown,
 } from "lucide-react";
 import Link from "next/link";
 import { trackScanStarted, trackScanCompleted } from "@/components/analytics/google-analytics";
@@ -50,10 +51,27 @@ export default function ScanPage() {
   const [requiresUpgrade, setRequiresUpgrade] = useState(false);
   const [recentScans, setRecentScans] = useState<Scan[]>([]);
   const [loadingScans, setLoadingScans] = useState(true);
+  const [userPlan, setUserPlan] = useState<string>("FREE");
 
   useEffect(() => {
     fetchRecentScans();
+    fetchSubscription();
   }, []);
+
+  const fetchSubscription = async () => {
+    try {
+      const response = await fetch("/api/subscription");
+      if (response.ok) {
+        const data = await response.json();
+        setUserPlan(data.plan || "FREE");
+      }
+    } catch (err) {
+      console.error("Failed to fetch subscription:", err);
+    }
+  };
+
+  // FREE users can only do FULL scans to see their complete exposure
+  const isFreePlan = userPlan === "FREE";
 
   const fetchRecentScans = async () => {
     try {
@@ -147,45 +165,48 @@ export default function ScanPage() {
       </div>
 
       {/* Scan Type Selection */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card
-          className={`cursor-pointer transition-all ${
-            scanType === "QUICK"
-              ? "border-emerald-500 bg-emerald-500/10"
-              : "bg-slate-800/50 border-slate-700 hover:border-slate-600"
-          }`}
-          onClick={() => !isScanning && setScanType("QUICK")}
-        >
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-yellow-500" />
-              <CardTitle className="text-white">Quick Scan</CardTitle>
-            </div>
-            <CardDescription className="text-slate-400">
-              Check breach databases for your email addresses
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-1 text-sm text-slate-400">
-              <li className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-emerald-500" />
-                Have I Been Pwned check
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-emerald-500" />
-                Breach database monitoring
-              </li>
-              <li className="flex items-center gap-2">
-                <XCircle className="h-3 w-3 text-slate-600" />
-                Data broker search
-              </li>
-              <li className="flex items-center gap-2">
-                <XCircle className="h-3 w-3 text-slate-600" />
-                Social media scan
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+      <div className={`grid gap-4 ${isFreePlan ? "md:grid-cols-1 max-w-xl" : "md:grid-cols-2"}`}>
+        {/* Quick Scan - Only show for paid plans */}
+        {!isFreePlan && (
+          <Card
+            className={`cursor-pointer transition-all ${
+              scanType === "QUICK"
+                ? "border-emerald-500 bg-emerald-500/10"
+                : "bg-slate-800/50 border-slate-700 hover:border-slate-600"
+            }`}
+            onClick={() => !isScanning && setScanType("QUICK")}
+          >
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-yellow-500" />
+                <CardTitle className="text-white">Quick Scan</CardTitle>
+              </div>
+              <CardDescription className="text-slate-400">
+                Check breach databases for your email addresses
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-1 text-sm text-slate-400">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-3 w-3 text-emerald-500" />
+                  Have I Been Pwned check
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-3 w-3 text-emerald-500" />
+                  Breach database monitoring
+                </li>
+                <li className="flex items-center gap-2">
+                  <XCircle className="h-3 w-3 text-slate-600" />
+                  Data broker search
+                </li>
+                <li className="flex items-center gap-2">
+                  <XCircle className="h-3 w-3 text-slate-600" />
+                  Social media scan
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+        )}
 
         <Card
           className={`cursor-pointer transition-all ${
@@ -200,7 +221,7 @@ export default function ScanPage() {
               <Globe className="h-5 w-5 text-blue-500" />
               <CardTitle className="text-white">Full Scan</CardTitle>
               <Badge className="bg-emerald-500/20 text-emerald-400 border-0">
-                Recommended
+                {isFreePlan ? "Free Trial" : "Recommended"}
               </Badge>
             </div>
             <CardDescription className="text-slate-400">
@@ -226,6 +247,14 @@ export default function ScanPage() {
                 Dark web monitoring (Enterprise)
               </li>
             </ul>
+            {isFreePlan && (
+              <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                <p className="text-sm text-amber-400 flex items-center gap-2">
+                  <Crown className="h-4 w-4" />
+                  See your full exposure, then upgrade to remove your data automatically
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
