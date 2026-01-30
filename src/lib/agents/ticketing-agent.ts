@@ -487,23 +487,6 @@ export async function processNewTicket(ticketId: string): Promise<{
             plan: true,
           },
         },
-        scan: {
-          select: {
-            status: true,
-            error: true,
-          },
-        },
-        removalRequest: {
-          select: {
-            status: true,
-            attempts: true,
-            exposure: {
-              select: {
-                sourceName: true,
-              },
-            },
-          },
-        },
         comments: {
           orderBy: { createdAt: "asc" },
           include: {
@@ -514,6 +497,38 @@ export async function processNewTicket(ticketId: string): Promise<{
         },
       },
     });
+
+    // Fetch linked scan and removal request separately if IDs exist
+    let linkedScan = null;
+    let linkedRemoval = null;
+
+    if (ticket?.scanId) {
+      const scan = await prisma.scan.findUnique({
+        where: { id: ticket.scanId },
+        select: { status: true },
+      });
+      if (scan) {
+        linkedScan = { status: scan.status, error: null };
+      }
+    }
+
+    if (ticket?.removalRequestId) {
+      const removal = await prisma.removalRequest.findUnique({
+        where: { id: ticket.removalRequestId },
+        include: {
+          exposure: {
+            select: { sourceName: true },
+          },
+        },
+      });
+      if (removal) {
+        linkedRemoval = {
+          status: removal.status,
+          attempts: removal.attempts,
+          brokerName: removal.exposure?.sourceName,
+        };
+      }
+    }
 
     if (!ticket) {
       return { success: false, autoResolved: false, message: "Ticket not found" };
@@ -532,14 +547,8 @@ export async function processNewTicket(ticketId: string): Promise<{
       userEmail: ticket.user.email || "",
       userPlan: ticket.user.plan || "FREE",
       errorDetails: ticket.errorDetails,
-      linkedScan: ticket.scan,
-      linkedRemoval: ticket.removalRequest
-        ? {
-            status: ticket.removalRequest.status,
-            attempts: ticket.removalRequest.attempts,
-            brokerName: ticket.removalRequest.exposure?.sourceName,
-          }
-        : null,
+      linkedScan,
+      linkedRemoval,
       previousComments: ticket.comments.map((c) => ({
         content: c.content,
         isFromUser: c.author.role === "USER",
@@ -673,23 +682,6 @@ export async function processNewComment(
             plan: true,
           },
         },
-        scan: {
-          select: {
-            status: true,
-            error: true,
-          },
-        },
-        removalRequest: {
-          select: {
-            status: true,
-            attempts: true,
-            exposure: {
-              select: {
-                sourceName: true,
-              },
-            },
-          },
-        },
         comments: {
           orderBy: { createdAt: "asc" },
           include: {
@@ -710,6 +702,38 @@ export async function processNewComment(
       return { success: false, responded: false, message: "Ticket is closed" };
     }
 
+    // Fetch linked scan and removal request separately if IDs exist
+    let linkedScan2 = null;
+    let linkedRemoval2 = null;
+
+    if (ticket.scanId) {
+      const scan = await prisma.scan.findUnique({
+        where: { id: ticket.scanId },
+        select: { status: true },
+      });
+      if (scan) {
+        linkedScan2 = { status: scan.status, error: null };
+      }
+    }
+
+    if (ticket.removalRequestId) {
+      const removal = await prisma.removalRequest.findUnique({
+        where: { id: ticket.removalRequestId },
+        include: {
+          exposure: {
+            select: { sourceName: true },
+          },
+        },
+      });
+      if (removal) {
+        linkedRemoval2 = {
+          status: removal.status,
+          attempts: removal.attempts,
+          brokerName: removal.exposure?.sourceName,
+        };
+      }
+    }
+
     // Build base context with new comment
     const baseContext: TicketContext = {
       id: ticket.id,
@@ -723,14 +747,8 @@ export async function processNewComment(
       userEmail: ticket.user.email || "",
       userPlan: ticket.user.plan || "FREE",
       errorDetails: ticket.errorDetails,
-      linkedScan: ticket.scan,
-      linkedRemoval: ticket.removalRequest
-        ? {
-            status: ticket.removalRequest.status,
-            attempts: ticket.removalRequest.attempts,
-            brokerName: ticket.removalRequest.exposure?.sourceName,
-          }
-        : null,
+      linkedScan: linkedScan2,
+      linkedRemoval: linkedRemoval2,
       previousComments: ticket.comments
         .filter((c) => !c.isInternal)
         .map((c) => ({
