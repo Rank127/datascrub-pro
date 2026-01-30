@@ -378,7 +378,7 @@ function ExposuresPageContent() {
             <div className="space-y-1">
               <label className="text-xs text-slate-500">Status</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40 bg-slate-700/50 border-slate-600">
+                <SelectTrigger className="w-48 bg-slate-700/50 border-slate-600">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
