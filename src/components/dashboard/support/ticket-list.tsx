@@ -29,6 +29,7 @@ import {
   Lightbulb,
   HelpCircle,
   MessageSquare,
+  Bot,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -72,6 +73,7 @@ interface Ticket {
   _count?: {
     comments: number;
   };
+  hasPendingAiDraft?: boolean;
 }
 
 interface TicketListProps {
@@ -241,6 +243,12 @@ export function TicketList({
                                   <MessageSquare className="h-3 w-3" />
                                   {ticket._count.comments}
                                 </span>
+                              )}
+                              {ticket.hasPendingAiDraft && (
+                                <Badge className="bg-blue-500/20 text-blue-400 text-xs gap-1 px-1.5">
+                                  <Bot className="h-3 w-3" />
+                                  AI Draft
+                                </Badge>
                               )}
                             </div>
                             <p className="text-sm text-white font-medium line-clamp-1">

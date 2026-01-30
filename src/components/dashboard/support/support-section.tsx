@@ -14,6 +14,7 @@ import {
   CheckCircle,
   RefreshCw,
   Loader2,
+  Bot,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -25,6 +26,7 @@ interface SupportStats {
   resolvedToday: number;
   avgResolutionHours: number;
   ticketsByType: Record<string, number>;
+  pendingAiReview: number;
 }
 
 interface Ticket {
@@ -67,6 +69,7 @@ interface Ticket {
   _count?: {
     comments: number;
   };
+  hasPendingAiDraft?: boolean;
 }
 
 export function SupportSection() {
@@ -267,6 +270,28 @@ export function SupportSection() {
             variant={(stats.avgResolutionHours ?? 0) < 24 ? "success" : (stats.avgResolutionHours ?? 0) < 48 ? "warning" : "danger"}
             subtitle="Time to resolve"
           />
+        </div>
+      )}
+
+      {/* Pending AI Review Card - Highlighted */}
+      {stats && stats.pendingAiReview > 0 && (
+        <div
+          className="p-4 rounded-lg border-2 border-blue-500/50 bg-blue-500/10 flex items-center justify-between cursor-pointer hover:bg-blue-500/20 transition-colors"
+          onClick={() => handleCardClick("ai_review", "status", "OPEN")}
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-500/20">
+              <Bot className="h-5 w-5 text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm text-blue-300 font-medium">AI Drafts Pending Review</p>
+              <p className="text-xs text-slate-400">Click to review and approve AI-generated responses</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold text-blue-400">{stats.pendingAiReview}</p>
+            <Badge className="bg-blue-500/20 text-blue-300 text-xs">Needs Review</Badge>
+          </div>
         </div>
       )}
 

@@ -271,6 +271,7 @@ export async function getTicketStats() {
     ticketsByStatus,
     recentTickets,
     avgResolutionTime,
+    pendingAiDrafts,
   ] = await Promise.all([
     // Open tickets
     prisma.supportTicket.count({
@@ -343,6 +344,21 @@ export async function getTicketStats() {
         resolvedAt: true,
       },
     }),
+
+    // Count tickets with pending AI drafts (need review)
+    prisma.ticketComment.findMany({
+      where: {
+        content: { startsWith: "[AI DRAFT RESPONSE" },
+        isInternal: true,
+        ticket: {
+          status: { notIn: ["RESOLVED", "CLOSED"] },
+        },
+      },
+      select: {
+        ticketId: true,
+        content: true,
+      },
+    }),
   ]);
 
   // Calculate average resolution time in hours
@@ -368,6 +384,15 @@ export async function getTicketStats() {
     statusStats[s.status] = s._count.id;
   });
 
+  // Count unique tickets with pending (not approved/rejected) AI drafts
+  const ticketsWithPendingDrafts = new Set<string>();
+  pendingAiDrafts.forEach((draft) => {
+    // Only count as pending if not already approved or rejected
+    if (!draft.content.includes("APPROVED") && !draft.content.includes("REJECTED")) {
+      ticketsWithPendingDrafts.add(draft.ticketId);
+    }
+  });
+
   return {
     openTickets,
     inProgressTickets,
@@ -378,6 +403,7 @@ export async function getTicketStats() {
     ticketsByType: typeStats,
     ticketsByStatus: statusStats,
     recentTickets,
+    pendingAiReview: ticketsWithPendingDrafts.size,
   };
 }
 

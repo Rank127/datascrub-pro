@@ -33,6 +33,12 @@ import {
   Zap,
   Monitor,
   Globe,
+  Bot,
+  Edit3,
+  ThumbsUp,
+  ThumbsDown,
+  Sparkles,
+  AlertOctagon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
@@ -82,6 +88,27 @@ interface AutoFixSuggestion {
   action: string;
   actionType: "auto" | "manual" | "user_action";
   severity: "info" | "warning" | "critical";
+}
+
+interface AIDraft {
+  id: string;
+  content: string;
+  createdAt: string;
+  status: "pending" | "approved" | "rejected";
+}
+
+interface AIAnalysisData {
+  hasPendingDraft: boolean;
+  pendingDraft: AIDraft | null;
+  allDrafts: AIDraft[];
+  latestAnalysis: {
+    suggestedActions: string[];
+    managerReviewItems: string[];
+    createdAt: string;
+  } | null;
+  hasManagerReviewItems: boolean;
+  allManagerReviewItems: string[];
+  totalAnalysisCount: number;
 }
 
 interface Comment {
@@ -136,6 +163,14 @@ export function TicketDetailDialog({
   const [executingFix, setExecutingFix] = useState<string | null>(null);
   const [autoResolving, setAutoResolving] = useState(false);
 
+  // AI Draft Review state
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisData | null>(null);
+  const [loadingAiAnalysis, setLoadingAiAnalysis] = useState(false);
+  const [editedDraft, setEditedDraft] = useState("");
+  const [isEditingDraft, setIsEditingDraft] = useState(false);
+  const [approvingDraft, setApprovingDraft] = useState(false);
+  const [resolveOnApprove, setResolveOnApprove] = useState(true);
+
   const handleAutoResolve = async () => {
     setAutoResolving(true);
     try {
@@ -153,6 +188,7 @@ export function TicketDetailDialog({
           toast.warning(result.message || "Auto-resolve needs manual intervention");
         }
         fetchComments();
+        fetchAiAnalysis();
         onUpdated();
       } else {
         toast.error(result.error || "Auto-resolve failed");
@@ -161,6 +197,83 @@ export function TicketDetailDialog({
       toast.error("Failed to auto-resolve");
     } finally {
       setAutoResolving(false);
+    }
+  };
+
+  // Fetch AI analysis data
+  const fetchAiAnalysis = async () => {
+    try {
+      setLoadingAiAnalysis(true);
+      const response = await fetch(`/api/admin/support/tickets/${ticket.id}/ai-analysis`);
+      if (response.ok) {
+        const data = await response.json();
+        setAiAnalysis(data);
+        // If there's a pending draft, set it for editing
+        if (data.pendingDraft) {
+          setEditedDraft(data.pendingDraft.content);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch AI analysis:", error);
+    } finally {
+      setLoadingAiAnalysis(false);
+    }
+  };
+
+  // Approve AI draft
+  const handleApproveDraft = async () => {
+    if (!aiAnalysis?.pendingDraft) return;
+
+    setApprovingDraft(true);
+    try {
+      const response = await fetch(`/api/admin/support/tickets/${ticket.id}/approve-draft`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          draftCommentId: aiAnalysis.pendingDraft.id,
+          editedContent: editedDraft,
+          resolveTicket: resolveOnApprove,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success(result.message || "Draft approved and sent to user");
+        setIsEditingDraft(false);
+        fetchComments();
+        fetchAiAnalysis();
+        onUpdated();
+      } else {
+        toast.error(result.error || "Failed to approve draft");
+      }
+    } catch {
+      toast.error("Failed to approve draft");
+    } finally {
+      setApprovingDraft(false);
+    }
+  };
+
+  // Reject AI draft (mark as rejected without sending)
+  const handleRejectDraft = async () => {
+    if (!aiAnalysis?.pendingDraft) return;
+
+    try {
+      // Add a rejection note as internal comment
+      await fetch(`/api/admin/support/tickets/${ticket.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: `[AI DRAFT - REJECTED]\nOriginal draft was rejected. Admin chose to write custom response.`,
+          isInternal: true,
+        }),
+      });
+
+      toast.info("Draft rejected. You can now write a custom response.");
+      fetchAiAnalysis();
+      fetchComments();
+    } catch {
+      toast.error("Failed to reject draft");
     }
   };
 
@@ -249,9 +362,11 @@ export function TicketDetailDialog({
   useEffect(() => {
     if (open) {
       fetchComments();
+      fetchAiAnalysis();
       setStatus(ticket.status);
       setPriority(ticket.priority);
       setResolution(ticket.resolution || "");
+      setIsEditingDraft(false);
     }
   }, [open, ticket]);
 
@@ -462,6 +577,156 @@ export function TicketDetailDialog({
                     {ticket.browserInfo}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* AI Draft Review Section */}
+            {aiAnalysis?.hasPendingDraft && aiAnalysis.pendingDraft && ticket.status !== "CLOSED" && (
+              <div className="space-y-3 p-4 rounded-lg border-2 border-blue-500/50 bg-blue-500/10">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-blue-400 flex items-center gap-2">
+                    <Bot className="h-4 w-4" />
+                    AI Draft Response
+                    <Badge className="bg-blue-500/20 text-blue-300 text-xs">Pending Review</Badge>
+                  </h4>
+                  <span className="text-xs text-slate-500">
+                    {formatDistanceToNow(new Date(aiAnalysis.pendingDraft.createdAt), { addSuffix: true })}
+                  </span>
+                </div>
+
+                {isEditingDraft ? (
+                  <Textarea
+                    value={editedDraft}
+                    onChange={(e) => setEditedDraft(e.target.value)}
+                    className="bg-slate-800 border-slate-700 min-h-[120px] text-sm"
+                    placeholder="Edit the AI response..."
+                  />
+                ) : (
+                  <div className="p-3 bg-slate-800/50 rounded-lg text-sm text-slate-300 whitespace-pre-wrap">
+                    {aiAnalysis.pendingDraft.content}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  {!isEditingDraft ? (
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={() => setIsEditingDraft(true)}
+                        variant="outline"
+                        className="gap-1"
+                      >
+                        <Edit3 className="h-3 w-3" />
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleApproveDraft}
+                        disabled={approvingDraft}
+                        className="gap-1 bg-emerald-600 hover:bg-emerald-700"
+                      >
+                        {approvingDraft ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <ThumbsUp className="h-3 w-3" />
+                        )}
+                        Approve & Send
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleRejectDraft}
+                        variant="outline"
+                        className="gap-1 border-red-500/50 text-red-400 hover:bg-red-500/10"
+                      >
+                        <ThumbsDown className="h-3 w-3" />
+                        Reject
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setIsEditingDraft(false);
+                          setEditedDraft(aiAnalysis.pendingDraft!.content);
+                        }}
+                        variant="outline"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleApproveDraft}
+                        disabled={approvingDraft || !editedDraft.trim()}
+                        className="gap-1 bg-emerald-600 hover:bg-emerald-700"
+                      >
+                        {approvingDraft ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <ThumbsUp className="h-3 w-3" />
+                        )}
+                        Approve Edited
+                      </Button>
+                    </>
+                  )}
+                  <label className="flex items-center gap-2 text-xs text-slate-400 ml-auto">
+                    <input
+                      type="checkbox"
+                      checked={resolveOnApprove}
+                      onChange={(e) => setResolveOnApprove(e.target.checked)}
+                      className="rounded border-slate-600"
+                    />
+                    Resolve ticket on approve
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* AI Analysis Summary */}
+            {aiAnalysis?.latestAnalysis && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-purple-400 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  AI Analysis
+                </h4>
+                <div className="grid gap-2">
+                  {aiAnalysis.latestAnalysis.suggestedActions.length > 0 && (
+                    <div className="p-3 bg-slate-800/50 rounded-lg">
+                      <p className="text-xs text-slate-500 mb-1">Suggested Actions</p>
+                      <div className="flex flex-wrap gap-1">
+                        {aiAnalysis.latestAnalysis.suggestedActions.map((action, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {action.replace(/_/g, " ")}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {aiAnalysis.hasManagerReviewItems && (
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                      <p className="text-xs text-amber-400 mb-2 flex items-center gap-1">
+                        <AlertOctagon className="h-3 w-3" />
+                        Manager Review Required
+                      </p>
+                      <ul className="text-sm text-slate-300 space-y-1">
+                        {aiAnalysis.allManagerReviewItems.map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="text-amber-400">•</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Loading AI Analysis */}
+            {loadingAiAnalysis && (
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading AI analysis...
               </div>
             )}
 

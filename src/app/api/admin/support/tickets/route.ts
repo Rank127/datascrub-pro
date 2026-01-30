@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
     if (priority && priority !== "all") where.priority = priority;
     if (assignedToId) where.assignedToId = assignedToId === "unassigned" ? null : assignedToId;
 
-    const [tickets, total] = await Promise.all([
+    const [tickets, total, pendingDrafts] = await Promise.all([
       prisma.supportTicket.findMany({
         where,
         orderBy: [
@@ -95,7 +95,32 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.supportTicket.count({ where }),
+      // Get pending AI drafts for all tickets
+      prisma.ticketComment.findMany({
+        where: {
+          content: { startsWith: "[AI DRAFT RESPONSE" },
+          isInternal: true,
+        },
+        select: {
+          ticketId: true,
+          content: true,
+        },
+      }),
     ]);
+
+    // Create a set of ticket IDs with pending drafts
+    const ticketsWithPendingDrafts = new Set<string>();
+    pendingDrafts.forEach((draft) => {
+      if (!draft.content.includes("APPROVED") && !draft.content.includes("REJECTED")) {
+        ticketsWithPendingDrafts.add(draft.ticketId);
+      }
+    });
+
+    // Add hasPendingAiDraft flag to each ticket
+    const ticketsWithDraftFlag = tickets.map((ticket) => ({
+      ...ticket,
+      hasPendingAiDraft: ticketsWithPendingDrafts.has(ticket.id),
+    }));
 
     // Log access
     await logAudit({
@@ -110,7 +135,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({
-      tickets,
+      tickets: ticketsWithDraftFlag,
       total,
       limit,
       offset,
