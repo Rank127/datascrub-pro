@@ -195,10 +195,16 @@ export function TicketList({
           </div>
         ) : tickets.length === 0 ? (
           <div className="text-center py-12 text-slate-400">
-            No tickets found matching your filters.
+            No tickets found matching your filters. Try clearing filters to see all tickets.
           </div>
         ) : (
           <>
+            {(filters.status || filters.priority || filters.type) && (
+              <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400 text-sm">
+                Showing {pagination.total} ticket(s) matching filter: <strong>{filters.status || filters.priority || filters.type}</strong>.
+                Click &quot;Show All Tickets&quot; to see all.
+              </div>
+            )}
             <div className="rounded-lg border border-slate-800 overflow-hidden">
               <Table>
                 <TableHeader>

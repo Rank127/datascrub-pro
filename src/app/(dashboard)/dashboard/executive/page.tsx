@@ -11,6 +11,7 @@ import { AnalyticsSection } from "@/components/dashboard/executive/analytics-sec
 import { OperationsSection } from "@/components/dashboard/executive/operations-section";
 import { UserActivitiesSection } from "@/components/dashboard/executive/user-activities-section";
 import { UserManagementSection } from "@/components/dashboard/executive/user-management-section";
+import { SupportSection } from "@/components/dashboard/support/support-section";
 import { ExecutiveStatsResponse } from "@/lib/executive/types";
 import {
   Loader2,
@@ -22,6 +23,7 @@ import {
   Users,
   UserCog,
   ShieldAlert,
+  Headphones,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,7 +31,7 @@ export default function ExecutiveDashboardPage() {
   useSession(); // Ensure user is authenticated
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const defaultTab = ["finance", "analytics", "operations", "activities", "users"].includes(tabParam || "")
+  const defaultTab = ["finance", "analytics", "operations", "activities", "users", "support"].includes(tabParam || "")
     ? tabParam!
     : "finance";
 
@@ -189,6 +191,13 @@ export default function ExecutiveDashboardPage() {
             <UserCog className="h-5 w-5" />
             <span>Users</span>
           </TabsTrigger>
+          <TabsTrigger
+            value="support"
+            className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-cyan-500/30 data-[state=active]:text-cyan-300 data-[state=active]:border-cyan-500/50 data-[state=active]:border hover:bg-cyan-500/10 hover:text-cyan-400 transition-all"
+          >
+            <Headphones className="h-5 w-5" />
+            <span>Support</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="finance" className="mt-6 p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
@@ -209,6 +218,10 @@ export default function ExecutiveDashboardPage() {
 
         <TabsContent value="users" className="mt-6 p-4 rounded-lg border border-pink-500/20 bg-pink-500/5">
           <UserManagementSection />
+        </TabsContent>
+
+        <TabsContent value="support" className="mt-6 p-4 rounded-lg border border-cyan-500/20 bg-cyan-500/5">
+          <SupportSection />
         </TabsContent>
       </Tabs>
     </div>

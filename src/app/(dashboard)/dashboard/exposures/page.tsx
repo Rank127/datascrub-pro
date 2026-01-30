@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExposureCard } from "@/components/dashboard/exposure-card";
+import { Input } from "@/components/ui/input";
 import {
   AlertTriangle,
   Loader2,
@@ -34,6 +35,7 @@ import {
   ShieldAlert,
   Building2,
   X,
+  Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trackRemovalRequested } from "@/components/analytics/google-analytics";
@@ -81,6 +83,9 @@ function ExposuresPageContent() {
   const [severityFilter, setSeverityFilter] = useState<string>(
     searchParams.get("severity") || "all"
   );
+  const [searchQuery, setSearchQuery] = useState<string>(
+    searchParams.get("search") || ""
+  );
   const [showHelp, setShowHelp] = useState(false);
 
   // Get only actionable exposures (active, not whitelisted)
@@ -117,6 +122,7 @@ function ExposuresPageContent() {
       const params = new URLSearchParams({ page: page.toString() });
       if (statusFilter !== "all") params.set("status", statusFilter);
       if (severityFilter !== "all") params.set("severity", severityFilter);
+      if (searchQuery.trim()) params.set("search", searchQuery.trim());
       const response = await fetch(`/api/exposures?${params}`);
       if (response.ok) {
         const data = await response.json();
@@ -129,7 +135,7 @@ function ExposuresPageContent() {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, severityFilter]);
+  }, [page, statusFilter, severityFilter, searchQuery]);
 
   useEffect(() => {
     fetchExposures();
@@ -354,6 +360,21 @@ function ExposuresPageContent() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
+            <div className="space-y-1 flex-1 min-w-[200px] max-w-[300px]">
+              <label className="text-xs text-slate-500">Search Company</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setPage(1);
+                  }}
+                  placeholder="Search by company name..."
+                  className="pl-9 bg-slate-700/50 border-slate-600"
+                />
+              </div>
+            </div>
             <div className="space-y-1">
               <label className="text-xs text-slate-500">Status</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>

@@ -15,6 +15,7 @@ export async function GET(request: Request) {
     const status = searchParams.get("status");
     const severity = searchParams.get("severity");
     const source = searchParams.get("source");
+    const search = searchParams.get("search"); // Search by company/source name
     const manualAction = searchParams.get("manualAction"); // "required", "pending", "done", "all"
     const excludeManual = searchParams.get("excludeManual") === "true"; // Exclude manual review items
     const page = parseInt(searchParams.get("page") || "1");
@@ -34,6 +35,14 @@ export async function GET(request: Request) {
 
     if (source) {
       where.source = source;
+    }
+
+    // Search by company/source name (case-insensitive)
+    if (search && search.trim()) {
+      where.sourceName = {
+        contains: search.trim(),
+        mode: "insensitive",
+      };
     }
 
     // Exclude manual review items (for main exposures page)
@@ -57,6 +66,11 @@ export async function GET(request: Request) {
     if (status) conditions.push(`"status" = '${status}'`);
     if (severity) conditions.push(`"severity" = '${severity}'`);
     if (source) conditions.push(`"source" = '${source}'`);
+    // Search by source name (case-insensitive)
+    if (search && search.trim()) {
+      const escapedSearch = search.trim().replace(/'/g, "''");
+      conditions.push(`"sourceName" ILIKE '%${escapedSearch}%'`);
+    }
     if (excludeManual) conditions.push(`"requiresManualAction" = false`);
     if (manualAction === "required" || manualAction === "all") {
       conditions.push(`"requiresManualAction" = true`);

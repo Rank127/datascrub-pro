@@ -83,7 +83,7 @@ export function SupportSection() {
   const [activeCard, setActiveCard] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 20,
+    limit: 50,
     total: 0,
   });
 
@@ -172,22 +172,58 @@ export function SupportSection() {
     <div className="space-y-6">
       {/* Header with Refresh */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">Support Tickets</h2>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-white">Support Tickets</h2>
+          {(activeCard || filters.status || filters.priority || filters.type) && (
+            <Badge variant="outline" className="bg-amber-500/20 text-amber-400 border-amber-500/50">
+              Filtered: {filters.status || filters.priority || filters.type || activeCard}
+            </Badge>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {(activeCard || filters.status || filters.priority || filters.type) && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => {
+                setActiveCard(null);
+                setFilters({ status: "", priority: "", type: "" });
+                setPagination((prev) => ({ ...prev, page: 1 }));
+              }}
+              className="gap-2 bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              Show All Tickets
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards - Click to filter */}
       {stats && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+          <MetricCard
+            title="All Tickets"
+            value={pagination.total}
+            icon={Inbox}
+            variant="default"
+            subtitle="View all"
+            onClick={() => {
+              setActiveCard(null);
+              setFilters({ status: "", priority: "", type: "" });
+              setPagination((prev) => ({ ...prev, page: 1 }));
+            }}
+            active={!activeCard && !filters.status && !filters.priority && !filters.type}
+          />
           <MetricCard
             title="Open Tickets"
             value={stats.openTickets}
