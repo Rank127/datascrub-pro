@@ -29,6 +29,13 @@ export type AuditAction =
   | "GRANT_PERMISSION"
   | "REVOKE_PERMISSION"
 
+  // Plan/Subscription changes
+  | "UPDATE_USER_PLAN"
+  | "PLAN_UPGRADE"
+  | "PLAN_DOWNGRADE"
+  | "SUBSCRIPTION_CANCELED"
+  | "SUBSCRIPTION_UPDATED"
+
   // Authentication
   | "LOGIN"
   | "LOGOUT"

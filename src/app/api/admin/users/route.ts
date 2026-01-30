@@ -333,15 +333,25 @@ export async function PATCH(request: Request) {
 
       updateData.plan = newPlan;
 
-      // Log data access
-      await logDataAccess(
-        { id: session.user.id, email: currentUser?.email || "", role: actorRole },
-        "MODIFY_USER",
-        "users",
-        targetUser.id,
-        { id: targetUser.id, email: targetUser.email },
-        request
-      );
+      // Log plan change with details for tracking upgrades/downgrades
+      const { logAudit } = await import("@/lib/rbac/audit-log");
+      await logAudit({
+        actorId: session.user.id,
+        actorEmail: currentUser?.email || "",
+        actorRole: actorRole,
+        action: "UPDATE_USER_PLAN",
+        resource: "user_plan",
+        resourceId: targetUser.id,
+        targetUserId: targetUser.id,
+        targetEmail: targetUser.email,
+        details: {
+          previousPlan: targetUser.plan,
+          newPlan: newPlan,
+          userName: targetUser.email.split("@")[0],
+        },
+        ipAddress: request.headers.get("x-forwarded-for")?.split(",")[0] || undefined,
+        userAgent: request.headers.get("user-agent") || undefined,
+      });
     }
 
     if (Object.keys(updateData).length === 0) {

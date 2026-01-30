@@ -4,7 +4,45 @@ import { prisma } from "@/lib/db";
 import { stripe, getPlanFromPriceId } from "@/lib/stripe";
 import { sendSubscriptionEmail, sendRefundConfirmationEmail } from "@/lib/email";
 import { createPaymentIssueTicket } from "@/lib/support/ticket-service";
+import { logAudit } from "@/lib/rbac/audit-log";
 import Stripe from "stripe";
+
+// Helper to log plan changes for admin dashboard tracking
+async function logPlanChange(
+  userId: string,
+  userEmail: string,
+  previousPlan: string,
+  newPlan: string,
+  reason?: string
+) {
+  const planRank: Record<string, number> = { FREE: 0, PRO: 1, ENTERPRISE: 2 };
+  const prevRank = planRank[previousPlan] ?? 0;
+  const newRank = planRank[newPlan] ?? 0;
+
+  let action: "PLAN_UPGRADE" | "PLAN_DOWNGRADE" = "PLAN_UPGRADE";
+  if (newPlan === "FREE") {
+    action = "PLAN_DOWNGRADE";
+  } else if (newRank < prevRank) {
+    action = "PLAN_DOWNGRADE";
+  }
+
+  await logAudit({
+    actorId: "STRIPE_WEBHOOK",
+    actorEmail: "stripe@system",
+    actorRole: "SYSTEM",
+    action,
+    resource: "user_plan",
+    resourceId: userId,
+    targetUserId: userId,
+    targetEmail: userEmail,
+    details: {
+      previousPlan,
+      newPlan,
+      reason: reason || "Stripe subscription change",
+      source: "stripe_webhook",
+    },
+  });
+}
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -160,6 +198,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   // Find user by Stripe customer ID
   const existingSubscription = await prisma.subscription.findFirst({
     where: { stripeCustomerId: customerId },
+    include: { user: { select: { email: true, plan: true } } },
   });
 
   if (!existingSubscription) {
@@ -170,7 +209,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const priceId = subscription.items.data[0]?.price.id;
   const currentPeriodEnd = subscription.items.data[0]?.current_period_end;
   const periodEndDate = currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null;
-  const plan = getPlanFromPriceId(priceId || "");
+  const newPlan = getPlanFromPriceId(priceId || "");
+  const previousPlan = existingSubscription.user.plan;
   const status = subscription.status === "active" ? "active" :
                  subscription.status === "past_due" ? "past_due" : "canceled";
 
@@ -181,15 +221,26 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
         stripeSubscriptionId: subscription.id,
         stripePriceId: priceId,
         stripeCurrentPeriodEnd: periodEndDate,
-        plan,
+        plan: newPlan,
         status,
       },
     }),
     prisma.user.update({
       where: { id: existingSubscription.userId },
-      data: { plan },
+      data: { plan: newPlan },
     }),
   ]);
+
+  // Log plan change if plan actually changed
+  if (previousPlan !== newPlan) {
+    await logPlanChange(
+      existingSubscription.userId,
+      existingSubscription.user.email,
+      previousPlan,
+      newPlan,
+      "Subscription updated via Stripe"
+    );
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -197,11 +248,14 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
   const existingSubscription = await prisma.subscription.findFirst({
     where: { stripeCustomerId: customerId },
+    include: { user: { select: { email: true, plan: true } } },
   });
 
   if (!existingSubscription) {
     return;
   }
+
+  const previousPlan = existingSubscription.user.plan;
 
   await prisma.$transaction([
     prisma.subscription.update({
@@ -226,6 +280,26 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       },
     }),
   ]);
+
+  // Log the cancellation for admin dashboard
+  if (previousPlan !== "FREE") {
+    await logAudit({
+      actorId: "STRIPE_WEBHOOK",
+      actorEmail: "stripe@system",
+      actorRole: "SYSTEM",
+      action: "SUBSCRIPTION_CANCELED",
+      resource: "user_plan",
+      resourceId: existingSubscription.userId,
+      targetUserId: existingSubscription.userId,
+      targetEmail: existingSubscription.user.email,
+      details: {
+        previousPlan,
+        newPlan: "FREE",
+        reason: "Subscription canceled",
+        source: "stripe_webhook",
+      },
+    });
+  }
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
@@ -313,6 +387,8 @@ async function handleRefund(charge: Stripe.Charge) {
   const isFullRefund = charge.refunded && charge.amount === charge.amount_refunded;
 
   if (isFullRefund) {
+    const previousPlan = subscription.plan;
+
     // Full refund - cancel subscription and downgrade to FREE
     await prisma.$transaction([
       prisma.subscription.update({
@@ -337,6 +413,26 @@ async function handleRefund(charge: Stripe.Charge) {
         },
       }),
     ]);
+
+    // Log the refund-triggered cancellation for admin dashboard
+    if (previousPlan !== "FREE") {
+      await logAudit({
+        actorId: "STRIPE_WEBHOOK",
+        actorEmail: "stripe@system",
+        actorRole: "SYSTEM",
+        action: "SUBSCRIPTION_CANCELED",
+        resource: "user_plan",
+        resourceId: subscription.userId,
+        targetUserId: subscription.userId,
+        targetEmail: subscription.user?.email || "",
+        details: {
+          previousPlan,
+          newPlan: "FREE",
+          reason: `Full refund of $${refundAmount.toFixed(2)}`,
+          source: "stripe_refund",
+        },
+      });
+    }
 
     // Cancel the Stripe subscription if it exists
     if (subscription.stripeSubscriptionId) {

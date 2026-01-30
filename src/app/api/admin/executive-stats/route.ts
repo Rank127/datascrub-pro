@@ -613,7 +613,14 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
   });
 
   // Recent plan changes from audit logs
-  const planChangeActions = ["UPDATE_USER_PLAN", "MODIFY_USER_PLAN", "PLAN_UPGRADE", "PLAN_DOWNGRADE", "SUBSCRIPTION_UPDATED"];
+  const planChangeActions = [
+    "UPDATE_USER_PLAN",      // Admin manual change
+    "MODIFY_USER_PLAN",      // Legacy admin change
+    "PLAN_UPGRADE",          // Stripe upgrade
+    "PLAN_DOWNGRADE",        // Stripe downgrade
+    "SUBSCRIPTION_UPDATED",  // Legacy
+    "SUBSCRIPTION_CANCELED", // Stripe cancellation/refund
+  ];
   const recentPlanChangeLogs = await prisma.auditLog.findMany({
     where: {
       action: { in: planChangeActions },
