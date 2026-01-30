@@ -20,7 +20,7 @@ import { solveCaptcha, isCaptchaSolverEnabled, type CaptchaType } from "./captch
 // Browser automation result
 export interface AutomationResult {
   success: boolean;
-  method: "FORM_SUBMIT" | "API" | "MANUAL_REQUIRED";
+  method: "FORM_SUBMIT" | "API" | "MANUAL_REQUIRED" | "DRY_RUN";
   message: string;
   screenshotUrl?: string;
   confirmationCode?: string;
