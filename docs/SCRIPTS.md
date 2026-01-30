@@ -15,7 +15,7 @@ All scripts are located in the `/scripts/` directory and are designed for manual
 | `generate-banners.js` | Generate marketing banner images | node |
 | `check-payment-methods.ts` | Check/cleanup duplicate Stripe payment methods | tsx |
 | `update-billing-portal.ts` | Configure Stripe billing portal settings | tsx |
-| `fix-sandeep-subscription.ts` | Fix duplicate subscription issues | tsx |
+| `fix-user-subscription.ts` | Fix duplicate subscription issues | tsx |
 | `test-cancellation-flow.ts` | Test subscription cancellation flow | tsx |
 | `check-user-history.ts` | View user subscription history | tsx |
 
@@ -365,17 +365,21 @@ Checks for duplicate payment methods attached to a Stripe customer and optionall
 **How to run:**
 ```bash
 # Check for duplicates (read-only)
-npx tsx scripts/check-payment-methods.ts
+npx tsx scripts/check-payment-methods.ts cus_abc123
 
 # Remove duplicates (destructive)
-npx tsx scripts/check-payment-methods.ts --cleanup
+npx tsx scripts/check-payment-methods.ts cus_abc123 --cleanup
 ```
+
+**Arguments:**
+- `<customer_id>` - Stripe customer ID (required, starts with `cus_`)
+- `--cleanup` - Actually remove duplicates (default is read-only)
 
 **Expected Output:**
 ```
 === Payment Methods for Customer ===
 
-Customer ID: cus_xxx
+Customer ID: cus_abc123
 Found 3 payment method(s):
 
   ID: pm_xxx
@@ -389,11 +393,8 @@ Card: amex-1003-12/2027
 Count: 2 duplicates
 
 To clean up duplicates, run:
-  npx tsx scripts/check-payment-methods.ts --cleanup
+  npx tsx scripts/check-payment-methods.ts cus_abc123 --cleanup
 ```
-
-**Configuration:**
-Edit the `customerId` variable in the script to target different customers.
 
 ---
 
@@ -453,9 +454,9 @@ Features enabled:
 
 ---
 
-### 6. fix-sandeep-subscription.ts
+### 6. fix-user-subscription.ts
 
-**Location:** `/scripts/fix-sandeep-subscription.ts`
+**Location:** `/scripts/fix-user-subscription.ts`
 **Runtime:** TypeScript (tsx)
 **Lines:** ~200
 
@@ -465,8 +466,8 @@ Fixes duplicate subscription issues by syncing the database with the correct Str
 **What it does:**
 1. Finds all Stripe subscriptions for a customer
 2. Identifies the highest-tier active subscription
-3. Cancels duplicate subscriptions in Stripe
-4. Syncs database to match the correct subscription
+3. Cancels duplicate subscriptions in Stripe (with `--cancel-duplicates`)
+4. Syncs database to match the correct subscription (with `--fix`)
 5. Updates user's plan to match subscription
 
 **When to use:**
@@ -476,14 +477,26 @@ Fixes duplicate subscription issues by syncing the database with the correct Str
 
 **How to run:**
 ```bash
-npx tsx scripts/fix-sandeep-subscription.ts
+# Check current state (dry run)
+npx tsx scripts/fix-user-subscription.ts user@example.com
+
+# Apply fixes to database
+npx tsx scripts/fix-user-subscription.ts user@example.com --fix
+
+# Also cancel duplicates in Stripe
+npx tsx scripts/fix-user-subscription.ts user@example.com --fix --cancel-duplicates
 ```
 
+**Arguments:**
+- `<email>` - User email address (required)
+- `--fix` - Apply fixes (default is dry-run, read-only)
+- `--cancel-duplicates` - Cancel duplicate subscriptions in Stripe
+
 **Safety Measures:**
+- Default is dry-run mode (shows what would happen)
 - Preserves the highest-tier subscription
 - Cancels duplicates at period end (user keeps access)
 - Logs all actions for audit
-- Can be customized for specific users
 
 ---
 
@@ -538,11 +551,11 @@ Displays complete subscription history and account status for a user.
 
 **How to run:**
 ```bash
-npx tsx scripts/check-user-history.ts
+npx tsx scripts/check-user-history.ts user@example.com
 ```
 
-**Configuration:**
-Edit the email variable in the script to target different users.
+**Arguments:**
+- `<email>` - User email address (required)
 
 ---
 
