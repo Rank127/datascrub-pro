@@ -13,6 +13,11 @@ All scripts are located in the `/scripts/` directory and are designed for manual
 | `cleanup-fake-exposures.ts` | Remove fraudulent exposures | ts-node |
 | `convert-manual-to-proactive.ts` | Convert manual reviews to auto opt-out | tsx |
 | `generate-banners.js` | Generate marketing banner images | node |
+| `check-payment-methods.ts` | Check/cleanup duplicate Stripe payment methods | tsx |
+| `update-billing-portal.ts` | Configure Stripe billing portal settings | tsx |
+| `fix-sandeep-subscription.ts` | Fix duplicate subscription issues | tsx |
+| `test-cancellation-flow.ts` | Test subscription cancellation flow | tsx |
+| `check-user-history.ts` | View user subscription history | tsx |
 
 ---
 
@@ -333,3 +338,247 @@ The SEO Agent is a separate automated system located in `/src/lib/seo-agent/`. S
 | `index.ts` | Module exports |
 
 These run automatically via the `/api/cron/seo-agent` endpoint and don't require manual execution.
+
+---
+
+## Stripe & Subscription Scripts
+
+### 4. check-payment-methods.ts
+
+**Location:** `/scripts/check-payment-methods.ts`
+**Runtime:** TypeScript (tsx)
+**Lines:** ~95
+
+**Purpose:**
+Checks for duplicate payment methods attached to a Stripe customer and optionally removes them.
+
+**What it does:**
+1. Fetches all card payment methods for a customer
+2. Identifies duplicates (same brand, last4, expiry)
+3. Optionally removes duplicates, keeping the newest one
+
+**When to use:**
+- When a customer reports duplicate cards in billing portal
+- After payment method issues are reported
+- Periodic cleanup of customer accounts
+
+**How to run:**
+```bash
+# Check for duplicates (read-only)
+npx tsx scripts/check-payment-methods.ts
+
+# Remove duplicates (destructive)
+npx tsx scripts/check-payment-methods.ts --cleanup
+```
+
+**Expected Output:**
+```
+=== Payment Methods for Customer ===
+
+Customer ID: cus_xxx
+Found 3 payment method(s):
+
+  ID: pm_xxx
+  Brand: amex
+  Last 4: 1003
+  Exp: 12/2027
+  Created: 2026-01-29T...
+
+=== DUPLICATE PAYMENT METHODS FOUND ===
+Card: amex-1003-12/2027
+Count: 2 duplicates
+
+To clean up duplicates, run:
+  npx tsx scripts/check-payment-methods.ts --cleanup
+```
+
+**Configuration:**
+Edit the `customerId` variable in the script to target different customers.
+
+---
+
+### 5. update-billing-portal.ts
+
+**Location:** `/scripts/update-billing-portal.ts`
+**Runtime:** TypeScript (tsx)
+**Lines:** ~110
+
+**Purpose:**
+Configures Stripe's Customer Billing Portal with proper upgrade/downgrade and cancellation settings.
+
+**What it does:**
+1. Updates billing portal configuration in Stripe
+2. Enables subscription upgrades/downgrades between plans
+3. Configures cancellation to occur at period end (not immediately)
+4. Requires cancellation reasons from customers
+5. Enables payment method updates and invoice history
+
+**Features Configured:**
+- **Subscription Update:** Pro ↔ Enterprise with proration
+- **Cancellation:** At period end, with reason required
+- **Payment Methods:** Update enabled
+- **Invoice History:** Enabled
+- **Customer Info:** Email, address, phone, name updates
+
+**When to use:**
+- Initial setup of billing portal
+- After adding new subscription plans
+- When changing cancellation policies
+
+**How to run:**
+```bash
+npx tsx scripts/update-billing-portal.ts
+```
+
+**Expected Output:**
+```
+=== Updating Billing Portal Configuration ===
+
+Config ID: bpc_xxx
+
+✓ Configuration updated successfully!
+
+Features enabled:
+  - Subscription upgrade/downgrade between Pro and Enterprise
+  - Cancellation at period end (keeps access until billing cycle ends)
+  - Cancellation reasons required
+  - Payment method updates
+  - Invoice history
+  - Customer info updates
+```
+
+**Prerequisites:**
+- `STRIPE_SECRET_KEY` in `.env.local`
+- Valid product and price IDs in script
+
+---
+
+### 6. fix-sandeep-subscription.ts
+
+**Location:** `/scripts/fix-sandeep-subscription.ts`
+**Runtime:** TypeScript (tsx)
+**Lines:** ~200
+
+**Purpose:**
+Fixes duplicate subscription issues by syncing the database with the correct Stripe subscription state.
+
+**What it does:**
+1. Finds all Stripe subscriptions for a customer
+2. Identifies the highest-tier active subscription
+3. Cancels duplicate subscriptions in Stripe
+4. Syncs database to match the correct subscription
+5. Updates user's plan to match subscription
+
+**When to use:**
+- When a user has accidentally created multiple subscriptions
+- After payment failures cause subscription state mismatches
+- When database and Stripe are out of sync
+
+**How to run:**
+```bash
+npx tsx scripts/fix-sandeep-subscription.ts
+```
+
+**Safety Measures:**
+- Preserves the highest-tier subscription
+- Cancels duplicates at period end (user keeps access)
+- Logs all actions for audit
+- Can be customized for specific users
+
+---
+
+### 7. test-cancellation-flow.ts
+
+**Location:** `/scripts/test-cancellation-flow.ts`
+**Runtime:** TypeScript (tsx)
+**Lines:** ~180
+
+**Purpose:**
+Tests the subscription cancellation flow including email notifications.
+
+**What it does:**
+1. Simulates cancellation request via API
+2. Verifies `cancel_at_period_end` is set correctly
+3. Tests cancellation email template
+4. Tests reactivation flow
+5. Verifies reactivation email template
+
+**When to use:**
+- After implementing cancellation features
+- Before deploying cancellation changes to production
+- Testing email templates
+
+**How to run:**
+```bash
+npx tsx scripts/test-cancellation-flow.ts
+```
+
+---
+
+### 8. check-user-history.ts
+
+**Location:** `/scripts/check-user-history.ts`
+**Runtime:** TypeScript (tsx)
+**Lines:** ~100
+
+**Purpose:**
+Displays complete subscription history and account status for a user.
+
+**What it does:**
+1. Fetches user profile from database
+2. Retrieves subscription details
+3. Shows Stripe subscription status
+4. Lists payment history
+5. Displays audit log entries
+
+**When to use:**
+- Debugging user account issues
+- Investigating billing problems
+- Customer support investigations
+
+**How to run:**
+```bash
+npx tsx scripts/check-user-history.ts
+```
+
+**Configuration:**
+Edit the email variable in the script to target different users.
+
+---
+
+## Support Ticket Guidelines
+
+When responding to support tickets via the admin dashboard:
+
+### Do:
+- Be professional and courteous
+- Apologize for any inconvenience
+- Provide clear step-by-step directions
+- Ask users to refresh the page
+- Point users to the correct feature/location
+
+### Don't:
+- Reveal internal system details
+- Mention bugs or code fixes
+- Use technical jargon
+- Share staff member names (use "GhostMyData Support")
+- Admit to system failures
+
+### Example Response:
+```
+Hi there,
+
+Thank you for reaching out! We apologize for any inconvenience.
+
+Please refresh your page and you'll find the [Feature] in the [Location].
+
+**To [do the thing]:**
+1. Go to **Dashboard → [Section]**
+2. Look for the **"[Feature Name]"** at the top
+3. [Additional steps...]
+
+If you have any other questions, we're happy to help!
+
+Best regards,
+GhostMyData Support Team
+```

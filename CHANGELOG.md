@@ -15,6 +15,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.26.0] - 2026-01-30
+
+### Added
+- **Exposures Search Feature** (`/dashboard/exposures`)
+  - New search input to filter exposures by company/source name
+  - Case-insensitive search with real-time filtering
+  - Works with existing status and severity filters
+  - API updated to support `search` query parameter
+
+- **Support Tab in Executive Dashboard** (`/dashboard/executive?tab=support`)
+  - Full ticket management for administrators
+  - Stats cards: All Tickets, Open, In Progress, Urgent, Resolved Today, Avg Resolution
+  - Click stat cards to filter ticket list
+  - "Show All Tickets" button to clear filters
+  - Filter indicator badge shows when filters are active
+  - Pagination increased to 50 tickets per page
+
+- **Professional Support Responses**
+  - Staff responses display as "GhostMyData Support" instead of individual names
+  - User-facing page already shows "Support Team" for staff replies
+  - Maintains professionalism in customer communications
+
+### Changed
+- Improved ticket list filtering UX with visible filter indicators
+- Support section shows warning banner when filters are applied
+
+### Scripts Added
+- `scripts/check-payment-methods.ts` - Check and cleanup duplicate payment methods for Stripe customers
+- `scripts/update-billing-portal.ts` - Configure Stripe billing portal settings
+
+---
+
 ## [1.25.0] - 2026-01-25
 
 ### Added
