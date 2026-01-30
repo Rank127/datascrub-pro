@@ -592,7 +592,9 @@ export function TicketDetailDialog({
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium text-white">
-                            {comment.author.name || comment.author.email}
+                            {comment.author.id === ticket.userId
+                              ? (comment.author.name || "Customer")
+                              : "GhostMyData Support"}
                           </span>
                           {comment.isInternal && (
                             <Badge className="bg-amber-500/20 text-amber-400 text-xs gap-1">
