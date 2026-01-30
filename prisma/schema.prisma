@@ -426,3 +426,21 @@ model FamilyInvitation {
   @@index([token])
   @@index([email])
 }
+
+// ==========================================
+// SYSTEM MONITORING
+// ==========================================
+
+model CronLog {
+  id          String   @id @default(cuid())
+  jobName     String   // e.g., "health-check", "ticketing-agent", "process-removals"
+  status      String   // "SUCCESS", "FAILED", "SKIPPED"
+  duration    Int?     // Duration in milliseconds
+  message     String?  // Success message or error details
+  metadata    String?  // JSON string with additional data (items processed, etc.)
+  createdAt   DateTime @default(now())
+
+  @@index([jobName])
+  @@index([createdAt])
+  @@index([jobName, createdAt])
+}

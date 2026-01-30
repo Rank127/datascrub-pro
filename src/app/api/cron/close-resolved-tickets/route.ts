@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { logCronExecution } from "@/lib/cron-logger";
 
 /**
  * Cron job to automatically close resolved tickets after 24 hours
@@ -87,9 +88,27 @@ export async function POST(request: Request) {
     };
 
     console.log("[Cron: Close Resolved Tickets] Complete:", JSON.stringify(response, null, 2));
+
+    // Log successful execution
+    await logCronExecution({
+      jobName: "close-resolved-tickets",
+      status: "SUCCESS",
+      duration,
+      message: `Closed ${closed} tickets${failed > 0 ? `, ${failed} failed` : ""}`,
+      metadata: { found: ticketsToClose.length, closed, failed },
+    });
+
     return NextResponse.json(response);
   } catch (error) {
     console.error("[Cron: Close Resolved Tickets] Error:", error);
+
+    // Log failed execution
+    await logCronExecution({
+      jobName: "close-resolved-tickets",
+      status: "FAILED",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+
     return NextResponse.json(
       {
         success: false,

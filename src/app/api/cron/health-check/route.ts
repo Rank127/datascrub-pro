@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { encrypt, decrypt } from "@/lib/encryption/crypto";
 import { Resend } from "resend";
+import { logCronExecution, getCronHealthStatus, cleanupOldCronLogs } from "@/lib/cron-logger";
 
 const ADMIN_EMAIL = "developer@ghostmydata.com";
 
@@ -296,6 +297,125 @@ export async function GET(request: Request) {
       name: "HIBP API",
       status: "WARN",
       message: `HIBP check failed: ${error}`,
+    });
+  }
+
+  // Test 8b: Anthropic API (AI Ticketing)
+  try {
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    if (!anthropicKey) {
+      tests.push({
+        name: "Anthropic API (AI Ticketing)",
+        status: "WARN",
+        message: "ANTHROPIC_API_KEY not configured - AI ticket resolution disabled",
+        actionRequired: "Add ANTHROPIC_API_KEY for AI-powered ticket resolution",
+      });
+    } else {
+      tests.push({
+        name: "Anthropic API (AI Ticketing)",
+        status: "PASS",
+        message: "Anthropic API key configured",
+      });
+    }
+  } catch (error) {
+    tests.push({
+      name: "Anthropic API (AI Ticketing)",
+      status: "WARN",
+      message: `Anthropic check failed: ${error}`,
+    });
+  }
+
+  // ========== CRON JOB MONITORING ==========
+
+  // Test 8c: Cron Job Execution Status
+  try {
+    const cronStatus = await getCronHealthStatus();
+
+    if (cronStatus.hasOverdueJobs) {
+      const overdueJobs = cronStatus.jobs.filter(j => j.isOverdue && j.lastRun);
+      tests.push({
+        name: "Cron Job Monitoring",
+        status: "WARN",
+        message: `${overdueJobs.length} cron job(s) are overdue: ${overdueJobs.map(j => j.name).join(", ")}`,
+        actionRequired: "Check Vercel cron configuration and deployment status",
+      });
+    } else {
+      const runningJobs = cronStatus.jobs.filter(j => j.lastRun);
+      tests.push({
+        name: "Cron Job Monitoring",
+        status: "PASS",
+        message: `${runningJobs.length} cron jobs tracked, all running on schedule`,
+      });
+    }
+
+    // Clean up old cron logs
+    const cleanedLogs = await cleanupOldCronLogs();
+    if (cleanedLogs > 0) {
+      console.log(`[Health Check] Cleaned up ${cleanedLogs} old cron logs`);
+    }
+  } catch (error) {
+    tests.push({
+      name: "Cron Job Monitoring",
+      status: "WARN",
+      message: `Could not check cron status: ${error}`,
+    });
+  }
+
+  // Test 8d: Vercel Deployment Status (optional)
+  try {
+    const vercelToken = process.env.VERCEL_API_TOKEN;
+    const vercelProjectId = process.env.VERCEL_PROJECT_ID;
+
+    if (vercelToken && vercelProjectId) {
+      const response = await fetch(
+        `https://api.vercel.com/v6/deployments?projectId=${vercelProjectId}&limit=5&state=ERROR`,
+        {
+          headers: {
+            Authorization: `Bearer ${vercelToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const failedDeployments = data.deployments || [];
+
+        if (failedDeployments.length > 0) {
+          const recentFailed = failedDeployments[0];
+          const failedAt = new Date(recentFailed.created).toLocaleString();
+          tests.push({
+            name: "Vercel Deployments",
+            status: "WARN",
+            message: `Recent failed deployment at ${failedAt}`,
+            actionRequired: "Check Vercel dashboard for deployment errors",
+          });
+        } else {
+          tests.push({
+            name: "Vercel Deployments",
+            status: "PASS",
+            message: "No recent failed deployments",
+          });
+        }
+      } else {
+        tests.push({
+          name: "Vercel Deployments",
+          status: "WARN",
+          message: "Could not fetch Vercel deployment status",
+        });
+      }
+    } else {
+      tests.push({
+        name: "Vercel Deployments",
+        status: "WARN",
+        message: "VERCEL_API_TOKEN or VERCEL_PROJECT_ID not configured",
+        actionRequired: "Add VERCEL_API_TOKEN and VERCEL_PROJECT_ID to monitor deployments",
+      });
+    }
+  } catch (error) {
+    tests.push({
+      name: "Vercel Deployments",
+      status: "WARN",
+      message: `Vercel check failed: ${error}`,
     });
   }
 
@@ -675,6 +795,20 @@ export async function GET(request: Request) {
       console.error("[Health Check] Failed to send email:", emailError);
     }
   }
+
+  // Log this health check execution
+  await logCronExecution({
+    jobName: "health-check",
+    status: summary.failed > 0 ? "FAILED" : "SUCCESS",
+    message: `${overall}: ${summary.passed} passed, ${summary.failed} failed, ${summary.warnings} warnings`,
+    metadata: {
+      overall,
+      passed: summary.passed,
+      failed: summary.failed,
+      warnings: summary.warnings,
+      autoFixed: summary.autoFixed,
+    },
+  });
 
   return NextResponse.json(report);
 }

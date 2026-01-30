@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { processNewTicket } from "@/lib/agents/ticketing-agent";
+import { logCronExecution } from "@/lib/cron-logger";
 
 /**
  * Cron job to automatically process open support tickets using AI agent
@@ -24,6 +25,11 @@ export async function POST(request: Request) {
     // Check if Anthropic API key is configured
     if (!process.env.ANTHROPIC_API_KEY) {
       console.log("[Cron: Ticketing Agent] ANTHROPIC_API_KEY not configured, skipping");
+      await logCronExecution({
+        jobName: "ticketing-agent",
+        status: "SKIPPED",
+        message: "ANTHROPIC_API_KEY not configured",
+      });
       return NextResponse.json({
         success: true,
         skipped: true,
@@ -141,9 +147,32 @@ export async function POST(request: Request) {
       results: `${results.length} tickets (details omitted)`,
     }, null, 2));
 
+    // Log successful execution
+    await logCronExecution({
+      jobName: "ticketing-agent",
+      status: failed > 0 && autoResolved === 0 ? "FAILED" : "SUCCESS",
+      duration,
+      message: `Processed ${processed} tickets: ${autoResolved} auto-resolved, ${needsReview} need review, ${failed} failed`,
+      metadata: {
+        found: ticketsToProcess.length,
+        processed,
+        autoResolved,
+        needsReview,
+        failed,
+      },
+    });
+
     return NextResponse.json(response);
   } catch (error) {
     console.error("[Cron: Ticketing Agent] Error:", error);
+
+    // Log failed execution
+    await logCronExecution({
+      jobName: "ticketing-agent",
+      status: "FAILED",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+
     return NextResponse.json(
       {
         success: false,

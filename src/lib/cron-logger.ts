@@ -1,0 +1,156 @@
+/**
+ * Cron Job Logger - Tracks cron execution for monitoring
+ */
+
+import { prisma } from "@/lib/db";
+
+export interface CronLogEntry {
+  jobName: string;
+  status: "SUCCESS" | "FAILED" | "SKIPPED";
+  duration?: number;
+  message?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Log a cron job execution
+ */
+export async function logCronExecution(entry: CronLogEntry): Promise<void> {
+  try {
+    await prisma.cronLog.create({
+      data: {
+        jobName: entry.jobName,
+        status: entry.status,
+        duration: entry.duration,
+        message: entry.message,
+        metadata: entry.metadata ? JSON.stringify(entry.metadata) : null,
+      },
+    });
+  } catch (error) {
+    // Don't throw - logging failures shouldn't break cron jobs
+    console.error("[CronLogger] Failed to log cron execution:", error);
+  }
+}
+
+/**
+ * Get the last successful run for a cron job
+ */
+export async function getLastSuccessfulRun(jobName: string): Promise<Date | null> {
+  try {
+    const lastRun = await prisma.cronLog.findFirst({
+      where: {
+        jobName,
+        status: "SUCCESS",
+      },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    });
+    return lastRun?.createdAt || null;
+  } catch (error) {
+    console.error("[CronLogger] Failed to get last run:", error);
+    return null;
+  }
+}
+
+/**
+ * Get cron job status summary for health check
+ */
+export async function getCronHealthStatus(): Promise<{
+  jobs: Array<{
+    name: string;
+    lastRun: Date | null;
+    lastStatus: string | null;
+    isOverdue: boolean;
+    expectedInterval: string;
+  }>;
+  hasOverdueJobs: boolean;
+}> {
+  // Define expected cron schedules (in hours)
+  const cronSchedules: Record<string, { interval: number; label: string }> = {
+    "health-check": { interval: 25, label: "Daily" },
+    "ticketing-agent": { interval: 25, label: "Daily" },
+    "process-removals": { interval: 5, label: "Every 4 hours" },
+    "verify-removals": { interval: 25, label: "Daily" },
+    "monitoring": { interval: 25, label: "Daily" },
+    "reports": { interval: 170, label: "Weekly" },
+    "follow-up-reminders": { interval: 25, label: "Daily" },
+    "link-checker": { interval: 25, label: "Daily" },
+    "close-resolved-tickets": { interval: 25, label: "Daily" },
+    "seo-agent": { interval: 170, label: "Weekly" },
+    "free-user-digest": { interval: 170, label: "Weekly" },
+    "monthly-rescan": { interval: 750, label: "Monthly" },
+  };
+
+  const jobs: Array<{
+    name: string;
+    lastRun: Date | null;
+    lastStatus: string | null;
+    isOverdue: boolean;
+    expectedInterval: string;
+  }> = [];
+
+  let hasOverdueJobs = false;
+
+  for (const [jobName, schedule] of Object.entries(cronSchedules)) {
+    try {
+      const lastLog = await prisma.cronLog.findFirst({
+        where: { jobName },
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true, status: true },
+      });
+
+      const lastRun = lastLog?.createdAt || null;
+      const lastStatus = lastLog?.status || null;
+
+      // Check if overdue (hasn't run within expected interval + 1 hour buffer)
+      const isOverdue = lastRun
+        ? Date.now() - lastRun.getTime() > (schedule.interval + 1) * 60 * 60 * 1000
+        : true; // Never ran = overdue (but only after system has been deployed)
+
+      // Don't mark as overdue if we have no logs at all (new deployment)
+      const hasAnyLogs = await prisma.cronLog.count() > 0;
+      const effectiveOverdue = hasAnyLogs ? isOverdue : false;
+
+      if (effectiveOverdue && lastRun) {
+        hasOverdueJobs = true;
+      }
+
+      jobs.push({
+        name: jobName,
+        lastRun,
+        lastStatus,
+        isOverdue: effectiveOverdue,
+        expectedInterval: schedule.label,
+      });
+    } catch (error) {
+      console.error(`[CronLogger] Failed to check ${jobName}:`, error);
+      jobs.push({
+        name: jobName,
+        lastRun: null,
+        lastStatus: "ERROR",
+        isOverdue: false,
+        expectedInterval: cronSchedules[jobName]?.label || "Unknown",
+      });
+    }
+  }
+
+  return { jobs, hasOverdueJobs };
+}
+
+/**
+ * Clean up old cron logs (keep last 30 days)
+ */
+export async function cleanupOldCronLogs(): Promise<number> {
+  try {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const result = await prisma.cronLog.deleteMany({
+      where: {
+        createdAt: { lt: thirtyDaysAgo },
+      },
+    });
+    return result.count;
+  } catch (error) {
+    console.error("[CronLogger] Failed to cleanup old logs:", error);
+    return 0;
+  }
+}
