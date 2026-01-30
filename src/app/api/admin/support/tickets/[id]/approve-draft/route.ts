@@ -87,8 +87,18 @@ export async function POST(
       return NextResponse.json({ error: "Draft comment not found" }, { status: 404 });
     }
 
+    // Security: Verify the draft belongs to this ticket
+    if (draftComment.ticketId !== id) {
+      return NextResponse.json({ error: "Draft does not belong to this ticket" }, { status: 400 });
+    }
+
     if (!draftComment.content.includes("[AI DRAFT RESPONSE")) {
       return NextResponse.json({ error: "This comment is not an AI draft" }, { status: 400 });
+    }
+
+    // Verify draft hasn't already been approved/rejected
+    if (draftComment.content.includes("APPROVED") || draftComment.content.includes("REJECTED")) {
+      return NextResponse.json({ error: "This draft has already been processed" }, { status: 400 });
     }
 
     // Use transaction to update draft and create public response

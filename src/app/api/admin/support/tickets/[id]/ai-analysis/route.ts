@@ -35,6 +35,16 @@ export async function GET(
 
     const { id } = await params;
 
+    // Verify ticket exists
+    const ticket = await prisma.supportTicket.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!ticket) {
+      return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
+    }
+
     // Fetch internal comments that contain AI analysis
     const internalComments = await prisma.ticketComment.findMany({
       where: {

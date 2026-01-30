@@ -15,6 +15,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.27.0] - 2026-01-30
+
+### Added
+- **Admin AI Draft Review Workflow**
+  - AI Draft Review section in ticket detail dialog with approve/edit/reject actions
+  - "AI Drafts Pending Review" indicator card in support section
+  - Visual badge on tickets with pending AI drafts in ticket list
+  - AI Analysis summary showing suggested actions and manager review items
+  - New endpoint: `POST /api/admin/support/tickets/[id]/approve-draft`
+  - New endpoint: `GET /api/admin/support/tickets/[id]/ai-analysis`
+  - Audit logging for `APPROVE_AI_DRAFT` and `REJECT_AI_DRAFT` actions
+  - `pendingAiReview` count added to ticket statistics
+
+### Changed
+- Ticket list now includes `hasPendingAiDraft` flag for each ticket
+- Support section shows clickable indicator when AI drafts need review
+
+---
+
 ## [1.26.0] - 2026-01-30
 
 ### Added
