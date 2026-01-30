@@ -49,3 +49,8 @@ export function getPlanFromPriceId(priceId: string): "PRO" | "ENTERPRISE" | "FRE
   }
   return "FREE";
 }
+
+// Re-export sync and intelligence functions
+export { syncUserFromStripe, getExistingActiveSubscription, upgradeSubscription, cancelSubscription, getCustomerSubscriptions } from "./sync";
+export { validateAndSyncSubscription, verifyPlanAccess, cleanupDuplicateSubscriptions, batchSyncAllSubscriptions, getStripeSubscriptionState } from "./subscription-intelligence";
+export { getValidatedUser, forceSyncUserSubscription, requirePlan, clearSyncCache } from "./use-subscription-sync";

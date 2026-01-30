@@ -595,6 +595,114 @@ export async function sendRefundConfirmationEmail(
   return sendEmail(email, `💰 Your $${refundAmount.toFixed(2)} Refund Has Been Processed`, html);
 }
 
+// Subscription Cancellation Email - reminds user they have until period end
+export async function sendCancellationEmail(
+  email: string,
+  name: string,
+  plan: string,
+  periodEnd: Date,
+  stats?: { exposuresFound?: number; removalsCompleted?: number }
+) {
+  const endDateFormatted = periodEnd.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const daysRemaining = Math.ceil((periodEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+
+  const html = baseTemplate(`
+    <h1 style="color: #f59e0b; margin-top: 0;">⏰ Your ${plan} Access Continues Until ${endDateFormatted}</h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      We've received your cancellation request. <strong>You still have ${daysRemaining} days</strong> to use all your ${plan} features!
+    </p>
+
+    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #3b82f6;">
+      <p style="margin: 0 0 8px 0; color: #60a5fa; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Your Access Ends</p>
+      <p style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">${endDateFormatted}</p>
+      <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 14px;">${daysRemaining} days remaining</p>
+    </div>
+
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <p style="margin: 0 0 16px 0; font-weight: 600; color: #10b981;">Make the most of your remaining time:</p>
+      <ul style="margin: 0; padding-left: 20px; color: #e2e8f0; line-height: 2;">
+        <li>🔍 <strong>Run a final scan</strong> to check for new exposures</li>
+        <li>🗑️ <strong>Submit removal requests</strong> for any remaining exposures</li>
+        <li>📊 <strong>Download your report</strong> for your records</li>
+        <li>👨‍👩‍👧‍👦 <strong>Check family members</strong> if on Enterprise plan</li>
+      </ul>
+    </div>
+
+    ${stats?.exposuresFound ? `
+    <div style="background-color: #7c3aed20; border: 1px solid #7c3aed; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <p style="margin: 0; color: #a78bfa;">
+        <strong>Your Protection Stats:</strong> We've helped you find ${stats.exposuresFound} exposures
+        ${stats.removalsCompleted ? ` and completed ${stats.removalsCompleted} removals` : ''}.
+      </p>
+    </div>
+    ` : ''}
+
+    ${buttonHtml("Use Your Premium Features Now", `${APP_URL}/dashboard`)}
+
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
+      <p style="margin: 0 0 12px 0; color: #e2e8f0; font-size: 16px;">Changed your mind?</p>
+      <p style="margin: 0; color: #94a3b8; font-size: 14px;">
+        You can reactivate your subscription anytime before ${endDateFormatted} and keep uninterrupted access.
+      </p>
+    </div>
+
+    <p style="font-size: 14px; color: #94a3b8; text-align: center; margin-top: 32px;">
+      We're sorry to see you go. If there's anything we could have done better,<br>
+      please reply to this email - we read every message.
+    </p>
+  `);
+
+  return sendEmail(
+    email,
+    `⏰ You have ${daysRemaining} days left to use your ${APP_NAME} ${plan} features`,
+    html
+  );
+}
+
+// Subscription Reactivation Email - when user reverses cancellation
+export async function sendReactivationEmail(
+  email: string,
+  name: string,
+  plan: string
+) {
+  const html = baseTemplate(`
+    <h1 style="color: #10b981; margin-top: 0;">🎉 Welcome Back! Your ${plan} Subscription is Active</h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Great news! Your cancellation has been reversed and your ${plan} subscription continues as normal.
+    </p>
+
+    <div style="background-color: #10b98120; border: 1px solid #10b981; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
+      <p style="margin: 0; color: #10b981; font-size: 18px; font-weight: 600;">
+        ✓ Your ${plan} features are fully active
+      </p>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6;">
+      We're thrilled to have you continue with us! Your personal data protection continues without interruption.
+    </p>
+
+    ${buttonHtml("Go to Dashboard", `${APP_URL}/dashboard`)}
+
+    <p style="font-size: 14px; color: #94a3b8;">
+      Thank you for your continued trust in ${APP_NAME}.
+    </p>
+  `);
+
+  return sendEmail(email, `🎉 Your ${APP_NAME} ${plan} subscription is back!`, html);
+}
+
 // Removal Follow-up Reminder Email (30/45 day reminder)
 interface FollowUpReminderData {
   sourceName: string;

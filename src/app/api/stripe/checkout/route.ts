@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { stripe, PLAN_TO_PRICE } from "@/lib/stripe";
+import { stripe, PLAN_TO_PRICE, getPlanFromPriceId } from "@/lib/stripe";
+import { getExistingActiveSubscription, upgradeSubscription } from "@/lib/stripe/sync";
+import { logAudit } from "@/lib/rbac/audit-log";
 import { z } from "zod";
+
+const PLAN_HIERARCHY: Record<string, number> = {
+  FREE: 0,
+  PRO: 1,
+  ENTERPRISE: 2,
+};
 
 const checkoutSchema = z.object({
   plan: z.enum(["PRO", "ENTERPRISE"]),
@@ -28,6 +36,10 @@ export async function POST(request: Request) {
     }
 
     const { plan, billingPeriod } = result.data;
+
+    // Get the price ID based on plan and billing period
+    const priceEnvKey = `STRIPE_${plan}_${billingPeriod.toUpperCase()}_PRICE_ID`;
+    const priceId = process.env[priceEnvKey] || PLAN_TO_PRICE[plan];
 
     // Get or create Stripe customer
     let subscription = await prisma.subscription.findUnique({
@@ -60,11 +72,90 @@ export async function POST(request: Request) {
       });
     }
 
-    // Get the price ID based on plan and billing period
-    const priceEnvKey = `STRIPE_${plan}_${billingPeriod.toUpperCase()}_PRICE_ID`;
-    const priceId = process.env[priceEnvKey] || PLAN_TO_PRICE[plan];
+    // Check for existing active subscription - PREVENT DUPLICATES
+    const existingSubscription = await getExistingActiveSubscription(customerId);
 
-    // Create checkout session
+    if (existingSubscription) {
+      const currentPriceId = existingSubscription.items.data[0]?.price.id || "";
+      const currentPlan = getPlanFromPriceId(currentPriceId);
+      const currentRank = PLAN_HIERARCHY[currentPlan] ?? 0;
+      const newRank = PLAN_HIERARCHY[plan] ?? 0;
+
+      if (newRank <= currentRank) {
+        // User already has equal or higher plan
+        return NextResponse.json(
+          {
+            error: `You already have an active ${currentPlan} subscription. To change plans, please manage your subscription in the billing portal.`,
+            currentPlan,
+            existingSubscriptionId: existingSubscription.id,
+          },
+          { status: 400 }
+        );
+      }
+
+      // Upgrade existing subscription instead of creating new
+      try {
+        const upgraded = await upgradeSubscription(existingSubscription.id, priceId);
+
+        // Update database
+        const periodEnd = upgraded.items.data[0]?.current_period_end;
+        await prisma.$transaction([
+          prisma.subscription.update({
+            where: { userId: session.user.id },
+            data: {
+              stripeSubscriptionId: upgraded.id,
+              stripePriceId: priceId,
+              stripeCurrentPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : null,
+              plan,
+              status: "active",
+            },
+          }),
+          prisma.user.update({
+            where: { id: session.user.id },
+            data: { plan },
+          }),
+          prisma.alert.create({
+            data: {
+              userId: session.user.id,
+              type: "SUBSCRIPTION_UPDATED",
+              title: "Plan Upgraded",
+              message: `Your subscription has been upgraded from ${currentPlan} to ${plan}!`,
+            },
+          }),
+        ]);
+
+        // Log the upgrade
+        await logAudit({
+          actorId: session.user.id,
+          actorEmail: session.user.email || "",
+          actorRole: "USER",
+          action: "PLAN_UPGRADE",
+          resource: "user_plan",
+          resourceId: session.user.id,
+          targetUserId: session.user.id,
+          targetEmail: session.user.email || "",
+          details: {
+            previousPlan: currentPlan,
+            newPlan: plan,
+            reason: "In-app upgrade",
+            source: "checkout_upgrade",
+          },
+        });
+
+        return NextResponse.json({
+          success: true,
+          upgraded: true,
+          message: `Upgraded from ${currentPlan} to ${plan}`,
+          previousPlan: currentPlan,
+          newPlan: plan,
+        });
+      } catch (upgradeError) {
+        console.error("Upgrade failed, falling back to checkout:", upgradeError);
+        // If upgrade fails, proceed to normal checkout
+      }
+    }
+
+    // Create checkout session for new subscription
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
@@ -80,6 +171,13 @@ export async function POST(request: Request) {
       metadata: {
         userId: session.user.id,
         plan,
+      },
+      // Prevent creating if already subscribed
+      subscription_data: {
+        metadata: {
+          userId: session.user.id,
+          plan,
+        },
       },
     });
 
