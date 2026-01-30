@@ -22,7 +22,16 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 async function checkPaymentMethods() {
-  const customerId = "cus_TptmcQZuD0mgsO"; // Sandeep's customer ID
+  const args = process.argv.slice(2);
+  const cleanupFlag = args.includes("--cleanup");
+  const customerId = args.find(arg => arg.startsWith("cus_")) || args.find(arg => !arg.startsWith("--"));
+
+  if (!customerId) {
+    console.log("Usage: npx tsx scripts/check-payment-methods.ts <customer_id> [--cleanup]");
+    console.log("Example: npx tsx scripts/check-payment-methods.ts cus_abc123");
+    console.log("         npx tsx scripts/check-payment-methods.ts cus_abc123 --cleanup");
+    process.exit(1);
+  }
 
   console.log("=== Payment Methods for Customer ===\n");
   console.log("Customer ID:", customerId);
@@ -65,8 +74,7 @@ async function checkPaymentMethods() {
       console.log("");
     }
 
-    const args = process.argv.slice(2);
-    if (args.includes("--cleanup")) {
+    if (cleanupFlag) {
       console.log("=== Cleaning up duplicates ===\n");
       for (const [key, pms] of duplicates) {
         // Keep the newest one, delete the rest

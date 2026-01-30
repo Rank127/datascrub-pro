@@ -1,3 +1,6 @@
+// Check user subscription history and account status
+// Usage: npx tsx scripts/check-user-history.ts <email>
+
 // Load environment manually
 import { readFileSync } from "fs";
 import { join } from "path";
@@ -22,14 +25,18 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function check() {
+  const args = process.argv.slice(2);
+  const emailArg = args.find(arg => arg.includes("@"));
+
+  if (!emailArg) {
+    console.log("Usage: npx tsx scripts/check-user-history.ts <email>");
+    console.log("Example: npx tsx scripts/check-user-history.ts user@example.com");
+    process.exit(1);
+  }
+
   // Find the user
   const user = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { email: { contains: "sandeepgupta", mode: "insensitive" } },
-        { name: { contains: "sandeepgupta", mode: "insensitive" } },
-      ]
-    },
+    where: { email: { equals: emailArg, mode: "insensitive" } },
     select: {
       id: true,
       email: true,
@@ -42,7 +49,7 @@ async function check() {
   });
 
   if (!user) {
-    console.log("User not found");
+    console.log(`User not found: ${emailArg}`);
     return;
   }
 

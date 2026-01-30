@@ -1,4 +1,5 @@
-// Script to check and fix sandeepgupta subscription issue by syncing from Stripe
+// Script to check and fix user subscription issues by syncing from Stripe
+// Usage: npx tsx scripts/fix-user-subscription.ts <email> [--fix] [--cancel-duplicates]
 import { readFileSync } from "fs";
 import { join } from "path";
 
@@ -55,14 +56,30 @@ async function checkAndFix() {
   const args = process.argv.slice(2);
   const dryRun = !args.includes("--fix");
   const cancelDuplicates = args.includes("--cancel-duplicates");
+  const emailArg = args.find(arg => !arg.startsWith("--") && arg.includes("@"));
+
+  if (!emailArg) {
+    console.log("Usage: npx tsx scripts/fix-user-subscription.ts <email> [--fix] [--cancel-duplicates]");
+    console.log("");
+    console.log("Options:");
+    console.log("  <email>              User email to check/fix");
+    console.log("  --fix                Apply fixes (default is dry-run)");
+    console.log("  --cancel-duplicates  Cancel duplicate subscriptions in Stripe");
+    console.log("");
+    console.log("Example:");
+    console.log("  npx tsx scripts/fix-user-subscription.ts user@example.com");
+    console.log("  npx tsx scripts/fix-user-subscription.ts user@example.com --fix");
+    console.log("  npx tsx scripts/fix-user-subscription.ts user@example.com --fix --cancel-duplicates");
+    process.exit(1);
+  }
 
   const user = await prisma.user.findFirst({
-    where: { email: { contains: "sandeepgupta", mode: "insensitive" } },
+    where: { email: { equals: emailArg, mode: "insensitive" } },
     select: { id: true, email: true, plan: true, name: true }
   });
 
   if (!user) {
-    console.log("User not found");
+    console.log(`User not found: ${emailArg}`);
     return;
   }
 
