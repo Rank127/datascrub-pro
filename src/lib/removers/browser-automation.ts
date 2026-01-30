@@ -43,6 +43,8 @@ export interface FormFieldMapping {
 }
 
 // Opt-out form configurations for different brokers
+// NOTE: Most data broker sites now use Cloudflare bot protection
+// Sites with hasCloudflare: true require manual submission or residential proxies
 const FORM_CONFIGS: Record<string, {
   url: string;
   fields: FormFieldMapping;
@@ -51,6 +53,7 @@ const FORM_CONFIGS: Record<string, {
   requiresCaptcha: boolean;
   captchaType?: CaptchaType;
   captchaSiteKey?: string;
+  hasCloudflare?: boolean; // Sites with Cloudflare bot protection
   notes?: string;
 }> = {
   TRUEPEOPLESEARCH: {
@@ -62,7 +65,8 @@ const FORM_CONFIGS: Record<string, {
     submitButton: "button[type='submit'], .remove-btn",
     confirmationIndicator: ".success-message, .confirmation",
     requiresCaptcha: false,
-    notes: "Simple form, usually processes quickly",
+    hasCloudflare: true,
+    notes: "Has Cloudflare protection - use email opt-out instead",
   },
   FASTPEOPLESEARCH: {
     url: "https://www.fastpeoplesearch.com/removal",
@@ -73,6 +77,7 @@ const FORM_CONFIGS: Record<string, {
     submitButton: "button[type='submit']",
     confirmationIndicator: ".success, .removed",
     requiresCaptcha: false,
+    hasCloudflare: true,
   },
   SPOKEO: {
     url: "https://www.spokeo.com/optout",
@@ -84,7 +89,8 @@ const FORM_CONFIGS: Record<string, {
     requiresCaptcha: true,
     captchaType: "recaptcha_v2",
     captchaSiteKey: "6LcJpRgTAAAAAHXTqG3_fvGnf7rvLrGb5CIqTfJK",
-    notes: "Requires email verification after submission",
+    hasCloudflare: true,
+    notes: "Has Cloudflare - requires email verification after submission",
   },
   WHITEPAGES: {
     url: "https://www.whitepages.com/suppression-requests",
@@ -98,7 +104,8 @@ const FORM_CONFIGS: Record<string, {
     requiresCaptcha: true,
     captchaType: "recaptcha_v2",
     captchaSiteKey: "6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-",
-    notes: "May require phone verification",
+    hasCloudflare: true,
+    notes: "Has Cloudflare - may require phone verification",
   },
   BEENVERIFIED: {
     url: "https://www.beenverified.com/opt-out/",
@@ -110,6 +117,7 @@ const FORM_CONFIGS: Record<string, {
     requiresCaptcha: true,
     captchaType: "recaptcha_v2",
     captchaSiteKey: "6LfF1dcZAAAAADq_P7WHVAsB6nRhCYZm1vHxuicc",
+    hasCloudflare: true,
   },
   RADARIS: {
     url: "https://radaris.com/control/privacy",
@@ -122,6 +130,7 @@ const FORM_CONFIGS: Record<string, {
     requiresCaptcha: true,
     captchaType: "recaptcha_v2",
     captchaSiteKey: "6LcmrUMUAAAAAJlYG-LN_3smS_uu3p-w9G6ZBaU7",
+    hasCloudflare: true,
     notes: "Complex multi-step process",
   },
   FAMILYTREENOW: {
@@ -132,6 +141,7 @@ const FORM_CONFIGS: Record<string, {
     submitButton: "button.opt-out",
     confirmationIndicator: ".success, .opted-out",
     requiresCaptcha: false,
+    hasCloudflare: true,
   },
   THATSTHEM: {
     url: "https://thatsthem.com/optout",
@@ -142,6 +152,7 @@ const FORM_CONFIGS: Record<string, {
     submitButton: "button[type='submit']",
     confirmationIndicator: ".success",
     requiresCaptcha: false,
+    hasCloudflare: true,
   },
 };
 
@@ -195,6 +206,20 @@ async function executeBrowserlessForm(
     };
   }
 
+  // Check for Cloudflare bot protection
+  if (formConfig.hasCloudflare) {
+    return {
+      success: false,
+      method: "MANUAL_REQUIRED",
+      message: `${brokerKey} has Cloudflare bot protection - form automation blocked`,
+      nextSteps: [
+        "This site blocks automated browsers",
+        `Visit ${formConfig.url} manually to submit opt-out`,
+        "Or use email-based CCPA/GDPR request instead (recommended)",
+      ],
+    };
+  }
+
   // Handle CAPTCHA if required
   let captchaToken: string | undefined;
 
@@ -245,80 +270,75 @@ async function executeBrowserlessForm(
   }
 
   try {
-    // Browserless function to fill and submit the form
+    // Browserless function to fill and submit the form (ES module format for v2)
     const browserlessCode = `
-      module.exports = async ({ page, context }) => {
-        const { url, fields, submitButton, confirmationIndicator, formData, captchaToken, captchaType } = context;
+export default async function ({ page, context }) {
+  const { url, fields, submitButton, confirmationIndicator, formData, captchaToken, captchaType } = context;
 
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+  await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
-        // Fill form fields
-        if (fields.name && formData.name) {
-          await page.waitForSelector(fields.name, { timeout: 5000 }).catch(() => null);
-          await page.type(fields.name, formData.name);
+  // Fill form fields
+  if (fields.name && formData.name) {
+    await page.waitForSelector(fields.name, { timeout: 5000 }).catch(() => null);
+    await page.type(fields.name, formData.name);
+  }
+
+  if (fields.email && formData.email) {
+    await page.waitForSelector(fields.email, { timeout: 5000 }).catch(() => null);
+    await page.type(fields.email, formData.email);
+  }
+
+  if (fields.phone && formData.phone) {
+    await page.waitForSelector(fields.phone, { timeout: 5000 }).catch(() => null);
+    await page.type(fields.phone, formData.phone);
+  }
+
+  // Inject CAPTCHA token if solved
+  if (captchaToken) {
+    if (captchaType === 'recaptcha_v2' || captchaType === 'recaptcha_v2_invisible' || captchaType === 'recaptcha_v3') {
+      await page.evaluate((token) => {
+        const textarea = document.getElementById('g-recaptcha-response');
+        if (textarea) {
+          textarea.innerHTML = token;
+          textarea.value = token;
         }
-
-        if (fields.email && formData.email) {
-          await page.waitForSelector(fields.email, { timeout: 5000 }).catch(() => null);
-          await page.type(fields.email, formData.email);
+        const input = document.querySelector('input[name="g-recaptcha-response"]');
+        if (input) input.value = token;
+        if (window.grecaptcha && window.grecaptcha.getResponse) {
+          try { window.___grecaptcha_cfg.clients[0].K.K.callback(token); } catch(e) {}
         }
-
-        if (fields.phone && formData.phone) {
-          await page.waitForSelector(fields.phone, { timeout: 5000 }).catch(() => null);
-          await page.type(fields.phone, formData.phone);
+      }, captchaToken);
+    } else if (captchaType === 'hcaptcha') {
+      await page.evaluate((token) => {
+        const textarea = document.querySelector('textarea[name="h-captcha-response"]');
+        if (textarea) {
+          textarea.innerHTML = token;
+          textarea.value = token;
         }
+        const input = document.querySelector('input[name="h-captcha-response"]');
+        if (input) input.value = token;
+      }, captchaToken);
+    }
+  }
 
-        // Inject CAPTCHA token if solved
-        if (captchaToken) {
-          if (captchaType === 'recaptcha_v2' || captchaType === 'recaptcha_v2_invisible' || captchaType === 'recaptcha_v3') {
-            // Inject reCAPTCHA token
-            await page.evaluate((token) => {
-              const textarea = document.getElementById('g-recaptcha-response');
-              if (textarea) {
-                textarea.innerHTML = token;
-                textarea.value = token;
-              }
-              // Also try hidden input
-              const input = document.querySelector('input[name="g-recaptcha-response"]');
-              if (input) input.value = token;
-              // Trigger callback if exists
-              if (window.grecaptcha && window.grecaptcha.getResponse) {
-                try { window.___grecaptcha_cfg.clients[0].K.K.callback(token); } catch(e) {}
-              }
-            }, captchaToken);
-          } else if (captchaType === 'hcaptcha') {
-            // Inject hCaptcha token
-            await page.evaluate((token) => {
-              const textarea = document.querySelector('textarea[name="h-captcha-response"]');
-              if (textarea) {
-                textarea.innerHTML = token;
-                textarea.value = token;
-              }
-              const input = document.querySelector('input[name="h-captcha-response"]');
-              if (input) input.value = token;
-            }, captchaToken);
-          }
-        }
+  // Click submit button
+  await page.waitForSelector(submitButton, { timeout: 5000 });
+  await page.click(submitButton);
 
-        // Click submit button
-        await page.waitForSelector(submitButton, { timeout: 5000 });
-        await page.click(submitButton);
+  // Wait for confirmation
+  await page.waitForTimeout(3000);
 
-        // Wait for confirmation
-        await page.waitForTimeout(3000);
+  // Check for success indicator
+  const success = await page.$(confirmationIndicator) !== null;
 
-        // Check for success indicator
-        const success = await page.$(confirmationIndicator) !== null;
+  // Take screenshot
+  const screenshot = await page.screenshot({ encoding: 'base64' });
 
-        // Take screenshot
-        const screenshot = await page.screenshot({ encoding: 'base64' });
-
-        return {
-          success,
-          screenshot,
-          url: page.url(),
-        };
-      };
+  return {
+    data: { success, screenshot, url: page.url() },
+    type: 'application/json',
+  };
+}
     `;
 
     const response = await fetch(`${config.endpoint}/function?token=${config.apiKey}`, {
@@ -347,12 +367,15 @@ async function executeBrowserlessForm(
 
     const result = await response.json();
 
-    if (result.success) {
+    // Handle both direct response and wrapped { data, type } format
+    const data = result.data || result;
+
+    if (data.success) {
       return {
         success: true,
         method: "FORM_SUBMIT",
         message: `Successfully submitted opt-out form for ${brokerKey}`,
-        screenshotUrl: result.screenshot ? `data:image/png;base64,${result.screenshot}` : undefined,
+        screenshotUrl: data.screenshot ? `data:image/png;base64,${data.screenshot}` : undefined,
         nextSteps: formConfig.notes
           ? [formConfig.notes]
           : ["Check your email for verification link if required"],
