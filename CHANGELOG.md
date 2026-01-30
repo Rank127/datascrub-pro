@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Maintains professionalism in customer communications
 
 - **AI Ticketing Agent Cron Job** (`/api/cron/ticketing-agent`)
-  - Runs 3x daily (8 AM, 2 PM, 8 PM UTC) to auto-resolve support tickets
+  - Runs daily at 9 AM UTC to auto-resolve support tickets
   - Processes up to 20 tickets per run (oldest first, prioritized by urgency)
   - Uses Claude AI for intelligent ticket analysis and response generation
   - Auto-resolves simple issues with professional responses

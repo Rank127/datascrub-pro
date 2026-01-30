@@ -27,7 +27,7 @@ All cron jobs are:
 | 10:00 | monthly-rescan | 1st of month |
 | 10:00 | free-user-digest | Wednesday |
 | 11:00 | close-resolved-tickets | Daily |
-| 08:00, 14:00, 20:00 | ticketing-agent | 3x daily |
+| 09:00 | ticketing-agent | Daily |
 | 14:00 | process-removals (batch 4) | Daily |
 | 18:00 | process-removals (batch 5) | Daily |
 | 22:00 | process-removals (batch 6) | Daily |
@@ -373,7 +373,7 @@ curl -X POST "https://ghostmydata.com/api/cron/seo-agent" \
 ## 12. AI Ticketing Agent
 
 **Endpoint:** `/api/cron/ticketing-agent`
-**Schedule:** 3x daily at 8 AM, 2 PM, 8 PM UTC (`0 8,14,20 * * *`)
+**Schedule:** Daily at 9 AM UTC (`0 9 * * *`)
 **Method:** GET, POST
 **Agent Location:** `/src/lib/agents/ticketing-agent.ts`
 
@@ -457,7 +457,7 @@ curl "https://ghostmydata.com/api/cron/ticketing-agent" \
     { "path": "/api/cron/monthly-rescan", "schedule": "0 10 1 * *" },
     { "path": "/api/cron/free-user-digest", "schedule": "0 10 * * 3" },
     { "path": "/api/cron/close-resolved-tickets", "schedule": "0 11 * * *" },
-    { "path": "/api/cron/ticketing-agent", "schedule": "0 8,14,20 * * *" },
+    { "path": "/api/cron/ticketing-agent", "schedule": "0 9 * * *" },
     { "path": "/api/cron/process-removals", "schedule": "0 14 * * *" },
     { "path": "/api/cron/process-removals", "schedule": "0 18 * * *" },
     { "path": "/api/cron/process-removals", "schedule": "0 22 * * *" },
