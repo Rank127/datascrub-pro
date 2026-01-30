@@ -97,10 +97,23 @@ export interface OperationsMetrics {
 export interface ActivitiesMetrics {
   recentSignups: UserActivity[];
   recentScans: ScanActivity[];
+  recentPlanChanges: PlanChangeActivity[];
   recentAuditLogs: AuditLogEntry[];
   activeUsersLast7Days: number;
   activeUsersLast30Days: number;
   topUsersByActivity: TopUser[];
+}
+
+export interface PlanChangeActivity {
+  id: string;
+  userId: string;
+  userEmail: string; // Masked
+  userName: string | null;
+  previousPlan: string;
+  newPlan: string;
+  changeType: "upgrade" | "downgrade" | "cancel";
+  reason?: string;
+  createdAt: string;
 }
 
 export interface TrendDataPoint {

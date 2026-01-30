@@ -612,6 +612,65 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
     },
   });
 
+  // Recent plan changes from audit logs
+  const planChangeActions = ["UPDATE_USER_PLAN", "MODIFY_USER_PLAN", "PLAN_UPGRADE", "PLAN_DOWNGRADE", "SUBSCRIPTION_UPDATED"];
+  const recentPlanChangeLogs = await prisma.auditLog.findMany({
+    where: {
+      action: { in: planChangeActions },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    select: {
+      id: true,
+      actorEmail: true,
+      targetEmail: true,
+      targetUserId: true,
+      action: true,
+      details: true,
+      createdAt: true,
+    },
+  });
+
+  // Parse plan change details from audit logs
+  const recentPlanChanges = recentPlanChangeLogs.map((log) => {
+    // Parse details - it's stored as JSON string or object
+    let details: Record<string, any> = {};
+    if (log.details) {
+      try {
+        details = typeof log.details === "string" ? JSON.parse(log.details) : (log.details as Record<string, any>);
+      } catch {
+        details = {};
+      }
+    }
+
+    const previousPlan = details.previousPlan || details.oldPlan || details.from || "FREE";
+    const newPlan = details.newPlan || details.plan || details.to || "FREE";
+
+    // Determine change type
+    const planRank: Record<string, number> = { FREE: 0, PRO: 1, ENTERPRISE: 2 };
+    const prevRank = planRank[previousPlan] ?? 0;
+    const newRank = planRank[newPlan] ?? 0;
+
+    let changeType: "upgrade" | "downgrade" | "cancel" = "upgrade";
+    if (newPlan === "FREE" || newPlan === "CANCELED") {
+      changeType = "cancel";
+    } else if (newRank < prevRank) {
+      changeType = "downgrade";
+    }
+
+    return {
+      id: log.id,
+      userId: log.targetUserId || "",
+      userEmail: log.targetEmail || log.actorEmail,
+      userName: details.userName || details.name || null,
+      previousPlan,
+      newPlan,
+      changeType,
+      reason: details.reason || details.cancelReason || undefined,
+      createdAt: log.createdAt.toISOString(),
+    };
+  });
+
   // Recent audit logs
   const recentAuditLogs = await prisma.auditLog.findMany({
     orderBy: { createdAt: "desc" },
@@ -692,6 +751,10 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
       exposuresFound: s.exposuresFound,
       sourcesChecked: s.sourcesChecked,
       createdAt: s.createdAt.toISOString(),
+    })),
+    recentPlanChanges: recentPlanChanges.map((p) => ({
+      ...p,
+      userEmail: maskFn(p.userEmail),
     })),
     recentAuditLogs: recentAuditLogs.map((a) => ({
       id: a.id,
