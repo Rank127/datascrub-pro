@@ -27,6 +27,7 @@ All cron jobs are:
 | 10:00 | monthly-rescan | 1st of month |
 | 10:00 | free-user-digest | Wednesday |
 | 11:00 | close-resolved-tickets | Daily |
+| */30 | ticketing-agent | Every 30 min |
 | 14:00 | process-removals (batch 4) | Daily |
 | 18:00 | process-removals (batch 5) | Daily |
 | 22:00 | process-removals (batch 6) | Daily |
@@ -371,48 +372,70 @@ curl -X POST "https://ghostmydata.com/api/cron/seo-agent" \
 
 ## 12. AI Ticketing Agent
 
-**Location:** `/src/lib/agents/ticketing-agent.ts`
-**Trigger:** Automatic (on ticket creation and user comments)
-**Method:** Event-driven (not cron)
+**Endpoint:** `/api/cron/ticketing-agent`
+**Schedule:** Every 30 minutes (`*/30 * * * *`)
+**Method:** GET, POST
+**Agent Location:** `/src/lib/agents/ticketing-agent.ts`
 
 **Purpose:**
-AI-powered ticket analysis and response system using Claude.
+AI-powered ticket analysis and auto-resolution system using Claude.
 
 **What it does:**
-1. Analyzes new tickets when created
-2. Reviews user comments on existing tickets
-3. Generates appropriate responses
-4. Auto-resolves simple issues
-5. Flags complex issues for human review
-6. Adjusts ticket priority based on content
+1. Finds all OPEN and IN_PROGRESS tickets
+2. Analyzes each ticket using AI (sentiment, user history, similar tickets)
+3. Auto-resolves simple issues with professional responses
+4. Flags complex issues for human review
+5. Adjusts ticket priority based on urgency/sentiment
+6. Sends email notifications to users on resolution
 
-**Trigger Points:**
-- `POST /api/support/tickets` - New ticket creation
-- `POST /api/support/tickets/[id]/comments` - User comment added
+**Processing Limits:**
+- Max 20 tickets per run (to prevent timeout)
+- 5-minute cooldown between processing same ticket
+- 1-second delay between tickets (rate limiting)
+- Prioritizes by: URGENT > HIGH > NORMAL > LOW, then oldest first
 
 **Response Types:**
 - **Auto-resolve:** Simple issues resolved automatically with AI response
 - **Draft response:** Complex issues get AI draft for human review
 - **Escalate:** Critical issues flagged for immediate human attention
+- **Manager review:** Important items logged for manager attention
+
+**Additional Trigger Points (Event-driven):**
+- `POST /api/support/tickets` - New ticket creation
+- `POST /api/support/tickets/[id]/comments` - User comment added
 
 **Environment Variables:**
 - `ANTHROPIC_API_KEY` - Claude API access (required)
+- `CRON_SECRET` - Authorization
+- `DATABASE_URL` - Database access
+- `RESEND_API_KEY` - Email notifications
 
 **AI Model:** Claude Sonnet 4
 
 **Behavior:**
 ```
-User creates ticket
+Every 30 minutes
     ↓
-AI analyzes ticket content
+Find OPEN/IN_PROGRESS tickets
     ↓
-┌─── Can auto-resolve? ───┐
-│                         │
-Yes                       No
-│                         │
-Send response            Save draft
-Mark RESOLVED            Flag for review
-Email user               Adjust priority
+For each ticket:
+    Enrich context (history, sentiment, similar tickets)
+    ↓
+    AI analyzes ticket content
+    ↓
+    ┌─── Can auto-resolve? ───┐
+    │                         │
+   Yes                       No
+    │                         │
+    Send response            Save draft
+    Mark RESOLVED            Flag for review
+    Email user               Adjust priority
+```
+
+**Manual Trigger:**
+```bash
+curl "https://ghostmydata.com/api/cron/ticketing-agent" \
+  -H "Authorization: Bearer YOUR_CRON_SECRET"
 ```
 
 ---
@@ -434,6 +457,7 @@ Email user               Adjust priority
     { "path": "/api/cron/monthly-rescan", "schedule": "0 10 1 * *" },
     { "path": "/api/cron/free-user-digest", "schedule": "0 10 * * 3" },
     { "path": "/api/cron/close-resolved-tickets", "schedule": "0 11 * * *" },
+    { "path": "/api/cron/ticketing-agent", "schedule": "*/30 * * * *" },
     { "path": "/api/cron/process-removals", "schedule": "0 14 * * *" },
     { "path": "/api/cron/process-removals", "schedule": "0 18 * * *" },
     { "path": "/api/cron/process-removals", "schedule": "0 22 * * *" },

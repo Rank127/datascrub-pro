@@ -37,13 +37,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - User-facing page already shows "Support Team" for staff replies
   - Maintains professionalism in customer communications
 
+- **AI Ticketing Agent Cron Job** (`/api/cron/ticketing-agent`)
+  - Runs every 30 minutes to auto-resolve support tickets
+  - Processes up to 20 tickets per run (oldest first, prioritized by urgency)
+  - Uses Claude AI for intelligent ticket analysis and response generation
+  - Auto-resolves simple issues with professional responses
+  - Flags complex issues for human review
+  - Adjusts ticket priority based on sentiment analysis
+  - Sends email notifications to users on resolution
+  - Requires `ANTHROPIC_API_KEY` environment variable
+
 ### Changed
 - Improved ticket list filtering UX with visible filter indicators
 - Support section shows warning banner when filters are applied
 
-### Scripts Added
-- `scripts/check-payment-methods.ts` - Check and cleanup duplicate payment methods for Stripe customers
-- `scripts/update-billing-portal.ts` - Configure Stripe billing portal settings
+### Scripts Updated
+- `scripts/check-payment-methods.ts` - Now accepts customer ID as CLI argument instead of hardcoded value
+- `scripts/fix-user-subscription.ts` - Renamed from `fix-sandeep-subscription.ts`, now accepts email as CLI argument
+- `scripts/check-user-history.ts` - Now accepts email as CLI argument instead of hardcoded value
+
+### Cron Jobs Added
+- `ticketing-agent` - Every 30 minutes - AI-powered ticket auto-resolution
 
 ---
 
