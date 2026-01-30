@@ -159,10 +159,10 @@ async function getUserHistory(userId: string): Promise<UserHistory> {
         where: { userId },
         select: { status: true, resolvedAt: true, createdAt: true },
       }),
-      prisma.scan.count({ where: { profile: { userId } } }),
-      prisma.exposure.count({ where: { profile: { userId } } }),
+      prisma.scan.count({ where: { userId } }),
+      prisma.exposure.count({ where: { userId } }),
       prisma.removalRequest.count({
-        where: { exposure: { profile: { userId } }, status: "COMPLETED" },
+        where: { exposure: { userId }, status: "COMPLETED" },
       }),
     ]);
 
