@@ -77,7 +77,7 @@
     },
     {
       "path": "/api/cron/ticketing-agent",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 8,14,20 * * *"
     }
   ]
 }
