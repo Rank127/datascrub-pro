@@ -26,8 +26,8 @@ export async function POST(
       );
     }
 
-    // Get invitation by token to find its ID
-    const invitation = await prisma.familyInvitation.findUnique({
+    // Get invitation by token OR by ID (frontend may pass either)
+    let invitation = await prisma.familyInvitation.findUnique({
       where: { token },
       include: {
         familyGroup: {
@@ -37,6 +37,20 @@ export async function POST(
         },
       },
     });
+
+    // If not found by token, try finding by ID
+    if (!invitation) {
+      invitation = await prisma.familyInvitation.findUnique({
+        where: { id: token },
+        include: {
+          familyGroup: {
+            include: {
+              owner: { select: { name: true, email: true } },
+            },
+          },
+        },
+      });
+    }
 
     if (!invitation) {
       return NextResponse.json(
