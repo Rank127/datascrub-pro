@@ -48,6 +48,7 @@ prisma/dev.db-journal
 # Test scripts
 *.mjs
 !next.config.mjs
+!postcss.config.mjs
 
 # IDE
 .idea
