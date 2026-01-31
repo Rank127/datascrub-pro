@@ -488,7 +488,7 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-amber-400 flex items-center gap-1">
               <AlertTriangle className="h-4 w-4" />
-              Warnings
+              Warnings - Click to take action
             </h4>
             <div className="space-y-2">
               {warningServices.map((service, idx) => (
