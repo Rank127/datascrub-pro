@@ -56,6 +56,19 @@ export async function POST(request: Request) {
     // Admin users get ENTERPRISE access
     const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE") as Plan;
 
+    // FREE users can only run FULL scans (not QUICK scans)
+    // This ensures they see their complete exposure before upgrading
+    if (userPlan === "FREE" && type === "QUICK") {
+      return NextResponse.json(
+        {
+          error: "Quick scans are only available for Pro and Enterprise plans. Please run a Full Scan to see your complete data exposure.",
+          requiresUpgrade: true,
+          upgradeUrl: "/pricing",
+        },
+        { status: 403 }
+      );
+    }
+
     // Check scan limits based on plan
     const currentMonth = new Date();
     currentMonth.setDate(1);

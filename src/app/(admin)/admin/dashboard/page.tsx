@@ -26,7 +26,12 @@ import {
   Shield,
   Plug,
   Headphones,
+  Cloud,
+  CheckCircle2,
+  XCircle,
+  Clock,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
 export default function AdminDashboardPage() {
@@ -37,6 +42,11 @@ export default function AdminDashboardPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("finance");
+  const [vercelData, setVercelData] = useState<{
+    configured: boolean;
+    lastDeployment?: { state: string; createdAt: number; url?: string };
+    analytics?: { pageViews: number; visitors: number };
+  } | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -45,8 +55,25 @@ export default function AdminDashboardPage() {
     }
     if (status === "authenticated") {
       fetchExecutiveStats();
+      fetchVercelStatus();
     }
   }, [status, router]);
+
+  const fetchVercelStatus = async () => {
+    try {
+      const response = await fetch("/api/admin/integrations/vercel");
+      if (response.ok) {
+        const result = await response.json();
+        setVercelData({
+          configured: result.configured,
+          lastDeployment: result.deployments?.[0],
+          analytics: result.analytics,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch Vercel status:", err);
+    }
+  };
 
   const fetchExecutiveStats = async (isRefresh = false) => {
     try {
@@ -78,6 +105,7 @@ export default function AdminDashboardPage() {
 
       if (isRefresh) {
         toast.success("Dashboard data refreshed");
+        fetchVercelStatus(); // Also refresh Vercel data
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "An error occurred";
@@ -199,7 +227,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Quick Stats - Interactive cards that switch tabs */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-4">
             <Card
               className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20 hover:border-blue-500/40 cursor-pointer transition-all"
               onClick={() => setActiveTab("activities")}
@@ -247,6 +275,76 @@ export default function AdminDashboardPage() {
                   <p className="text-xl font-bold text-white">
                     {(data.operations.pendingRemovalRequests + data.operations.manualActionQueue).toLocaleString()}
                   </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Vercel Deployment Status */}
+            <Card
+              className={`bg-gradient-to-br cursor-pointer transition-all ${
+                vercelData?.lastDeployment?.state === "READY"
+                  ? "from-emerald-500/10 to-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40"
+                  : vercelData?.lastDeployment?.state === "ERROR"
+                  ? "from-red-500/10 to-red-500/5 border-red-500/20 hover:border-red-500/40"
+                  : vercelData?.lastDeployment?.state === "BUILDING"
+                  ? "from-blue-500/10 to-blue-500/5 border-blue-500/20 hover:border-blue-500/40"
+                  : "from-slate-500/10 to-slate-500/5 border-slate-500/20 hover:border-slate-500/40"
+              }`}
+              onClick={() => setActiveTab("integrations")}
+            >
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className={`p-3 rounded-lg ${
+                  vercelData?.lastDeployment?.state === "READY"
+                    ? "bg-emerald-500/20"
+                    : vercelData?.lastDeployment?.state === "ERROR"
+                    ? "bg-red-500/20"
+                    : vercelData?.lastDeployment?.state === "BUILDING"
+                    ? "bg-blue-500/20"
+                    : "bg-slate-500/20"
+                }`}>
+                  <Cloud className={`h-6 w-6 ${
+                    vercelData?.lastDeployment?.state === "READY"
+                      ? "text-emerald-400"
+                      : vercelData?.lastDeployment?.state === "ERROR"
+                      ? "text-red-400"
+                      : vercelData?.lastDeployment?.state === "BUILDING"
+                      ? "text-blue-400"
+                      : "text-slate-400"
+                  }`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-slate-400">Vercel Deploy</p>
+                  <div className="flex items-center gap-2">
+                    {vercelData?.lastDeployment ? (
+                      <>
+                        <Badge
+                          variant="outline"
+                          className={`text-xs px-1.5 py-0 ${
+                            vercelData.lastDeployment.state === "READY"
+                              ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                              : vercelData.lastDeployment.state === "ERROR"
+                              ? "bg-red-500/20 text-red-400 border-red-500/30"
+                              : vercelData.lastDeployment.state === "BUILDING"
+                              ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                              : "bg-slate-500/20 text-slate-400 border-slate-500/30"
+                          }`}
+                        >
+                          {vercelData.lastDeployment.state === "READY" && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                          {vercelData.lastDeployment.state === "ERROR" && <XCircle className="h-3 w-3 mr-1" />}
+                          {vercelData.lastDeployment.state === "BUILDING" && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                          {vercelData.lastDeployment.state === "QUEUED" && <Clock className="h-3 w-3 mr-1" />}
+                          {vercelData.lastDeployment.state}
+                        </Badge>
+                        <span className="text-xs text-slate-500">
+                          {new Date(vercelData.lastDeployment.createdAt).toLocaleDateString()}
+                        </span>
+                      </>
+                    ) : vercelData?.configured === false ? (
+                      <span className="text-sm text-slate-500">Not configured</span>
+                    ) : (
+                      <span className="text-sm text-slate-500">Loading...</span>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>

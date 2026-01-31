@@ -109,6 +109,24 @@ export function AnalyticsSection({ data }: AnalyticsSectionProps) {
 
         {!data.googleAnalytics.configured ? (
           <NotConfigured service="Google Analytics" />
+        ) : !data.googleAnalytics.pageViews && !data.googleAnalytics.activeUsers && data.googleAnalytics.topPages.length === 0 ? (
+          <Card className="bg-amber-900/20 border-amber-800">
+            <CardContent className="p-6 text-center">
+              <AlertCircle className="h-10 w-10 text-amber-400 mx-auto mb-3" />
+              <h3 className="text-md font-medium text-white mb-2">No Analytics Data Available</h3>
+              <p className="text-slate-400 text-sm">
+                Google Analytics is configured but no data was returned. This could mean:
+              </p>
+              <ul className="text-slate-500 text-sm mt-2 space-y-1">
+                <li>• The service account may not have access to the GA property</li>
+                <li>• The property ID may be incorrect</li>
+                <li>• There may be no recent traffic data</li>
+              </ul>
+              <p className="text-slate-500 text-xs mt-3">
+                Check the Integrations tab for more details
+              </p>
+            </CardContent>
+          </Card>
         ) : (
           <>
             {/* Page Views */}
@@ -235,6 +253,19 @@ export function AnalyticsSection({ data }: AnalyticsSectionProps) {
 
         {!data.bing.configured ? (
           <NotConfigured service="Bing Webmaster Tools" />
+        ) : !data.bing.searchPerformance && !data.bing.crawlStats && data.bing.topQueries.length === 0 ? (
+          <Card className="bg-amber-900/20 border-amber-800">
+            <CardContent className="p-6 text-center">
+              <AlertCircle className="h-10 w-10 text-amber-400 mx-auto mb-3" />
+              <h3 className="text-md font-medium text-white mb-2">No Bing Data Available</h3>
+              <p className="text-slate-400 text-sm">
+                Bing Webmaster Tools is configured but no data was returned.
+              </p>
+              <p className="text-slate-500 text-xs mt-2">
+                Check the Integrations tab for API status
+              </p>
+            </CardContent>
+          </Card>
         ) : (
           <>
             {/* Search Performance */}
