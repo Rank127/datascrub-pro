@@ -21,6 +21,8 @@ import {
   LucideIcon,
   TrendingUp,
   AlertTriangle,
+  Bot,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -266,9 +268,12 @@ export function ServicesStatus({
     data.leakcheck,
     data.scrapingbee,
     data.redis,
+    data.anthropic,
+    data.twilio,
   ];
-  const connectedCount = services.filter((s) => s.status === "connected").length;
-  const errorCount = services.filter((s) => s.status === "error").length;
+  const connectedCount = services.filter((s) => s?.status === "connected").length;
+  const errorCount = services.filter((s) => s?.status === "error").length;
+  const warningCount = services.filter((s) => s?.rateLimit?.status === "warning" || s?.rateLimit?.status === "critical").length;
 
   return (
     <div className="space-y-4">
@@ -352,6 +357,34 @@ export function ServicesStatus({
             creditsLabel="Queue Jobs"
             rateLimit={data.redis.rateLimit}
           />
+
+          {/* Anthropic Claude */}
+          {data.anthropic && (
+            <ServiceCard
+              name="Claude AI (Anthropic)"
+              icon={Bot}
+              status={data.anthropic.status}
+              message={data.anthropic.message}
+              rateLimit={data.anthropic.rateLimit}
+            />
+          )}
+
+          {/* Twilio SMS */}
+          {data.twilio && (
+            <ServiceCard
+              name="Twilio SMS"
+              icon={MessageSquare}
+              status={data.twilio.status}
+              message={data.twilio.message}
+              credits={
+                data.twilio.balance !== undefined
+                  ? `${data.twilio.currency || '$'}${data.twilio.balance.toFixed(2)}`
+                  : undefined
+              }
+              creditsLabel="Balance"
+              rateLimit={data.twilio.rateLimit}
+            />
+          )}
         </div>
       </IntegrationCard>
 
@@ -461,6 +494,50 @@ export function ServicesStatus({
                 </Badge>
               </div>
             </div>
+
+            {/* Anthropic */}
+            {data.anthropic && (
+              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Bot className="h-4 w-4 text-slate-400" />
+                  <span className="text-sm text-white">Claude AI (Anthropic)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <StatusIndicator status={data.anthropic.status} />
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "text-xs",
+                      statusConfig[data.anthropic.status].color
+                    )}
+                  >
+                    ANTHROPIC_API_KEY
+                  </Badge>
+                </div>
+              </div>
+            )}
+
+            {/* Twilio */}
+            {data.twilio && (
+              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <MessageSquare className="h-4 w-4 text-slate-400" />
+                  <span className="text-sm text-white">Twilio SMS</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <StatusIndicator status={data.twilio.status} />
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "text-xs",
+                      statusConfig[data.twilio.status].color
+                    )}
+                  >
+                    TWILIO_*
+                  </Badge>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

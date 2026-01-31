@@ -12,6 +12,8 @@ import {
   LeakCheckServiceStatus,
   ScrapingBeeServiceStatus,
   RedisServiceStatus,
+  AnthropicServiceStatus,
+  TwilioServiceStatus,
   RateLimitHealth,
 } from "@/lib/integrations/types";
 
@@ -541,6 +543,136 @@ async function checkRedisStatus(): Promise<RedisServiceStatus> {
   }
 }
 
+async function checkAnthropicStatus(): Promise<AnthropicServiceStatus> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return { status: "not_configured", message: "ANTHROPIC_API_KEY not set" };
+  }
+
+  try {
+    // Make a simple API call to verify the key works
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-3-haiku-20240307",
+        max_tokens: 10,
+        messages: [{ role: "user", content: "ping" }],
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        status: "connected",
+        message: "Claude API connected",
+        model: data.model || "claude-3",
+      };
+    } else if (response.status === 401) {
+      return {
+        status: "error",
+        message: "Invalid API key",
+      };
+    } else if (response.status === 429) {
+      return {
+        status: "connected",
+        message: "Claude API rate limited",
+        rateLimit: {
+          status: "warning",
+          used: 0,
+          limit: 0,
+          percentUsed: 100,
+          recommendation: "Rate limited - reduce API calls",
+        },
+      };
+    } else {
+      return {
+        status: "error",
+        message: `API returned ${response.status}`,
+      };
+    }
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Connection failed",
+    };
+  }
+}
+
+async function checkTwilioStatus(): Promise<TwilioServiceStatus> {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+
+  if (!accountSid || !authToken) {
+    return { status: "not_configured", message: "Twilio credentials not set" };
+  }
+
+  try {
+    // Get account balance
+    const balanceResponse = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Balance.json`,
+      {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString("base64")}`,
+        },
+      }
+    );
+
+    if (balanceResponse.ok) {
+      const balanceData = await balanceResponse.json();
+      const balance = parseFloat(balanceData.balance || "0");
+      const currency = balanceData.currency || "USD";
+
+      // Calculate rate limit status based on balance
+      let rateLimitStatus: RateLimitHealth | undefined;
+      if (balance < 5) {
+        rateLimitStatus = {
+          status: "critical",
+          used: 0,
+          limit: 0,
+          percentUsed: 95,
+          recommendation: "Balance critically low - add funds",
+        };
+      } else if (balance < 20) {
+        rateLimitStatus = {
+          status: "warning",
+          used: 0,
+          limit: 0,
+          percentUsed: 75,
+          recommendation: "Balance running low",
+        };
+      }
+
+      return {
+        status: "connected",
+        message: `Balance: ${currency} ${balance.toFixed(2)}`,
+        accountSid: accountSid.slice(-4), // Show only last 4 chars
+        balance,
+        currency,
+        rateLimit: rateLimitStatus,
+      };
+    } else if (balanceResponse.status === 401) {
+      return {
+        status: "error",
+        message: "Invalid credentials",
+      };
+    } else {
+      return {
+        status: "error",
+        message: `API returned ${balanceResponse.status}`,
+      };
+    }
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Connection failed",
+    };
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const session = await auth();
@@ -579,7 +711,7 @@ export async function GET(request: Request) {
 
     // Check all services in parallel with error handling
     console.log("[Services] Checking all services...");
-    const [resend, hibp, leakcheck, scrapingbee, redis] = await Promise.all([
+    const [resend, hibp, leakcheck, scrapingbee, redis, anthropic, twilio] = await Promise.all([
       checkResendStatus().catch(e => {
         console.error("[Services] checkResendStatus failed:", e);
         return { status: "error" as const, message: "Failed to check Resend status" };
@@ -600,6 +732,14 @@ export async function GET(request: Request) {
         console.error("[Services] checkRedisStatus failed:", e);
         return { status: "error" as const, message: "Failed to check Redis status" };
       }),
+      checkAnthropicStatus().catch(e => {
+        console.error("[Services] checkAnthropicStatus failed:", e);
+        return { status: "error" as const, message: "Failed to check Anthropic status" };
+      }),
+      checkTwilioStatus().catch(e => {
+        console.error("[Services] checkTwilioStatus failed:", e);
+        return { status: "error" as const, message: "Failed to check Twilio status" };
+      }),
     ]);
     console.log("[Services] All checks completed");
 
@@ -609,6 +749,8 @@ export async function GET(request: Request) {
       leakcheck,
       scrapingbee,
       redis,
+      anthropic,
+      twilio,
     };
 
     console.log("[Services] Response:", JSON.stringify(response, null, 2));

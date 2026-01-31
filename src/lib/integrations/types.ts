@@ -302,12 +302,27 @@ export interface RedisServiceStatus extends ServiceStatus {
   maxStorage?: string;
 }
 
+export interface AnthropicServiceStatus extends ServiceStatus {
+  model?: string;
+  tokensUsed?: number;
+  tokensLimit?: number;
+}
+
+export interface TwilioServiceStatus extends ServiceStatus {
+  accountSid?: string;
+  balance?: number;
+  currency?: string;
+  smsCount?: number;
+}
+
 export interface ServicesIntegrationResponse {
   resend: ResendServiceStatus;
   hibp: HIBPServiceStatus;
   leakcheck: LeakCheckServiceStatus;
   scrapingbee: ScrapingBeeServiceStatus;
   redis: RedisServiceStatus;
+  anthropic: AnthropicServiceStatus;
+  twilio: TwilioServiceStatus;
 }
 
 // ============================================

@@ -8,6 +8,7 @@ import { AnalyticsSection } from "./analytics-section";
 import { BingSection } from "./bing-section";
 import { DatabaseSection } from "./database-section";
 import { ServicesStatus } from "./services-status";
+import { OperationsOverview } from "./operations-overview";
 import {
   VercelIntegrationResponse,
   StripeIntegrationResponse,
@@ -120,6 +121,9 @@ export function IntegrationsSection() {
 
   return (
     <div className="space-y-6">
+      {/* Operations Overview - Shows all service warnings at a glance */}
+      <OperationsOverview />
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-slate-800/50 border border-slate-700 p-1 flex-wrap">
           <TabsTrigger
