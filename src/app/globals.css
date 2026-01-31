@@ -2,8 +2,7 @@
 @import "../styles/tw-animate.css";
 
 /* Explicitly define content sources for Tailwind v4 to ensure proper build on Vercel */
-@source "../../src/**/*.{js,ts,jsx,tsx,mdx}";
-@source "../../components/**/*.{js,ts,jsx,tsx}";
+@source "../**/*.{js,ts,jsx,tsx,mdx}";
 
 @custom-variant dark (&:is(.dark *));
 
