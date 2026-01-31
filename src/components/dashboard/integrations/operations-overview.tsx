@@ -387,7 +387,7 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-medium text-white flex items-center gap-2">
           <Activity className="h-5 w-5 text-blue-400" />
-          Operations Overview <span className="text-xs text-slate-500 ml-2">v3</span>
+          Operations Overview
           {criticalServices.length > 0 && (
             <Badge variant="destructive" className="ml-2">
               {criticalServices.length} Critical
