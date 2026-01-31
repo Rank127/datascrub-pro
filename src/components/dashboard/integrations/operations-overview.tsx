@@ -387,7 +387,7 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-medium text-white flex items-center gap-2">
           <Activity className="h-5 w-5 text-blue-400" />
-          Operations Overview <span className="text-xs text-slate-500 ml-2">v2</span>
+          Operations Overview <span className="text-xs text-slate-500 ml-2">v3</span>
           {criticalServices.length > 0 && (
             <Badge variant="destructive" className="ml-2">
               {criticalServices.length} Critical
@@ -446,13 +446,14 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             </h4>
             <div className="space-y-2">
               {criticalServices.map((service, idx) => (
-                <a
+                <div
                   key={idx}
-                  href={service.dashboardUrl || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={() => service.dashboardUrl && window.open(service.dashboardUrl, '_blank')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && service.dashboardUrl && window.open(service.dashboardUrl, '_blank')}
                   className={cn(
-                    "p-3 rounded-lg border block cursor-pointer hover:ring-2 hover:ring-red-500/50 transition-all",
+                    "p-3 rounded-lg border block cursor-pointer hover:ring-2 hover:ring-red-500/50 transition-all select-none",
                     getStatusBg(service.status)
                   )}
                 >
@@ -476,7 +477,7 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
                       {service.recommendation}
                     </p>
                   )}
-                </a>
+                </div>
               ))}
             </div>
           </div>
@@ -491,13 +492,14 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             </h4>
             <div className="space-y-2">
               {warningServices.map((service, idx) => (
-                <a
+                <div
                   key={idx}
-                  href={service.dashboardUrl || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={() => service.dashboardUrl && window.open(service.dashboardUrl, '_blank')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && service.dashboardUrl && window.open(service.dashboardUrl, '_blank')}
                   className={cn(
-                    "p-3 rounded-lg border block cursor-pointer hover:ring-2 hover:ring-amber-500/50 transition-all",
+                    "p-3 rounded-lg border block cursor-pointer hover:ring-2 hover:ring-amber-500/50 transition-all select-none",
                     getStatusBg(service.status)
                   )}
                 >
@@ -521,7 +523,7 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
                   {service.recommendation && (
                     <p className="text-xs text-amber-400 mt-1">{service.recommendation}</p>
                   )}
-                </a>
+                </div>
               ))}
             </div>
           </div>
@@ -532,39 +534,27 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
           <h4 className="text-sm font-medium text-slate-300">All Services</h4>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {services.map((service, idx) => (
-              service.dashboardUrl ? (
-                <a
-                  key={idx}
-                  href={service.dashboardUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    "p-2 rounded-lg border flex items-center gap-2 hover:ring-1 hover:ring-slate-500 transition-all cursor-pointer group",
-                    getStatusBg(service.status)
-                  )}
-                >
-                  {service.icon}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-medium text-white truncate">{service.name}</div>
-                  </div>
-                  <ExternalLink className="h-3 w-3 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  {getStatusIcon(service.status)}
-                </a>
-              ) : (
-                <div
-                  key={idx}
-                  className={cn(
-                    "p-2 rounded-lg border flex items-center gap-2",
-                    getStatusBg(service.status)
-                  )}
-                >
-                  {service.icon}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-medium text-white truncate">{service.name}</div>
-                  </div>
-                  {getStatusIcon(service.status)}
+              <div
+                key={idx}
+                onClick={() => service.dashboardUrl && window.open(service.dashboardUrl, '_blank')}
+                role={service.dashboardUrl ? "button" : undefined}
+                tabIndex={service.dashboardUrl ? 0 : undefined}
+                onKeyDown={(e) => e.key === 'Enter' && service.dashboardUrl && window.open(service.dashboardUrl, '_blank')}
+                className={cn(
+                  "p-2 rounded-lg border flex items-center gap-2 transition-all group",
+                  service.dashboardUrl && "hover:ring-1 hover:ring-slate-500 cursor-pointer",
+                  getStatusBg(service.status)
+                )}
+              >
+                {service.icon}
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-medium text-white truncate">{service.name}</div>
                 </div>
-              )
+                {service.dashboardUrl && (
+                  <ExternalLink className="h-3 w-3 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
+                {getStatusIcon(service.status)}
+              </div>
             ))}
           </div>
         </div>
