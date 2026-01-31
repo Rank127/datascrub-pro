@@ -446,9 +446,15 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             </h4>
             <div className="space-y-2">
               {criticalServices.map((service, idx) => (
-                <div
+                <a
                   key={idx}
-                  className={cn("p-3 rounded-lg border", getStatusBg(service.status))}
+                  href={service.dashboardUrl || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "p-3 rounded-lg border block cursor-pointer hover:ring-2 hover:ring-red-500/50 transition-all",
+                    getStatusBg(service.status)
+                  )}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -456,17 +462,10 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
                       <span className="text-sm font-medium text-white">{service.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      {service.dashboardUrl && (
-                        <a
-                          href={service.dashboardUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded flex items-center gap-1 transition-colors"
-                        >
-                          {service.actionLabel || "Fix Now"}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
+                      <span className="text-xs bg-red-500 text-white px-2 py-1 rounded flex items-center gap-1">
+                        {service.actionLabel || "Fix Now"}
+                        <ExternalLink className="h-3 w-3" />
+                      </span>
                       {getStatusIcon(service.status)}
                     </div>
                   </div>
@@ -477,7 +476,7 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
                       {service.recommendation}
                     </p>
                   )}
-                </div>
+                </a>
               ))}
             </div>
           </div>
@@ -492,9 +491,15 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             </h4>
             <div className="space-y-2">
               {warningServices.map((service, idx) => (
-                <div
+                <a
                   key={idx}
-                  className={cn("p-3 rounded-lg border", getStatusBg(service.status))}
+                  href={service.dashboardUrl || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "p-3 rounded-lg border block cursor-pointer hover:ring-2 hover:ring-amber-500/50 transition-all",
+                    getStatusBg(service.status)
+                  )}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -505,17 +510,10 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
                       {service.percentUsed !== undefined && (
                         <span className="text-xs text-amber-400">{service.percentUsed}% used</span>
                       )}
-                      {service.dashboardUrl && (
-                        <a
-                          href={service.dashboardUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded flex items-center gap-1 transition-colors"
-                        >
-                          {service.actionLabel || "View"}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
+                      <span className="text-xs bg-amber-500 text-white px-2 py-1 rounded flex items-center gap-1">
+                        {service.actionLabel || "View"}
+                        <ExternalLink className="h-3 w-3" />
+                      </span>
                       {getStatusIcon(service.status)}
                     </div>
                   </div>
@@ -523,7 +521,7 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
                   {service.recommendation && (
                     <p className="text-xs text-amber-400 mt-1">{service.recommendation}</p>
                   )}
-                </div>
+                </a>
               ))}
             </div>
           </div>
