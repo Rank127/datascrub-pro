@@ -23,6 +23,7 @@ import {
   Globe,
   Server,
   Activity,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +35,8 @@ interface ServiceHealthItem {
   icon: React.ReactNode;
   percentUsed?: number;
   recommendation?: string;
+  dashboardUrl?: string;
+  actionLabel?: string;
 }
 
 interface OperationsOverviewProps {
@@ -94,6 +97,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
           status: vercelRes.configured ? status : "not_configured",
           message: vercelRes.configured ? message : "Not configured",
           icon: <Cloud className="h-4 w-4" />,
+          dashboardUrl: "https://vercel.com/ghostmydata/datascrub-pro",
+          actionLabel: "View Deployments",
         });
       }
 
@@ -121,6 +126,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
           status: databaseRes.configured ? status : "not_configured",
           message: databaseRes.configured ? message : "Not configured",
           icon: <Database className="h-4 w-4" />,
+          dashboardUrl: "https://supabase.com/dashboard",
+          actionLabel: "Open Dashboard",
         });
       }
 
@@ -145,6 +152,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
           status: stripeRes.configured ? status : "not_configured",
           message: stripeRes.configured ? message : "Not configured",
           icon: <CreditCard className="h-4 w-4" />,
+          dashboardUrl: "https://dashboard.stripe.com",
+          actionLabel: "Open Dashboard",
         });
       }
 
@@ -163,6 +172,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             icon: <Mail className="h-4 w-4" />,
             percentUsed: rl?.percentUsed,
             recommendation: rl?.recommendation,
+            dashboardUrl: "https://resend.com/overview",
+            actionLabel: "View Usage",
           });
         }
 
@@ -178,6 +189,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             message: servicesRes.hibp.message || "Unknown",
             icon: <Shield className="h-4 w-4" />,
             percentUsed: rl?.percentUsed,
+            dashboardUrl: "https://haveibeenpwned.com/API/Key",
+            actionLabel: "Manage API Key",
           });
         }
 
@@ -194,6 +207,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             icon: <Search className="h-4 w-4" />,
             percentUsed: rl?.percentUsed,
             recommendation: rl?.recommendation,
+            dashboardUrl: "https://leakcheck.io/dashboard",
+            actionLabel: "Buy Credits",
           });
         }
 
@@ -210,6 +225,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             icon: <Bug className="h-4 w-4" />,
             percentUsed: rl?.percentUsed,
             recommendation: rl?.recommendation,
+            dashboardUrl: "https://app.scrapingbee.com/account",
+            actionLabel: "Upgrade Plan",
           });
         }
 
@@ -225,6 +242,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             message: servicesRes.redis.message || "Unknown",
             icon: <Server className="h-4 w-4" />,
             percentUsed: rl?.percentUsed,
+            dashboardUrl: "https://console.upstash.com",
+            actionLabel: "Open Console",
           });
         }
 
@@ -240,6 +259,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             message: servicesRes.anthropic.message || "Unknown",
             icon: <Bot className="h-4 w-4" />,
             percentUsed: rl?.percentUsed,
+            dashboardUrl: "https://console.anthropic.com/settings/billing",
+            actionLabel: "Manage Billing",
           });
         }
 
@@ -256,6 +277,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             icon: <MessageSquare className="h-4 w-4" />,
             percentUsed: rl?.percentUsed,
             recommendation: rl?.recommendation,
+            dashboardUrl: "https://console.twilio.com/us1/billing/manage-billing/billing-overview",
+            actionLabel: "Add Funds",
           });
         }
       }
@@ -270,6 +293,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             ? `${analyticsRes.activeUsers?.dau || 0} daily active users`
             : "Not configured",
           icon: <BarChart3 className="h-4 w-4" />,
+          dashboardUrl: "https://analytics.google.com",
+          actionLabel: "View Analytics",
         });
       }
 
@@ -283,6 +308,8 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
             ? `${bingRes.crawlStats?.inIndex || 0} pages indexed`
             : "Not configured",
           icon: <Globe className="h-4 w-4" />,
+          dashboardUrl: "https://www.bing.com/webmasters",
+          actionLabel: "View SEO",
         });
       }
 
@@ -428,7 +455,20 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
                       {service.icon}
                       <span className="text-sm font-medium text-white">{service.name}</span>
                     </div>
-                    {getStatusIcon(service.status)}
+                    <div className="flex items-center gap-2">
+                      {service.dashboardUrl && (
+                        <a
+                          href={service.dashboardUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded flex items-center gap-1 transition-colors"
+                        >
+                          {service.actionLabel || "Fix Now"}
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                      {getStatusIcon(service.status)}
+                    </div>
                   </div>
                   <p className="text-xs text-slate-400 mt-1">{service.message}</p>
                   {service.recommendation && (
@@ -465,6 +505,17 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
                       {service.percentUsed !== undefined && (
                         <span className="text-xs text-amber-400">{service.percentUsed}% used</span>
                       )}
+                      {service.dashboardUrl && (
+                        <a
+                          href={service.dashboardUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded flex items-center gap-1 transition-colors"
+                        >
+                          {service.actionLabel || "View"}
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
                       {getStatusIcon(service.status)}
                     </div>
                   </div>
@@ -483,19 +534,39 @@ export function OperationsOverview({ className }: OperationsOverviewProps) {
           <h4 className="text-sm font-medium text-slate-300">All Services</h4>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {services.map((service, idx) => (
-              <div
-                key={idx}
-                className={cn(
-                  "p-2 rounded-lg border flex items-center gap-2",
-                  getStatusBg(service.status)
-                )}
-              >
-                {service.icon}
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium text-white truncate">{service.name}</div>
+              service.dashboardUrl ? (
+                <a
+                  key={idx}
+                  href={service.dashboardUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "p-2 rounded-lg border flex items-center gap-2 hover:ring-1 hover:ring-slate-500 transition-all cursor-pointer group",
+                    getStatusBg(service.status)
+                  )}
+                >
+                  {service.icon}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-medium text-white truncate">{service.name}</div>
+                  </div>
+                  <ExternalLink className="h-3 w-3 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  {getStatusIcon(service.status)}
+                </a>
+              ) : (
+                <div
+                  key={idx}
+                  className={cn(
+                    "p-2 rounded-lg border flex items-center gap-2",
+                    getStatusBg(service.status)
+                  )}
+                >
+                  {service.icon}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-medium text-white truncate">{service.name}</div>
+                  </div>
+                  {getStatusIcon(service.status)}
                 </div>
-                {getStatusIcon(service.status)}
-              </div>
+              )
             ))}
           </div>
         </div>
