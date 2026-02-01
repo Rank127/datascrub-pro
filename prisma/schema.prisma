@@ -32,6 +32,10 @@ model User {
   smsExposureAlerts      Boolean           @default(true)
   smsRemovalUpdates      Boolean           @default(true)
   smsBreachAlerts        Boolean           @default(true)
+  // Two-Factor Authentication
+  twoFactorEnabled       Boolean           @default(false)
+  twoFactorSecret        String?           // Encrypted TOTP secret
+  twoFactorBackupCodes   String?           // JSON array of hashed backup codes
   role                   String            @default("USER")
   lastExposureDigestSent DateTime?
   lastScanAt             DateTime?

@@ -33,6 +33,9 @@ import {
   Trash2,
 } from "lucide-react";
 import { FamilySection } from "@/components/dashboard/family";
+import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
+import { TwoFactorSetupDialog } from "@/components/settings/two-factor-setup-dialog";
+import { TwoFactorDisableDialog } from "@/components/settings/two-factor-disable-dialog";
 
 interface SubscriptionData {
   plan: string;
@@ -87,9 +90,28 @@ function SettingsContent() {
   const [verificationPending, setVerificationPending] = useState(false);
   const [pendingPhone, setPendingPhone] = useState<string | null>(null);
 
-  // Security section inline messages
-  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
-  const [twoFactorMessage, setTwoFactorMessage] = useState<string | null>(null);
+  // Security section
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [twoFactorSetupOpen, setTwoFactorSetupOpen] = useState(false);
+  const [twoFactorDisableOpen, setTwoFactorDisableOpen] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [twoFactorLoading, setTwoFactorLoading] = useState(true);
+
+  // Fetch 2FA status
+  const fetch2FAStatus = async () => {
+    setTwoFactorLoading(true);
+    try {
+      const response = await fetch("/api/account/2fa");
+      if (response.ok) {
+        const data = await response.json();
+        setTwoFactorEnabled(data.enabled);
+      }
+    } catch (error) {
+      console.error("Failed to fetch 2FA status:", error);
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
 
   // Fetch notification preferences
   const fetchNotificationPrefs = async () => {
@@ -293,6 +315,7 @@ function SettingsContent() {
     fetchSubscription();
     fetchNotificationPrefs();
     fetchSmsSettings();
+    fetch2FAStatus();
   }, []);
 
   const handleSaveAccount = async () => {
@@ -1060,7 +1083,7 @@ function SettingsContent() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-4 bg-slate-700/30 rounded-lg space-y-3">
+          <div className="p-4 bg-slate-700/30 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium text-white">Change Password</h4>
@@ -1071,52 +1094,51 @@ function SettingsContent() {
               <Button
                 variant="outline"
                 className="border-slate-600"
-                onClick={() => setPasswordMessage("Password change coming soon. Contact support@ghostmydata.com to reset your password.")}
+                onClick={() => setPasswordDialogOpen(true)}
               >
                 Change
               </Button>
             </div>
-            {passwordMessage && (
-              <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-300 text-sm">
-                <XCircle className="h-4 w-4 shrink-0" />
-                <span>{passwordMessage}</span>
-                <button
-                  onClick={() => setPasswordMessage(null)}
-                  className="ml-auto text-xs underline hover:no-underline"
-                >
-                  Dismiss
-                </button>
-              </div>
-            )}
           </div>
-          <div className="p-4 bg-slate-700/30 rounded-lg space-y-3">
+          <div className="p-4 bg-slate-700/30 rounded-lg">
             <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium text-white">Two-Factor Authentication</h4>
-                <p className="text-sm text-slate-400">
-                  Add an extra layer of security to your account
-                </p>
+              <div className="flex items-center gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium text-white">Two-Factor Authentication</h4>
+                    {twoFactorLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                    ) : twoFactorEnabled ? (
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                        Enabled
+                      </Badge>
+                    ) : null}
+                  </div>
+                  <p className="text-sm text-slate-400">
+                    Add an extra layer of security to your account
+                  </p>
+                </div>
               </div>
-              <Button
-                variant="outline"
-                className="border-slate-600"
-                onClick={() => setTwoFactorMessage("Two-factor authentication coming soon. We're working on adding this security feature.")}
-              >
-                Enable
-              </Button>
+              {!twoFactorLoading && (
+                twoFactorEnabled ? (
+                  <Button
+                    variant="outline"
+                    className="border-red-500/50 text-red-400 hover:bg-red-500/20"
+                    onClick={() => setTwoFactorDisableOpen(true)}
+                  >
+                    Disable
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="border-slate-600"
+                    onClick={() => setTwoFactorSetupOpen(true)}
+                  >
+                    Enable
+                  </Button>
+                )
+              )}
             </div>
-            {twoFactorMessage && (
-              <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-300 text-sm">
-                <XCircle className="h-4 w-4 shrink-0" />
-                <span>{twoFactorMessage}</span>
-                <button
-                  onClick={() => setTwoFactorMessage(null)}
-                  className="ml-auto text-xs underline hover:no-underline"
-                >
-                  Dismiss
-                </button>
-              </div>
-            )}
           </div>
           <div className="flex items-center justify-between p-4 bg-red-500/10 rounded-lg">
             <div>
@@ -1139,6 +1161,28 @@ function SettingsContent() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Security Dialogs */}
+      <ChangePasswordDialog
+        open={passwordDialogOpen}
+        onOpenChange={setPasswordDialogOpen}
+      />
+      <TwoFactorSetupDialog
+        open={twoFactorSetupOpen}
+        onOpenChange={setTwoFactorSetupOpen}
+        onComplete={() => {
+          setTwoFactorEnabled(true);
+          setMessage({ type: "success", text: "Two-factor authentication enabled successfully!" });
+        }}
+      />
+      <TwoFactorDisableDialog
+        open={twoFactorDisableOpen}
+        onOpenChange={setTwoFactorDisableOpen}
+        onComplete={() => {
+          setTwoFactorEnabled(false);
+          setMessage({ type: "success", text: "Two-factor authentication disabled." });
+        }}
+      />
     </div>
   );
 }
