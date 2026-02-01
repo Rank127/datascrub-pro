@@ -40,23 +40,23 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "Is GhostMyData better than Incogni?",
-    answer: "GhostMyData offers more comprehensive protection including dark web monitoring, breach alerts, and covers significantly more data brokers (2,100+ vs 35+) plus 60 AI Shield sources. Incogni is a budget option but lacks these features.",
+    answer: "GhostMyData has more features. It has dark web alerts, breach alerts, and covers 2,100+ sites vs 35+ for Incogni. Incogni is cheaper but has fewer features.",
   },
   {
-    question: "How much does Incogni cost compared to GhostMyData?",
-    answer: "Incogni costs $6.49/month when billed annually or $12.99/month for monthly billing. GhostMyData offers a free tier, with paid plans starting at $11.99/month including more features like breach monitoring.",
+    question: "How much does Incogni cost?",
+    answer: "Incogni costs $6.49/month yearly or $12.99/month. GhostMyData has a free tier. Paid plans start at $11.99/month with more features.",
   },
   {
     question: "Does Incogni have dark web monitoring?",
-    answer: "No, Incogni does not offer dark web monitoring. It focuses only on data broker removal. GhostMyData includes dark web monitoring in its Enterprise plan.",
+    answer: "No. Incogni only does data broker removal. GhostMyData has dark web alerts in its Enterprise plan.",
   },
   {
-    question: "Can I try Incogni or GhostMyData for free?",
-    answer: "GhostMyData offers a free tier with a comprehensive scan and manual removal guides. Incogni does not have a free tier, but offers a 30-day money-back guarantee.",
+    question: "Can I try these for free?",
+    answer: "GhostMyData has a free tier with a full scan. Incogni has no free tier but offers a 30-day refund.",
   },
   {
-    question: "Which service covers more data brokers?",
-    answer: "GhostMyData covers 2,100+ data brokers plus 60 AI Shield sources, while Incogni covers approximately 35+ data brokers. GhostMyData offers industry-leading coverage.",
+    question: "Which covers more data brokers?",
+    answer: "GhostMyData covers 2,100+ sites plus 60 AI Shield sources. Incogni covers about 35+ sites.",
   },
 ];
 
@@ -159,14 +159,12 @@ export default function CompareIncogniPage() {
           Quick Verdict
         </h2>
         <p className="text-slate-300 text-lg mb-4">
-          <strong className="text-white">GhostMyData</strong> offers more comprehensive protection with
-          dark web monitoring, breach alerts, and more data broker coverage.
-          <strong className="text-white"> Incogni</strong> is a solid budget option, especially if you&apos;re
-          already a Surfshark customer.
+          <strong className="text-white">GhostMyData</strong> has more features.
+          It has dark web alerts and covers more sites.
+          <strong className="text-white"> Incogni</strong> is a budget option for Surfshark users.
         </p>
         <p className="text-slate-400">
-          Choose GhostMyData for complete privacy protection. Choose Incogni if you
-          want the cheapest option and don&apos;t need dark web monitoring.
+          Pick GhostMyData for full protection. Pick Incogni for the cheapest price.
         </p>
       </div>
 
@@ -176,10 +174,10 @@ export default function CompareIncogniPage() {
           <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
             <Shield className="h-6 w-6 text-emerald-500" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">More Complete Protection</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">More Protection</h3>
           <p className="text-slate-400">
-            GhostMyData includes dark web monitoring and breach alerts.
-            Incogni only focuses on data broker removal.
+            GhostMyData has dark web and breach alerts.
+            Incogni only removes data from brokers.
           </p>
         </div>
 
@@ -187,10 +185,10 @@ export default function CompareIncogniPage() {
           <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
             <DollarSign className="h-6 w-6 text-emerald-500" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Free Tier Available</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">Free Tier</h3>
           <p className="text-slate-400">
-            GhostMyData lets you scan for free before committing.
-            Incogni requires payment to see any results.
+            GhostMyData lets you scan for free first.
+            Incogni needs payment to see results.
           </p>
         </div>
 
@@ -198,10 +196,10 @@ export default function CompareIncogniPage() {
           <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
             <Users className="h-6 w-6 text-emerald-500" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Family Protection</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">Family Plans</h3>
           <p className="text-slate-400">
-            GhostMyData offers family plans for up to 5 people.
-            Incogni only offers individual accounts.
+            GhostMyData has family plans for up to 5 people.
+            Incogni is only for one person.
           </p>
         </div>
       </div>
@@ -321,20 +319,20 @@ export default function CompareIncogniPage() {
       <div className="mb-16 p-8 bg-slate-800/30 rounded-2xl border border-slate-700">
         <h2 className="text-2xl font-bold text-white mb-4">When to Choose Incogni</h2>
         <p className="text-slate-400 mb-4">
-          Incogni might be the better choice if:
+          Incogni might be right if:
         </p>
         <ul className="space-y-2 text-slate-400">
           <li className="flex items-start gap-2">
             <span className="text-slate-500">•</span>
-            You&apos;re already a Surfshark VPN customer and want a bundle deal
+            You use Surfshark VPN and want a bundle
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">•</span>
-            Budget is your primary concern and you can pay annually ($6.49/mo)
+            Budget is key and you can pay yearly ($6.49/mo)
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">•</span>
-            You only need basic data broker removal without dark web monitoring
+            You only need basic broker removal
           </li>
         </ul>
       </div>

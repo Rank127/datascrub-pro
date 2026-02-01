@@ -40,23 +40,23 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "Is GhostMyData better than Optery?",
-    answer: "GhostMyData offers more comprehensive protection with 2,100+ data brokers (plus 60 AI Shield sources), dark web monitoring, and breach alerts. Optery has a lower entry price but covers fewer brokers (370-635) and lacks dark web monitoring features.",
+    answer: "GhostMyData covers 2,100+ sites vs 370-635 for Optery. It also has dark web and breach alerts. Optery is cheaper but has fewer features.",
   },
   {
-    question: "How much does Optery cost compared to GhostMyData?",
-    answer: "Optery's Core plan starts at $39/year ($3.25/mo), while their Ultimate plan is $249/year. GhostMyData offers a free tier, with Pro at $11.99/month including more features like breach monitoring.",
+    question: "How much does Optery cost?",
+    answer: "Optery starts at $39/year ($3.25/mo). Their top plan is $249/year. GhostMyData has a free tier. Pro costs $11.99/mo with more features.",
   },
   {
     question: "Does Optery have dark web monitoring?",
-    answer: "No, Optery does not offer dark web monitoring at any tier. GhostMyData includes dark web monitoring in its Enterprise plan, alerting you when your data appears on dark web marketplaces.",
+    answer: "No. Optery has no dark web alerts at any price. GhostMyData does in its Enterprise plan.",
   },
   {
-    question: "Which service has better data broker coverage?",
-    answer: "GhostMyData covers 2,100+ data brokers plus 60 AI Shield sources, while Optery covers 370-635 brokers depending on your plan. GhostMyData offers more comprehensive coverage.",
+    question: "Which covers more data brokers?",
+    answer: "GhostMyData covers 2,100+ sites plus 60 AI Shield sources. Optery covers 370-635 sites based on plan.",
   },
   {
     question: "Does Optery have a free tier?",
-    answer: "Optery offers a limited free tier for self-service removal guides. GhostMyData's free tier includes a comprehensive scan across 2,100+ sources with manual removal guides.",
+    answer: "Optery has a limited free tier with self-service guides. GhostMyData's free tier has a full scan of 2,100+ sites.",
   },
 ];
 
@@ -153,14 +153,11 @@ export default function CompareOpteryPage() {
           Quick Verdict
         </h2>
         <p className="text-slate-300 text-lg mb-4">
-          <strong className="text-white">GhostMyData</strong> offers more comprehensive protection with
-          dark web monitoring, breach alerts, and 3x more data broker coverage.
-          <strong className="text-white"> Optery</strong> has a lower entry price point but lacks advanced
-          security features.
+          <strong className="text-white">GhostMyData</strong> has dark web alerts and 3x more coverage.
+          <strong className="text-white"> Optery</strong> is cheaper but has fewer features.
         </p>
         <p className="text-slate-400">
-          Choose GhostMyData for complete privacy protection. Choose Optery if you
-          want the absolute cheapest option and only need basic data broker removal.
+          Pick GhostMyData for full protection. Pick Optery if you want the cheapest option.
         </p>
       </div>
 
@@ -172,8 +169,8 @@ export default function CompareOpteryPage() {
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">More Coverage</h3>
           <p className="text-slate-400">
-            GhostMyData covers 2,100+ data brokers plus 60 AI Shield sources.
-            Optery covers 370-635 depending on your plan tier.
+            GhostMyData covers 2,100+ sites plus 60 AI Shield sources.
+            Optery covers 370-635 sites based on plan.
           </p>
         </div>
 
@@ -181,10 +178,10 @@ export default function CompareOpteryPage() {
           <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
             <Shield className="h-6 w-6 text-emerald-500" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Advanced Security</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">More Security</h3>
           <p className="text-slate-400">
-            GhostMyData includes dark web monitoring and breach alerts.
-            Optery focuses only on data broker removal.
+            GhostMyData has dark web and breach alerts.
+            Optery only does data broker removal.
           </p>
         </div>
 
@@ -192,10 +189,10 @@ export default function CompareOpteryPage() {
           <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
             <DollarSign className="h-6 w-6 text-emerald-500" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Better Value</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">Better Free Tier</h3>
           <p className="text-slate-400">
-            GhostMyData&apos;s free tier includes comprehensive scanning.
-            Optery&apos;s free tier is limited to self-service guides.
+            GhostMyData&apos;s free tier has a full scan.
+            Optery&apos;s free tier only has self-service guides.
           </p>
         </div>
       </div>
@@ -319,20 +316,20 @@ export default function CompareOpteryPage() {
       <div className="mb-16 p-8 bg-slate-800/30 rounded-2xl border border-slate-700">
         <h2 className="text-2xl font-bold text-white mb-4">When to Choose Optery</h2>
         <p className="text-slate-400 mb-4">
-          Optery might be the better choice if:
+          Optery might be right if:
         </p>
         <ul className="space-y-2 text-slate-400">
           <li className="flex items-start gap-2">
             <span className="text-slate-500">-</span>
-            Budget is your primary concern and $39/year is your limit
+            Budget is key and $39/year is your limit
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">-</span>
-            You only need basic data broker removal without advanced security
+            You only need basic broker removal
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">-</span>
-            You prefer their patented before/after screenshot system
+            You like their screenshot proof system
           </li>
         </ul>
       </div>

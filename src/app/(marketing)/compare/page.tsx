@@ -127,22 +127,22 @@ export default function ComparePage() {
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <Search className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Coverage</h3>
-              <p className="text-slate-400">How many data broker sites do they monitor? More coverage means better protection. Look for services covering 200+ sites.</p>
+              <p className="text-slate-400">How many sites do they check? More sites means better protection. Look for 200+ sites.</p>
             </div>
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <Clock className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Speed</h3>
-              <p className="text-slate-400">Automated systems work faster and more consistently. They don't miss sites or forget to follow up on removal requests.</p>
+              <p className="text-slate-400">Automated systems work faster. They don't miss sites or forget to follow up.</p>
             </div>
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <BarChart3 className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Monitoring</h3>
-              <p className="text-slate-400">Daily monitoring catches new exposures quickly. Weekly or monthly checks let data spread further before removal.</p>
+              <p className="text-slate-400">Daily checks catch new data fast. Weekly checks let data spread before removal.</p>
             </div>
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <HeadphonesIcon className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Support</h3>
-              <p className="text-slate-400">Can you reach someone when you have questions? Good support makes a difference. Look for multiple contact options.</p>
+              <p className="text-slate-400">Can you reach someone with questions? Good support matters. Look for multiple ways to contact them.</p>
             </div>
           </div>
         </div>

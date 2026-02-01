@@ -147,22 +147,22 @@ export default function RemoveFromPage() {
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <FileText className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Public Records</h3>
-              <p className="text-slate-400">Property records show where you live and what you own. Court documents reveal legal history. Voter registrations provide contact details.</p>
+              <p className="text-slate-400">Property records show where you live. Court docs show legal history. Voter rolls have your contact info.</p>
             </div>
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <Eye className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Online Activity</h3>
-              <p className="text-slate-400">Social media profiles share personal details. Shopping habits show your preferences. Website registrations leak contact information.</p>
+              <p className="text-slate-400">Social media shares your details. Shopping sites track you. Sign-ups leak your email.</p>
             </div>
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <Shield className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Third-Party Data</h3>
-              <p className="text-slate-400">Data brokers buy information from other companies. Credit card companies sell transaction data. Retailers share customer information.</p>
+              <p className="text-slate-400">Brokers buy data from other firms. Credit card firms sell data. Stores share what you buy.</p>
             </div>
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <Search className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">People-Search Sites</h3>
-              <p className="text-slate-400">Anyone can search for you by name. They find your address within seconds. Your phone number appears publicly for anyone to see.</p>
+              <p className="text-slate-400">Anyone can search your name. They find your address fast. Your phone is public.</p>
             </div>
           </div>
         </div>
@@ -178,19 +178,19 @@ export default function RemoveFromPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-3">
               <h3 className="text-lg font-semibold text-white">Identity Theft</h3>
-              <p className="text-slate-400">Identity thieves use your exposed information to open credit cards in your name, file fraudulent tax returns, and access your accounts.</p>
+              <p className="text-slate-400">Thieves use your data to open cards in your name. They file fake tax returns. They break into your accounts.</p>
             </div>
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-white">Stalking & Harassment</h3>
-              <p className="text-slate-400">Stalkers find targets through people-search sites. Your home address and workplace shouldn't be publicly available online.</p>
+              <h3 className="text-lg font-semibold text-white">Stalking</h3>
+              <p className="text-slate-400">Stalkers find targets on people-search sites. Your address shouldn't be online for all to see.</p>
             </div>
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-white">Targeted Scams</h3>
-              <p className="text-slate-400">Scammers use personal details to seem legitimate. They reference your family members by name, making their scams more convincing.</p>
+              <h3 className="text-lg font-semibold text-white">Scams</h3>
+              <p className="text-slate-400">Scammers use your details to sound real. They name your family to trick you.</p>
             </div>
             <div className="space-y-3">
               <h3 className="text-lg font-semibold text-white">Unwanted Contact</h3>
-              <p className="text-slate-400">Telemarketers buy your phone number. Junk mail fills your mailbox. Your exposed data fuels constant interruption.</p>
+              <p className="text-slate-400">Telemarketers buy your number. Junk mail piles up. Your data fuels constant spam.</p>
             </div>
           </div>
         </div>
@@ -275,10 +275,10 @@ export default function RemoveFromPage() {
           <h2 className="text-2xl font-bold text-white mb-6">{whyUsSection.title}</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {[
-              { title: "Comprehensive Coverage", desc: "We cover 200+ data broker sites including all major people-search sites and lesser-known data aggregators." },
-              { title: "Fully Automated", desc: "Set it up once and we handle everything. Our systems work 24/7 to protect your privacy." },
-              { title: "Proven Results", desc: "Our removal rate exceeds industry averages. We've helped thousands of people remove their data." },
-              { title: "Clear Reporting", desc: "Our dashboard shows exactly what we're doing. Track removal progress in real-time." },
+              { title: "Wide Coverage", desc: "We cover 200+ data broker sites. We check the big ones and small ones too." },
+              { title: "Fully Automated", desc: "Set it up once. We do the rest 24/7." },
+              { title: "Proven Results", desc: "We beat industry averages. We've helped thousands." },
+              { title: "Clear Reports", desc: "See what we do in your dashboard. Track progress in real-time." },
             ].map(({ title, desc }) => (
               <div key={title} className="flex gap-4">
                 <CheckCircle2 className="h-6 w-6 text-emerald-500 flex-shrink-0 mt-1" />

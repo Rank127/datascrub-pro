@@ -40,23 +40,23 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "Is GhostMyData better than DeleteMe?",
-    answer: "GhostMyData offers more features at a comparable price, including dark web monitoring, a free tier, and monthly billing options. DeleteMe has been operating longer (since 2011), but lacks modern features like dark web monitoring and requires annual billing.",
+    answer: "GhostMyData has more features for a similar price. It offers dark web monitoring, a free tier, and monthly billing. DeleteMe has been around since 2011 but lacks dark web alerts.",
   },
   {
-    question: "How much does DeleteMe cost compared to GhostMyData?",
-    answer: "DeleteMe costs $129/year (no monthly option) for individual plans. GhostMyData offers a free tier, and paid plans starting at $11.99/month with both monthly and annual billing options.",
+    question: "How much does DeleteMe cost?",
+    answer: "DeleteMe costs $129/year with no monthly option. GhostMyData has a free tier and paid plans from $11.99/month.",
   },
   {
-    question: "Which service removes more data brokers?",
-    answer: "GhostMyData covers 2,100+ data brokers (plus 60 AI Shield sources) while DeleteMe covers approximately 40+ data brokers. GhostMyData has the most comprehensive coverage in the industry.",
+    question: "Which service covers more data brokers?",
+    answer: "GhostMyData covers 2,100+ sites plus 60 AI Shield sources. DeleteMe covers about 40+ sites. GhostMyData has wider coverage.",
   },
   {
     question: "Does DeleteMe have dark web monitoring?",
-    answer: "No, DeleteMe does not offer dark web monitoring. GhostMyData includes dark web monitoring in its Enterprise plan, alerting you when your data appears on dark web marketplaces and forums.",
+    answer: "No. DeleteMe does not watch the dark web. GhostMyData does in its Enterprise plan.",
   },
   {
-    question: "Can I try these services before paying?",
-    answer: "GhostMyData offers a free tier that includes a comprehensive scan and manual removal guides. DeleteMe does not have a free tier, but offers a 30-day money-back guarantee.",
+    question: "Can I try these for free?",
+    answer: "GhostMyData has a free tier with a full scan and guides. DeleteMe has no free tier but offers a 30-day refund.",
   },
 ];
 
@@ -165,13 +165,12 @@ export default function CompareDeleteMePage() {
           Quick Verdict
         </h2>
         <p className="text-slate-300 text-lg mb-4">
-          <strong className="text-white">GhostMyData</strong> offers more features at a lower price point,
-          including dark web monitoring and a free tier. <strong className="text-white">DeleteMe</strong> has
-          a longer track record but lacks modern features like dark web monitoring and requires annual billing.
+          <strong className="text-white">GhostMyData</strong> has more features for less money.
+          It includes dark web alerts and a free tier.
+          <strong className="text-white"> DeleteMe</strong> has been around longer but lacks dark web monitoring.
         </p>
         <p className="text-slate-400">
-          Choose GhostMyData for better value and comprehensive protection. Choose DeleteMe if you
-          prioritize company longevity over features.
+          Pick GhostMyData for better value. Pick DeleteMe if you want a company with a longer history.
         </p>
       </div>
 
@@ -183,8 +182,8 @@ export default function CompareDeleteMePage() {
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">Better Pricing</h3>
           <p className="text-slate-400">
-            GhostMyData offers a free tier and monthly billing from $11.99/mo.
-            DeleteMe requires $129/year upfront (no monthly option).
+            GhostMyData has a free tier. Paid plans start at $11.99/mo.
+            DeleteMe costs $129/year with no monthly option.
           </p>
         </div>
 
@@ -194,8 +193,8 @@ export default function CompareDeleteMePage() {
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">More Protection</h3>
           <p className="text-slate-400">
-            GhostMyData includes dark web monitoring and breach alerts.
-            DeleteMe focuses only on data broker removal.
+            GhostMyData has dark web alerts and breach alerts.
+            DeleteMe only removes data from brokers.
           </p>
         </div>
 
@@ -205,8 +204,8 @@ export default function CompareDeleteMePage() {
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">Faster Removals</h3>
           <p className="text-slate-400">
-            GhostMyData processes removals in 1-7 days on average.
-            DeleteMe typically takes 7-14 days for initial removals.
+            GhostMyData removes data in 1-7 days on average.
+            DeleteMe takes 7-14 days.
           </p>
         </div>
       </div>
@@ -328,20 +327,20 @@ export default function CompareDeleteMePage() {
       <div className="mb-16 p-8 bg-slate-800/30 rounded-2xl border border-slate-700">
         <h2 className="text-2xl font-bold text-white mb-4">When to Choose DeleteMe</h2>
         <p className="text-slate-400 mb-4">
-          DeleteMe might be the better choice if:
+          DeleteMe might be right if:
         </p>
         <ul className="space-y-2 text-slate-400">
           <li className="flex items-start gap-2">
             <span className="text-slate-500">•</span>
-            You prioritize company longevity (DeleteMe has been operating since 2011)
+            You want an older, well-known company (since 2011)
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">•</span>
-            You prefer annual billing and don&apos;t mind the upfront cost
+            You&apos;re okay paying yearly
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">•</span>
-            You don&apos;t need dark web monitoring features
+            You don&apos;t need dark web alerts
           </li>
         </ul>
       </div>
