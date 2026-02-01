@@ -1,28 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Shield, CheckCircle } from "lucide-react";
+import { ArrowRight, Shield, CheckCircle, Search, Clock, BarChart3, HeadphonesIcon } from "lucide-react";
+import { comparePage } from "@/content/pages";
 
 export const metadata: Metadata = {
-  title: "Compare Data Removal Services - GhostMyData vs Competitors",
-  description:
-    "Compare GhostMyData with other data removal services like DeleteMe, Incogni, Optery, and more. Find the best privacy protection service for your needs.",
-  keywords: [
-    "data removal service comparison",
-    "best data removal service",
-    "deleteme alternative",
-    "incogni alternative",
-    "optery alternative",
-    "kanary alternative",
-    "privacy bee alternative",
-    "privacy service comparison",
-  ],
+  title: comparePage.meta.title,
+  description: comparePage.meta.description,
+  keywords: comparePage.meta.keywords,
   alternates: {
     canonical: "https://ghostmydata.com/compare",
   },
   openGraph: {
-    title: "Compare Data Removal Services - GhostMyData vs Competitors",
-    description:
-      "Compare GhostMyData with DeleteMe, Incogni, Optery, Kanary, and Privacy Bee. Find the best data removal service for your needs.",
+    title: comparePage.meta.title,
+    description: comparePage.meta.description,
     url: "https://ghostmydata.com/compare",
     type: "website",
     images: [
@@ -95,53 +85,144 @@ const comparisons = [
 ];
 
 export default function ComparePage() {
+  // Get content sections
+  const heroSection = comparePage.sections.find(s => s.id === "hero");
+  const whyCompareSection = comparePage.sections.find(s => s.id === "why-compare");
+  const whatToLookForSection = comparePage.sections.find(s => s.id === "what-to-look-for");
+  const advantageSection = comparePage.sections.find(s => s.id === "ghostmydata-advantage");
+  const comparisonFactorsSection = comparePage.sections.find(s => s.id === "comparison-factors");
+  const faqSection = comparePage.sections.find(s => s.id === "faq");
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      {/* Hero Section */}
       <div className="text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          Compare Data Removal Services
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          {heroSection?.title || "Compare Data Removal Services"}
         </h1>
-        <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-          See how GhostMyData stacks up against other privacy protection services.
-        </p>
+        <div className="text-lg text-slate-300 max-w-3xl mx-auto space-y-4">
+          {heroSection?.content.split("\n\n").map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 mb-16">
-        {comparisons.map((comp) => (
-          <Link
-            key={comp.slug}
-            href={`/compare/${comp.slug}`}
-            className="group p-8 bg-slate-800/50 rounded-2xl border border-slate-700 hover:border-emerald-500/50 transition-colors"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <Shield className="h-6 w-6 text-emerald-500" />
-              <h2 className="text-2xl font-bold text-white group-hover:text-emerald-400 transition-colors">
-                GhostMyData vs {comp.competitor}
-              </h2>
+      {/* Why Compare Section */}
+      {whyCompareSection && (
+        <div className="mb-16 p-8 bg-slate-800/30 rounded-2xl border border-slate-700">
+          <h2 className="text-2xl font-bold text-white mb-6">{whyCompareSection.title}</h2>
+          <div className="text-slate-300 space-y-4">
+            {whyCompareSection.content.split("\n\n").map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* What to Look For Section */}
+      {whatToLookForSection && (
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">{whatToLookForSection.title}</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <Search className="h-8 w-8 text-emerald-500 mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">Coverage</h3>
+              <p className="text-slate-400">How many data broker sites do they monitor? More coverage means better protection. Look for services covering 200+ sites.</p>
             </div>
-            <p className="text-slate-400 mb-6">{comp.description}</p>
-            <div className="space-y-2 mb-6">
-              {comp.advantages.map((adv) => (
-                <div key={adv} className="flex items-center gap-2 text-sm text-slate-300">
-                  <CheckCircle className="h-4 w-4 text-emerald-500" />
-                  {adv}
+            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <Clock className="h-8 w-8 text-emerald-500 mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">Speed</h3>
+              <p className="text-slate-400">Automated systems work faster and more consistently. They don't miss sites or forget to follow up on removal requests.</p>
+            </div>
+            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <BarChart3 className="h-8 w-8 text-emerald-500 mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">Monitoring</h3>
+              <p className="text-slate-400">Daily monitoring catches new exposures quickly. Weekly or monthly checks let data spread further before removal.</p>
+            </div>
+            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <HeadphonesIcon className="h-8 w-8 text-emerald-500 mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">Support</h3>
+              <p className="text-slate-400">Can you reach someone when you have questions? Good support makes a difference. Look for multiple contact options.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Competitor Comparisons Grid */}
+      <div className="mb-16">
+        <h2 className="text-2xl font-bold text-white mb-8 text-center">Compare GhostMyData with Top Services</h2>
+        <div className="grid md:grid-cols-2 gap-8">
+          {comparisons.map((comp) => (
+            <Link
+              key={comp.slug}
+              href={`/compare/${comp.slug}`}
+              className="group p-8 bg-slate-800/50 rounded-2xl border border-slate-700 hover:border-emerald-500/50 transition-colors"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <Shield className="h-6 w-6 text-emerald-500" />
+                <h3 className="text-2xl font-bold text-white group-hover:text-emerald-400 transition-colors">
+                  GhostMyData vs {comp.competitor}
+                </h3>
+              </div>
+              <p className="text-slate-400 mb-6">{comp.description}</p>
+              <div className="space-y-2 mb-6">
+                {comp.advantages.map((adv) => (
+                  <div key={adv} className="flex items-center gap-2 text-sm text-slate-300">
+                    <CheckCircle className="h-4 w-4 text-emerald-500" />
+                    {adv}
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 text-emerald-400 group-hover:text-emerald-300">
+                Read full comparison
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* GhostMyData Advantage Section */}
+      {advantageSection && (
+        <div className="mb-16 p-8 bg-emerald-500/5 rounded-2xl border border-emerald-500/20">
+          <h2 className="text-2xl font-bold text-white mb-6">{advantageSection.title}</h2>
+          <div className="text-slate-300 space-y-4">
+            {advantageSection.content.split("\n\n").map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* FAQ Section */}
+      {faqSection && (
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-8 text-center">{faqSection.title}</h2>
+          <div className="space-y-4">
+            {faqSection.content.split("\n\n").map((item, i) => {
+              const lines = item.split("\n");
+              const question = lines[0]?.replace(/^\*\*/, "").replace(/\*\*$/, "");
+              const answer = lines.slice(1).join(" ");
+              if (!question || !answer) return null;
+              return (
+                <div key={i} className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+                  <h3 className="text-lg font-semibold text-white mb-2">{question}</h3>
+                  <p className="text-slate-400">{answer}</p>
                 </div>
-              ))}
-            </div>
-            <div className="flex items-center gap-2 text-emerald-400 group-hover:text-emerald-300">
-              Read full comparison
-              <ArrowRight className="h-4 w-4" />
-            </div>
-          </Link>
-        ))}
-      </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
+      {/* CTA Section */}
       <div className="text-center p-8 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
         <h2 className="text-2xl font-bold text-white mb-4">
           Try GhostMyData Free
         </h2>
-        <p className="text-slate-400 mb-6">
+        <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
           No credit card required. See where your data is exposed before committing.
+          Join thousands who have taken control of their personal information.
         </p>
         <Link
           href="/register"

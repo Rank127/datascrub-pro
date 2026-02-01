@@ -1,30 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Shield, Search } from "lucide-react";
+import { ArrowRight, Shield, Search, AlertTriangle, FileText, Eye, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { removeFromPage } from "@/content/pages";
 
 export const metadata: Metadata = {
-  title: "Data Broker Removal Guides - How to Remove Your Personal Information",
-  description:
-    "Step-by-step guides to remove your personal information from data brokers like Spokeo, WhitePages, BeenVerified, and more. Free opt-out instructions.",
-  keywords: [
-    "data broker removal",
-    "opt out of data brokers",
-    "remove personal information",
-    "spokeo removal",
-    "whitepages removal",
-    "beenverified removal",
-    "people search removal",
-    "data broker opt out",
-    "remove my information from internet",
-  ],
+  title: removeFromPage.meta.title,
+  description: removeFromPage.meta.description,
+  keywords: removeFromPage.meta.keywords,
   alternates: {
     canonical: "https://ghostmydata.com/remove-from",
   },
   openGraph: {
-    title: "Data Broker Removal Guides - Remove Your Personal Information",
-    description:
-      "Free step-by-step guides to remove your data from 50+ data brokers. Learn how to opt out and protect your privacy.",
+    title: removeFromPage.meta.title,
+    description: removeFromPage.meta.description,
     url: "https://ghostmydata.com/remove-from",
     type: "website",
     images: [
@@ -112,17 +101,25 @@ const brokers = [
 ];
 
 export default function RemoveFromPage() {
+  // Get content sections
+  const heroSection = removeFromPage.sections.find(s => s.id === "hero");
+  const howBrokersWorkSection = removeFromPage.sections.find(s => s.id === "how-brokers-work");
+  const risksSection = removeFromPage.sections.find(s => s.id === "risks");
+  const processSection = removeFromPage.sections.find(s => s.id === "our-process");
+  const whyUsSection = removeFromPage.sections.find(s => s.id === "why-ghostmydata");
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
       {/* Header */}
       <div className="text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          Data Broker Removal Guides
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          {heroSection?.title || "Remove Your Information from Data Brokers"}
         </h1>
-        <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-          Step-by-step instructions to remove your personal information from the
-          most common data brokers and people search sites.
-        </p>
+        <div className="text-lg text-slate-300 max-w-3xl mx-auto space-y-4">
+          {heroSection?.content.split("\n\n").map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
+        </div>
       </div>
 
       {/* Quick Action */}
@@ -141,6 +138,63 @@ export default function RemoveFromPage() {
           </Button>
         </Link>
       </div>
+
+      {/* How Data Brokers Work Section */}
+      {howBrokersWorkSection && (
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-8 text-center">{howBrokersWorkSection.title}</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <FileText className="h-8 w-8 text-emerald-500 mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">Public Records</h3>
+              <p className="text-slate-400">Property records show where you live and what you own. Court documents reveal legal history. Voter registrations provide contact details.</p>
+            </div>
+            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <Eye className="h-8 w-8 text-emerald-500 mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">Online Activity</h3>
+              <p className="text-slate-400">Social media profiles share personal details. Shopping habits show your preferences. Website registrations leak contact information.</p>
+            </div>
+            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <Shield className="h-8 w-8 text-emerald-500 mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">Third-Party Data</h3>
+              <p className="text-slate-400">Data brokers buy information from other companies. Credit card companies sell transaction data. Retailers share customer information.</p>
+            </div>
+            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <Search className="h-8 w-8 text-emerald-500 mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">People-Search Sites</h3>
+              <p className="text-slate-400">Anyone can search for you by name. They find your address within seconds. Your phone number appears publicly for anyone to see.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Risks Section */}
+      {risksSection && (
+        <div className="mb-16 p-8 bg-red-500/5 rounded-2xl border border-red-500/20">
+          <div className="flex items-center gap-3 mb-6">
+            <AlertTriangle className="h-8 w-8 text-red-400" />
+            <h2 className="text-2xl font-bold text-white">{risksSection.title}</h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-white">Identity Theft</h3>
+              <p className="text-slate-400">Identity thieves use your exposed information to open credit cards in your name, file fraudulent tax returns, and access your accounts.</p>
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-white">Stalking & Harassment</h3>
+              <p className="text-slate-400">Stalkers find targets through people-search sites. Your home address and workplace shouldn't be publicly available online.</p>
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-white">Targeted Scams</h3>
+              <p className="text-slate-400">Scammers use personal details to seem legitimate. They reference your family members by name, making their scams more convincing.</p>
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-white">Unwanted Contact</h3>
+              <p className="text-slate-400">Telemarketers buy your phone number. Junk mail fills your mailbox. Your exposed data fuels constant interruption.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Broker Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
@@ -191,13 +245,61 @@ export default function RemoveFromPage() {
         </div>
       </div>
 
+      {/* Our Process Section */}
+      {processSection && (
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-8 text-center">{processSection.title}</h2>
+          <div className="grid md:grid-cols-5 gap-4">
+            {[
+              { step: 1, title: "Scan", desc: "We scan 200+ data broker sites for your information" },
+              { step: 2, title: "Request", desc: "We submit removal requests to every site" },
+              { step: 3, title: "Follow Up", desc: "We track and follow up on every request" },
+              { step: 4, title: "Verify", desc: "We confirm your data is actually removed" },
+              { step: 5, title: "Monitor", desc: "We continuously monitor for new exposures" },
+            ].map(({ step, title, desc }) => (
+              <div key={step} className="text-center p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-3 font-bold">
+                  {step}
+                </div>
+                <h3 className="font-semibold text-white mb-2">{title}</h3>
+                <p className="text-sm text-slate-400">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Why GhostMyData Section */}
+      {whyUsSection && (
+        <div className="mb-16 p-8 bg-emerald-500/5 rounded-2xl border border-emerald-500/20">
+          <h2 className="text-2xl font-bold text-white mb-6">{whyUsSection.title}</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            {[
+              { title: "Comprehensive Coverage", desc: "We cover 200+ data broker sites including all major people-search sites and lesser-known data aggregators." },
+              { title: "Fully Automated", desc: "Set it up once and we handle everything. Our systems work 24/7 to protect your privacy." },
+              { title: "Proven Results", desc: "Our removal rate exceeds industry averages. We've helped thousands of people remove their data." },
+              { title: "Clear Reporting", desc: "Our dashboard shows exactly what we're doing. Track removal progress in real-time." },
+            ].map(({ title, desc }) => (
+              <div key={title} className="flex gap-4">
+                <CheckCircle2 className="h-6 w-6 text-emerald-500 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-white mb-1">{title}</h3>
+                  <p className="text-slate-400">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* CTA */}
-      <div className="text-center">
+      <div className="text-center p-8 bg-slate-800/30 rounded-2xl">
         <h2 className="text-2xl font-bold text-white mb-4">
           Don&apos;t Have Time for Manual Removal?
         </h2>
-        <p className="text-slate-400 mb-6">
+        <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
           GhostMyData automates the entire process. One scan, continuous protection.
+          Every day you wait, your data spreads further. Take control of your privacy now.
         </p>
         <Link href="/register">
           <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700">

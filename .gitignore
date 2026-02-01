@@ -58,3 +58,8 @@ prisma/dev.db-journal
 *.log
 OPERATIONS_GUIDE.md
 .env*.local
+
+# Auto-generated content drafts
+*.optimized.md
+*.draft.md
+content-optimization-progress.json
