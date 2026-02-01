@@ -111,20 +111,16 @@ const DATA_TYPES = [
 ];
 
 /**
- * Get existing blog post slugs from the filesystem
+ * Get existing blog post slugs from the blog posts array
  */
 export async function getExistingBlogSlugs(): Promise<string[]> {
-  // Check the blog content directory for existing posts
-  const fs = await import("fs").then(m => m.promises);
-  const path = await import("path");
-
   try {
-    const blogDir = path.join(process.cwd(), "src", "content", "blog");
-    const files = await fs.readdir(blogDir);
-    return files
-      .filter(f => f.endsWith(".ts") || f.endsWith(".tsx") || f.endsWith(".mdx"))
-      .map(f => f.replace(/\.(ts|tsx|mdx)$/, ""));
-  } catch {
+    // Import the blog posts from the posts.ts file
+    const { getAllPosts } = await import("@/lib/blog/posts");
+    const posts = getAllPosts();
+    return posts.map(post => post.slug);
+  } catch (error) {
+    console.error("[SEO Agent] Failed to get existing blog slugs:", error);
     return [];
   }
 }
