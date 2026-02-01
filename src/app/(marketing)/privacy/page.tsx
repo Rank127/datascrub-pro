@@ -1,25 +1,16 @@
 import type { Metadata } from "next";
+import { privacyPage } from "@/content/pages";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy - How We Protect Your Data",
-  description:
-    "How GhostMyData protects your data. AES-256 encryption, never sell your data, CCPA and GDPR compliant. Read our full privacy policy.",
-  keywords: [
-    "GhostMyData privacy policy",
-    "data protection policy",
-    "privacy terms",
-    "GDPR compliance",
-    "CCPA compliance",
-    "data security",
-    "personal data protection",
-  ],
+  title: privacyPage.meta.title,
+  description: privacyPage.meta.description,
+  keywords: privacyPage.meta.keywords,
   alternates: {
     canonical: "https://ghostmydata.com/privacy",
   },
   openGraph: {
-    title: "Privacy Policy - GhostMyData",
-    description:
-      "Our commitment to protecting your privacy. AES-256 encryption, zero data selling, full GDPR/CCPA compliance.",
+    title: privacyPage.meta.title,
+    description: privacyPage.meta.description,
     url: "https://ghostmydata.com/privacy",
     type: "website",
     images: [
@@ -38,13 +29,50 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
+  // Get SEO content sections
+  const introSection = privacyPage.sections.find(s => s.id === "intro");
+  const commitmentSection = privacyPage.sections.find(s => s.id === "commitment");
+  const neverDoSection = privacyPage.sections.find(s => s.id === "what-we-dont-do");
+
   return (
     <div className="py-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold text-white mb-4">Privacy Policy</h1>
+        <h1 className="text-4xl font-bold text-white mb-4">{introSection?.title || "Privacy Policy"}</h1>
         <p className="text-slate-400 text-lg mb-8">
           Last updated: January 20, 2026
         </p>
+
+        {/* SEO-Optimized Introduction */}
+        <div className="mb-8 space-y-4">
+          {introSection?.content.split("\n\n").map((para, i) => (
+            <p key={i} className="text-lg text-slate-300">{para}</p>
+          ))}
+        </div>
+
+        {/* Commitment Section for SEO */}
+        {commitmentSection && (
+          <div className="mb-8 p-6 bg-emerald-500/5 rounded-xl border border-emerald-500/20">
+            <h2 className="text-xl font-bold text-white mb-4">{commitmentSection.title}</h2>
+            <div className="text-slate-300 space-y-4">
+              {commitmentSection.content.split("\n\n").map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* What We Never Do - Important for trust */}
+        {neverDoSection && (
+          <div className="mb-8 p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+            <h2 className="text-xl font-bold text-white mb-4">{neverDoSection.title}</h2>
+            <div className="text-slate-300 space-y-4">
+              {neverDoSection.content.split("\n\n").map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="prose prose-invert prose-slate max-w-none space-y-8">
 
           <section className="bg-slate-800/30 rounded-lg p-6 border border-slate-700">

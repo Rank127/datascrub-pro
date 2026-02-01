@@ -1,24 +1,16 @@
 import type { Metadata } from "next";
+import { termsPage } from "@/content/pages";
 
 export const metadata: Metadata = {
-  title: "Terms of Service - User Agreement",
-  description:
-    "GhostMyData Terms of Service. Read our user agreement covering service usage, subscription terms, data removal authorization, privacy rights, and legal terms.",
-  keywords: [
-    "GhostMyData terms of service",
-    "user agreement",
-    "service terms",
-    "legal terms",
-    "subscription terms",
-    "data removal terms",
-  ],
+  title: termsPage.meta.title,
+  description: termsPage.meta.description,
+  keywords: termsPage.meta.keywords,
   alternates: {
     canonical: "https://ghostmydata.com/terms",
   },
   openGraph: {
-    title: "Terms of Service - GhostMyData",
-    description:
-      "Read our terms of service covering data removal authorization, subscription billing, and user responsibilities.",
+    title: termsPage.meta.title,
+    description: termsPage.meta.description,
     url: "https://ghostmydata.com/terms",
     type: "website",
     images: [
@@ -37,13 +29,37 @@ export const metadata: Metadata = {
 };
 
 export default function TermsPage() {
+  // Get SEO content sections
+  const introSection = termsPage.sections.find(s => s.id === "intro");
+  const serviceSection = termsPage.sections.find(s => s.id === "service-description");
+
   return (
     <div className="py-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold text-white mb-4">Terms of Service</h1>
+        <h1 className="text-4xl font-bold text-white mb-4">{introSection?.title || "Terms of Service"}</h1>
         <p className="text-slate-400 text-lg mb-8">
           Last updated: January 20, 2026
         </p>
+
+        {/* SEO-Optimized Introduction */}
+        <div className="mb-8 space-y-4">
+          {introSection?.content.split("\n\n").map((para, i) => (
+            <p key={i} className="text-lg text-slate-300">{para}</p>
+          ))}
+        </div>
+
+        {/* Service Description for SEO */}
+        {serviceSection && (
+          <div className="mb-8 p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+            <h2 className="text-xl font-bold text-white mb-4">{serviceSection.title}</h2>
+            <div className="text-slate-300 space-y-4">
+              {serviceSection.content.split("\n\n").map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="prose prose-invert prose-slate max-w-none space-y-8">
 
           <section className="bg-slate-800/30 rounded-lg p-6 border border-slate-700">

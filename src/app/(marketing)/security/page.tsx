@@ -1,27 +1,17 @@
 import type { Metadata } from "next";
 import { Shield, Lock, Server, Eye, Key, FileCheck, AlertTriangle, CheckCircle } from "lucide-react";
+import { securityPage } from "@/content/pages";
 
 export const metadata: Metadata = {
-  title: "Security - Bank-Level Data Protection",
-  description:
-    "GhostMyData uses AES-256 encryption, SOC 2 compliant infrastructure, and industry-leading security to protect your data.",
-  keywords: [
-    "data security",
-    "AES-256 encryption",
-    "SOC 2 compliance",
-    "secure data removal",
-    "privacy security",
-    "encrypted data storage",
-    "secure personal data",
-    "cybersecurity",
-  ],
+  title: securityPage.meta.title,
+  description: securityPage.meta.description,
+  keywords: securityPage.meta.keywords,
   alternates: {
     canonical: "https://ghostmydata.com/security",
   },
   openGraph: {
-    title: "Security - GhostMyData",
-    description:
-      "Bank-level security with AES-256 encryption, SOC 2 compliance, and 24/7 monitoring to protect your data.",
+    title: securityPage.meta.title,
+    description: securityPage.meta.description,
     url: "https://ghostmydata.com/security",
     type: "website",
     images: [
@@ -68,6 +58,10 @@ const certifications = [
 ];
 
 export default function SecurityPage() {
+  // Get content sections for SEO-optimized intro text
+  const heroSection = securityPage.sections.find(s => s.id === "hero");
+  const encryptionSection = securityPage.sections.find(s => s.id === "encryption");
+
   return (
     <div className="py-24">
       {/* Hero Section */}
@@ -76,14 +70,27 @@ export default function SecurityPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 mb-6">
             <Shield className="h-8 w-8 text-emerald-500" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Security at GhostMyData
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            {heroSection?.title || "Security at GhostMyData"}
           </h1>
-          <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-            We protect your data with the same intensity we use to remove it from the internet.
-            Your privacy and security are the foundation of everything we do.
-          </p>
+          <div className="text-lg text-slate-300 max-w-3xl mx-auto space-y-4">
+            {heroSection?.content.split("\n\n").map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
         </div>
+
+        {/* SEO Content Section */}
+        {encryptionSection && (
+          <div className="mb-16 p-8 bg-slate-800/30 rounded-2xl border border-slate-700">
+            <h2 className="text-2xl font-bold text-white mb-4">{encryptionSection.title}</h2>
+            <div className="text-slate-300 space-y-4">
+              {encryptionSection.content.split("\n\n").map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Security Features Grid */}
         <div className="grid md:grid-cols-2 gap-8 mb-24">
