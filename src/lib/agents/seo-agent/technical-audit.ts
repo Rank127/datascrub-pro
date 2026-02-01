@@ -247,10 +247,12 @@ export async function auditPage(baseUrl: string, path: string): Promise<SEOAudit
       });
     }
 
-    // Check page load size
+    // Check page load size (uncompressed HTML)
+    // Note: Modern Next.js pages with structured data and rich content typically 100-150KB
+    // Compressed transfer size is usually 10-20KB which is acceptable
     maxScore += 10;
     const pageSize = html.length;
-    if (pageSize < 100000) {
+    if (pageSize < 150000) {
       checks.push({
         name: "Page Size",
         status: "pass",
@@ -258,7 +260,7 @@ export async function auditPage(baseUrl: string, path: string): Promise<SEOAudit
         value: pageSize,
       });
       totalScore += 10;
-    } else if (pageSize < 200000) {
+    } else if (pageSize < 250000) {
       checks.push({
         name: "Page Size",
         status: "warning",
