@@ -644,13 +644,22 @@ export async function getEffectivePlanDetails(userId: string): Promise<PlanDetai
 
   // If user has their own Enterprise subscription, they're the owner
   if (ownPlan === "ENTERPRISE") {
-    // Check if they own a family group
+    // Check if they own a family group with member and invitation counts
     const familyGroup = await prisma.familyGroup.findUnique({
       where: { ownerId: userId },
       include: {
         _count: { select: { members: true } },
+        invitations: {
+          where: { status: "PENDING" },
+          select: { id: true },
+        },
       },
     });
+
+    const memberCount = familyGroup?._count.members || 0;
+    const pendingInvitations = familyGroup?.invitations.length || 0;
+    const maxMembers = familyGroup?.maxMembers || 5;
+    const spotsRemaining = Math.max(0, maxMembers - memberCount - pendingInvitations);
 
     return {
       plan: "ENTERPRISE",
@@ -662,8 +671,10 @@ export async function getEffectivePlanDetails(userId: string): Promise<PlanDetai
         ownerName: user.name,
         ownerEmail: user.email,
         role: "OWNER",
-        memberCount: familyGroup._count.members,
-        maxMembers: familyGroup.maxMembers,
+        memberCount,
+        pendingInvitations,
+        maxMembers,
+        spotsRemaining,
       } : undefined,
       subscriptionInfo: user.subscription ? {
         status: user.subscription.status,
@@ -683,6 +694,10 @@ export async function getEffectivePlanDetails(userId: string): Promise<PlanDetai
             include: { subscription: true },
           },
           _count: { select: { members: true } },
+          invitations: {
+            where: { status: "PENDING" },
+            select: { id: true },
+          },
         },
       },
     },
@@ -694,6 +709,11 @@ export async function getEffectivePlanDetails(userId: string): Promise<PlanDetai
       membership.familyGroup.owner.plan;
 
     if (ownerPlan === "ENTERPRISE") {
+      const memberCount = membership.familyGroup._count.members;
+      const pendingInvitations = membership.familyGroup.invitations.length;
+      const maxMembers = membership.familyGroup.maxMembers;
+      const spotsRemaining = Math.max(0, maxMembers - memberCount - pendingInvitations);
+
       return {
         plan: "ENTERPRISE",
         source: "FAMILY",
@@ -704,8 +724,10 @@ export async function getEffectivePlanDetails(userId: string): Promise<PlanDetai
           ownerName: membership.familyGroup.owner.name,
           ownerEmail: membership.familyGroup.owner.email,
           role: membership.role,
-          memberCount: membership.familyGroup._count.members,
-          maxMembers: membership.familyGroup.maxMembers,
+          memberCount,
+          pendingInvitations,
+          maxMembers,
+          spotsRemaining,
         },
         subscriptionInfo: membership.familyGroup.owner.subscription ? {
           status: membership.familyGroup.owner.subscription.status,

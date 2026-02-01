@@ -42,8 +42,11 @@ export async function GET() {
         role: planDetails.familyInfo.role,           // "OWNER" or "MEMBER"
         ownerName: planDetails.familyInfo.ownerName, // Who pays for the plan
         ownerEmail: planDetails.isOwner ? undefined : planDetails.familyInfo.ownerEmail,
+        // Accurate member/seat tracking
         memberCount: planDetails.familyInfo.memberCount,
+        pendingInvitations: planDetails.familyInfo.pendingInvitations,
         maxMembers: planDetails.familyInfo.maxMembers,
+        spotsRemaining: planDetails.familyInfo.spotsRemaining,
       } : null,
     });
   } catch (error) {

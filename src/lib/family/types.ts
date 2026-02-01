@@ -88,8 +88,10 @@ export interface PlanDetails {
     ownerName: string | null;
     ownerEmail: string;
     role: string;
-    memberCount: number;
-    maxMembers: number;
+    memberCount: number;       // Current active members
+    pendingInvitations: number; // Pending invitations (reserved spots)
+    maxMembers: number;        // Total allowed members
+    spotsRemaining: number;    // Available spots (maxMembers - memberCount - pendingInvitations)
   };
   subscriptionInfo?: {
     status: string;
