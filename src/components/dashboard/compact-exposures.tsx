@@ -54,6 +54,14 @@ const severityConfig: Record<Severity, { color: string; bgColor: string }> = {
   CRITICAL: { color: "text-red-400", bgColor: "bg-red-500/20" },
 };
 
+// Severity order for sorting (higher = more severe)
+const severityOrder: Record<Severity, number> = {
+  CRITICAL: 4,
+  HIGH: 3,
+  MEDIUM: 2,
+  LOW: 1,
+};
+
 export function CompactExposures({
   exposures,
   onRemove,
@@ -63,6 +71,11 @@ export function CompactExposures({
   if (exposures.length === 0) {
     return null;
   }
+
+  // Sort by severity (critical/high first)
+  const sortedExposures = [...exposures].sort(
+    (a, b) => severityOrder[b.severity] - severityOrder[a.severity]
+  );
 
   return (
     <Card className={cn("bg-slate-800/50 border-slate-700", className)}>
@@ -84,7 +97,7 @@ export function CompactExposures({
       </CardHeader>
       <CardContent className="pt-0">
         <div className="divide-y divide-slate-700/50">
-          {exposures.map((exposure) => {
+          {sortedExposures.map((exposure) => {
             const displayName = exposure.sourceName || DataSourceNames[exposure.source] || exposure.source;
             const dataTypeLabel = dataTypeShortLabels[exposure.dataType] || exposure.dataType;
             const severity = severityConfig[exposure.severity];
