@@ -60,25 +60,25 @@ const features = [
     icon: Search,
     title: "Find Your Data",
     description:
-      "Scan data brokers, breach databases, dark web, and social media to discover where your personal information is exposed.",
+      "We scan data brokers, breach databases, and the dark web. We find where your info is exposed.",
   },
   {
     icon: Trash2,
-    title: "Automated Removal",
+    title: "Auto Removal",
     description:
-      "We automatically submit opt-out requests to data brokers and send CCPA/GDPR removal requests on your behalf.",
+      "We send opt-out requests for you. We also send CCPA and GDPR requests on your behalf.",
   },
   {
     icon: Eye,
-    title: "Continuous Monitoring",
+    title: "24/7 Monitoring",
     description:
-      "24/7 monitoring for new exposures. Get instant alerts when your data appears somewhere new.",
+      "We watch for new exposures all day. You get alerts when your data shows up.",
   },
   {
     icon: Lock,
     title: "Encrypted & Secure",
     description:
-      "Your data is encrypted with AES-256. We never share your information with third parties.",
+      "Your data is locked with AES-256. We never share it with anyone.",
   },
 ];
 
@@ -95,36 +95,36 @@ const dataSources = [
 
 const faqs = [
   {
-    question: "How does GhostMyData find my personal information?",
-    answer: "We scan over 2,100 data sources including people-search sites (Spokeo, WhitePages, BeenVerified), breach databases (Have I Been Pwned), dark web monitoring services, and 60 AI Shield sources. Our automated system searches for your email addresses, phone numbers, names, and addresses across these sources.",
+    question: "How does GhostMyData find my info?",
+    answer: "We scan 2,100+ sites. We check Spokeo, WhitePages, and more. We also check breach databases and the dark web. We search for your emails, phones, names, and addresses.",
   },
   {
-    question: "How long does it take to remove my data?",
-    answer: "Most data broker removals are processed within 1-7 days. Some sites may take up to 2-4 weeks to fully process removal requests. We continuously monitor and re-submit requests if your data reappears.",
+    question: "How long does removal take?",
+    answer: "Most removals take 1-7 days. Some sites take 2-4 weeks. We keep watching and resend requests if your data comes back.",
   },
   {
-    question: "Is my information safe with GhostMyData?",
-    answer: "Absolutely. We use bank-level AES-256 encryption for all personal data. Your information is encrypted at rest and in transit. We never sell your data, and our systems are hosted on SOC 2 Type II compliant infrastructure.",
+    question: "Is my info safe with you?",
+    answer: "Yes. We use AES-256 encryption. Your data is locked at rest and in transit. We never sell it. We use SOC 2 Type II servers.",
   },
   {
-    question: "Can I try GhostMyData for free?",
-    answer: "Yes! Our free plan includes a comprehensive scan to show you where your data is exposed, plus manual removal guides. No credit card required. You can upgrade to automated removals anytime.",
+    question: "Can I try it for free?",
+    answer: "Yes. Our free plan scans for your data. You get removal guides too. No card needed. Upgrade anytime.",
   },
   {
-    question: "What's the difference between free and paid plans?",
-    answer: "The free plan shows you where your data is exposed and provides DIY removal guides. Paid plans (Pro and Enterprise) automate the removal process, provide continuous monitoring, and include features like dark web monitoring and priority support.",
+    question: "What do paid plans add?",
+    answer: "Paid plans automate removals. You get ongoing monitoring. Enterprise adds dark web alerts and priority support.",
   },
   {
-    question: "Will my data stay removed permanently?",
-    answer: "Data brokers continuously collect new information, so removed data can reappear over time. That's why we offer continuous monitoring - we regularly check for re-listings and automatically submit new removal requests to keep you protected.",
+    question: "Will my data stay gone?",
+    answer: "Brokers keep collecting data. Your info may come back. That's why we monitor. We send new removal requests when needed.",
   },
   {
-    question: "Do you support CCPA and GDPR removal requests?",
-    answer: "Yes. We automatically generate and submit legally compliant CCPA (California) and GDPR (European) data deletion requests on your behalf. These laws require companies to honor removal requests.",
+    question: "Do you send CCPA and GDPR requests?",
+    answer: "Yes. We send legal removal requests for you. CCPA is for California. GDPR is for Europe. Companies must honor these.",
   },
   {
-    question: "Can I protect my whole family?",
-    answer: "Yes! Our Enterprise plan includes family protection for up to 5 profiles. Each family member gets their own scan, removal requests, and monitoring dashboard.",
+    question: "Can I protect my family?",
+    answer: "Yes. Enterprise covers up to 5 people. Each person gets their own scans and dashboard.",
   },
 ];
 
@@ -163,9 +163,8 @@ export default function HomePage() {
             </h1>
 
             <p className="text-xl text-slate-400 max-w-3xl mx-auto mb-8">
-              GhostMyData finds where your personal information is exposed
-              online and automatically removes it from data brokers, breach
-              databases, and the dark web.
+              GhostMyData finds your exposed data online. We remove it from
+              data brokers, breach databases, and the dark web.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -219,8 +218,8 @@ export default function HomePage() {
             Your Data Is Everywhere
           </h2>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            Right now, your personal information is being bought and sold by data
-            brokers, exposed in data breaches, and traded on the dark web.
+            Right now, your info is being bought and sold. It&apos;s in breaches.
+            It&apos;s on the dark web.
           </p>
         </div>
 
@@ -233,8 +232,8 @@ export default function HomePage() {
               Data Brokers
             </h3>
             <p className="text-slate-400">
-              Over 4,000 data brokers collect and sell your personal information
-              including name, address, phone, and more.
+              Over 4,000 brokers sell your info. They have your name, address,
+              phone, and more.
             </p>
           </div>
 
@@ -246,8 +245,8 @@ export default function HomePage() {
               Data Breaches
             </h3>
             <p className="text-slate-400">
-              Billions of records exposed in data breaches. Your email and
-              passwords may already be compromised.
+              Billions of records are leaked. Your email and passwords may
+              already be out there.
             </p>
           </div>
 
@@ -259,8 +258,8 @@ export default function HomePage() {
               Dark Web
             </h3>
             <p className="text-slate-400">
-              Personal information is actively traded on dark web marketplaces
-              and forums for identity theft.
+              Your info is sold on the dark web. Criminals use it for identity
+              theft.
             </p>
           </div>
         </div>
@@ -274,8 +273,7 @@ export default function HomePage() {
               How GhostMyData Works
             </h2>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              Our automated system finds and removes your personal data from
-              hundreds of sources across the internet.
+              We find and remove your data from hundreds of sites. It&apos;s automatic.
             </p>
           </div>
 
@@ -476,8 +474,7 @@ export default function HomePage() {
               Ready to Take Back Your Privacy?
             </h2>
             <p className="text-lg text-white/80 max-w-2xl mx-auto mb-8">
-              Join thousands of users who have already removed their personal
-              data from the internet. Start with a free scan today.
+              Thousands have already removed their data. Start with a free scan today.
             </p>
             <Link href="/register">
               <Button

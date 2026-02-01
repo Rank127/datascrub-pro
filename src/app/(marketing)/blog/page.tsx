@@ -50,8 +50,7 @@ export default function BlogPage() {
           Privacy Blog
         </h1>
         <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-          Expert guides on removing your data from the internet, protecting your
-          privacy, and understanding your rights.
+          Learn how to remove your data. Protect your privacy. Know your rights.
         </p>
       </div>
 
@@ -155,7 +154,7 @@ export default function BlogPage() {
           Ready to Protect Your Privacy?
         </h2>
         <p className="text-slate-400 mb-6">
-          Stop reading about data brokers. Start removing yourself from them.
+          Stop reading. Start removing your data now.
         </p>
         <Link
           href="/register"
