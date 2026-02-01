@@ -37,6 +37,7 @@ import {
   ClipboardList,
   Smartphone,
   Flag,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -169,29 +170,6 @@ export default function DNCPage() {
     }
   };
 
-  const handleVerify = async (id: string) => {
-    setActionLoading(id);
-    try {
-      const response = await fetch(`/api/dnc/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify" }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to verify");
-      }
-
-      toast.success(result.isRegistered ? "Number is on DNC registry" : "Number not found on registry");
-      fetchDNCData();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Verification failed");
-    } finally {
-      setActionLoading(null);
-    }
-  };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to remove this registration?")) return;
@@ -236,11 +214,11 @@ export default function DNCPage() {
       case "VERIFIED":
         return "Verified on Registry";
       case "SUBMITTED":
-        return "Submitted - Pending Verification";
+        return "Processing";
       case "PENDING":
-        return "Pending Submission";
+        return "Ready to Submit";
       case "FAILED":
-        return "Failed";
+        return "Error - Please Retry";
       default:
         return status;
     }
@@ -458,18 +436,20 @@ export default function DNCPage() {
                         )}
                       </Button>
                     )}
-                    {reg.status === "SUBMITTED" && (
+                    {reg.status === "FAILED" && (
                       <Button
                         size="sm"
-                        variant="outline"
-                        onClick={() => handleVerify(reg.id)}
+                        onClick={() => handleSubmit(reg.id)}
                         disabled={actionLoading === reg.id}
-                        className="border-slate-700"
+                        className="bg-orange-600 hover:bg-orange-700"
                       >
                         {actionLoading === reg.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          "Verify"
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-1" />
+                            Retry
+                          </>
                         )}
                       </Button>
                     )}

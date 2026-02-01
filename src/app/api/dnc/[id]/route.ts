@@ -5,6 +5,7 @@ import {
   submitDNCRegistration,
   verifyDNCStatus,
   removeDNCRegistration,
+  fixDNCRegistration,
   checkDNCAccess,
 } from "@/lib/dnc";
 
@@ -95,8 +96,22 @@ export async function POST(
       });
     }
 
+    if (action === "fix") {
+      const { last4 } = body;
+      const result = await fixDNCRegistration(session.user.id, id, last4);
+
+      if (!result.success) {
+        return NextResponse.json({ error: result.error }, { status: 400 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        phoneLast4: result.phoneLast4,
+      });
+    }
+
     return NextResponse.json(
-      { error: "Invalid action. Use 'submit' or 'verify'" },
+      { error: "Invalid action. Use 'submit', 'verify', or 'fix'" },
       { status: 400 }
     );
   } catch (error) {

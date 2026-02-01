@@ -226,8 +226,9 @@ model Alert {
 model DNCRegistration {
   id           String    @id @default(cuid())
   userId       String
-  phoneNumber  String
-  phoneHash    String
+  phoneNumber  String    // Encrypted full phone number
+  phoneHash    String    // Hash for deduplication
+  phoneLast4   String?   // Last 4 digits for display
   status       String    @default("PENDING")
   registeredAt DateTime?
   verifiedAt   DateTime?
