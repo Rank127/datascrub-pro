@@ -16,6 +16,11 @@ import {
   urlToFilePath,
   OptimizationConfig,
 } from "@/lib/agents/content-agent/page-optimizer";
+import {
+  getOptimizationKeywords,
+  getKeywordStats,
+  getKeywordGaps,
+} from "@/lib/agents/shared/keyword-intelligence";
 import * as fs from "fs/promises";
 import * as path from "path";
 
@@ -27,18 +32,33 @@ const CRON_SECRET = process.env.CRON_SECRET;
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@ghostmydata.com";
 
+// Default keywords (used if keyword intelligence not available)
+const DEFAULT_KEYWORDS = [
+  "data removal service",
+  "remove personal information",
+  "data broker removal",
+  "privacy protection",
+  "delete my data online",
+];
+
 // Target configuration - aiming for 100% over a week
-const TARGET_CONFIG: OptimizationConfig = {
-  targetWordCount: 1000, // Minimum words for comprehensive content
-  targetReadability: 65, // Good readability (60-70 is ideal)
-  targetKeywords: [
-    "data removal service",
-    "remove personal information",
-    "data broker removal",
-    "privacy protection",
-    "delete my data online",
-  ],
-};
+// Keywords are loaded dynamically from the shared intelligence store
+async function getTargetConfig(): Promise<OptimizationConfig> {
+  // Try to get keywords from the shared intelligence store
+  let targetKeywords = DEFAULT_KEYWORDS;
+  try {
+    targetKeywords = await getOptimizationKeywords(10);
+    console.log(`[Content Optimizer] Using ${targetKeywords.length} keywords from intelligence store`);
+  } catch (err) {
+    console.log("[Content Optimizer] Using default keywords (intelligence store not available)");
+  }
+
+  return {
+    targetWordCount: 1000, // Minimum words for comprehensive content
+    targetReadability: 65, // Good readability (60-70 is ideal)
+    targetKeywords,
+  };
+}
 
 // Pages to optimize (in priority order)
 const PAGES_TO_OPTIMIZE = [
@@ -418,11 +438,21 @@ async function runOptimization(): Promise<{
   pagesOptimized: number;
   improvements: string[];
   progress: OptimizationProgress;
+  keywordStats?: {
+    totalDiscovered: number;
+    highRelevance: number;
+    gaps: number;
+    lastUpdated: string;
+  };
 }> {
   const improvements: string[] = [];
 
-  // Step 1: Run SEO analysis to get current state
-  console.log("[Content Optimizer] Running SEO analysis...");
+  // Step 0: Get dynamic keyword configuration
+  const TARGET_CONFIG = await getTargetConfig();
+  console.log(`[Content Optimizer] Target keywords: ${TARGET_CONFIG.targetKeywords.slice(0, 5).join(", ")}...`);
+
+  // Step 1: Run SEO analysis to get current state (this also runs keyword research)
+  console.log("[Content Optimizer] Running SEO analysis with keyword research...");
   const seoResult = await runFullSEOReport();
 
   const currentScore = seoResult.report.overallScore;
@@ -523,11 +553,20 @@ async function runOptimization(): Promise<{
   // Save progress
   await saveProgress(progress);
 
+  // Get keyword intelligence stats
+  let kwStats;
+  try {
+    kwStats = await getKeywordStats();
+  } catch {
+    kwStats = undefined;
+  }
+
   return {
     seoScore: currentScore,
     pagesOptimized,
     improvements,
     progress,
+    keywordStats: kwStats,
   };
 }
 
@@ -540,6 +579,12 @@ async function sendOptimizationReport(result: {
   pagesOptimized: number;
   improvements: string[];
   progress: OptimizationProgress;
+  keywordStats?: {
+    totalDiscovered: number;
+    highRelevance: number;
+    gaps: number;
+    lastUpdated: string;
+  };
 }): Promise<void> {
   if (!resend) {
     console.log("[Content Optimizer] Email not configured, skipping report");
@@ -604,6 +649,24 @@ async function sendOptimizationReport(result: {
         <div class="stat-label">Pages Optimized</div>
       </div>
     </div>
+
+    ${result.keywordStats ? `
+    <h2>Keyword Intelligence</h2>
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-value">${result.keywordStats.totalDiscovered}</div>
+        <div class="stat-label">Keywords Found</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">${result.keywordStats.highRelevance}</div>
+        <div class="stat-label">High Relevance</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">${result.keywordStats.gaps}</div>
+        <div class="stat-label">Keyword Gaps</div>
+      </div>
+    </div>
+    ` : ''}
 
     ${result.improvements.length > 0 ? `
     <h2>Today's Improvements</h2>

@@ -55,6 +55,10 @@ import {
   KeywordResearchResult,
   KeywordData,
 } from "./keyword-research";
+import {
+  updateFromKeywordResearch,
+  getKeywordStats,
+} from "../shared/keyword-intelligence";
 
 // ============================================================================
 // CONSTANTS
@@ -412,9 +416,23 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
       // Step 4: Generate report
       const report = await generateSEOReport(technicalAudit, contentAnalysis, blogIdeas);
 
-      // Add keyword research to report
+      // Add keyword research to report and save to shared store
       if (keywordResearchData) {
         (report as SEOReport & { keywordResearch?: KeywordResearchResult }).keywordResearch = keywordResearchData;
+
+        // Save to shared keyword intelligence store for other agents to use
+        try {
+          await updateFromKeywordResearch({
+            discoveredKeywords: keywordResearchData.discoveredKeywords,
+            competitorKeywords: keywordResearchData.competitorKeywords,
+            keywordGaps: keywordResearchData.keywordGaps,
+            suggestedNewTargets: keywordResearchData.suggestedNewTargets,
+            searchEnginesUsed: keywordResearchData.searchEnginesUsed,
+          });
+          console.log(`[${this.name}] Saved ${keywordResearchData.discoveredKeywords.length} keywords to shared intelligence store`);
+        } catch (err) {
+          console.error(`[${this.name}] Failed to save keywords to store:`, err);
+        }
       }
 
       // Step 5: Store report
@@ -562,6 +580,20 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
       console.log(`[${this.name}] Engines used: ${research.searchEnginesUsed.join(", ")}`);
       console.log(`[${this.name}] Keywords found: ${research.discoveredKeywords.length}`);
       console.log(`[${this.name}] Top opportunities: ${topOpportunities.length}`);
+
+      // Save to shared keyword intelligence store for other agents
+      try {
+        await updateFromKeywordResearch({
+          discoveredKeywords: research.discoveredKeywords,
+          competitorKeywords: research.competitorKeywords,
+          keywordGaps: research.keywordGaps,
+          suggestedNewTargets: research.suggestedNewTargets,
+          searchEnginesUsed: research.searchEnginesUsed,
+        });
+        console.log(`[${this.name}] Saved keywords to shared intelligence store`);
+      } catch (err) {
+        console.error(`[${this.name}] Failed to save to intelligence store:`, err);
+      }
 
       return this.createSuccessResult<KeywordResearchResultOutput>(
         {

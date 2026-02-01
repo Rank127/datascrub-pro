@@ -8,6 +8,7 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import Anthropic from "@anthropic-ai/sdk";
+import { getOptimizationKeywords } from "../shared/keyword-intelligence";
 
 // ============================================================================
 // TYPES
@@ -480,15 +481,25 @@ export async function optimizePage(
 export async function optimizeAllPages(
   issues: Array<{ url: string; type: string; description: string }>
 ): Promise<PageOptimizationResult[]> {
+  // Get dynamic keywords from shared intelligence store
+  let targetKeywords = [
+    "data removal service",
+    "remove personal information",
+    "data broker removal",
+    "privacy protection",
+  ];
+
+  try {
+    targetKeywords = await getOptimizationKeywords(10);
+    console.log(`[PageOptimizer] Using ${targetKeywords.length} keywords from intelligence store`);
+  } catch {
+    console.log("[PageOptimizer] Using default keywords");
+  }
+
   const defaultConfig: OptimizationConfig = {
     targetWordCount: 800,
     targetReadability: 60,
-    targetKeywords: [
-      "data removal service",
-      "remove personal information",
-      "data broker removal",
-      "privacy protection",
-    ],
+    targetKeywords,
   };
 
   // Group issues by URL
