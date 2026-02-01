@@ -141,6 +141,16 @@ const faqs = [
     answer:
       "Yes. We use bank-grade encryption. We never sell your data. Your info is locked down tight.",
   },
+  {
+    question: "What happens after data is removed?",
+    answer:
+      "We keep monitoring to make sure your data stays gone. If a site re-lists you, we send another removal request automatically. You stay protected.",
+  },
+  {
+    question: "Can I upgrade or downgrade my plan?",
+    answer:
+      "Yes, you can change plans any time. When you upgrade, you get instant access to new features. When you downgrade, changes apply at the next billing cycle.",
+  },
 ];
 
 export default function PricingPage() {
@@ -167,6 +177,7 @@ export default function PricingPage() {
         </p>
         <p className="text-lg text-slate-500 max-w-xl mx-auto mt-4">
           No hidden fees. No contracts. Cancel any time. We scan 2,100+ data broker sites to find and remove your info.
+          Every plan includes our easy-to-use dashboard where you can track removal progress in real time.
         </p>
       </div>
 
