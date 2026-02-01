@@ -117,7 +117,7 @@ export async function POST(request: Request) {
       sendEmailReport,
     });
 
-    const agent = getSEOAgent();
+    const agent = await getSEOAgent();
     const context = createAgentContext({
       requestId: nanoid(),
       invocationType: InvocationTypes.ON_DEMAND,

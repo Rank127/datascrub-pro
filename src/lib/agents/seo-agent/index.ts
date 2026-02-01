@@ -505,9 +505,10 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
 
 let seoAgentInstance: SEOAgent | null = null;
 
-export function getSEOAgent(): SEOAgent {
+export async function getSEOAgent(): Promise<SEOAgent> {
   if (!seoAgentInstance) {
     seoAgentInstance = new SEOAgent();
+    await seoAgentInstance.initialize();
     registerAgent(seoAgentInstance);
   }
   return seoAgentInstance;
@@ -515,7 +516,7 @@ export function getSEOAgent(): SEOAgent {
 
 // Convenience functions
 export async function runSEOAudit(baseUrl?: string): Promise<TechnicalAuditResult> {
-  const agent = getSEOAgent();
+  const agent = await getSEOAgent();
   const context = createAgentContext({
     requestId: nanoid(),
     invocationType: InvocationTypes.ON_DEMAND,
@@ -535,7 +536,7 @@ export async function runSEOAudit(baseUrl?: string): Promise<TechnicalAuditResul
 }
 
 export async function runFullSEOReport(options?: FullReportInput): Promise<FullReportResult> {
-  const agent = getSEOAgent();
+  const agent = await getSEOAgent();
   const context = createAgentContext({
     requestId: nanoid(),
     invocationType: InvocationTypes.CRON,
@@ -555,7 +556,7 @@ export async function runFullSEOReport(options?: FullReportInput): Promise<FullR
 }
 
 export async function getBlogIdeas(limit = 10): Promise<BlogTopic[]> {
-  const agent = getSEOAgent();
+  const agent = await getSEOAgent();
   const context = createAgentContext({
     requestId: nanoid(),
     invocationType: InvocationTypes.ON_DEMAND,
