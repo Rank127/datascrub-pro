@@ -262,7 +262,7 @@ Your privacy is worth protecting. We make it easy and affordable. Join thousands
 export const securityPage: PageContent = {
   meta: {
     title: "Security Practices | GhostMyData",
-    description: "Learn how GhostMyData protects your data. We use bank-level encryption and follow strict security practices. Your privacy and security are our top priorities.",
+    description: "See how GhostMyData keeps your data safe. We use strong encryption. Your security is our priority.",
     keywords: ["data security", "privacy protection", "encryption", "secure data removal"],
   },
   sections: [
@@ -270,105 +270,105 @@ export const securityPage: PageContent = {
       id: "hero",
       type: "hero",
       title: "Security at GhostMyData",
-      content: `Security is the foundation of everything we do. As a data removal service, we handle sensitive personal information. We protect it with industry-leading security measures. Your trust depends on keeping your data safe with us.
+      content: `We keep your data safe. This is our core promise. We use strong tools to guard your info. You can trust us to do this right.
 
-We believe strong security enables strong privacy. You can't have privacy without security. That's why we invest heavily in protecting your information at every step.`
+Good security makes privacy work. One needs the other. We put a lot of care into this.`
     },
     {
       id: "encryption",
       type: "content",
-      title: "Data Encryption",
-      content: `We encrypt all data both in transit and at rest. Your information is protected at every moment.
+      title: "How We Lock Your Data",
+      content: `We lock all data when it moves and when it sits. Your info stays safe at all times.
 
-**In-Transit Encryption**
-All connections use TLS 1.3. This is the latest and strongest transport encryption. Your data cannot be intercepted during transmission. We enforce encrypted connections for all communications.
+**Data in Motion**
+We use TLS 1.3 for all links. This is the best lock for data in motion. No one can grab your data as it moves.
 
-**At-Rest Encryption**
-Stored data uses AES-256 encryption. This is the same standard used by banks and governments. Even if storage were compromised, data remains unreadable. We rotate encryption keys regularly for added protection.
+**Data at Rest**
+Stored data uses AES-256. Banks use this same lock. If someone got to our drives, they still can't read it. We swap out keys often to stay safe.
 
-**End-to-End Protection**
-From the moment you enter information to when it's stored, encryption protects it. There are no gaps in our security chain. Your personal details stay protected throughout.`
+**Full Coverage**
+From the time you type to when we store it, locks guard your data. There are no weak spots. Your details stay safe the whole way.`
     },
     {
       id: "infrastructure",
       type: "content",
-      title: "Infrastructure Security",
-      content: `Our infrastructure is built with security as the primary concern. Every component is designed to protect your data.
+      title: "Safe Servers",
+      content: `We built our systems with safety first. Each part guards your data.
 
-**Secure Cloud Hosting**
-We use industry-leading cloud providers. Our servers run in certified secure data centers. Physical access requires multiple authentication steps. Environmental controls protect against hardware failures.
+**Cloud Hosting**
+We use top cloud hosts. Our servers sit in safe data hubs. Getting in takes many checks. Backup systems handle any failures.
 
-**Network Protection**
-Multiple layers of firewalls protect our systems. Intrusion detection monitors for threats continuously. DDoS protection prevents service disruption. Network traffic is logged and analyzed for anomalies.
+**Network Guards**
+Many walls block bad actors. We watch for threats all day. DDoS shields keep us online. We log and check all traffic.
 
-**System Hardening**
-All servers follow strict hardening guidelines. Unnecessary services are disabled. Default passwords are never used. Security patches are applied promptly when released.`
+**Locked Down Servers**
+All servers follow strict rules. Extra services are off. We never use default keys. We apply fixes fast when they come out.`
     },
     {
       id: "access-control",
       type: "content",
-      title: "Access Controls",
-      content: `We strictly limit who can access your data. Strong controls prevent unauthorized access.
+      title: "Who Can See Your Data",
+      content: `Very few people can see your data. Tight rules stop bad access.
 
-**Role-Based Access**
-Employees only access what they need for their job. Customer data access requires specific authorization. Each role has carefully defined permissions.
+**Job-Based Access**
+Staff only see what they need for work. Seeing user data needs a sign-off. Each job has set limits.
 
-**Authentication**
-Multi-factor authentication is required for all staff access. Passwords must meet strict complexity requirements. Authentication attempts are monitored and rate-limited.
+**Login Checks**
+Staff must use two-step login. Passwords must be strong. We watch and limit login tries.
 
-**Audit Logging**
-Every access to customer data is logged. We review logs regularly for unusual patterns. Unauthorized access attempts trigger immediate alerts.
+**Access Logs**
+We log every look at user data. We check logs for odd patterns. Bad access tries set off alerts.
 
-**Background Checks**
-All employees undergo background verification. Security training is required and ongoing. Staff understand their responsibility to protect your data.`
+**Staff Vetting**
+All staff pass background checks. Safety training is ongoing. Staff know they must guard your data.`
     },
     {
       id: "compliance",
       type: "content",
-      title: "Compliance and Certifications",
-      content: `We meet or exceed industry security standards. Regular audits verify our practices.
+      title: "Rules We Follow",
+      content: `We meet or beat industry safety rules. Regular checks prove this.
 
-**Privacy Regulations**
-We comply fully with GDPR requirements. CCPA compliance is maintained for California residents. We support privacy rights globally.
+**Privacy Laws**
+We follow GDPR fully. We meet CCPA rules too. We support privacy rights worldwide.
 
-**Security Standards**
-Our practices align with SOC 2 requirements. We follow NIST cybersecurity framework guidelines. Industry best practices guide our decisions.
+**Safety Standards**
+We align with SOC 2 rules. NIST guides our choices. Best practices shape what we do.
 
-**Regular Audits**
-Third-party security experts examine our systems. Penetration testing identifies vulnerabilities. We address findings promptly and thoroughly.
+**Regular Checks**
+Outside experts test our systems. They hunt for weak spots. We fix issues fast.
 
-**Continuous Improvement**
-Security is never "done." We constantly evaluate and improve. New threats require new defenses. We stay current with evolving security landscape.`
+**Always Getting Better**
+Safety work never ends. We keep improving. New threats need new defenses. We stay current.`
     },
     {
       id: "incident-response",
       type: "content",
-      title: "Incident Response",
-      content: `Despite all precautions, we prepare for potential incidents. Our response plan ensures quick, effective action.
+      title: "If Something Goes Wrong",
+      content: `We plan for problems. Our response is fast and clear.
 
-**Prepared Response**
-Our incident response plan is documented and tested. Team members know their roles. We can respond quickly to any security event.
+**Ready to Act**
+Our plan is written and tested. Team members know their jobs. We can act fast on any issue.
 
-**Transparent Communication**
-If an incident affects your data, we notify you promptly. We explain what happened clearly. We describe actions taken to address it.
+**Clear Updates**
+If an issue hits your data, we tell you right away. We explain what happened. We describe what we did to fix it.
 
-**Continuous Learning**
-Every incident teaches us something. We analyze what happened thoroughly. We implement improvements to prevent recurrence.`
+**Learn and Improve**
+Every issue teaches us. We dig into what went wrong. We make changes to stop it next time.`
     },
     {
       id: "your-role",
       type: "content",
-      title: "Security Partnership",
-      content: `Strong security requires partnership between us and you. Here's how you can help.
+      title: "Your Part in Safety",
+      content: `Good safety needs teamwork. Here is how you can help.
 
-**Account Security**
-Use a strong, unique password for your account. Enable two-factor authentication when available. Don't share your login credentials with others.
+**Your Account**
+Pick a strong password. Use one you don't use elsewhere. Turn on two-step login if you can. Keep your login to yourself.
 
-**Stay Current**
-Keep your contact information updated. This ensures you receive important notifications. Report any suspicious activity promptly.
+**Stay in Touch**
+Keep your contact info current. This helps us reach you with alerts. Tell us if you see anything odd.
 
-**Report Concerns**
-If you notice anything unusual, let us know. Security researchers can report vulnerabilities through our responsible disclosure program. We take all reports seriously.`
+**Report Issues**
+Let us know if something seems wrong. Security experts can report bugs to us. We take all reports seriously.`
     }
   ],
   lastUpdated: "2026-02-01",
@@ -381,7 +381,7 @@ If you notice anything unusual, let us know. Security researchers can report vul
 export const privacyPage: PageContent = {
   meta: {
     title: "Privacy Policy | GhostMyData",
-    description: "GhostMyData privacy policy. Learn how we collect, use, and protect your personal information. We're committed to your privacy and transparent data practices.",
+    description: "See how GhostMyData handles your data. We keep it safe and private. Read our simple privacy policy.",
     keywords: ["privacy policy", "data protection", "personal information", "privacy rights"],
   },
   sections: [
@@ -389,102 +389,102 @@ export const privacyPage: PageContent = {
       id: "intro",
       type: "hero",
       title: "Privacy Policy",
-      content: `At GhostMyData, privacy is our mission. We help remove your personal information from the internet. We take your privacy seriously in everything we do. This policy explains our practices in clear, simple terms.
+      content: `Privacy is why we exist. We remove your data from the web. We guard your privacy in all we do. This policy is clear and simple.
 
-We believe you deserve to know how your information is handled. This policy covers what we collect, how we use it, and how we protect it. We update this policy when our practices change.`
+You should know how we handle your data. We tell you what we gather. We tell you how we use it. We tell you how we keep it safe.`
     },
     {
       id: "commitment",
       type: "content",
-      title: "Our Privacy Commitment",
-      content: `We are a data removal service dedicated to protecting your privacy. We understand the value and sensitivity of personal information. We know the risks when data is exposed.
+      title: "Our Promise to You",
+      content: `We help remove your data from the web. We know your info is valuable. We know what can happen when data gets out.
 
-**Core Principles**
-We collect only information we need to provide our service. We use your data only for stated purposes. We never sell your personal information to anyone. We protect your data with strong security measures.
+**Our Core Rules**
+We only gather what we need. We only use it for our service. We never sell your data. We lock it down tight.
 
-These principles guide every decision we make about your data. They are not just policies but fundamental values.`
+These rules guide all we do. They are not just words. They are who we are.`
     },
     {
       id: "what-we-collect",
       type: "content",
-      title: "Information We Collect",
-      content: `To remove your data from the internet, we need certain information. Here's what we collect and why.
+      title: "What We Gather",
+      content: `To remove your data, we need some info. Here is what we gather and why.
 
-**Identity Information**
-We collect your name and any variations you use. This helps us find your data across different sites. We may ask about maiden names or nicknames that appear online.
+**Your Name**
+We gather your name and other names you use. This helps us find your data on many sites. We may ask for past names too.
 
-**Contact Information**
-We collect current and past phone numbers. Email addresses help us find online accounts. Physical addresses are needed to locate public records listings.
+**Contact Info**
+We gather phone numbers, old and new. Email helps us find accounts. Addresses help us find public records.
 
-**Payment Information**
-For paid subscriptions, we collect payment details. Credit card information is processed by secure payment providers. We don't store complete card numbers on our systems.
+**Payment Info**
+For paid plans, we gather billing details. Card data goes to safe payment sites. We don't store full card numbers.
 
-**Usage Information**
-We collect data about how you use our service. This includes pages visited and features used. We use this to improve our service and user experience.`
+**Usage Info**
+We see how you use our service. This means pages you visit and tools you use. We use this to make our service better.`
     },
     {
       id: "how-we-use",
       type: "content",
-      title: "How We Use Your Information",
-      content: `We use your information for specific, legitimate purposes.
+      title: "How We Use Your Info",
+      content: `We use your info for clear reasons.
 
 **Data Removal**
-Our primary use is removing your data from the internet. We search data broker sites using your information. We submit removal requests on your behalf. We monitor for new exposures to address.
+Our main job is removing your data. We search data broker sites. We send removal requests for you. We watch for new issues.
 
-**Service Communication**
-We send updates about removal progress. We notify you when new exposures are found. We communicate important service announcements.
+**Talking to You**
+We send updates on removal progress. We alert you to new exposures. We share important news.
 
-**Service Improvement**
-We analyze usage patterns to make our service better. We identify and fix problems. We develop new features based on user needs.
+**Making Things Better**
+We look at how people use our service. We find and fix problems. We build new features.
 
-**Customer Support**
-We use your information to provide support. This helps us understand your account and resolve issues quickly.`
+**Support**
+We use your info to help you. This helps us fix issues fast.`
     },
     {
       id: "what-we-dont-do",
       type: "content",
       title: "What We Never Do",
-      content: `Some things we will never do with your information.
+      content: `Some things we will never do.
 
 **No Selling**
-We never sell your personal information. Your data is not a product we monetize. You are our customer, not our inventory.
+We never sell your info. We don't make money from your data. You are our customer, not our product.
 
-**No Marketing Sharing**
-We don't share data with marketers. We don't provide information to advertisers. Your details stay private with us.
+**No Ad Sharing**
+We don't share data with ad firms. We don't give info to marketers. Your details stay with us.
 
-**No Tracking Across Sites**
-We don't track your activity on other websites. We don't build advertising profiles. We focus solely on protecting your privacy.`
+**No Tracking**
+We don't track you on other sites. We don't build ad profiles. We only focus on your privacy.`
     },
     {
       id: "your-rights",
       type: "content",
-      title: "Your Privacy Rights",
-      content: `You have important rights regarding your personal data.
+      title: "Your Rights",
+      content: `You have key rights over your data.
 
-**Right to Access**
-You can request a copy of information we hold about you. We provide this within 30 days of your request.
+**See Your Data**
+You can ask for a copy of your info. We send it within 30 days.
 
-**Right to Correction**
-You can request corrections to inaccurate data. We update our records promptly when notified.
+**Fix Errors**
+You can ask us to fix wrong data. We update our records when you tell us.
 
-**Right to Deletion**
-You can request deletion of your account and data. We remove your information from our systems upon request.
+**Delete Your Data**
+You can ask us to delete your account. We remove your info when you ask.
 
-**Right to Portability**
-You can request your data in a portable format. This helps if you decide to switch services.
+**Move Your Data**
+You can get your data in a file you can use. This helps if you want to switch.
 
-**Regional Rights**
-California residents have additional rights under CCPA. European residents have rights under GDPR. We honor these rights fully.`
+**Local Laws**
+California has CCPA rules. Europe has GDPR rules. We follow both fully.`
     },
     {
       id: "contact",
       type: "content",
-      title: "Contact Us",
-      content: `Questions about this privacy policy? We're happy to help.
+      title: "Get in Touch",
+      content: `Have questions? We are glad to help.
 
-Email us at privacy@ghostmydata.com for privacy-related inquiries. Our team responds to questions promptly. We want you to understand and feel comfortable with our practices.
+Email privacy@ghostmydata.com for privacy questions. We reply quickly. We want you to feel good about our practices.
 
-For general support, contact support@ghostmydata.com. We're here to help with any aspect of our service.`
+For other help, email support@ghostmydata.com. We are here for you.`
     }
   ],
   lastUpdated: "2026-02-01",

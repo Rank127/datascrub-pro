@@ -29,22 +29,22 @@ const securityFeatures = [
   {
     icon: Lock,
     title: "AES-256 Encryption",
-    description: "All personal data is encrypted at rest using military-grade AES-256 encryption, the same standard used by banks and government agencies.",
+    description: "We lock all your data with AES-256. Banks use this same lock. Your info stays safe even at rest.",
   },
   {
     icon: Server,
-    title: "Secure Infrastructure",
-    description: "Hosted on SOC 2 Type II compliant infrastructure with DDoS protection, automatic backups, and geographic redundancy.",
+    title: "Safe Servers",
+    description: "Our servers meet SOC 2 rules. We block attacks. We back up data. We spread it across regions for safety.",
   },
   {
     icon: Key,
-    title: "Password Protection",
-    description: "Passwords are hashed using bcrypt with high cost factors, making brute-force attacks computationally infeasible.",
+    title: "Password Safety",
+    description: "We hash passwords with bcrypt. This makes them very hard to crack. Hackers can't brute force their way in.",
   },
   {
     icon: Eye,
-    title: "Zero Plain-Text SSN",
-    description: "Social Security Numbers are immediately hashed upon entry and never stored, logged, or transmitted in plain text.",
+    title: "SSN Safety",
+    description: "We hash your SSN right away. We never store it as plain text. We never log it or send it in the clear.",
   },
 ];
 
@@ -125,15 +125,15 @@ export default function SecurityPage() {
                 <ul className="space-y-3 text-slate-400">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">At Rest:</strong> All personal data stored in our database is encrypted using AES-256 encryption with unique encryption keys per user.</span>
+                    <span><strong className="text-slate-300">At Rest:</strong> We lock all stored data with AES-256. Each user gets their own key.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">In Transit:</strong> All data transmitted between your browser and our servers is protected by TLS 1.3, the latest and most secure transport layer protocol.</span>
+                    <span><strong className="text-slate-300">In Transit:</strong> Data moving between you and us uses TLS 1.3. This is the best lock for data in motion.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Key Management:</strong> Encryption keys are stored separately from encrypted data and rotated regularly according to industry best practices.</span>
+                    <span><strong className="text-slate-300">Key Safety:</strong> We keep keys away from the data they lock. We swap them out often.</span>
                   </li>
                 </ul>
               </div>
@@ -146,15 +146,15 @@ export default function SecurityPage() {
                 <ul className="space-y-3 text-slate-400">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Password Hashing:</strong> We use bcrypt with a cost factor of 12, making password cracking attempts extremely time-consuming.</span>
+                    <span><strong className="text-slate-300">Password Hashing:</strong> We use bcrypt to hash passwords. Cracking them takes a very long time.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Session Management:</strong> Secure, HTTP-only cookies with short expiration times and automatic session invalidation on suspicious activity.</span>
+                    <span><strong className="text-slate-300">Sessions:</strong> We use safe cookies that expire fast. We end sessions if we see odd activity.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Rate Limiting:</strong> Aggressive rate limiting on authentication endpoints to prevent brute-force attacks.</span>
+                    <span><strong className="text-slate-300">Login Limits:</strong> We limit login tries. This stops hackers from guessing passwords.</span>
                   </li>
                 </ul>
               </div>
@@ -167,15 +167,15 @@ export default function SecurityPage() {
                 <ul className="space-y-3 text-slate-400">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">SSN Protection:</strong> Social Security Numbers are immediately hashed using SHA-256 with a unique salt. The plain-text SSN is never stored, logged, or retained in memory beyond the initial processing.</span>
+                    <span><strong className="text-slate-300">SSN Safety:</strong> We hash your SSN right away with SHA-256. We add a unique salt. We never store, log, or keep the plain text.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Data Minimization:</strong> We only collect information necessary to provide our services. We never ask for more than we need.</span>
+                    <span><strong className="text-slate-300">Less Is More:</strong> We only gather what we need. We never ask for extra info.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Automatic Purging:</strong> Temporary data and logs are automatically purged according to our retention policy.</span>
+                    <span><strong className="text-slate-300">Auto Delete:</strong> We delete temp data and logs on a set schedule.</span>
                   </li>
                 </ul>
               </div>
@@ -193,19 +193,19 @@ export default function SecurityPage() {
                 <ul className="space-y-3 text-slate-400">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Cloud Infrastructure:</strong> Hosted on enterprise-grade cloud infrastructure with SOC 2 Type II certification, ensuring strict security controls and auditing.</span>
+                    <span><strong className="text-slate-300">Cloud Servers:</strong> We use top cloud hosts with SOC 2 rules. This means strict safety checks.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">DDoS Protection:</strong> Automatic DDoS mitigation protects our services from volumetric and application-layer attacks.</span>
+                    <span><strong className="text-slate-300">Attack Blocks:</strong> We block DDoS attacks. This keeps our service up and running.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Network Isolation:</strong> Database servers are isolated in private subnets with no direct internet access.</span>
+                    <span><strong className="text-slate-300">Network Walls:</strong> Databases sit in private zones. They have no direct web access.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Geographic Redundancy:</strong> Data is replicated across multiple availability zones for disaster recovery.</span>
+                    <span><strong className="text-slate-300">Backup Regions:</strong> We copy data across zones. If one fails, others take over.</span>
                   </li>
                 </ul>
               </div>
@@ -218,19 +218,19 @@ export default function SecurityPage() {
                 <ul className="space-y-3 text-slate-400">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">24/7 Monitoring:</strong> Continuous monitoring of all systems for security anomalies and performance issues.</span>
+                    <span><strong className="text-slate-300">24/7 Watch:</strong> We watch all systems day and night. We look for threats and issues.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Audit Logging:</strong> Comprehensive logging of all security-relevant events with tamper-proof storage.</span>
+                    <span><strong className="text-slate-300">Event Logs:</strong> We log all safety events. These logs can't be changed.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Intrusion Detection:</strong> Automated systems detect and alert on suspicious activities in real-time.</span>
+                    <span><strong className="text-slate-300">Threat Alerts:</strong> Our systems spot odd activity fast. They send alerts right away.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Penetration Testing:</strong> Regular third-party security assessments and penetration tests.</span>
+                    <span><strong className="text-slate-300">Expert Tests:</strong> Outside experts test our systems often. They hunt for weak spots.</span>
                   </li>
                 </ul>
               </div>
@@ -243,46 +243,46 @@ export default function SecurityPage() {
               <ul className="space-y-3 text-slate-400">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">OWASP Compliance:</strong> Our application is built following OWASP security guidelines, protecting against common vulnerabilities like SQL injection, XSS, and CSRF.</span>
+                  <span><strong className="text-slate-300">OWASP Rules:</strong> We follow OWASP safety rules. This blocks common attacks like SQL injection and XSS.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">Input Validation:</strong> All user inputs are validated and sanitized to prevent injection attacks.</span>
+                  <span><strong className="text-slate-300">Input Checks:</strong> We check and clean all user input. This stops injection attacks.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">Content Security Policy:</strong> Strict CSP headers prevent cross-site scripting and data injection attacks.</span>
+                  <span><strong className="text-slate-300">CSP Headers:</strong> Strict headers block cross-site scripting. Bad code can't run on our pages.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">Dependency Scanning:</strong> Automated scanning for vulnerabilities in third-party dependencies with immediate patching.</span>
+                  <span><strong className="text-slate-300">Code Scans:</strong> We scan our code for weak spots. We patch issues right away.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">Secure Development:</strong> Security-focused code reviews and automated security testing in our CI/CD pipeline.</span>
+                  <span><strong className="text-slate-300">Safe Coding:</strong> We review code for safety. We run auto tests before we deploy.</span>
                 </li>
               </ul>
             </div>
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold text-white mb-6">Payment Security</h2>
+            <h2 className="text-3xl font-bold text-white mb-6">Payment Safety</h2>
             <div className="bg-slate-800/30 rounded-lg p-6 border border-slate-700">
               <p className="text-slate-400 mb-4">
-                All payment processing is handled by Stripe, a PCI-DSS Level 1 certified payment processor—the highest level of certification in the payment industry.
+                Stripe handles all payments. They have the top safety rating in the industry.
               </p>
               <ul className="space-y-3 text-slate-400">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">No Card Storage:</strong> We never store credit card numbers on our servers. All payment data goes directly to Stripe.</span>
+                  <span><strong className="text-slate-300">No Card Storage:</strong> We never store card numbers. All payment data goes to Stripe.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">3D Secure:</strong> Support for additional cardholder authentication where available.</span>
+                  <span><strong className="text-slate-300">Extra Checks:</strong> We support 3D Secure for added safety when you pay.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">Fraud Detection:</strong> Stripe&apos;s machine learning-based fraud detection protects against unauthorized transactions.</span>
+                  <span><strong className="text-slate-300">Fraud Blocks:</strong> Stripe uses smart tech to spot and stop bad charges.</span>
                 </li>
               </ul>
             </div>
@@ -304,46 +304,46 @@ export default function SecurityPage() {
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold text-white mb-6">Incident Response</h2>
+            <h2 className="text-3xl font-bold text-white mb-6">If Things Go Wrong</h2>
             <div className="bg-slate-800/30 rounded-lg p-6 border border-slate-700">
               <p className="text-slate-400 mb-4">
-                We maintain a comprehensive incident response plan to handle security events:
+                We have a plan for security events. Here is how we handle them:
               </p>
               <ul className="space-y-3 text-slate-400">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">Rapid Response:</strong> Dedicated security team ready to respond to incidents 24/7.</span>
+                  <span><strong className="text-slate-300">Fast Action:</strong> Our safety team is ready to act day and night.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">User Notification:</strong> Commitment to notify affected users within 72 hours of discovering a confirmed breach.</span>
+                  <span><strong className="text-slate-300">Quick Notice:</strong> We tell you within 72 hours if a breach hits your data.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">Root Cause Analysis:</strong> Thorough investigation of all incidents with published post-mortems for significant events.</span>
+                  <span><strong className="text-slate-300">Deep Dives:</strong> We dig into what went wrong. We share reports on big events.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">Continuous Improvement:</strong> Lessons learned are incorporated into our security practices.</span>
+                  <span><strong className="text-slate-300">Learn and Fix:</strong> We use each event to get better. Lessons shape our practices.</span>
                 </li>
               </ul>
             </div>
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold text-white mb-6">Report a Vulnerability</h2>
+            <h2 className="text-3xl font-bold text-white mb-6">Found a Bug?</h2>
             <div className="bg-emerald-500/10 rounded-lg p-6 border border-emerald-500/20">
               <p className="text-slate-300 mb-4">
-                We take security seriously and appreciate responsible disclosure of vulnerabilities. If you discover a security issue, please report it to us:
+                We value safety reports. If you find a security bug, please tell us:
               </p>
               <p className="text-slate-300">
-                <strong>Security Team:</strong>{" "}
+                <strong>Safety Team:</strong>{" "}
                 <a href="mailto:security@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                   security@ghostmydata.com
                 </a>
               </p>
               <p className="text-slate-400 mt-4 text-sm">
-                We request that you give us reasonable time to address the issue before public disclosure. We do not pursue legal action against security researchers who act in good faith.
+                Please give us time to fix the issue before you share it. We don't take legal action against good faith reports.
               </p>
             </div>
           </section>
@@ -351,7 +351,7 @@ export default function SecurityPage() {
           <section>
             <h2 className="text-3xl font-bold text-white mb-6">Questions?</h2>
             <p className="text-slate-400">
-              If you have questions about our security practices or would like more information, please contact us at{" "}
+              Have questions about our safety practices? Email us at{" "}
               <a href="mailto:security@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                 security@ghostmydata.com
               </a>
