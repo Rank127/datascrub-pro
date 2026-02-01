@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { encryptArray, encryptObject, hashSSN, encrypt, decrypt, decryptArray, decryptObject } from "@/lib/encryption/crypto";
+import { encryptArray, encryptObject, hashSSN, encrypt, safeDecrypt, decryptArray, decryptObject } from "@/lib/encryption/crypto";
 import { z } from "zod";
 
 const addressSchema = z.object({
@@ -51,7 +51,7 @@ export async function GET() {
         emails: profile.emails ? decryptArray(profile.emails) : [],
         phones: profile.phones ? decryptArray(profile.phones) : [],
         addresses: profile.addresses ? decryptObject(profile.addresses) : [],
-        dateOfBirth: profile.dateOfBirth ? decrypt(profile.dateOfBirth) : "",
+        dateOfBirth: safeDecrypt(profile.dateOfBirth),
         hasSSN: !!profile.ssnHash, // SSN is hashed, can't be decrypted - just indicate if it exists
         usernames: profile.usernames ? decryptArray(profile.usernames) : [],
         updatedAt: profile.updatedAt,

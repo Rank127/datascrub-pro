@@ -51,6 +51,21 @@ export function decrypt(encryptedText: string): string {
   return decrypted;
 }
 
+/**
+ * Safely decrypt a string, returning the original value if decryption fails.
+ * This handles legacy unencrypted data or data encrypted with a different key.
+ */
+export function safeDecrypt(encryptedText: string | null | undefined): string {
+  if (!encryptedText) return "";
+  try {
+    return decrypt(encryptedText);
+  } catch {
+    // If decryption fails, return the original value
+    // This handles legacy unencrypted data
+    return encryptedText;
+  }
+}
+
 export function hashSSN(ssn: string): string {
   // One-way hash for SSN - can only be used for matching, not retrieval
   const salt = process.env.ENCRYPTION_KEY || "default-salt";

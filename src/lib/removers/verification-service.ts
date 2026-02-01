@@ -120,11 +120,33 @@ async function prepareScanInputForUser(userId: string): Promise<ScanInput | null
       const decrypted = decrypt(encrypted);
       return JSON.parse(decrypted) as T;
     } catch {
+      // Decryption failed - check if it's already valid JSON (plaintext)
       try {
         return JSON.parse(encrypted) as T;
       } catch {
+        // Neither decryptable nor valid JSON - likely encrypted with wrong key
+        console.warn(`[Verification] Cannot decrypt/parse field, encryption key mismatch`);
         return undefined;
       }
+    }
+  };
+
+  // Helper to safely decrypt a single string value
+  const safeDecrypt = (encrypted: string | null): string | undefined => {
+    if (!encrypted) return undefined;
+    try {
+      return decrypt(encrypted);
+    } catch {
+      // If decryption fails, check if it looks like plaintext (not a hex string)
+      // Encrypted data is always hex format (64+ chars of 0-9a-f)
+      const isLikelyEncrypted = /^[0-9a-f]{64,}$/i.test(encrypted);
+      if (isLikelyEncrypted) {
+        // This is encrypted data we can't decrypt - return undefined
+        console.warn(`[Verification] Cannot decrypt field, encryption key mismatch`);
+        return undefined;
+      }
+      // Looks like plaintext, return as-is
+      return encrypted;
     }
   };
 
@@ -140,7 +162,7 @@ async function prepareScanInputForUser(userId: string): Promise<ScanInput | null
       zipCode: string;
       country: string;
     }>>(profile.addresses),
-    dateOfBirth: profile.dateOfBirth ? decrypt(profile.dateOfBirth) : undefined,
+    dateOfBirth: safeDecrypt(profile.dateOfBirth),
     ssnHash: profile.ssnHash || undefined,
     usernames: safeDecryptAndParse<string[]>(profile.usernames),
   };
@@ -274,6 +296,36 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
   const scanInput = await prepareScanInputForUser(removalRequest.user.id);
   if (!scanInput) {
     return { success: false, status: "PENDING", message: "User profile not found" };
+  }
+
+  // Validate that we have usable data for scanning
+  const hasUsableData = !!(
+    scanInput.fullName ||
+    (scanInput.emails && scanInput.emails.length > 0) ||
+    (scanInput.phones && scanInput.phones.length > 0)
+  );
+
+  if (!hasUsableData) {
+    console.log(`[Verification] No usable profile data for user (encryption key mismatch?)`);
+
+    // Schedule retry - the user may update their profile or key may be fixed
+    const nextVerify = new Date();
+    nextVerify.setDate(nextVerify.getDate() + 7);
+
+    await prisma.removalRequest.update({
+      where: { id: removalRequestId },
+      data: {
+        verifyAfter: nextVerify,
+        lastVerifiedAt: new Date(),
+        notes: "Verification skipped - profile data unavailable (possible encryption key mismatch)",
+      },
+    });
+
+    return {
+      success: false,
+      status: "PENDING",
+      message: "Profile data unavailable for verification"
+    };
   }
 
   try {
