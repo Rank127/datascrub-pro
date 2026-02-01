@@ -18,6 +18,10 @@ import {
   PriorityLevel,
   SuggestedAction,
 } from "../types";
+import {
+  createAgentTicket,
+  getMethodologyForIssue,
+} from "@/lib/support/ticket-service";
 
 // ============================================================================
 // TYPES
@@ -211,24 +215,26 @@ const DEFAULT_REMEDIATION_RULES: RemediationRule[] = [
     id: "seo-technical",
     issueTypePattern: /^seo\.(missing_sitemap|invalid_robots|broken_links)$/,
     severityLevels: ["critical", "high"],
-    autoRemediate: false, // Requires human review for technical changes
+    autoRemediate: true, // Will create ticket with methodology
     maxAttempts: 1,
     enabled: true,
     generateActions: (issue) => [
       {
         id: nanoid(),
-        type: "notify",
-        targetAgentId: "operations-agent",
-        capability: "create-alert",
+        type: "escalate",
+        targetAgentId: "ticket-creator",
+        capability: "create-ticket",
         input: {
-          alertType: "seo_technical_issue",
+          issueType: issue.type,
           severity: issue.severity,
-          message: issue.description,
+          title: `Technical SEO Issue: ${issue.type.replace("seo.", "").replace(/_/g, " ")}`,
+          description: issue.description,
           affectedResource: issue.affectedResource,
+          recommendation: issue.details?.recommendation,
         },
         priority: Priority.HIGH,
         autoExecute: true,
-        description: `Alert team about technical SEO issue: ${issue.type}`,
+        description: `Create ticket with fix methodology for: ${issue.type}`,
       },
     ],
   },
@@ -259,77 +265,89 @@ const DEFAULT_REMEDIATION_RULES: RemediationRule[] = [
     ],
   },
 
-  // Security Issues - Always escalate
+  // Security Issues - Create ticket with investigation methodology
   {
     id: "security-vulnerability",
     issueTypePattern: /^security\./,
     severityLevels: ["critical", "high", "medium", "low"],
-    autoRemediate: false,
+    autoRemediate: true, // Will create ticket with methodology
     maxAttempts: 1,
     enabled: true,
     generateActions: (issue) => [
       {
         id: nanoid(),
         type: "escalate",
-        targetAgentId: "security-agent",
-        capability: "investigate",
+        targetAgentId: "ticket-creator",
+        capability: "create-ticket",
         input: {
-          issue: issue,
+          issueType: issue.type,
+          severity: issue.severity,
+          title: `🔒 Security Issue: ${issue.type.replace("security.", "").replace(/_/g, " ")}`,
+          description: issue.description,
+          affectedResource: issue.affectedResource,
+          recommendation: issue.details?.recommendation,
         },
         priority: Priority.CRITICAL,
         autoExecute: true,
-        description: `Escalate security issue: ${issue.type}`,
+        description: `Create URGENT ticket for security issue: ${issue.type}`,
       },
     ],
   },
 
-  // Compliance Issues
+  // Compliance Issues - Create ticket with compliance methodology
   {
     id: "compliance-violation",
     issueTypePattern: /^compliance\./,
     severityLevels: ["critical", "high"],
-    autoRemediate: false,
+    autoRemediate: true, // Will create ticket with methodology
     maxAttempts: 1,
     enabled: true,
     generateActions: (issue) => [
       {
         id: nanoid(),
         type: "escalate",
-        targetAgentId: "compliance-agent",
-        capability: "review",
+        targetAgentId: "ticket-creator",
+        capability: "create-ticket",
         input: {
-          issue: issue,
+          issueType: issue.type,
+          severity: issue.severity,
+          title: `⚖️ Compliance Issue: ${issue.type.replace("compliance.", "").replace(/_/g, " ")}`,
+          description: issue.description,
+          affectedResource: issue.affectedResource,
+          recommendation: issue.details?.recommendation,
         },
         priority: Priority.CRITICAL,
         autoExecute: true,
-        description: `Escalate compliance issue: ${issue.type}`,
+        description: `Create URGENT ticket for compliance issue: ${issue.type}`,
       },
     ],
   },
 
-  // Performance Issues
+  // Performance Issues - Create ticket with performance methodology
   {
     id: "performance-degradation",
     issueTypePattern: /^performance\./,
     severityLevels: ["critical", "high"],
-    autoRemediate: false,
+    autoRemediate: true, // Will create ticket with methodology
     maxAttempts: 1,
     enabled: true,
     generateActions: (issue) => [
       {
         id: nanoid(),
-        type: "notify",
-        targetAgentId: "operations-agent",
-        capability: "create-alert",
+        type: "escalate",
+        targetAgentId: "ticket-creator",
+        capability: "create-ticket",
         input: {
-          alertType: "performance_issue",
+          issueType: issue.type,
           severity: issue.severity,
-          message: issue.description,
+          title: `⚡ Performance Issue: ${issue.type.replace("performance.", "").replace(/_/g, " ")}`,
+          description: issue.description,
+          affectedResource: issue.affectedResource,
           metrics: issue.details?.metrics,
         },
         priority: Priority.HIGH,
         autoExecute: true,
-        description: `Alert team about performance issue`,
+        description: `Create ticket for performance issue`,
       },
     ],
   },
@@ -796,6 +814,11 @@ class RemediationEngine {
       `[RemediationEngine] Executing action ${action.id}: ${action.description}`
     );
 
+    // Special handler for ticket creation
+    if (action.targetAgentId === "ticket-creator") {
+      return this.createTicketAction(action, plan);
+    }
+
     const registry = getRegistry();
     const agent = registry.getAgent(action.targetAgentId);
 
@@ -848,6 +871,162 @@ class RemediationEngine {
           capability: action.capability,
           requestId: context.requestId,
           duration: 0,
+          usedFallback: false,
+          executedAt: new Date(),
+        },
+      };
+    }
+  }
+
+  /**
+   * Create a support ticket with methodology-based fix plan
+   */
+  private async createTicketAction(
+    action: RemediationAction,
+    plan: RemediationPlan
+  ): Promise<AgentResult> {
+    const startTime = Date.now();
+    const input = action.input as {
+      issueType: string;
+      severity: string;
+      title: string;
+      description: string;
+      affectedResource?: string;
+      recommendation?: string;
+    };
+
+    try {
+      // Get methodology for this issue type
+      const methodologyData = getMethodologyForIssue(
+        input.issueType,
+        input.affectedResource
+      );
+
+      if (!methodologyData) {
+        // Create a generic methodology
+        const genericMethodology = {
+          methodology: {
+            summary: `Investigate and resolve: ${input.title}`,
+            estimatedEffort: "medium" as const,
+            requiredSkills: ["Technical expertise"],
+            steps: [
+              {
+                order: 1,
+                title: "Investigate the issue",
+                description: input.description,
+                action: "investigate" as const,
+                expectedOutcome: "Root cause identified",
+              },
+              {
+                order: 2,
+                title: "Implement fix",
+                description: input.recommendation || "Apply appropriate fix based on investigation",
+                action: "implement" as const,
+                expectedOutcome: "Issue resolved",
+              },
+              {
+                order: 3,
+                title: "Verify resolution",
+                description: "Confirm the issue is fully resolved",
+                action: "verify" as const,
+                expectedOutcome: "Issue confirmed resolved",
+              },
+            ],
+          },
+          documentation: [] as Array<{ title: string; url: string; type: "official" | "guide" | "reference" | "example" }>,
+        };
+
+        const ticket = await createAgentTicket({
+          agentId: plan.issue.sourceAgentId,
+          issueType: input.issueType,
+          severity: input.severity as "critical" | "high" | "medium" | "low",
+          title: input.title,
+          description: input.description,
+          affectedResource: input.affectedResource,
+          methodology: genericMethodology.methodology,
+          documentation: genericMethodology.documentation,
+        });
+
+        return {
+          success: true,
+          data: {
+            ticketId: ticket.id,
+            ticketNumber: ticket.ticketNumber,
+            message: `Ticket created: ${ticket.ticketNumber}`,
+          },
+          needsHumanReview: false,
+          metadata: {
+            agentId: "ticket-creator",
+            capability: "create-ticket",
+            requestId: nanoid(),
+            duration: Date.now() - startTime,
+            usedFallback: false,
+            executedAt: new Date(),
+          },
+        };
+      }
+
+      // Create ticket with methodology
+      const ticket = await createAgentTicket({
+        agentId: plan.issue.sourceAgentId,
+        issueType: input.issueType,
+        severity: input.severity as "critical" | "high" | "medium" | "low",
+        title: input.title,
+        description: input.description,
+        affectedResource: input.affectedResource,
+        methodology: methodologyData.methodology,
+        documentation: methodologyData.documentation,
+      });
+
+      console.log(
+        `[RemediationEngine] Created ticket ${ticket.ticketNumber} for ${input.issueType}`
+      );
+
+      // Emit event for ticket creation
+      await getEventBus().emitCustom(
+        "remediation-engine",
+        "ticket.created",
+        {
+          ticketId: ticket.id,
+          ticketNumber: ticket.ticketNumber,
+          issueType: input.issueType,
+          severity: input.severity,
+        }
+      );
+
+      return {
+        success: true,
+        data: {
+          ticketId: ticket.id,
+          ticketNumber: ticket.ticketNumber,
+          message: `Ticket created with methodology: ${ticket.ticketNumber}`,
+        },
+        needsHumanReview: false,
+        metadata: {
+          agentId: "ticket-creator",
+          capability: "create-ticket",
+          requestId: nanoid(),
+          duration: Date.now() - startTime,
+          usedFallback: false,
+          executedAt: new Date(),
+        },
+      };
+    } catch (error) {
+      console.error("[RemediationEngine] Failed to create ticket:", error);
+
+      return {
+        success: false,
+        error: {
+          code: "TICKET_CREATION_FAILED",
+          message: error instanceof Error ? error.message : "Failed to create ticket",
+          retryable: true,
+        },
+        needsHumanReview: true,
+        metadata: {
+          agentId: "ticket-creator",
+          capability: "create-ticket",
+          requestId: nanoid(),
+          duration: Date.now() - startTime,
           usedFallback: false,
           executedAt: new Date(),
         },
