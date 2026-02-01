@@ -4,9 +4,9 @@ import { getAllPosts, getFeaturedPosts, getAllCategories } from "@/lib/blog/post
 import { Calendar, Clock, ArrowRight, Tag } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Privacy Blog | Data Removal Guides | GhostMyData",
+  title: "Privacy Blog | Data Removal Tips | GhostMyData",
   description:
-    "Learn how to remove your data from data brokers. Get privacy tips and know your rights under CCPA and GDPR.",
+    "Learn how to remove your data from data brokers. Get privacy tips and know your rights under CCPA and GDPR. Expert guides included.",
   keywords: [
     "data removal guide",
     "privacy blog",

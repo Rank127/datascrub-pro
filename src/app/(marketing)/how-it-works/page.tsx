@@ -16,7 +16,7 @@ import { FAQSchema } from "@/components/seo/structured-data";
 export const metadata: Metadata = {
   title: "How It Works - 5-Step Data Removal Process",
   description:
-    "See how GhostMyData removes your data in 5 steps: profile, scan, review, auto removal, and 24/7 monitoring.",
+    "See how GhostMyData removes your data in 5 steps: create profile, scan sources, review exposures, auto removal, and 24/7 monitoring.",
   keywords: [
     "how data removal works",
     "data broker opt out process",

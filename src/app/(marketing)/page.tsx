@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { FAQSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {
-  title: "GhostMyData - Remove Your Data From The Internet",
+  title: "GhostMyData - Remove Your Data From The Web",
   description:
     "Remove your personal data from data brokers, breach databases, and the dark web. Automated privacy protection with 98% success rate. Free scan.",
   keywords: [
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     canonical: "https://ghostmydata.com",
   },
   openGraph: {
-    title: "GhostMyData - Remove Your Data From The Internet",
+    title: "GhostMyData - Remove Your Data From The Web",
     description:
       "Find and remove your data from data brokers, breach databases, and the dark web. Start your free scan today.",
     url: "https://ghostmydata.com",
