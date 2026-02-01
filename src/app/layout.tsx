@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import dynamic from "next/dynamic";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "@/components/ui/sonner";
 import {
   OrganizationSchema,
   WebsiteSchema,
@@ -11,6 +11,12 @@ import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { MicrosoftClarity } from "@/components/analytics/microsoft-clarity";
 import { QueryProvider } from "@/lib/query-provider";
 import "./globals.css";
+
+// Lazy load Toaster - not needed for initial render
+const Toaster = dynamic(
+  () => import("@/components/ui/sonner").then((mod) => mod.Toaster),
+  { ssr: false }
+);
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

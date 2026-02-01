@@ -78,6 +78,19 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  // Bundle optimization - tree-shake large packages
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "@radix-ui/react-icons",
+      "recharts",
+      "date-fns",
+    ],
+  },
+  // Enable compression
+  compress: true,
+  // Minimize output
+  productionBrowserSourceMaps: false,
 };
 
 export default nextConfig;
