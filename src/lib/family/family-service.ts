@@ -614,29 +614,119 @@ export async function hasEnterpriseThroughFamily(userId: string): Promise<boolea
  * Get effective plan for a user (checks own plan + family membership)
  */
 export async function getEffectivePlan(userId: string): Promise<string> {
-  // Get user's own plan
+  const details = await getEffectivePlanDetails(userId);
+  return details.plan;
+}
+
+// Re-export types
+export type { PlanSource, PlanDetails } from "./types";
+import type { PlanDetails } from "./types";
+
+/**
+ * Get detailed plan information including source (direct subscription vs family)
+ */
+export async function getEffectivePlanDetails(userId: string): Promise<PlanDetails> {
+  // Get user's own plan and subscription
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: { subscription: true },
   });
 
   if (!user) {
-    return "FREE";
+    return {
+      plan: "FREE",
+      source: "DEFAULT",
+      isOwner: false,
+    };
   }
 
   const ownPlan = user.subscription?.plan || user.plan;
 
-  // If user has Enterprise, no need to check family
+  // If user has their own Enterprise subscription, they're the owner
   if (ownPlan === "ENTERPRISE") {
-    return "ENTERPRISE";
+    // Check if they own a family group
+    const familyGroup = await prisma.familyGroup.findUnique({
+      where: { ownerId: userId },
+      include: {
+        _count: { select: { members: true } },
+      },
+    });
+
+    return {
+      plan: "ENTERPRISE",
+      source: "DIRECT",
+      isOwner: true,
+      familyInfo: familyGroup ? {
+        familyGroupId: familyGroup.id,
+        familyName: familyGroup.name,
+        ownerName: user.name,
+        ownerEmail: user.email,
+        role: "OWNER",
+        memberCount: familyGroup._count.members,
+        maxMembers: familyGroup.maxMembers,
+      } : undefined,
+      subscriptionInfo: user.subscription ? {
+        status: user.subscription.status,
+        stripeSubscriptionId: user.subscription.stripeSubscriptionId,
+        currentPeriodEnd: user.subscription.stripeCurrentPeriodEnd,
+      } : undefined,
+    };
   }
 
-  // Check family membership
-  if (await hasEnterpriseThroughFamily(userId)) {
-    return "ENTERPRISE";
+  // Check family membership for inherited Enterprise access
+  const membership = await prisma.familyMember.findUnique({
+    where: { userId },
+    include: {
+      familyGroup: {
+        include: {
+          owner: {
+            include: { subscription: true },
+          },
+          _count: { select: { members: true } },
+        },
+      },
+    },
+  });
+
+  if (membership) {
+    const ownerPlan =
+      membership.familyGroup.owner.subscription?.plan ||
+      membership.familyGroup.owner.plan;
+
+    if (ownerPlan === "ENTERPRISE") {
+      return {
+        plan: "ENTERPRISE",
+        source: "FAMILY",
+        isOwner: false,
+        familyInfo: {
+          familyGroupId: membership.familyGroup.id,
+          familyName: membership.familyGroup.name,
+          ownerName: membership.familyGroup.owner.name,
+          ownerEmail: membership.familyGroup.owner.email,
+          role: membership.role,
+          memberCount: membership.familyGroup._count.members,
+          maxMembers: membership.familyGroup.maxMembers,
+        },
+        subscriptionInfo: membership.familyGroup.owner.subscription ? {
+          status: membership.familyGroup.owner.subscription.status,
+          stripeSubscriptionId: null, // Don't expose owner's Stripe ID to members
+          currentPeriodEnd: membership.familyGroup.owner.subscription.stripeCurrentPeriodEnd,
+        } : undefined,
+      };
+    }
   }
 
-  return ownPlan;
+  // Return user's own plan (PRO or FREE)
+  return {
+    plan: ownPlan,
+    source: ownPlan === "FREE" ? "DEFAULT" : "DIRECT",
+    isOwner: true,
+    subscriptionInfo: user.subscription ? {
+      status: user.subscription.status,
+      stripeSubscriptionId: user.subscription.stripeSubscriptionId,
+      currentPeriodEnd: user.subscription.stripeCurrentPeriodEnd,
+    } : undefined,
+  };
 }
 
 // ==========================================

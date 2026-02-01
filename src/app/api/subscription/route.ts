@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isAdmin } from "@/lib/admin";
-import { getEffectivePlan } from "@/lib/family/family-service";
+import { getEffectivePlanDetails } from "@/lib/family/family-service";
 
 export async function GET() {
   try {
@@ -12,11 +12,6 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user's subscription
-    const subscription = await prisma.subscription.findUnique({
-      where: { userId: session.user.id },
-    });
-
     // Get user's email for admin check
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -24,15 +19,32 @@ export async function GET() {
     });
 
     const userIsAdmin = isAdmin(user?.email);
-    // Get effective plan (checks subscription + family membership)
-    const effectivePlan = await getEffectivePlan(session.user.id);
+
+    // Get detailed plan info (checks subscription + family membership)
+    const planDetails = await getEffectivePlanDetails(session.user.id);
 
     return NextResponse.json({
-      plan: effectivePlan,
-      status: subscription?.status || "active",
-      currentPeriodEnd: userIsAdmin ? null : (subscription?.stripeCurrentPeriodEnd?.toISOString() || null),
-      hasStripeSubscription: userIsAdmin ? false : !!subscription?.stripeSubscriptionId,
+      // Basic info (backwards compatible)
+      plan: planDetails.plan,
+      status: planDetails.subscriptionInfo?.status || "active",
+      currentPeriodEnd: userIsAdmin ? null : (planDetails.subscriptionInfo?.currentPeriodEnd?.toISOString() || null),
+      hasStripeSubscription: userIsAdmin ? false : !!planDetails.subscriptionInfo?.stripeSubscriptionId,
       isAdmin: userIsAdmin,
+
+      // New detailed info
+      planSource: planDetails.source, // "DIRECT" | "FAMILY" | "STAFF" | "DEFAULT"
+      isOwner: planDetails.isOwner,   // true if they own this plan (not inherited)
+
+      // Family info (if applicable)
+      familyPlan: planDetails.familyInfo ? {
+        familyGroupId: planDetails.familyInfo.familyGroupId,
+        familyName: planDetails.familyInfo.familyName,
+        role: planDetails.familyInfo.role,           // "OWNER" or "MEMBER"
+        ownerName: planDetails.familyInfo.ownerName, // Who pays for the plan
+        ownerEmail: planDetails.isOwner ? undefined : planDetails.familyInfo.ownerEmail,
+        memberCount: planDetails.familyInfo.memberCount,
+        maxMembers: planDetails.familyInfo.maxMembers,
+      } : null,
     });
   } catch (error) {
     console.error("Subscription fetch error:", error);

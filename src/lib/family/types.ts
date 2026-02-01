@@ -73,3 +73,27 @@ export interface InvitationDetails {
   familyOwnerEmail: string;
   familyName: string | null;
 }
+
+// Plan source types - where the user's plan comes from
+export type PlanSource = "DIRECT" | "FAMILY" | "STAFF" | "DEFAULT";
+
+// Detailed plan information
+export interface PlanDetails {
+  plan: string;
+  source: PlanSource;
+  isOwner: boolean;
+  familyInfo?: {
+    familyGroupId: string;
+    familyName: string | null;
+    ownerName: string | null;
+    ownerEmail: string;
+    role: string;
+    memberCount: number;
+    maxMembers: number;
+  };
+  subscriptionInfo?: {
+    status: string;
+    stripeSubscriptionId: string | null;
+    currentPeriodEnd: Date | null;
+  };
+}
