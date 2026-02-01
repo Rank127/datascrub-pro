@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getEffectivePlan } from "@/lib/admin";
+import { getEffectivePlan } from "@/lib/family/family-service";
 
 // AI Shield source categories (60 sources across 5 categories)
 const AI_TRAINING_SOURCES = [
@@ -65,12 +65,8 @@ export async function GET() {
 
     const userId = session.user.id;
 
-    // Get user info for plan
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { plan: true, email: true },
-    });
-    const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE");
+    // Get user's effective plan (checks subscription + family membership)
+    const userPlan = await getEffectivePlan(userId);
 
     // Fetch AI-related exposures by category (5 categories now)
     const [

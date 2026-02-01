@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getEffectivePlan } from "@/lib/admin";
+import { getEffectivePlan } from "@/lib/family/family-service";
 
 // GET - Get a specific custom removal request
 export async function GET(
@@ -18,12 +18,12 @@ export async function GET(
     const { id } = await params;
     const userId = session.user.id;
 
-    // Check user plan
+    // Check user plan (checks subscription + family membership) and role
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { plan: true, email: true, role: true },
+      select: { role: true },
     });
-    const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE");
+    const userPlan = await getEffectivePlan(userId);
     const isAdmin = ["ADMIN", "SUPPORT", "SUPER_ADMIN"].includes(user?.role || "");
 
     const customRequest = await prisma.customRemovalRequest.findUnique({

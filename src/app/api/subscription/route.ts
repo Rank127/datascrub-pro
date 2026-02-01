@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { isAdmin, getEffectivePlan } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
+import { getEffectivePlan } from "@/lib/family/family-service";
 
 export async function GET() {
   try {
@@ -16,14 +17,15 @@ export async function GET() {
       where: { userId: session.user.id },
     });
 
-    // Get user's plan from User table as fallback
+    // Get user's email for admin check
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { plan: true, email: true },
+      select: { email: true },
     });
 
     const userIsAdmin = isAdmin(user?.email);
-    const effectivePlan = getEffectivePlan(user?.email, subscription?.plan || user?.plan || "FREE");
+    // Get effective plan (checks subscription + family membership)
+    const effectivePlan = await getEffectivePlan(session.user.id);
 
     return NextResponse.json({
       plan: effectivePlan,

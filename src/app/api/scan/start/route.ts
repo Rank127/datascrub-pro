@@ -10,7 +10,8 @@ import {
 } from "@/lib/scanners/scan-orchestrator";
 import type { Plan, ScanType } from "@/lib/types";
 import { z } from "zod";
-import { isAdmin, getEffectivePlan } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
+import { getEffectivePlan } from "@/lib/family/family-service";
 import { generateScreenshotUrl } from "@/lib/screenshots/screenshot-service";
 import { createScanErrorTicket } from "@/lib/support/ticket-service";
 
@@ -47,14 +48,8 @@ export async function POST(request: Request) {
 
     const { type } = result.data;
 
-    // Get user's plan
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { plan: true, email: true },
-    });
-
-    // Admin users get ENTERPRISE access
-    const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE") as Plan;
+    // Get user's plan (checks subscription + family membership)
+    const userPlan = await getEffectivePlan(session.user.id) as Plan;
 
     // FREE users can only run FULL scans (not QUICK scans)
     // This ensures they see their complete exposure before upgrading

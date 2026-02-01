@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getEffectivePlan } from "@/lib/admin";
+import { getEffectivePlan } from "@/lib/family/family-service";
 import { z } from "zod";
 
 // Monthly limit for custom removal requests
@@ -28,12 +28,8 @@ export async function GET() {
 
     const userId = session.user.id;
 
-    // Check user plan
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { plan: true, email: true },
-    });
-    const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE");
+    // Check user plan (checks subscription + family membership)
+    const userPlan = await getEffectivePlan(userId);
 
     if (userPlan !== "ENTERPRISE") {
       return NextResponse.json(
@@ -89,12 +85,8 @@ export async function POST(request: NextRequest) {
 
     const userId = session.user.id;
 
-    // Check user plan
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { plan: true, email: true },
-    });
-    const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE");
+    // Check user plan (checks subscription + family membership)
+    const userPlan = await getEffectivePlan(userId);
 
     if (userPlan !== "ENTERPRISE") {
       return NextResponse.json(

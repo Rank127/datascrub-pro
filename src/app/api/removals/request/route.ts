@@ -5,7 +5,8 @@ import { executeRemoval } from "@/lib/removers/removal-service";
 import { getDataBrokerInfo, getSubsidiaries, getConsolidationParent, isParentBroker } from "@/lib/removers/data-broker-directory";
 import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
-import { isAdmin, getEffectivePlan } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
+import { getEffectivePlan } from "@/lib/family/family-service";
 
 const requestSchema = z.object({
   exposureId: z.string(),
@@ -67,13 +68,8 @@ export async function POST(request: Request) {
 
     const { exposureId } = result.data;
 
-    // Check user's plan
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { plan: true, email: true },
-    });
-
-    const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE") as Plan;
+    // Check user's plan (checks subscription + family membership)
+    const userPlan = await getEffectivePlan(session.user.id) as Plan;
 
     // Check removal limits based on plan
     const removalLimits: Record<Plan, number> = {

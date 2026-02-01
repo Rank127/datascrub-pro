@@ -5,7 +5,7 @@ import { getDataBrokerInfo, getSubsidiaries, isParentBroker, getOptOutInstructio
 import { getEmailQuotaStatus, sendBulkRemovalSummaryEmail, sendBulkCCPARemovalRequest, canSendEmail } from "@/lib/email";
 import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
-import { getEffectivePlan } from "@/lib/admin";
+import { getEffectivePlan } from "@/lib/family/family-service";
 import { calculateVerifyAfterDate } from "@/lib/removers/verification-service";
 
 // Max emails per bulk operation to avoid quota exhaustion
@@ -68,13 +68,8 @@ export async function POST(request: Request) {
     const { exposureIds, mode } = result.data;
     const userId = session.user.id;
 
-    // Check user's plan
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { plan: true, email: true },
-    });
-
-    const userPlan = getEffectivePlan(user?.email, user?.plan || "FREE") as Plan;
+    // Check user's plan (checks subscription + family membership)
+    const userPlan = await getEffectivePlan(userId) as Plan;
 
     // Only PRO and ENTERPRISE can use bulk removal
     if (userPlan === "FREE") {
@@ -101,6 +96,10 @@ export async function POST(request: Request) {
     }
 
     // Get user info for summary email
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
     const userName = session.user.name || user?.email?.split("@")[0] || "User";
     const userEmail = user?.email || session.user.email;
 
