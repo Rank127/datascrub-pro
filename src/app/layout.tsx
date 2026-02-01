@@ -128,7 +128,7 @@ export const metadata: Metadata = {
   classification: "Privacy & Security",
   referrer: "origin-when-cross-origin",
   verification: {
-    // Google verification done via Cloudflare DNS
+    google: "I-d7oUvQLg-VixdzuhzSAXpPPmTY15ko0vlZFE-sP9s",
     other: {
       "msvalidate.01": ["EB8B76BA0A76EF68700EDBCC7434AA48"],
     },
