@@ -30,6 +30,13 @@ import {
   Loader2,
   Info,
   Shield,
+  Lightbulb,
+  Ban,
+  Vote,
+  Heart,
+  ClipboardList,
+  Smartphone,
+  Flag,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -560,6 +567,116 @@ export default function DNCPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Workarounds for Exempt Callers */}
+      <Card className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-amber-400" />
+            Workarounds for Exempt Callers
+          </CardTitle>
+          <CardDescription className="text-slate-300">
+            The DNC registry doesn&apos;t stop political calls, charities, or surveys. Here&apos;s how to reduce them anyway.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Political Calls */}
+          <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+            <div className="flex items-center gap-2 mb-3">
+              <Vote className="h-5 w-5 text-blue-400" />
+              <h4 className="font-semibold text-white">Political Calls</h4>
+            </div>
+            <ul className="space-y-2 text-sm text-slate-300">
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                <span><strong>Ask to be removed</strong> - When you answer, say &quot;Please add me to your do-not-call list.&quot; They must comply.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                <span><strong>Contact campaigns directly</strong> - Visit their website and submit opt-out requests.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                <span><strong>Check state registries</strong> - Some states (like Indiana, Missouri) have separate political call restrictions.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Charity Calls */}
+          <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+            <div className="flex items-center gap-2 mb-3">
+              <Heart className="h-5 w-5 text-pink-400" />
+              <h4 className="font-semibold text-white">Charity Calls</h4>
+            </div>
+            <ul className="space-y-2 text-sm text-slate-300">
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                <span><strong>Request their internal DNC list</strong> - Charities must maintain their own do-not-call lists and honor removal requests.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                <span><strong>Report persistent callers</strong> - File complaints with your state attorney general if they ignore requests.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                <span><strong>Check for paid solicitors</strong> - Third-party telemarketers calling for charities ARE subject to DNC rules.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Survey Calls */}
+          <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+            <div className="flex items-center gap-2 mb-3">
+              <ClipboardList className="h-5 w-5 text-purple-400" />
+              <h4 className="font-semibold text-white">Survey Calls</h4>
+            </div>
+            <ul className="space-y-2 text-sm text-slate-300">
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                <span><strong>Identify disguised sales calls</strong> - &quot;Surveys&quot; that pitch products are illegal. Report to FTC.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                <span><strong>Opt out of market research</strong> - Register at <a href="https://www.surveyoptout.com" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">SurveyOptOut.com</a> to reduce legitimate survey calls.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                <span><strong>Request removal</strong> - Ask legitimate survey companies to add you to their exclusion list.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* General Tips */}
+          <div className="p-4 bg-emerald-500/10 rounded-lg border border-emerald-500/30">
+            <div className="flex items-center gap-2 mb-3">
+              <Smartphone className="h-5 w-5 text-emerald-400" />
+              <h4 className="font-semibold text-white">Universal Call Blocking Tips</h4>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4 text-sm text-slate-300">
+              <div className="space-y-2">
+                <p className="flex items-start gap-2">
+                  <Ban className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <span><strong>Use call blocking apps</strong> - Nomorobo, Hiya, RoboKiller, or Truecaller</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <Ban className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <span><strong>Enable carrier blocking</strong> - AT&T Call Protect, Verizon Call Filter, T-Mobile Scam Shield</span>
+                </p>
+              </div>
+              <div className="space-y-2">
+                <p className="flex items-start gap-2">
+                  <Ban className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <span><strong>Silence unknown callers</strong> - iPhone/Android can auto-silence non-contacts</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <Flag className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <span><strong>Report violations</strong> - File complaints at <a href="https://reportfraud.ftc.gov" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">ReportFraud.ftc.gov</a></span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
