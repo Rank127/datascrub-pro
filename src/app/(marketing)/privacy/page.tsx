@@ -77,259 +77,246 @@ export default function PrivacyPage() {
 
           <section className="bg-slate-800/30 rounded-lg p-6 border border-slate-700">
             <p className="text-slate-300 text-lg">
-              At GhostMyData, we understand that privacy is paramount—it&apos;s why our service exists. This Privacy Policy
-              explains how we collect, use, disclose, and safeguard your information when you use our personal data
-              removal service. We are committed to protecting your privacy with the same rigor we apply to removing
-              your data from third parties.
+              Privacy matters to us. That&apos;s why we exist. This policy tells you how we use your data.
+              We protect your info just like we help you remove it from other sites.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">1. Information We Collect</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">1. What We Collect</h2>
 
-            <h3 className="text-xl font-medium text-white mb-3">1.1 Information You Provide Directly</h3>
+            <h3 className="text-xl font-medium text-white mb-3">1.1 Info You Give Us</h3>
             <p className="text-slate-400 mb-4">
-              To provide our data removal services, we collect information you voluntarily provide:
+              To help remove your data, we collect what you share:
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
-              <li><strong className="text-slate-300">Account Information:</strong> Email address, name, and password (stored as a secure hash)</li>
-              <li><strong className="text-slate-300">Personal Identifiers for Scanning:</strong> Email addresses, phone numbers, physical addresses, names, aliases, and usernames you want us to search for</li>
-              <li><strong className="text-slate-300">Sensitive Identifiers (Optional):</strong> Date of birth, Social Security Number (SSN), and other identifiers for comprehensive dark web monitoring. SSNs are cryptographically hashed immediately upon receipt and never stored in plain text.</li>
-              <li><strong className="text-slate-300">Payment Information:</strong> Billing details processed securely by Stripe. We do not store credit card numbers on our servers.</li>
-              <li><strong className="text-slate-300">Communications:</strong> Any messages you send to our support team</li>
+              <li><strong className="text-slate-300">Account Info:</strong> Email, name, and password (we hash it for safety)</li>
+              <li><strong className="text-slate-300">Scan Info:</strong> Emails, phones, addresses, and names you want us to search</li>
+              <li><strong className="text-slate-300">Sensitive Info (Optional):</strong> Birthday, SSN for dark web scans. SSNs are hashed right away. We never store them in plain text.</li>
+              <li><strong className="text-slate-300">Payment Info:</strong> Stripe handles your card. We don&apos;t store card numbers.</li>
+              <li><strong className="text-slate-300">Support Messages:</strong> When you email us</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">1.2 Information Collected Automatically</h3>
+            <h3 className="text-xl font-medium text-white mb-3">1.2 Info We Get Automatically</h3>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
-              <li><strong className="text-slate-300">Usage Data:</strong> Pages visited, features used, scan history, and interaction patterns</li>
-              <li><strong className="text-slate-300">Device Information:</strong> Browser type, operating system, device identifiers, and IP address</li>
-              <li><strong className="text-slate-300">Cookies:</strong> Essential cookies for authentication and session management. We do not use advertising or tracking cookies.</li>
+              <li><strong className="text-slate-300">Usage Data:</strong> Pages you visit and features you use</li>
+              <li><strong className="text-slate-300">Device Info:</strong> Browser, OS, and IP address</li>
+              <li><strong className="text-slate-300">Cookies:</strong> Only for login. No ads or tracking.</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">1.3 Information from Third-Party Sources</h3>
+            <h3 className="text-xl font-medium text-white mb-3">1.3 Info from Scans</h3>
             <p className="text-slate-400 mb-4">
-              When performing scans on your behalf, we may retrieve information about you from:
+              When we scan for you, we may find your data on:
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li>Data broker websites and people-search engines</li>
-              <li>Breach notification databases (e.g., Have I Been Pwned)</li>
-              <li>Dark web monitoring services</li>
-              <li>Public records and social media platforms</li>
+              <li>Data broker sites</li>
+              <li>Breach databases</li>
+              <li>Dark web</li>
+              <li>Public records and social media</li>
             </ul>
             <p className="text-slate-400 mt-4">
-              This information is collected solely to show you where your data is exposed and to facilitate its removal.
+              We only collect this to show you where your data is. Then we help remove it.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">2. How We Use Your Information</h2>
-            <p className="text-slate-400 mb-4">We use your information exclusively for the following purposes:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">2. How We Use Your Info</h2>
+            <p className="text-slate-400 mb-4">We only use your info for:</p>
 
-            <h3 className="text-xl font-medium text-white mb-3">2.1 Service Delivery</h3>
+            <h3 className="text-xl font-medium text-white mb-3">2.1 Our Service</h3>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
-              <li>Scanning data sources to identify where your personal information appears</li>
-              <li>Submitting automated opt-out and removal requests to data brokers</li>
-              <li>Generating and sending CCPA/GDPR deletion requests on your behalf</li>
-              <li>Monitoring for new exposures and alerting you to threats</li>
-              <li>Providing customer support and responding to inquiries</li>
+              <li>Scanning sites to find your data</li>
+              <li>Sending opt-out requests for you</li>
+              <li>Sending CCPA/GDPR deletion requests</li>
+              <li>Watching for new exposures</li>
+              <li>Helping you with support</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">2.2 Account Management</h3>
+            <h3 className="text-xl font-medium text-white mb-3">2.2 Your Account</h3>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
-              <li>Creating and maintaining your account</li>
-              <li>Processing payments and managing subscriptions</li>
-              <li>Sending transactional emails (scan results, removal confirmations, account updates)</li>
-              <li>Authenticating your identity and preventing fraud</li>
+              <li>Setting up and running your account</li>
+              <li>Processing your payments</li>
+              <li>Sending you scan results and updates</li>
+              <li>Keeping your account safe</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">2.3 Service Improvement</h3>
+            <h3 className="text-xl font-medium text-white mb-3">2.3 Making Things Better</h3>
             <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li>Analyzing usage patterns to improve our service (using aggregated, anonymized data)</li>
-              <li>Developing new features and data source integrations</li>
-              <li>Ensuring security and preventing abuse</li>
+              <li>Learning how to improve (using data with no names)</li>
+              <li>Building new features</li>
+              <li>Keeping the service secure</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">3. How We Share Your Information</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">3. Who We Share With</h2>
             <p className="text-slate-400 mb-4">
-              <strong className="text-emerald-400">We do not sell your personal information. Ever.</strong> We share your
-              information only in the following limited circumstances:
+              <strong className="text-emerald-400">We never sell your data. Ever.</strong> We only share it when:
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">3.1 With Your Consent</h3>
+            <h3 className="text-xl font-medium text-white mb-3">3.1 You Ask Us To</h3>
             <p className="text-slate-400 mb-6">
-              When you authorize us to submit removal requests, we share the minimum necessary information with data
-              brokers to verify your identity and process the removal. This is the core function of our service.
+              When we send removal requests, we share the minimum info needed with data brokers.
+              This is how we remove your data for you.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">3.2 Service Providers</h3>
-            <p className="text-slate-400 mb-4">We use trusted third-party services to operate our platform:</p>
+            <h3 className="text-xl font-medium text-white mb-3">3.2 Our Partners</h3>
+            <p className="text-slate-400 mb-4">We use trusted services:</p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
-              <li><strong className="text-slate-300">Stripe:</strong> Payment processing (PCI-DSS compliant)</li>
-              <li><strong className="text-slate-300">Vercel:</strong> Hosting infrastructure</li>
-              <li><strong className="text-slate-300">Supabase:</strong> Database hosting (with encryption at rest)</li>
-              <li><strong className="text-slate-300">Resend:</strong> Transactional email delivery</li>
-              <li><strong className="text-slate-300">Have I Been Pwned:</strong> Breach database monitoring</li>
+              <li><strong className="text-slate-300">Stripe:</strong> Payments</li>
+              <li><strong className="text-slate-300">Vercel:</strong> Hosting</li>
+              <li><strong className="text-slate-300">Supabase:</strong> Database</li>
+              <li><strong className="text-slate-300">Resend:</strong> Emails</li>
+              <li><strong className="text-slate-300">Have I Been Pwned:</strong> Breach checks</li>
             </ul>
             <p className="text-slate-400 mb-6">
-              These providers are contractually obligated to protect your data and use it only for the services they provide to us.
+              They must protect your data. They can only use it to help us serve you.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">3.3 Legal Requirements</h3>
+            <h3 className="text-xl font-medium text-white mb-3">3.3 Legal Requests</h3>
             <p className="text-slate-400">
-              We may disclose information if required by law, subpoena, court order, or government request. We will
-              notify you of such requests when legally permitted and will challenge requests we believe are overly
-              broad or inappropriate.
+              We may share data if the law requires it. We&apos;ll tell you if we can.
+              We push back on requests that go too far.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">4. Data Security</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">4. How We Keep You Safe</h2>
             <p className="text-slate-400 mb-4">
-              We implement comprehensive security measures to protect your personal information:
+              We use strong security to protect your data:
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li><strong className="text-slate-300">Encryption at Rest:</strong> All personal data is encrypted using AES-256 encryption</li>
-              <li><strong className="text-slate-300">Encryption in Transit:</strong> All connections use TLS 1.3 (HTTPS)</li>
-              <li><strong className="text-slate-300">Password Security:</strong> Passwords are hashed using bcrypt with appropriate cost factors</li>
-              <li><strong className="text-slate-300">SSN Protection:</strong> Social Security Numbers are immediately hashed using SHA-256 with a unique salt and are never stored or logged in plain text</li>
-              <li><strong className="text-slate-300">Access Controls:</strong> Strict role-based access controls limit employee access to user data</li>
-              <li><strong className="text-slate-300">Infrastructure Security:</strong> Hosted on SOC 2 Type II compliant infrastructure</li>
-              <li><strong className="text-slate-300">Regular Audits:</strong> Periodic security assessments and penetration testing</li>
+              <li><strong className="text-slate-300">Storage:</strong> AES-256 encryption locks your data</li>
+              <li><strong className="text-slate-300">Transfer:</strong> HTTPS keeps data safe in transit</li>
+              <li><strong className="text-slate-300">Passwords:</strong> We hash them with bcrypt</li>
+              <li><strong className="text-slate-300">SSNs:</strong> Hashed right away. Never stored in plain text.</li>
+              <li><strong className="text-slate-300">Access:</strong> Staff only see what they need</li>
+              <li><strong className="text-slate-300">Hosting:</strong> SOC 2 Type II compliant</li>
+              <li><strong className="text-slate-300">Testing:</strong> Regular security checks</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">5. Data Retention</h2>
-            <p className="text-slate-400 mb-4">We retain your data according to the following schedule:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">5. How Long We Keep Data</h2>
+            <p className="text-slate-400 mb-4">Here&apos;s how long we keep things:</p>
             <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li><strong className="text-slate-300">Account Data:</strong> Retained while your account is active and for 30 days after deletion request</li>
-              <li><strong className="text-slate-300">Scan Results:</strong> Retained for 12 months to track removal progress and detect re-listings</li>
-              <li><strong className="text-slate-300">Removal Request Records:</strong> Retained for 24 months for compliance documentation</li>
-              <li><strong className="text-slate-300">Payment Records:</strong> Retained as required by tax and financial regulations (typically 7 years)</li>
-              <li><strong className="text-slate-300">Server Logs:</strong> Automatically deleted after 90 days</li>
+              <li><strong className="text-slate-300">Account Data:</strong> While active, plus 30 days after you delete</li>
+              <li><strong className="text-slate-300">Scan Results:</strong> 12 months to track removals</li>
+              <li><strong className="text-slate-300">Removal Records:</strong> 24 months for records</li>
+              <li><strong className="text-slate-300">Payment Records:</strong> 7 years (tax law)</li>
+              <li><strong className="text-slate-300">Logs:</strong> 90 days, then auto-deleted</li>
             </ul>
             <p className="text-slate-400 mt-4">
-              You may request deletion of your account and associated data at any time. Upon deletion, we will remove
-              your personal information within 30 days, except where retention is required by law.
+              Want your data gone? Delete your account. We&apos;ll remove your info within 30 days.
+              Some data we must keep by law.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">6. Your Privacy Rights</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">6. Your Rights</h2>
 
-            <h3 className="text-xl font-medium text-white mb-3">6.1 Rights for All Users</h3>
-            <p className="text-slate-400 mb-4">Regardless of your location, you have the right to:</p>
+            <h3 className="text-xl font-medium text-white mb-3">6.1 Everyone Gets These</h3>
+            <p className="text-slate-400 mb-4">No matter where you live, you can:</p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
-              <li>Access and download your personal data</li>
-              <li>Correct inaccurate information</li>
-              <li>Delete your account and associated data</li>
-              <li>Export your data in a portable format</li>
-              <li>Opt out of marketing communications</li>
+              <li>See and download your data</li>
+              <li>Fix wrong info</li>
+              <li>Delete your account</li>
+              <li>Export your data</li>
+              <li>Stop marketing emails</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">6.2 California Residents (CCPA/CPRA)</h3>
-            <p className="text-slate-400 mb-4">California residents have additional rights under the California Consumer Privacy Act:</p>
+            <h3 className="text-xl font-medium text-white mb-3">6.2 California (CCPA)</h3>
+            <p className="text-slate-400 mb-4">California folks also get:</p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
-              <li>Right to know what personal information is collected and how it&apos;s used</li>
-              <li>Right to delete personal information</li>
-              <li>Right to opt-out of the sale of personal information (we do not sell your data)</li>
-              <li>Right to non-discrimination for exercising your rights</li>
-              <li>Right to correct inaccurate personal information</li>
-              <li>Right to limit use of sensitive personal information</li>
+              <li>Know what data we have and how we use it</li>
+              <li>Delete your data</li>
+              <li>Stop data sales (we don&apos;t sell anyway)</li>
+              <li>No punishment for using your rights</li>
+              <li>Fix wrong data</li>
+              <li>Limit use of sensitive data</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">6.3 European Residents (GDPR)</h3>
-            <p className="text-slate-400 mb-4">If you are in the European Economic Area, you have rights under the General Data Protection Regulation:</p>
+            <h3 className="text-xl font-medium text-white mb-3">6.3 Europe (GDPR)</h3>
+            <p className="text-slate-400 mb-4">EU folks also get:</p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
-              <li>Right of access to your personal data</li>
-              <li>Right to rectification of inaccurate data</li>
-              <li>Right to erasure (&quot;right to be forgotten&quot;)</li>
-              <li>Right to restrict processing</li>
-              <li>Right to data portability</li>
-              <li>Right to object to processing</li>
-              <li>Right to withdraw consent at any time</li>
-              <li>Right to lodge a complaint with a supervisory authority</li>
+              <li>See your data</li>
+              <li>Fix wrong data</li>
+              <li>Delete your data</li>
+              <li>Stop processing</li>
+              <li>Move your data</li>
+              <li>Say no to processing</li>
+              <li>Take back consent</li>
+              <li>Complain to authorities</li>
             </ul>
             <p className="text-slate-400">
-              Our legal basis for processing your data is: (a) performance of a contract when providing our services,
-              (b) your consent for optional features, and (c) legitimate interests for security and service improvement.
+              We process your data to run our service, with your consent, and to keep things safe.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">7. Children&apos;s Privacy</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">7. Kids</h2>
             <p className="text-slate-400">
-              GhostMyData is not intended for use by individuals under the age of 18. We do not knowingly collect
-              personal information from children. If we learn that we have collected personal information from a
-              child under 18, we will promptly delete that information. If you believe a child has provided us
-              with personal information, please contact us immediately.
+              Our service is for adults 18 and up. We don&apos;t collect kids&apos; data on purpose.
+              If we find out we have a child&apos;s info, we delete it. Tell us if you think a child signed up.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">8. International Data Transfers</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">8. Data Transfers</h2>
             <p className="text-slate-400">
-              Your information may be transferred to and processed in countries other than your own. We ensure
-              appropriate safeguards are in place for such transfers, including Standard Contractual Clauses
-              approved by the European Commission where applicable. By using our service, you consent to the
-              transfer of your information to the United States and other countries where our service providers operate.
+              Your data may move to other countries. We use legal safeguards to protect it.
+              By using our service, you agree to this.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">9. Cookies and Tracking</h2>
-            <p className="text-slate-400 mb-4">We use only essential cookies necessary for the functioning of our service:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">9. Cookies</h2>
+            <p className="text-slate-400 mb-4">We only use cookies we need:</p>
             <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li><strong className="text-slate-300">Authentication Cookies:</strong> To keep you logged in securely</li>
-              <li><strong className="text-slate-300">Session Cookies:</strong> To maintain your session state</li>
-              <li><strong className="text-slate-300">Security Cookies:</strong> To prevent cross-site request forgery and other attacks</li>
+              <li><strong className="text-slate-300">Login Cookies:</strong> Keep you signed in</li>
+              <li><strong className="text-slate-300">Session Cookies:</strong> Remember your session</li>
+              <li><strong className="text-slate-300">Security Cookies:</strong> Stop attacks</li>
             </ul>
             <p className="text-slate-400 mt-4">
-              We do not use advertising cookies, tracking pixels, or third-party analytics that track you across websites.
-              We respect Do Not Track browser signals.
+              No ad cookies. No tracking. We honor Do Not Track.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">10. Changes to This Policy</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">10. Policy Changes</h2>
             <p className="text-slate-400">
-              We may update this Privacy Policy from time to time. We will notify you of any material changes by
-              posting the new policy on this page with an updated &quot;Last updated&quot; date, and for significant changes,
-              we will send you an email notification. Your continued use of our service after any changes indicates
-              your acceptance of the updated policy.
+              We may update this policy. We&apos;ll post changes here with a new date. For big changes, we&apos;ll email you.
+              If you keep using our service, you agree to the new policy.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">11. Contact Us</h2>
             <p className="text-slate-400 mb-4">
-              If you have questions about this Privacy Policy, wish to exercise your privacy rights, or have concerns
-              about our data practices, please contact us:
+              Questions? Want to use your rights? Reach out:
             </p>
             <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
               <p className="text-slate-300">
-                <strong>Privacy Inquiries:</strong>{" "}
+                <strong>Privacy:</strong>{" "}
                 <a href="mailto:privacy@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                   privacy@ghostmydata.com
                 </a>
               </p>
               <p className="text-slate-300 mt-2">
-                <strong>Data Protection Officer:</strong>{" "}
+                <strong>DPO:</strong>{" "}
                 <a href="mailto:dpo@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                   dpo@ghostmydata.com
                 </a>
               </p>
               <p className="text-slate-300 mt-2">
-                <strong>General Support:</strong>{" "}
+                <strong>Support:</strong>{" "}
                 <a href="mailto:support@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                   support@ghostmydata.com
                 </a>
               </p>
             </div>
             <p className="text-slate-400 mt-4">
-              We will respond to all privacy-related inquiries within 30 days, or sooner as required by applicable law.
+              We reply within 30 days.
             </p>
           </section>
 

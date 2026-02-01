@@ -53,64 +53,64 @@ const steps = [
     icon: User,
     title: "Create Your Profile",
     description:
-      "Enter your personal information including email addresses, phone numbers, names, and addresses. All data is encrypted with AES-256 encryption.",
+      "Add your info: emails, phones, names, and addresses. We lock it with AES-256. Your data stays safe with us.",
     details: [
-      "Add multiple email addresses",
+      "Add many email addresses",
       "Include past addresses",
-      "Add aliases and maiden names",
-      "Optional: SSN for dark web monitoring",
+      "Add other names you use",
+      "SSN for dark web scans (optional)",
     ],
   },
   {
     number: 2,
     icon: Search,
-    title: "Run a Comprehensive Scan",
+    title: "Run a Full Scan",
     description:
-      "Our system searches across 2,100+ data sources including data brokers, breach databases, dark web forums, social media platforms, and 60 AI Shield sources.",
+      "We search 2,100+ sites for your data. This includes data brokers, breach databases, and the dark web.",
     details: [
-      "2,100+ data brokers (Spokeo, WhitePages, etc.)",
-      "Breach databases (Have I Been Pwned, LeakCheck)",
-      "Dark web marketplaces and forums",
-      "60 AI Shield sources (5 categories)",
+      "2,100+ data brokers checked",
+      "Breach databases scanned",
+      "Dark web forums searched",
+      "60 AI Shield sources",
     ],
   },
   {
     number: 3,
     icon: ListChecks,
-    title: "Review Your Exposures",
+    title: "See Your Results",
     description:
-      "View a detailed report of everywhere your personal information was found, sorted by severity and risk level.",
+      "View a report of all places your data was found. We sort by risk level so you know what matters most.",
     details: [
-      "Risk score based on exposure severity",
-      "Detailed preview of exposed data",
-      "Source URLs and verification",
-      "Whitelist accounts you want to keep",
+      "Risk scores for each exposure",
+      "Preview of exposed data",
+      "Source links for proof",
+      "Keep accounts you want",
     ],
   },
   {
     number: 4,
     icon: Trash2,
-    title: "Automated Removal",
+    title: "Auto Removal",
     description:
-      "We automatically submit opt-out requests to data brokers and send CCPA/GDPR removal requests on your behalf.",
+      "We send opt-out requests to all sites. We also send CCPA and GDPR removal requests for you.",
     details: [
-      "One-click removal requests",
-      "Automated form submissions",
-      "CCPA/GDPR compliant requests",
-      "Track removal progress",
+      "One-click removal",
+      "Auto form filling",
+      "Legal requests sent",
+      "Track your progress",
     ],
   },
   {
     number: 5,
     icon: Bell,
-    title: "Continuous Monitoring",
+    title: "Always Watching",
     description:
-      "Our system continuously monitors for new exposures and alerts you immediately when your data appears somewhere new.",
+      "We keep scanning for new exposures. When your data shows up again, we alert you right away.",
     details: [
-      "Weekly or daily scans",
+      "Daily or weekly scans",
       "Instant email alerts",
-      "Monthly protection reports",
-      "Re-scan and verify removals",
+      "Monthly reports",
+      "Verify removals worked",
     ],
   },
 ];
@@ -119,44 +119,44 @@ const guarantees = [
   {
     icon: Shield,
     title: "Bank-Level Security",
-    description: "Your data is protected with AES-256 encryption and never shared.",
+    description: "We use AES-256 encryption. We never share your data.",
   },
   {
     icon: CheckCircle,
     title: "98% Success Rate",
-    description: "Our automated removal system has a 98% success rate with data brokers.",
+    description: "Our system removes data from 98% of data broker sites.",
   },
   {
     icon: Bell,
     title: "24/7 Monitoring",
-    description: "Continuous monitoring ensures you're always protected against new exposures.",
+    description: "We watch for new exposures all day, every day.",
   },
 ];
 
 const faqs = [
   {
-    question: "How does GhostMyData find my personal information?",
-    answer: "GhostMyData scans over 2,100 data broker sites, breach databases, dark web forums, and 60 AI Shield sources using your provided information (name, email, phone, addresses). Our automated system searches these sources to identify where your data is exposed.",
+    question: "How does GhostMyData find my data?",
+    answer: "We scan 2,100+ sites using your name, email, phone, and addresses. We check data brokers, breach databases, and the dark web. Our system finds where your data is exposed.",
   },
   {
-    question: "How long does the data removal process take?",
-    answer: "Initial scans complete within minutes. Removal requests are submitted immediately, but data brokers typically take 1-7 days to process. Some may take up to 45 days. We track all requests and send follow-ups automatically.",
+    question: "How long does removal take?",
+    answer: "Scans finish in minutes. We send removal requests right away. Most data brokers take 1-7 days to remove your data. Some take up to 45 days. We track and follow up on all requests.",
   },
   {
-    question: "What information do I need to provide?",
-    answer: "At minimum, you need your name and email address. For comprehensive scanning, you can add phone numbers, current and past addresses, aliases, and maiden names. All data is encrypted with AES-256 encryption.",
+    question: "What info do I need to give?",
+    answer: "You need at least your name and email. For a full scan, add phone numbers and addresses. You can also add other names you use. We encrypt all your data with AES-256.",
   },
   {
-    question: "Is my data safe with GhostMyData?",
-    answer: "Yes. We use bank-level AES-256 encryption for all stored data. Your information is only used to search for and remove your exposures - we never sell or share your data. We're SOC 2 compliant.",
+    question: "Is my data safe with you?",
+    answer: "Yes. We use bank-level AES-256 encryption. We only use your info to find and remove your data. We never sell or share it. We follow SOC 2 rules.",
   },
   {
-    question: "What happens after my data is removed?",
-    answer: "We continue monitoring for new exposures. Data brokers often re-list information from public records, so continuous monitoring is essential. We'll alert you immediately if your data reappears and submit new removal requests.",
+    question: "What happens after removal?",
+    answer: "We keep watching for new exposures. Data brokers often re-add info from public records. We alert you if your data shows up again. Then we send new removal requests.",
   },
   {
-    question: "Do I need technical knowledge to use GhostMyData?",
-    answer: "No. GhostMyData is designed for everyone. Simply create a profile, run a scan, and we handle everything else - from finding exposures to submitting removal requests and monitoring for new data.",
+    question: "Do I need tech skills?",
+    answer: "No. GhostMyData is made for everyone. Just create a profile and run a scan. We do the rest. We find exposures, send removal requests, and watch for new data.",
   },
 ];
 

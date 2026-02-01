@@ -64,392 +64,352 @@ export default function TermsPage() {
 
           <section className="bg-slate-800/30 rounded-lg p-6 border border-slate-700">
             <p className="text-slate-300 text-lg">
-              Please read these Terms of Service (&quot;Terms&quot;, &quot;Agreement&quot;) carefully before using the GhostMyData
-              website and services. By accessing or using our service, you agree to be bound by these Terms. If you
-              disagree with any part of the Terms, you may not access the service.
+              Please read these Terms of Service carefully. By using GhostMyData, you agree to these Terms.
+              If you don&apos;t agree, please don&apos;t use our service.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">1. Definitions</h2>
             <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li><strong className="text-slate-300">&quot;Service&quot;</strong> refers to the GhostMyData website, applications, and all related services</li>
-              <li><strong className="text-slate-300">&quot;User,&quot; &quot;You,&quot; &quot;Your&quot;</strong> refers to any individual or entity that accesses or uses the Service</li>
-              <li><strong className="text-slate-300">&quot;We,&quot; &quot;Us,&quot; &quot;Our,&quot; &quot;Company&quot;</strong> refers to GhostMyData and its operators</li>
-              <li><strong className="text-slate-300">&quot;Personal Data&quot;</strong> refers to any information relating to an identified or identifiable individual</li>
-              <li><strong className="text-slate-300">&quot;Subscription&quot;</strong> refers to a paid plan that provides access to premium features</li>
-              <li><strong className="text-slate-300">&quot;Data Broker&quot;</strong> refers to third-party companies that collect and sell personal information</li>
+              <li><strong className="text-slate-300">&quot;Service&quot;</strong> means the GhostMyData website and apps</li>
+              <li><strong className="text-slate-300">&quot;User,&quot; &quot;You,&quot; &quot;Your&quot;</strong> means anyone who uses our Service</li>
+              <li><strong className="text-slate-300">&quot;We,&quot; &quot;Us,&quot; &quot;Our&quot;</strong> means GhostMyData</li>
+              <li><strong className="text-slate-300">&quot;Personal Data&quot;</strong> means info that can identify you</li>
+              <li><strong className="text-slate-300">&quot;Subscription&quot;</strong> means a paid plan</li>
+              <li><strong className="text-slate-300">&quot;Data Broker&quot;</strong> means sites that collect and sell your info</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">2. Description of Service</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">2. What We Do</h2>
             <p className="text-slate-400 mb-4">
-              GhostMyData provides personal data discovery and removal services designed to help you take control of your
-              online privacy. Our services include:
+              GhostMyData finds and removes your personal data online. We help you protect your privacy.
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
-              <li>Scanning data broker websites, breach databases, dark web sources, and social media platforms to identify where your personal information is exposed</li>
-              <li>Automated submission of opt-out requests to data brokers</li>
-              <li>Generation and sending of CCPA, GDPR, and other privacy law-based deletion requests</li>
-              <li>Continuous monitoring for new data exposures</li>
-              <li>Alerts and reports about your online data exposure status</li>
+              <li>We scan data broker sites, breach databases, and the dark web to find your data</li>
+              <li>We send opt-out requests to data brokers for you</li>
+              <li>We send CCPA and GDPR deletion requests on your behalf</li>
+              <li>We watch for new exposures</li>
+              <li>We send you alerts and reports</li>
             </ul>
             <p className="text-slate-400">
-              The Service acts as your authorized agent for the purpose of submitting data removal requests on your behalf.
+              We act as your agent. We submit removal requests for you.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">3. Eligibility</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">3. Who Can Use Our Service</h2>
             <p className="text-slate-400 mb-4">To use our Service, you must:</p>
             <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li>Be at least 18 years of age</li>
-              <li>Have the legal capacity to enter into a binding agreement</li>
-              <li>Be the owner of the personal information you submit for scanning and removal, or be legally authorized to act on behalf of the owner</li>
-              <li>Not be prohibited from using the Service under applicable laws</li>
-              <li>Provide accurate and complete information during registration</li>
+              <li>Be at least 18 years old</li>
+              <li>Be able to enter a legal agreement</li>
+              <li>Own the data you submit, or have permission to act for the owner</li>
+              <li>Not be banned by law from using this Service</li>
+              <li>Give us true and complete info when you sign up</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">4. Account Registration and Security</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">4. Your Account</h2>
 
-            <h3 className="text-xl font-medium text-white mb-3">4.1 Account Creation</h3>
+            <h3 className="text-xl font-medium text-white mb-3">4.1 Creating an Account</h3>
             <p className="text-slate-400 mb-4">
-              To access certain features of the Service, you must create an account. You agree to provide accurate,
-              current, and complete information during registration and to update such information to keep it accurate,
-              current, and complete.
+              You need an account to use some features. Give us true info when you sign up.
+              Keep your info up to date.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">4.2 Account Security</h3>
-            <p className="text-slate-400 mb-4">You are responsible for:</p>
+            <h3 className="text-xl font-medium text-white mb-3">4.2 Keeping It Safe</h3>
+            <p className="text-slate-400 mb-4">You must:</p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
-              <li>Maintaining the confidentiality of your account credentials</li>
-              <li>All activities that occur under your account</li>
-              <li>Notifying us immediately of any unauthorized access or security breach</li>
-              <li>Using a strong, unique password for your account</li>
+              <li>Keep your password secret</li>
+              <li>Take charge of all actions on your account</li>
+              <li>Tell us right away if someone else gets in</li>
+              <li>Use a strong, unique password</li>
             </ul>
             <p className="text-slate-400">
-              We reserve the right to suspend or terminate accounts that we reasonably believe have been compromised or
-              are being used in violation of these Terms.
+              We may close accounts that are hacked or break these Terms.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">5. User Responsibilities and Representations</h2>
-            <p className="text-slate-400 mb-4">By using our Service, you represent and warrant that:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">5. Your Promises</h2>
+            <p className="text-slate-400 mb-4">By using our Service, you promise that:</p>
             <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li>All personal information you provide is your own, or you have proper authorization to provide it</li>
-              <li>You will only request removal of data that belongs to you or that you are authorized to manage</li>
-              <li>You will not use the Service for any fraudulent, illegal, or unauthorized purposes</li>
-              <li>You will not attempt to interfere with or disrupt the Service or its infrastructure</li>
-              <li>You will not attempt to circumvent any security measures or access controls</li>
-              <li>You will not use automated tools to access the Service except as expressly permitted</li>
-              <li>You will not impersonate another person or entity</li>
-              <li>You will comply with all applicable laws and regulations</li>
+              <li>The info you give us is yours, or you have permission to share it</li>
+              <li>You only ask us to remove data that is yours</li>
+              <li>You won&apos;t use our Service for fraud or illegal acts</li>
+              <li>You won&apos;t try to break or hack our Service</li>
+              <li>You won&apos;t try to get around our security</li>
+              <li>You won&apos;t use bots or scripts without our okay</li>
+              <li>You won&apos;t pretend to be someone else</li>
+              <li>You will follow all laws</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">6. Authorization and Agency</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">6. You Authorize Us</h2>
             <p className="text-slate-400 mb-4">
-              By using the Service to submit data removal requests, you hereby authorize GhostMyData to act as your
-              authorized agent for the following purposes:
+              When you use our Service, you let us act for you. We can:
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
-              <li>Submit opt-out requests to data brokers on your behalf</li>
-              <li>Send CCPA, GDPR, and other privacy-related requests using your information</li>
-              <li>Communicate with third parties as necessary to process your removal requests</li>
-              <li>Verify your identity with data brokers when required for removal processing</li>
+              <li>Send opt-out requests to data brokers for you</li>
+              <li>Send CCPA and GDPR requests using your info</li>
+              <li>Talk to other sites to process your removals</li>
+              <li>Verify who you are when data brokers ask</li>
             </ul>
             <p className="text-slate-400">
-              This authorization remains in effect while you maintain an active account and may be revoked by
-              deleting your account or contacting us in writing.
+              This lasts while your account is active. Delete your account to stop it.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">7. Subscription Plans and Billing</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">7. Plans and Billing</h2>
 
             <h3 className="text-xl font-medium text-white mb-3">7.1 Free and Paid Plans</h3>
             <p className="text-slate-400 mb-4">
-              We offer both free and paid subscription plans. Free plans provide limited access to our services,
-              while paid plans (&quot;Pro&quot; and &quot;Enterprise&quot;) offer additional features including automated removal
-              requests, continuous monitoring, and priority support.
+              We have free and paid plans. Free plans have limits. Paid plans (Pro and Enterprise)
+              give you more features like auto removal and priority support.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">7.2 Billing and Payment</h3>
+            <h3 className="text-xl font-medium text-white mb-3">7.2 How Billing Works</h3>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
-              <li>Paid subscriptions are billed in advance on a recurring monthly or annual basis</li>
-              <li>All payments are processed securely through Stripe</li>
-              <li>Prices are listed in US dollars unless otherwise specified</li>
-              <li>You authorize us to charge your payment method for all fees associated with your subscription</li>
-              <li>We may change pricing with 30 days&apos; notice; existing subscriptions will be honored until renewal</li>
+              <li>Paid plans bill monthly or yearly in advance</li>
+              <li>We use Stripe for secure payments</li>
+              <li>Prices are in US dollars</li>
+              <li>You let us charge your card for your plan</li>
+              <li>We give 30 days&apos; notice before price changes</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">7.3 Cancellation and Refunds</h3>
+            <h3 className="text-xl font-medium text-white mb-3">7.3 Canceling and Refunds</h3>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
-              <li>You may cancel your subscription at any time through your account settings or by contacting support</li>
-              <li>Upon cancellation, you will retain access to paid features until the end of your current billing period</li>
-              <li><strong className="text-slate-300">30-Day Money-Back Guarantee:</strong> If you are not satisfied with our service, you may request a full refund within 30 days of your initial subscription purchase by contacting support@ghostmydata.com</li>
-              <li>Refund requests made after 30 days from the initial purchase are not eligible for a refund</li>
-              <li>We do not provide prorated refunds for partial billing periods outside the 30-day guarantee window</li>
-              <li>Refunds are processed within 5-10 business days and returned to the original payment method</li>
-              <li>If you believe you were charged in error, contact us within 30 days of the charge</li>
+              <li>Cancel any time in settings or by email</li>
+              <li>You keep access until your paid period ends</li>
+              <li><strong className="text-slate-300">30-Day Money Back:</strong> Ask for a full refund within 30 days of your first payment</li>
+              <li>After 30 days, we don&apos;t give refunds</li>
+              <li>No partial refunds after the 30-day window</li>
+              <li>Refunds take 5-10 business days</li>
+              <li>Think we charged you wrong? Tell us within 30 days</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">7.4 Free Trial</h3>
+            <h3 className="text-xl font-medium text-white mb-3">7.4 Free Trials</h3>
             <p className="text-slate-400">
-              We may offer free trials of paid features. At the end of the trial period, you will be automatically
-              enrolled in a paid subscription unless you cancel before the trial ends. We will notify you before
-              any charges are made.
+              We may offer free trials. Your paid plan starts when the trial ends. Cancel before then to avoid charges.
+              We&apos;ll let you know before we charge you.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">8. Service Limitations and Disclaimers</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">8. What We Can&apos;t Promise</h2>
 
             <h3 className="text-xl font-medium text-white mb-3">8.1 No Guarantee of Results</h3>
             <p className="text-slate-400 mb-4">
-              While we strive to provide effective data removal services, we cannot and do not guarantee:
+              We work hard to remove your data. But we can&apos;t promise:
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
-              <li>Complete removal of all your personal data from all sources</li>
-              <li>That data brokers will comply with removal requests within any specific timeframe</li>
-              <li>That removed data will not reappear on data broker sites in the future</li>
-              <li>Prevention of future data collection by third parties</li>
-              <li>Detection of all instances where your data may appear online</li>
+              <li>That we&apos;ll remove all your data from every site</li>
+              <li>That data brokers will act by a certain date</li>
+              <li>That your data won&apos;t show up again later</li>
+              <li>That we&apos;ll stop future data collection</li>
+              <li>That we&apos;ll find every place your data appears</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">8.2 Third-Party Dependencies</h3>
+            <h3 className="text-xl font-medium text-white mb-3">8.2 Other Sites</h3>
             <p className="text-slate-400 mb-4">
-              Our Service depends on third-party data sources and data brokers. We are not responsible for:
+              We rely on other sites and data brokers. We&apos;re not in charge of:
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
-              <li>The accuracy of information provided by third-party sources</li>
-              <li>Data broker compliance with removal requests</li>
-              <li>Changes to data broker opt-out processes that may affect our service</li>
-              <li>Temporary or permanent unavailability of third-party services</li>
+              <li>How accurate their info is</li>
+              <li>Whether they follow our removal requests</li>
+              <li>If they change how opt-outs work</li>
+              <li>If their sites go down</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">8.3 Service Availability</h3>
+            <h3 className="text-xl font-medium text-white mb-3">8.3 Uptime</h3>
             <p className="text-slate-400">
-              We strive to maintain high availability but do not guarantee uninterrupted access to the Service.
-              We may suspend or restrict access to the Service for maintenance, updates, or other operational reasons.
-              We will endeavor to provide advance notice of planned maintenance when possible.
+              We try to stay online all the time. But we may go down for updates or fixes.
+              We&apos;ll try to warn you before planned work.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">9. Intellectual Property</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">9. Our Property</h2>
 
-            <h3 className="text-xl font-medium text-white mb-3">9.1 Our Intellectual Property</h3>
+            <h3 className="text-xl font-medium text-white mb-3">9.1 What We Own</h3>
             <p className="text-slate-400 mb-4">
-              The Service and its original content, features, and functionality are owned by GhostMyData and are
-              protected by international copyright, trademark, patent, trade secret, and other intellectual property
-              laws. This includes but is not limited to:
+              We own our Service and all its parts. This is protected by law. We own:
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
-              <li>The GhostMyData name, logo, and branding</li>
-              <li>Website design, text, graphics, and user interfaces</li>
-              <li>Software, algorithms, and underlying technology</li>
-              <li>Data removal methodologies and processes</li>
+              <li>The GhostMyData name and logo</li>
+              <li>Our website design and graphics</li>
+              <li>Our software and code</li>
+              <li>Our removal methods</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">9.2 Limited License</h3>
+            <h3 className="text-xl font-medium text-white mb-3">9.2 Your License</h3>
             <p className="text-slate-400">
-              We grant you a limited, non-exclusive, non-transferable, revocable license to access and use the
-              Service for your personal, non-commercial use in accordance with these Terms. This license does not
-              include the right to copy, modify, distribute, sell, or lease any part of the Service.
+              You can use our Service for yourself. You can&apos;t copy, change, share, or sell any part of it.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">10. Prohibited Activities</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">10. Don&apos;t Do This</h2>
             <p className="text-slate-400 mb-4">You agree not to:</p>
             <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li>Use the Service to remove data belonging to someone else without proper authorization</li>
-              <li>Attempt to gain unauthorized access to any part of the Service or its systems</li>
-              <li>Use automated scripts, bots, or other means to access the Service without permission</li>
-              <li>Interfere with or disrupt the integrity or performance of the Service</li>
-              <li>Attempt to reverse engineer, decompile, or disassemble any part of the Service</li>
-              <li>Use the Service for any illegal, fraudulent, or harmful purpose</li>
-              <li>Transmit viruses, malware, or other malicious code</li>
-              <li>Harass, abuse, or harm other users or our staff</li>
-              <li>Violate any applicable laws, regulations, or third-party rights</li>
-              <li>Resell or commercially exploit the Service without authorization</li>
+              <li>Remove someone else&apos;s data without their okay</li>
+              <li>Try to hack our Service</li>
+              <li>Use bots or scripts without asking</li>
+              <li>Break or slow down our Service</li>
+              <li>Take apart or copy our code</li>
+              <li>Do anything illegal or harmful</li>
+              <li>Send viruses or malware</li>
+              <li>Harass users or staff</li>
+              <li>Break any laws</li>
+              <li>Resell our Service</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">11. Limitation of Liability</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">11. Limits on What We Owe</h2>
             <p className="text-slate-400 mb-4">
-              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:
+              AS MUCH AS THE LAW ALLOWS:
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
-              <li>THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED</li>
-              <li>WE DISCLAIM ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT</li>
-              <li>WE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES</li>
-              <li>OUR TOTAL LIABILITY FOR ANY CLAIMS ARISING FROM YOUR USE OF THE SERVICE SHALL NOT EXCEED THE AMOUNT YOU PAID US IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM</li>
-              <li>WE ARE NOT LIABLE FOR DAMAGES RESULTING FROM UNAUTHORIZED ACCESS TO YOUR ACCOUNT, DATA BREACHES AT THIRD-PARTY SERVICES, OR ACTIONS OF DATA BROKERS</li>
+              <li>WE GIVE THE SERVICE &quot;AS IS&quot; WITH NO WARRANTIES</li>
+              <li>WE DON&apos;T PROMISE IT WILL WORK PERFECTLY FOR YOU</li>
+              <li>WE&apos;RE NOT LIABLE FOR INDIRECT OR SPECIAL DAMAGES</li>
+              <li>THE MOST WE OWE YOU IS WHAT YOU PAID US IN THE PAST 12 MONTHS</li>
+              <li>WE&apos;RE NOT LIABLE FOR HACKS, DATA BREACHES, OR WHAT DATA BROKERS DO</li>
             </ul>
             <p className="text-slate-400">
-              Some jurisdictions do not allow the exclusion of certain warranties or limitations on liability, so some
-              of the above limitations may not apply to you. In such cases, our liability will be limited to the
-              maximum extent permitted by applicable law.
+              Some places don&apos;t allow these limits. If that&apos;s you, we limit our liability as much as your laws allow.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">12. Indemnification</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">12. You Protect Us</h2>
             <p className="text-slate-400">
-              You agree to indemnify, defend, and hold harmless GhostMyData, its officers, directors, employees,
-              agents, and affiliates from and against any claims, liabilities, damages, losses, costs, or expenses
-              (including reasonable attorneys&apos; fees) arising out of or related to: (a) your use of the Service;
-              (b) your violation of these Terms; (c) your violation of any rights of another party; (d) any content
-              you submit through the Service; or (e) your violation of any applicable laws or regulations.
+              If we get sued because of something you did, you agree to cover our costs. This includes legal fees.
+              This applies if you break these Terms, break the law, or hurt someone through our Service.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">13. Termination</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">13. Ending Your Account</h2>
 
-            <h3 className="text-xl font-medium text-white mb-3">13.1 Termination by You</h3>
+            <h3 className="text-xl font-medium text-white mb-3">13.1 You Can Leave</h3>
             <p className="text-slate-400 mb-4">
-              You may terminate your account at any time by using the account deletion feature in your settings or
-              by contacting our support team. Upon termination, your right to use the Service will immediately cease.
+              Delete your account any time in settings or by emailing support. Your access stops right away.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">13.2 Termination by Us</h3>
+            <h3 className="text-xl font-medium text-white mb-3">13.2 We Can End It</h3>
             <p className="text-slate-400 mb-4">
-              We may suspend or terminate your account and access to the Service immediately, without prior notice
-              or liability, for any reason, including but not limited to:
+              We may close your account if you:
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
-              <li>Breach of these Terms</li>
-              <li>Fraudulent, illegal, or abusive activity</li>
-              <li>Non-payment of fees</li>
-              <li>Request by law enforcement or government agencies</li>
-              <li>Extended periods of inactivity</li>
-              <li>Discontinuation of the Service</li>
+              <li>Break these Terms</li>
+              <li>Do something illegal or abusive</li>
+              <li>Don&apos;t pay</li>
+              <li>Get flagged by law enforcement</li>
+              <li>Don&apos;t use your account for a long time</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">13.3 Effect of Termination</h3>
+            <h3 className="text-xl font-medium text-white mb-3">13.3 What Happens After</h3>
             <p className="text-slate-400">
-              Upon termination, all licenses and rights granted to you will immediately cease. We may retain certain
-              information as required by law or for legitimate business purposes. Sections of these Terms that by
-              their nature should survive termination shall survive, including ownership provisions, warranty
-              disclaimers, indemnity, and limitations of liability.
+              When your account ends, you lose access. We may keep some data as the law requires.
+              Some parts of these Terms still apply after you leave.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">14. Dispute Resolution</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">14. Disputes</h2>
 
-            <h3 className="text-xl font-medium text-white mb-3">14.1 Informal Resolution</h3>
+            <h3 className="text-xl font-medium text-white mb-3">14.1 Talk to Us First</h3>
             <p className="text-slate-400 mb-4">
-              Before filing any formal dispute, you agree to contact us first and attempt to resolve the dispute
-              informally by sending a written notice to legal@ghostmydata.com. We will attempt to resolve the
-              dispute within 30 days.
+              Have a problem? Email legal@ghostmydata.com first. We&apos;ll try to fix it within 30 days.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">14.2 Arbitration Agreement</h3>
+            <h3 className="text-xl font-medium text-white mb-3">14.2 Arbitration</h3>
             <p className="text-slate-400 mb-4">
-              If informal resolution fails, any dispute arising from these Terms or your use of the Service shall
-              be resolved through binding arbitration administered by the American Arbitration Association (AAA)
-              under its Consumer Arbitration Rules. The arbitration will be conducted in English, and judgment on
-              the award may be entered in any court of competent jurisdiction.
+              If we can&apos;t fix it, we use arbitration through the AAA. A neutral person decides.
+              No court trial.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">14.3 Class Action Waiver</h3>
+            <h3 className="text-xl font-medium text-white mb-3">14.3 No Class Actions</h3>
             <p className="text-slate-400 mb-4">
-              YOU AGREE THAT ANY DISPUTE RESOLUTION PROCEEDINGS WILL BE CONDUCTED ONLY ON AN INDIVIDUAL BASIS AND
-              NOT IN A CLASS, CONSOLIDATED, OR REPRESENTATIVE ACTION. If this class action waiver is found to be
-              unenforceable, then the entirety of this arbitration provision shall be null and void.
+              YOU CAN ONLY SUE US ON YOUR OWN. NO CLASS ACTIONS. If a court says this is invalid,
+              then this whole section is void.
             </p>
 
             <h3 className="text-xl font-medium text-white mb-3">14.4 Exceptions</h3>
             <p className="text-slate-400">
-              Notwithstanding the above, either party may seek injunctive or other equitable relief in any court of
-              competent jurisdiction to prevent infringement of intellectual property rights. Small claims court
-              actions are also exempt from the arbitration requirement.
+              Either of us can go to court to protect IP rights. Small claims court is also okay.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">15. Governing Law</h2>
             <p className="text-slate-400">
-              These Terms shall be governed by and construed in accordance with the laws of the State of Delaware,
-              United States, without regard to its conflict of law provisions. You agree to submit to the personal
-              and exclusive jurisdiction of the courts located within Delaware for any disputes not subject to
-              arbitration.
+              Delaware law governs these Terms. If we go to court, it will be in Delaware.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">16. Changes to Terms</h2>
             <p className="text-slate-400 mb-4">
-              We reserve the right to modify these Terms at any time. When we make material changes:
+              We may change these Terms. When we make big changes:
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li>We will post the updated Terms on this page with a new &quot;Last updated&quot; date</li>
-              <li>We will notify you via email at least 30 days before material changes take effect</li>
-              <li>Your continued use of the Service after changes take effect constitutes acceptance of the new Terms</li>
-              <li>If you do not agree to the modified Terms, you must stop using the Service and may cancel your subscription</li>
+              <li>We&apos;ll update this page with a new date</li>
+              <li>We&apos;ll email you 30 days before big changes</li>
+              <li>If you keep using our Service, you agree to the new Terms</li>
+              <li>If you don&apos;t agree, stop using our Service</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">17. General Provisions</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">17. General Rules</h2>
 
-            <h3 className="text-xl font-medium text-white mb-3">17.1 Entire Agreement</h3>
+            <h3 className="text-xl font-medium text-white mb-3">17.1 Full Agreement</h3>
             <p className="text-slate-400 mb-4">
-              These Terms, together with our Privacy Policy and any other legal notices published on the Service,
-              constitute the entire agreement between you and GhostMyData regarding your use of the Service.
+              These Terms plus our Privacy Policy are the full deal between us.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">17.2 Severability</h3>
+            <h3 className="text-xl font-medium text-white mb-3">17.2 If Part Is Invalid</h3>
             <p className="text-slate-400 mb-4">
-              If any provision of these Terms is found to be unenforceable or invalid, that provision will be limited
-              or eliminated to the minimum extent necessary, and the remaining provisions will remain in full force
-              and effect.
+              If a court strikes down part of these Terms, the rest still applies.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">17.3 Waiver</h3>
+            <h3 className="text-xl font-medium text-white mb-3">17.3 We Can Wait</h3>
             <p className="text-slate-400 mb-4">
-              Our failure to enforce any right or provision of these Terms shall not constitute a waiver of such
-              right or provision.
+              If we don&apos;t enforce a rule right away, we can still enforce it later.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">17.4 Assignment</h3>
+            <h3 className="text-xl font-medium text-white mb-3">17.4 You Can&apos;t Transfer</h3>
             <p className="text-slate-400 mb-4">
-              You may not assign or transfer these Terms or your rights hereunder without our prior written consent.
-              We may assign these Terms without restriction.
+              You can&apos;t give your account to someone else. We can transfer our business.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">17.5 Force Majeure</h3>
+            <h3 className="text-xl font-medium text-white mb-3">17.5 Things Beyond Our Control</h3>
             <p className="text-slate-400">
-              We shall not be liable for any failure or delay in performing our obligations where such failure or
-              delay results from circumstances beyond our reasonable control, including but not limited to natural
-              disasters, war, terrorism, riots, government actions, or internet service failures.
+              We&apos;re not liable if something breaks due to disasters, wars, or internet outages.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">18. Contact Information</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">18. Contact Us</h2>
             <p className="text-slate-400 mb-4">
-              For questions about these Terms of Service, please contact us:
+              Questions? Reach out:
             </p>
             <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
               <p className="text-slate-300">
-                <strong>Legal Inquiries:</strong>{" "}
+                <strong>Legal:</strong>{" "}
                 <a href="mailto:legal@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                   legal@ghostmydata.com
                 </a>
               </p>
               <p className="text-slate-300 mt-2">
-                <strong>General Support:</strong>{" "}
+                <strong>Support:</strong>{" "}
                 <a href="mailto:support@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                   support@ghostmydata.com
                 </a>
@@ -459,8 +419,7 @@ export default function TermsPage() {
 
           <section className="bg-emerald-500/10 rounded-lg p-6 border border-emerald-500/20">
             <p className="text-slate-300">
-              By using GhostMyData, you acknowledge that you have read, understood, and agree to be bound by these
-              Terms of Service. If you do not agree to these Terms, please do not use our Service.
+              By using GhostMyData, you agree to these Terms. If you don&apos;t agree, please don&apos;t use our Service.
             </p>
           </section>
 
