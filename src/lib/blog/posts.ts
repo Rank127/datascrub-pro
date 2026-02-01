@@ -849,6 +849,275 @@ TruePeopleSearch is just one of 2,100+ data brokers exposing your information. G
     `
   },
   {
+    slug: "how-to-remove-yourself-from-fastpeoplesearch",
+    title: "How to Remove Yourself from FastPeopleSearch (2026 Guide)",
+    description: "Quick opt-out guide for FastPeopleSearch. Remove your name, address, and phone number in minutes. Free and easy steps that work.",
+    publishedAt: "2026-02-01",
+    author: "GhostMyData Team",
+    category: "Data Broker Removal",
+    tags: ["fastpeoplesearch", "data broker", "opt-out", "privacy"],
+    readTime: "5 min read",
+    content: `
+## What is FastPeopleSearch?
+
+FastPeopleSearch is a free people-search website that provides access to personal information from public records. It's one of the most popular free alternatives to paid services like BeenVerified.
+
+### Information FastPeopleSearch Displays:
+
+- Full name and aliases
+- Age and date of birth
+- Current and past addresses
+- Phone numbers (including cell phones)
+- Email addresses
+- Possible relatives
+- Possible associates
+- Social media profiles
+
+## Why FastPeopleSearch is a Privacy Risk
+
+Because FastPeopleSearch is completely free, it's extremely accessible:
+
+- **No barriers** - Anyone can look you up instantly
+- **Detailed profiles** - Surprisingly comprehensive for a free service
+- **Easy to find** - High Google rankings mean more exposure
+- **Frequently updated** - Regular data refreshes
+
+## How to Remove Yourself from FastPeopleSearch
+
+Good news: FastPeopleSearch has a straightforward opt-out process.
+
+### Step 1: Find Your Listing
+
+1. Go to FastPeopleSearch.com
+2. Search for your name and state
+3. Click on your profile
+4. Copy the URL of your record
+
+### Step 2: Access the Removal Page
+
+1. Scroll to the bottom of your profile page
+2. Click "Remove My Record" or "Privacy"
+3. Or go directly to their removal page
+
+### Step 3: Submit Removal Request
+
+1. Enter the URL of your record
+2. Complete the CAPTCHA verification
+3. Enter your email address
+4. Submit the request
+
+### Step 4: Verify via Email
+
+1. Check your inbox for a confirmation email
+2. Click the verification link
+3. Your removal request is confirmed
+
+### Processing Time
+
+FastPeopleSearch typically removes listings within **24-48 hours**.
+
+## After Removal
+
+- **Check for multiple records** - Search variations of your name
+- **Monitor for re-listing** - Your data may reappear
+- **Remove from other sites** - FastPeopleSearch is just one of many
+
+## Complete Your Privacy Protection
+
+FastPeopleSearch is one of 2,100+ data brokers. GhostMyData removes you from all of them automatically:
+
+- One-click removal from all major sites
+- Continuous monitoring for re-listings
+- Dark web surveillance
+
+[Start your free scan](/register) to see everywhere your data is exposed.
+    `
+  },
+  {
+    slug: "how-to-remove-yourself-from-ussearch",
+    title: "How to Remove Yourself from USSearch (2026 Opt-Out Guide)",
+    description: "Complete guide to removing your personal data from USSearch.com. Step-by-step opt-out instructions with tips for successful removal.",
+    publishedAt: "2026-02-01",
+    author: "GhostMyData Team",
+    category: "Data Broker Removal",
+    tags: ["ussearch", "data broker", "opt-out", "privacy"],
+    readTime: "6 min read",
+    content: `
+## What is USSearch?
+
+USSearch (also known as US Search) is a long-standing people-search and background check company that has been operating since 1993. It's one of the oldest data brokers in the industry.
+
+### Information USSearch Collects:
+
+- Full legal name and aliases
+- Date of birth and age
+- Current and historical addresses
+- Phone numbers
+- Email addresses
+- Criminal records
+- Court records
+- Property records
+- Relatives and associates
+- Marriage and divorce records
+
+## USSearch Privacy Risks
+
+As one of the oldest data brokers, USSearch has:
+
+- **Decades of data** - Historical records going back 30+ years
+- **Extensive networks** - Connected to multiple data sources
+- **Paid services** - People pay for detailed background checks on you
+- **Wide reach** - Used by employers, landlords, and individuals
+
+## How to Remove Yourself from USSearch
+
+### Step 1: Find Your Record
+
+1. Visit USSearch.com
+2. Search for your name and state
+3. Locate your profile in the results
+4. Note down your profile URL
+
+### Step 2: Go to the Opt-Out Page
+
+Navigate to the USSearch opt-out page or look for the privacy/removal link at the bottom of their website.
+
+### Step 3: Submit Your Request
+
+1. Enter your full name
+2. Enter your city and state
+3. Provide your email address
+4. Complete any verification steps
+
+### Step 4: Verify Your Identity
+
+1. Check your email for verification
+2. Click the confirmation link
+3. Your opt-out request is submitted
+
+### Processing Time
+
+USSearch removal typically takes **7-14 days** to complete.
+
+## Important Considerations
+
+- **Multiple records** - You may appear in multiple listings
+- **Associated sites** - USSearch data may appear on partner sites
+- **Re-listing** - Data can reappear as databases update
+- **Ongoing monitoring** - Regular checks are recommended
+
+## Comprehensive Data Removal
+
+USSearch is just one of thousands of data brokers. For complete privacy:
+
+- Remove from all major data brokers
+- Monitor for re-listings continuously
+- Reduce your digital footprint
+
+GhostMyData handles all of this automatically.
+
+[Get your free privacy scan](/register) and see your full exposure.
+    `
+  },
+  {
+    slug: "how-to-remove-yourself-from-peoplelooker",
+    title: "How to Remove Yourself from PeopleLooker (2026 Guide)",
+    description: "Step-by-step instructions to opt out of PeopleLooker and remove your personal information. Complete removal guide with tips.",
+    publishedAt: "2026-02-01",
+    author: "GhostMyData Team",
+    category: "Data Broker Removal",
+    tags: ["peoplelooker", "data broker", "opt-out", "privacy"],
+    readTime: "5 min read",
+    content: `
+## What is PeopleLooker?
+
+PeopleLooker is a people-search and background check service that compiles personal information from public records and other sources. It offers both free searches and paid detailed reports.
+
+### Data PeopleLooker Collects:
+
+- Full name and known aliases
+- Age and date of birth
+- Current and past addresses
+- Phone numbers
+- Email addresses
+- Criminal records
+- Court records
+- Property ownership
+- Relatives and associates
+- Social media profiles
+
+## Why Remove Yourself from PeopleLooker?
+
+PeopleLooker makes your personal information easily accessible:
+
+- **Background checks** - Used by employers and landlords
+- **Identity verification** - Your data used to verify others
+- **Public access** - Anyone can search for you
+- **Aggregated data** - Combines multiple sources
+
+## How to Remove Yourself from PeopleLooker
+
+### Step 1: Find Your Profile
+
+1. Visit PeopleLooker.com
+2. Search for your name and location
+3. Find your listing in the results
+4. Click to view your profile
+
+### Step 2: Access Opt-Out
+
+1. Look for the opt-out or privacy link
+2. Navigate to their removal request page
+3. Or search "PeopleLooker opt out" for direct link
+
+### Step 3: Submit Removal Request
+
+1. Enter the URL of your profile
+2. Provide your email address
+3. Select the reason for removal
+4. Complete CAPTCHA verification
+5. Submit your request
+
+### Step 4: Email Verification
+
+1. Check your inbox for confirmation email
+2. Click the verification link
+3. Your removal is queued
+
+### Processing Time
+
+PeopleLooker removals typically take **48-72 hours**.
+
+## Tips for Successful Removal
+
+- **Search all name variations** - Maiden name, nicknames, misspellings
+- **Check multiple locations** - Current and past cities
+- **Document your requests** - Keep confirmation emails
+- **Follow up** - Verify removal after processing time
+
+## Beyond PeopleLooker
+
+Your data exists on dozens of similar sites:
+
+- BeenVerified
+- Spokeo
+- Whitepages
+- Intelius
+- And many more...
+
+## Let GhostMyData Handle It
+
+Instead of manually opting out of each site:
+
+- **Automated scanning** of 2,100+ data brokers
+- **One-click removal** requests
+- **Continuous monitoring** for re-listings
+- **Progress tracking** dashboard
+
+[Start with a free scan](/register) to see all sites exposing your data.
+    `
+  },
+  {
     slug: "how-to-remove-yourself-from-radaris",
     title: "How to Remove Yourself from Radaris (2026 Complete Guide)",
     description: "Step-by-step instructions to opt out of Radaris and remove your personal information. Detailed guide with screenshots and tips for successful removal.",
