@@ -1051,20 +1051,6 @@ function SettingsContent() {
             ))}
           </div>
 
-          {/* Refund Request - Only for paid users */}
-          {currentPlan !== "FREE" && (
-            <div className="mt-6 pt-4 border-t border-slate-700">
-              <p className="text-sm text-slate-400">
-                Need a refund? We offer a 30-day money-back guarantee.{" "}
-                <a
-                  href={`mailto:support@ghostmydata.com?subject=Refund%20Request%20-%20${currentPlan}%20Plan&body=Hi%20GhostMyData%20Support%2C%0A%0AI%20would%20like%20to%20request%20a%20refund%20for%20my%20${currentPlan}%20subscription.%0A%0AAccount%20Email%3A%20${encodeURIComponent(email)}%0AReason%20for%20refund%3A%20%0A%0AThank%20you.`}
-                  className="text-emerald-500 hover:text-emerald-400 underline"
-                >
-                  Request a refund
-                </a>
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
 
