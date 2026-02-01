@@ -2,7 +2,7 @@
 
 ## Overview
 
-DataScrub Pro uses 23 AI-powered agents organized into 8 categories to automate privacy protection workflows. Each agent extends a common `BaseAgent` class that provides graceful fallback from AI-powered to rule-based execution.
+DataScrub Pro uses 24 AI-powered agents organized into 8 categories to automate privacy protection workflows. Each agent extends a common `BaseAgent` class that provides graceful fallback from AI-powered to rule-based execution.
 
 ## Quick Start
 
@@ -48,12 +48,13 @@ const health = await orchestrator.getSystemHealth();
 | **ComplianceAgent** | HYBRID | GDPR/CCPA tracking, legal templates, regulatory monitoring |
 | **SecurityAgent** | HYBRID | Threat detection, suspicious activity, breach notifications |
 
-### User Experience (2 Agents)
+### User Experience (3 Agents)
 
 | Agent | Mode | Purpose |
 |-------|------|---------|
 | **ContentAgent** | AI | Blog posts, help articles, marketing copy, SEO content |
 | **OnboardingAgent** | HYBRID | Personalized onboarding, first-scan guidance, feature recommendations |
+| **SEOAgent** | HYBRID | Technical SEO audits, content analysis, blog ideas, SEO reports |
 
 ### Intelligence (3 Agents)
 

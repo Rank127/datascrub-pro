@@ -207,7 +207,7 @@ export {
 } from "./security-agent";
 
 // ============================================================================
-// USER EXPERIENCE AGENTS (2)
+// USER EXPERIENCE AGENTS (3)
 // ============================================================================
 
 export {
@@ -223,6 +223,14 @@ export {
   personalizeOnboarding,
   trackOnboardingProgress,
 } from "./onboarding-agent";
+
+export {
+  getSEOAgent,
+  SEOAgent,
+  runSEOAudit,
+  runFullSEOReport,
+  getBlogIdeas,
+} from "./seo-agent";
 
 // ============================================================================
 // GROWTH & REVENUE AGENTS (3)

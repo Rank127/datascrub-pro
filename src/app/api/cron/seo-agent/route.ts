@@ -1,21 +1,16 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { runFullAudit } from "@/lib/seo-agent/technical-audit";
-import { analyzeAllContent } from "@/lib/seo-agent/content-optimizer";
-import { getTopBlogIdeas } from "@/lib/seo-agent/blog-generator";
-import {
-  generateSEOReport,
-  storeReport,
-  formatReportForEmail,
-  formatReportAsJson,
-} from "@/lib/seo-agent/report-generator";
+import { getSEOAgent, runFullSEOReport } from "@/lib/agents/seo-agent";
+import { createAgentContext } from "@/lib/agents/base-agent";
+import { InvocationTypes } from "@/lib/agents/types";
+import { nanoid } from "nanoid";
 
 // Initialize Resend for email notifications
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 async function sendSEOAlertEmail(to: string, subject: string, content: string): Promise<boolean> {
   if (!resend) {
-    console.log("[SEO Agent] Email service not configured, skipping email");
+    console.log("[SEO Agent Cron] Email service not configured, skipping email");
     return false;
   }
 
@@ -28,58 +23,18 @@ async function sendSEOAlertEmail(to: string, subject: string, content: string): 
     });
 
     if (error) {
-      console.error("[SEO Agent] Email error:", error);
+      console.error("[SEO Agent Cron] Email error:", error);
       return false;
     }
     return true;
   } catch (err) {
-    console.error("[SEO Agent] Failed to send email:", err);
+    console.error("[SEO Agent Cron] Failed to send email:", err);
     return false;
   }
 }
 
 // Verify cron secret to prevent unauthorized access
 const CRON_SECRET = process.env.CRON_SECRET;
-
-// Pages to audit - prioritized by SEO importance
-const PAGES_TO_AUDIT = [
-  // High priority - main pages
-  "/",
-  "/pricing",
-  "/how-it-works",
-  "/blog",
-  // Comparison pages (high-value keywords)
-  "/compare",
-  "/compare/deleteme",
-  "/compare/incogni",
-  "/compare/optery",
-  "/compare/kanary",
-  "/compare/privacy-bee",
-  // Data broker removal guides (high SEO value)
-  "/remove-from",
-  "/remove-from/spokeo",
-  "/remove-from/whitepages",
-  "/remove-from/beenverified",
-  "/remove-from/radaris",
-  "/remove-from/intelius",
-  "/remove-from/truepeoplesearch",
-  "/remove-from/fastpeoplesearch",
-  "/remove-from/mylife",
-  "/remove-from/ussearch",
-  "/remove-from/peoplefinder",
-  // Location-based landing pages
-  "/data-removal-california",
-  "/data-removal-texas",
-  "/data-removal-new-york",
-  "/data-removal-florida",
-  // Resource pages
-  "/resources",
-  "/testimonials",
-  // Legal pages (lower priority)
-  "/privacy",
-  "/terms",
-  "/security",
-];
 
 export async function GET(request: Request) {
   try {
@@ -89,55 +44,30 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("[SEO Agent] Starting automated SEO optimization run...");
+    console.log("[SEO Agent Cron] Starting automated SEO optimization run...");
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com";
+    // Use the new SEO Agent
+    const result = await runFullSEOReport();
 
-    // Step 1: Run technical SEO audit
-    console.log("[SEO Agent] Running technical audit...");
-    const technicalAudit = await runFullAudit(baseUrl);
-
-    // Step 2: Analyze content
-    console.log("[SEO Agent] Analyzing content...");
-    const contentAnalysis = await analyzeAllContent(baseUrl, PAGES_TO_AUDIT);
-
-    // Step 3: Generate blog ideas
-    console.log("[SEO Agent] Generating blog ideas...");
-    const blogIdeasRaw = await getTopBlogIdeas(10);
-    const blogIdeas = blogIdeasRaw.map(idea => ({
-      title: idea.title,
-      slug: idea.slug,
-      keywords: idea.keywords,
-      priority: idea.priority,
-      category: idea.category,
-    }));
-
-    // Step 4: Generate comprehensive report
-    console.log("[SEO Agent] Generating report...");
-    const report = await generateSEOReport(technicalAudit, contentAnalysis, blogIdeas);
-
-    // Step 5: Store report
-    await storeReport(report);
-
-    // Step 6: Send email notification if score is low or there are critical issues
+    // Send email if score is low or there are critical issues
     const adminEmail = process.env.ADMIN_EMAILS?.split(",")[0];
-    if (adminEmail && (report.overallScore < 70 || report.criticalIssues.length > 0)) {
-      console.log("[SEO Agent] Sending alert email...");
+    if (adminEmail && (result.report.overallScore < 70 || result.report.criticalIssues.length > 0)) {
+      console.log("[SEO Agent Cron] Sending alert email...");
       await sendSEOAlertEmail(
         adminEmail,
-        `GhostMyData SEO Alert - Score: ${report.overallScore}/100`,
-        formatReportForEmail(report)
+        `GhostMyData SEO Alert - Score: ${result.report.overallScore}/100`,
+        result.emailContent || ""
       );
     }
 
-    console.log(`[SEO Agent] Run complete. Score: ${report.overallScore}/100`);
+    console.log(`[SEO Agent Cron] Run complete. Score: ${result.report.overallScore}/100`);
 
     return NextResponse.json({
       success: true,
-      report: formatReportAsJson(report),
+      report: result.formatted,
     });
   } catch (error) {
-    console.error("[SEO Agent] Error:", error);
+    console.error("[SEO Agent Cron] Error:", error);
     return NextResponse.json(
       {
         success: false,
@@ -159,77 +89,56 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => ({}));
     const {
-      runTechnicalAudit = true,
-      runContentAnalysis = true,
-      generateBlogIdeas = true,
+      capability = "full-report",
       sendEmailReport = false,
     } = body;
 
-    console.log("[SEO Agent] Starting manual SEO run with options:", {
-      runTechnicalAudit,
-      runContentAnalysis,
-      generateBlogIdeas,
+    console.log("[SEO Agent Cron] Starting manual SEO run with options:", {
+      capability,
       sendEmailReport,
     });
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com";
-    const results: Record<string, unknown> = {};
+    const agent = getSEOAgent();
+    const context = createAgentContext({
+      requestId: nanoid(),
+      invocationType: InvocationTypes.ON_DEMAND,
+    });
 
-    // Technical audit
-    if (runTechnicalAudit) {
-      console.log("[SEO Agent] Running technical audit...");
-      results.technicalAudit = await runFullAudit(baseUrl);
-    }
+    const result = await agent.execute(capability, body, context);
 
-    // Content analysis
-    if (runContentAnalysis) {
-      console.log("[SEO Agent] Analyzing content...");
-      results.contentAnalysis = await analyzeAllContent(baseUrl, PAGES_TO_AUDIT);
-    }
-
-    // Blog ideas
-    if (generateBlogIdeas) {
-      console.log("[SEO Agent] Generating blog ideas...");
-      results.blogIdeas = await getTopBlogIdeas(10);
-    }
-
-    // Generate and store report if we have audit data
-    if (runTechnicalAudit && runContentAnalysis) {
-      const blogIdeasForReport = generateBlogIdeas
-        ? (results.blogIdeas as Array<{ title: string; slug: string; keywords: string[]; priority: number; category: string }>)
-        : [];
-
-      const report = await generateSEOReport(
-        results.technicalAudit as Parameters<typeof generateSEOReport>[0],
-        results.contentAnalysis as Parameters<typeof generateSEOReport>[1],
-        blogIdeasForReport
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error?.message || "Agent execution failed",
+        },
+        { status: 500 }
       );
+    }
 
-      await storeReport(report);
-      results.report = formatReportAsJson(report);
-
-      // Send email if requested
-      if (sendEmailReport) {
-        const adminEmail = process.env.ADMIN_EMAILS?.split(",")[0];
-        if (adminEmail) {
-          const emailSent = await sendSEOAlertEmail(
-            adminEmail,
-            `GhostMyData SEO Report - Score: ${report.overallScore}/100`,
-            formatReportForEmail(report)
-          );
-          results.emailSent = emailSent;
-        }
+    // Send email if requested and we have report data
+    if (sendEmailReport && capability === "full-report") {
+      const adminEmail = process.env.ADMIN_EMAILS?.split(",")[0];
+      if (adminEmail && result.data) {
+        const reportData = result.data as { report: { overallScore: number }; emailContent?: string };
+        const emailSent = await sendSEOAlertEmail(
+          adminEmail,
+          `GhostMyData SEO Report - Score: ${reportData.report.overallScore}/100`,
+          reportData.emailContent || ""
+        );
+        (result.data as Record<string, unknown>).emailSent = emailSent;
       }
     }
 
-    console.log("[SEO Agent] Manual run complete");
+    console.log("[SEO Agent Cron] Manual run complete");
 
     return NextResponse.json({
       success: true,
-      results,
+      result: result.data,
+      metadata: result.metadata,
     });
   } catch (error) {
-    console.error("[SEO Agent] Error:", error);
+    console.error("[SEO Agent Cron] Error:", error);
     return NextResponse.json(
       {
         success: false,
