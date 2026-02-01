@@ -445,3 +445,126 @@ model CronLog {
   @@index([createdAt])
   @@index([jobName, createdAt])
 }
+
+// ==========================================
+// AGENT SYSTEM
+// ==========================================
+
+model AgentExecution {
+  id                String    @id @default(cuid())
+  agentId           String    // Agent identifier (e.g., "removal-agent", "scanning-agent")
+  capability        String    // Capability executed (e.g., "batch-process", "verify-removal")
+  requestId         String    @unique // Unique request ID for tracing
+  invocationType    String    // CRON, ON_DEMAND, EVENT, WEBHOOK, MANUAL
+  status            String    // PENDING, RUNNING, COMPLETED, FAILED, CANCELLED, TIMEOUT
+  input             String?   // JSON stringified input
+  output            String?   // JSON stringified output
+  error             String?   // JSON stringified error if failed
+  confidence        Float?    // AI confidence score (0-1)
+  needsHumanReview  Boolean   @default(false)
+  startedAt         DateTime
+  completedAt       DateTime?
+  duration          Int?      // Duration in milliseconds
+  tokensUsed        Int?      // AI tokens consumed
+  model             String?   // AI model used (e.g., "claude-sonnet-4-20250514")
+  usedFallback      Boolean   @default(false) // Whether rule-based fallback was used
+  parentRequestId   String?   // For chained/workflow executions
+  correlationId     String?   // For distributed tracing
+  createdAt         DateTime  @default(now())
+
+  @@index([agentId])
+  @@index([agentId, createdAt])
+  @@index([status])
+  @@index([invocationType])
+  @@index([parentRequestId])
+  @@index([correlationId])
+  @@index([createdAt])
+}
+
+model AgentHealth {
+  id                    String    @id @default(cuid())
+  agentId               String    @unique // Agent identifier
+  status                String    // HEALTHY, DEGRADED, UNHEALTHY, UNKNOWN
+  lastRun               DateTime?
+  lastSuccess           DateTime?
+  lastFailure           DateTime?
+  consecutiveFailures   Int       @default(0)
+  successRate24h        Float?    // Success rate over last 24 hours
+  avgExecutionTime      Int?      // Average execution time in ms
+  aiAvailable           Boolean   @default(true)
+  errorMessage          String?   // Current error message if unhealthy
+  executions24h         Int       @default(0)
+  successes24h          Int       @default(0)
+  failures24h           Int       @default(0)
+  tokensUsed24h         Int       @default(0)
+  estimatedCost24h      Float     @default(0)
+  avgConfidence         Float?    // Average AI confidence score
+  humanReviewRate       Float?    // Rate of results needing human review
+  updatedAt             DateTime  @updatedAt
+  createdAt             DateTime  @default(now())
+
+  @@index([status])
+  @@index([lastRun])
+}
+
+model AgentConfig {
+  id              String   @id @default(cuid())
+  agentId         String   @unique // Agent identifier
+  enabled         Boolean  @default(true)
+  model           String?  // AI model override
+  maxTokens       Int?     // Max tokens per request
+  temperature     Float?   // AI temperature setting
+  rateLimits      String?  // JSON rate limit config
+  retryConfig     String?  // JSON retry config
+  features        String?  // JSON feature flags
+  customConfig    String?  // JSON custom configuration
+  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
+
+  @@index([enabled])
+}
+
+model AgentEvent {
+  id              String   @id @default(cuid())
+  eventId         String   @unique // Unique event ID
+  type            String   // agent.started, agent.completed, agent.failed, etc.
+  sourceAgentId   String   // Agent that emitted the event
+  targetAgentId   String?  // Target agent if applicable
+  payload         String?  // JSON event payload
+  correlationId   String?  // For tracing related events
+  timestamp       DateTime @default(now())
+  processed       Boolean  @default(false)
+  processedAt     DateTime?
+
+  @@index([type])
+  @@index([sourceAgentId])
+  @@index([targetAgentId])
+  @@index([correlationId])
+  @@index([timestamp])
+  @@index([processed])
+}
+
+model WorkflowExecution {
+  id              String    @id @default(cuid())
+  workflowId      String    // Workflow identifier
+  requestId       String    @unique // Unique request ID
+  status          String    // RUNNING, COMPLETED, FAILED, CANCELLED
+  currentStep     Int       @default(0)
+  totalSteps      Int
+  stepResults     String?   // JSON map of step results
+  input           String?   // JSON input data
+  output          String?   // JSON final output
+  error           String?   // Error message if failed
+  startedAt       DateTime
+  completedAt     DateTime?
+  duration        Int?      // Total duration in milliseconds
+  tokensUsed      Int       @default(0)
+  agentsInvoked   Int       @default(0)
+  usedFallbacks   Boolean   @default(false)
+  executionPath   String?   // JSON array of executed step IDs
+  createdAt       DateTime  @default(now())
+
+  @@index([workflowId])
+  @@index([status])
+  @@index([createdAt])
+}
