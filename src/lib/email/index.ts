@@ -1,9 +1,17 @@
 import { Resend } from "resend";
 import { prisma } from "@/lib/db";
 
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
+// Lazy-initialize Resend client to ensure env vars are loaded
+let _resend: Resend | null = null;
+function getResendClient(): Resend | null {
+  if (_resend === null && process.env.RESEND_API_KEY) {
+    _resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return _resend;
+}
+
+// For backwards compatibility
+const resend = null as Resend | null; // Will use getResendClient() instead
 
 const APP_NAME = (process.env.NEXT_PUBLIC_APP_NAME || "GhostMyData").replace(/[\r\n]/g, "").trim();
 
@@ -134,7 +142,8 @@ async function sendEmail(
 
   const { skipQuotaCheck = false, queueIfExceeded = true, emailType, userId, priority, context } = options;
 
-  if (!resend) {
+  const client = getResendClient();
+  if (!client) {
     console.warn("Email service not configured - RESEND_API_KEY missing");
     return { success: false, error: "Email service not configured" };
   }
@@ -152,7 +161,7 @@ async function sendEmail(
   }
 
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
       subject,
