@@ -262,32 +262,32 @@ Your privacy is worth protecting. We make it easy and affordable. Join thousands
 export const securityPage: PageContent = {
   meta: {
     title: "Security Practices | GhostMyData",
-    description: "See how GhostMyData keeps your data safe. We use strong encryption. Your security is our priority.",
-    keywords: ["data security", "privacy protection", "encryption", "secure data removal"],
+    description: "See how GhostMyData keeps your data safe. We use strong encryption for our data removal service. Your privacy protection is our priority.",
+    keywords: ["data security", "privacy protection", "encryption", "secure data removal", "data removal service"],
   },
   sections: [
     {
       id: "hero",
       type: "hero",
       title: "Security at GhostMyData",
-      content: `We keep your data safe. This is our core promise. We use strong tools to guard your info. You can trust us to do this right.
+      content: `Our data removal service keeps your info safe. This is our core promise. We use strong tools to guard your data. You can trust us to do this right.
 
-Good security makes privacy work. One needs the other. We put a lot of care into this.`
+Good security makes privacy protection work. One needs the other. We put a lot of care into keeping your data safe. When you remove personal information with us, it stays protected.`
     },
     {
       id: "encryption",
       type: "content",
       title: "How We Lock Your Data",
-      content: `We lock all data when it moves and when it sits. Your info stays safe at all times.
+      content: `Our data removal service locks all data when it moves and when it sits. Your info stays safe at all times. This is key to privacy protection.
 
 **Data in Motion**
-We use TLS 1.3 for all links. This is the best lock for data in motion. No one can grab your data as it moves.
+We use TLS 1.3 for all links. This is the best lock for data in motion. No one can grab your data as it moves. When we remove personal information for you, it travels safely.
 
 **Data at Rest**
 Stored data uses AES-256. Banks use this same lock. If someone got to our drives, they still can't read it. We swap out keys often to stay safe.
 
 **Full Coverage**
-From the time you type to when we store it, locks guard your data. There are no weak spots. Your details stay safe the whole way.`
+From the time you type to when we store it, locks guard your data. There are no weak spots. Your details stay safe the whole way. Our data broker removal process is fully encrypted.`
     },
     {
       id: "infrastructure",
@@ -381,17 +381,17 @@ Let us know if something seems wrong. Security experts can report bugs to us. We
 export const privacyPage: PageContent = {
   meta: {
     title: "Privacy Policy | GhostMyData",
-    description: "See how GhostMyData handles your data. We keep it safe and private. Read our simple privacy policy.",
-    keywords: ["privacy policy", "data protection", "personal information", "privacy rights"],
+    description: "See how GhostMyData handles your data. Our data removal service keeps it safe. Read our simple privacy policy for privacy protection details.",
+    keywords: ["privacy policy", "data protection", "personal information", "privacy rights", "data removal service"],
   },
   sections: [
     {
       id: "intro",
       type: "hero",
       title: "Privacy Policy",
-      content: `Privacy is why we exist. We remove your data from the web. We guard your privacy in all we do. This policy is clear and simple.
+      content: `Privacy is why our data removal service exists. We remove personal information from the web. We guard your privacy protection in all we do. This policy is clear and simple.
 
-You should know how we handle your data. We tell you what we gather. We tell you how we use it. We tell you how we keep it safe.`
+You should know how we handle your data. We tell you what we gather. We tell you how we use it. We tell you how we keep it safe. Our data broker removal process respects your rights.`
     },
     {
       id: "commitment",

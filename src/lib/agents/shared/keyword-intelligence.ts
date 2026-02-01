@@ -2,12 +2,12 @@
  * Shared Keyword Intelligence Store
  *
  * Central store for keyword data discovered by SEO agent.
+ * Uses PostgreSQL database for persistence on serverless (Vercel).
  * Other agents (Content Agent, Content Optimizer) use this
  * to improve content with the latest keyword insights.
  */
 
-import * as fs from "fs/promises";
-import * as path from "path";
+import { prisma } from "@/lib/db";
 import { TARGET_KEYWORDS } from "@/content/pages";
 
 // ============================================================================
@@ -44,20 +44,79 @@ export interface KeywordIntelligence {
 }
 
 // ============================================================================
-// STORAGE
+// DATABASE OPERATIONS
 // ============================================================================
 
-const STORE_FILE = path.join(process.cwd(), "keyword-intelligence.json");
-
 /**
- * Load keyword intelligence from disk
+ * Load keyword intelligence from database
  */
 export async function loadKeywordIntelligence(): Promise<KeywordIntelligence> {
   try {
-    const data = await fs.readFile(STORE_FILE, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    // Return default structure if file doesn't exist
+    // Get all keywords from database
+    const keywords = await prisma.keywordIntelligence.findMany({
+      orderBy: { relevance: "desc" },
+    });
+
+    // Convert to DiscoveredKeyword format
+    const discoveredKeywords: DiscoveredKeyword[] = keywords.map(k => ({
+      keyword: k.keyword,
+      source: k.source as DiscoveredKeyword["source"],
+      relevance: k.relevance,
+      searchVolume: k.searchVolume as DiscoveredKeyword["searchVolume"],
+      difficulty: k.difficulty as DiscoveredKeyword["difficulty"],
+      firstSeen: k.firstSeen.toISOString(),
+      lastSeen: k.lastSeen.toISOString(),
+      timesFound: k.timesFound,
+    }));
+
+    // Get competitor keywords
+    const competitorKeywords = keywords.filter(k => k.source === "competitor" && k.competitor);
+    const competitorMap = new Map<string, string[]>();
+    for (const k of competitorKeywords) {
+      if (k.competitor) {
+        const existing = competitorMap.get(k.competitor) || [];
+        existing.push(k.keyword);
+        competitorMap.set(k.competitor, existing);
+      }
+    }
+
+    const competitorInsights: CompetitorInsight[] = Array.from(competitorMap.entries()).map(
+      ([competitor, keywords]) => ({
+        competitor,
+        domain: "",
+        topKeywords: keywords.slice(0, 20),
+        lastAnalyzed: new Date().toISOString(),
+      })
+    );
+
+    // Get keyword gaps (high relevance but not targeted)
+    const keywordGaps = keywords
+      .filter(k => k.relevance >= 50 && !k.isTargeted)
+      .map(k => k.keyword)
+      .slice(0, 30);
+
+    // Get suggested targets
+    const suggestedTargets = keywords
+      .filter(k => k.relevance >= 60 && !k.isTargeted)
+      .map(k => k.keyword)
+      .slice(0, 20);
+
+    // Get unique sources
+    const searchEnginesQueried = [...new Set(keywords.map(k => k.source))];
+
+    return {
+      lastUpdated: new Date().toISOString(),
+      baseKeywords: TARGET_KEYWORDS,
+      discoveredKeywords,
+      competitorInsights,
+      keywordGaps,
+      suggestedTargets,
+      searchEnginesQueried,
+      totalKeywordsDiscovered: keywords.length,
+    };
+  } catch (error) {
+    console.error("[KeywordIntelligence] Failed to load from database:", error);
+    // Return default structure if database fails
     return {
       lastUpdated: new Date().toISOString(),
       baseKeywords: TARGET_KEYWORDS,
@@ -72,21 +131,7 @@ export async function loadKeywordIntelligence(): Promise<KeywordIntelligence> {
 }
 
 /**
- * Save keyword intelligence to disk
- */
-export async function saveKeywordIntelligence(
-  intelligence: KeywordIntelligence
-): Promise<void> {
-  await fs.writeFile(STORE_FILE, JSON.stringify(intelligence, null, 2));
-  console.log(`[KeywordIntelligence] Saved ${intelligence.totalKeywordsDiscovered} keywords to store`);
-}
-
-// ============================================================================
-// KEYWORD MANAGEMENT
-// ============================================================================
-
-/**
- * Merge new keyword research results into the store
+ * Merge new keyword research results into the database
  */
 export async function updateFromKeywordResearch(research: {
   discoveredKeywords: Array<{
@@ -102,87 +147,89 @@ export async function updateFromKeywordResearch(research: {
   suggestedNewTargets: string[];
   searchEnginesUsed: string[];
 }): Promise<KeywordIntelligence> {
-  const current = await loadKeywordIntelligence();
-  const now = new Date().toISOString();
+  const now = new Date();
+  const startTime = Date.now();
 
-  // Create a map of existing keywords for quick lookup
-  const existingMap = new Map<string, DiscoveredKeyword>();
-  for (const kw of current.discoveredKeywords) {
-    existingMap.set(kw.keyword.toLowerCase(), kw);
-  }
-
-  // Merge discovered keywords
-  for (const newKw of research.discoveredKeywords) {
-    const key = newKw.keyword.toLowerCase();
-    const existing = existingMap.get(key);
-
-    if (existing) {
-      // Update existing keyword
-      existing.lastSeen = now;
-      existing.timesFound += 1;
-      existing.relevance = Math.max(existing.relevance, newKw.relevance);
-    } else {
-      // Add new keyword
-      existingMap.set(key, {
-        keyword: newKw.keyword,
-        source: newKw.source as DiscoveredKeyword["source"],
-        relevance: newKw.relevance,
-        firstSeen: now,
-        lastSeen: now,
-        timesFound: 1,
+  try {
+    // Upsert discovered keywords
+    for (const kw of research.discoveredKeywords) {
+      await prisma.keywordIntelligence.upsert({
+        where: { keyword: kw.keyword.toLowerCase() },
+        update: {
+          lastSeen: now,
+          relevance: Math.max(kw.relevance, 0),
+          timesFound: { increment: 1 },
+        },
+        create: {
+          keyword: kw.keyword.toLowerCase(),
+          source: kw.source,
+          relevance: kw.relevance,
+          timesFound: 1,
+          firstSeen: now,
+          lastSeen: now,
+        },
       });
     }
-  }
 
-  // Update competitor insights
-  const competitorMap = new Map<string, CompetitorInsight>();
-  for (const insight of current.competitorInsights) {
-    competitorMap.set(insight.competitor, insight);
-  }
-
-  // Group competitor keywords
-  const competitorKeywordMap = new Map<string, string[]>();
-  for (const ck of research.competitorKeywords) {
-    const keywords = competitorKeywordMap.get(ck.competitor) || [];
-    if (!keywords.includes(ck.keyword)) {
-      keywords.push(ck.keyword);
-    }
-    competitorKeywordMap.set(ck.competitor, keywords);
-  }
-
-  // Update competitor insights
-  for (const [competitor, keywords] of competitorKeywordMap) {
-    const existing = competitorMap.get(competitor);
-    if (existing) {
-      existing.topKeywords = [...new Set([...existing.topKeywords, ...keywords])].slice(0, 20);
-      existing.lastAnalyzed = now;
-    } else {
-      competitorMap.set(competitor, {
-        competitor,
-        domain: "", // Will be filled in later if needed
-        topKeywords: keywords.slice(0, 20),
-        lastAnalyzed: now,
+    // Upsert competitor keywords
+    for (const ck of research.competitorKeywords) {
+      await prisma.keywordIntelligence.upsert({
+        where: { keyword: ck.keyword.toLowerCase() },
+        update: {
+          lastSeen: now,
+          competitor: ck.competitor,
+          timesFound: { increment: 1 },
+        },
+        create: {
+          keyword: ck.keyword.toLowerCase(),
+          source: "competitor",
+          relevance: 50, // Default relevance for competitor keywords
+          competitor: ck.competitor,
+          timesFound: 1,
+          firstSeen: now,
+          lastSeen: now,
+        },
       });
     }
+
+    // Log the research run
+    await prisma.keywordResearchRun.create({
+      data: {
+        searchEnginesUsed: JSON.stringify(research.searchEnginesUsed),
+        keywordsDiscovered: research.discoveredKeywords.length,
+        keywordGaps: research.keywordGaps.length,
+        competitorsAnalyzed: new Set(research.competitorKeywords.map(k => k.competitor)).size,
+        duration: Date.now() - startTime,
+        status: "COMPLETED",
+      },
+    });
+
+    console.log(`[KeywordIntelligence] Saved ${research.discoveredKeywords.length} keywords to database`);
+
+    // Return updated intelligence
+    return loadKeywordIntelligence();
+  } catch (error) {
+    console.error("[KeywordIntelligence] Failed to save to database:", error);
+
+    // Log failed run
+    try {
+      await prisma.keywordResearchRun.create({
+        data: {
+          searchEnginesUsed: JSON.stringify(research.searchEnginesUsed),
+          keywordsDiscovered: 0,
+          keywordGaps: 0,
+          competitorsAnalyzed: 0,
+          duration: Date.now() - startTime,
+          status: "FAILED",
+          error: error instanceof Error ? error.message : "Unknown error",
+        },
+      });
+    } catch {
+      // Ignore logging failure
+    }
+
+    throw error;
   }
-
-  // Build updated intelligence
-  const discoveredKeywords = Array.from(existingMap.values())
-    .sort((a, b) => b.relevance - a.relevance);
-
-  const updated: KeywordIntelligence = {
-    lastUpdated: now,
-    baseKeywords: current.baseKeywords,
-    discoveredKeywords,
-    competitorInsights: Array.from(competitorMap.values()),
-    keywordGaps: [...new Set([...current.keywordGaps, ...research.keywordGaps])].slice(0, 30),
-    suggestedTargets: [...new Set([...research.suggestedNewTargets, ...current.suggestedTargets])].slice(0, 20),
-    searchEnginesQueried: [...new Set([...current.searchEnginesQueried, ...research.searchEnginesUsed])],
-    totalKeywordsDiscovered: discoveredKeywords.length,
-  };
-
-  await saveKeywordIntelligence(updated);
-  return updated;
 }
 
 // ============================================================================
@@ -194,21 +241,21 @@ export async function updateFromKeywordResearch(research: {
  * Combines base keywords with top discovered keywords
  */
 export async function getOptimizationKeywords(limit = 10): Promise<string[]> {
-  const intelligence = await loadKeywordIntelligence();
-
   // Start with base keywords
-  const keywords = [...intelligence.baseKeywords];
+  const keywords = [...TARGET_KEYWORDS];
 
-  // Add top discovered keywords by relevance
-  const topDiscovered = intelligence.discoveredKeywords
-    .filter(kw => kw.relevance >= 50)
-    .slice(0, limit)
-    .map(kw => kw.keyword);
+  try {
+    // Add top discovered keywords by relevance
+    const topDiscovered = await prisma.keywordIntelligence.findMany({
+      where: { relevance: { gte: 50 } },
+      orderBy: { relevance: "desc" },
+      take: limit,
+    });
 
-  keywords.push(...topDiscovered);
-
-  // Add suggested targets
-  keywords.push(...intelligence.suggestedTargets.slice(0, 5));
+    keywords.push(...topDiscovered.map(k => k.keyword));
+  } catch (error) {
+    console.error("[KeywordIntelligence] Failed to get keywords from DB:", error);
+  }
 
   // Deduplicate and return
   return [...new Set(keywords)].slice(0, limit + 5);
@@ -218,16 +265,52 @@ export async function getOptimizationKeywords(limit = 10): Promise<string[]> {
  * Get keyword gaps - valuable keywords we should be targeting
  */
 export async function getKeywordGaps(): Promise<string[]> {
-  const intelligence = await loadKeywordIntelligence();
-  return intelligence.keywordGaps;
+  try {
+    const gaps = await prisma.keywordIntelligence.findMany({
+      where: {
+        relevance: { gte: 50 },
+        isTargeted: false,
+      },
+      orderBy: { relevance: "desc" },
+      take: 30,
+    });
+    return gaps.map(k => k.keyword);
+  } catch {
+    return [];
+  }
 }
 
 /**
  * Get competitor insights
  */
 export async function getCompetitorKeywords(): Promise<CompetitorInsight[]> {
-  const intelligence = await loadKeywordIntelligence();
-  return intelligence.competitorInsights;
+  try {
+    const competitorKeywords = await prisma.keywordIntelligence.findMany({
+      where: {
+        source: "competitor",
+        competitor: { not: null },
+      },
+      orderBy: { relevance: "desc" },
+    });
+
+    const competitorMap = new Map<string, string[]>();
+    for (const k of competitorKeywords) {
+      if (k.competitor) {
+        const existing = competitorMap.get(k.competitor) || [];
+        existing.push(k.keyword);
+        competitorMap.set(k.competitor, existing);
+      }
+    }
+
+    return Array.from(competitorMap.entries()).map(([competitor, keywords]) => ({
+      competitor,
+      domain: "",
+      topKeywords: keywords.slice(0, 20),
+      lastAnalyzed: new Date().toISOString(),
+    }));
+  } catch {
+    return [];
+  }
 }
 
 /**
@@ -236,41 +319,84 @@ export async function getCompetitorKeywords(): Promise<CompetitorInsight[]> {
 export async function getDiscoveredKeywords(
   minRelevance = 40
 ): Promise<DiscoveredKeyword[]> {
-  const intelligence = await loadKeywordIntelligence();
-  return intelligence.discoveredKeywords.filter(kw => kw.relevance >= minRelevance);
+  try {
+    const keywords = await prisma.keywordIntelligence.findMany({
+      where: { relevance: { gte: minRelevance } },
+      orderBy: { relevance: "desc" },
+    });
+
+    return keywords.map(k => ({
+      keyword: k.keyword,
+      source: k.source as DiscoveredKeyword["source"],
+      relevance: k.relevance,
+      searchVolume: k.searchVolume as DiscoveredKeyword["searchVolume"],
+      difficulty: k.difficulty as DiscoveredKeyword["difficulty"],
+      firstSeen: k.firstSeen.toISOString(),
+      lastSeen: k.lastSeen.toISOString(),
+      timesFound: k.timesFound,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 /**
  * Check if a keyword is already being targeted
  */
 export async function isKeywordTargeted(keyword: string): Promise<boolean> {
-  const intelligence = await loadKeywordIntelligence();
   const lowerKw = keyword.toLowerCase();
 
   // Check base keywords
-  if (intelligence.baseKeywords.some(k => k.toLowerCase() === lowerKw)) {
+  if (TARGET_KEYWORDS.some(k => k.toLowerCase() === lowerKw)) {
     return true;
   }
 
-  // Check if it's in the top discovered keywords that we're using
-  const topDiscovered = intelligence.discoveredKeywords
-    .filter(kw => kw.relevance >= 60)
-    .slice(0, 10)
-    .map(kw => kw.keyword.toLowerCase());
-
-  return topDiscovered.includes(lowerKw);
+  try {
+    const kw = await prisma.keywordIntelligence.findUnique({
+      where: { keyword: lowerKw },
+    });
+    return kw?.isTargeted ?? false;
+  } catch {
+    return false;
+  }
 }
 
 /**
- * Add a manual keyword to the base list
+ * Mark a keyword as targeted
  */
-export async function addManualKeyword(keyword: string): Promise<void> {
-  const intelligence = await loadKeywordIntelligence();
+export async function markKeywordAsTargeted(keyword: string): Promise<void> {
+  try {
+    await prisma.keywordIntelligence.update({
+      where: { keyword: keyword.toLowerCase() },
+      data: { isTargeted: true },
+    });
+  } catch {
+    // Keyword may not exist, that's ok
+  }
+}
 
-  if (!intelligence.baseKeywords.includes(keyword)) {
-    intelligence.baseKeywords.push(keyword);
-    intelligence.lastUpdated = new Date().toISOString();
-    await saveKeywordIntelligence(intelligence);
+/**
+ * Add a manual keyword to track
+ */
+export async function addManualKeyword(keyword: string, relevance = 70): Promise<void> {
+  try {
+    await prisma.keywordIntelligence.upsert({
+      where: { keyword: keyword.toLowerCase() },
+      update: {
+        relevance: Math.max(relevance, 70),
+        lastSeen: new Date(),
+      },
+      create: {
+        keyword: keyword.toLowerCase(),
+        source: "manual",
+        relevance,
+        isTargeted: true,
+        firstSeen: new Date(),
+        lastSeen: new Date(),
+      },
+    });
+  } catch (error) {
+    console.error("[KeywordIntelligence] Failed to add manual keyword:", error);
   }
 }
 
@@ -287,18 +413,40 @@ export async function getKeywordStats(): Promise<{
   gaps: number;
   lastUpdated: string;
 }> {
-  const intelligence = await loadKeywordIntelligence();
+  try {
+    const [total, google, bing, ddg, competitor, highRel, gaps, lastRun] = await Promise.all([
+      prisma.keywordIntelligence.count(),
+      prisma.keywordIntelligence.count({ where: { source: "google" } }),
+      prisma.keywordIntelligence.count({ where: { source: "bing" } }),
+      prisma.keywordIntelligence.count({ where: { source: "duckduckgo" } }),
+      prisma.keywordIntelligence.count({ where: { source: "competitor" } }),
+      prisma.keywordIntelligence.count({ where: { relevance: { gte: 70 } } }),
+      prisma.keywordIntelligence.count({ where: { relevance: { gte: 50 }, isTargeted: false } }),
+      prisma.keywordResearchRun.findFirst({ orderBy: { createdAt: "desc" } }),
+    ]);
 
-  return {
-    totalDiscovered: intelligence.totalKeywordsDiscovered,
-    fromGoogle: intelligence.discoveredKeywords.filter(k => k.source === "google").length,
-    fromBing: intelligence.discoveredKeywords.filter(k => k.source === "bing").length,
-    fromDuckDuckGo: intelligence.discoveredKeywords.filter(k => k.source === "duckduckgo").length,
-    fromCompetitors: intelligence.discoveredKeywords.filter(k => k.source === "competitor").length,
-    highRelevance: intelligence.discoveredKeywords.filter(k => k.relevance >= 70).length,
-    gaps: intelligence.keywordGaps.length,
-    lastUpdated: intelligence.lastUpdated,
-  };
+    return {
+      totalDiscovered: total,
+      fromGoogle: google,
+      fromBing: bing,
+      fromDuckDuckGo: ddg,
+      fromCompetitors: competitor,
+      highRelevance: highRel,
+      gaps,
+      lastUpdated: lastRun?.createdAt.toISOString() || new Date().toISOString(),
+    };
+  } catch {
+    return {
+      totalDiscovered: 0,
+      fromGoogle: 0,
+      fromBing: 0,
+      fromDuckDuckGo: 0,
+      fromCompetitors: 0,
+      highRelevance: 0,
+      gaps: 0,
+      lastUpdated: new Date().toISOString(),
+    };
+  }
 }
 
 // ============================================================================
@@ -307,13 +455,13 @@ export async function getKeywordStats(): Promise<{
 
 export default {
   loadKeywordIntelligence,
-  saveKeywordIntelligence,
   updateFromKeywordResearch,
   getOptimizationKeywords,
   getKeywordGaps,
   getCompetitorKeywords,
   getDiscoveredKeywords,
   isKeywordTargeted,
+  markKeywordAsTargeted,
   addManualKeyword,
   getKeywordStats,
 };

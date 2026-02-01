@@ -573,3 +573,43 @@ model WorkflowExecution {
   @@index([status])
   @@index([createdAt])
 }
+
+// ==========================================
+// SEO KEYWORD INTELLIGENCE
+// ==========================================
+
+model KeywordIntelligence {
+  id                  String   @id @default(cuid())
+  keyword             String   @unique
+  source              String   // google, bing, duckduckgo, competitor, manual
+  relevance           Int      // 0-100
+  searchVolume        String?  // high, medium, low
+  difficulty          String?  // easy, medium, hard
+  timesFound          Int      @default(1)
+  competitor          String?  // Which competitor uses this (if source=competitor)
+  isTargeted          Boolean  @default(false) // Are we actively targeting this?
+  firstSeen           DateTime @default(now())
+  lastSeen            DateTime @default(now())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([source])
+  @@index([relevance])
+  @@index([isTargeted])
+  @@index([lastSeen])
+}
+
+model KeywordResearchRun {
+  id                  String   @id @default(cuid())
+  searchEnginesUsed   String   // JSON array of engines used
+  keywordsDiscovered  Int
+  keywordGaps         Int
+  competitorsAnalyzed Int
+  duration            Int      // milliseconds
+  status              String   @default("COMPLETED") // RUNNING, COMPLETED, FAILED
+  error               String?
+  createdAt           DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([status])
+}
