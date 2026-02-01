@@ -1268,12 +1268,11 @@ export async function createAgentTicket(data: AgentTicketData) {
 
 /**
  * Map agent issue types to support ticket types
+ * Valid types: SCAN_ERROR, REMOVAL_FAILED, PAYMENT_ISSUE, ACCOUNT_ISSUE, FEATURE_REQUEST, OTHER
  */
 function mapIssueTypeToTicketType(issueType: string): string {
-  if (issueType.startsWith("seo.")) return "TECHNICAL_ISSUE";
-  if (issueType.startsWith("security.")) return "SECURITY_ISSUE";
-  if (issueType.startsWith("compliance.")) return "COMPLIANCE_ISSUE";
-  if (issueType.startsWith("performance.")) return "TECHNICAL_ISSUE";
+  // All agent-detected issues map to OTHER since they're technical/system issues
+  // The actual issue type is stored in internalNotes for categorization
   return "OTHER";
 }
 

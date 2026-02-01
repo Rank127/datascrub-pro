@@ -49,9 +49,28 @@ export async function GET(request: Request) {
     // Use the new SEO Agent
     const result = await runFullSEOReport();
 
+    // Validate result structure
+    if (!result || !result.report || typeof result.report.overallScore !== 'number') {
+      console.error("[SEO Agent Cron] Invalid result structure:", JSON.stringify(result, null, 2).slice(0, 500));
+      return NextResponse.json(
+        {
+          success: false,
+          error: "SEO report generation returned invalid data",
+          details: result ? {
+            hasReport: !!result.report,
+            hasScore: result.report ? typeof result.report.overallScore : 'no report',
+          } : 'no result',
+        },
+        { status: 500 }
+      );
+    }
+
     // Send email if score is low or there are critical issues
     const adminEmail = process.env.ADMIN_EMAILS?.split(",")[0];
-    if (adminEmail && (result.report.overallScore < 70 || result.report.criticalIssues.length > 0)) {
+    const hasLowScore = result.report.overallScore < 70;
+    const hasCriticalIssues = result.report.criticalIssues && result.report.criticalIssues.length > 0;
+
+    if (adminEmail && (hasLowScore || hasCriticalIssues)) {
       console.log("[SEO Agent Cron] Sending alert email...");
       await sendSEOAlertEmail(
         adminEmail,

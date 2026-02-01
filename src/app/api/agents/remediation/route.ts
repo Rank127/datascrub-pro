@@ -25,6 +25,8 @@ export async function GET(request: Request) {
 
   try {
     const engine = getRemediationEngine();
+    // Ensure engine is initialized with rules
+    await engine.initialize();
     const stats = engine.getStats();
     const activePlans = engine.getActivePlans();
     const recentPlans = engine.getCompletedPlans(20);
@@ -102,6 +104,8 @@ export async function POST(request: Request) {
     const { action, ...params } = body;
 
     const engine = getRemediationEngine();
+    // Ensure engine is initialized with rules
+    await engine.initialize();
 
     switch (action) {
       case "report": {
