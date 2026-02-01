@@ -96,6 +96,39 @@ export async function GET(request: Request) {
           plan: true,
           createdAt: true,
           emailVerified: true,
+          subscription: {
+            select: {
+              plan: true,
+              status: true,
+            },
+          },
+          familyMembership: {
+            select: {
+              role: true,
+              familyGroup: {
+                select: {
+                  owner: {
+                    select: {
+                      email: true,
+                      name: true,
+                      subscription: {
+                        select: { plan: true },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          ownedFamilyGroup: {
+            select: {
+              id: true,
+              _count: {
+                select: { members: true },
+              },
+              maxMembers: true,
+            },
+          },
           _count: {
             select: {
               exposures: true,
@@ -107,8 +140,49 @@ export async function GET(request: Request) {
       prisma.user.count({ where }),
     ]);
 
+    // Calculate effective plan for each user (considering family membership)
+    const usersWithEffectivePlan = users.map(user => {
+      let effectivePlan = user.subscription?.plan || user.plan;
+      let planSource: "DIRECT" | "FAMILY" | "FREE" = effectivePlan === "FREE" ? "FREE" : "DIRECT";
+      let familyRole: string | null = null;
+      let familyOwner: string | null = null;
+
+      // Check if user gets Enterprise through family membership
+      if (effectivePlan !== "ENTERPRISE" && user.familyMembership) {
+        const ownerPlan = user.familyMembership.familyGroup.owner.subscription?.plan;
+        if (ownerPlan === "ENTERPRISE") {
+          effectivePlan = "ENTERPRISE";
+          planSource = "FAMILY";
+          familyRole = user.familyMembership.role;
+          familyOwner = user.familyMembership.familyGroup.owner.email;
+        }
+      }
+
+      // Check if user owns a family group
+      const familyGroupInfo = user.ownedFamilyGroup ? {
+        memberCount: user.ownedFamilyGroup._count.members,
+        maxMembers: user.ownedFamilyGroup.maxMembers,
+      } : null;
+
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        plan: user.plan,
+        effectivePlan,
+        planSource,
+        familyRole,
+        familyOwner,
+        familyGroupInfo,
+        createdAt: user.createdAt,
+        emailVerified: user.emailVerified,
+        _count: user._count,
+      };
+    });
+
     // If exposure stats requested, fetch detailed exposure data per user
-    let usersWithExposureStats = users;
+    let usersWithExposureStats = usersWithEffectivePlan;
     if (includeExposureStats && users.length > 0) {
       const userIds = users.map(u => u.id);
 
@@ -137,7 +211,7 @@ export async function GET(request: Request) {
         }
       });
 
-      usersWithExposureStats = users.map(user => ({
+      usersWithExposureStats = usersWithEffectivePlan.map(user => ({
         ...user,
         exposureStats: statsMap[user.id] || { total: 0, removed: 0, pending: 0, inProgress: 0 },
       }));
