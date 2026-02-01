@@ -56,86 +56,86 @@ export const comparePage: PageContent = {
       id: "hero",
       type: "hero",
       title: "Compare Data Removal Services",
-      content: `Looking for the best data removal service? You're in the right place. We help you understand your options clearly. Making the right choice protects your privacy effectively. Your personal information is valuable. Choose a service that keeps it safe.
+      content: `Looking for the best data removal service? You're in the right place. We help you compare your options. The right choice keeps your data safe. Your info is valuable. Protect it well.
 
-Data brokers collect and sell your information daily. This creates real risks for you and your family. Identity theft affects millions each year. Unwanted contact disrupts your peace. A good data removal service solves these problems quickly.`
+Data brokers sell your info daily. This puts you at risk. Thieves can steal your identity. Scammers can call you. A good data removal service stops this fast.`
     },
     {
       id: "why-compare",
       type: "content",
       title: "Why Compare Before You Choose?",
-      content: `Not all data removal services work the same way. Coverage varies significantly between providers. Some check 50 sites. Others check 200 or more. The difference matters for your protection.
+      content: `Not all services work the same way. Some check 50 sites. Others check 200 or more. More sites means better coverage.
 
-Speed also differs greatly. Some services take weeks to start. Others begin removing your data within hours. Fast action means less exposure time for your personal information.
+Speed matters too. Some services take weeks to start. Others start in hours. Fast action means less risk.
 
-Price is another key factor. Monthly costs range from $10 to $30 or more. Annual plans often save you money. But the cheapest option isn't always the best value.
+Price varies a lot. Plans range from $10 to $30 a month. Annual plans save money. But cheap isn't always best.
 
-Consider what's included in each plan. Some services offer one-time removal only. Others provide continuous monitoring. Ongoing protection catches new exposures before they spread.`
+Check what each plan includes. Some only do one-time removal. Others watch for new data all year. Ongoing checks catch new issues fast.`
     },
     {
       id: "what-to-look-for",
       type: "content",
       title: "Key Features to Look For",
-      content: `When choosing a data removal service, start with coverage. How many data broker sites do they monitor? More coverage means better protection. Look for services covering 200+ sites.
+      content: `Start with coverage. How many sites do they check? More is better. Look for 200+ sites.
 
-Check the removal process next. Is it fully automated or manual? Automated systems work faster and more consistently. They don't miss sites or forget to follow up.
+Check if removal is auto or manual. Auto systems work faster. They don't miss sites. They follow up on time.
 
-Monitoring frequency matters too. Daily monitoring catches new exposures quickly. Weekly or monthly checks let data spread further before removal.
+How often do they check for new data? Daily is best. Weekly lets data spread too long.
 
-Consider the verification process. Good services confirm each removal. They show you proof that your data is gone. This transparency builds trust.
+Do they prove removal? Good services show you proof. They confirm your data is gone.
 
-Look at customer support options. Can you reach someone when you have questions? Email-only support can leave you waiting. Phone or chat support provides faster answers.`
+Can you get help when you need it? Email-only support is slow. Chat or phone is faster.`
     },
     {
       id: "ghostmydata-advantage",
       type: "content",
       title: "The GhostMyData Advantage",
-      content: `GhostMyData offers comprehensive data broker removal. We cover 200+ data broker websites. Our automated system works around the clock to protect you.
+      content: `GhostMyData covers 200+ data broker sites. Our auto system works all day to guard you.
 
-Our process is simple. We scan for your information first. Then we submit removal requests to every site where you appear. We follow up until removal is confirmed.
+Our process is simple. We scan for your info. We send removal requests. We follow up until it's done.
 
-Continuous monitoring catches new exposures fast. Data brokers re-add information constantly. We catch these new listings and remove them again. This is included in every subscription.
+We check for new data all the time. Brokers add new info often. We catch it and remove it again. This comes with every plan.
 
-Our dashboard shows everything clearly. See exactly where your data appeared. Track removal progress in real-time. Get notifications when new exposures are found.
+Our dashboard shows it all. See where your data was. Track removal live. Get alerts for new issues.
 
-We offer transparent pricing with no hidden fees. Monthly and annual plans fit different budgets. Cancel anytime without penalties or hassle.`
+Our pricing is clear. No hidden fees. Monthly and yearly plans. Cancel any time.`
     },
     {
       id: "comparison-factors",
       type: "content",
       title: "How Services Compare",
-      content: `Let's look at how major services stack up:
+      content: `Here's how services stack up:
 
-**Coverage**: GhostMyData covers 200+ sites. Many competitors cover fewer. More coverage means more complete protection for your personal data.
+**Coverage**: We cover 200+ sites. Many others cover fewer. More sites means better protection.
 
-**Speed**: We begin removal within 24 hours of signup. Some services take days to start. Faster action reduces your exposure window.
+**Speed**: We start removal in 24 hours. Some take days. Fast action means less risk.
 
-**Monitoring**: Our daily monitoring catches new exposures quickly. Weekly monitoring lets data spread for days before action.
+**Monitoring**: We check daily. Weekly checks let data spread too long.
 
-**Reporting**: We provide detailed, real-time reports. You always know your protection status. Some services only send monthly summaries.
+**Reporting**: We give live reports. You always know your status. Others only send monthly updates.
 
-**Support**: Our team responds quickly to questions. We offer multiple contact options. Good support matters when you have concerns.
+**Support**: Our team is fast. We offer chat, email, and phone. Good support helps.
 
-**Value**: Our pricing includes all features. No upsells or add-on charges. Everything you need for complete privacy protection.`
+**Value**: Our price includes all features. No extra fees. No upsells.`
     },
     {
       id: "faq",
       type: "faq",
       title: "Frequently Asked Questions",
-      content: `**How long does data removal take?**
-Most removals complete within 2-4 weeks. Some sites process requests faster. A few take longer due to their procedures. We keep you updated throughout the entire process.
+      content: `**How long does removal take?**
+Most removals take 2-4 weeks. Some sites are faster. Some are slower. We keep you updated.
 
-**What information do you need from me?**
-We need your name and contact details to find your data online. This includes current and past addresses, phone numbers, and email addresses. We protect this information with bank-level encryption.
+**What info do you need?**
+We need your name and contact info. This means addresses, phones, and emails. We lock this data with strong encryption.
 
-**Can I cancel my subscription anytime?**
-Yes, you can cancel whenever you want. No long-term contracts lock you in. No cancellation fees apply. You keep protection until your current period ends.
+**Can I cancel anytime?**
+Yes. No long contracts. No cancel fees. You keep access until your period ends.
 
-**What happens if my data reappears?**
-We monitor continuously for re-listings. When data reappears, we submit new removal requests automatically. This ongoing protection is included in your subscription.
+**What if my data comes back?**
+We watch for new data. When it shows up, we remove it again. This is part of your plan.
 
-**Do you guarantee complete removal?**
-We achieve removal from most data broker sites. Some sites have policies we cannot override. We clearly report which sites have been cleared and which remain challenging.`
+**Do you remove all data?**
+We remove from most sites. Some sites have rules we can't change. We tell you which sites are done.`
     }
   ],
   lastUpdated: "2026-02-01",

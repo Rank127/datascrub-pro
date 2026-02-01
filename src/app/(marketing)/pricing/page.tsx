@@ -104,27 +104,42 @@ const faqs = [
   {
     question: "How does the free trial work?",
     answer:
-      "Start with a free scan to see your exposure level. If you decide to upgrade, you'll get a 14-day free trial of the Pro or Enterprise plan with full access to all features.",
+      "Start with a free scan to see your data. Then try Pro or Enterprise free for 14 days. No credit card needed to start.",
   },
   {
     question: "Can I cancel anytime?",
     answer:
-      "Yes, you can cancel your subscription at any time. Your access will continue until the end of your billing period.",
+      "Yes. Cancel any time you want. You keep access until your paid period ends. No fees to cancel.",
   },
   {
     question: "What payment methods do you accept?",
     answer:
-      "We accept all major credit cards (Visa, MasterCard, American Express) and PayPal through our secure payment processor, Stripe.",
+      "We take Visa, MasterCard, and American Express. We also take PayPal. All payments are safe with Stripe.",
   },
   {
     question: "Do you offer refunds?",
     answer:
-      "We offer a 30-day money-back guarantee. If you're not satisfied with our service, contact support for a full refund.",
+      "Yes. We have a 30-day money-back promise. If you're not happy, we refund you. Just ask support.",
   },
   {
-    question: "What's included in the family plan?",
+    question: "What's in the family plan?",
     answer:
-      "The Enterprise family plan allows you to protect up to 5 different people with their own profiles and monitoring. Perfect for protecting your whole household.",
+      "The Enterprise plan covers up to 5 people. Each person gets their own profile. Great for families.",
+  },
+  {
+    question: "How fast does removal work?",
+    answer:
+      "Most sites process requests in 2-4 weeks. Some are faster. We keep you updated on every request.",
+  },
+  {
+    question: "How many sites do you scan?",
+    answer:
+      "We scan 2,100+ data broker sites. This includes Spokeo, WhitePages, and BeenVerified. We also check the dark web.",
+  },
+  {
+    question: "Is my data safe with you?",
+    answer:
+      "Yes. We use bank-grade encryption. We never sell your data. Your info is locked down tight.",
   },
 ];
 
@@ -147,8 +162,8 @@ export default function PricingPage() {
           Simple, Transparent Pricing
         </h1>
         <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-          Choose the plan that fits your needs. Start free, upgrade when you&apos;re
-          ready.
+          Choose the plan that fits your needs. Start free and upgrade when you&apos;re
+          ready. All plans include our data removal service to help delete your data from the web.
         </p>
       </div>
 

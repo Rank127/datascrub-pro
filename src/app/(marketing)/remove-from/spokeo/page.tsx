@@ -95,11 +95,23 @@ const spokeoInfo: BrokerInfo = {
     },
     {
       question: "Is opt-out free?",
-      answer: "Yes. Spokeo opt-out costs nothing. Watch out for scams.",
+      answer: "Yes. Spokeo opt-out costs nothing. Watch out for scams that charge fees.",
     },
     {
       question: "Can I remove someone else?",
-      answer: "No. Spokeo needs email proof. The owner must do it.",
+      answer: "No. Spokeo needs email proof. The owner of the data must do it.",
+    },
+    {
+      question: "What if I don't get the email?",
+      answer: "Check your spam folder. The email comes from Spokeo. If nothing shows up, try again.",
+    },
+    {
+      question: "Why does Spokeo have my data?",
+      answer: "Spokeo pulls data from public records, social media, and other sources. They build profiles on millions of people.",
+    },
+    {
+      question: "Can GhostMyData do this for me?",
+      answer: "Yes. We remove you from Spokeo and 2,100+ other sites. We also monitor for new data and remove it again.",
     },
   ],
   lastUpdated: "January 24, 2026",

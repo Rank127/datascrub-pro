@@ -87,19 +87,31 @@ const whitepagesInfo: BrokerInfo = {
     },
     {
       question: "Can I skip the phone step?",
-      answer: "No, you must verify by phone. GhostMyData can handle this for you without sharing your number directly.",
+      answer: "No, you must verify by phone. GhostMyData can handle this for you without sharing your number.",
     },
     {
       question: "Does this remove WhitePages Premium too?",
-      answer: "No. WhitePages and WhitePages Premium are different. You may need to remove from both.",
+      answer: "No. WhitePages and WhitePages Premium are different. You may need to remove from both sites.",
     },
     {
       question: "How fast is removal?",
-      answer: "Most removals take 24-48 hours. WhitePages is one of the faster sites.",
+      answer: "Most removals take 24-48 hours. WhitePages is one of the faster sites to process requests.",
     },
     {
       question: "Will my data come back?",
       answer: "It can. WhitePages gets new data from public records. Your info may show up again later.",
+    },
+    {
+      question: "What if I have multiple listings?",
+      answer: "Remove each one. You may have listings for old names or old addresses. Check all variations.",
+    },
+    {
+      question: "Is WhitePages removal free?",
+      answer: "Yes. The opt-out process is free. Don't pay for services that claim to do it for you.",
+    },
+    {
+      question: "Can GhostMyData help?",
+      answer: "Yes. We handle WhitePages removal plus 2,100+ other sites. We also watch for new listings.",
     },
   ],
   lastUpdated: "January 24, 2026",

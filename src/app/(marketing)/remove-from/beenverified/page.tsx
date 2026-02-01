@@ -84,6 +84,22 @@ const beenverifiedInfo: BrokerInfo = {
       question: "Can bosses still check my background?",
       answer: "Yes. Employers use other databases. This only removes you from BeenVerified's search tool.",
     },
+    {
+      question: "Is removal free?",
+      answer: "Yes. BeenVerified opt-out is free. No payment needed to remove your data.",
+    },
+    {
+      question: "What if I have multiple records?",
+      answer: "Remove each one. You may have records for old names or addresses. Check for all versions.",
+    },
+    {
+      question: "Why does BeenVerified have my info?",
+      answer: "They gather data from public records, court files, and other sources. They put it all in one profile.",
+    },
+    {
+      question: "Can GhostMyData help?",
+      answer: "Yes. We remove you from BeenVerified and 2,100+ other sites. We watch for new data too.",
+    },
   ],
   lastUpdated: "January 24, 2026",
 };
