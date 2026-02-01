@@ -16,7 +16,7 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "how-to-remove-yourself-from-spokeo",
     title: "How to Remove Yourself from Spokeo in 2026 (Step-by-Step Guide)",
-    description: "Complete guide to removing your personal information from Spokeo. Learn the opt-out process, what information Spokeo collects, and how to permanently delete your listing.",
+    description: "Remove your info from Spokeo fast. Learn the opt-out steps. See what data Spokeo has on you. Delete your listing for good.",
     publishedAt: "2026-01-15",
     author: "GhostMyData Team",
     category: "Data Broker Removal",
@@ -113,7 +113,7 @@ No. Each data broker requires a separate opt-out request. There are thousands of
   {
     slug: "how-to-remove-yourself-from-beenverified",
     title: "How to Remove Yourself from BeenVerified (2026 Complete Guide)",
-    description: "Step-by-step instructions to opt out of BeenVerified and remove your personal data. Learn what information BeenVerified collects and how to delete your listing permanently.",
+    description: "Opt out of BeenVerified fast. Remove your data with our simple steps. See what info they have. Delete your listing for good.",
     publishedAt: "2026-01-14",
     author: "GhostMyData Team",
     category: "Data Broker Removal",
@@ -211,7 +211,7 @@ Instead of spending hours opting out of each site manually, let GhostMyData auto
   {
     slug: "how-to-remove-yourself-from-whitepages",
     title: "How to Remove Yourself from Whitepages (2026 Guide)",
-    description: "Complete walkthrough to opt out of Whitepages and Whitepages Premium. Remove your name, address, and phone number from this popular people-search site.",
+    description: "Opt out of Whitepages fast. Remove your name, address, and phone. Works for both regular and Premium. Free and easy.",
     publishedAt: "2026-01-13",
     author: "GhostMyData Team",
     category: "Data Broker Removal",
@@ -298,7 +298,7 @@ Whitepages is just one of thousands of data brokers. For comprehensive protectio
   {
     slug: "what-is-a-data-broker",
     title: "What is a Data Broker? Everything You Need to Know in 2026",
-    description: "Learn what data brokers are, how they collect and sell your personal information, and what you can do to protect your privacy from these companies.",
+    description: "Learn what data brokers are. See how they get and sell your info. Find out how to protect your privacy from them.",
     publishedAt: "2026-01-12",
     author: "GhostMyData Team",
     category: "Privacy Education",

@@ -165,6 +165,9 @@ export default function PricingPage() {
           Choose the plan that fits your needs. Start free and upgrade when you&apos;re
           ready. All plans include our data removal service to help delete your data from the web.
         </p>
+        <p className="text-lg text-slate-500 max-w-xl mx-auto mt-4">
+          No hidden fees. No contracts. Cancel any time. We scan 2,100+ data broker sites to find and remove your info.
+        </p>
       </div>
 
       {/* Pricing Cards */}
