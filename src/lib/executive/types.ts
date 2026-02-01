@@ -56,6 +56,11 @@ export interface WebAnalyticsMetrics {
       wau: number;
       mau: number;
     };
+    realTimeUsers?: {
+      activeUsers: number;
+      activeUsersByCountry: { country: string; users: number }[];
+      activeUsersByPage: { page: string; users: number }[];
+    };
     topPages: { path: string; views: number }[];
     trafficSources: { source: string; sessions: number }[];
   };

@@ -22,6 +22,7 @@ import {
   CheckCircle,
   BarChart3,
   ExternalLink,
+  Radio,
 } from "lucide-react";
 
 interface AnalyticsSectionProps {
@@ -109,7 +110,7 @@ export function AnalyticsSection({ data }: AnalyticsSectionProps) {
 
         {!data.googleAnalytics.configured ? (
           <NotConfigured service="Google Analytics" />
-        ) : !data.googleAnalytics.pageViews && !data.googleAnalytics.activeUsers && data.googleAnalytics.topPages.length === 0 ? (
+        ) : !data.googleAnalytics.pageViews && !data.googleAnalytics.activeUsers && !data.googleAnalytics.realTimeUsers && data.googleAnalytics.topPages.length === 0 ? (
           <Card className="bg-amber-900/20 border-amber-800">
             <CardContent className="p-6 text-center">
               <AlertCircle className="h-10 w-10 text-amber-400 mx-auto mb-3" />
@@ -129,6 +130,74 @@ export function AnalyticsSection({ data }: AnalyticsSectionProps) {
           </Card>
         ) : (
           <>
+            {/* Real-Time Users */}
+            {data.googleAnalytics.realTimeUsers && (
+              <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/30">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-md font-medium text-white flex items-center gap-2">
+                    <div className="relative">
+                      <Radio className="h-4 w-4 text-emerald-400" />
+                      <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-emerald-400 rounded-full animate-pulse" />
+                    </div>
+                    Real-Time (Last 30 minutes)
+                    <Badge className="bg-emerald-500/20 text-emerald-400 ml-2">
+                      LIVE
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {/* Active Users Now */}
+                    <div className="flex items-center gap-3 p-4 bg-slate-800/50 rounded-lg">
+                      <div className="p-2 bg-emerald-500/20 rounded-lg">
+                        <Users className="h-6 w-6 text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400">Active Users Now</p>
+                        <p className="text-3xl font-bold text-white">
+                          {data.googleAnalytics.realTimeUsers.activeUsers}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* By Country */}
+                    <div className="p-4 bg-slate-800/50 rounded-lg">
+                      <p className="text-xs text-slate-400 mb-2">By Country</p>
+                      {data.googleAnalytics.realTimeUsers.activeUsersByCountry.length === 0 ? (
+                        <p className="text-sm text-slate-500">No data</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {data.googleAnalytics.realTimeUsers.activeUsersByCountry.map((item, index) => (
+                            <div key={index} className="flex justify-between text-sm">
+                              <span className="text-slate-300 truncate">{item.country}</span>
+                              <span className="text-white font-medium">{item.users}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* By Page */}
+                    <div className="p-4 bg-slate-800/50 rounded-lg">
+                      <p className="text-xs text-slate-400 mb-2">By Page</p>
+                      {data.googleAnalytics.realTimeUsers.activeUsersByPage.length === 0 ? (
+                        <p className="text-sm text-slate-500">No data</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {data.googleAnalytics.realTimeUsers.activeUsersByPage.map((item, index) => (
+                            <div key={index} className="flex justify-between text-sm">
+                              <span className="text-slate-300 truncate flex-1 mr-2">{item.page}</span>
+                              <span className="text-white font-medium">{item.users}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Page Views */}
             {data.googleAnalytics.pageViews && (
               <div className="grid gap-4 md:grid-cols-3">

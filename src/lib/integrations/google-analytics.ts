@@ -313,6 +313,120 @@ export async function getTrafficSources(): Promise<GATrafficSource[]> {
 }
 
 /**
+ * Get real-time active users (last 30 minutes)
+ */
+export async function getRealTimeUsers(): Promise<{
+  activeUsers: number;
+  activeUsersByCountry: Array<{ country: string; users: number }>;
+  activeUsersByPage: Array<{ page: string; users: number }>;
+} | null> {
+  if (!isGAConfigured()) {
+    console.log("[GA] Real-time: Not configured");
+    return null;
+  }
+
+  const config = await getConfig();
+  if (!config) {
+    console.log("[GA] Real-time: No config");
+    return null;
+  }
+
+  try {
+    console.log("[GA] Real-time: Fetching data...");
+    const response = await fetch(
+      `${GA_API_BASE}/${config.propertyId}:runRealtimeReport`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${config.accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          metrics: [{ name: "activeUsers" }],
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[GA] Real-time report failed:", errorText);
+      return null;
+    }
+
+    const totalResult = await response.json();
+    console.log("[GA] Real-time response:", JSON.stringify(totalResult, null, 2));
+    const activeUsers = parseInt(totalResult?.rows?.[0]?.metricValues?.[0]?.value || "0");
+
+    // Get by country
+    const countryResponse = await fetch(
+      `${GA_API_BASE}/${config.propertyId}:runRealtimeReport`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${config.accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          dimensions: [{ name: "country" }],
+          metrics: [{ name: "activeUsers" }],
+        }),
+      }
+    );
+
+    let activeUsersByCountry: Array<{ country: string; users: number }> = [];
+    if (countryResponse.ok) {
+      const countryResult = await countryResponse.json();
+      activeUsersByCountry = (countryResult?.rows || [])
+        .map((row: { dimensionValues: Array<{ value: string }>; metricValues: Array<{ value: string }> }) => ({
+          country: row.dimensionValues[0]?.value || "Unknown",
+          users: parseInt(row.metricValues[0]?.value || "0"),
+        }))
+        .sort((a: { users: number }, b: { users: number }) => b.users - a.users)
+        .slice(0, 5);
+    }
+
+    // Get by page
+    const pageResponse = await fetch(
+      `${GA_API_BASE}/${config.propertyId}:runRealtimeReport`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${config.accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          dimensions: [{ name: "unifiedScreenName" }],
+          metrics: [{ name: "activeUsers" }],
+        }),
+      }
+    );
+
+    let activeUsersByPage: Array<{ page: string; users: number }> = [];
+    if (pageResponse.ok) {
+      const pageResult = await pageResponse.json();
+      activeUsersByPage = (pageResult?.rows || [])
+        .map((row: { dimensionValues: Array<{ value: string }>; metricValues: Array<{ value: string }> }) => ({
+          page: row.dimensionValues[0]?.value || "Unknown",
+          users: parseInt(row.metricValues[0]?.value || "0"),
+        }))
+        .sort((a: { users: number }, b: { users: number }) => b.users - a.users)
+        .slice(0, 5);
+    }
+
+    const result = {
+      activeUsers,
+      activeUsersByCountry,
+      activeUsersByPage,
+    };
+    console.log("[GA] Real-time result:", result);
+    return result;
+  } catch (error) {
+    console.error("[GA] Failed to get real-time users:", error);
+    return null;
+  }
+}
+
+/**
  * Get conversion events
  */
 export async function getConversions(): Promise<GAConversion[]> {

@@ -20,6 +20,7 @@ import {
   getActiveUsers,
   getTopPages,
   getTrafficSources,
+  getRealTimeUsers,
 } from "@/lib/integrations/google-analytics";
 import {
   isBingConfigured,
@@ -298,19 +299,22 @@ async function getWebAnalyticsMetrics(): Promise<WebAnalyticsMetrics> {
   const gaConfigured = isGAConfigured();
   let gaPageViews = null;
   let gaActiveUsers = null;
+  let gaRealTimeUsers = null;
   let gaTopPages: { path: string; views: number }[] = [];
   let gaTrafficSources: { source: string; sessions: number }[] = [];
 
   if (gaConfigured) {
     try {
-      const [pageViews, activeUsers, topPages, trafficSources] = await Promise.all([
+      const [pageViews, activeUsers, realTimeUsers, topPages, trafficSources] = await Promise.all([
         getPageViews(),
         getActiveUsers(),
+        getRealTimeUsers(),
         getTopPages(10),
         getTrafficSources(),
       ]);
       gaPageViews = pageViews;
       gaActiveUsers = activeUsers;
+      gaRealTimeUsers = realTimeUsers;
       gaTopPages = topPages;
       gaTrafficSources = trafficSources;
     } catch (error) {
@@ -348,6 +352,7 @@ async function getWebAnalyticsMetrics(): Promise<WebAnalyticsMetrics> {
       configured: gaConfigured,
       pageViews: gaPageViews || undefined,
       activeUsers: gaActiveUsers || undefined,
+      realTimeUsers: gaRealTimeUsers || undefined,
       topPages: gaTopPages,
       trafficSources: gaTrafficSources,
     },
