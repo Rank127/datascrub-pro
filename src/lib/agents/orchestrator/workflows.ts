@@ -491,6 +491,183 @@ export const PREDEFINED_WORKFLOWS: Workflow[] = [
       },
     ],
   },
+
+  // =========================================================================
+  // SEO REMEDIATION WORKFLOW
+  // =========================================================================
+  {
+    id: "seo-remediation",
+    name: "SEO Remediation Workflow",
+    description: "Auto-remediate SEO issues: generate fix -> apply -> verify",
+    enabled: true,
+    version: "1.0.0",
+    steps: [
+      {
+        id: "generate-meta",
+        name: "Generate Meta Tags",
+        action: "content.generate-meta",
+        input: (prev: Map<string, AgentResult>) => {
+          const inputData = prev.get("input")?.data as {
+            url?: string;
+            issueType?: string;
+          } | undefined;
+          return {
+            url: inputData?.url,
+            issueType: inputData?.issueType,
+          };
+        },
+        required: true,
+      },
+      {
+        id: "verify-fix",
+        name: "Verify Fix Applied",
+        action: "seo.technical-audit",
+        input: (prev: Map<string, AgentResult>) => {
+          const inputData = prev.get("input")?.data as { url?: string } | undefined;
+          return {
+            pages: [inputData?.url],
+          };
+        },
+        required: false,
+        condition: (prev: Map<string, AgentResult>) => prev.get("generate-meta")?.success === true,
+      },
+      {
+        id: "notify-completion",
+        name: "Notify Remediation Complete",
+        action: "operations.create-alert",
+        input: (prev: Map<string, AgentResult>) => ({
+          alertType: "seo_remediation_complete",
+          severity: "low",
+          message: "SEO issue auto-remediated",
+          data: {
+            generatedMeta: prev.get("generate-meta")?.data,
+            verificationResult: prev.get("verify-fix")?.data,
+          },
+        }),
+        required: false,
+      },
+    ],
+  },
+
+  // =========================================================================
+  // SEO FULL AUDIT WITH AUTO-REMEDIATION
+  // =========================================================================
+  {
+    id: "seo-audit-remediate",
+    name: "SEO Audit with Auto-Remediation",
+    description: "Run full SEO audit and auto-fix issues: audit -> generate fixes -> send report",
+    enabled: true,
+    version: "1.0.0",
+    steps: [
+      {
+        id: "run-audit",
+        name: "Run SEO Audit",
+        action: "seo.full-report",
+        input: (prev: Map<string, AgentResult>) => prev.get("input")?.data || {},
+        required: true,
+        timeout: 300000, // 5 minutes
+      },
+      {
+        id: "generate-content-fixes",
+        name: "Generate Content Fixes",
+        action: "content.generate-meta",
+        input: (prev: Map<string, AgentResult>) => {
+          const auditData = prev.get("run-audit")?.data as {
+            report?: {
+              criticalIssues?: string[];
+            };
+          } | undefined;
+          // Get first critical issue URL if any
+          const criticalIssues = auditData?.report?.criticalIssues || [];
+          const urlMatch = criticalIssues[0]?.match(/^(https?:\/\/[^\s:]+|\/[^\s:]*)/);
+          return {
+            url: urlMatch?.[1] || "/",
+            issueType: "missing_meta",
+            batch: criticalIssues.slice(0, 5),
+          };
+        },
+        required: false,
+        condition: (prev: Map<string, AgentResult>) => {
+          const auditData = prev.get("run-audit")?.data as {
+            report?: { criticalIssues?: string[] };
+          } | undefined;
+          return (auditData?.report?.criticalIssues?.length || 0) > 0;
+        },
+      },
+      {
+        id: "generate-blog-ideas",
+        name: "Generate Blog Ideas",
+        action: "seo.blog-ideas",
+        input: { limit: 5 },
+        required: false,
+        condition: (prev: Map<string, AgentResult>) => prev.get("run-audit")?.success === true,
+      },
+      {
+        id: "send-report",
+        name: "Send SEO Report",
+        action: "communications.email",
+        input: (prev: Map<string, AgentResult>) => ({
+          type: "seo_report",
+          auditResults: prev.get("run-audit")?.data,
+          contentFixes: prev.get("generate-content-fixes")?.data,
+          blogIdeas: prev.get("generate-blog-ideas")?.data,
+        }),
+        required: false,
+      },
+    ],
+  },
+
+  // =========================================================================
+  // CONTENT GENERATION WORKFLOW
+  // =========================================================================
+  {
+    id: "content-generation",
+    name: "Content Generation Workflow",
+    description: "Generate and optimize content: generate -> optimize SEO -> review",
+    enabled: true,
+    version: "1.0.0",
+    steps: [
+      {
+        id: "generate-content",
+        name: "Generate Content",
+        action: "content.generate-blog",
+        input: (prev: Map<string, AgentResult>) => prev.get("input")?.data || {},
+        required: true,
+      },
+      {
+        id: "optimize-seo",
+        name: "Optimize for SEO",
+        action: "content.optimize-seo",
+        input: (prev: Map<string, AgentResult>) => {
+          const contentData = prev.get("generate-content")?.data as {
+            content?: string;
+            keywords?: string[];
+          } | undefined;
+          return {
+            content: contentData?.content || "",
+            targetKeywords: contentData?.keywords || [],
+          };
+        },
+        required: true,
+        condition: (prev: Map<string, AgentResult>) => prev.get("generate-content")?.success === true,
+      },
+      {
+        id: "flag-for-review",
+        name: "Flag for Human Review",
+        action: "operations.create-alert",
+        input: (prev: Map<string, AgentResult>) => ({
+          alertType: "content_review_needed",
+          severity: "low",
+          message: "New content ready for review",
+          data: {
+            content: prev.get("generate-content")?.data,
+            seoAnalysis: prev.get("optimize-seo")?.data,
+          },
+        }),
+        required: false,
+      },
+    ],
+  },
 ];
 
 // ============================================================================

@@ -107,6 +107,35 @@ interface SEOOptimizeResult {
   readabilityScore: number;
 }
 
+interface GenerateMetaInput {
+  url: string;
+  issueType: string;
+  currentContent?: {
+    title?: string;
+    description?: string;
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImage?: string;
+  };
+  pageContent?: string;
+}
+
+interface GenerateMetaResult {
+  url: string;
+  meta: {
+    title: string;
+    description: string;
+    ogTitle: string;
+    ogDescription: string;
+    ogImage: string;
+    twitterCard: string;
+    twitterTitle: string;
+    twitterDescription: string;
+  };
+  code: string; // Next.js metadata export code
+  applied: boolean;
+}
+
 // ============================================================================
 // CONTENT AGENT CLASS
 // ============================================================================
@@ -149,6 +178,20 @@ class ContentAgent extends BaseAgent {
       requiresAI: true,
       estimatedTokens: 500,
     },
+    {
+      id: "generate-meta",
+      name: "Generate Meta Tags",
+      description: "Generate missing meta tags (title, description, OG tags) for pages",
+      requiresAI: false,
+      estimatedTokens: 200,
+    },
+    {
+      id: "optimize-content",
+      name: "Optimize Content",
+      description: "Optimize existing content for SEO and readability",
+      requiresAI: true,
+      estimatedTokens: 800,
+    },
   ];
 
   protected getSystemPrompt(): string {
@@ -160,6 +203,8 @@ class ContentAgent extends BaseAgent {
     this.handlers.set("generate-help", this.handleGenerateHelp.bind(this));
     this.handlers.set("generate-marketing", this.handleGenerateMarketing.bind(this));
     this.handlers.set("optimize-seo", this.handleOptimizeSEO.bind(this));
+    this.handlers.set("generate-meta", this.handleGenerateMeta.bind(this));
+    this.handlers.set("optimize-content", this.handleOptimizeContent.bind(this));
   }
 
   private async handleGenerateBlog(
@@ -676,6 +721,251 @@ GhostMyData finds where your data appears and automatically requests removal. We
   ): string {
     // Return original content - actual optimization would be done by AI in production
     return content;
+  }
+
+  private async handleGenerateMeta(
+    input: unknown,
+    context: AgentContext
+  ): Promise<AgentResult<GenerateMetaResult>> {
+    const startTime = Date.now();
+    const { url, issueType, currentContent = {} } = input as GenerateMetaInput;
+
+    try {
+      // Extract page name from URL for generating content
+      const pageName = this.extractPageName(url);
+      const meta = this.generateMetaForPage(pageName, currentContent);
+
+      // Generate Next.js metadata export code
+      const code = this.generateMetadataCode(meta);
+
+      return this.createSuccessResult<GenerateMetaResult>(
+        {
+          url,
+          meta,
+          code,
+          applied: false, // Content agent generates, doesn't apply
+        },
+        {
+          capability: "generate-meta",
+          requestId: context.requestId,
+          duration: Date.now() - startTime,
+          usedFallback: false,
+          executedAt: new Date(),
+        },
+        {
+          needsHumanReview: true, // Always review generated meta
+          suggestedActions: [
+            {
+              action: "apply-meta-tags",
+              description: `Apply generated meta tags to ${url}`,
+              targetAgent: "operations-agent",
+              priority: "HIGH",
+              autoExecute: false,
+            },
+          ],
+        }
+      );
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          code: "META_GENERATION_ERROR",
+          message: error instanceof Error ? error.message : "Meta tag generation failed",
+          retryable: true,
+        },
+        needsHumanReview: true,
+        metadata: {
+          agentId: this.id,
+          capability: "generate-meta",
+          requestId: context.requestId,
+          duration: Date.now() - startTime,
+          usedFallback: false,
+          executedAt: new Date(),
+        },
+      };
+    }
+  }
+
+  private extractPageName(url: string): string {
+    // Extract meaningful page name from URL
+    const path = url.replace(/^https?:\/\/[^\/]+/, "").replace(/\/$/, "");
+    if (!path || path === "/") return "Home";
+
+    const parts = path.split("/").filter(Boolean);
+    const pageName = parts[parts.length - 1]
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+
+    return pageName;
+  }
+
+  private generateMetaForPage(
+    pageName: string,
+    currentContent: GenerateMetaInput["currentContent"]
+  ): GenerateMetaResult["meta"] {
+    const siteName = "GhostMyData";
+    const baseDescription = "Protect your privacy online. Remove your personal information from data broker sites automatically.";
+
+    // Generate contextual title
+    const title = currentContent?.title ||
+      (pageName === "Home"
+        ? `${siteName} - Remove Your Personal Data from the Internet`
+        : `${pageName} | ${siteName}`);
+
+    // Generate contextual description
+    const description = currentContent?.description ||
+      this.generateDescription(pageName, baseDescription);
+
+    // OG tags (use title/description if not provided)
+    const ogTitle = currentContent?.ogTitle || title;
+    const ogDescription = currentContent?.ogDescription || description;
+    const ogImage = currentContent?.ogImage || "https://ghostmydata.com/og-image.png";
+
+    return {
+      title,
+      description,
+      ogTitle,
+      ogDescription,
+      ogImage,
+      twitterCard: "summary_large_image",
+      twitterTitle: ogTitle,
+      twitterDescription: ogDescription,
+    };
+  }
+
+  private generateDescription(pageName: string, baseDescription: string): string {
+    const descriptions: Record<string, string> = {
+      "Home": "GhostMyData automatically removes your personal information from data brokers. Protect your privacy and reduce unwanted contact. Start your free scan today.",
+      "Pricing": "Choose the right privacy protection plan for you. GhostMyData offers affordable data removal services with continuous monitoring.",
+      "How It Works": "Learn how GhostMyData protects your privacy. We scan data brokers, submit removal requests, and continuously monitor for re-appearances.",
+      "Blog": "Privacy tips, data protection guides, and industry insights from GhostMyData. Stay informed about protecting your personal information online.",
+      "Compare": "Compare GhostMyData with other data removal services. See why we offer the best value for comprehensive privacy protection.",
+      "Privacy": "Read GhostMyData's privacy policy. We're committed to protecting your data while removing it from unwanted places.",
+      "Terms": "GhostMyData terms of service. Understand your rights and responsibilities when using our data removal services.",
+      "Security": "Learn about GhostMyData's security practices. We use enterprise-grade encryption to protect your information.",
+    };
+
+    return descriptions[pageName] || `${pageName} - ${baseDescription}`;
+  }
+
+  private generateMetadataCode(meta: GenerateMetaResult["meta"]): string {
+    return `// Add this to your page component
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "${meta.title}",
+  description: "${meta.description}",
+  openGraph: {
+    title: "${meta.ogTitle}",
+    description: "${meta.ogDescription}",
+    images: ["${meta.ogImage}"],
+    type: 'website',
+  },
+  twitter: {
+    card: "${meta.twitterCard}",
+    title: "${meta.twitterTitle}",
+    description: "${meta.twitterDescription}",
+  },
+};`;
+  }
+
+  private async handleOptimizeContent(
+    input: unknown,
+    context: AgentContext
+  ): Promise<AgentResult<SEOOptimizeResult>> {
+    const startTime = Date.now();
+    const { url, issueType, currentContent, targetKeywords = [] } = input as {
+      url?: string;
+      issueType?: string;
+      currentContent?: string;
+      targetKeywords?: string[];
+    };
+
+    try {
+      // If no content provided, return suggestions only
+      if (!currentContent) {
+        return this.createSuccessResult<SEOOptimizeResult>(
+          {
+            optimizedContent: "",
+            seoScore: 0,
+            improvements: [
+              {
+                type: "no_content",
+                suggestion: "No content provided for optimization. Fetch page content first.",
+                impact: "HIGH",
+              },
+            ],
+            keywordDensity: {},
+            readabilityScore: 0,
+          },
+          {
+            capability: "optimize-content",
+            requestId: context.requestId,
+            duration: Date.now() - startTime,
+            usedFallback: false,
+            executedAt: new Date(),
+          }
+        );
+      }
+
+      // Use the existing SEO analysis
+      const analysis = this.analyzeSEO(currentContent, targetKeywords);
+
+      // Generate optimization suggestions based on issue type
+      if (issueType === "thin_content" && analysis.improvements.every(i => i.type !== "content_length")) {
+        analysis.improvements.push({
+          type: "content_expansion",
+          suggestion: "Add more detailed explanations, examples, and supporting content",
+          impact: "HIGH",
+        });
+      }
+
+      if (issueType === "low_readability" && analysis.improvements.every(i => i.type !== "readability")) {
+        analysis.improvements.push({
+          type: "readability",
+          suggestion: "Break up long sentences and paragraphs, use simpler words",
+          impact: "MEDIUM",
+        });
+      }
+
+      return this.createSuccessResult<SEOOptimizeResult>(
+        {
+          optimizedContent: currentContent, // Would be AI-optimized in production
+          seoScore: analysis.score,
+          improvements: analysis.improvements,
+          keywordDensity: analysis.keywordDensity,
+          readabilityScore: analysis.readabilityScore,
+        },
+        {
+          capability: "optimize-content",
+          requestId: context.requestId,
+          duration: Date.now() - startTime,
+          usedFallback: false,
+          executedAt: new Date(),
+        },
+        {
+          needsHumanReview: true,
+        }
+      );
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          code: "CONTENT_OPTIMIZE_ERROR",
+          message: error instanceof Error ? error.message : "Content optimization failed",
+          retryable: true,
+        },
+        needsHumanReview: true,
+        metadata: {
+          agentId: this.id,
+          capability: "optimize-content",
+          requestId: context.requestId,
+          duration: Date.now() - startTime,
+          usedFallback: false,
+          executedAt: new Date(),
+        },
+      };
+    }
   }
 
   protected async executeRuleBased<T>(

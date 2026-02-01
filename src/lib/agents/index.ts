@@ -50,6 +50,27 @@ export type {
 } from "./orchestrator";
 
 // ============================================================================
+// REMEDIATION ENGINE
+// ============================================================================
+
+export {
+  getRemediationEngine,
+  reportIssue,
+  emitIssue,
+} from "./orchestrator/remediation-engine";
+
+export type {
+  DetectedIssue,
+  RemediationAction,
+  RemediationPlan,
+  RemediationRule,
+  RemediationStats,
+  IssueSeverity,
+  RemediationActionType,
+  RemediationStatus,
+} from "./orchestrator/remediation-engine";
+
+// ============================================================================
 // EVENT BUS
 // ============================================================================
 

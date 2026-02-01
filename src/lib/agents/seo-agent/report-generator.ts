@@ -2,6 +2,8 @@
 // Generates comprehensive SEO reports and stores results
 
 import { prisma } from "@/lib/db";
+import { getEventBus } from "../orchestrator/event-bus";
+import { nanoid } from "nanoid";
 
 export interface SEOReport {
   id: string;
@@ -23,6 +25,16 @@ export interface BlogIdea {
   keywords: string[];
   priority: number;
   category: string;
+}
+
+export interface SEOIssue {
+  id: string;
+  type: string;
+  severity: "critical" | "high" | "medium" | "low";
+  description: string;
+  url?: string;
+  recommendation?: string;
+  canAutoRemediate: boolean;
 }
 
 /**
@@ -114,6 +126,72 @@ export async function getLatestReport(): Promise<SEOReport | null> {
 }
 
 /**
+ * Emit detected issues to the event bus for auto-remediation
+ */
+async function emitSEOIssues(issues: SEOIssue[]): Promise<void> {
+  const eventBus = getEventBus();
+
+  for (const issue of issues) {
+    try {
+      await eventBus.emitCustom("seo-agent", "issue.detected", {
+        issue: {
+          id: issue.id,
+          type: issue.type,
+          severity: issue.severity,
+          description: issue.description,
+          sourceAgentId: "seo-agent",
+          affectedResource: issue.url,
+          details: {
+            recommendation: issue.recommendation,
+          },
+          canAutoRemediate: issue.canAutoRemediate,
+          detectedAt: new Date(),
+        },
+      });
+    } catch (error) {
+      console.error(`[SEO Agent] Failed to emit issue ${issue.id}:`, error);
+    }
+  }
+
+  if (issues.length > 0) {
+    console.log(`[SEO Agent] Emitted ${issues.length} issues for remediation`);
+  }
+}
+
+/**
+ * Map check name to issue type
+ */
+function mapCheckToIssueType(checkName: string): string {
+  const mapping: Record<string, string> = {
+    "Title Tag": "seo.missing_title",
+    "Meta Description": "seo.missing_description",
+    "Open Graph Tags": "seo.missing_og_tags",
+    "H1 Tag": "seo.missing_h1",
+    "Canonical URL": "seo.missing_canonical",
+    "Structured Data": "seo.missing_structured_data",
+    "Page Size": "seo.large_page_size",
+    "Page Accessible": "seo.page_not_accessible",
+    "robots.txt": "seo.invalid_robots",
+    "Sitemap": "seo.missing_sitemap",
+  };
+  return mapping[checkName] || `seo.${checkName.toLowerCase().replace(/\s+/g, "_")}`;
+}
+
+/**
+ * Determine if an issue type can be auto-remediated
+ */
+function canAutoRemediate(issueType: string): boolean {
+  const autoRemediable = [
+    "seo.missing_title",
+    "seo.missing_description",
+    "seo.missing_og_tags",
+    "seo.thin_content",
+    "seo.low_readability",
+  ];
+  return autoRemediable.some(type => issueType.startsWith(type));
+}
+
+/**
  * Generate comprehensive SEO report
  */
 export async function generateSEOReport(
@@ -129,8 +207,11 @@ export async function generateSEOReport(
     overallSuggestions: Array<{ type: string; priority: string; message: string; recommendation: string }>;
     contentScore: number;
   },
-  blogIdeas: BlogIdea[]
+  blogIdeas: BlogIdea[],
+  options?: { emitIssues?: boolean }
 ): Promise<SEOReport> {
+  const { emitIssues = true } = options || {};
+  const detectedIssues: SEOIssue[] = [];
   const report: SEOReport = {
     id: generateReportId(),
     generatedAt: new Date(),
@@ -145,11 +226,23 @@ export async function generateSEOReport(
     nextActions: [],
   };
 
-  // Collect critical issues
+  // Collect critical issues and create issue objects
   for (const audit of technicalAudit.pageAudits) {
     for (const check of audit.checks) {
       if (check.status === "fail") {
         report.criticalIssues.push(`${audit.url}: ${check.message}`);
+
+        // Create issue for remediation
+        const issueType = mapCheckToIssueType(check.name);
+        detectedIssues.push({
+          id: nanoid(),
+          type: issueType,
+          severity: "critical",
+          description: check.message,
+          url: audit.url,
+          recommendation: check.recommendation,
+          canAutoRemediate: canAutoRemediate(issueType),
+        });
       }
     }
   }
@@ -158,6 +251,18 @@ export async function generateSEOReport(
     for (const suggestion of analysis.suggestions) {
       if (suggestion.priority === "high") {
         report.criticalIssues.push(`${analysis.url}: ${suggestion.message}`);
+
+        // Create issue for remediation
+        const issueType = `seo.${suggestion.type.toLowerCase().replace(/\s+/g, "_")}`;
+        detectedIssues.push({
+          id: nanoid(),
+          type: issueType,
+          severity: "high",
+          description: suggestion.message,
+          url: analysis.url,
+          recommendation: suggestion.recommendation,
+          canAutoRemediate: canAutoRemediate(issueType),
+        });
       }
     }
   }
@@ -167,6 +272,18 @@ export async function generateSEOReport(
     for (const check of audit.checks) {
       if (check.status === "warning") {
         report.warnings.push(`${audit.url}: ${check.message}`);
+
+        // Create issue for remediation (lower severity)
+        const issueType = mapCheckToIssueType(check.name);
+        detectedIssues.push({
+          id: nanoid(),
+          type: issueType,
+          severity: "medium",
+          description: check.message,
+          url: audit.url,
+          recommendation: check.recommendation,
+          canAutoRemediate: canAutoRemediate(issueType),
+        });
       }
     }
   }
@@ -175,6 +292,18 @@ export async function generateSEOReport(
     for (const suggestion of analysis.suggestions) {
       if (suggestion.priority === "medium") {
         report.warnings.push(`${analysis.url}: ${suggestion.message}`);
+
+        // Create issue for remediation
+        const issueType = `seo.${suggestion.type.toLowerCase().replace(/\s+/g, "_")}`;
+        detectedIssues.push({
+          id: nanoid(),
+          type: issueType,
+          severity: "medium",
+          description: suggestion.message,
+          url: analysis.url,
+          recommendation: suggestion.recommendation,
+          canAutoRemediate: canAutoRemediate(issueType),
+        });
       }
     }
   }
@@ -235,6 +364,15 @@ export async function generateSEOReport(
     report.summary += "SEO needs some improvements.";
   } else {
     report.summary += "SEO needs significant attention.";
+  }
+
+  // Emit issues for auto-remediation
+  if (emitIssues && detectedIssues.length > 0) {
+    // Only emit critical and high issues for auto-remediation
+    const issuesForRemediation = detectedIssues.filter(
+      (i) => i.severity === "critical" || i.severity === "high"
+    );
+    await emitSEOIssues(issuesForRemediation);
   }
 
   return report;

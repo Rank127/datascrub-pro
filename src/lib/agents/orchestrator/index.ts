@@ -19,6 +19,7 @@ import { getRegistry } from "../registry";
 import { getRouter, RoutingResult } from "./routing-rules";
 import { getEventBus } from "./event-bus";
 import { WorkflowEngine } from "./workflows";
+import { getRemediationEngine } from "./remediation-engine";
 import { createAgentContext } from "../base-agent";
 
 // ============================================================================
@@ -107,6 +108,9 @@ class AgentOrchestrator {
     if (this.config.enableEvents) {
       this.setupEventHandlers();
     }
+
+    // Initialize the remediation engine for auto-handling issues
+    await getRemediationEngine().initialize();
 
     this.isInitialized = true;
     console.log("[Orchestrator] Initialization complete");
@@ -510,9 +514,17 @@ class AgentOrchestrator {
    */
   async shutdown(): Promise<void> {
     console.log("[Orchestrator] Shutting down...");
+    await getRemediationEngine().shutdown();
     await getRegistry().shutdownAll();
     this.isInitialized = false;
     console.log("[Orchestrator] Shutdown complete");
+  }
+
+  /**
+   * Get the remediation engine
+   */
+  getRemediationEngine() {
+    return getRemediationEngine();
   }
 }
 

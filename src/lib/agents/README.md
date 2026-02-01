@@ -210,6 +210,61 @@ eventBus.emit({
 });
 ```
 
+## Auto-Remediation Engine
+
+The system includes an intelligent auto-remediation engine that detects and fixes issues automatically:
+
+```typescript
+import { getRemediationEngine, reportIssue, emitIssue } from "@/lib/agents";
+
+// Report an issue for automatic remediation
+await reportIssue({
+  type: "seo.missing_title",
+  severity: "critical",
+  description: "Missing title tag on /pricing page",
+  sourceAgentId: "seo-agent",
+  affectedResource: "/pricing",
+  canAutoRemediate: true,
+});
+
+// Or emit from within an agent
+await emitIssue("my-agent", {
+  type: "seo.thin_content",
+  severity: "medium",
+  description: "Content too short",
+  canAutoRemediate: true,
+});
+```
+
+### Remediation Flow
+
+1. **Detection**: Agents detect issues and emit them to the event bus
+2. **Matching**: Remediation engine matches issues to remediation rules
+3. **Planning**: Creates a remediation plan with ordered actions
+4. **Execution**: Auto-executes actions if `canAutoRemediate` is true
+5. **Verification**: Runs verification step to confirm fix worked
+6. **Notification**: Notifies on completion or escalates for human review
+
+### Remediation Rules
+
+Built-in rules cover:
+- **SEO Issues**: Missing meta tags, thin content, readability issues
+- **Security Issues**: Always escalated to security agent
+- **Compliance Issues**: Always escalated for human review
+- **Performance Issues**: Alerts operations team
+
+### API Endpoints
+
+```
+GET  /api/agents/remediation        # Get status, plans, and statistics
+POST /api/agents/remediation        # Report issues, approve/reject plans
+  - action: "report"                # Report new issue
+  - action: "approve"               # Approve pending plan
+  - action: "reject"                # Reject pending plan
+  - action: "enable-rule"           # Enable a rule
+  - action: "disable-rule"          # Disable a rule
+```
+
 ## File Structure
 
 ```
