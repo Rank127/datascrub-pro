@@ -36,6 +36,9 @@ import {
   Building2,
   X,
   Search,
+  Crown,
+  Zap,
+  Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trackRemovalRequested } from "@/components/analytics/google-analytics";
@@ -87,6 +90,23 @@ function ExposuresPageContent() {
     searchParams.get("search") || ""
   );
   const [showHelp, setShowHelp] = useState(false);
+  const [userPlan, setUserPlan] = useState<string>("FREE");
+
+  // Fetch user plan
+  useEffect(() => {
+    const fetchPlan = async () => {
+      try {
+        const response = await fetch("/api/subscription");
+        if (response.ok) {
+          const data = await response.json();
+          setUserPlan(data.plan || "FREE");
+        }
+      } catch (error) {
+        console.error("Failed to fetch plan:", error);
+      }
+    };
+    fetchPlan();
+  }, []);
 
   // Get only actionable exposures (active, not whitelisted)
   const actionableExposures = exposures.filter(
@@ -291,6 +311,46 @@ function ExposuresPageContent() {
           View and manage all your discovered data exposures
         </p>
       </div>
+
+      {/* Free User Upgrade Banner */}
+      {userPlan === "FREE" && (
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-red-500/20 border border-amber-500/40 p-6">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-amber-500/20 rounded-xl shrink-0">
+                <Shield className="h-8 w-8 text-amber-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-amber-400" />
+                  Your Data is Exposed - Take Action Now
+                </h3>
+                <p className="text-slate-300 mt-1 max-w-xl">
+                  Free accounts can only view exposures. <strong className="text-amber-300">Upgrade to Pro</strong> to automatically remove your personal information from data brokers and protect your privacy.
+                </p>
+                <div className="flex items-center gap-4 mt-3 text-sm">
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <Zap className="h-4 w-4" /> Automated removals
+                  </span>
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <Shield className="h-4 w-4" /> 50 sites monitored
+                  </span>
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <Crown className="h-4 w-4" /> Priority support
+                  </span>
+                </div>
+              </div>
+            </div>
+            <Link href="/dashboard/settings#subscription">
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold px-6 py-2 shadow-lg shadow-amber-500/25 shrink-0">
+                <Crown className="h-4 w-4 mr-2" />
+                Upgrade Now - 40% Off
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
