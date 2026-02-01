@@ -5,9 +5,9 @@ import { CheckCircle, X, ArrowRight, Shield, DollarSign, Clock, Zap } from "luci
 import { FAQSchema, BreadcrumbSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {
-  title: "GhostMyData vs DeleteMe: Which Data Removal Service is Better? (2026)",
+  title: "GhostMyData vs DeleteMe: Full Comparison (2026)",
   description:
-    "Detailed comparison of GhostMyData and DeleteMe. Compare pricing, features, data broker coverage, and removal success rates to choose the best data removal service.",
+    "Compare GhostMyData vs DeleteMe: pricing, features, coverage, and success rates. Find the best data removal service.",
   keywords: [
     "ghostmydata vs deleteme",
     "deleteme alternative",

@@ -127,22 +127,22 @@ export default function ComparePage() {
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <Search className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Coverage</h3>
-              <p className="text-slate-400">How many sites do they check? More sites means better protection. Look for 200+ sites.</p>
+              <p className="text-slate-400">How many sites do they check? More is better. Look for 200+ sites.</p>
             </div>
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <Clock className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Speed</h3>
-              <p className="text-slate-400">Automated systems work faster. They don't miss sites or forget to follow up.</p>
+              <p className="text-slate-400">Auto systems work faster. They don't miss sites. They follow up on time.</p>
             </div>
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <BarChart3 className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Monitoring</h3>
-              <p className="text-slate-400">Daily checks catch new data fast. Weekly checks let data spread before removal.</p>
+              <p className="text-slate-400">Daily checks catch new data fast. Weekly checks let data spread.</p>
             </div>
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <HeadphonesIcon className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Support</h3>
-              <p className="text-slate-400">Can you reach someone with questions? Good support matters. Look for multiple ways to contact them.</p>
+              <p className="text-slate-400">Can you reach them? Good support matters. Look for email, chat, or phone.</p>
             </div>
           </div>
         </div>
@@ -221,8 +221,8 @@ export default function ComparePage() {
           Try GhostMyData Free
         </h2>
         <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
-          No credit card required. See where your data is exposed before committing.
-          Join thousands who have taken control of their personal information.
+          No card needed. See where your data is exposed before you pay.
+          Join thousands who control their data now.
         </p>
         <Link
           href="/register"

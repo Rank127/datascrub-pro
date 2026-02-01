@@ -5,7 +5,7 @@ import { CheckCircle, ArrowRight, Shield, DollarSign, Zap, Users } from "lucide-
 import { FAQSchema, BreadcrumbSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {
-  title: "GhostMyData vs Incogni: Complete Comparison (2026)",
+  title: "GhostMyData vs Incogni Comparison (2026)",
   description:
     "Compare GhostMyData vs Incogni data removal services. See pricing, features, coverage, and which offers better privacy protection.",
   keywords: [

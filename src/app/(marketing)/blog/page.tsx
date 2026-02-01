@@ -4,9 +4,9 @@ import { getAllPosts, getFeaturedPosts, getAllCategories } from "@/lib/blog/post
 import { Calendar, Clock, ArrowRight, Tag } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Privacy Blog - Data Removal Guides & Privacy Tips",
+  title: "Privacy Blog | Data Removal Guides | GhostMyData",
   description:
-    "Expert guides on removing your personal data from data brokers, protecting your privacy online, and understanding your data rights under CCPA and GDPR.",
+    "Learn how to remove your data from data brokers. Get privacy tips and know your rights under CCPA and GDPR.",
   keywords: [
     "data removal guide",
     "privacy blog",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Privacy Blog - GhostMyData",
     description:
-      "Expert guides on data removal, privacy protection, and understanding your data rights.",
+      "Learn how to remove your data. Get privacy tips. Know your rights.",
     url: "https://ghostmydata.com/blog",
     type: "website",
     images: [
