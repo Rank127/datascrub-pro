@@ -91,6 +91,7 @@ function ExposuresPageContent() {
   );
   const [showHelp, setShowHelp] = useState(false);
   const [userPlan, setUserPlan] = useState<string>("FREE");
+  const [planSource, setPlanSource] = useState<string>("DEFAULT");
 
   // Fetch user plan
   useEffect(() => {
@@ -100,6 +101,7 @@ function ExposuresPageContent() {
         if (response.ok) {
           const data = await response.json();
           setUserPlan(data.plan || "FREE");
+          setPlanSource(data.planSource || "DEFAULT");
         }
       } catch (error) {
         console.error("Failed to fetch plan:", error);
@@ -107,6 +109,9 @@ function ExposuresPageContent() {
     };
     fetchPlan();
   }, []);
+
+  // Show upgrade banner only for actual FREE users (not family members with inherited plans)
+  const showUpgradeBanner = userPlan === "FREE" && planSource !== "FAMILY";
 
   // Get only actionable exposures (active, not whitelisted)
   const actionableExposures = exposures.filter(
@@ -313,7 +318,7 @@ function ExposuresPageContent() {
       </div>
 
       {/* Free User Upgrade Banner */}
-      {userPlan === "FREE" && (
+      {showUpgradeBanner && (
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-red-500/20 border border-amber-500/40 p-6">
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
           <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
