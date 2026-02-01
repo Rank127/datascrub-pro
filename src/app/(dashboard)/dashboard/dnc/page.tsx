@@ -50,14 +50,6 @@ interface DNCRegistration {
   phoneType: string;
 }
 
-interface DNCStats {
-  total: number;
-  pending: number;
-  submitted: number;
-  verified: number;
-  failed: number;
-}
-
 interface DNCInfo {
   registryUrl: string;
   phoneNumber: string;
@@ -68,7 +60,6 @@ interface DNCInfo {
 
 interface DNCData {
   registrations: DNCRegistration[];
-  stats: DNCStats;
   info: DNCInfo;
 }
 
@@ -81,6 +72,7 @@ export default function DNCPage() {
   const [phoneType, setPhoneType] = useState<string>("MOBILE");
   const [submitting, setSubmitting] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const isPlanEnterprise = plan === "ENTERPRISE";
 
@@ -108,17 +100,18 @@ export default function DNCPage() {
   }, [plan]);
 
   const fetchDNCData = async () => {
+    setError(null);
     try {
       const response = await fetch("/api/dnc");
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to fetch DNC data");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch DNC data");
       }
       const result = await response.json();
       setData(result);
-    } catch (error) {
-      console.error("DNC fetch error:", error);
-      toast.error("Failed to load DNC data");
+    } catch (err) {
+      console.error("DNC fetch error:", err);
+      setError(err instanceof Error ? err.message : "Failed to load DNC data");
     } finally {
       setLoading(false);
     }
@@ -298,6 +291,37 @@ export default function DNCPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Do Not Call Registry</h1>
+          <p className="text-slate-400 mt-1">
+            Register your phone numbers to reduce telemarketing calls
+          </p>
+        </div>
+        <Card className="bg-red-500/10 border-red-500/30">
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-400" />
+              <h3 className="text-lg font-medium text-white mb-2">Failed to Load</h3>
+              <p className="text-slate-400 mb-6">{error}</p>
+              <Button
+                onClick={() => {
+                  setLoading(true);
+                  fetchDNCData();
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -317,41 +341,6 @@ export default function DNCPage() {
         </Button>
       </div>
 
-      {/* Stats */}
-      {data?.stats && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="pt-4 pb-4">
-              <div className="text-sm text-slate-400">Total</div>
-              <div className="text-2xl font-bold text-white">{data.stats.total}</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="pt-4 pb-4">
-              <div className="text-sm text-slate-400">Pending</div>
-              <div className="text-2xl font-bold text-yellow-500">{data.stats.pending}</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="pt-4 pb-4">
-              <div className="text-sm text-slate-400">Submitted</div>
-              <div className="text-2xl font-bold text-blue-500">{data.stats.submitted}</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="pt-4 pb-4">
-              <div className="text-sm text-slate-400">Verified</div>
-              <div className="text-2xl font-bold text-emerald-500">{data.stats.verified}</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="pt-4 pb-4">
-              <div className="text-sm text-slate-400">Failed</div>
-              <div className="text-2xl font-bold text-red-500">{data.stats.failed}</div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Add Phone Form */}
       {showAddForm && (
