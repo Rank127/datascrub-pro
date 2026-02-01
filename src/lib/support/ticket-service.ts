@@ -2,7 +2,13 @@
 // Core functions for creating, managing, and resolving support tickets
 
 import { prisma } from "@/lib/db";
+import { Resend } from "resend";
 import type { TicketType, TicketPriority, TicketSource } from "@/lib/types";
+
+// Email client for agent ticket notifications
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@ghostmydata.com";
+const APP_NAME = (process.env.NEXT_PUBLIC_APP_NAME || "GhostMyData").replace(/[\r\n]/g, "").trim();
 
 interface CreateTicketData {
   userId: string;
@@ -1263,7 +1269,129 @@ export async function createAgentTicket(data: AgentTicketData) {
 
   console.log(`[TicketService] Created agent ticket ${ticketNumber} for ${data.issueType}`);
 
+  // Send email notification to support
+  await sendAgentTicketNotification(ticket, data);
+
   return ticket;
+}
+
+/**
+ * Send email notification to support for agent-created tickets
+ * These are technical SEO, security, and compliance issues requiring human review
+ */
+async function sendAgentTicketNotification(
+  ticket: { ticketNumber: string; id: string },
+  data: AgentTicketData
+): Promise<void> {
+  if (!resend) {
+    console.log("[TicketService] Email service not configured, skipping notification");
+    return;
+  }
+
+  const severityEmoji: Record<string, string> = {
+    critical: "🚨",
+    high: "⚠️",
+    medium: "📋",
+    low: "ℹ️",
+  };
+
+  const categoryPrefix = data.issueType.split(".")[0].toUpperCase();
+  const issueLabel = data.issueType.replace(/\./g, " → ").replace(/_/g, " ");
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0f172a; color: #e2e8f0; padding: 40px 20px; margin: 0;">
+      <div style="max-width: 700px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 40px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <span style="font-size: 48px;">${severityEmoji[data.severity] || "📋"}</span>
+        </div>
+
+        <h1 style="color: ${data.severity === "critical" ? "#ef4444" : data.severity === "high" ? "#f97316" : "#10b981"}; margin-top: 0; text-align: center;">
+          ${categoryPrefix} Issue Detected
+        </h1>
+
+        <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+          <table style="width: 100%; border-collapse: collapse; color: #e2e8f0;">
+            <tr>
+              <td style="padding: 8px 0; color: #94a3b8; width: 140px;">Ticket Number:</td>
+              <td style="padding: 8px 0; font-weight: bold; color: #10b981;">${ticket.ticketNumber}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #94a3b8;">Detected By:</td>
+              <td style="padding: 8px 0;">${data.agentId}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #94a3b8;">Issue Type:</td>
+              <td style="padding: 8px 0;">${issueLabel}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #94a3b8;">Severity:</td>
+              <td style="padding: 8px 0; color: ${data.severity === "critical" ? "#ef4444" : data.severity === "high" ? "#f97316" : "#fbbf24"}; font-weight: bold;">${data.severity.toUpperCase()}</td>
+            </tr>
+            ${data.affectedResource ? `
+            <tr>
+              <td style="padding: 8px 0; color: #94a3b8;">Affected Resource:</td>
+              <td style="padding: 8px 0;"><a href="${data.affectedResource}" style="color: #3b82f6;">${data.affectedResource}</a></td>
+            </tr>
+            ` : ""}
+          </table>
+        </div>
+
+        <h2 style="color: #e2e8f0; font-size: 18px;">Issue Description</h2>
+        <p style="color: #cbd5e1; line-height: 1.6;">${data.description}</p>
+
+        <h2 style="color: #e2e8f0; font-size: 18px;">Recommended Action Plan</h2>
+        <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 16px 0;">
+          <p style="color: #10b981; font-weight: bold; margin-top: 0;">${data.methodology.summary}</p>
+          <p style="color: #94a3b8; margin-bottom: 16px;">Estimated Effort: ${data.methodology.estimatedEffort.toUpperCase()} | Skills: ${data.methodology.requiredSkills.join(", ")}</p>
+
+          ${data.methodology.steps.map((step, i) => `
+            <div style="margin-bottom: 16px; padding-left: 16px; border-left: 2px solid #10b981;">
+              <p style="color: #e2e8f0; font-weight: bold; margin: 0 0 4px 0;">Step ${step.order}: ${step.title}</p>
+              <p style="color: #94a3b8; margin: 0;">${step.description}</p>
+            </div>
+          `).join("")}
+        </div>
+
+        ${data.documentation && data.documentation.length > 0 ? `
+        <h2 style="color: #e2e8f0; font-size: 18px;">Reference Documentation</h2>
+        <ul style="color: #cbd5e1;">
+          ${data.documentation.map(doc => `<li><a href="${doc.url}" style="color: #3b82f6;">${doc.title}</a> (${doc.type})</li>`).join("")}
+        </ul>
+        ` : ""}
+
+        <hr style="border: none; border-top: 1px solid #334155; margin: 32px 0;">
+
+        <p style="font-size: 12px; color: #64748b; text-align: center;">
+          This ticket was auto-generated by the ${APP_NAME} Agent System.<br>
+          Please review and take appropriate action.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    const { error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || `${APP_NAME} <onboarding@resend.dev>`,
+      to: SUPPORT_EMAIL,
+      subject: `${severityEmoji[data.severity] || "📋"} [${ticket.ticketNumber}] ${categoryPrefix} Issue: ${data.title}`,
+      html,
+    });
+
+    if (error) {
+      console.error("[TicketService] Failed to send ticket notification:", error);
+    } else {
+      console.log(`[TicketService] Sent notification to ${SUPPORT_EMAIL} for ${ticket.ticketNumber}`);
+    }
+  } catch (err) {
+    console.error("[TicketService] Error sending ticket notification:", err);
+  }
 }
 
 /**

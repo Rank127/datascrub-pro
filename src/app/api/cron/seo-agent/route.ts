@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getSEOAgent, runFullSEOReport } from "@/lib/agents/seo-agent";
+import { getContentAgent } from "@/lib/agents/content-agent";
 import { createAgentContext } from "@/lib/agents/base-agent";
 import { InvocationTypes } from "@/lib/agents/types";
+import { getRemediationEngine } from "@/lib/agents";
 import { nanoid } from "nanoid";
 
 // Initialize Resend for email notifications
@@ -46,6 +48,16 @@ export async function GET(request: Request) {
 
     console.log("[SEO Agent Cron] Starting automated SEO optimization run...");
 
+    // IMPORTANT: Initialize agents and remediation engine BEFORE SEO scan
+    // 1. Initialize Content Agent so it's available for auto-fixing content issues
+    await getContentAgent();
+    console.log("[SEO Agent Cron] Content Agent initialized for auto-remediation");
+
+    // 2. Initialize remediation engine so it's listening for events
+    const remediationEngine = getRemediationEngine();
+    await remediationEngine.initialize();
+    console.log("[SEO Agent Cron] Remediation engine initialized and listening for issues");
+
     // Use the new SEO Agent
     const result = await runFullSEOReport();
 
@@ -81,9 +93,21 @@ export async function GET(request: Request) {
 
     console.log(`[SEO Agent Cron] Run complete. Score: ${result.report.overallScore}/100`);
 
+    // Get remediation stats after SEO run
+    const remediationStats = remediationEngine.getStats();
+    const activePlans = remediationEngine.getActivePlans();
+
+    console.log(`[SEO Agent Cron] Remediation: ${remediationStats.totalIssuesDetected} issues detected, ${activePlans.length} active plans`);
+
     return NextResponse.json({
       success: true,
       report: result.formatted,
+      remediation: {
+        issuesDetected: remediationStats.totalIssuesDetected,
+        plansCreated: remediationStats.totalPlansCreated,
+        activePlans: activePlans.length,
+        autoRemediatedCount: remediationStats.autoRemediatedCount,
+      },
     });
   } catch (error) {
     console.error("[SEO Agent Cron] Error:", error);
@@ -116,6 +140,13 @@ export async function POST(request: Request) {
       capability,
       sendEmailReport,
     });
+
+    // Initialize Content Agent for auto-remediation
+    await getContentAgent();
+
+    // Initialize remediation engine so it's listening for events
+    const remediationEngine = getRemediationEngine();
+    await remediationEngine.initialize();
 
     const agent = await getSEOAgent();
     const context = createAgentContext({
@@ -151,10 +182,20 @@ export async function POST(request: Request) {
 
     console.log("[SEO Agent Cron] Manual run complete");
 
+    // Get remediation stats after run
+    const remediationStats = remediationEngine.getStats();
+    const activePlans = remediationEngine.getActivePlans();
+
     return NextResponse.json({
       success: true,
       result: result.data,
       metadata: result.metadata,
+      remediation: {
+        issuesDetected: remediationStats.totalIssuesDetected,
+        plansCreated: remediationStats.totalPlansCreated,
+        activePlans: activePlans.length,
+        autoRemediatedCount: remediationStats.autoRemediatedCount,
+      },
     });
   } catch (error) {
     console.error("[SEO Agent Cron] Error:", error);

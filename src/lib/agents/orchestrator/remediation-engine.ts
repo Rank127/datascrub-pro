@@ -265,6 +265,56 @@ const DEFAULT_REMEDIATION_RULES: RemediationRule[] = [
     ],
   },
 
+  // SEO - Content issues (auto-fixed by Content Agent, NO human interaction)
+  // These are readability, structure, and keyword issues that Content Agent can fix
+  {
+    id: "seo-content-auto-fix",
+    issueTypePattern: /^seo\.(structure|readability|keyword)$/,
+    severityLevels: ["critical", "high", "medium"],
+    autoRemediate: true,
+    maxAttempts: 2,
+    enabled: true,
+    generateActions: (issue) => {
+      const generateId = nanoid();
+      const verifyId = nanoid();
+      return [
+        {
+          id: generateId,
+          type: "generate",
+          targetAgentId: "content-agent",
+          capability: "optimize-content",
+          input: {
+            url: issue.affectedResource,
+            issueType: issue.type,
+            currentContent: issue.details?.content,
+            targetKeywords: issue.details?.targetKeywords || [
+              "data removal service",
+              "remove personal information",
+              "data broker removal",
+              "privacy protection",
+            ],
+          },
+          priority: Priority.NORMAL,
+          autoExecute: true,
+          description: `Auto-fix ${issue.type} issue: ${issue.description}`,
+        },
+        {
+          id: verifyId,
+          type: "verify",
+          targetAgentId: "seo-agent",
+          capability: "technical-audit",
+          input: {
+            pages: [issue.affectedResource],
+          },
+          priority: Priority.NORMAL,
+          autoExecute: true,
+          description: "Verify SEO fix was applied correctly",
+          dependsOn: [generateId],
+        },
+      ];
+    },
+  },
+
   // Security Issues - Create ticket with investigation methodology
   {
     id: "security-vulnerability",

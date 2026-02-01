@@ -179,14 +179,22 @@ function mapCheckToIssueType(checkName: string): string {
 
 /**
  * Determine if an issue type can be auto-remediated
+ * Content issues (structure, readability, keyword) can be auto-fixed by Content Agent
+ * Technical issues (sitemap, robots) require human review
  */
 function canAutoRemediate(issueType: string): boolean {
   const autoRemediable = [
+    // Meta tag issues - Content Agent can generate these
     "seo.missing_title",
     "seo.missing_description",
     "seo.missing_og_tags",
+    // Content issues - Content Agent can optimize these
     "seo.thin_content",
     "seo.low_readability",
+    "seo.structure",      // Thin content/word count issues
+    "seo.readability",    // Readability score issues
+    "seo.keyword",        // Missing keyword issues
+    "seo.content",        // General content issues
   ];
   return autoRemediable.some(type => issueType.startsWith(type));
 }

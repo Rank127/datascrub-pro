@@ -1004,9 +1004,10 @@ export const metadata: Metadata = {
 
 let contentAgentInstance: ContentAgent | null = null;
 
-export function getContentAgent(): ContentAgent {
+export async function getContentAgent(): Promise<ContentAgent> {
   if (!contentAgentInstance) {
     contentAgentInstance = new ContentAgent();
+    await contentAgentInstance.initialize();
     registerAgent(contentAgentInstance);
   }
   return contentAgentInstance;
@@ -1016,7 +1017,7 @@ export async function generateBlogPost(
   topic: string,
   keywords?: string[]
 ): Promise<BlogPostResult> {
-  const agent = getContentAgent();
+  const agent = await getContentAgent();
   const context = createAgentContext({
     requestId: nanoid(),
     invocationType: InvocationTypes.ON_DEMAND,
@@ -1039,7 +1040,7 @@ export async function generateHelpArticle(
   topic: string,
   category: HelpArticleInput["category"]
 ): Promise<HelpArticleResult> {
-  const agent = getContentAgent();
+  const agent = await getContentAgent();
   const context = createAgentContext({
     requestId: nanoid(),
     invocationType: InvocationTypes.ON_DEMAND,
