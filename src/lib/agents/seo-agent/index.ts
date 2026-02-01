@@ -49,6 +49,12 @@ import {
   getLatestReport,
   SEOReport,
 } from "./report-generator";
+import {
+  runKeywordResearch,
+  getKeywordSuggestions,
+  KeywordResearchResult,
+  KeywordData,
+} from "./keyword-research";
 
 // ============================================================================
 // CONSTANTS
@@ -137,6 +143,17 @@ interface GetReportResult {
   formatted: object | null;
 }
 
+interface KeywordResearchInput {
+  topic?: string;
+}
+
+interface KeywordResearchResultOutput {
+  research: KeywordResearchResult;
+  topOpportunities: string[];
+  keywordGaps: string[];
+  competitorInsights: { competitor: string; topKeywords: string[] }[];
+}
+
 // ============================================================================
 // SEO AGENT CLASS
 // ============================================================================
@@ -181,6 +198,12 @@ class SEOAgent extends BaseAgent {
       description: "Retrieve the most recent SEO report",
       requiresAI: false,
     },
+    {
+      id: "keyword-research",
+      name: "Keyword Research",
+      description: "Search multiple engines (Google, Bing, DuckDuckGo) to discover keyword opportunities and competitor keywords",
+      requiresAI: false,
+    },
   ];
 
   protected getSystemPrompt(): string {
@@ -199,6 +222,7 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
     this.handlers.set("blog-ideas", this.handleBlogIdeas.bind(this));
     this.handlers.set("full-report", this.handleFullReport.bind(this));
     this.handlers.set("get-report", this.handleGetReport.bind(this));
+    this.handlers.set("keyword-research", this.handleKeywordResearch.bind(this));
   }
 
   private getBaseUrl(): string {
@@ -375,8 +399,23 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
         category: idea.category,
       }));
 
+      // Step 3.5: Keyword research from multiple engines
+      console.log(`[${this.name}] Running keyword research across search engines...`);
+      let keywordResearchData: KeywordResearchResult | null = null;
+      try {
+        keywordResearchData = await runKeywordResearch();
+        console.log(`[${this.name}] Found ${keywordResearchData.discoveredKeywords.length} keywords from ${keywordResearchData.searchEnginesUsed.join(", ")}`);
+      } catch (err) {
+        console.error(`[${this.name}] Keyword research failed, continuing without:`, err);
+      }
+
       // Step 4: Generate report
       const report = await generateSEOReport(technicalAudit, contentAnalysis, blogIdeas);
+
+      // Add keyword research to report
+      if (keywordResearchData) {
+        (report as SEOReport & { keywordResearch?: KeywordResearchResult }).keywordResearch = keywordResearchData;
+      }
 
       // Step 5: Store report
       await storeReport(report);
@@ -460,6 +499,97 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
         metadata: {
           agentId: this.id,
           capability: "get-report",
+          requestId: context.requestId,
+          duration: Date.now() - startTime,
+          usedFallback: false,
+          executedAt: new Date(),
+        },
+      };
+    }
+  }
+
+  private async handleKeywordResearch(
+    input: unknown,
+    context: AgentContext
+  ): Promise<AgentResult<KeywordResearchResultOutput>> {
+    const startTime = Date.now();
+    const { topic } = (input as KeywordResearchInput) || {};
+
+    try {
+      console.log(`[${this.name}] Starting multi-engine keyword research...`);
+
+      // Run full keyword research
+      const research = await runKeywordResearch();
+
+      // If topic provided, get topic-specific suggestions too
+      if (topic) {
+        const topicSuggestions = await getKeywordSuggestions(topic);
+        topicSuggestions.forEach(suggestion => {
+          if (!research.discoveredKeywords.find(k => k.keyword === suggestion)) {
+            research.discoveredKeywords.push({
+              keyword: suggestion,
+              source: "related",
+              relevance: 50,
+              currentlyTargeted: false,
+            });
+          }
+        });
+      }
+
+      // Extract top opportunities (high relevance, not targeted)
+      const topOpportunities = research.discoveredKeywords
+        .filter(k => k.relevance >= 60 && !k.currentlyTargeted)
+        .slice(0, 15)
+        .map(k => k.keyword);
+
+      // Group competitor keywords by competitor
+      const competitorMap = new Map<string, string[]>();
+      research.competitorKeywords.forEach(ck => {
+        const existing = competitorMap.get(ck.competitor) || [];
+        if (!existing.includes(ck.keyword)) {
+          existing.push(ck.keyword);
+        }
+        competitorMap.set(ck.competitor, existing);
+      });
+
+      const competitorInsights = Array.from(competitorMap.entries())
+        .map(([competitor, keywords]) => ({
+          competitor,
+          topKeywords: keywords.slice(0, 10),
+        }));
+
+      console.log(`[${this.name}] Keyword research complete.`);
+      console.log(`[${this.name}] Engines used: ${research.searchEnginesUsed.join(", ")}`);
+      console.log(`[${this.name}] Keywords found: ${research.discoveredKeywords.length}`);
+      console.log(`[${this.name}] Top opportunities: ${topOpportunities.length}`);
+
+      return this.createSuccessResult<KeywordResearchResultOutput>(
+        {
+          research,
+          topOpportunities,
+          keywordGaps: research.keywordGaps,
+          competitorInsights,
+        },
+        {
+          capability: "keyword-research",
+          requestId: context.requestId,
+          duration: Date.now() - startTime,
+          usedFallback: false,
+          executedAt: new Date(),
+        }
+      );
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          code: "KEYWORD_RESEARCH_ERROR",
+          message: error instanceof Error ? error.message : "Keyword research failed",
+          retryable: true,
+        },
+        needsHumanReview: false,
+        metadata: {
+          agentId: this.id,
+          capability: "keyword-research",
           requestId: context.requestId,
           duration: Date.now() - startTime,
           usedFallback: false,
@@ -575,6 +705,26 @@ export async function getBlogIdeas(limit = 10): Promise<BlogTopic[]> {
   throw new Error(result.error?.message || "Blog idea generation failed");
 }
 
+export async function runKeywordResearchReport(topic?: string): Promise<KeywordResearchResultOutput> {
+  const agent = await getSEOAgent();
+  const context = createAgentContext({
+    requestId: nanoid(),
+    invocationType: InvocationTypes.ON_DEMAND,
+  });
+
+  const result = await agent.execute<KeywordResearchResultOutput>(
+    "keyword-research",
+    { topic },
+    context
+  );
+
+  if (result.success && result.data) {
+    return result.data;
+  }
+
+  throw new Error(result.error?.message || "Keyword research failed");
+}
+
 export { SEOAgent };
 export default getSEOAgent;
 
@@ -585,4 +735,9 @@ export type {
   BlogIdeasResult,
   FullReportResult,
   GetReportResult,
+  KeywordResearchResultOutput,
 };
+
+// Re-export keyword research functions
+export { runKeywordResearch, getKeywordSuggestions } from "./keyword-research";
+export type { KeywordResearchResult, KeywordData } from "./keyword-research";
