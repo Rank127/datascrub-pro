@@ -2169,8 +2169,8 @@ We help prevent SSN exposure by:
     `
   },
   {
-    slug: "how-to-opt-out-of-peoplefinder",
-    title: "How to Opt Out of PeopleFinder.com (2026 Removal Guide)",
+    slug: "how-to-remove-yourself-from-peoplefinder",
+    title: "How to Remove Yourself from PeopleFinder (2026 Removal Guide)",
     description: "Remove your personal information from PeopleFinder with this step-by-step opt-out guide. Fast and free removal instructions that work.",
     publishedAt: "2026-01-05",
     author: "GhostMyData Team",
