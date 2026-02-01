@@ -66,7 +66,7 @@ const steps = [
     icon: Search,
     title: "Run a Full Scan",
     description:
-      "We search 2,100+ sites for your data. This includes data brokers, breach databases, and the dark web.",
+      "Our data broker removal system searches 2,100+ sites for your data. We check data brokers, breach databases, and the dark web.",
     details: [
       "2,100+ data brokers checked",
       "Breach databases scanned",
@@ -92,7 +92,7 @@ const steps = [
     icon: Trash2,
     title: "Auto Removal",
     description:
-      "We send opt-out requests to all sites. We also send CCPA and GDPR removal requests for you.",
+      "Our data removal service sends opt-out requests to all sites. We send CCPA and GDPR requests to remove personal information for you.",
     details: [
       "One-click removal",
       "Auto form filling",
@@ -119,17 +119,17 @@ const guarantees = [
   {
     icon: Shield,
     title: "Bank-Level Security",
-    description: "We use AES-256 encryption. We never share your data.",
+    description: "Our privacy protection uses AES-256 encryption. We never share your data.",
   },
   {
     icon: CheckCircle,
     title: "98% Success Rate",
-    description: "Our system removes data from 98% of data broker sites.",
+    description: "Our data removal service removes data from 98% of data broker sites.",
   },
   {
     icon: Bell,
     title: "24/7 Monitoring",
-    description: "We watch for new exposures all day, every day.",
+    description: "We watch for new exposures all day. We help you remove personal information fast.",
   },
 ];
 
@@ -172,8 +172,8 @@ export default function HowItWorksPage() {
             How GhostMyData Works
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            Our 5-step process finds and removes your personal data from across
-            the internet, then keeps you protected with continuous monitoring.
+            Our data removal service uses a 5-step process to remove personal information from data brokers.
+            We help you delete my data online and provide privacy protection with ongoing monitoring.
           </p>
         </div>
 
