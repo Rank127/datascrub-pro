@@ -10,13 +10,18 @@ export async function GET() {
   }
 
   try {
-    const alerts = await prisma.alert.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      take: 50, // Limit to last 50 alerts
-    });
+    const [alerts, unreadCount] = await Promise.all([
+      prisma.alert.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: "desc" },
+        take: 50, // Limit to last 50 alerts
+      }),
+      prisma.alert.count({
+        where: { userId: session.user.id, isRead: false },
+      }),
+    ]);
 
-    return NextResponse.json({ alerts });
+    return NextResponse.json({ alerts, unreadCount });
   } catch (error) {
     console.error("Failed to fetch alerts:", error);
     return NextResponse.json(

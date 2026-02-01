@@ -23,11 +23,34 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Prevent hydration mismatch with Radix UI dropdown IDs
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Fetch unread alert count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch("/api/alerts");
+        if (response.ok) {
+          const data = await response.json();
+          setUnreadCount(data.unreadCount || 0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch alert count:", error);
+      }
+    };
+
+    if (session?.user) {
+      fetchUnreadCount();
+      // Refresh count every 60 seconds
+      const interval = setInterval(fetchUnreadCount, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [session]);
 
   const initials = session?.user?.name
     ?.split(" ")
@@ -56,9 +79,11 @@ export function Header({ onMenuClick }: HeaderProps) {
         <Link href="/dashboard/alerts">
           <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-white">
             <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-              3
-            </span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </Button>
         </Link>
 
