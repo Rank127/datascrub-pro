@@ -10,6 +10,8 @@ import { nanoid } from "nanoid";
 // Initialize Resend for email notifications
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@ghostmydata.com";
+
 async function sendSEOAlertEmail(to: string, subject: string, content: string): Promise<boolean> {
   if (!resend) {
     console.log("[SEO Agent Cron] Email service not configured, skipping email");
@@ -33,6 +35,194 @@ async function sendSEOAlertEmail(to: string, subject: string, content: string): 
     console.error("[SEO Agent Cron] Failed to send email:", err);
     return false;
   }
+}
+
+interface RemediationSummary {
+  totalIssuesDetected: number;
+  totalAutoRemediated: number;
+  totalEscalated: number;
+  totalFailed: number;
+  issuesByType: Record<string, number>;
+  completedActions: Array<{
+    issueType: string;
+    description: string;
+    url?: string;
+    status: string;
+  }>;
+}
+
+async function sendRemediationSummaryEmail(summary: RemediationSummary, seoScore: number): Promise<boolean> {
+  if (!resend) {
+    console.log("[SEO Agent Cron] Email service not configured, skipping remediation summary");
+    return false;
+  }
+
+  // Only send if there were auto-remediated issues
+  if (summary.totalAutoRemediated === 0 && summary.totalEscalated === 0) {
+    console.log("[SEO Agent Cron] No remediation activity, skipping summary email");
+    return false;
+  }
+
+  const issueTypeLabels: Record<string, string> = {
+    "seo.structure": "Content Structure (Thin Content)",
+    "seo.readability": "Content Readability",
+    "seo.keyword": "Missing Keywords",
+    "seo.missing_title": "Missing Title Tag",
+    "seo.missing_description": "Missing Meta Description",
+    "seo.missing_og_tags": "Missing Open Graph Tags",
+  };
+
+  let html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; padding: 24px; }
+    h1 { color: #22d3ee; margin-top: 0; }
+    h2 { color: #94a3b8; font-size: 16px; margin-top: 24px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
+    .score { font-size: 48px; font-weight: bold; color: ${seoScore >= 80 ? '#22c55e' : seoScore >= 60 ? '#eab308' : '#ef4444'}; }
+    .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
+    .stat-box { background: #334155; border-radius: 8px; padding: 16px; text-align: center; }
+    .stat-value { font-size: 24px; font-weight: bold; color: #22d3ee; }
+    .stat-label { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+    .success { color: #22c55e; }
+    .warning { color: #eab308; }
+    .error { color: #ef4444; }
+    .action-list { list-style: none; padding: 0; margin: 0; }
+    .action-item { background: #334155; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+    .action-type { font-weight: bold; color: #22d3ee; }
+    .action-desc { color: #cbd5e1; font-size: 14px; margin-top: 4px; }
+    .action-url { color: #94a3b8; font-size: 12px; margin-top: 4px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+    .badge-success { background: #166534; color: #22c55e; }
+    .badge-escalated { background: #854d0e; color: #eab308; }
+    .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #334155; font-size: 12px; color: #64748b; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SEO Auto-Remediation Summary</h1>
+    <p>The SEO Agent has completed its automated scan and remediation.</p>
+
+    <div style="text-align: center; margin: 24px 0;">
+      <div class="score">${seoScore}/100</div>
+      <div style="color: #94a3b8;">Current SEO Score</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-value">${summary.totalIssuesDetected}</div>
+        <div class="stat-label">Issues Detected</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value success">${summary.totalAutoRemediated}</div>
+        <div class="stat-label">Auto-Remediated</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value warning">${summary.totalEscalated}</div>
+        <div class="stat-label">Escalated to Human</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value error">${summary.totalFailed}</div>
+        <div class="stat-label">Failed</div>
+      </div>
+    </div>`;
+
+  // Add issues by type breakdown
+  if (Object.keys(summary.issuesByType).length > 0) {
+    html += `
+    <h2>Issues by Type</h2>
+    <ul class="action-list">`;
+
+    for (const [type, count] of Object.entries(summary.issuesByType)) {
+      const label = issueTypeLabels[type] || type;
+      html += `
+      <li class="action-item">
+        <span class="action-type">${label}</span>
+        <span style="float: right; color: #94a3b8;">${count} issue${count !== 1 ? 's' : ''}</span>
+      </li>`;
+    }
+    html += `</ul>`;
+  }
+
+  // Add completed actions
+  if (summary.completedActions.length > 0) {
+    html += `
+    <h2>Remediation Actions Completed</h2>
+    <ul class="action-list">`;
+
+    for (const action of summary.completedActions.slice(0, 10)) {
+      const label = issueTypeLabels[action.issueType] || action.issueType;
+      const badgeClass = action.status === 'completed' ? 'badge-success' : 'badge-escalated';
+      const badgeText = action.status === 'completed' ? 'Auto-Fixed' : 'Escalated';
+
+      html += `
+      <li class="action-item">
+        <div>
+          <span class="action-type">${label}</span>
+          <span class="badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="action-desc">${action.description}</div>
+        ${action.url ? `<div class="action-url">${action.url}</div>` : ''}
+      </li>`;
+    }
+
+    if (summary.completedActions.length > 10) {
+      html += `<li class="action-item" style="text-align: center; color: #94a3b8;">... and ${summary.completedActions.length - 10} more actions</li>`;
+    }
+    html += `</ul>`;
+  }
+
+  html += `
+    <div class="footer">
+      <p>Generated by GhostMyData SEO Agent</p>
+      <p>${new Date().toISOString()}</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  try {
+    const { error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "GhostMyData <onboarding@resend.dev>",
+      to: SUPPORT_EMAIL,
+      subject: `SEO Auto-Remediation: ${summary.totalAutoRemediated} issues fixed, Score: ${seoScore}/100`,
+      html,
+    });
+
+    if (error) {
+      console.error("[SEO Agent Cron] Remediation summary email error:", error);
+      return false;
+    }
+
+    console.log(`[SEO Agent Cron] Sent remediation summary to ${SUPPORT_EMAIL}`);
+    return true;
+  } catch (err) {
+    console.error("[SEO Agent Cron] Failed to send remediation summary:", err);
+    return false;
+  }
+}
+
+async function waitForRemediationComplete(
+  remediationEngine: ReturnType<typeof getRemediationEngine>,
+  maxWaitMs = 60000,
+  pollIntervalMs = 1000
+): Promise<void> {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < maxWaitMs) {
+    const activePlans = remediationEngine.getActivePlans();
+    if (activePlans.length === 0) {
+      console.log("[SEO Agent Cron] All remediation plans completed");
+      return;
+    }
+
+    console.log(`[SEO Agent Cron] Waiting for ${activePlans.length} active plans to complete...`);
+    await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+  }
+
+  console.log("[SEO Agent Cron] Remediation wait timeout reached, continuing...");
 }
 
 // Verify cron secret to prevent unauthorized access
@@ -93,20 +283,44 @@ export async function GET(request: Request) {
 
     console.log(`[SEO Agent Cron] Run complete. Score: ${result.report.overallScore}/100`);
 
-    // Get remediation stats after SEO run
-    const remediationStats = remediationEngine.getStats();
-    const activePlans = remediationEngine.getActivePlans();
+    // Wait for all remediation plans to complete (max 60 seconds)
+    await waitForRemediationComplete(remediationEngine, 60000, 2000);
 
-    console.log(`[SEO Agent Cron] Remediation: ${remediationStats.totalIssuesDetected} issues detected, ${activePlans.length} active plans`);
+    // Get remediation stats after all plans complete
+    const remediationStats = remediationEngine.getStats();
+    const completedPlans = remediationEngine.getCompletedPlans(50);
+
+    console.log(`[SEO Agent Cron] Remediation: ${remediationStats.totalIssuesDetected} issues detected, ${remediationStats.totalAutoRemediated} auto-remediated`);
+
+    // Build remediation summary for email
+    const completedActions = completedPlans.map(plan => ({
+      issueType: plan.issue.type,
+      description: plan.issue.description,
+      url: plan.issue.affectedResource,
+      status: plan.status,
+    }));
+
+    const remediationSummary: RemediationSummary = {
+      totalIssuesDetected: remediationStats.totalIssuesDetected,
+      totalAutoRemediated: remediationStats.totalAutoRemediated,
+      totalEscalated: remediationStats.totalEscalated,
+      totalFailed: remediationStats.totalFailed,
+      issuesByType: remediationStats.issuesByType,
+      completedActions,
+    };
+
+    // Send remediation summary email to support
+    await sendRemediationSummaryEmail(remediationSummary, result.report.overallScore);
 
     return NextResponse.json({
       success: true,
       report: result.formatted,
       remediation: {
         issuesDetected: remediationStats.totalIssuesDetected,
-        plansCreated: remediationStats.totalPlansCreated,
-        activePlans: activePlans.length,
-        autoRemediatedCount: remediationStats.autoRemediatedCount,
+        totalAutoRemediated: remediationStats.totalAutoRemediated,
+        totalEscalated: remediationStats.totalEscalated,
+        totalFailed: remediationStats.totalFailed,
+        issuesByType: remediationStats.issuesByType,
       },
     });
   } catch (error) {
@@ -182,9 +396,35 @@ export async function POST(request: Request) {
 
     console.log("[SEO Agent Cron] Manual run complete");
 
-    // Get remediation stats after run
+    // Wait for all remediation plans to complete (max 60 seconds)
+    await waitForRemediationComplete(remediationEngine, 60000, 2000);
+
+    // Get remediation stats after all plans complete
     const remediationStats = remediationEngine.getStats();
-    const activePlans = remediationEngine.getActivePlans();
+    const completedPlans = remediationEngine.getCompletedPlans(50);
+
+    // Build remediation summary for email if this was a full report
+    if (capability === "full-report" && result.data) {
+      const reportData = result.data as { report: { overallScore: number } };
+      const completedActions = completedPlans.map(plan => ({
+        issueType: plan.issue.type,
+        description: plan.issue.description,
+        url: plan.issue.affectedResource,
+        status: plan.status,
+      }));
+
+      const remediationSummary: RemediationSummary = {
+        totalIssuesDetected: remediationStats.totalIssuesDetected,
+        totalAutoRemediated: remediationStats.totalAutoRemediated,
+        totalEscalated: remediationStats.totalEscalated,
+        totalFailed: remediationStats.totalFailed,
+        issuesByType: remediationStats.issuesByType,
+        completedActions,
+      };
+
+      // Send remediation summary email to support
+      await sendRemediationSummaryEmail(remediationSummary, reportData.report.overallScore);
+    }
 
     return NextResponse.json({
       success: true,
@@ -192,9 +432,10 @@ export async function POST(request: Request) {
       metadata: result.metadata,
       remediation: {
         issuesDetected: remediationStats.totalIssuesDetected,
-        plansCreated: remediationStats.totalPlansCreated,
-        activePlans: activePlans.length,
-        autoRemediatedCount: remediationStats.autoRemediatedCount,
+        totalAutoRemediated: remediationStats.totalAutoRemediated,
+        totalEscalated: remediationStats.totalEscalated,
+        totalFailed: remediationStats.totalFailed,
+        issuesByType: remediationStats.issuesByType,
       },
     });
   } catch (error) {
