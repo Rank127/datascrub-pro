@@ -358,10 +358,12 @@ export async function executeRemoval(
       }
 
       default: {
+        // Mark unknown methods as requiring manual intervention
+        await updateRemovalStatus(removalRequestId, "REQUIRES_MANUAL");
         return {
           success: false,
           method: "MANUAL_GUIDE",
-          message: "Unknown removal method",
+          message: `Unknown removal method: ${method}`,
         };
       }
     }

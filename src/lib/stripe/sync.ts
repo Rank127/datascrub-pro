@@ -257,6 +257,7 @@ export async function getExistingActiveSubscription(
 
 /**
  * Upgrade an existing subscription instead of creating a new one
+ * Uses proration to only charge the difference between plans
  */
 export async function upgradeSubscription(
   subscriptionId: string,
@@ -265,8 +266,14 @@ export async function upgradeSubscription(
   const stripe = getStripe();
 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const currentPriceId = subscription.items.data[0]?.price.id;
 
-  // Update the subscription to the new price
+  console.log(`[Stripe Upgrade] Upgrading subscription ${subscriptionId}`);
+  console.log(`[Stripe Upgrade] From price: ${currentPriceId} -> To price: ${newPriceId}`);
+
+  // Update the subscription to the new price with proper proration
+  // - proration_behavior: "always_invoice" creates an invoice immediately for the prorated amount
+  // - This charges only the difference between old and new plan for remaining billing period
   const updated = await stripe.subscriptions.update(subscriptionId, {
     items: [
       {
@@ -274,8 +281,11 @@ export async function upgradeSubscription(
         price: newPriceId,
       },
     ],
-    proration_behavior: "create_prorations", // Pro-rate the difference
+    proration_behavior: "always_invoice", // Immediately invoice the prorated difference
+    payment_behavior: "error_if_incomplete", // Fail if payment doesn't go through
   });
+
+  console.log(`[Stripe Upgrade] Successfully upgraded. New subscription status: ${updated.status}`);
 
   return updated;
 }
