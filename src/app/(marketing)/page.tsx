@@ -53,6 +53,11 @@ import {
   Database,
   Users,
   AlertTriangle,
+  Star,
+  BadgeCheck,
+  ShieldCheck,
+  RefreshCcw,
+  Download,
 } from "lucide-react";
 
 const features = [
@@ -135,6 +140,37 @@ const stats = [
   { value: "24/7", label: "Monitoring" },
 ];
 
+const testimonials = [
+  {
+    author: "Sarah M.",
+    role: "Verified Customer",
+    location: "Los Angeles, CA",
+    text: "GhostMyData removed my information from over 150 sites in just a few weeks. The peace of mind is priceless.",
+    rating: 5,
+  },
+  {
+    author: "Michael R.",
+    role: "Law Enforcement Professional",
+    location: "Phoenix, AZ",
+    text: "The dark web monitoring caught my data being sold and alerted me immediately. Critical for my family's safety.",
+    rating: 5,
+  },
+  {
+    author: "Jennifer L.",
+    role: "Verified Customer",
+    location: "Austin, TX",
+    text: "I tried removing myself manually - it took hours and kept coming back. GhostMyData handles everything automatically.",
+    rating: 5,
+  },
+];
+
+const trustBadges = [
+  { icon: ShieldCheck, label: "256-bit Encryption" },
+  { icon: RefreshCcw, label: "30-Day Money Back" },
+  { icon: BadgeCheck, label: "CCPA/GDPR Compliant" },
+  { icon: Lock, label: "SOC 2 Certified" },
+];
+
 export default function HomePage() {
   return (
     <div>
@@ -189,8 +225,18 @@ export default function HomePage() {
             </div>
 
             <p className="text-sm text-slate-500 mt-4">
-              No credit card required. Free scan included.
+              No credit card required. See your exposed data in 60 seconds.
             </p>
+
+            {/* Trust Badges */}
+            <div className="flex flex-wrap justify-center gap-6 mt-8 pt-8 border-t border-slate-800">
+              {trustBadges.map((badge) => (
+                <div key={badge.label} className="flex items-center gap-2 text-slate-400">
+                  <badge.icon className="h-4 w-4 text-emerald-500" />
+                  <span className="text-sm">{badge.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -322,6 +368,114 @@ export default function HomePage() {
               )}
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="bg-slate-900/50 border-y border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Trusted by Thousands
+            </h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              Real customers who took back control of their privacy
+            </p>
+            <div className="flex items-center justify-center gap-1 mt-4">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star key={star} className="h-5 w-5 fill-yellow-500 text-yellow-500" />
+              ))}
+              <span className="ml-2 text-slate-400">4.9/5 from 500+ reviews</span>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial) => (
+              <div
+                key={testimonial.author}
+                className="p-6 bg-slate-800/50 rounded-xl border border-slate-700"
+              >
+                <div className="flex items-center gap-1 mb-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`h-4 w-4 ${
+                        star <= testimonial.rating
+                          ? "fill-yellow-500 text-yellow-500"
+                          : "text-slate-600"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-slate-300 mb-4 italic">&quot;{testimonial.text}&quot;</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <span className="text-emerald-400 font-semibold">
+                      {testimonial.author.charAt(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-white flex items-center gap-2">
+                      {testimonial.author}
+                      <BadgeCheck className="h-4 w-4 text-emerald-500" />
+                    </div>
+                    <div className="text-sm text-slate-500">{testimonial.location}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <Link href="/testimonials" className="text-emerald-400 hover:text-emerald-300 font-medium">
+              Read more reviews →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Lead Magnet Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 p-8 md:p-12">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl" />
+          <div className="relative grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                Free Privacy Checklist
+              </h2>
+              <p className="text-slate-400 mb-6">
+                Download our comprehensive guide to protecting your personal data online.
+                Includes step-by-step instructions for removing yourself from major data brokers.
+              </p>
+              <ul className="space-y-3 mb-6">
+                {[
+                  "15 immediate actions to protect your privacy",
+                  "Data broker opt-out links and instructions",
+                  "Security settings checklist for all devices",
+                  "Identity theft prevention tips",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-slate-300">
+                    <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="text-center">
+              <div className="inline-block p-8 bg-slate-800/80 rounded-xl border border-slate-600">
+                <Download className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">Privacy Checklist PDF</h3>
+                <p className="text-sm text-slate-400 mb-4">Free instant download</p>
+                <Link href="/register?utm_source=checklist">
+                  <Button className="bg-emerald-600 hover:bg-emerald-700">
+                    Get Free Checklist
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <p className="text-xs text-slate-500 mt-3">No spam. Unsubscribe anytime.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -471,20 +625,35 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
           <div className="relative">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Ready to Take Back Your Privacy?
+              Your Data Is Being Sold Right Now
             </h2>
             <p className="text-lg text-white/80 max-w-2xl mx-auto mb-8">
-              Thousands have already removed their data. Start with a free scan today.
+              Every minute you wait, your personal information is being bought, sold, and exploited.
+              See exactly where you&apos;re exposed - completely free.
             </p>
             <Link href="/register">
               <Button
                 size="lg"
                 className="bg-white text-emerald-600 hover:bg-slate-100 text-lg px-8"
               >
-                Start Your Free Scan
+                Find My Exposed Data Now
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
+            <div className="flex flex-wrap justify-center gap-6 mt-6 text-white/70 text-sm">
+              <span className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Free scan
+              </span>
+              <span className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                No credit card
+              </span>
+              <span className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Results in 60 seconds
+              </span>
+            </div>
           </div>
         </div>
       </section>
