@@ -220,7 +220,8 @@ export async function executeRemoval(
   }
 
   // Determine execution method based on broker and available info
-  const method = removalRequest.method as RemovalMethod;
+  // Cast to string to handle both new and legacy method names in the database
+  const method = removalRequest.method as string;
 
   try {
     switch (method) {
@@ -381,7 +382,7 @@ export async function executeRemoval(
 
     return {
       success: false,
-      method,
+      method: method as RemovalMethod,
       message: "Failed to execute removal request",
     };
   }
