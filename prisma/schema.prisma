@@ -57,6 +57,12 @@ model User {
   ownedFamilyGroup       FamilyGroup?      @relation("FamilyOwner")
   familyMembership       FamilyMember?
   sentFamilyInvites      FamilyInvitation[] @relation("SentFamilyInvitations")
+  // Drip Campaign
+  dripCampaign           DripCampaign?
+  dripEmailLogs          DripEmailLog[]
+  // Referral Program
+  referralsMade          Referral[]        @relation("Referrals")
+  referredBy             Referral?         @relation("ReferredBy")
 }
 
 model Account {
@@ -611,5 +617,59 @@ model KeywordResearchRun {
   createdAt           DateTime @default(now())
 
   @@index([createdAt])
+  @@index([status])
+}
+
+// ==========================================
+// DRIP CAMPAIGN
+// ==========================================
+
+model DripCampaign {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrolledAt  DateTime @default(now())
+  nextEmailDay Int     @default(0)
+  status      String   @default("active") // active, paused, completed, unsubscribed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([enrolledAt])
+}
+
+model DripEmailLog {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId String   // welcome, scan_reminder, case_study, discount_offer, final_push
+  sentAt     DateTime @default(now())
+  opened     Boolean  @default(false)
+  clicked    Boolean  @default(false)
+
+  @@index([userId])
+  @@index([templateId])
+  @@index([sentAt])
+}
+
+// ==========================================
+// REFERRAL PROGRAM
+// ==========================================
+
+model Referral {
+  id             String    @id @default(cuid())
+  referrerId     String    // User who referred
+  referrer       User      @relation("Referrals", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredUserId String?   // User who was referred (null until they sign up)
+  referredUser   User?     @relation("ReferredBy", fields: [referredUserId], references: [id], onDelete: SetNull)
+  referralCode   String    @unique
+  status         String    @default("pending") // pending, signed_up, converted, rewarded
+  rewardAmount   Int       @default(0) // cents
+  createdAt      DateTime  @default(now())
+  convertedAt    DateTime?
+
+  @@index([referrerId])
+  @@index([referredUserId])
+  @@index([referralCode])
   @@index([status])
 }

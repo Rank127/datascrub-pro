@@ -18,11 +18,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Shield, Loader2, Check, Lock, Users } from "lucide-react";
 import { trackSignUp } from "@/components/analytics/google-analytics";
+import { trackEvents } from "@/components/analytics/retargeting-pixels";
 
 export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const discount = searchParams.get("discount");
+  const referralCode = searchParams.get("ref");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -63,7 +65,7 @@ export default function RegisterPage() {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, referralCode: referralCode || undefined }),
       });
 
       const data = await response.json();
@@ -75,6 +77,7 @@ export default function RegisterPage() {
 
       // Track successful sign up
       trackSignUp("email");
+      trackEvents.completeRegistration();
 
       // Redirect to login with success message
       router.push("/login?registered=true");

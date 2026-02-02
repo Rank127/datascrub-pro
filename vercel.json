@@ -90,6 +90,10 @@
     {
       "path": "/api/cron/clear-pending-queue",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/drip-campaigns",
+      "schedule": "0 10 * * *"
     }
   ]
 }

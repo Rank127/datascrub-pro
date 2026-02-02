@@ -3,6 +3,8 @@ import { hash } from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { encrypt } from "@/lib/encryption/crypto";
 import { sendWelcomeEmail } from "@/lib/email";
+import { enrollInDripCampaign } from "@/lib/email/drip-campaigns";
+import { trackReferralSignup } from "@/lib/referrals";
 import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
 import { z } from "zod";
 
@@ -10,6 +12,7 @@ const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   name: z.string().min(1, "Name is required"),
+  referralCode: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -31,7 +34,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { email, password, name } = result.data;
+    const { email, password, name, referralCode } = result.data;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -69,6 +72,14 @@ export async function POST(request: Request) {
 
     // Send welcome email (non-blocking)
     sendWelcomeEmail(email, name).catch(console.error);
+
+    // Enroll in drip campaign for conversion optimization (non-blocking)
+    enrollInDripCampaign(user.id).catch(console.error);
+
+    // Track referral if code provided (non-blocking)
+    if (referralCode) {
+      trackReferralSignup(referralCode, user.id).catch(console.error);
+    }
 
     return NextResponse.json(
       { message: "Account created successfully", userId: user.id },
