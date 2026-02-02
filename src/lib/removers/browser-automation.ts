@@ -583,12 +583,12 @@ export async function attemptAutomatedOptOut(
     };
   }
 
-  // Check if form requires CAPTCHA
-  if (formConfig.requiresCaptcha) {
+  // Check if form requires CAPTCHA and we can't solve it
+  if (formConfig.requiresCaptcha && !isCaptchaSolverEnabled()) {
     return {
       success: false,
       method: "MANUAL_REQUIRED",
-      message: `${broker.name} requires CAPTCHA verification`,
+      message: `${broker.name} requires CAPTCHA verification and solver is not configured`,
       nextSteps: [
         `Visit ${formConfig.url}`,
         "Complete the opt-out form",
@@ -598,7 +598,7 @@ export async function attemptAutomatedOptOut(
     };
   }
 
-  // Attempt automated form submission via Browserless
+  // Attempt automated form submission via Browserless (handles CAPTCHA with solver)
   return executeBrowserlessForm(brokerKey, userData);
 }
 

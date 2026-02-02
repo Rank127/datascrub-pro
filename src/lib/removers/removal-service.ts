@@ -1023,7 +1023,7 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
       const result = await executeRemoval(id, request.userId, { skipUserNotification: true });
       stats.processed++;
 
-      if (result.success && result.method === "AUTO_EMAIL") {
+      if (result.success && (result.method === "AUTO_EMAIL" || result.method === "AUTO_FORM")) {
         stats.successful++;
 
         // Track broker distribution
