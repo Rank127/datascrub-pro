@@ -3333,6 +3333,817 @@ GhostMyData helps protect remote workers by:
     `
   },
   {
+    slug: "protect-yourself-from-phishing-attacks",
+    title: "How to Protect Yourself from Phishing Attacks (2026 Guide)",
+    description: "Learn to identify and avoid phishing attacks. Protect your accounts from email, text, and voice phishing scams.",
+    publishedAt: "2026-02-02",
+    author: "GhostMyData Team",
+    category: "Security",
+    tags: ["phishing", "security", "scams", "email security"],
+    readTime: "9 min read",
+    content: `
+## What is Phishing?
+
+Phishing is a cyberattack where criminals impersonate trusted entities to steal your personal information, login credentials, or financial data.
+
+## Types of Phishing Attacks
+
+### Email Phishing
+Most common type:
+- Fake emails from "banks" or "services"
+- Urgent requests for action
+- Links to fake websites
+- Malicious attachments
+
+### Spear Phishing
+Targeted attacks using personal info:
+- Addressed to you by name
+- References real information about you
+- Appears to come from known contacts
+- Highly convincing
+
+### Smishing (SMS Phishing)
+Text message attacks:
+- Fake delivery notifications
+- Bank fraud alerts
+- Prize notifications
+- Account verification requests
+
+### Vishing (Voice Phishing)
+Phone call attacks:
+- IRS or government impersonators
+- Tech support scams
+- Bank security calls
+- Utility company threats
+
+## Red Flags to Watch For
+
+### Email Red Flags
+- Generic greetings ("Dear Customer")
+- Urgent or threatening language
+- Spelling and grammar errors
+- Suspicious sender addresses
+- Mismatched URLs (hover to check)
+- Requests for personal information
+
+### Website Red Flags
+- URL doesn't match company
+- No HTTPS/padlock
+- Poor design quality
+- Unusual form requests
+- Pop-ups asking for login
+
+## Protecting Yourself
+
+### Email Protection
+- Don't click links in unexpected emails
+- Go directly to websites instead
+- Verify sender addresses carefully
+- Enable spam filtering
+- Report phishing attempts
+
+### Account Security
+- Use unique passwords
+- Enable two-factor authentication
+- Use authenticator apps, not SMS
+- Monitor account activity
+
+### Browser Protection
+- Keep browser updated
+- Use anti-phishing extensions
+- Check URLs before entering data
+- Don't save passwords in browsers
+
+### Mobile Protection
+- Don't click links in texts from unknown numbers
+- Verify caller identity before sharing info
+- Use official apps for banking/shopping
+- Enable spam call blocking
+
+## What to Do If You're Phished
+
+1. **Change passwords immediately** - Start with the compromised account
+2. **Enable 2FA** - Add extra protection
+3. **Check for unauthorized access** - Review account activity
+4. **Monitor finances** - Watch for fraudulent charges
+5. **Report the phishing** - Forward to spam@uce.gov
+
+## GhostMyData Helps Reduce Phishing Risk
+
+Less exposed data means fewer phishing attempts:
+- Remove data from brokers (less info for spear phishing)
+- Dark web monitoring (know when credentials leak)
+- Breach alerts (act fast when exposed)
+
+[Reduce your phishing risk](/register) with a free scan.
+    `
+  },
+  {
+    slug: "protect-yourself-from-sim-swapping",
+    title: "How to Protect Yourself from SIM Swapping Attacks (2026)",
+    description: "Prevent SIM swap attacks that hijack your phone number. Protect your accounts from this growing threat.",
+    publishedAt: "2026-02-02",
+    author: "GhostMyData Team",
+    category: "Security",
+    tags: ["sim swapping", "security", "phone", "two-factor"],
+    readTime: "8 min read",
+    content: `
+## What is SIM Swapping?
+
+SIM swapping is when criminals convince your phone carrier to transfer your number to their SIM card. They then receive your calls, texts, and crucially - your 2FA codes.
+
+## How SIM Swap Attacks Work
+
+### Step 1: Information Gathering
+Criminals collect your info from:
+- Data brokers and people-search sites
+- Social media profiles
+- Data breaches
+- Phishing attacks
+
+### Step 2: Carrier Contact
+They contact your carrier pretending to be you:
+- Use gathered personal info
+- Claim phone is lost/stolen
+- Request SIM transfer
+
+### Step 3: Number Takeover
+Once successful:
+- Your phone loses service
+- They receive your calls/texts
+- They get your 2FA codes
+
+### Step 4: Account Compromise
+They quickly:
+- Reset passwords via SMS
+- Access financial accounts
+- Steal cryptocurrency
+- Take over social media
+
+## Warning Signs
+
+- Sudden loss of cell service
+- Unable to make calls/texts
+- Notification of SIM change you didn't request
+- Password reset emails you didn't initiate
+
+## Protection Measures
+
+### Carrier Security
+
+**Add a PIN/Passcode**
+- Call your carrier to add a transfer PIN
+- Required for any SIM changes
+- Different from voicemail PIN
+
+**Port Freeze**
+- Some carriers offer port freeze
+- Prevents number transfers
+- Requires extra verification to remove
+
+**Account Alerts**
+- Enable SIM change notifications
+- Account modification alerts
+- Login notifications
+
+### Authentication Security
+
+**Move Away from SMS 2FA**
+Use instead:
+- Authenticator apps (Google Authenticator, Authy)
+- Hardware keys (YubiKey)
+- Push notifications
+
+**Email Security**
+- Your email is your master key
+- Use strongest protection on email
+- Never use SMS 2FA for email
+
+### Reduce Data Exposure
+
+Less exposed data = harder to impersonate you:
+- Remove from data brokers
+- Minimize social media sharing
+- Protect date of birth, address, SSN
+
+## What to Do If SIM Swapped
+
+1. **Contact carrier immediately** - Report the swap
+2. **Regain your number** - May require ID verification
+3. **Change all passwords** - Assume accounts compromised
+4. **Check financial accounts** - Look for fraud
+5. **Enable non-SMS 2FA** - Prevent future attacks
+6. **File reports** - FTC, local police
+
+## GhostMyData Reduces SIM Swap Risk
+
+We remove the data criminals need:
+- Personal info from data brokers
+- Address and phone details
+- Information enabling impersonation
+
+[Protect yourself from SIM swapping](/register) with data removal.
+    `
+  },
+  {
+    slug: "protect-yourself-from-account-takeover",
+    title: "How to Protect Yourself from Account Takeover (2026 Guide)",
+    description: "Prevent account takeover attacks. Learn how criminals hijack accounts and how to stop them.",
+    publishedAt: "2026-02-02",
+    author: "GhostMyData Team",
+    category: "Security",
+    tags: ["account takeover", "security", "passwords", "protection"],
+    readTime: "8 min read",
+    content: `
+## What is Account Takeover?
+
+Account takeover (ATO) occurs when criminals gain unauthorized access to your online accounts. They can then steal money, data, or use your identity.
+
+## How Account Takeovers Happen
+
+### Credential Stuffing
+- Criminals obtain leaked passwords
+- Automate login attempts across sites
+- Exploit password reuse
+
+### Phishing
+- Trick you into revealing credentials
+- Fake login pages
+- Social engineering
+
+### SIM Swapping
+- Hijack your phone number
+- Intercept 2FA codes
+- Reset passwords via SMS
+
+### Malware
+- Keyloggers capture passwords
+- Browser hijackers steal sessions
+- Info-stealers harvest credentials
+
+### Social Engineering
+- Call customer support as you
+- Use personal info to verify identity
+- Bypass security questions
+
+## Accounts Most Targeted
+
+1. **Email** - Gateway to other accounts
+2. **Banking/Financial** - Direct money theft
+3. **Social Media** - Identity exploitation
+4. **Shopping** - Fraudulent purchases
+5. **Cryptocurrency** - Irreversible theft
+
+## Protection Strategies
+
+### Password Security
+- Unique password per account
+- 16+ characters
+- Use password manager
+- Never reuse passwords
+
+### Two-Factor Authentication
+- Enable on all accounts
+- Prefer authenticator apps
+- Hardware keys for high-value accounts
+- Avoid SMS when possible
+
+### Account Monitoring
+- Enable login notifications
+- Review active sessions
+- Check for unauthorized changes
+- Set up account alerts
+
+### Security Questions
+- Don't use real answers
+- Treat as secondary passwords
+- Store in password manager
+
+### Email Security
+- Strongest protection on email
+- Unique complex password
+- Hardware key 2FA if possible
+- It's your master account
+
+## Signs of Account Takeover
+
+- Login notifications from unknown locations
+- Password reset emails you didn't request
+- Missing emails (rules forwarding mail)
+- Unknown transactions
+- Friends report strange messages from you
+- Account lockouts
+
+## What to Do If Compromised
+
+1. **Regain access** - Reset password, contact support
+2. **Change password** - Create new unique password
+3. **Enable 2FA** - Add or strengthen authentication
+4. **Check settings** - Look for forwarding rules, connected apps
+5. **Review activity** - Find what was accessed/changed
+6. **Secure linked accounts** - Check accounts using same email/password
+
+## GhostMyData Helps Prevent ATO
+
+We reduce your attack surface:
+- Remove data used for social engineering
+- Monitor for credential breaches
+- Alert to dark web exposure
+
+[Protect your accounts](/register) with a free scan.
+    `
+  },
+  {
+    slug: "protect-yourself-from-doxxing",
+    title: "How to Protect Yourself from Doxxing (Complete 2026 Guide)",
+    description: "Prevent doxxing attacks that expose your personal information. Protect your privacy and stay safe online.",
+    publishedAt: "2026-02-02",
+    author: "GhostMyData Team",
+    category: "Security",
+    tags: ["doxxing", "privacy", "harassment", "security"],
+    readTime: "10 min read",
+    content: `
+## What is Doxxing?
+
+Doxxing (or doxing) is the malicious publication of someone's private information online without consent. It's used for harassment, intimidation, and threats.
+
+## Information Typically Doxxed
+
+- Home address
+- Phone number
+- Email address
+- Workplace
+- Family members
+- Photos
+- Social media accounts
+- Financial information
+
+## Why People Get Doxxed
+
+- Online disagreements
+- Gaming disputes
+- Political views
+- Journalism/activism
+- Revenge/relationship issues
+- Random targeting
+
+## How Doxxers Find Information
+
+### Data Brokers
+People-search sites like:
+- Spokeo, BeenVerified
+- Whitepages, TruePeopleSearch
+- Radaris, Intelius
+
+### Social Media
+- Location check-ins
+- Photo metadata
+- Friend networks
+- Workplace info
+
+### Public Records
+- Property records
+- Voter registration
+- Court filings
+- Business registrations
+
+### Domain Registration
+- WHOIS lookups
+- Website ownership
+
+## Protecting Yourself
+
+### Remove Data from Brokers
+**Most important step:**
+- Opt out of people-search sites
+- Remove from data aggregators
+- Monitor for re-listings
+- Use GhostMyData for automation
+
+### Social Media Privacy
+- Private accounts when possible
+- Remove location info
+- Limit personal details
+- Audit friend connections
+- Check photo backgrounds
+
+### Separate Identities
+- Different usernames per platform
+- Dedicated email for sensitive activities
+- Use pseudonyms when appropriate
+- Don't link accounts
+
+### Domain Privacy
+- Use WHOIS privacy protection
+- Use privacy-focused registrars
+- Consider proxy registration
+
+### Reduce Digital Footprint
+- Google yourself regularly
+- Remove old accounts
+- Use privacy-focused services
+- Limit data shared with services
+
+## If You're Doxxed
+
+### Immediate Steps
+1. **Document everything** - Screenshots of doxxing
+2. **Report to platforms** - Where info was posted
+3. **Notify police** - If threats are made
+4. **Warn family/workplace** - They may be targeted too
+
+### Damage Control
+- Change phone number if shared
+- Increase home security
+- Vary daily routines
+- Consider temporary relocation if threatened
+
+### Long-Term Recovery
+- Accelerate data broker removals
+- Increase privacy measures
+- Consider reputation management
+- Seek support if needed
+
+## GhostMyData Anti-Doxxing Protection
+
+We're specifically designed to prevent doxxing:
+- Remove from 2,100+ data brokers
+- Eliminate easy information sources
+- Continuous monitoring
+- Fast re-removal
+
+[Protect yourself from doxxing](/register) - start with a free scan.
+    `
+  },
+  {
+    slug: "protect-yourself-from-stalking",
+    title: "How to Protect Yourself from Stalking (Digital Safety Guide)",
+    description: "Protect your digital privacy from stalkers. Learn how to secure your location, accounts, and personal information.",
+    publishedAt: "2026-02-02",
+    author: "GhostMyData Team",
+    category: "Security",
+    tags: ["stalking", "safety", "privacy", "protection"],
+    readTime: "11 min read",
+    content: `
+## Digital Stalking: A Growing Threat
+
+Technology makes it easier for stalkers to track, monitor, and harass victims. Protecting your digital privacy is essential for physical safety.
+
+## How Stalkers Use Technology
+
+### Location Tracking
+- Hidden tracking apps
+- AirTag/Tile abuse
+- Social media location posts
+- Photo metadata
+
+### Data Broker Sites
+- Find current addresses
+- Discover phone numbers
+- Identify relatives
+- Track location history
+
+### Account Monitoring
+- Compromised email access
+- Shared account access
+- Keyloggers and spyware
+- Password reuse exploitation
+
+### Social Media
+- Direct monitoring
+- Fake friend requests
+- Information gathering
+- Network mapping
+
+## Protection Strategies
+
+### Location Security
+
+**Device Checks**
+- Check for unknown apps
+- Scan for AirTags (iPhone detects automatically)
+- Review location sharing settings
+- Check Google/Apple location history
+
+**Social Media**
+- Disable location on posts
+- Remove location metadata from photos
+- Don't check in at locations
+- Delay posting about locations
+
+### Account Security
+
+**Email Safety**
+- Change password
+- Enable 2FA (authenticator app, not SMS)
+- Review forwarding rules
+- Check connected apps
+- Use new email if compromised
+
+**All Accounts**
+- Change all passwords
+- Remove shared access
+- Enable login notifications
+- Review security settings
+
+### Data Removal
+
+**Priority: People-Search Sites**
+These sites are stalker tools:
+- Reveal current address
+- Show phone numbers
+- List family members
+- Provide background info
+
+Removing this data is critical for safety.
+
+### Physical Security
+
+**Address Protection**
+- Use PO Box or mail service
+- Consider address confidentiality program
+- Don't use home address for deliveries
+
+**Phone Number**
+- Consider new number
+- Use Google Voice as buffer
+- Enable spam/call blocking
+
+## Resources for Victims
+
+### Safety Planning
+- National Domestic Violence Hotline: 1-800-799-7233
+- Stalking Prevention, Awareness, and Resource Center (SPARC)
+- Local victim advocates
+
+### Legal Options
+- Restraining orders
+- Police reports
+- Documentation of incidents
+
+### Tech Safety
+- Tech Safety Project (NNEDV)
+- Device security assessments
+- Account security help
+
+## GhostMyData for Stalking Survivors
+
+We help protect stalking victims by:
+- Removing data stalkers use to find you
+- Eliminating address exposure on people-search sites
+- Ongoing monitoring for re-listings
+- Reducing digital footprint
+
+[Protect your safety](/register) with emergency data removal.
+
+*If you're in immediate danger, call 911.*
+    `
+  },
+  {
+    slug: "protect-yourself-from-data-breaches",
+    title: "How to Protect Yourself from Data Breaches (2026 Guide)",
+    description: "Minimize your risk from data breaches. Learn proactive steps to protect your data and what to do when breaches occur.",
+    publishedAt: "2026-02-02",
+    author: "GhostMyData Team",
+    category: "Security",
+    tags: ["data breach", "security", "protection", "privacy"],
+    readTime: "9 min read",
+    content: `
+## The Data Breach Reality
+
+Data breaches are constant. Major companies, small businesses, and government agencies all get breached. The question isn't if your data will be exposed, but when.
+
+## 2025-2026 Breach Statistics
+
+- 3,200+ publicly disclosed breaches
+- 8+ billion records exposed
+- Average person in 5+ breaches
+- Costs companies $4.5M average
+
+## Types of Data Breached
+
+### Common
+- Email addresses
+- Passwords (often hashed)
+- Names and usernames
+
+### Sensitive
+- Social Security Numbers
+- Financial data
+- Medical records
+- Government IDs
+
+### Dangerous Combinations
+- Full identity profiles
+- Authentication data
+- Security question answers
+
+## Proactive Protection
+
+### Minimize Data Exposure
+
+**Share Less**
+- Question why data is needed
+- Provide minimum required
+- Use fake data when possible (non-legal forms)
+
+**Reduce Accounts**
+- Delete unused accounts
+- Consolidate where possible
+- Use "Sign in with" carefully
+
+**Remove from Data Brokers**
+- Less aggregated data = less breach exposure
+- Fewer places storing your info
+- Reduced identity theft risk
+
+### Strong Account Security
+
+**Passwords**
+- Unique per account
+- 16+ characters
+- Password manager
+
+**Two-Factor Authentication**
+- Enable everywhere
+- Authenticator apps preferred
+- Hardware keys for critical accounts
+
+### Monitoring
+
+**Breach Alerts**
+- Use HaveIBeenPwned
+- GhostMyData breach monitoring
+- Google/Firefox alerts
+
+**Credit Monitoring**
+- Free credit reports
+- Credit freezes (proactive)
+- Fraud alerts
+
+## When a Breach Occurs
+
+### Immediate Actions
+1. **Change password** on breached service
+2. **Change it everywhere** if reused
+3. **Enable 2FA** if not already
+4. **Monitor the account** for suspicious activity
+
+### If Sensitive Data Exposed
+
+**SSN Exposed**
+- Freeze credit immediately
+- IRS Identity Protection PIN
+- Monitor credit closely
+
+**Financial Data**
+- Alert your bank/card issuer
+- Request new cards
+- Monitor transactions
+
+**Medical Data**
+- Watch for medical identity theft
+- Review insurance statements
+- Check medical records
+
+## GhostMyData Breach Protection
+
+We help before and after breaches:
+
+**Before:**
+- Remove data from brokers (less to steal)
+- Reduce your digital footprint
+- Fewer places storing your data
+
+**After:**
+- Breach monitoring alerts
+- Dark web surveillance
+- Rapid notification
+
+[Get breach protection](/register) with your free scan.
+    `
+  },
+  {
+    slug: "protect-yourself-from-social-engineering",
+    title: "How to Protect Yourself from Social Engineering Attacks",
+    description: "Defend against manipulation tactics used by scammers. Learn to recognize and prevent social engineering attacks.",
+    publishedAt: "2026-02-02",
+    author: "GhostMyData Team",
+    category: "Security",
+    tags: ["social engineering", "scams", "security", "manipulation"],
+    readTime: "10 min read",
+    content: `
+## What is Social Engineering?
+
+Social engineering is psychological manipulation that tricks people into making security mistakes or giving away sensitive information. It exploits human nature rather than technical vulnerabilities.
+
+## Common Social Engineering Tactics
+
+### Pretexting
+Creating a fabricated scenario:
+- "This is IT, we need your password"
+- "I'm from the bank fraud department"
+- "There's been an accident, I need your info"
+
+### Phishing
+Deceptive communications:
+- Fake emails from trusted brands
+- Fraudulent text messages
+- Impersonation websites
+
+### Baiting
+Offering something enticing:
+- Free USB drives (infected)
+- Too-good-to-be-true offers
+- Fake prize notifications
+
+### Quid Pro Quo
+Offering a service in exchange:
+- Fake tech support
+- Survey rewards for info
+- Help in exchange for access
+
+### Tailgating
+Physical access exploitation:
+- Following employees into buildings
+- Impersonating delivery persons
+- Exploiting courtesy
+
+## Why Social Engineering Works
+
+### Psychological Triggers
+- **Authority** - We comply with authority figures
+- **Urgency** - Pressure reduces critical thinking
+- **Fear** - Threats cloud judgment
+- **Reciprocity** - We feel obligated to return favors
+- **Social proof** - We follow others' actions
+- **Liking** - We trust people we like
+
+## Protection Strategies
+
+### Verify Independently
+- Don't use contact info provided by caller
+- Look up official numbers independently
+- Call back through verified channels
+
+### Question Urgency
+- Legitimate organizations allow verification time
+- Pressure = red flag
+- Pause before acting
+
+### Protect Information
+- Never share passwords
+- Verify identity before sharing data
+- Question unusual requests
+
+### Be Skeptical
+- If it seems too good, it is
+- Authority can be faked
+- Verify through other channels
+
+### Secure Your Data
+- Less available info = harder to manipulate
+- Remove from data brokers
+- Limit social media sharing
+
+## Common Scenarios
+
+### Fake Tech Support
+"Microsoft" calls about virus:
+- Microsoft doesn't call unsolicited
+- Never give remote access
+- Hang up and ignore
+
+### IRS/Government Impersonation
+Threatening calls about taxes:
+- IRS contacts by mail first
+- Never demands gift cards
+- Verify through irs.gov
+
+### Business Email Compromise
+Boss emails requesting wire transfer:
+- Verify through known phone number
+- Question unusual requests
+- Confirm in person if possible
+
+### Romance Scams
+Online relationship asking for money:
+- Never send money to online contacts
+- Video verify identity
+- Be wary of overseas contacts
+
+## GhostMyData Reduces Social Engineering Risk
+
+Social engineers use your data against you. We help by:
+- Removing info from data brokers
+- Reducing publicly available data
+- Making you harder to research
+- Less information = less convincing pretexts
+
+[Protect yourself from manipulation](/register) with data removal.
+    `
+  },
+  {
     slug: "protect-yourself-from-identity-theft",
     title: "10 Ways to Protect Yourself from Identity Theft in 2026",
     description: "Essential tips to prevent identity theft. Learn how to protect your personal information, detect fraud early, and recover if you become a victim.",

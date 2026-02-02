@@ -107,11 +107,11 @@ export default function BlogPage() {
         </section>
       )}
 
-      {/* All Posts */}
+      {/* All Posts - Limited to 12 for performance */}
       <section>
-        <h2 className="text-2xl font-bold text-white mb-8">All Articles</h2>
+        <h2 className="text-2xl font-bold text-white mb-8">Latest Articles</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts.map((post) => (
+          {posts.slice(0, 12).map((post) => (
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
@@ -146,6 +146,20 @@ export default function BlogPage() {
             </Link>
           ))}
         </div>
+        {posts.length > 12 && (
+          <div className="mt-8 text-center">
+            <p className="text-slate-400 mb-4">
+              Showing 12 of {posts.length} articles
+            </p>
+            <Link
+              href="/blog/archive"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg transition-colors border border-slate-700"
+            >
+              View All Articles
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* CTA */}
