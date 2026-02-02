@@ -221,7 +221,7 @@ export function PrivacyScoreQuiz() {
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Check Your Email!</h2>
         <p className="text-slate-400 mb-6">
-          We've sent your personalized privacy report to <strong>{email}</strong>
+          We&apos;ve sent your personalized privacy report to <strong>{email}</strong>
         </p>
         <p className="text-sm text-slate-500 mb-6">
           Want to take action now? Start a free scan to see all your exposed data.

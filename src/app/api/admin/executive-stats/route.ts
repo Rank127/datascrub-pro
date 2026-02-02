@@ -646,17 +646,17 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
   // Parse plan change details from audit logs
   const recentPlanChanges = recentPlanChangeLogs.map((log) => {
     // Parse details - it's stored as JSON string or object
-    let details: Record<string, any> = {};
+    let details: Record<string, unknown> = {};
     if (log.details) {
       try {
-        details = typeof log.details === "string" ? JSON.parse(log.details) : (log.details as Record<string, any>);
+        details = typeof log.details === "string" ? JSON.parse(log.details) : (log.details as Record<string, unknown>);
       } catch {
         details = {};
       }
     }
 
-    const previousPlan = details.previousPlan || details.oldPlan || details.from || "FREE";
-    const newPlan = details.newPlan || details.plan || details.to || "FREE";
+    const previousPlan = String(details.previousPlan || details.oldPlan || details.from || "FREE");
+    const newPlan = String(details.newPlan || details.plan || details.to || "FREE");
 
     // Determine change type
     const planRank: Record<string, number> = { FREE: 0, PRO: 1, ENTERPRISE: 2 };
@@ -674,11 +674,11 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
       id: log.id,
       userId: log.targetUserId || "",
       userEmail: log.targetEmail || log.actorEmail,
-      userName: details.userName || details.name || null,
+      userName: details.userName ? String(details.userName) : details.name ? String(details.name) : null,
       previousPlan,
       newPlan,
       changeType,
-      reason: details.reason || details.cancelReason || undefined,
+      reason: details.reason ? String(details.reason) : details.cancelReason ? String(details.cancelReason) : undefined,
       createdAt: log.createdAt.toISOString(),
     };
   });

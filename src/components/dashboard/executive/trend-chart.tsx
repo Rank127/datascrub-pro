@@ -45,7 +45,7 @@ export function TrendChart({
 }: TrendChartProps) {
   const chartColor = COLORS[color as keyof typeof COLORS] || COLORS.emerald;
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-lg">
@@ -227,7 +227,7 @@ export function DonutChart({ title, data, height = 200 }: PieChartProps) {
               height={36}
               content={({ payload }) => (
                 <div className="flex flex-wrap justify-center gap-4 mt-2">
-                  {payload?.map((entry: any, index: number) => (
+                  {payload?.map((entry: { color?: string; value?: string }, index: number) => (
                     <div key={index} className="flex items-center gap-2">
                       <div
                         className="w-3 h-3 rounded-full"

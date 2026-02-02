@@ -47,6 +47,7 @@ type DialogType = "activeUsers7" | "activeUsers30" | "signup" | "planChanges" | 
 
 export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
   const [dialogType, setDialogType] = useState<DialogType>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
   const formatDate = (dateStr: string) => {
@@ -70,6 +71,7 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUserClick = (user: any) => {
     setSelectedItem(user);
     setDialogType("user");
@@ -85,6 +87,7 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
     setDialogType("winback");
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleAuditLogClick = (log: any) => {
     setSelectedItem(log);
     setDialogType("auditLog");

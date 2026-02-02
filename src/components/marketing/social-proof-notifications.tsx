@@ -42,15 +42,25 @@ export function SocialProofNotifications() {
       return;
     }
 
+    const showNotificationHandler = () => {
+      setNotification(getRandomNotification());
+      setIsVisible(true);
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        setIsVisible(false);
+      }, 5000);
+    };
+
     // Show first notification after 8 seconds
     const initialTimer = setTimeout(() => {
-      showNotification();
+      showNotificationHandler();
     }, 8000);
 
     // Then show every 25-45 seconds
     const interval = setInterval(() => {
       const randomDelay = Math.floor(Math.random() * 20000) + 25000;
-      setTimeout(showNotification, randomDelay);
+      setTimeout(showNotificationHandler, randomDelay);
     }, 45000);
 
     return () => {
@@ -58,16 +68,6 @@ export function SocialProofNotifications() {
       clearInterval(interval);
     };
   }, []);
-
-  const showNotification = () => {
-    setNotification(getRandomNotification());
-    setIsVisible(true);
-
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-      setIsVisible(false);
-    }, 5000);
-  };
 
   const handleClose = () => {
     setIsVisible(false);

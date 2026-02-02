@@ -49,6 +49,7 @@ prisma/dev.db-journal
 *.mjs
 !next.config.mjs
 !postcss.config.mjs
+!eslint.config.mjs
 
 # IDE
 .idea

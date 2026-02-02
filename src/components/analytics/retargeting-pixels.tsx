@@ -52,7 +52,7 @@ export function RetargetingPixels() {
     const initFbq = () => {
       const n = (window.fbq = function (...args: unknown[]) {
         if (n.callMethod) {
-          n.callMethod.apply(n, args);
+          n.callMethod(...args);
         } else {
           n.queue.push(args);
         }

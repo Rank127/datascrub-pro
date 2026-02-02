@@ -132,7 +132,7 @@ export default function ComparePage() {
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <Clock className="h-8 w-8 text-emerald-500 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Speed</h3>
-              <p className="text-slate-400">Auto systems work faster. They don't miss sites. They follow up on time.</p>
+              <p className="text-slate-400">Auto systems work faster. They don&apos;t miss sites. They follow up on time.</p>
             </div>
             <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
               <BarChart3 className="h-8 w-8 text-emerald-500 mb-4" />

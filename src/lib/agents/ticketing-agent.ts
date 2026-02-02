@@ -878,9 +878,10 @@ async function sendTicketResponseEmail(
     const { sendTicketStatusUpdateEmail } = await import("@/lib/email");
     await sendTicketStatusUpdateEmail(email, name, {
       ticketNumber,
+      subject: "Support Request",
       status: "RESOLVED",
       comment: response,
-    } as any);
+    });
   } catch (error) {
     console.error("Failed to send ticket response email:", error);
   }
