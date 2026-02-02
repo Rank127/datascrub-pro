@@ -341,4 +341,37 @@ Based on competitor analysis (DeleteMe, Kanary, Privacy Duck):
 - Some features may require third-party partnerships or API access
 - Security and privacy compliance are non-negotiable for all features
 
-Last Updated: January 25, 2026
+---
+
+## Recently Completed (v1.25.0 - February 2026)
+
+### Conversion Optimization Suite
+All features implemented and live:
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Exit-Intent Popup | 50% off offer when leaving | ✅ Live |
+| Social Proof Notifications | "X just signed up" toasts | ✅ Live |
+| Live Chat Widget | Crisp integration | ✅ Live |
+| Countdown Timer | Limited time offer urgency | ✅ Live |
+| Retargeting Pixels | Facebook Pixel + Google Ads | ✅ Live |
+| Email Drip Campaigns | 5-email nurture sequence (14 days) | ✅ Live |
+| Referral Program | Give $10, Get $10 system | ✅ Live |
+| Privacy Score Quiz | Interactive lead capture at /privacy-score | ✅ Live |
+
+### SEO Automation
+| Feature | Description | Status |
+|---------|-------------|--------|
+| SEO Agent | Runs 6x daily, 579+ keywords tracked | ✅ Live |
+| Content Optimizer | Automatic page improvements | ✅ Live |
+| Link Checker | Broken link detection | ✅ Live |
+
+### Technical Improvements
+- Next.js 16.1.4 with Turbopack
+- Suspense boundaries for useSearchParams
+- Client wrapper components for ssr:false dynamic imports
+- Improved CAPTCHA handling in removal service
+
+---
+
+Last Updated: February 1, 2026

@@ -130,6 +130,17 @@ src/
 │   │       ├── user-activities   # Activity tables
 │   │       ├── metric-card       # Reusable KPI card
 │   │       └── trend-chart       # Recharts wrapper
+│   ├── marketing/                # Conversion optimization
+│   │   ├── exit-intent-popup     # 50% off exit popup
+│   │   ├── social-proof-notifications # "X just signed up" toasts
+│   │   ├── live-chat-widget      # Crisp chat integration
+│   │   ├── countdown-timer       # Limited time offer timer
+│   │   ├── privacy-score-quiz    # Interactive lead capture quiz
+│   │   ├── marketing-widgets     # Client wrapper for widgets
+│   │   └── pricing-countdown     # Client wrapper for timer
+│   ├── analytics/                # Tracking components
+│   │   ├── google-analytics      # GA4 integration
+│   │   └── retargeting-pixels    # Facebook Pixel + Google Ads
 │   ├── forms/                    # Form components
 │   └── seo/                      # SEO components
 │
@@ -443,6 +454,17 @@ enum RemovalStatus {
 | Health Check | Daily 7 AM UTC | System validation |
 | Monitoring | Daily 6 AM UTC | Check for new exposures |
 | Reports | Monday 8 AM UTC | Send weekly reports |
+| SEO Agent | Every 4 hours | Keyword research, site audits |
+| Process Removals | 6x daily (2,6,10,14,18,22 UTC) | Submit removal requests |
+| Verify Removals | Daily 8 AM UTC | Verify completed removals |
+| Drip Campaigns | Daily 10 AM UTC | Send nurture emails |
+| Content Optimizer | Daily 3 AM UTC | Optimize page content |
+| Link Checker | Daily 5 AM UTC | Find broken links |
+| Ticketing Agent | Daily 9 AM UTC | AI ticket resolution |
+| Free User Digest | Wednesday 10 AM UTC | Weekly digest for free users |
+| Close Resolved Tickets | Daily 11 AM UTC | Auto-close stale tickets |
+| Monthly Rescan | 1st of month 10 AM UTC | Trigger monthly scans |
+| Clear Pending Queue | Hourly | Clean stale queue items |
 
 ### Health Check Tests
 - Database connectivity

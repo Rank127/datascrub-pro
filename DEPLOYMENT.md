@@ -51,6 +51,24 @@ NEXT_PUBLIC_APP_URL=https://your-domain.com
 NEXT_PUBLIC_APP_NAME=GhostMyData
 ```
 
+### Analytics & Retargeting (Optional)
+```
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-xxx (Google Analytics 4)
+NEXT_PUBLIC_FB_PIXEL_ID=xxx (Facebook Pixel)
+NEXT_PUBLIC_GOOGLE_ADS_ID=AW-xxx (Google Ads)
+NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID=xxx (Conversion tracking)
+```
+
+### Live Chat (Optional)
+```
+NEXT_PUBLIC_CRISP_WEBSITE_ID=xxx (Crisp chat widget)
+```
+
+### Cron Jobs
+```
+CRON_SECRET=xxx (Vercel cron authentication)
+```
+
 ---
 
 ## Stripe Setup
@@ -146,6 +164,26 @@ npx prisma db push
 - [x] Password hashing (bcrypt)
 - [x] Rate limiting on critical endpoints
 - [x] Plan restrictions for paid features
+
+### Marketing & Conversion (Complete)
+- [x] Exit-intent popup (50% off offer)
+- [x] Social proof notifications
+- [x] Live chat widget (Crisp)
+- [x] Countdown timer for urgency
+- [x] Retargeting pixels (Facebook + Google)
+- [x] Email drip campaigns (5-email sequence)
+- [x] Referral program (Give $10, Get $10)
+- [x] Privacy score quiz lead capture
+
+### SEO & Analytics (Complete)
+- [x] Google Analytics 4 integration
+- [x] Facebook Pixel tracking
+- [x] Google Ads conversion tracking
+- [x] SEO agent (runs 6x daily)
+- [x] Content optimizer
+- [x] Link checker
+- [x] Dynamic sitemap
+- [x] RSS feed
 
 ---
 
