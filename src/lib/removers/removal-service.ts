@@ -224,7 +224,9 @@ export async function executeRemoval(
 
   try {
     switch (method) {
-      case "AUTO_EMAIL": {
+      // Handle both new (AUTO_EMAIL) and legacy (EMAIL) method names
+      case "AUTO_EMAIL":
+      case "EMAIL": {
         // Send CCPA/GDPR removal request email
         // Only send if broker supports email AND has a valid privacyEmail
         const supportsEmail = brokerInfo.removalMethod === "EMAIL" || brokerInfo.removalMethod === "BOTH";
@@ -259,7 +261,8 @@ export async function executeRemoval(
           }
         }
 
-        // Fall back to manual if email fails
+        // Fall back to manual if email fails - mark as REQUIRES_MANUAL
+        await updateRemovalStatus(removalRequestId, "REQUIRES_MANUAL");
         return {
           success: true,
           method: "MANUAL_GUIDE",
@@ -268,7 +271,9 @@ export async function executeRemoval(
         };
       }
 
-      case "AUTO_FORM": {
+      // Handle both new (AUTO_FORM) and legacy (FORM) method names
+      case "AUTO_FORM":
+      case "FORM": {
         // Try browser automation if configured
         if (isAutomationEnabled()) {
           // Get full profile for form data
