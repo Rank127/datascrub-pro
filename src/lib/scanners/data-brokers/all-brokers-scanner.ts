@@ -94,12 +94,12 @@ function getSeverityForBroker(brokerKey: string): Severity {
   }
 
   // Medium for professional/B2B
-  if (BROKER_CATEGORIES.PROFESSIONAL_B2B.includes(brokerKey as any)) {
+  if ((BROKER_CATEGORIES.PROFESSIONAL_B2B as readonly string[]).includes(brokerKey)) {
     return "MEDIUM";
   }
 
   // Medium for marketing data brokers
-  if (BROKER_CATEGORIES.MARKETING.includes(brokerKey as any)) {
+  if ((BROKER_CATEGORIES.MARKETING as readonly string[]).includes(brokerKey)) {
     return "MEDIUM";
   }
 

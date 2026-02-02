@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const stats = registry.getStats();
 
     // Get execution data from database
-    let executionStats = {
+    const executionStats = {
       total: 0,
       successful: 0,
       failed: 0,

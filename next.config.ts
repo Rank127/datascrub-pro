@@ -31,29 +31,6 @@ const securityHeaders = [
   },
 ];
 
-const corsHeaders = [
-  {
-    key: "Access-Control-Allow-Origin",
-    value: process.env.CORS_ORIGIN || "*",
-  },
-  {
-    key: "Access-Control-Allow-Methods",
-    value: "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-  },
-  {
-    key: "Access-Control-Allow-Headers",
-    value: "Content-Type, Authorization, X-Requested-With",
-  },
-  {
-    key: "Access-Control-Allow-Credentials",
-    value: "true",
-  },
-  {
-    key: "Access-Control-Max-Age",
-    value: "86400",
-  },
-];
-
 const nextConfig: NextConfig = {
   async headers() {
     return [
@@ -61,10 +38,7 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: securityHeaders,
       },
-      {
-        source: "/api/:path*",
-        headers: corsHeaders,
-      },
+      // CORS is handled by middleware for dynamic origin support with credentials
     ];
   },
   async rewrites() {

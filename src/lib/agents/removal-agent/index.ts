@@ -574,7 +574,7 @@ class RemovalAgent extends BaseAgent {
 
       const results: VerifyResult["results"] = [];
       let verified = 0;
-      let stillPresent = 0;
+      const stillPresent = 0;
       let errors = 0;
 
       for (const removal of toVerify) {

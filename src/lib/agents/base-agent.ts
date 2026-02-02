@@ -240,7 +240,7 @@ export abstract class BaseAgent implements Agent {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
     // Get execution stats from database
-    let stats = {
+    const stats = {
       executions24h: 0,
       successes24h: 0,
       failures24h: 0,

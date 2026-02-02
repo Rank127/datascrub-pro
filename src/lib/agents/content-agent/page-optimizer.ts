@@ -129,7 +129,7 @@ export function findKeywords(text: string, keywords: string[]): string[] {
 
 export function extractTextContent(jsxContent: string): string {
   // Remove imports, exports, and code
-  let text = jsxContent
+  const text = jsxContent
     // Remove import statements
     .replace(/^import\s+.*?;?\s*$/gm, "")
     // Remove export statements (but keep content)

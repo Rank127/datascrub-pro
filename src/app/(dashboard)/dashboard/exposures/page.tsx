@@ -510,7 +510,7 @@ function ExposuresPageContent() {
                   <li>• They control their database</li>
                   <li>• CCPA/GDPR laws require them to delete on request</li>
                   <li>• GhostMyData sends automated opt-out requests</li>
-                  <li>• <span className="text-emerald-400">Can be removed</span> - click "Remove" button</li>
+                  <li>• <span className="text-emerald-400">Can be removed</span> - click &quot;Remove&quot; button</li>
                 </ul>
               </div>
               <div className="p-4 bg-purple-900/20 border border-purple-700/30 rounded-lg">
@@ -524,7 +524,7 @@ function ExposuresPageContent() {
                 <ul className="text-sm text-slate-400 space-y-1">
                   <li>• The data was stolen and leaked online</li>
                   <li>• Exists on hacker forums, dark web, torrents</li>
-                  <li>• The original company can't "remove" it</li>
+                  <li>• The original company can&apos;t &quot;remove&quot; it</li>
                   <li>• <span className="text-purple-400">Cannot be removed</span> - take protective action instead</li>
                 </ul>
               </div>

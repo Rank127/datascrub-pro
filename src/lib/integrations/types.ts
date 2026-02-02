@@ -282,9 +282,8 @@ export interface ResendServiceStatus extends ServiceStatus {
   queue?: EmailQueueInfo;
 }
 
-export interface HIBPServiceStatus extends ServiceStatus {
-  // HIBP uses standard RateLimitHealth now
-}
+// HIBP uses standard ServiceStatus (no additional fields needed)
+export type HIBPServiceStatus = ServiceStatus;
 
 export interface LeakCheckServiceStatus extends ServiceStatus {
   credits?: number;

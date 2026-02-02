@@ -222,7 +222,7 @@ export default function SecurityPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Event Logs:</strong> We log all safety events. These logs can't be changed.</span>
+                    <span><strong className="text-slate-300">Event Logs:</strong> We log all safety events. These logs can&apos;t be changed.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -251,7 +251,7 @@ export default function SecurityPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span><strong className="text-slate-300">CSP Headers:</strong> Strict headers block cross-site scripting. Bad code can't run on our pages.</span>
+                  <span><strong className="text-slate-300">CSP Headers:</strong> Strict headers block cross-site scripting. Bad code can&apos;t run on our pages.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -343,7 +343,7 @@ export default function SecurityPage() {
                 </a>
               </p>
               <p className="text-slate-400 mt-4 text-sm">
-                Please give us time to fix the issue before you share it. We don't take legal action against good faith reports.
+                Please give us time to fix the issue before you share it. We don&apos;t take legal action against good faith reports.
               </p>
             </div>
           </section>

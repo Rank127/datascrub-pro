@@ -215,7 +215,7 @@ export async function POST(request: Request) {
     }[] = [];
 
     let totalProcessed = 0;
-    let totalConsolidated = 0;
+    const totalConsolidated = 0;
     let successCount = 0;
     let failCount = 0;
     let emailsSent = 0;

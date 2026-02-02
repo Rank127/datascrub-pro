@@ -2,19 +2,36 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// CORS headers for API routes
-const corsHeaders: Record<string, string> = {
-  "Access-Control-Allow-Origin": process.env.CORS_ORIGIN || "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
-  "Access-Control-Allow-Credentials": "true",
-  "Access-Control-Max-Age": "86400",
-};
+// Allowed origins for CORS (comma-separated in env, or single origin)
+const ALLOWED_ORIGINS = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
+  : [];
+
+// Get CORS headers with dynamic origin validation
+function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
+  // If no allowed origins configured, allow same-origin only (no CORS header)
+  // If origin matches allowed list, reflect it back
+  const origin =
+    requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin)
+      ? requestOrigin
+      : ALLOWED_ORIGINS[0] || "";
+
+  return {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Max-Age": "86400",
+  };
+}
 
 // Helper to add CORS headers to response
-function addCorsHeaders(response: NextResponse): NextResponse {
+function addCorsHeaders(response: NextResponse, requestOrigin: string | null): NextResponse {
+  const corsHeaders = getCorsHeaders(requestOrigin);
   Object.entries(corsHeaders).forEach(([key, value]) => {
-    response.headers.set(key, value);
+    if (value) {
+      response.headers.set(key, value);
+    }
   });
   return response;
 }
@@ -24,13 +41,14 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const isApiRoute = nextUrl.pathname.startsWith("/api");
   const hostname = req.headers.get("host") || "";
+  const requestOrigin = req.headers.get("origin");
   const isAdminSubdomain = hostname.startsWith("admin.") || hostname.startsWith("192.168.");
 
   // Handle CORS preflight requests
   if (req.method === "OPTIONS" && isApiRoute) {
     return new NextResponse(null, {
       status: 204,
-      headers: corsHeaders,
+      headers: getCorsHeaders(requestOrigin),
     });
   }
 
@@ -58,7 +76,7 @@ export default auth((req) => {
   if (isApiAuthPage || isBingVerify || isCronRoute) {
     const response = NextResponse.next();
     if (isApiRoute) {
-      return addCorsHeaders(response);
+      return addCorsHeaders(response, requestOrigin);
     }
     return response;
   }
@@ -89,7 +107,7 @@ export default auth((req) => {
   // Add CORS headers to all API responses
   const response = NextResponse.next();
   if (isApiRoute) {
-    return addCorsHeaders(response);
+    return addCorsHeaders(response, requestOrigin);
   }
 
   return response;

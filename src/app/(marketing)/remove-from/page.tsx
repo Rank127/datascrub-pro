@@ -182,7 +182,7 @@ export default function RemoveFromPage() {
             </div>
             <div className="space-y-3">
               <h3 className="text-lg font-semibold text-white">Stalking</h3>
-              <p className="text-slate-400">Stalkers find targets on people-search sites. Your address shouldn't be online for all to see.</p>
+              <p className="text-slate-400">Stalkers find targets on people-search sites. Your address shouldn&apos;t be online for all to see.</p>
             </div>
             <div className="space-y-3">
               <h3 className="text-lg font-semibold text-white">Scams</h3>

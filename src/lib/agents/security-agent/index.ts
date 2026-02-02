@@ -495,7 +495,7 @@ class SecurityAgent extends BaseAgent {
       const notifications: BreachNotificationResult["notifications"] = [];
       let pending = 0;
       let sent = 0;
-      let failed = 0;
+      const failed = 0;
 
       for (const user of affectedUsers) {
         const affectedData = [...new Set(user.exposures.map((e) => e.dataType))];
