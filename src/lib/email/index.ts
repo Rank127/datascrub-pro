@@ -43,7 +43,11 @@ export function canSendEmail(): boolean {
   return emailsSentToday < DAILY_EMAIL_LIMIT;
 }
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH_URL || "https://ghostmydata.com";
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || `${APP_NAME} <onboarding@resend.dev>`;
+
+// Use getter to ensure env var is read at runtime (after dotenv loads in scripts)
+function getFromEmail(): string {
+  return process.env.RESEND_FROM_EMAIL || `${APP_NAME} <onboarding@resend.dev>`;
+}
 
 // Base email template
 function baseTemplate(content: string): string {
@@ -162,7 +166,7 @@ async function sendEmail(
 
   try {
     const { error } = await client.emails.send({
-      from: FROM_EMAIL,
+      from: getFromEmail(),
       to,
       subject,
       html,
