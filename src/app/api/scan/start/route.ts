@@ -332,11 +332,21 @@ export async function POST(request: Request) {
 
     const sourcesChecked = orchestrator.getSourcesCheckedCount();
 
+    // Count exposures by severity for upgrade recommendations
+    const severityCounts = {
+      critical: exposures.filter(e => e.severity === "CRITICAL").length,
+      high: exposures.filter(e => e.severity === "HIGH").length,
+      medium: exposures.filter(e => e.severity === "MEDIUM").length,
+      low: exposures.filter(e => e.severity === "LOW").length,
+    };
+
     return NextResponse.json({
       scanId: scan.id,
       exposuresFound: exposures.length,
       sourcesChecked,
       status: "COMPLETED",
+      severityCounts,
+      userPlan,
     });
   } catch (error) {
     console.error("Scan error:", error);

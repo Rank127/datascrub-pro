@@ -46,6 +46,13 @@ export default function ScanPage() {
     exposuresFound: number;
     sourcesChecked: number;
     scanId: string;
+    severityCounts?: {
+      critical: number;
+      high: number;
+      medium: number;
+      low: number;
+    };
+    userPlan?: string;
   } | null>(null);
   const [error, setError] = useState("");
   const [requiresUpgrade, setRequiresUpgrade] = useState(false);
@@ -153,6 +160,58 @@ export default function ScanPage() {
       default:
         return <Clock className="h-4 w-4 text-slate-400" />;
     }
+  };
+
+  // Determine recommended plan based on exposure severity
+  const getRecommendedPlan = () => {
+    if (!scanResult?.severityCounts) return null;
+    const { critical, high, medium, low } = scanResult.severityCounts;
+    const totalExposures = critical + high + medium + low;
+
+    if (totalExposures === 0) return null;
+
+    // Recommend Enterprise for critical/high severity or many exposures
+    if (critical > 0 || high >= 3 || totalExposures >= 10) {
+      return {
+        plan: "ENTERPRISE",
+        title: "Enterprise Protection Recommended",
+        reason: critical > 0
+          ? `You have ${critical} critical exposure${critical !== 1 ? 's' : ''} that require immediate attention.`
+          : high >= 3
+          ? `You have ${high} high-severity exposures that put your identity at serious risk.`
+          : `With ${totalExposures} exposures found, you need comprehensive protection.`,
+        features: [
+          "Automated removal from 2,000+ data brokers",
+          "AI Shield protection from AI training data",
+          "Priority removal processing",
+          "Dedicated support & removal verification",
+          "Dark web monitoring",
+        ],
+        price: "$29/month",
+        savings: "Save 50% with code EXIT50",
+        cta: "Protect My Data Now",
+        urgency: critical > 0 ? "URGENT: Your data is at critical risk" : "Your identity is at high risk",
+      };
+    }
+
+    // Recommend Pro for medium/low severity
+    return {
+      plan: "PRO",
+      title: "Pro Protection Recommended",
+      reason: high > 0
+        ? `You have ${high} high-severity exposure${high !== 1 ? 's' : ''} that should be addressed.`
+        : `We found ${totalExposures} exposure${totalExposures !== 1 ? 's' : ''} of your personal data.`,
+      features: [
+        "Automated removal requests",
+        "Monthly monitoring scans",
+        "Email & form opt-out automation",
+        "Removal tracking dashboard",
+      ],
+      price: "$11.99/month",
+      savings: "Save 50% with code EXIT50",
+      cta: "Start Removing My Data",
+      urgency: high > 0 ? "Act now to protect your privacy" : "Take control of your data",
+    };
   };
 
   return (
@@ -291,33 +350,118 @@ export default function ScanPage() {
               </p>
             </div>
           ) : scanResult ? (
-            <div className="text-center space-y-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 mb-2">
-                <CheckCircle className="h-8 w-8 text-emerald-500" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white">
-                  Scan Complete
-                </h3>
-                <p className="text-slate-400">
-                  Found {scanResult.exposuresFound} exposures across{" "}
-                  {scanResult.sourcesChecked} sources
-                </p>
-              </div>
-              <div className="flex gap-4 justify-center">
-                <Link href="/dashboard/exposures">
-                  <Button className="bg-emerald-600 hover:bg-emerald-700">
-                    View Exposures
+            <div className="space-y-6">
+              <div className="text-center space-y-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 mb-2">
+                  <CheckCircle className="h-8 w-8 text-emerald-500" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white">
+                    Scan Complete
+                  </h3>
+                  <p className="text-slate-400">
+                    Found {scanResult.exposuresFound} exposures across{" "}
+                    {scanResult.sourcesChecked} sources
+                  </p>
+                </div>
+
+                {/* Severity breakdown */}
+                {scanResult.severityCounts && scanResult.exposuresFound > 0 && (
+                  <div className="flex justify-center gap-3 flex-wrap">
+                    {scanResult.severityCounts.critical > 0 && (
+                      <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+                        {scanResult.severityCounts.critical} Critical
+                      </Badge>
+                    )}
+                    {scanResult.severityCounts.high > 0 && (
+                      <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
+                        {scanResult.severityCounts.high} High
+                      </Badge>
+                    )}
+                    {scanResult.severityCounts.medium > 0 && (
+                      <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                        {scanResult.severityCounts.medium} Medium
+                      </Badge>
+                    )}
+                    {scanResult.severityCounts.low > 0 && (
+                      <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">
+                        {scanResult.severityCounts.low} Low
+                      </Badge>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex gap-4 justify-center">
+                  <Link href="/dashboard/exposures">
+                    <Button className="bg-emerald-600 hover:bg-emerald-700">
+                      View Exposures
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    className="border-slate-600"
+                    onClick={() => setScanResult(null)}
+                  >
+                    New Scan
                   </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  className="border-slate-600"
-                  onClick={() => setScanResult(null)}
-                >
-                  New Scan
-                </Button>
+                </div>
               </div>
+
+              {/* Upgrade Recommendation for FREE users */}
+              {isFreePlan && scanResult.exposuresFound > 0 && (() => {
+                const recommendation = getRecommendedPlan();
+                if (!recommendation) return null;
+
+                return (
+                  <div className={`p-6 rounded-lg border ${
+                    recommendation.plan === "ENTERPRISE"
+                      ? "bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30"
+                      : "bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border-emerald-500/30"
+                  }`}>
+                    {/* Urgency banner for critical/high exposures */}
+                    {scanResult.severityCounts && (scanResult.severityCounts.critical > 0 || scanResult.severityCounts.high >= 3) && (
+                      <div className="flex items-center justify-center gap-2 mb-4 p-2 bg-red-500/20 rounded-lg">
+                        <AlertTriangle className="h-4 w-4 text-red-400" />
+                        <span className="text-sm font-medium text-red-400">{recommendation.urgency}</span>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Crown className={`h-5 w-5 ${recommendation.plan === "ENTERPRISE" ? "text-purple-400" : "text-emerald-400"}`} />
+                          <h4 className="text-lg font-semibold text-white">{recommendation.title}</h4>
+                        </div>
+                        <p className="text-slate-300 mb-3">{recommendation.reason}</p>
+                        <ul className="space-y-1 mb-4">
+                          {recommendation.features.map((feature, index) => (
+                            <li key={index} className="flex items-center gap-2 text-sm text-slate-400">
+                              <CheckCircle className="h-3 w-3 text-emerald-500 flex-shrink-0" />
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="text-center md:text-right">
+                        <div className="mb-2">
+                          <span className="text-2xl font-bold text-white">{recommendation.price}</span>
+                        </div>
+                        <p className="text-sm text-emerald-400 mb-3">{recommendation.savings}</p>
+                        <Link href="/pricing">
+                          <Button className={`w-full md:w-auto ${
+                            recommendation.plan === "ENTERPRISE"
+                              ? "bg-purple-600 hover:bg-purple-700"
+                              : "bg-emerald-600 hover:bg-emerald-700"
+                          }`}>
+                            <Shield className="mr-2 h-4 w-4" />
+                            {recommendation.cta}
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           ) : (
             <div className="text-center space-y-4">
