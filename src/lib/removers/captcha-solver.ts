@@ -1,19 +1,21 @@
 /**
- * CAPTCHA Solver Service using 2Captcha
+ * CAPTCHA Solver Service using CapSolver
  *
  * Supports:
  * - reCAPTCHA v2 (checkbox and invisible)
  * - reCAPTCHA v3
  * - hCaptcha
  * - Image CAPTCHA (text recognition)
+ * - FunCaptcha
  *
  * Pricing (as of 2026):
- * - reCAPTCHA v2: $2.99 per 1000 solved
- * - reCAPTCHA v3: $2.99 per 1000 solved
- * - hCaptcha: $2.99 per 1000 solved
- * - Image CAPTCHA: $0.50-$1.00 per 1000
+ * - reCAPTCHA v2: $0.8-1.5 per 1000 solved
+ * - reCAPTCHA v3: $1.5-2.5 per 1000 solved
+ * - hCaptcha: $0.8-1.5 per 1000 solved
+ * - Image CAPTCHA: $0.1-0.2 per 1000
  *
- * Set TWOCAPTCHA_API_KEY in environment to enable.
+ * Set CAPSOLVER_API_KEY in environment to enable.
+ * Get your API key at: https://capsolver.com
  */
 
 export type CaptchaType =
@@ -41,33 +43,36 @@ export interface CaptchaSolveResult {
   solveTime?: number;    // Time in seconds
 }
 
-const TWOCAPTCHA_API = "https://2captcha.com";
-const POLL_INTERVAL = 5000;  // 5 seconds
-const MAX_POLL_TIME = 180000; // 3 minutes max wait
+const CAPSOLVER_API = "https://api.capsolver.com";
+const POLL_INTERVAL = 2000;  // 2 seconds (CapSolver is faster)
+const MAX_POLL_TIME = 120000; // 2 minutes max wait
 
 /**
  * Check if CAPTCHA solving is enabled
  */
 export function isCaptchaSolverEnabled(): boolean {
-  return !!process.env.TWOCAPTCHA_API_KEY;
+  return !!process.env.CAPSOLVER_API_KEY;
 }
 
 /**
- * Get 2Captcha account balance
+ * Get CapSolver account balance
  */
 export async function getCaptchaBalance(): Promise<number | null> {
-  const apiKey = process.env.TWOCAPTCHA_API_KEY;
+  const apiKey = process.env.CAPSOLVER_API_KEY;
   if (!apiKey) return null;
 
   try {
-    const response = await fetch(
-      `${TWOCAPTCHA_API}/res.php?key=${apiKey}&action=getbalance&json=1`
-    );
+    const response = await fetch(`${CAPSOLVER_API}/getBalance`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientKey: apiKey }),
+    });
     const data = await response.json();
 
-    if (data.status === 1) {
-      return parseFloat(data.request);
+    if (data.errorId === 0) {
+      return data.balance;
     }
+    console.error("[Captcha] Balance error:", data.errorDescription);
     return null;
   } catch {
     return null;
@@ -75,15 +80,15 @@ export async function getCaptchaBalance(): Promise<number | null> {
 }
 
 /**
- * Solve a CAPTCHA using 2Captcha service
+ * Solve a CAPTCHA using CapSolver service
  */
 export async function solveCaptcha(request: CaptchaSolveRequest): Promise<CaptchaSolveResult> {
-  const apiKey = process.env.TWOCAPTCHA_API_KEY;
+  const apiKey = process.env.CAPSOLVER_API_KEY;
 
   if (!apiKey) {
     return {
       success: false,
-      error: "CAPTCHA solver not configured (TWOCAPTCHA_API_KEY missing)",
+      error: "CAPTCHA solver not configured (CAPSOLVER_API_KEY missing)",
     };
   }
 
@@ -91,19 +96,38 @@ export async function solveCaptcha(request: CaptchaSolveRequest): Promise<Captch
 
   try {
     // Submit CAPTCHA for solving
-    const taskId = await submitCaptcha(apiKey, request);
+    const taskResult = await submitCaptcha(apiKey, request);
 
-    if (!taskId) {
+    if (!taskResult.success) {
       return {
         success: false,
-        error: "Failed to submit CAPTCHA to solver",
+        error: taskResult.error || "Failed to submit CAPTCHA to solver",
       };
     }
 
-    console.log(`[Captcha] Submitted ${request.type} CAPTCHA, task ID: ${taskId}`);
+    // If solution is returned immediately (CapSolver can do this)
+    if (taskResult.solution) {
+      const solveTime = (Date.now() - startTime) / 1000;
+      console.log(`[Captcha] Solved instantly in ${solveTime.toFixed(1)}s`);
+      return {
+        success: true,
+        solution: taskResult.solution,
+        solveTime,
+        cost: getCaptchaCost(request.type),
+      };
+    }
 
-    // Poll for solution
-    const solution = await pollForSolution(apiKey, taskId);
+    // Otherwise poll for solution
+    if (!taskResult.taskId) {
+      return {
+        success: false,
+        error: "No task ID returned from solver",
+      };
+    }
+
+    console.log(`[Captcha] Submitted ${request.type} CAPTCHA, task ID: ${taskResult.taskId}`);
+
+    const solution = await pollForSolution(apiKey, taskResult.taskId);
 
     if (!solution) {
       return {
@@ -130,70 +154,108 @@ export async function solveCaptcha(request: CaptchaSolveRequest): Promise<Captch
   }
 }
 
-/**
- * Submit CAPTCHA to 2Captcha for solving
- */
-async function submitCaptcha(apiKey: string, request: CaptchaSolveRequest): Promise<string | null> {
-  const params = new URLSearchParams({
-    key: apiKey,
-    json: "1",
-    soft_id: "4706", // 2Captcha partner ID for tracking
-  });
-
-  switch (request.type) {
-    case "recaptcha_v2":
-    case "recaptcha_v2_invisible":
-      params.append("method", "userrecaptcha");
-      params.append("googlekey", request.siteKey!);
-      params.append("pageurl", request.pageUrl);
-      if (request.type === "recaptcha_v2_invisible") {
-        params.append("invisible", "1");
-      }
-      break;
-
-    case "recaptcha_v3":
-      params.append("method", "userrecaptcha");
-      params.append("googlekey", request.siteKey!);
-      params.append("pageurl", request.pageUrl);
-      params.append("version", "v3");
-      params.append("action", request.action || "verify");
-      params.append("min_score", String(request.minScore || 0.3));
-      break;
-
-    case "hcaptcha":
-      params.append("method", "hcaptcha");
-      params.append("sitekey", request.siteKey!);
-      params.append("pageurl", request.pageUrl);
-      break;
-
-    case "image":
-      params.append("method", "base64");
-      params.append("body", request.imageBase64!);
-      break;
-
-    case "funcaptcha":
-      params.append("method", "funcaptcha");
-      params.append("publickey", request.siteKey!);
-      params.append("pageurl", request.pageUrl);
-      break;
-
-    default:
-      return null;
-  }
-
-  const response = await fetch(`${TWOCAPTCHA_API}/in.php?${params.toString()}`);
-  const data = await response.json();
-
-  if (data.status === 1) {
-    return data.request; // Task ID
-  }
-
-  console.error("[Captcha] Submit error:", data.request);
-  return null;
+interface TaskSubmitResult {
+  success: boolean;
+  taskId?: string;
+  solution?: string;
+  error?: string;
 }
 
 /**
- * Poll 2Captcha for solution
+ * Submit CAPTCHA to CapSolver for solving
+ */
+async function submitCaptcha(apiKey: string, request: CaptchaSolveRequest): Promise<TaskSubmitResult> {
+  let task: Record<string, unknown>;
+
+  switch (request.type) {
+    case "recaptcha_v2":
+      task = {
+        type: "ReCaptchaV2TaskProxyLess",
+        websiteURL: request.pageUrl,
+        websiteKey: request.siteKey,
+      };
+      break;
+
+    case "recaptcha_v2_invisible":
+      task = {
+        type: "ReCaptchaV2TaskProxyLess",
+        websiteURL: request.pageUrl,
+        websiteKey: request.siteKey,
+        isInvisible: true,
+      };
+      break;
+
+    case "recaptcha_v3":
+      task = {
+        type: "ReCaptchaV3TaskProxyLess",
+        websiteURL: request.pageUrl,
+        websiteKey: request.siteKey,
+        pageAction: request.action || "verify",
+        minScore: request.minScore || 0.7,
+      };
+      break;
+
+    case "hcaptcha":
+      task = {
+        type: "HCaptchaTaskProxyLess",
+        websiteURL: request.pageUrl,
+        websiteKey: request.siteKey,
+      };
+      break;
+
+    case "image":
+      task = {
+        type: "ImageToTextTask",
+        body: request.imageBase64,
+      };
+      break;
+
+    case "funcaptcha":
+      task = {
+        type: "FunCaptchaTaskProxyLess",
+        websiteURL: request.pageUrl,
+        websitePublicKey: request.siteKey,
+      };
+      break;
+
+    default:
+      return { success: false, error: `Unsupported CAPTCHA type: ${request.type}` };
+  }
+
+  try {
+    const response = await fetch(`${CAPSOLVER_API}/createTask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        clientKey: apiKey,
+        task,
+      }),
+    });
+    const data = await response.json();
+
+    if (data.errorId !== 0) {
+      console.error("[Captcha] Submit error:", data.errorDescription);
+      return { success: false, error: data.errorDescription };
+    }
+
+    // CapSolver may return solution immediately
+    if (data.solution) {
+      const solution = data.solution.gRecaptchaResponse ||
+                       data.solution.token ||
+                       data.solution.text ||
+                       data.solution;
+      return { success: true, solution: typeof solution === 'string' ? solution : JSON.stringify(solution) };
+    }
+
+    return { success: true, taskId: data.taskId };
+  } catch (error) {
+    console.error("[Captcha] Submit exception:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Network error" };
+  }
+}
+
+/**
+ * Poll CapSolver for solution
  */
 async function pollForSolution(apiKey: string, taskId: string): Promise<string | null> {
   const startTime = Date.now();
@@ -201,39 +263,59 @@ async function pollForSolution(apiKey: string, taskId: string): Promise<string |
   while (Date.now() - startTime < MAX_POLL_TIME) {
     await sleep(POLL_INTERVAL);
 
-    const response = await fetch(
-      `${TWOCAPTCHA_API}/res.php?key=${apiKey}&action=get&id=${taskId}&json=1`
-    );
-    const data = await response.json();
+    try {
+      const response = await fetch(`${CAPSOLVER_API}/getTaskResult`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientKey: apiKey,
+          taskId,
+        }),
+      });
+      const data = await response.json();
 
-    if (data.status === 1) {
-      return data.request; // Solution
-    }
+      if (data.errorId !== 0) {
+        console.error("[Captcha] Poll error:", data.errorDescription);
+        return null;
+      }
 
-    if (data.request !== "CAPCHA_NOT_READY") {
-      console.error("[Captcha] Poll error:", data.request);
+      if (data.status === "ready" && data.solution) {
+        // Extract the solution token based on CAPTCHA type
+        const solution = data.solution.gRecaptchaResponse ||
+                         data.solution.token ||
+                         data.solution.text ||
+                         data.solution;
+        return typeof solution === 'string' ? solution : JSON.stringify(solution);
+      }
+
+      if (data.status === "failed") {
+        console.error("[Captcha] Task failed:", data.errorDescription);
+        return null;
+      }
+
+      // Status is "processing", continue polling
+    } catch (error) {
+      console.error("[Captcha] Poll exception:", error);
       return null;
     }
-
-    // Still processing, continue polling
   }
 
   return null; // Timeout
 }
 
 /**
- * Get estimated cost for CAPTCHA type
+ * Get estimated cost for CAPTCHA type (CapSolver pricing)
  */
 function getCaptchaCost(type: CaptchaType): number {
   const costs: Record<CaptchaType, number> = {
-    recaptcha_v2: 0.00299,
-    recaptcha_v2_invisible: 0.00299,
-    recaptcha_v3: 0.00299,
-    hcaptcha: 0.00299,
-    image: 0.001,
-    funcaptcha: 0.00299,
+    recaptcha_v2: 0.001,
+    recaptcha_v2_invisible: 0.001,
+    recaptcha_v3: 0.002,
+    hcaptcha: 0.001,
+    image: 0.0001,
+    funcaptcha: 0.002,
   };
-  return costs[type] || 0.003;
+  return costs[type] || 0.002;
 }
 
 /**
@@ -303,6 +385,6 @@ export async function getCaptchaSolverStatus(): Promise<{
   return {
     enabled,
     balance,
-    provider: enabled ? "2Captcha" : "None",
+    provider: enabled ? "CapSolver" : "None",
   };
 }

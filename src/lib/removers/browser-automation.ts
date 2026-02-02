@@ -5,7 +5,7 @@
  *
  * Requirements:
  * - BROWSERLESS_API_KEY: For browser automation ($50/month for 10,000 sessions)
- * - TWOCAPTCHA_API_KEY: For CAPTCHA solving (~$3 per 1000 CAPTCHAs)
+ * - CAPSOLVER_API_KEY: For CAPTCHA solving (~$1-2 per 1000 CAPTCHAs)
  *
  * Supports:
  * - Simple forms (no CAPTCHA)
@@ -314,7 +314,7 @@ async function executeBrowserlessForm(
         method: "MANUAL_REQUIRED",
         message: `${brokerKey} requires CAPTCHA - solver not configured`,
         nextSteps: [
-          "Set TWOCAPTCHA_API_KEY in environment, or:",
+          "Set CAPSOLVER_API_KEY in environment, or:",
           `Visit ${formConfig.url}`,
           "Complete the opt-out form manually",
           "Solve the CAPTCHA",
