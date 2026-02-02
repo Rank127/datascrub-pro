@@ -1,6 +1,23 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// Dynamic imports for marketing components (client-side only)
+const ExitIntentPopup = dynamic(
+  () => import("@/components/marketing/exit-intent-popup").then(mod => ({ default: mod.ExitIntentPopup })),
+  { ssr: false }
+);
+
+const SocialProofNotifications = dynamic(
+  () => import("@/components/marketing/social-proof-notifications").then(mod => ({ default: mod.SocialProofNotifications })),
+  { ssr: false }
+);
+
+const LiveChatWidget = dynamic(
+  () => import("@/components/marketing/live-chat-widget").then(mod => ({ default: mod.LiveChatWidget })),
+  { ssr: false }
+);
 
 export default function MarketingLayout({
   children,
@@ -9,6 +26,10 @@ export default function MarketingLayout({
 }) {
   return (
     <div className="min-h-screen bg-slate-950">
+      {/* Marketing Widgets */}
+      <ExitIntentPopup />
+      <SocialProofNotifications />
+      <LiveChatWidget />
       {/* Navigation */}
       <nav className="fixed top-0 w-full bg-slate-950/80 backdrop-blur-lg border-b border-slate-800 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

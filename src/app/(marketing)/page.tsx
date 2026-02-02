@@ -35,6 +35,11 @@ const FAQSection = dynamic(
   { loading: () => <div className="h-96" /> }
 );
 
+const VideoExplainerSection = dynamic(
+  () => import("@/components/marketing/video-explainer-section").then(mod => ({ default: mod.VideoExplainerSection })),
+  { loading: () => <div className="h-96" /> }
+);
+
 export const metadata: Metadata = {
   title: "GhostMyData - Remove Your Data From The Web",
   description:
@@ -298,6 +303,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Video Explainer Section - Dynamically Loaded */}
+      <VideoExplainerSection />
 
       {/* Data Sources Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
