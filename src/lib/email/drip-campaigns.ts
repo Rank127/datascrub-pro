@@ -6,7 +6,7 @@
  */
 
 import { Resend } from "resend";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 
 // Lazy-initialize Resend client
 let _resend: Resend | null = null;

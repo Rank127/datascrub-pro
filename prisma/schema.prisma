@@ -660,7 +660,7 @@ model Referral {
   id             String    @id @default(cuid())
   referrerId     String    // User who referred
   referrer       User      @relation("Referrals", fields: [referrerId], references: [id], onDelete: Cascade)
-  referredUserId String?   // User who was referred (null until they sign up)
+  referredUserId String?   @unique // User who was referred (null until they sign up)
   referredUser   User?     @relation("ReferredBy", fields: [referredUserId], references: [id], onDelete: SetNull)
   referralCode   String    @unique
   status         String    @default("pending") // pending, signed_up, converted, rewarded

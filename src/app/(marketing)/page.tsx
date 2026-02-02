@@ -40,9 +40,9 @@ const VideoExplainerSection = dynamic(
   { loading: () => <div className="h-96" /> }
 );
 
-const CountdownTimer = dynamic(
-  () => import("@/components/marketing/countdown-timer").then(mod => ({ default: mod.CountdownTimer })),
-  { ssr: false }
+const PricingCountdown = dynamic(
+  () => import("@/components/marketing/pricing-countdown").then(mod => ({ default: mod.PricingCountdown })),
+  { loading: () => <div className="h-16" /> }
 );
 
 export const metadata: Metadata = {
@@ -355,7 +355,7 @@ export default function HomePage() {
               </span>
             </div>
             <div className="mb-6">
-              <CountdownTimer />
+              <PricingCountdown />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Simple, Transparent Pricing

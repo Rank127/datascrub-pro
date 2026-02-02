@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -20,11 +20,11 @@ import { Shield, Loader2, Check, Lock, Users } from "lucide-react";
 import { trackSignUp } from "@/components/analytics/google-analytics";
 import { trackEvents } from "@/components/analytics/retargeting-pixels";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const discount = searchParams.get("discount");
-  const referralCode = searchParams.get("ref");
+  const discount = searchParams?.get("discount");
+  const referralCode = searchParams?.get("ref");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -300,5 +300,25 @@ export default function RegisterPage() {
         </CardFooter>
       </form>
     </Card>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <Card className="border-slate-700 bg-slate-800/50 backdrop-blur">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10">
+            <Shield className="h-6 w-6 text-emerald-500" />
+          </div>
+          <CardTitle className="text-2xl text-white">Create your account</CardTitle>
+          <CardDescription className="text-slate-400">
+            Loading...
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    }>
+      <RegisterForm />
+    </Suspense>
   );
 }

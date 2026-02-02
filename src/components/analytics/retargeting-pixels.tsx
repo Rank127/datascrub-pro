@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 // Environment variables for pixel IDs
@@ -17,10 +17,30 @@ declare global {
   }
 }
 
-export function RetargetingPixels() {
+// Route change tracker component (uses useSearchParams, must be wrapped in Suspense)
+function RouteChangeTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // Track page views on route change
+  useEffect(() => {
+    const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
+
+    // Facebook page view
+    if (FB_PIXEL_ID && window.fbq) {
+      window.fbq("track", "PageView");
+    }
+
+    // Google Ads page view
+    if (GOOGLE_ADS_ID && window.gtag) {
+      window.gtag("config", GOOGLE_ADS_ID, { page_path: url });
+    }
+  }, [pathname, searchParams]);
+
+  return null;
+}
+
+export function RetargetingPixels() {
   // Initialize Facebook Pixel
   useEffect(() => {
     if (!FB_PIXEL_ID) {
@@ -89,22 +109,11 @@ export function RetargetingPixels() {
     };
   }, []);
 
-  // Track page views on route change
-  useEffect(() => {
-    const url = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
-
-    // Facebook page view
-    if (FB_PIXEL_ID && window.fbq) {
-      window.fbq("track", "PageView");
-    }
-
-    // Google Ads page view
-    if (GOOGLE_ADS_ID && window.gtag) {
-      window.gtag("config", GOOGLE_ADS_ID, { page_path: url });
-    }
-  }, [pathname, searchParams]);
-
-  return null;
+  return (
+    <Suspense fallback={null}>
+      <RouteChangeTracker />
+    </Suspense>
+  );
 }
 
 // Conversion tracking functions

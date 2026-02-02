@@ -5,7 +5,7 @@
  * Referral structure: Give $10, Get $10 (applied as credit)
  */
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
 
 const REFERRAL_REWARD_CENTS = 1000; // $10.00
