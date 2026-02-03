@@ -113,6 +113,11 @@ export async function getDeployments(limit = 10): Promise<VercelDeployment[]> {
       }>;
     }>(`/v6/deployments?projectId=${config.projectId}&limit=${limit}`, config);
 
+    if (!response.deployments || !Array.isArray(response.deployments)) {
+      console.warn("[Vercel] Unexpected response format:", response);
+      return [];
+    }
+
     return response.deployments.map((d) => ({
       id: d.uid,
       name: d.name,

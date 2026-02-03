@@ -129,7 +129,8 @@ export function VercelSection({ data, loading, onRefresh }: VercelSectionProps) 
     );
   }
 
-  const recentDeployment = data.deployments[0];
+  const deployments = data.deployments || [];
+  const recentDeployment = deployments[0];
 
   return (
     <div className="space-y-4">
@@ -205,10 +206,10 @@ export function VercelSection({ data, loading, onRefresh }: VercelSectionProps) 
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {data.deployments.length === 0 ? (
+            {deployments.length === 0 ? (
               <p className="text-slate-500 text-center py-4">No deployments found</p>
             ) : (
-              data.deployments.map((deployment) => {
+              deployments.map((deployment) => {
                 const statusConfig =
                   deploymentStatusConfig[deployment.state] ||
                   deploymentStatusConfig.QUEUED;
