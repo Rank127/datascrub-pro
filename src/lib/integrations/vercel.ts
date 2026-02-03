@@ -37,6 +37,8 @@ async function vercelFetch<T>(
     url.searchParams.set("teamId", config.teamId);
   }
 
+  console.log("[Vercel] Fetching:", url.toString());
+
   const response = await fetch(url.toString(), {
     headers: {
       Authorization: `Bearer ${config.accessToken}`,
@@ -44,8 +46,11 @@ async function vercelFetch<T>(
     },
   });
 
+  console.log("[Vercel] Response status:", response.status);
+
   if (!response.ok) {
     const errorText = await response.text();
+    console.error("[Vercel] API error:", response.status, errorText);
     throw new Error(`Vercel API error (${response.status}): ${errorText}`);
   }
 
@@ -91,7 +96,16 @@ export async function getProject(): Promise<VercelProject | null> {
  */
 export async function getDeployments(limit = 10): Promise<VercelDeployment[]> {
   const config = getConfig();
-  if (!config) return [];
+  if (!config) {
+    console.warn("[Vercel] getDeployments: No config available");
+    return [];
+  }
+
+  console.log("[Vercel] getDeployments: Fetching with config:", {
+    projectId: config.projectId,
+    hasToken: !!config.accessToken,
+    teamId: config.teamId
+  });
 
   try {
     const response = await vercelFetch<{
@@ -113,10 +127,14 @@ export async function getDeployments(limit = 10): Promise<VercelDeployment[]> {
       }>;
     }>(`/v6/deployments?projectId=${config.projectId}&limit=${limit}`, config);
 
+    console.log("[Vercel] getDeployments: Raw response:", JSON.stringify(response).slice(0, 500));
+
     if (!response.deployments || !Array.isArray(response.deployments)) {
       console.warn("[Vercel] Unexpected response format:", response);
       return [];
     }
+
+    console.log("[Vercel] getDeployments: Found", response.deployments.length, "deployments");
 
     return response.deployments.map((d) => ({
       id: d.uid,
