@@ -68,15 +68,9 @@ export async function GET(request: Request) {
     // Fetch Vercel data in parallel
     const [project, deployments, analytics] = await Promise.all([
       getProject(),
-      getDeployments(10),
+      getDeployments(5),
       getAnalytics(),
     ]);
-
-    console.log("[Vercel API] Fetched data:", {
-      project: project?.name,
-      deploymentsCount: deployments?.length,
-      hasAnalytics: !!analytics
-    });
 
     const response: VercelIntegrationResponse = {
       configured: true,
@@ -85,21 +79,7 @@ export async function GET(request: Request) {
       analytics,
     };
 
-    // Add debug info to response
-    const debugResponse = {
-      ...response,
-      _debug: {
-        envCheck: {
-          hasToken: !!process.env.VERCEL_ACCESS_TOKEN,
-          tokenLength: process.env.VERCEL_ACCESS_TOKEN?.length,
-          projectId: process.env.VERCEL_PROJECT_ID,
-          teamId: process.env.VERCEL_TEAM_ID,
-        },
-        deploymentsCount: deployments?.length || 0,
-      }
-    };
-
-    return NextResponse.json(debugResponse);
+    return NextResponse.json(response);
   } catch (error) {
     console.error("[Integrations/Vercel] Error:", error);
     return NextResponse.json(

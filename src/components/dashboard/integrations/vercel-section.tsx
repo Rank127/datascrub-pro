@@ -132,13 +132,10 @@ export function VercelSection({ data, loading, onRefresh }: VercelSectionProps) 
   const deployments = data.deployments || [];
   const recentDeployment = deployments[0];
 
-  // Debug: log what we're receiving
-  console.log("[VercelSection] Data received:", {
-    configured: data.configured,
-    project: data.project,
-    deploymentsCount: deployments.length,
-    deployments: deployments.slice(0, 2)
-  });
+  // Get build name from deployment URL or meta
+  const buildName = recentDeployment?.url?.split('-ghostmydata')[0]?.split('datascrub-')[1] ||
+                    recentDeployment?.meta?.githubCommitSha?.slice(0, 7) ||
+                    recentDeployment?.id?.slice(0, 8);
 
   return (
     <div className="space-y-4">
@@ -146,20 +143,31 @@ export function VercelSection({ data, loading, onRefresh }: VercelSectionProps) 
         title="Vercel"
         icon={Cloud}
         status="connected"
-        message={data.project ? `Project: ${data.project.name}` : `${deployments.length} deployments loaded`}
+        message={recentDeployment ? `Build: ${buildName} • ${recentDeployment.state}` : "No deployments"}
       >
-        {/* Project Info & Actions */}
+        {/* Build Info & Actions */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            {data.project?.framework && (
-              <Badge variant="outline" className="bg-slate-800/50">
-                {data.project.framework}
-              </Badge>
-            )}
             {recentDeployment && (
-              <span className="text-xs text-slate-500">
-                Last deploy: {formatTimeAgo(recentDeployment.createdAt)}
-              </span>
+              <>
+                <Badge
+                  variant="outline"
+                  className={`${
+                    recentDeployment.state === "READY"
+                      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                      : recentDeployment.state === "ERROR"
+                      ? "bg-red-500/20 text-red-400 border-red-500/30"
+                      : recentDeployment.state === "BUILDING"
+                      ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                      : "bg-slate-500/20 text-slate-400 border-slate-500/30"
+                  }`}
+                >
+                  {recentDeployment.state}
+                </Badge>
+                <span className="text-xs text-slate-500">
+                  {formatTimeAgo(recentDeployment.createdAt)}
+                </span>
+              </>
             )}
           </div>
           <div className="flex items-center gap-2">

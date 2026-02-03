@@ -16,16 +16,7 @@ function getConfig(): VercelClientConfig | null {
   const projectId = process.env.VERCEL_PROJECT_ID;
   const teamId = process.env.VERCEL_TEAM_ID;
 
-  console.log("[Vercel] getConfig:", {
-    hasToken: !!accessToken,
-    tokenLength: accessToken?.length,
-    tokenStart: accessToken?.slice(0, 4),
-    projectId,
-    teamId
-  });
-
   if (!accessToken || !projectId) {
-    console.warn("[Vercel] Missing config:", { hasToken: !!accessToken, hasProjectId: !!projectId });
     return null;
   }
 
@@ -47,8 +38,6 @@ async function vercelFetch<T>(
     url.searchParams.set("teamId", config.teamId);
   }
 
-  console.log("[Vercel] Fetching:", url.toString());
-
   const response = await fetch(url.toString(), {
     headers: {
       Authorization: `Bearer ${config.accessToken}`,
@@ -56,11 +45,8 @@ async function vercelFetch<T>(
     },
   });
 
-  console.log("[Vercel] Response status:", response.status);
-
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("[Vercel] API error:", response.status, errorText);
     throw new Error(`Vercel API error (${response.status}): ${errorText}`);
   }
 
@@ -104,18 +90,11 @@ export async function getProject(): Promise<VercelProject | null> {
 /**
  * Get recent deployments
  */
-export async function getDeployments(limit = 10): Promise<VercelDeployment[]> {
+export async function getDeployments(limit = 5): Promise<VercelDeployment[]> {
   const config = getConfig();
   if (!config) {
-    console.warn("[Vercel] getDeployments: No config available");
     return [];
   }
-
-  console.log("[Vercel] getDeployments: Fetching with config:", {
-    projectId: config.projectId,
-    hasToken: !!config.accessToken,
-    teamId: config.teamId
-  });
 
   try {
     const response = await vercelFetch<{
@@ -137,14 +116,9 @@ export async function getDeployments(limit = 10): Promise<VercelDeployment[]> {
       }>;
     }>(`/v6/deployments?projectId=${config.projectId}&limit=${limit}`, config);
 
-    console.log("[Vercel] getDeployments: Raw response:", JSON.stringify(response).slice(0, 500));
-
     if (!response.deployments || !Array.isArray(response.deployments)) {
-      console.warn("[Vercel] Unexpected response format:", response);
       return [];
     }
-
-    console.log("[Vercel] getDeployments: Found", response.deployments.length, "deployments");
 
     return response.deployments.map((d) => ({
       id: d.uid,
