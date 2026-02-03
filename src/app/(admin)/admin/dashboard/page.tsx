@@ -61,17 +61,28 @@ export default function AdminDashboardPage() {
 
   const fetchVercelStatus = async () => {
     try {
+      console.log("[Admin] Fetching Vercel status...");
       const response = await fetch("/api/admin/integrations/vercel");
+      console.log("[Admin] Vercel response status:", response.status);
+
       if (response.ok) {
         const result = await response.json();
+        console.log("[Admin] Vercel data received:", {
+          configured: result.configured,
+          deploymentsCount: result.deployments?.length,
+          hasAnalytics: !!result.analytics
+        });
         setVercelData({
           configured: result.configured,
           lastDeployment: result.deployments?.[0],
           analytics: result.analytics,
         });
+      } else {
+        const errorText = await response.text();
+        console.error("[Admin] Vercel API error:", response.status, errorText);
       }
     } catch (err) {
-      console.error("Failed to fetch Vercel status:", err);
+      console.error("[Admin] Failed to fetch Vercel status:", err);
     }
   };
 
