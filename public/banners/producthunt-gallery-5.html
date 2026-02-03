@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GhostMyData Product Hunt Gallery 5 - CTA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .banner {
+      width: 1270px;
+      height: 760px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 50%);
+    }
+
+    .shield {
+      z-index: 1;
+      margin-bottom: 40px;
+    }
+
+    .shield svg {
+      width: 140px;
+      height: 168px;
+    }
+
+    .title {
+      font-size: 64px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+      z-index: 1;
+    }
+
+    .subtitle {
+      font-size: 28px;
+      color: #94a3b8;
+      margin-bottom: 50px;
+      z-index: 1;
+    }
+
+    .cta-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      z-index: 1;
+    }
+
+    .cta-button {
+      padding: 20px 60px;
+      background: #10b981;
+      border-radius: 12px;
+      font-size: 24px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .cta-subtext {
+      font-size: 18px;
+      color: #64748b;
+    }
+
+    .features-row {
+      display: flex;
+      gap: 40px;
+      margin-top: 50px;
+      z-index: 1;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #94a3b8;
+      font-size: 16px;
+    }
+
+    .feature-icon {
+      color: #10b981;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <div class="shield">
+      <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 5 L90 20 L90 55 C90 85 50 115 50 115 C50 115 10 85 10 55 L10 20 L50 5Z"
+              stroke="#10b981" stroke-width="4" fill="none"/>
+        <path d="M30 60 L45 75 L70 45"
+              stroke="#10b981" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="title">Take Back Your Privacy</div>
+    <div class="subtitle">See what data brokers know about you</div>
+
+    <div class="cta-box">
+      <div class="cta-button">Start Your Free Scan</div>
+      <div class="cta-subtext">No credit card required</div>
+    </div>
+
+    <div class="features-row">
+      <div class="feature">
+        <span class="feature-icon">✓</span>
+        <span>400+ sites scanned</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">✓</span>
+        <span>Results in minutes</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">✓</span>
+        <span>100% free</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

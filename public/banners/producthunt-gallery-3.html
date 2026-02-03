@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GhostMyData Product Hunt Gallery 3 - Stats</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .banner {
+      width: 1270px;
+      height: 760px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.12) 0%, transparent 35%),
+        radial-gradient(circle at 70% 60%, rgba(16, 185, 129, 0.08) 0%, transparent 35%);
+    }
+
+    .content {
+      z-index: 1;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 48px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      font-size: 24px;
+      color: #94a3b8;
+      margin-bottom: 60px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 80px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 80px;
+      font-weight: 700;
+      color: #10b981;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .stat-label {
+      font-size: 20px;
+      color: #94a3b8;
+    }
+
+    .bottom-text {
+      margin-top: 60px;
+      padding: 20px 40px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+    }
+
+    .bottom-text p {
+      font-size: 22px;
+      color: #fff;
+    }
+
+    .highlight {
+      color: #10b981;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <div class="content">
+      <div class="title">Your Data Is Everywhere</div>
+      <div class="subtitle">The average person is listed on 80+ data broker websites</div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">400+</div>
+          <div class="stat-label">Data Brokers<br>We Monitor</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">80+</div>
+          <div class="stat-label">Average Exposures<br>Per Person</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">100+</div>
+          <div class="stat-label">Hours Saved<br>vs Manual Removal</div>
+        </div>
+      </div>
+
+      <div class="bottom-text">
+        <p>GhostMyData removes your data automatically — <span class="highlight">starting at just $11.99/month</span></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

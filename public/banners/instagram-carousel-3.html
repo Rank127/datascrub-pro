@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Instagram Carousel 3 - Solution</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .slide {
+      width: 1080px;
+      height: 1080px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 80px;
+      position: relative;
+    }
+
+    .slide::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.12) 0%, transparent 50%);
+    }
+
+    .shield {
+      margin-bottom: 40px;
+      z-index: 1;
+    }
+
+    .shield svg {
+      width: 160px;
+      height: 192px;
+    }
+
+    .title {
+      font-size: 64px;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 20px;
+      z-index: 1;
+    }
+
+    .subtitle {
+      font-size: 36px;
+      color: #10b981;
+      text-align: center;
+      margin-bottom: 50px;
+      z-index: 1;
+    }
+
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 1;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 32px;
+      color: #fff;
+    }
+
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(16, 185, 129, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #10b981;
+      font-size: 24px;
+    }
+
+    .swipe {
+      position: absolute;
+      bottom: 60px;
+      font-size: 24px;
+      color: #10b981;
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="shield">
+      <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 5 L90 20 L90 55 C90 85 50 115 50 115 C50 115 10 85 10 55 L10 20 L50 5Z"
+              stroke="#10b981" stroke-width="4" fill="none"/>
+        <path d="M30 60 L45 75 L70 45"
+              stroke="#10b981" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="title">GhostMyData</div>
+    <div class="subtitle">We remove your data automatically</div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">🔍</div>
+        <span>Scan 400+ data broker sites</span>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🗑️</div>
+        <span>Auto-submit removal requests</span>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✅</div>
+        <span>Verify with screenshots</span>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        <span>Weekly monitoring</span>
+      </div>
+    </div>
+
+    <div class="swipe">→</div>
+  </div>
+</body>
+</html>

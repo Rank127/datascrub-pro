@@ -72,10 +72,16 @@ export async function GET(request: Request) {
       getAnalytics(),
     ]);
 
+    console.log("[Vercel API] Fetched data:", {
+      project: project?.name,
+      deploymentsCount: deployments?.length,
+      hasAnalytics: !!analytics
+    });
+
     const response: VercelIntegrationResponse = {
       configured: true,
       project: project || undefined,
-      deployments,
+      deployments: deployments || [],
       analytics,
     };
 

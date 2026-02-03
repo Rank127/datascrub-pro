@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GhostMyData Removals Screenshot</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1366px;
+      height: 768px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+    }
+
+    .app {
+      display: flex;
+      height: 100%;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: #1e293b;
+      padding: 20px;
+      border-right: 1px solid #334155;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .logo svg {
+      width: 32px;
+      height: 38px;
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .nav-item.active {
+      background: #10b981;
+      color: #fff;
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px 40px;
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .progress-section {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #334155;
+      margin-bottom: 24px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .progress-title {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .progress-stats {
+      color: #10b981;
+      font-size: 14px;
+    }
+
+    .progress-bar-container {
+      height: 12px;
+      background: #334155;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 82%;
+      background: linear-gradient(90deg, #10b981, #34d399);
+      border-radius: 6px;
+    }
+
+    .removal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .removal-card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #334155;
+    }
+
+    .removal-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .broker-icon {
+      width: 44px;
+      height: 44px;
+      background: #334155;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .broker-details h3 {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .broker-details span {
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .removal-status {
+      margin-left: auto;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-verified {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .status-processing {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+    }
+
+    .removal-timeline {
+      border-left: 2px solid #334155;
+      padding-left: 16px;
+      margin-left: 8px;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 12px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -21px;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+
+    .timeline-item.pending::before {
+      background: #64748b;
+    }
+
+    .timeline-text {
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .timeline-date {
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    .screenshot-preview {
+      margin-top: 12px;
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .screenshot-icon {
+      color: #10b981;
+      font-size: 18px;
+    }
+
+    .screenshot-text {
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    .view-link {
+      color: #10b981;
+      font-size: 12px;
+      margin-left: auto;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 5 L90 20 L90 55 C90 85 50 115 50 115 C50 115 10 85 10 55 L10 20 L50 5Z"
+                stroke="#10b981" stroke-width="6" fill="none"/>
+          <path d="M30 60 L45 75 L70 45"
+                stroke="#10b981" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="logo-text">GhostMyData</span>
+      </div>
+
+      <div class="nav-item">
+        <span>📊</span> Dashboard
+      </div>
+      <div class="nav-item">
+        <span>🔍</span> Scan Results
+      </div>
+      <div class="nav-item active">
+        <span>🗑️</span> Removals
+      </div>
+      <div class="nav-item">
+        <span>📈</span> Monitoring
+      </div>
+      <div class="nav-item">
+        <span>⚙️</span> Settings
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="header">
+        <h1>Removal Progress</h1>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-header">
+          <span class="progress-title">Overall Removal Progress</span>
+          <span class="progress-stats">71 of 87 exposures removed (82%)</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar"></div>
+        </div>
+      </div>
+
+      <div class="removal-grid">
+        <div class="removal-card">
+          <div class="removal-card-header">
+            <div class="broker-icon">SP</div>
+            <div class="broker-details">
+              <h3>Spokeo</h3>
+              <span>spokeo.com</span>
+            </div>
+            <div class="removal-status status-verified">✓ Verified</div>
+          </div>
+          <div class="removal-timeline">
+            <div class="timeline-item">
+              <div class="timeline-text">Removal verified with screenshot</div>
+              <div class="timeline-date">Jan 28, 2024 at 3:45 PM</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-text">Opt-out request submitted</div>
+              <div class="timeline-date">Jan 21, 2024 at 9:12 AM</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-text">Exposure detected</div>
+              <div class="timeline-date">Jan 20, 2024 at 2:30 PM</div>
+            </div>
+          </div>
+          <div class="screenshot-preview">
+            <span class="screenshot-icon">📸</span>
+            <span class="screenshot-text">Verification screenshot available</span>
+            <a href="#" class="view-link">View →</a>
+          </div>
+        </div>
+
+        <div class="removal-card">
+          <div class="removal-card-header">
+            <div class="broker-icon">WP</div>
+            <div class="broker-details">
+              <h3>WhitePages</h3>
+              <span>whitepages.com</span>
+            </div>
+            <div class="removal-status status-processing">Processing</div>
+          </div>
+          <div class="removal-timeline">
+            <div class="timeline-item pending">
+              <div class="timeline-text">Awaiting removal confirmation</div>
+              <div class="timeline-date">Expected: Feb 3, 2024</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-text">Opt-out request submitted</div>
+              <div class="timeline-date">Jan 27, 2024 at 11:20 AM</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-text">Exposure detected</div>
+              <div class="timeline-date">Jan 20, 2024 at 2:30 PM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="removal-card">
+          <div class="removal-card-header">
+            <div class="broker-icon">BV</div>
+            <div class="broker-details">
+              <h3>BeenVerified</h3>
+              <span>beenverified.com</span>
+            </div>
+            <div class="removal-status status-verified">✓ Verified</div>
+          </div>
+          <div class="removal-timeline">
+            <div class="timeline-item">
+              <div class="timeline-text">Removal verified with screenshot</div>
+              <div class="timeline-date">Jan 26, 2024 at 5:15 PM</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-text">Opt-out request submitted</div>
+              <div class="timeline-date">Jan 22, 2024 at 10:45 AM</div>
+            </div>
+          </div>
+          <div class="screenshot-preview">
+            <span class="screenshot-icon">📸</span>
+            <span class="screenshot-text">Verification screenshot available</span>
+            <a href="#" class="view-link">View →</a>
+          </div>
+        </div>
+
+        <div class="removal-card">
+          <div class="removal-card-header">
+            <div class="broker-icon">RD</div>
+            <div class="broker-details">
+              <h3>Radaris</h3>
+              <span>radaris.com</span>
+            </div>
+            <div class="removal-status status-verified">✓ Verified</div>
+          </div>
+          <div class="removal-timeline">
+            <div class="timeline-item">
+              <div class="timeline-text">Removal verified with screenshot</div>
+              <div class="timeline-date">Jan 25, 2024 at 1:30 PM</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-text">Opt-out request submitted</div>
+              <div class="timeline-date">Jan 21, 2024 at 8:00 AM</div>
+            </div>
+          </div>
+          <div class="screenshot-preview">
+            <span class="screenshot-icon">📸</span>
+            <span class="screenshot-text">Verification screenshot available</span>
+            <a href="#" class="view-link">View →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

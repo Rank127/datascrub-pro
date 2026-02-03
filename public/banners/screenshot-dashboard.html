@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GhostMyData Dashboard Screenshot</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1366px;
+      height: 768px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+    }
+
+    .app {
+      display: flex;
+      height: 100%;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: #1e293b;
+      padding: 20px;
+      border-right: 1px solid #334155;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .logo svg {
+      width: 32px;
+      height: 38px;
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 4px;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      background: #10b981;
+      color: #fff;
+    }
+
+    .nav-item:hover:not(.active) {
+      background: #334155;
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px 40px;
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1e293b;
+      padding: 8px 16px;
+      border-radius: 24px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: #10b981;
+      border-radius: 50%;
+    }
+
+    .user-name {
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #334155;
+    }
+
+    .stat-label {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .stat-value.green { color: #10b981; }
+    .stat-value.yellow { color: #fbbf24; }
+    .stat-value.red { color: #ef4444; }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .panel {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #334155;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .removal-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #334155;
+    }
+
+    .removal-item:last-child {
+      border-bottom: none;
+    }
+
+    .broker-name {
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-removed {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+    }
+
+    .status-inprogress {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+    }
+
+    .activity-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+
+    .activity-text {
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .activity-time {
+      color: #64748b;
+      font-size: 12px;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 5 L90 20 L90 55 C90 85 50 115 50 115 C50 115 10 85 10 55 L10 20 L50 5Z"
+                stroke="#10b981" stroke-width="6" fill="none"/>
+          <path d="M30 60 L45 75 L70 45"
+                stroke="#10b981" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="logo-text">GhostMyData</span>
+      </div>
+
+      <div class="nav-item active">
+        <span>📊</span> Dashboard
+      </div>
+      <div class="nav-item">
+        <span>🔍</span> Scan Results
+      </div>
+      <div class="nav-item">
+        <span>🗑️</span> Removals
+      </div>
+      <div class="nav-item">
+        <span>📈</span> Monitoring
+      </div>
+      <div class="nav-item">
+        <span>⚙️</span> Settings
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="header">
+        <h1>Privacy Dashboard</h1>
+        <div class="user-badge">
+          <div class="user-avatar"></div>
+          <span class="user-name">John Smith</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Data Brokers Scanned</div>
+          <div class="stat-value">412</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Exposures Found</div>
+          <div class="stat-value red">87</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Removed</div>
+          <div class="stat-value green">71</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">In Progress</div>
+          <div class="stat-value yellow">16</div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Recent Removals</span>
+          </div>
+          <div class="removal-item">
+            <span class="broker-name">Spokeo</span>
+            <span class="status-badge status-removed">Removed</span>
+          </div>
+          <div class="removal-item">
+            <span class="broker-name">WhitePages</span>
+            <span class="status-badge status-removed">Removed</span>
+          </div>
+          <div class="removal-item">
+            <span class="broker-name">BeenVerified</span>
+            <span class="status-badge status-inprogress">In Progress</span>
+          </div>
+          <div class="removal-item">
+            <span class="broker-name">FastPeopleSearch</span>
+            <span class="status-badge status-pending">Pending</span>
+          </div>
+          <div class="removal-item">
+            <span class="broker-name">Radaris</span>
+            <span class="status-badge status-removed">Removed</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Activity</span>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot"></div>
+            <span class="activity-text">Spokeo removal verified</span>
+            <span class="activity-time">2h ago</span>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot"></div>
+            <span class="activity-text">Weekly scan completed</span>
+            <span class="activity-time">1d ago</span>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot"></div>
+            <span class="activity-text">3 new exposures found</span>
+            <span class="activity-time">1d ago</span>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot"></div>
+            <span class="activity-text">Radaris removal verified</span>
+            <span class="activity-time">3d ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

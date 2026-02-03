@@ -255,12 +255,62 @@ Start with a free scan → ghostmydata.com
 5. Add link in bio (use Linktree or direct)
 6. Create first post (carousel explaining service)
 
+**How to Create Carousel Post:**
+1. Transfer images to phone (email, cloud storage, or AirDrop)
+2. Open Instagram app
+3. Tap **+** at bottom center (or swipe right)
+4. Select **Post**
+5. Tap the **layered squares icon** (multiple selection) in corner
+6. Select all 4 carousel images **in order**:
+   - `instagram-carousel-1.png` (Hook)
+   - `instagram-carousel-2.png` (Problem)
+   - `instagram-carousel-3.png` (Solution)
+   - `instagram-carousel-4.png` (CTA)
+7. Tap **Next**
+8. Apply filters if desired (keep consistent across all slides)
+9. Tap **Next**
+10. Paste caption (below)
+11. Add location: "United States" (optional)
+12. Tap **Share**
+
 **Bio:**
 ```
 🔒 Remove your data from 400+ sites
 🛡️ Automated privacy protection
 📊 Free scan available
 👇 Protect yourself now
+```
+
+**First Post Caption (for carousel):**
+```
+Your personal data is on 400+ websites right now. 😱
+
+Data brokers are selling:
+📍 Your home address
+📞 Your phone number
+👨‍👩‍👧‍👦 Your relatives' names
+📧 Your email
+💰 Your income estimate
+
+This is how spam calls find you. This is how stalkers find you. This is how scammers target you.
+
+GhostMyData removes your data automatically:
+✅ Scan 400+ data broker sites
+✅ Auto-submit removal requests
+✅ Verify each removal with screenshots
+✅ Weekly monitoring for new listings
+
+Take back your privacy. Free scan at ghostmydata.com (link in bio)
+
+#privacy #dataprivacy #cybersecurity #identitytheft #dataprotection #onlinesafety #digitalfootprint #personaldatasecurity #optout #databrokers
+```
+
+**Carousel Images (4 slides):**
+```
+/public/banners/instagram-carousel-1.png (Hook - "Your data is on 400+ sites")
+/public/banners/instagram-carousel-2.png (Problem - Data brokers sell...)
+/public/banners/instagram-carousel-3.png (Solution - GhostMyData features)
+/public/banners/instagram-carousel-4.png (CTA - Free scan)
 ```
 
 - [ ] Account created
@@ -279,40 +329,151 @@ Start with a free scan → ghostmydata.com
 **Steps:**
 1. Sign up with Twitter (for social proof)
 2. Create maker profile
-3. Build hunter relationships (follow, engage)
+3. Build hunter relationships (see below)
 4. Prep product page (don't launch yet)
 
 **Product Details:**
 ```
 Name: GhostMyData
-Tagline: Remove your data from 400+ data broker sites automatically
+Tagline: Remove your data from 400+ broker sites (40 chars max)
 Description: [Use long bio]
 Topics: Privacy, Security, SaaS, Productivity
 ```
 
-**Launch Day Assets Needed:**
-- Product icon (240x240)
-- Gallery images (1270x760) x 5
+**Building Hunter Relationships (2-4 weeks before launch):**
+
+Top hunters to follow/engage:
+- Kevin William David (@kevinwdavid) - 3,470+ products hunted, helped 10,000+ founders
+- Ryan Hoover (@rrhoover) - Product Hunt founder, 840+ products
+- Ben Lang (@benln) - Angel investor, very active hunter
+- KP (@thisiskp_) - Build In Public Fellowship founder
+- Rohan Chaubey (@rohanchaubey) - Growth advisor, VC scout
+- Find more: https://www.producthunt.com/leaderboard
+
+Steps to build relationships:
+1. Follow hunters and upvote their hunted products
+2. Leave thoughtful comments on products they hunt (not just "Great product!")
+3. Be active - hunt other products, comment on trending launches
+4. After 1-2 weeks of engagement, reach out via DM or Twitter
+
+**Hunter Outreach Template:**
+```
+Subject: Would you hunt GhostMyData?
+
+Hi [Name],
+
+I've been following your hunts - loved [specific product they hunted].
+
+I'm launching GhostMyData, a privacy tool that removes personal data from 400+ data broker sites automatically.
+
+Would you be interested in hunting it? Happy to share early access and provide all assets.
+
+Thanks,
+[Your name]
+```
+
+**Alternative:** Self-hunt (launch yourself as maker - less visibility but no hunter needed)
+
+**Launch Day Assets (all ready):**
+```
+/public/banners/producthunt-icon.png (240x240)
+/public/banners/producthunt-gallery.png (1270x760)
+/public/banners/producthunt-gallery-2.png (1270x760)
+/public/banners/producthunt-gallery-3.png (1270x760)
+/public/banners/producthunt-gallery-4.png (1270x760)
+/public/banners/producthunt-gallery-5.png (1270x760)
+```
 - Video demo (optional but recommended)
 - Maker comment ready
 
 - [ ] Account created
 - [ ] Profile complete
 - [ ] Product drafted (not launched)
+- [ ] Hunters followed and engaged (2-4 weeks)
+- [ ] Hunter outreach sent
 
 ---
 
 ### 8. Indie Hackers
 **URL:** https://www.indiehackers.com/
-**Time:** 10 min
+**Time:** 10 min setup + ongoing engagement
+
+**IMPORTANT: Unlocking Privileges**
+New accounts cannot post links or products immediately. You must earn privileges first:
+
+Option A - Earn privileges (free):
+1. Make thoughtful, effortful comments on other posts
+2. Moderators review accounts daily for authentic contributors
+3. Once approved, you get lifelong posting privileges
+
+Option B - Indie Hackers Plus (paid):
+- Instant access to all privileges
 
 **Steps:**
 1. Sign up
-2. Create product page
-3. Add to product directory
-4. Post introduction
+2. Find and join relevant groups (see below)
+3. Start commenting on posts - be helpful, answer questions, share genuine insights
+4. After earning privileges: Create product page and post introduction
 
-**Introduction Post:**
+**Finding Groups:**
+- Groups URL: https://www.indiehackers.com/groups
+- Sort by "Popular" or "Recent" to find active threads
+- Main feed shows posts from all groups - filter by topic tags
+
+**Recommended Groups to Join:**
+| Group | Why |
+|-------|-----|
+| SaaS | Your product category |
+| Cybersecurity | Related industry |
+| Bootstrapped | If self-funded |
+| Launch | For launch announcements |
+| Marketing | Growth strategies |
+| Build in Public | Share progress updates |
+| Revenue Milestones | Share MRR wins |
+
+**Helpful Comment Examples (to build reputation):**
+
+Privacy/Security threads:
+```
+"Data privacy is huge right now - the average person is on 80+ data broker sites without knowing it. Have you looked into CCPA compliance for your product?"
+```
+```
+"The spam call problem is almost always traced back to data brokers. They scrape public records and sell your info to anyone. Opting out manually takes 100+ hours though."
+```
+
+SaaS/Launch threads:
+```
+"Nice launch! One thing that helped my SaaS was adding screenshot verification - users love proof that the service actually works."
+```
+```
+"Congrats on the launch! Quick tip: adding a free tier or free scan helped my conversion rate a lot. People want to see value before paying."
+```
+
+Pricing/Business threads:
+```
+"I found that being 30-40% cheaper than competitors while offering more features was the sweet spot. Price anchoring against the big players works well."
+```
+```
+"Weekly email reports with actual progress screenshots were a game changer for retention. Users need to see the value they're getting."
+```
+
+Technical threads:
+```
+"Next.js + Supabase has been solid for my stack. The auth and database combo saves so much time vs rolling your own."
+```
+```
+"For automation at scale, I'd look into job queues with BullMQ. Handles retries and rate limiting which is critical for API-heavy products."
+```
+
+Founder struggles threads:
+```
+"Been there. The key for me was focusing on one channel until it worked, not spreading thin across 10 platforms. Reddit and SEO were my winners."
+```
+```
+"Customer interviews changed everything. I thought I knew what users wanted but hearing them describe the problem in their own words was eye-opening."
+```
+
+**Introduction Post (use after earning privileges):**
 ```
 Title: Launched GhostMyData - Automated Data Broker Removal
 
@@ -332,6 +493,8 @@ Would love feedback from the community. What privacy tools do you use?
 ```
 
 - [ ] Account created
+- [ ] Started commenting (build reputation)
+- [ ] Privileges unlocked
 - [ ] Product added
 - [ ] Introduction posted
 

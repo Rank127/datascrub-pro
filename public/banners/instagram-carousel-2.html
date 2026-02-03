@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Instagram Carousel 2 - Problem</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .slide {
+      width: 1080px;
+      height: 1080px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 80px;
+    }
+
+    .title {
+      font-size: 48px;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .data-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .data-item {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 16px;
+      padding: 24px 32px;
+    }
+
+    .data-icon {
+      font-size: 40px;
+    }
+
+    .data-text {
+      font-size: 32px;
+      color: #fff;
+    }
+
+    .exposed {
+      margin-left: auto;
+      color: #ef4444;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .swipe {
+      position: absolute;
+      bottom: 60px;
+      font-size: 24px;
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="title">Data brokers sell:</div>
+
+    <div class="data-list">
+      <div class="data-item">
+        <span class="data-icon">📍</span>
+        <span class="data-text">Your home address</span>
+        <span class="exposed">EXPOSED</span>
+      </div>
+      <div class="data-item">
+        <span class="data-icon">📞</span>
+        <span class="data-text">Your phone number</span>
+        <span class="exposed">EXPOSED</span>
+      </div>
+      <div class="data-item">
+        <span class="data-icon">👨‍👩‍👧‍👦</span>
+        <span class="data-text">Your relatives' names</span>
+        <span class="exposed">EXPOSED</span>
+      </div>
+      <div class="data-item">
+        <span class="data-icon">📧</span>
+        <span class="data-text">Your email address</span>
+        <span class="exposed">EXPOSED</span>
+      </div>
+      <div class="data-item">
+        <span class="data-icon">💰</span>
+        <span class="data-text">Your income estimate</span>
+        <span class="exposed">EXPOSED</span>
+      </div>
+    </div>
+
+    <div class="swipe">→</div>
+  </div>
+</body>
+</html>

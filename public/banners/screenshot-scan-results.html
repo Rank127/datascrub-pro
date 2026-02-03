@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GhostMyData Scan Results Screenshot</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1366px;
+      height: 768px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+    }
+
+    .app {
+      display: flex;
+      height: 100%;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: #1e293b;
+      padding: 20px;
+      border-right: 1px solid #334155;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .logo svg {
+      width: 32px;
+      height: 38px;
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .nav-item.active {
+      background: #10b981;
+      color: #fff;
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px 40px;
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .scan-info {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .last-scan {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .rescan-btn {
+      background: #10b981;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .summary-bar {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #1e293b;
+      border-radius: 12px;
+      border: 1px solid #334155;
+    }
+
+    .summary-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .summary-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .summary-icon.danger { background: rgba(239, 68, 68, 0.2); }
+    .summary-icon.warning { background: rgba(251, 191, 36, 0.2); }
+    .summary-icon.success { background: rgba(16, 185, 129, 0.2); }
+
+    .summary-label {
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    .summary-value {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .results-table {
+      background: #1e293b;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      overflow: hidden;
+    }
+
+    .table-header {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+      padding: 16px 24px;
+      background: #0f172a;
+      border-bottom: 1px solid #334155;
+    }
+
+    .table-header span {
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+      padding: 16px 24px;
+      border-bottom: 1px solid #334155;
+      align-items: center;
+    }
+
+    .broker-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .broker-icon {
+      width: 36px;
+      height: 36px;
+      background: #334155;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .broker-name {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .broker-url {
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .data-exposed {
+      color: #ef4444;
+      font-size: 14px;
+    }
+
+    .risk-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-block;
+    }
+
+    .risk-high {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .risk-medium {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-exposed {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+    }
+
+    .action-btn {
+      background: #10b981;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .action-btn.secondary {
+      background: #334155;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 5 L90 20 L90 55 C90 85 50 115 50 115 C50 115 10 85 10 55 L10 20 L50 5Z"
+                stroke="#10b981" stroke-width="6" fill="none"/>
+          <path d="M30 60 L45 75 L70 45"
+                stroke="#10b981" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="logo-text">GhostMyData</span>
+      </div>
+
+      <div class="nav-item">
+        <span>📊</span> Dashboard
+      </div>
+      <div class="nav-item active">
+        <span>🔍</span> Scan Results
+      </div>
+      <div class="nav-item">
+        <span>🗑️</span> Removals
+      </div>
+      <div class="nav-item">
+        <span>📈</span> Monitoring
+      </div>
+      <div class="nav-item">
+        <span>⚙️</span> Settings
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="header">
+        <h1>Scan Results</h1>
+        <div class="scan-info">
+          <span class="last-scan">Last scan: Today at 9:42 AM</span>
+          <button class="rescan-btn">Run New Scan</button>
+        </div>
+      </div>
+
+      <div class="summary-bar">
+        <div class="summary-item">
+          <div class="summary-icon danger">⚠️</div>
+          <div>
+            <div class="summary-label">Exposures Found</div>
+            <div class="summary-value">87</div>
+          </div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon warning">⏳</div>
+          <div>
+            <div class="summary-label">Pending Removal</div>
+            <div class="summary-value">16</div>
+          </div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon success">✓</div>
+          <div>
+            <div class="summary-label">Successfully Removed</div>
+            <div class="summary-value">71</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-table">
+        <div class="table-header">
+          <span>Data Broker</span>
+          <span>Data Exposed</span>
+          <span>Risk Level</span>
+          <span>Status</span>
+          <span>Action</span>
+        </div>
+
+        <div class="table-row">
+          <div class="broker-info">
+            <div class="broker-icon">SP</div>
+            <div>
+              <div class="broker-name">Spokeo</div>
+              <div class="broker-url">spokeo.com</div>
+            </div>
+          </div>
+          <div class="data-exposed">Name, Address, Phone</div>
+          <div><span class="risk-badge risk-high">High</span></div>
+          <div><span class="status-badge status-exposed">Exposed</span></div>
+          <div><button class="action-btn">Remove</button></div>
+        </div>
+
+        <div class="table-row">
+          <div class="broker-info">
+            <div class="broker-icon">WP</div>
+            <div>
+              <div class="broker-name">WhitePages</div>
+              <div class="broker-url">whitepages.com</div>
+            </div>
+          </div>
+          <div class="data-exposed">Name, Address, Email</div>
+          <div><span class="risk-badge risk-high">High</span></div>
+          <div><span class="status-badge status-pending">Pending</span></div>
+          <div><button class="action-btn secondary">View</button></div>
+        </div>
+
+        <div class="table-row">
+          <div class="broker-info">
+            <div class="broker-icon">BV</div>
+            <div>
+              <div class="broker-name">BeenVerified</div>
+              <div class="broker-url">beenverified.com</div>
+            </div>
+          </div>
+          <div class="data-exposed">Full Profile</div>
+          <div><span class="risk-badge risk-high">High</span></div>
+          <div><span class="status-badge status-exposed">Exposed</span></div>
+          <div><button class="action-btn">Remove</button></div>
+        </div>
+
+        <div class="table-row">
+          <div class="broker-info">
+            <div class="broker-icon">FP</div>
+            <div>
+              <div class="broker-name">FastPeopleSearch</div>
+              <div class="broker-url">fastpeoplesearch.com</div>
+            </div>
+          </div>
+          <div class="data-exposed">Name, Phone, Relatives</div>
+          <div><span class="risk-badge risk-medium">Medium</span></div>
+          <div><span class="status-badge status-exposed">Exposed</span></div>
+          <div><button class="action-btn">Remove</button></div>
+        </div>
+
+        <div class="table-row">
+          <div class="broker-info">
+            <div class="broker-icon">RD</div>
+            <div>
+              <div class="broker-name">Radaris</div>
+              <div class="broker-url">radaris.com</div>
+            </div>
+          </div>
+          <div class="data-exposed">Name, Address</div>
+          <div><span class="risk-badge risk-medium">Medium</span></div>
+          <div><span class="status-badge status-exposed">Exposed</span></div>
+          <div><button class="action-btn">Remove</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

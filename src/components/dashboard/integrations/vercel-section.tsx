@@ -132,13 +132,21 @@ export function VercelSection({ data, loading, onRefresh }: VercelSectionProps) 
   const deployments = data.deployments || [];
   const recentDeployment = deployments[0];
 
+  // Debug: log what we're receiving
+  console.log("[VercelSection] Data received:", {
+    configured: data.configured,
+    project: data.project,
+    deploymentsCount: deployments.length,
+    deployments: deployments.slice(0, 2)
+  });
+
   return (
     <div className="space-y-4">
       <IntegrationCard
         title="Vercel"
         icon={Cloud}
         status="connected"
-        message={data.project ? `Project: ${data.project.name}` : undefined}
+        message={data.project ? `Project: ${data.project.name}` : `${deployments.length} deployments loaded`}
       >
         {/* Project Info & Actions */}
         <div className="flex items-center justify-between mb-4">

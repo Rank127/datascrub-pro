@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GhostMyData Product Hunt Gallery 4 - Comparison</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .banner {
+      width: 1270px;
+      height: 760px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      position: relative;
+      overflow: hidden;
+      padding: 60px;
+    }
+
+    .title {
+      font-size: 48px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 50px;
+      z-index: 1;
+    }
+
+    .comparison {
+      display: flex;
+      gap: 40px;
+      z-index: 1;
+    }
+
+    .column {
+      width: 360px;
+      padding: 32px;
+      border-radius: 16px;
+    }
+
+    .column.others {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .column.ghost {
+      background: rgba(16, 185, 129, 0.1);
+      border: 2px solid rgba(16, 185, 129, 0.5);
+    }
+
+    .column-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .column-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .others .column-title { color: #ef4444; }
+    .ghost .column-title { color: #10b981; }
+
+    .price {
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    .others .price { color: #ef4444; }
+    .ghost .price { color: #10b981; }
+
+    .price span {
+      font-size: 16px;
+      font-weight: 400;
+      color: #94a3b8;
+    }
+
+    .features {
+      list-style: none;
+    }
+
+    .features li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      font-size: 16px;
+      color: #e2e8f0;
+    }
+
+    .features li:last-child {
+      border-bottom: none;
+    }
+
+    .check { color: #10b981; font-size: 20px; }
+    .cross { color: #ef4444; font-size: 20px; }
+
+    .vs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      background: #334155;
+      border-radius: 50%;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      z-index: 1;
+    }
+
+    .cta {
+      margin-top: 40px;
+      padding: 16px 40px;
+      background: #10b981;
+      border-radius: 8px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <div class="title">Why Choose GhostMyData?</div>
+
+    <div class="comparison">
+      <div class="column others">
+        <div class="column-header">
+          <div class="column-title">Competitors</div>
+          <div class="price">$20+ <span>/month</span></div>
+        </div>
+        <ul class="features">
+          <li><span class="check">✓</span> Data broker removal</li>
+          <li><span class="cross">✗</span> Screenshot verification</li>
+          <li><span class="cross">✗</span> Weekly monitoring</li>
+          <li><span class="cross">✗</span> 400+ sites covered</li>
+          <li><span class="cross">✗</span> Free scan</li>
+        </ul>
+      </div>
+
+      <div class="vs">VS</div>
+
+      <div class="column ghost">
+        <div class="column-header">
+          <div class="column-title">GhostMyData</div>
+          <div class="price">$11.99 <span>/month</span></div>
+        </div>
+        <ul class="features">
+          <li><span class="check">✓</span> Data broker removal</li>
+          <li><span class="check">✓</span> Screenshot verification</li>
+          <li><span class="check">✓</span> Weekly monitoring</li>
+          <li><span class="check">✓</span> 400+ sites covered</li>
+          <li><span class="check">✓</span> Free scan</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cta">Save 40% vs Competitors</div>
+  </div>
+</body>
+</html>
