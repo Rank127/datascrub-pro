@@ -5931,13 +5931,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "EMAIL",
     estimatedDays: 21,
   },
-  POWER_REVIEWS: {
-    name: "PowerReviews",
-    optOutUrl: "https://www.powerreviews.com/privacy/",
-    privacyEmail: "privacy@powerreviews.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
+  // POWER_REVIEWS: Removed - Syndigo/PowerReviews are Data Processors, not Data Brokers
+  // They act on behalf of their retail clients (Data Controllers) per GDPR Articles 28/29
+  // Sending deletion requests to them is inappropriate - see blocklist.ts for details
   YOTPO_DATA: {
     name: "Yotpo",
     optOutUrl: "https://www.yotpo.com/privacy/",
@@ -13222,7 +13218,7 @@ export const BROKER_CATEGORIES = {
     "THE_TRADE_DESK_DATA", "BIDSWITCH", "SAMBA_TV", "VIZIO_INSCAPE", "AUTOMATIC_TV"
   ],
   ADDITIONAL_RETAIL_DATA: [
-    "SHOPPERTRACK", "PRICESPIDER", "BAZAARVOICE", "POWER_REVIEWS", "YOTPO_DATA"
+    "SHOPPERTRACK", "PRICESPIDER", "BAZAARVOICE", "YOTPO_DATA"
   ],
 
   // ==========================================

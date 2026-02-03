@@ -1,6 +1,6 @@
 # GhostMyData Account Setup Checklist
 
-**Email to use:** developer@ghostmydata.com
+**Email to use:** ghostmydata@gmail.com
 **Password suggestion:** Use a password manager, create unique for each
 
 ---
@@ -78,7 +78,7 @@ United States
 1. Go to https://twitter.com/i/flow/signup
 2. Click **Create account**
 3. Enter name: `GhostMyData`
-4. Enter email: `developer@ghostmydata.com`
+4. Enter email: `ghostmydata@gmail.com`
 5. Enter birth date (use company founding or your date)
 6. Click **Next**
 7. Complete CAPTCHA if prompted
@@ -225,7 +225,7 @@ Start with a free scan: ghostmydata.com
 **STEP 1: Create Account**
 1. Go to https://www.reddit.com/register
 2. Click **Sign Up**
-3. Enter email: `developer@ghostmydata.com`
+3. Enter email: `ghostmydata@gmail.com`
 4. Click **Continue**
 5. Check email for verification link
 6. Click link to verify
@@ -310,7 +310,7 @@ For identity theft threads:
 
 **STEP 1: Create Google Account (if needed)**
 1. Go to https://accounts.google.com/signup
-2. Create account with: `developer@ghostmydata.com`
+2. Create account with: `ghostmydata@gmail.com`
 3. Or use existing Google account
 
 **STEP 2: Create YouTube Channel**
@@ -350,7 +350,7 @@ Data brokers collect and sell your information - your name, address, phone numbe
    - Website: `https://ghostmydata.com`
    - Twitter: `https://twitter.com/GhostMyData`
    - LinkedIn: `https://linkedin.com/company/ghostmydata`
-6. **Contact info:** `developer@ghostmydata.com`
+6. **Contact info:** `ghostmydata@gmail.com`
 7. Click **Publish**
 
 **STEP 5: Get Custom URL (requires 100 subscribers)**
@@ -421,7 +421,7 @@ GhostMyData automatically removes your personal information from 400+ data broke
 ```
    - **Categories:** Software Company, Internet Company
    - **Phone:** (optional)
-   - **Email:** `developer@ghostmydata.com`
+   - **Email:** `ghostmydata@gmail.com`
    - **Website:** `https://ghostmydata.com`
    - **Location:** United States
 3. Click **Save**
@@ -486,7 +486,7 @@ Option A - From Facebook (recommended):
 
 Option B - New account:
 1. Go to https://www.instagram.com/accounts/emailsignup/
-2. Enter email: `developer@ghostmydata.com`
+2. Enter email: `ghostmydata@gmail.com`
 3. Enter full name: `GhostMyData`
 4. Create username: `GhostMyData` (or `GhostMyDataHQ` if taken)
 5. Create password
@@ -514,9 +514,39 @@ Option B - New account:
 📊 Free scan available
 👇 Protect yourself now
 ```
-6. **Website:** `https://ghostmydata.com`
-7. **Contact options:** Add email `developer@ghostmydata.com`
-8. Tap **Done**
+6. **Website:** `https://ghostmydata.com` (or Linktree URL - see below)
+7. **Link Title:** `Free Privacy Scan`
+8. **Contact options:** Add email `ghostmydata@gmail.com`
+9. Tap **Done**
+
+**STEP 3B: Set Up Linktree (Optional - for multiple links)**
+1. Go to https://linktr.ee/
+2. Click **Sign up free**
+3. Enter email: `ghostmydata@gmail.com`
+4. Choose username: `ghostmydata` (creates linktr.ee/ghostmydata)
+5. Create password
+6. Verify email
+
+**Customize Linktree:**
+1. Click **Add link** for each:
+   | Title | URL |
+   |-------|-----|
+   | `🔍 Free Privacy Scan` | `https://ghostmydata.com` |
+   | `📰 Newsletter` | `https://ghostmydata.substack.com` |
+   | `📝 Blog` | `https://ghostmydata.com/blog` |
+   | `🐦 Twitter/X` | `https://twitter.com/GhostMyData` |
+   | `💼 LinkedIn` | `https://linkedin.com/company/ghostmydata` |
+
+2. Go to **Appearance** tab:
+   - Upload profile photo: `/public/logo.png`
+   - Choose theme (dark recommended)
+   - Add bio: `Remove your data from 400+ sites`
+
+3. Copy your Linktree URL: `linktr.ee/ghostmydata`
+
+4. **Update Instagram bio link** to: `https://linktr.ee/ghostmydata`
+
+**Linktree URL:** `linktr.ee/ghostmydata`
 
 **STEP 4: Transfer Carousel Images to Phone**
 Option A - Email:
@@ -590,7 +620,8 @@ Take back your privacy. Free scan at ghostmydata.com (link in bio)
 - [ ] Switched to Business account
 - [ ] Profile photo uploaded
 - [ ] Bio complete
-- [ ] Website added
+- [ ] Website/Linktree added
+- [ ] Linktree set up (optional)
 - [ ] Images transferred to phone
 - [ ] Carousel post published
 
@@ -608,7 +639,7 @@ Take back your privacy. Free scan at ghostmydata.com (link in bio)
 1. Go to https://www.producthunt.com/
 2. Click **Sign up** (top right)
 3. Choose **Sign up with Twitter** (recommended for social proof)
-   - Or use email: `developer@ghostmydata.com`
+   - Or use email: `ghostmydata@gmail.com`
 4. Complete signup flow
 5. Verify email if using email signup
 
@@ -736,6 +767,33 @@ I'd love your feedback - and happy to answer any questions about privacy, data b
 Start a free scan: ghostmydata.com
 ```
 
+**STEP 4B: Pricing & Promo Code**
+
+Pricing section:
+- Select: **Paid (with a free trial or plan)**
+
+Promo Code:
+- **What is the offer?** `50% off first month`
+- **Promo code:** `HUNT50`
+- **Expiration Date:** 30-60 days from launch
+
+Funding Information:
+- Select: **Bootstrapped**
+
+**Create Promo Code in Stripe:**
+1. Go to https://dashboard.stripe.com/coupons
+2. Click **+ Create coupon**
+3. Fill in:
+   - **Name:** `Product Hunt Launch - 50% off first month`
+   - **ID/Code:** `HUNT50`
+   - **Type:** Percentage discount
+   - **Percent off:** `50`
+   - **Duration:** `Once` (first invoice only)
+   - **Expiration:** Match Product Hunt expiration date
+4. Click **Create coupon**
+
+---
+
 **Launch Day Assets (all ready):**
 ```
 /public/banners/producthunt-icon.png (240x240)
@@ -748,12 +806,16 @@ Start a free scan: ghostmydata.com
 
 - [ ] Account created
 - [ ] Profile complete
+- [ ] Interest tags selected
 - [ ] Hunters followed
 - [ ] Engaging daily (comments, upvotes)
 - [ ] Product drafted (not launched)
 - [ ] Gallery images uploaded
+- [ ] Maker comment written
+- [ ] Pricing set (Paid with free trial)
+- [ ] Promo code set (HUNT50 - 50% off first month)
+- [ ] Promo code created in Stripe
 - [ ] Hunter outreach sent
-- [ ] Maker comment ready
 
 ---
 
@@ -777,7 +839,7 @@ Option B - Indie Hackers Plus (paid):
 **STEP 1: Create Account**
 1. Go to https://www.indiehackers.com/
 2. Click **Sign Up** (top right)
-3. Sign up with Twitter/Google or email: developer@ghostmydata.com
+3. Sign up with Twitter/Google or email: ghostmydata@gmail.com
 4. Verify email if using email signup
 5. Choose username: `GhostMyData` or `GhostMyDataFounder`
 
@@ -899,9 +961,11 @@ Would love feedback from the community. What privacy tools do you use?
 
 ---
 
-### 9. Medium
+### 9. Medium (Free Account)
 **URL:** https://medium.com/
 **Time:** 5 min
+
+**NOTE:** Publications require paid membership ($5/mo). Use free account instead - post articles directly to your profile. Use Substack for free publication features.
 
 ---
 
@@ -909,13 +973,14 @@ Would love feedback from the community. What privacy tools do you use?
 1. Go to https://medium.com/
 2. Click **Get started** or **Sign up**
 3. Choose **Sign up with Google** (easiest)
-   - Or use email: `developer@ghostmydata.com`
-4. Complete signup flow
+   - Or use email: `ghostmydata@gmail.com`
+4. Click **"Or continue with a free account"** (skip paid)
+5. Complete signup flow
 
 **STEP 2: Complete Profile**
 1. Click your avatar → **Settings**
 2. Fill in:
-   - **Name:** `GhostMyData` or [Your Name]
+   - **Name:** `GhostMyData`
    - **Bio:**
 ```
 Founder of GhostMyData | Removing personal data from 400+ data broker sites | Privacy advocate | ghostmydata.com
@@ -923,47 +988,217 @@ Founder of GhostMyData | Removing personal data from 400+ data broker sites | Pr
    - **Photo:** Upload `/public/logo.png` or professional photo
 3. Click **Save**
 
-**STEP 3: Create Publication**
-1. Click your avatar → **Manage publications**
-2. Click **New publication**
-3. Fill in:
-   - **Name:** `GhostMyData Blog`
-   - **Description:**
-```
-Privacy tips, data broker insights, and identity protection guides from the team at GhostMyData. Learn how to protect your personal information online.
-```
-   - **Avatar:** Upload `/public/logo.png`
-   - **Publication URL:** `medium.com/ghostmydata`
-4. Click **Create**
+**STEP 3: Select Topics to Follow**
+1. During onboarding or in Settings
+2. Select topics:
+   - Privacy
+   - Cybersecurity
+   - Data Privacy
+   - Security
+   - Technology
+   - Identity Theft
+   - Internet
+   - Software
+   - Startup
 
-**STEP 4: Customize Publication**
-1. Go to your publication
-2. Click **Publication settings** (gear icon)
-3. **Homepage header:** Upload `/public/banners/medium-header.png`
-4. **Navigation:** Add links to your website
-5. **Social links:** Add Twitter, LinkedIn
-6. Click **Save**
-
-**STEP 5: Publish First Article**
-1. Click **Write a story**
-2. Write or paste article (suggested topics below)
-3. Add relevant tags: Privacy, Data Privacy, Cybersecurity, Identity Theft, Technology
+**STEP 4: Publish First Article (to profile, not publication)**
+1. Click **Write** (top right)
+2. Paste the article below
+3. Add tags: Privacy, Data Privacy, Cybersecurity, Identity Theft, Technology, Personal Data, Internet Safety
 4. Click **Publish**
-5. Add to your publication when prompted
+5. Your article URL: `medium.com/@ghostmydata/article-title`
 
-**Article Ideas:**
-- "How Data Brokers Get Your Information (And How to Stop Them)"
-- "I Found My Data on 80+ Websites - Here's What I Did About It"
+**First Article (copy-paste ready):**
+
+Title:
+```
+I Found My Personal Data on 87 Websites — Here's What I Did About It
+```
+
+Story:
+```
+Last month, I Googled myself. What I found was terrifying.
+
+My full name, home address, phone number, email, age, and even my relatives' names — all publicly listed on websites I'd never heard of. Sites like Spokeo, WhitePages, BeenVerified, and FastPeopleSearch had built detailed profiles about me without my knowledge or consent.
+
+I counted 87 different websites selling my personal information.
+
+## How did this happen?
+
+These sites are called "data brokers." They scrape public records, social media, and purchase data from apps and companies. Then they compile it into searchable profiles and sell access to anyone willing to pay — marketers, scammers, debt collectors, stalkers, or just curious strangers.
+
+This is why you get spam calls. This is why scammers know your name. This is how people get doxxed.
+
+## The manual removal nightmare
+
+I tried removing myself manually. Each site has a different opt-out process:
+- Some require email verification
+- Some require photo ID uploads
+- Some require faxing (yes, faxing)
+- Some make you wait 72 hours then resubmit
+- Some "process" your request and never actually remove you
+
+After spending 6 hours removing myself from just 12 sites, I did the math. At 30 minutes per site, removing myself from all 87 would take over 40 hours.
+
+And here's the worst part — they re-add you after a few months.
+
+## The real cost of exposed data
+
+This isn't just an inconvenience. Exposed personal data leads to:
+
+- **Spam calls** — Telemarketers buy your number from data brokers
+- **Identity theft** — Criminals use your info to open accounts in your name
+- **Stalking** — Abusers use people-search sites to find victims
+- **Targeted scams** — Scammers use your details to make calls more convincing
+- **Employment issues** — Background checks pull from these sites
+
+## What actually works
+
+After researching solutions, I found three options:
+
+1. **Manual removal** — Free, but takes 50–100 hours and requires constant monitoring
+2. **Paid services** — Companies like DeleteMe ($129/year) or Incogni ($77/year) automate the process
+3. **Build your own tool** — What I ended up doing
+
+I built GhostMyData because I was frustrated with the options. It scans 400+ data broker sites, submits opt-out requests automatically, verifies each removal with screenshots, and monitors weekly for new listings.
+
+## 5 things you can do right now
+
+Even if you don't use a removal service, here's how to protect yourself:
+
+1. **Google yourself** — See what's out there (use incognito mode)
+2. **Start with the big ones** — Opt out from Spokeo, WhitePages, and BeenVerified first
+3. **Freeze your credit** — Free with all 3 bureaus, prevents identity theft
+4. **Use unique passwords** — Get a password manager
+5. **Set a calendar reminder** — Re-check these sites every 3 months
+
+## The bottom line
+
+Your personal data is a commodity being bought and sold without your permission. The data broker industry generates $250 billion annually by trading information about people like you.
+
+You can fight back, but it takes effort. Whether you do it manually, use a service, or build your own solution — the important thing is to start.
+
+Your privacy is worth protecting.
+
+---
+
+*If you want to see what data brokers know about you, I built a free scan at ghostmydata.com. It checks 400+ sites and shows you exactly where your data is exposed.*
+```
+
+**Future Article Ideas:**
 - "The Real Reason You're Getting Spam Calls"
 - "Data Broker Opt-Out Guide: The Complete List"
+- "How to Disappear from the Internet (Legally)"
+- "Why Your Phone Number Is on 50+ Websites"
 
-**Header file:** `/public/banners/medium-header.png`
+- [ ] Account created (free)
+- [ ] Profile complete
+- [ ] Topics selected
+- [ ] First article published
+
+---
+
+### 9B. Substack (Free Newsletter - Recommended)
+**URL:** https://substack.com/
+**Time:** 10 min
+
+**WHY SUBSTACK:** Free publications, email list building, better than Medium paid.
+
+---
+
+**STEP 1: Create Account**
+1. Go to https://substack.com/
+2. Click **Start writing** or **Get started**
+3. Enter email: `ghostmydata@gmail.com`
+4. Create password
+5. Click **Sign up**
+6. Verify email
+
+**STEP 2: Create Publication (via Post)**
+1. After signup, you'll see options: **Note**, **Post**, or **Video**
+2. Click **Post** - this triggers publication setup
+3. When prompted, fill in publication details:
+   - **Publication name:** `GhostMyData`
+   - **Subdomain/URL:** `ghostmydata` (creates ghostmydata.substack.com)
+4. Complete the setup flow
+
+**Alternative path:**
+1. Click your **avatar/profile** (top right)
+2. Click **Settings** or **Publication settings**
+3. Fill in publication details there
+
+**STEP 3: Complete Publication Settings**
+1. Go to **Settings** (gear icon) → **Publication details**
+2. Fill in:
+   - **Publication name:** `GhostMyData`
+   - **Description:**
+```
+Privacy tips, data broker insights, and identity protection guides. Learn how to remove your personal data from the internet and protect yourself from spam calls, stalkers, and identity theft.
+```
+   - **Logo:** Upload `/public/logo.png`
+   - **Cover image:** Upload `/public/banners/substack-cover.png` (1200x400)
+3. Click **Save**
+
+**STEP 4: Add Social Links**
+1. Go to **Settings** → **Profile** or **About**
+2. Add links:
+   - **Website:** `https://ghostmydata.com`
+   - **Twitter/X:** `@GhostMyData`
+   - **LinkedIn:** `https://linkedin.com/company/ghostmydata`
+3. Click **Save**
+
+**STEP 4: Set Up Welcome Email (if available)**
+1. Go to **Settings** → **Emails** or **Subscriber settings**
+2. Look for **Welcome email** option
+3. If found, customize with:
+```
+Subject: Welcome to GhostMyData
+
+Thanks for subscribing!
+
+I started GhostMyData because I found my personal data on 80+ data broker websites. Now I help others remove their data too.
+
+Here's what you'll get:
+- Privacy tips & guides
+- Data broker news
+- Identity protection strategies
+
+To get started, try our free scan: https://ghostmydata.com
+
+Talk soon,
+[Your name]
+Founder, GhostMyData
+```
+4. Click **Save**
+
+**Note:** If welcome email option isn't visible, Substack may send automatic welcome emails or this feature may be in a different location. Skip this step and proceed to publishing your first post.
+
+**STEP 5: Publish First Post**
+1. Click **New post**
+2. Write or paste article
+3. Choose **Everyone** (free) or **Subscribers only** (paid)
+4. Add tags/topics
+5. Click **Publish**
+
+**STEP 6: Add Subscribe Button to Website**
+1. Get your Substack URL: `ghostmydata.substack.com`
+2. Add subscribe link to ghostmydata.com footer/blog
+
+**Post Ideas:**
+- "Why Your Phone Number Is Public (And How to Fix It)"
+- "The Data Broker Industry Explained"
+- "Weekly Privacy News Roundup"
+- "How I Removed Myself from 80+ Websites"
+
+**Substack URL:** `ghostmydata.substack.com`
 
 - [ ] Account created
-- [ ] Profile complete
 - [ ] Publication created
-- [ ] Publication customized
-- [ ] First article published
+- [ ] Logo uploaded
+- [ ] Cover image uploaded
+- [ ] Welcome email set up
+- [ ] First post published
+- [ ] Subscribe link added to website
 
 ---
 
@@ -976,7 +1211,7 @@ Privacy tips, data broker insights, and identity protection guides from the team
 **STEP 1: Create Account**
 1. Go to https://www.quora.com/
 2. Click **Sign up with email** (or Google)
-3. Enter email: `developer@ghostmydata.com`
+3. Enter email: `ghostmydata@gmail.com`
 4. Enter name: [Your Name] (use real name, not brand - Quora prefers this)
 5. Create password
 6. Click **Sign up**
@@ -1106,7 +1341,7 @@ The data broker removal is often overlooked but it's huge - that's where scammer
 **STEP 2: Create Business Account**
 1. Go to https://business.trustpilot.com/
 2. Click **Get started free** or **Sign up**
-3. Enter business email: `developer@ghostmydata.com`
+3. Enter business email: `ghostmydata@gmail.com`
 4. Enter business name: `GhostMyData`
 5. Enter website: `https://ghostmydata.com`
 6. Create password
@@ -1130,7 +1365,7 @@ The data broker removal is often overlooked but it's huge - that's where scammer
 ```
 GhostMyData automatically removes your personal information from 400+ data broker websites. We scan for exposed data, submit opt-out requests, verify removals with screenshots, and monitor for new listings. Protect yourself from spam calls, stalkers, and identity theft.
 ```
-   - **Contact email:** `developer@ghostmydata.com`
+   - **Contact email:** `ghostmydata@gmail.com`
    - **Address:** (optional - can use registered agent or leave blank)
    - **Category:** Computer Security Service, Software Company
 3. Click **Save**
@@ -1194,7 +1429,7 @@ The GhostMyData Team
 **STEP 1: Create Vendor Account**
 1. Go to https://sell.g2.com/create-a-profile
 2. Click **Get Started** or **Create Free Profile**
-3. Enter work email: `developer@ghostmydata.com`
+3. Enter work email: `ghostmydata@gmail.com`
 4. Enter your name and company: `GhostMyData`
 5. Create password
 6. Click **Sign up**
@@ -1314,7 +1549,7 @@ Thank you!
 **STEP 1: Create Vendor Account**
 1. Go to https://www.capterra.com/vendors/sign-up
 2. Click **Get Started** or **List Your Software**
-3. Enter work email: `developer@ghostmydata.com`
+3. Enter work email: `ghostmydata@gmail.com`
 4. Enter your name
 5. Enter company name: `GhostMyData`
 6. Create password
@@ -1441,7 +1676,7 @@ Thanks,
 **STEP 1: Create Account**
 1. Go to https://alternativeto.net/
 2. Click **Sign up** (top right)
-3. Enter email: `developer@ghostmydata.com`
+3. Enter email: `ghostmydata@gmail.com`
 4. Create username: `GhostMyData`
 5. Create password
 6. Click **Sign up**
@@ -1528,7 +1763,7 @@ GhostMyData offers similar data broker removal with screenshot verification at 4
 1. Go to https://www.crunchbase.com/
 2. Click **Sign up** (top right)
 3. Choose **Sign up with email**
-4. Enter email: `developer@ghostmydata.com`
+4. Enter email: `ghostmydata@gmail.com`
 5. Create password
 6. Click **Sign up**
 7. Verify email
@@ -1626,7 +1861,7 @@ GhostMyData is a privacy protection service that automatically removes personal 
 1. Go to https://www.helpareporter.com/sources/
 2. Or try https://www.connectively.us/ (new platform)
 3. Click **Sign up as a Source**
-4. Enter email: `developer@ghostmydata.com`
+4. Enter email: `ghostmydata@gmail.com`
 5. Enter name: [Your Name]
 6. Create password
 7. Click **Sign up**
@@ -1746,6 +1981,188 @@ Services like GhostMyData automate this process - we submit opt-out requests to 
 
 ---
 
+## WEEK 4: Video & Emerging Platforms
+
+### 17. TikTok
+**URL:** https://www.tiktok.com/signup
+**Time:** 15 min setup + ongoing content
+
+**WHY TIKTOK:** Short-form videos about privacy tips can go viral. Great for reaching younger demographics who are increasingly privacy-conscious.
+
+---
+
+**STEP 1: Create Account**
+1. Go to https://www.tiktok.com/signup
+2. Sign up with email: `ghostmydata@gmail.com`
+3. Or download TikTok app and sign up there
+4. Verify email/phone
+5. Choose username: `ghostmydata`
+
+**STEP 2: Switch to Business Account**
+1. Go to **Settings** → **Account**
+2. Tap **Switch to Business Account**
+3. Select category: **Tech/Software** or **Education**
+4. Complete setup
+
+**STEP 3: Complete Profile**
+1. Go to **Edit Profile**
+2. Fill in:
+   - **Username:** `ghostmydata`
+   - **Name:** `GhostMyData`
+   - **Bio:**
+```
+🔒 Remove your data from 400+ sites
+🛡️ Privacy tips & data broker secrets
+👇 Free scan
+```
+   - **Website:** `https://ghostmydata.com`
+   - **Profile photo:** Upload `/public/logo.png`
+3. Tap **Save**
+
+**STEP 4: Content Ideas (30-60 second videos)**
+
+Video 1 - Hook:
+```
+"Your personal data is on 400+ websites right now. Here's how I know..."
+[Show screen recording of searching yourself on Spokeo/WhitePages]
+```
+
+Video 2 - Problem:
+```
+"This is why you keep getting spam calls..."
+[Explain data brokers in simple terms]
+```
+
+Video 3 - Solution:
+```
+"I removed myself from 87 websites. Here's what happened to my spam calls..."
+[Show before/after of call logs]
+```
+
+Video 4 - Tutorial:
+```
+"How to opt out of Spokeo in 60 seconds"
+[Quick tutorial]
+```
+
+Video 5 - Shocking fact:
+```
+"Data brokers make $250 BILLION selling YOUR information"
+[Explain the industry]
+```
+
+**TikTok Best Practices:**
+- Post 1-3x per day for growth
+- Use trending sounds
+- Hook in first 1-2 seconds
+- Add captions (most watch without sound)
+- Use hashtags: #privacy #databroker #spamcalls #protectyourself #tech #cybersecurity
+
+**Profile Image:** `/public/logo.png`
+
+- [ ] Account created
+- [ ] Business account enabled
+- [ ] Profile complete
+- [ ] Bio with link added
+- [ ] First video posted
+- [ ] 5 videos posted
+
+---
+
+### 18. Bluesky
+**URL:** https://bsky.app/
+**Time:** 10 min
+
+**WHY BLUESKY:** Twitter/X alternative growing in popularity. Tech-savvy, privacy-conscious audience. Early presence = advantage.
+
+---
+
+**STEP 1: Create Account**
+1. Go to https://bsky.app/
+2. Click **Sign up**
+3. Enter email: `ghostmydata@gmail.com`
+4. Choose handle: `ghostmydata.bsky.social`
+5. Create password
+6. Complete verification
+
+**STEP 2: Complete Profile**
+1. Click **Edit Profile**
+2. Fill in:
+   - **Display Name:** `GhostMyData`
+   - **Handle:** `@ghostmydata.bsky.social`
+   - **Bio:**
+```
+Remove your personal data from 400+ data broker sites automatically. Stop spam calls, prevent stalking, protect your identity. 🔒
+
+Free scan → ghostmydata.com
+```
+   - **Avatar:** Upload `/public/logo.png`
+   - **Banner:** Upload `/public/banners/twitter-banner.png` (similar size)
+3. Click **Save**
+
+**STEP 3: First Posts**
+
+Post 1 - Introduction:
+```
+Hey Bluesky! 👋
+
+I built GhostMyData to solve a problem: my personal data was on 87 websites without my consent.
+
+We remove your data from 400+ data broker sites automatically.
+
+If you're getting spam calls, this is probably why.
+
+Free scan: ghostmydata.com
+```
+
+Post 2 - Value post:
+```
+The average person is on 80+ data broker websites right now.
+
+These sites sell your:
+• Name & address
+• Phone number
+• Email
+• Relatives' names
+• Income estimate
+
+And it's all legal. 🤯
+
+That's why spam calls find you.
+```
+
+Post 3 - Engagement:
+```
+Quick question for the privacy-conscious folks here:
+
+How many spam calls do you get per week?
+
+🔁 Repost with your number
+
+(I was getting 10+/day before I removed my data)
+```
+
+**STEP 4: Follow Relevant Accounts**
+- Search for and follow accounts posting about:
+  - Privacy
+  - Cybersecurity
+  - Tech
+  - Startups
+  - Data protection
+
+**Profile Image:** `/public/logo.png`
+**Banner:** `/public/banners/twitter-banner.png`
+
+- [ ] Account created
+- [ ] Handle claimed
+- [ ] Profile complete
+- [ ] Avatar uploaded
+- [ ] Banner uploaded
+- [ ] First post published
+- [ ] Following relevant accounts
+
+---
+
 ## PROGRESS TRACKER
 
 | Platform | Account | Profile | Content | Status |
@@ -1758,7 +2175,8 @@ Services like GhostMyData automate this process - we submit opt-out requests to 
 | Instagram | [ ] | [ ] | [ ] | ⏳ |
 | Product Hunt | [ ] | [ ] | [ ] | ⏳ |
 | Indie Hackers | [ ] | [ ] | [ ] | ⏳ |
-| Medium | [ ] | [ ] | [ ] | ⏳ |
+| Medium (free) | [ ] | [ ] | [ ] | ⏳ |
+| Substack | [ ] | [ ] | [ ] | ⏳ |
 | Quora | [ ] | [ ] | [ ] | ⏳ |
 | Trustpilot | [ ] | [ ] | [ ] | ⏳ |
 | G2 | [ ] | [ ] | [ ] | ⏳ |
@@ -1766,6 +2184,8 @@ Services like GhostMyData automate this process - we submit opt-out requests to 
 | AlternativeTo | [ ] | [ ] | [ ] | ⏳ |
 | Crunchbase | [ ] | [ ] | [ ] | ⏳ |
 | HARO | [ ] | [ ] | [ ] | ⏳ |
+| TikTok | [ ] | [ ] | [ ] | ⏳ |
+| Bluesky | [ ] | [ ] | [ ] | ⏳ |
 
 ---
 
@@ -1774,6 +2194,7 @@ Services like GhostMyData automate this process - we submit opt-out requests to 
 | Phase | Platforms | Estimated Time |
 |-------|-----------|----------------|
 | Week 1 Core | 6 accounts | 1-2 hours |
-| Week 2 Distribution | 5 accounts | 1 hour |
+| Week 2 Distribution | 6 accounts (incl. Substack) | 1-2 hours |
 | Week 3 Directories | 5 accounts | 1 hour |
-| **Total** | 16 accounts | **3-4 hours** |
+| Week 4 Video & Emerging | 2 accounts (TikTok, Bluesky) | 30 min setup + ongoing |
+| **Total** | 19 accounts | **4-5 hours** |

@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { prisma } from "@/lib/db";
+import { isEmailBlocklisted, getBlocklistEntry } from "@/lib/removers/blocklist";
 
 // Lazy-initialize Resend client to ensure env vars are loaded
 let _resend: Resend | null = null;
@@ -948,6 +949,13 @@ interface RemovalRequestEmail {
 }
 
 export async function sendCCPARemovalRequest(data: RemovalRequestEmail) {
+  // Check blocklist before sending
+  if (isEmailBlocklisted(data.toEmail)) {
+    const entry = getBlocklistEntry(data.toEmail.split("@")[1]);
+    console.warn(`[Email] Blocked CCPA request to ${data.toEmail}: ${entry?.reason || "Blocklisted"}`);
+    return { success: false, blocked: true, reason: entry?.reason || "Email domain is blocklisted" };
+  }
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -1006,6 +1014,13 @@ interface BulkRemovalRequestEmail {
 }
 
 export async function sendBulkCCPARemovalRequest(data: BulkRemovalRequestEmail) {
+  // Check blocklist before sending
+  if (isEmailBlocklisted(data.toEmail)) {
+    const entry = getBlocklistEntry(data.toEmail.split("@")[1]);
+    console.warn(`[Email] Blocked bulk CCPA request to ${data.toEmail} (${data.brokerName}): ${entry?.reason || "Blocklisted"}`);
+    return { success: false, blocked: true, reason: entry?.reason || "Email domain is blocklisted" };
+  }
+
   // Dedupe data types
   const uniqueDataTypes = [...new Set(data.exposures.map(e => e.dataType))];
 

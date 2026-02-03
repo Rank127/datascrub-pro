@@ -36,6 +36,9 @@ const banners = [
   { html: 'screenshot-dashboard.html', png: 'screenshot-dashboard.png', width: 1366, height: 768 },
   { html: 'screenshot-scan-results.html', png: 'screenshot-scan-results.png', width: 1366, height: 768 },
   { html: 'screenshot-removals.html', png: 'screenshot-removals.png', width: 1366, height: 768 },
+
+  // Substack
+  { html: 'substack-cover.html', png: 'substack-cover.png', width: 1200, height: 400 },
 ];
 
 async function generateBanners() {
