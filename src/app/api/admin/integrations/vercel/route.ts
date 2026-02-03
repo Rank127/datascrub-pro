@@ -85,7 +85,21 @@ export async function GET(request: Request) {
       analytics,
     };
 
-    return NextResponse.json(response);
+    // Add debug info to response
+    const debugResponse = {
+      ...response,
+      _debug: {
+        envCheck: {
+          hasToken: !!process.env.VERCEL_ACCESS_TOKEN,
+          tokenLength: process.env.VERCEL_ACCESS_TOKEN?.length,
+          projectId: process.env.VERCEL_PROJECT_ID,
+          teamId: process.env.VERCEL_TEAM_ID,
+        },
+        deploymentsCount: deployments?.length || 0,
+      }
+    };
+
+    return NextResponse.json(debugResponse);
   } catch (error) {
     console.error("[Integrations/Vercel] Error:", error);
     return NextResponse.json(

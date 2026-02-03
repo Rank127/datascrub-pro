@@ -14,15 +14,25 @@ interface VercelClientConfig {
 function getConfig(): VercelClientConfig | null {
   const accessToken = process.env.VERCEL_ACCESS_TOKEN;
   const projectId = process.env.VERCEL_PROJECT_ID;
+  const teamId = process.env.VERCEL_TEAM_ID;
+
+  console.log("[Vercel] getConfig:", {
+    hasToken: !!accessToken,
+    tokenLength: accessToken?.length,
+    tokenStart: accessToken?.slice(0, 4),
+    projectId,
+    teamId
+  });
 
   if (!accessToken || !projectId) {
+    console.warn("[Vercel] Missing config:", { hasToken: !!accessToken, hasProjectId: !!projectId });
     return null;
   }
 
   return {
     accessToken,
     projectId,
-    teamId: process.env.VERCEL_TEAM_ID,
+    teamId,
   };
 }
 
