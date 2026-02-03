@@ -616,7 +616,7 @@ Take back your privacy. Free scan at ghostmydata.com (link in bio)
 1. Click your avatar → **Settings** (or go to https://www.producthunt.com/me/edit)
 2. Fill in:
    - **Name:** [Your Name]
-   - **Headline:** `Founder of GhostMyData | Privacy Advocate`
+   - **Headline:** `Founder @ GhostMyData | Privacy Advocate`
    - **Bio:**
 ```
 Building GhostMyData - removing personal data from 400+ data broker sites automatically. Passionate about privacy and protecting people from spam calls, stalkers, and identity theft.
@@ -625,6 +625,38 @@ Building GhostMyData - removing personal data from 400+ data broker sites automa
    - **Twitter:** `@GhostMyData`
    - **Profile picture:** Upload professional photo or logo
 3. Click **Save**
+
+**STEP 2B: Select Interest Tags**
+1. Go to **Settings** → **Interests** (or during onboarding)
+2. Select these launch tags:
+
+**Must-Have (Primary):**
+- Privacy
+- Security
+- Cybersecurity
+- SaaS
+
+**Recommended (Secondary):**
+- Tech
+- Productivity
+- Web App
+- Consumer
+- Identity
+- Data
+- Personal Finance
+- Tools
+
+**Optional (If Available):**
+- Subscription
+- Software
+- Automation
+- B2C
+- Online Safety
+- Protection
+
+3. Click **Save**
+
+*Note: More tags = more launches in your feed = more opportunities to engage and build relationships before your launch*
 
 **STEP 3: Build Hunter Relationships (2-4 weeks before launch)**
 

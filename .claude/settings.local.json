@@ -91,7 +91,8 @@
       "Bash(node test-family.js:*)",
       "WebFetch(domain:www.security.org)",
       "WebFetch(domain:onerep.com)",
-      "Bash(pnpm list:*)"
+      "Bash(pnpm list:*)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''\\\\n''.join\\([f\"\"{x[''state'']} - {x[''meta''].get\\(''githubCommitMessage'',''cli''\\)[:50]}\"\" for x in d[''deployments'']]\\)\\)\")"
     ]
   }
 }

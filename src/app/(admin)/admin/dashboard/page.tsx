@@ -44,9 +44,16 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState("finance");
   const [vercelData, setVercelData] = useState<{
     configured: boolean;
-    lastDeployment?: { state: string; createdAt: number; url?: string };
+    lastDeployment?: { state: string; createdAt: number; url?: string; id?: string };
     analytics?: { pageViews: number; visitors: number };
   } | null>(null);
+
+  // Extract build ID from deployment
+  const getBuildId = () => {
+    if (!vercelData?.lastDeployment) return null;
+    const { url, id } = vercelData.lastDeployment;
+    return url?.split('-ghostmydata')[0]?.split('datascrub-')[1] || id?.slice(0, 8);
+  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -61,28 +68,17 @@ export default function AdminDashboardPage() {
 
   const fetchVercelStatus = async () => {
     try {
-      console.log("[Admin] Fetching Vercel status...");
       const response = await fetch("/api/admin/integrations/vercel");
-      console.log("[Admin] Vercel response status:", response.status);
-
       if (response.ok) {
         const result = await response.json();
-        console.log("[Admin] Vercel data received:", {
-          configured: result.configured,
-          deploymentsCount: result.deployments?.length,
-          hasAnalytics: !!result.analytics
-        });
         setVercelData({
           configured: result.configured,
           lastDeployment: result.deployments?.[0],
           analytics: result.analytics,
         });
-      } else {
-        const errorText = await response.text();
-        console.error("[Admin] Vercel API error:", response.status, errorText);
       }
     } catch (err) {
-      console.error("[Admin] Failed to fetch Vercel status:", err);
+      console.error("Failed to fetch Vercel status:", err);
     }
   };
 
@@ -328,6 +324,9 @@ export default function AdminDashboardPage() {
                   <div className="flex items-center gap-2">
                     {vercelData?.lastDeployment ? (
                       <>
+                        <span className="text-sm font-medium text-white truncate">
+                          {getBuildId()}
+                        </span>
                         <Badge
                           variant="outline"
                           className={`text-xs px-1.5 py-0 ${
@@ -346,9 +345,6 @@ export default function AdminDashboardPage() {
                           {vercelData.lastDeployment.state === "QUEUED" && <Clock className="h-3 w-3 mr-1" />}
                           {vercelData.lastDeployment.state}
                         </Badge>
-                        <span className="text-xs text-slate-500">
-                          {new Date(vercelData.lastDeployment.createdAt).toLocaleDateString()}
-                        </span>
                       </>
                     ) : vercelData?.configured === false ? (
                       <span className="text-sm text-slate-500">Not configured</span>
