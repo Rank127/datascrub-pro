@@ -9,8 +9,8 @@ import { isDomainBlocklisted, getBlocklistEntry } from "./blocklist";
 import { CONFIDENCE_THRESHOLDS } from "@/lib/scanners/base-scanner";
 
 const MAX_REMOVAL_ATTEMPTS = 5;
-const MAX_REQUESTS_PER_BROKER_PER_DAY = 25; // Limit requests to any single broker per day (avoid spam flags)
-const MIN_MINUTES_BETWEEN_SAME_BROKER = 15; // Space requests to same broker (minutes)
+const MAX_REQUESTS_PER_BROKER_PER_DAY = 100; // Increased from 25 - clearing backlog with handful of users
+const MIN_MINUTES_BETWEEN_SAME_BROKER = 2; // Reduced from 15 - faster processing for backlog clearance
 
 interface RemovalExecutionResult {
   success: boolean;

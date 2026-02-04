@@ -33,7 +33,15 @@
     },
     {
       "path": "/api/cron/process-removals",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/process-removals",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/process-removals",
+      "schedule": "0 4 * * *"
     },
     {
       "path": "/api/cron/process-removals",
@@ -41,7 +49,15 @@
     },
     {
       "path": "/api/cron/process-removals",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/process-removals",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/process-removals",
+      "schedule": "0 12 * * *"
     },
     {
       "path": "/api/cron/process-removals",
@@ -49,7 +65,15 @@
     },
     {
       "path": "/api/cron/process-removals",
+      "schedule": "0 16 * * *"
+    },
+    {
+      "path": "/api/cron/process-removals",
       "schedule": "0 18 * * *"
+    },
+    {
+      "path": "/api/cron/process-removals",
+      "schedule": "0 20 * * *"
     },
     {
       "path": "/api/cron/process-removals",
