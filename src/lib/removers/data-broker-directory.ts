@@ -5924,23 +5924,17 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "EMAIL",
     estimatedDays: 14,
   },
-  BAZAARVOICE: {
-    name: "Bazaarvoice",
-    optOutUrl: "https://www.bazaarvoice.com/privacy/",
-    privacyEmail: "privacy@bazaarvoice.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 21,
-  },
+  // BAZAARVOICE: Removed - Data Processor, not Data Broker
+  // They process reviews/UGC on behalf of retailer clients (Data Controllers) per GDPR Articles 28/29
+  // Sending deletion requests to them is inappropriate - see blocklist.ts for details
+
   // POWER_REVIEWS: Removed - Syndigo/PowerReviews are Data Processors, not Data Brokers
   // They act on behalf of their retail clients (Data Controllers) per GDPR Articles 28/29
   // Sending deletion requests to them is inappropriate - see blocklist.ts for details
-  YOTPO_DATA: {
-    name: "Yotpo",
-    optOutUrl: "https://www.yotpo.com/privacy/",
-    privacyEmail: "privacy@yotpo.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
+
+  // YOTPO_DATA: Removed - Data Processor, not Data Broker
+  // They process reviews/UGC on behalf of retailer clients (Data Controllers) per GDPR Articles 28/29
+  // Sending deletion requests to them is inappropriate - see blocklist.ts for details
 
   // ==========================================
   // MASSIVE EXPANSION v1.20.0 - 1500 SOURCES
@@ -13218,7 +13212,8 @@ export const BROKER_CATEGORIES = {
     "THE_TRADE_DESK_DATA", "BIDSWITCH", "SAMBA_TV", "VIZIO_INSCAPE", "AUTOMATIC_TV"
   ],
   ADDITIONAL_RETAIL_DATA: [
-    "SHOPPERTRACK", "PRICESPIDER", "BAZAARVOICE", "YOTPO_DATA"
+    "SHOPPERTRACK", "PRICESPIDER"
+    // BAZAARVOICE and YOTPO_DATA removed - Data Processors, not Data Brokers
   ],
 
   // ==========================================

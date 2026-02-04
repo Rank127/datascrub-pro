@@ -60,6 +60,20 @@ export const BLOCKLISTED_COMPANIES: BlocklistedCompany[] = [
     contactedBy: "Sean Milford, Head of Global Data Privacy (Syndigo)",
     notes: "Syndigo affiliate. Processes product data on behalf of brand/retailer clients.",
   },
+  {
+    name: "Bazaarvoice",
+    domains: ["bazaarvoice.com"],
+    reason: "Data Processor, not Data Broker. Processes reviews/UGC on behalf of retailer clients per GDPR Articles 28/29.",
+    dateAdded: "2026-02-03",
+    notes: "UGC and reviews platform. Retailers are the Data Controllers - Bazaarvoice only processes data on their behalf.",
+  },
+  {
+    name: "Yotpo",
+    domains: ["yotpo.com"],
+    reason: "Data Processor, not Data Broker. Processes reviews/UGC on behalf of retailer clients per GDPR Articles 28/29.",
+    dateAdded: "2026-02-03",
+    notes: "E-commerce marketing platform including reviews. Retailers are the Data Controllers - Yotpo only processes data on their behalf.",
+  },
 ];
 
 /**
@@ -69,6 +83,8 @@ export const BLOCKLISTED_EMAIL_DOMAINS: string[] = [
   "syndigo.com",
   "powerreviews.com",
   "1worldsync.com",
+  "bazaarvoice.com",
+  "yotpo.com",
 ];
 
 /**
