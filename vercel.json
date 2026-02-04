@@ -114,6 +114,18 @@
     {
       "path": "/api/cron/cleanup-data-processors",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/auto-process-manual-queue",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/auto-process-manual-queue",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/auto-process-manual-queue",
+      "schedule": "0 17 * * *"
     }
   ]
 }
