@@ -85,8 +85,9 @@ export async function POST(request: Request) {
       }
 
       // Step 3: Calculate adaptive batch size based on predictions
-      const basePendingBatch = 100;
-      const baseRetryBatch = 25;
+      // Increased batch sizes to clear backlog faster (was 100/25)
+      const basePendingBatch = 500;
+      const baseRetryBatch = 100;
       const adaptiveMultiplier = criticalPredictions.length > 0 ? 0.5 : 1;
       const pendingBatchSize = Math.floor(basePendingBatch * adaptiveMultiplier);
       const retryBatchSize = Math.floor(baseRetryBatch * adaptiveMultiplier);
