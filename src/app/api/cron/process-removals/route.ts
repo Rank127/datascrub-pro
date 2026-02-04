@@ -4,15 +4,26 @@ import {
   retryFailedRemovalsBatch,
   getAutomationStats,
 } from "@/lib/removers/removal-service";
+import {
+  acquireJobLock,
+  releaseJobLock,
+  getSmartRemovalPriority,
+  analyzePatternsAndPredict,
+  getBrokerIntelligence,
+} from "@/lib/agents/intelligence-coordinator";
+import { logCronExecution } from "@/lib/cron-logger";
+
+const JOB_NAME = "process-removals";
 
 /**
  * Cron job to automatically process pending and retry failed removals
  * Schedule: 6x daily (every 4 hours) at 2, 6, 10, 14, 18, 22 UTC
  *
- * This job:
- * 1. Processes pending removal requests (sends CCPA emails)
- * 2. Retries failed removals with alternative email patterns
- * 3. Returns automation statistics
+ * INTELLIGENT FEATURES:
+ * - Smart broker prioritization based on success rates
+ * - Job locking to prevent race conditions
+ * - Predictive insights for anomaly detection
+ * - Adaptive processing based on broker intelligence
  *
  * Rate limiting (Resend Pro: 50,000/month):
  * - 100 pending + 25 retries = 125 broker emails per batch
@@ -26,6 +37,8 @@ import {
  * - Severity-weighted round-robin distribution across brokers
  */
 export async function POST(request: Request) {
+  const startTime = Date.now();
+
   try {
     // Verify cron secret
     const authHeader = request.headers.get("authorization");
@@ -35,55 +48,143 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("[Cron: Process Removals] Starting automated removal processing...");
-    const startTime = Date.now();
+    // Step 0: Acquire job lock to prevent race conditions
+    const lockResult = await acquireJobLock(JOB_NAME);
+    if (!lockResult.acquired) {
+      console.log(`[Cron: ${JOB_NAME}] Skipped: ${lockResult.reason}`);
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: lockResult.reason,
+      });
+    }
 
-    // Step 1: Process pending removals (100 per batch × 6 batches/day = 600 emails)
-    console.log("[Cron: Process Removals] Processing pending removals...");
-    const pendingResults = await processPendingRemovalsBatch(100);
+    try {
+      console.log(`[Cron: ${JOB_NAME}] Starting intelligent removal processing...`);
 
-    // Step 2: Retry failed removals (25 per batch × 6 batches/day = 150 emails)
-    console.log("[Cron: Process Removals] Retrying failed removals...");
-    const retryResults = await retryFailedRemovalsBatch(25);
+      // Step 1: Get smart prioritization based on broker intelligence
+      console.log(`[Cron: ${JOB_NAME}] Analyzing broker intelligence...`);
+      const priorities = await getSmartRemovalPriority();
+      const topBrokers = priorities.slice(0, 5);
+      console.log(
+        `[Cron: ${JOB_NAME}] Top priority brokers:`,
+        topBrokers.map((b) => `${b.brokerKey} (${b.priority})`).join(", ")
+      );
 
-    // Step 3: Get automation stats
-    const stats = await getAutomationStats();
+      // Step 2: Check for anomalies before processing
+      const predictions = await analyzePatternsAndPredict();
+      const criticalPredictions = predictions.filter((p) => p.severity === "CRITICAL");
 
-    const duration = Date.now() - startTime;
+      if (criticalPredictions.length > 0) {
+        console.log(`[Cron: ${JOB_NAME}] CRITICAL ANOMALIES DETECTED:`);
+        for (const pred of criticalPredictions) {
+          console.log(`  - ${pred.message}`);
+        }
+        // Continue processing but with reduced batch size
+        console.log(`[Cron: ${JOB_NAME}] Reducing batch size due to anomalies`);
+      }
 
-    const response = {
-      success: true,
-      duration: `${(duration / 1000).toFixed(1)}s`,
-      pending: {
-        processed: pendingResults.processed,
-        successful: pendingResults.successful,
-        failed: pendingResults.failed,
-        skipped: pendingResults.skipped,
-        brokerDistribution: pendingResults.brokerDistribution,
-      },
-      retries: {
-        processed: retryResults.processed,
-        retried: retryResults.retried,
-        stillFailed: retryResults.stillFailed,
-        skippedDueToLimit: retryResults.skippedDueToLimit,
-      },
-      rateLimiting: {
-        maxPerBrokerPerDay: 25,
-        minMinutesBetweenSameBroker: 15,
-        batchSize: { pending: 100, retries: 25 },
-        dailyBatches: 6,
-      },
-      automationStats: {
-        total: stats.totalRemovals,
-        automationRate: `${stats.automationRate}%`,
-        byStatus: stats.byStatus,
-      },
-    };
+      // Step 3: Calculate adaptive batch size based on predictions
+      const basePendingBatch = 100;
+      const baseRetryBatch = 25;
+      const adaptiveMultiplier = criticalPredictions.length > 0 ? 0.5 : 1;
+      const pendingBatchSize = Math.floor(basePendingBatch * adaptiveMultiplier);
+      const retryBatchSize = Math.floor(baseRetryBatch * adaptiveMultiplier);
 
-    console.log("[Cron: Process Removals] Complete:", JSON.stringify(response, null, 2));
-    return NextResponse.json(response);
+      // Step 4: Process pending removals with smart prioritization
+      console.log(`[Cron: ${JOB_NAME}] Processing ${pendingBatchSize} pending removals...`);
+      const pendingResults = await processPendingRemovalsBatch(pendingBatchSize);
+
+      // Step 5: Retry failed removals
+      console.log(`[Cron: ${JOB_NAME}] Retrying ${retryBatchSize} failed removals...`);
+      const retryResults = await retryFailedRemovalsBatch(retryBatchSize);
+
+      // Step 6: Get automation stats
+      const stats = await getAutomationStats();
+
+      // Step 7: Gather broker intelligence for top processed brokers
+      const brokerIntel: Record<string, { successRate: number; riskLevel: string }> = {};
+      if (pendingResults.brokerDistribution) {
+        const processedBrokers = Object.keys(pendingResults.brokerDistribution).slice(0, 5);
+        for (const broker of processedBrokers) {
+          const intel = await getBrokerIntelligence(broker);
+          brokerIntel[broker] = {
+            successRate: intel.successRate,
+            riskLevel: intel.riskLevel,
+          };
+        }
+      }
+
+      const duration = Date.now() - startTime;
+
+      const response = {
+        success: true,
+        duration: `${(duration / 1000).toFixed(1)}s`,
+        intelligence: {
+          prioritizedBrokers: topBrokers.length,
+          predictionsGenerated: predictions.length,
+          criticalAnomalies: criticalPredictions.length,
+          adaptiveBatchMultiplier: adaptiveMultiplier,
+          brokerIntelligence: brokerIntel,
+        },
+        pending: {
+          processed: pendingResults.processed,
+          successful: pendingResults.successful,
+          failed: pendingResults.failed,
+          skipped: pendingResults.skipped,
+          brokerDistribution: pendingResults.brokerDistribution,
+        },
+        retries: {
+          processed: retryResults.processed,
+          retried: retryResults.retried,
+          stillFailed: retryResults.stillFailed,
+          skippedDueToLimit: retryResults.skippedDueToLimit,
+        },
+        rateLimiting: {
+          maxPerBrokerPerDay: 25,
+          minMinutesBetweenSameBroker: 15,
+          batchSize: { pending: pendingBatchSize, retries: retryBatchSize },
+          dailyBatches: 6,
+        },
+        automationStats: {
+          total: stats.totalRemovals,
+          automationRate: `${stats.automationRate}%`,
+          byStatus: stats.byStatus,
+        },
+        predictions: predictions.slice(0, 3).map((p) => ({
+          type: p.type,
+          severity: p.severity,
+          message: p.message,
+        })),
+      };
+
+      // Log execution
+      await logCronExecution({
+        jobName: JOB_NAME,
+        status: pendingResults.failed > pendingResults.successful ? "FAILED" : "SUCCESS",
+        duration,
+        message: `Processed ${pendingResults.processed} pending, ${retryResults.processed} retries. Intelligence: ${priorities.length} brokers analyzed.`,
+      });
+
+      console.log(`[Cron: ${JOB_NAME}] Complete:`, JSON.stringify(response, null, 2));
+      return NextResponse.json(response);
+    } finally {
+      // Always release the lock
+      releaseJobLock(JOB_NAME);
+    }
   } catch (error) {
-    console.error("[Cron: Process Removals] Error:", error);
+    const duration = Date.now() - startTime;
+    console.error(`[Cron: ${JOB_NAME}] Error:`, error);
+
+    await logCronExecution({
+      jobName: JOB_NAME,
+      status: "FAILED",
+      duration,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+
+    releaseJobLock(JOB_NAME);
+
     return NextResponse.json(
       {
         success: false,

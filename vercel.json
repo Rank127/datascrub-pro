@@ -106,6 +106,14 @@
     {
       "path": "/api/cron/dashboard-validation",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/auto-verify-fast-brokers",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-data-processors",
+      "schedule": "0 5 * * *"
     }
   ]
 }

@@ -3,8 +3,15 @@ import { prisma } from "@/lib/db";
 import { encrypt, decrypt } from "@/lib/encryption/crypto";
 import { Resend } from "resend";
 import { logCronExecution, getCronHealthStatus, cleanupOldCronLogs } from "@/lib/cron-logger";
+import {
+  acquireJobLock,
+  releaseJobLock,
+  analyzePatternsAndPredict,
+  getCoordinatorStatus,
+} from "@/lib/agents/intelligence-coordinator";
 
 const ADMIN_EMAIL = "developer@ghostmydata.com";
+const JOB_NAME = "health-check";
 
 // Lazy initialization to avoid build-time errors
 function getResend() {
@@ -666,6 +673,169 @@ export async function GET(request: Request) {
       name: "Daily Activity",
       status: "WARN",
       message: `Could not get activity metrics: ${error}`,
+    });
+  }
+
+  // ========== PREDICTIVE INTELLIGENCE ==========
+
+  // Test 16: Predictive Anomaly Detection
+  try {
+    const predictions = await analyzePatternsAndPredict();
+    const criticalPredictions = predictions.filter(p => p.severity === "CRITICAL");
+    const warningPredictions = predictions.filter(p => p.severity === "WARNING");
+
+    if (criticalPredictions.length > 0) {
+      tests.push({
+        name: "Predictive Intelligence",
+        status: "FAIL",
+        message: `${criticalPredictions.length} critical anomalies detected: ${criticalPredictions[0].message}`,
+        actionRequired: criticalPredictions[0].suggestedAction || "Review critical predictions",
+      });
+    } else if (warningPredictions.length > 0) {
+      tests.push({
+        name: "Predictive Intelligence",
+        status: "WARN",
+        message: `${warningPredictions.length} warnings detected: ${warningPredictions[0].message}`,
+      });
+    } else {
+      tests.push({
+        name: "Predictive Intelligence",
+        status: "PASS",
+        message: `No anomalies detected. ${predictions.length} patterns analyzed.`,
+      });
+    }
+  } catch (error) {
+    tests.push({
+      name: "Predictive Intelligence",
+      status: "WARN",
+      message: `Could not run predictive analysis: ${error instanceof Error ? error.message : "Unknown error"}`,
+    });
+  }
+
+  // Test 17: Intelligence Coordinator Status
+  try {
+    const coordinatorStatus = getCoordinatorStatus();
+
+    tests.push({
+      name: "Intelligence Coordinator",
+      status: "PASS",
+      message: `Active locks: ${coordinatorStatus.activeLocks.length}, Insights: ${coordinatorStatus.insightCount}, Broker intel: ${coordinatorStatus.brokerIntelCount}`,
+    });
+  } catch (error) {
+    tests.push({
+      name: "Intelligence Coordinator",
+      status: "WARN",
+      message: `Could not get coordinator status: ${error instanceof Error ? error.message : "Unknown error"}`,
+    });
+  }
+
+  // Test 18: Removal Success Rate Trend
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+
+    // Last 7 days
+    const recentRemovals = await prisma.removalRequest.groupBy({
+      by: ["status"],
+      where: { updatedAt: { gte: sevenDaysAgo } },
+      _count: true,
+    });
+
+    // Previous 7 days (for comparison)
+    const previousRemovals = await prisma.removalRequest.groupBy({
+      by: ["status"],
+      where: { updatedAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo } },
+      _count: true,
+    });
+
+    const recentCompleted = recentRemovals.find(r => r.status === "COMPLETED")?._count || 0;
+    const recentFailed = recentRemovals.find(r => r.status === "FAILED")?._count || 0;
+    const recentTotal = recentCompleted + recentFailed;
+    const recentRate = recentTotal > 0 ? (recentCompleted / recentTotal) * 100 : 100;
+
+    const prevCompleted = previousRemovals.find(r => r.status === "COMPLETED")?._count || 0;
+    const prevFailed = previousRemovals.find(r => r.status === "FAILED")?._count || 0;
+    const prevTotal = prevCompleted + prevFailed;
+    const prevRate = prevTotal > 0 ? (prevCompleted / prevTotal) * 100 : 100;
+
+    const trend = recentRate - prevRate;
+    const trendDirection = trend > 0 ? "↑" : trend < 0 ? "↓" : "→";
+
+    if (recentRate < 50) {
+      tests.push({
+        name: "Removal Success Rate",
+        status: "FAIL",
+        message: `${recentRate.toFixed(1)}% success rate (${trendDirection} ${Math.abs(trend).toFixed(1)}% from last week)`,
+        actionRequired: "Review failed removals and adjust strategies",
+      });
+    } else if (recentRate < 70 || trend < -10) {
+      tests.push({
+        name: "Removal Success Rate",
+        status: "WARN",
+        message: `${recentRate.toFixed(1)}% success rate (${trendDirection} ${Math.abs(trend).toFixed(1)}% from last week)`,
+      });
+    } else {
+      tests.push({
+        name: "Removal Success Rate",
+        status: "PASS",
+        message: `${recentRate.toFixed(1)}% success rate (${trendDirection} ${Math.abs(trend).toFixed(1)}% from last week)`,
+      });
+    }
+  } catch (error) {
+    tests.push({
+      name: "Removal Success Rate",
+      status: "WARN",
+      message: `Could not calculate success rate trend: ${error instanceof Error ? error.message : "Unknown error"}`,
+    });
+  }
+
+  // Test 19: Queue Backlog Health
+  try {
+    const pendingCount = await prisma.removalRequest.count({
+      where: { status: "PENDING" },
+    });
+
+    const submittedCount = await prisma.removalRequest.count({
+      where: { status: "SUBMITTED" },
+    });
+
+    // Check oldest pending
+    const oldestPending = await prisma.removalRequest.findFirst({
+      where: { status: "PENDING" },
+      orderBy: { createdAt: "asc" },
+      select: { createdAt: true },
+    });
+
+    let oldestDays = 0;
+    if (oldestPending) {
+      oldestDays = Math.floor((Date.now() - oldestPending.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
+    if (pendingCount > 500 || oldestDays > 14) {
+      tests.push({
+        name: "Queue Backlog",
+        status: "FAIL",
+        message: `${pendingCount} pending, ${submittedCount} submitted. Oldest: ${oldestDays} days`,
+        actionRequired: oldestDays > 14 ? "Clear stale pending requests" : "Increase processing capacity",
+      });
+    } else if (pendingCount > 200 || oldestDays > 7) {
+      tests.push({
+        name: "Queue Backlog",
+        status: "WARN",
+        message: `${pendingCount} pending, ${submittedCount} submitted. Oldest: ${oldestDays} days`,
+      });
+    } else {
+      tests.push({
+        name: "Queue Backlog",
+        status: "PASS",
+        message: `${pendingCount} pending, ${submittedCount} submitted. Oldest: ${oldestDays} days`,
+      });
+    }
+  } catch (error) {
+    tests.push({
+      name: "Queue Backlog",
+      status: "WARN",
+      message: `Could not check queue backlog: ${error instanceof Error ? error.message : "Unknown error"}`,
     });
   }
 
