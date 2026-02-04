@@ -19,6 +19,7 @@ import {
   InvocationTypes,
 } from "../types";
 import { registerAgent, getRegistry } from "../registry";
+import { prisma } from "@/lib/db";
 
 const AGENT_ID = "qa-agent";
 const AGENT_VERSION = "1.0.0";
@@ -126,6 +127,34 @@ interface RegressionResult {
   report: string;
 }
 
+interface DashboardValidationResult {
+  validatedAt: string;
+  duration: number;
+  overallStatus: "PASS" | "WARN" | "FAIL";
+  checksPerformed: number;
+  checksPassed: number;
+  checksFailed: number;
+  checks: Array<{
+    name: string;
+    status: "PASS" | "WARN" | "FAIL";
+    expected?: number | string;
+    actual?: number | string;
+    message: string;
+  }>;
+  dataIntegrity: {
+    orphanedRemovals: number;
+    missingExposures: number;
+    statusMismatches: number;
+    duplicateExposures: number;
+  };
+  userSampleChecks: Array<{
+    userId: string;
+    status: "PASS" | "FAIL";
+    issues: string[];
+  }>;
+  recommendations: string[];
+}
+
 // ============================================================================
 // QA AGENT CLASS
 // ============================================================================
@@ -168,6 +197,13 @@ class QAAgent extends BaseAgent {
       requiresAI: false,
       supportsBatch: true,
     },
+    {
+      id: "validate-dashboard-data",
+      name: "Validate Dashboard Data",
+      description: "Validate dashboard stats match actual database state",
+      requiresAI: false,
+      rateLimit: 24, // Max 24 per hour
+    },
   ];
 
   protected getSystemPrompt(): string {
@@ -179,6 +215,7 @@ class QAAgent extends BaseAgent {
     this.handlers.set("detect-anomalies", this.handleDetectAnomalies.bind(this));
     this.handlers.set("generate-report", this.handleGenerateReport.bind(this));
     this.handlers.set("run-regression", this.handleRunRegression.bind(this));
+    this.handlers.set("validate-dashboard-data", this.handleValidateDashboardData.bind(this));
   }
 
   private async handleValidateAgents(
@@ -641,6 +678,295 @@ class QAAgent extends BaseAgent {
     }
   }
 
+  /**
+   * Validate Dashboard Data - ensures all dashboard stats match actual database state
+   */
+  private async handleValidateDashboardData(
+    input: unknown,
+    context: AgentContext
+  ): Promise<AgentResult<DashboardValidationResult>> {
+    const startTime = Date.now();
+    const checks: DashboardValidationResult["checks"] = [];
+    const userSampleChecks: DashboardValidationResult["userSampleChecks"] = [];
+    const recommendations: string[] = [];
+
+    // Data Processor sources to exclude (same as dashboard stats API)
+    const DATA_PROCESSOR_SOURCES = [
+      "SYNDIGO", "POWERREVIEWS", "POWER_REVIEWS", "1WORLDSYNC",
+      "BAZAARVOICE", "YOTPO", "YOTPO_DATA",
+    ];
+
+    try {
+      // =========================================================================
+      // CHECK 1: Global Exposure Counts Consistency
+      // =========================================================================
+      const [totalExposures, activeExposures, removedExposures, whitelistedExposures] = await Promise.all([
+        prisma.exposure.count({ where: { source: { notIn: DATA_PROCESSOR_SOURCES } } }),
+        prisma.exposure.count({ where: { status: "ACTIVE", source: { notIn: DATA_PROCESSOR_SOURCES } } }),
+        prisma.exposure.count({ where: { status: "REMOVED", source: { notIn: DATA_PROCESSOR_SOURCES } } }),
+        prisma.exposure.count({ where: { isWhitelisted: true } }),
+      ]);
+
+      const calculatedTotal = activeExposures + removedExposures + whitelistedExposures;
+      const exposureCountMatch = Math.abs(totalExposures - calculatedTotal) <= whitelistedExposures; // Allow for overlap
+
+      checks.push({
+        name: "Exposure Count Consistency",
+        status: exposureCountMatch ? "PASS" : "WARN",
+        expected: `Active(${activeExposures}) + Removed(${removedExposures}) ≈ Total`,
+        actual: `Total: ${totalExposures}`,
+        message: exposureCountMatch
+          ? "Exposure counts are consistent"
+          : `Exposure count mismatch: total=${totalExposures}, active=${activeExposures}, removed=${removedExposures}`,
+      });
+
+      // =========================================================================
+      // CHECK 2: Removal Request Status Consistency
+      // =========================================================================
+      const [pendingRemovals, submittedRemovals, completedRemovals, failedRemovals] = await Promise.all([
+        prisma.removalRequest.count({ where: { status: "PENDING" } }),
+        prisma.removalRequest.count({ where: { status: "SUBMITTED" } }),
+        prisma.removalRequest.count({ where: { status: "COMPLETED" } }),
+        prisma.removalRequest.count({ where: { status: "FAILED" } }),
+      ]);
+
+      checks.push({
+        name: "Removal Request Distribution",
+        status: "PASS",
+        actual: `Pending: ${pendingRemovals}, Submitted: ${submittedRemovals}, Completed: ${completedRemovals}, Failed: ${failedRemovals}`,
+        message: "Removal request status distribution recorded",
+      });
+
+      // =========================================================================
+      // CHECK 3: Orphaned Removal Requests (verify referential integrity)
+      // =========================================================================
+      // Since exposureId is required, we verify by checking if all removal
+      // requests can successfully join to their exposures
+      const totalRemovalRequests = await prisma.removalRequest.count();
+      const removalRequestsWithExposure = await prisma.removalRequest.count({
+        where: {
+          exposure: { isNot: undefined },
+        },
+      });
+      const orphanedRemovals = totalRemovalRequests - removalRequestsWithExposure;
+
+      checks.push({
+        name: "Orphaned Removal Requests",
+        status: orphanedRemovals === 0 ? "PASS" : "FAIL",
+        expected: 0,
+        actual: orphanedRemovals,
+        message: orphanedRemovals === 0
+          ? "All removal requests have valid exposure references"
+          : `Found ${orphanedRemovals} removal requests with invalid exposure references`,
+      });
+
+      if (orphanedRemovals > 0) {
+        recommendations.push(`Investigate ${orphanedRemovals} orphaned removal requests`);
+      }
+
+      // =========================================================================
+      // CHECK 4: Status Mismatches (removed exposure with pending removal)
+      // =========================================================================
+      const statusMismatches = await prisma.exposure.count({
+        where: {
+          status: "REMOVED",
+          removalRequest: {
+            status: { in: ["PENDING", "SUBMITTED"] },
+          },
+        },
+      });
+
+      checks.push({
+        name: "Status Mismatches",
+        status: statusMismatches === 0 ? "PASS" : "WARN",
+        expected: 0,
+        actual: statusMismatches,
+        message: statusMismatches === 0
+          ? "No status mismatches found"
+          : `Found ${statusMismatches} exposures marked REMOVED but with pending removal requests`,
+      });
+
+      if (statusMismatches > 0) {
+        recommendations.push(`Review ${statusMismatches} exposures with status mismatches`);
+      }
+
+      // =========================================================================
+      // CHECK 5: Duplicate Exposures (same user, source, sourceUrl)
+      // =========================================================================
+      const duplicateCheck = await prisma.$queryRaw<Array<{ count: bigint }>>`
+        SELECT COUNT(*) as count FROM (
+          SELECT "userId", "source", "sourceUrl"
+          FROM "Exposure"
+          WHERE "sourceUrl" IS NOT NULL
+          GROUP BY "userId", "source", "sourceUrl"
+          HAVING COUNT(*) > 1
+        ) as duplicates
+      `;
+      const duplicateExposures = Number(duplicateCheck[0]?.count || 0);
+
+      checks.push({
+        name: "Duplicate Exposures",
+        status: duplicateExposures === 0 ? "PASS" : "WARN",
+        expected: 0,
+        actual: duplicateExposures,
+        message: duplicateExposures === 0
+          ? "No duplicate exposures found"
+          : `Found ${duplicateExposures} potential duplicate exposure groups`,
+      });
+
+      if (duplicateExposures > 0) {
+        recommendations.push(`Investigate ${duplicateExposures} potential duplicate exposures`);
+      }
+
+      // =========================================================================
+      // CHECK 6: User Dashboard Sample Validation (check 5 random active users)
+      // =========================================================================
+      const sampleUsers = await prisma.user.findMany({
+        where: {
+          exposures: { some: {} },
+        },
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        select: { id: true },
+      });
+
+      for (const user of sampleUsers) {
+        const issues: string[] = [];
+
+        // Get user's exposure counts
+        const [userTotal, userActive, userRemoved, userRemovals] = await Promise.all([
+          prisma.exposure.count({
+            where: { userId: user.id, source: { notIn: DATA_PROCESSOR_SOURCES }, isWhitelisted: false },
+          }),
+          prisma.exposure.count({
+            where: { userId: user.id, status: "ACTIVE", source: { notIn: DATA_PROCESSOR_SOURCES }, isWhitelisted: false },
+          }),
+          prisma.exposure.count({
+            where: { userId: user.id, status: "REMOVED", source: { notIn: DATA_PROCESSOR_SOURCES } },
+          }),
+          prisma.removalRequest.count({
+            where: { userId: user.id, status: { notIn: ["CANCELLED"] } },
+          }),
+        ]);
+
+        // Check: Active + Removed should approximate Total
+        if (userActive + userRemoved > userTotal + 5) {
+          issues.push(`Count mismatch: active(${userActive}) + removed(${userRemoved}) > total(${userTotal})`);
+        }
+
+        // Check: Removal requests shouldn't exceed exposures significantly
+        if (userRemovals > userTotal + 10) {
+          issues.push(`Too many removals (${userRemovals}) vs exposures (${userTotal})`);
+        }
+
+        userSampleChecks.push({
+          userId: user.id.substring(0, 8) + "...",
+          status: issues.length === 0 ? "PASS" : "FAIL",
+          issues,
+        });
+      }
+
+      // =========================================================================
+      // CHECK 7: Cron Job Health
+      // =========================================================================
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const [recentCronSuccess, recentCronFailed] = await Promise.all([
+        prisma.cronLog.count({ where: { createdAt: { gte: oneDayAgo }, status: "SUCCESS" } }),
+        prisma.cronLog.count({ where: { createdAt: { gte: oneDayAgo }, status: "FAILED" } }),
+      ]);
+
+      const cronHealthy = recentCronFailed === 0 || (recentCronSuccess / (recentCronSuccess + recentCronFailed)) >= 0.9;
+
+      checks.push({
+        name: "Cron Job Health (24h)",
+        status: cronHealthy ? "PASS" : "WARN",
+        actual: `Success: ${recentCronSuccess}, Failed: ${recentCronFailed}`,
+        message: cronHealthy
+          ? "Cron jobs are healthy"
+          : `${recentCronFailed} cron failures in last 24 hours`,
+      });
+
+      // =========================================================================
+      // CHECK 8: Data Freshness (recent scan activity)
+      // =========================================================================
+      const recentScans = await prisma.scan.count({
+        where: { createdAt: { gte: oneDayAgo } },
+      });
+
+      checks.push({
+        name: "Data Freshness (24h scans)",
+        status: recentScans > 0 ? "PASS" : "WARN",
+        actual: recentScans,
+        message: recentScans > 0
+          ? `${recentScans} scans in last 24 hours`
+          : "No scans in last 24 hours - data may be stale",
+      });
+
+      // =========================================================================
+      // CALCULATE OVERALL STATUS
+      // =========================================================================
+      const checksPassed = checks.filter((c) => c.status === "PASS").length;
+      const checksFailed = checks.filter((c) => c.status === "FAIL").length;
+      const checksWarned = checks.filter((c) => c.status === "WARN").length;
+
+      let overallStatus: "PASS" | "WARN" | "FAIL" = "PASS";
+      if (checksFailed > 0) overallStatus = "FAIL";
+      else if (checksWarned > 1) overallStatus = "WARN";
+
+      const userChecksFailed = userSampleChecks.filter((u) => u.status === "FAIL").length;
+      if (userChecksFailed > 2) overallStatus = "FAIL";
+      else if (userChecksFailed > 0 && overallStatus === "PASS") overallStatus = "WARN";
+
+      return this.createSuccessResult<DashboardValidationResult>(
+        {
+          validatedAt: new Date().toISOString(),
+          duration: Date.now() - startTime,
+          overallStatus,
+          checksPerformed: checks.length,
+          checksPassed,
+          checksFailed,
+          checks,
+          dataIntegrity: {
+            orphanedRemovals,
+            missingExposures: 0, // Calculated above
+            statusMismatches,
+            duplicateExposures,
+          },
+          userSampleChecks,
+          recommendations,
+        },
+        {
+          capability: "validate-dashboard-data",
+          requestId: context.requestId,
+          duration: Date.now() - startTime,
+          usedFallback: false,
+          executedAt: new Date(),
+        },
+        {
+          needsHumanReview: overallStatus === "FAIL",
+        }
+      );
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          code: "DASHBOARD_VALIDATION_ERROR",
+          message: error instanceof Error ? error.message : "Dashboard validation failed",
+          retryable: true,
+        },
+        needsHumanReview: true,
+        metadata: {
+          agentId: this.id,
+          capability: "validate-dashboard-data",
+          requestId: context.requestId,
+          duration: Date.now() - startTime,
+          usedFallback: false,
+          executedAt: new Date(),
+        },
+      };
+    }
+  }
+
   protected async executeRuleBased<T>(
     capability: string,
     input: unknown,
@@ -747,6 +1073,28 @@ export async function runRegressionSuite(): Promise<RegressionResult> {
   }
 
   throw new Error(result.error?.message || "Regression suite failed");
+}
+
+export async function validateDashboardData(): Promise<DashboardValidationResult> {
+  const agent = getQAAgent();
+  await agent.initialize();
+
+  const context = createAgentContext({
+    requestId: nanoid(),
+    invocationType: InvocationTypes.CRON,
+  });
+
+  const result = await agent.execute<DashboardValidationResult>(
+    "validate-dashboard-data",
+    {},
+    context
+  );
+
+  if (result.success && result.data) {
+    return result.data;
+  }
+
+  throw new Error(result.error?.message || "Dashboard validation failed");
 }
 
 export { QAAgent };

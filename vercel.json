@@ -102,6 +102,10 @@
     {
       "path": "/api/cron/email-monitor",
       "schedule": "0 20 * * *"
+    },
+    {
+      "path": "/api/cron/dashboard-validation",
+      "schedule": "0 6 * * *"
     }
   ]
 }
