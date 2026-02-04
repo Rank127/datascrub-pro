@@ -1153,10 +1153,10 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   LAION_AI: {
     name: "LAION AI Dataset",
     optOutUrl: "https://haveibeentrained.com/",
-    privacyEmail: "contact@laion.ai",
-    removalMethod: "BOTH",
+    // Email bounced - contact@laion.ai is invalid
+    removalMethod: "FORM",
     estimatedDays: 30,
-    notes: "Check if your images are in LAION-5B dataset used to train Stable Diffusion and other AI models",
+    notes: "Check if your images are in LAION-5B dataset used to train Stable Diffusion and other AI models. Use haveibeentrained.com to check and opt out.",
   },
   STABILITY_AI: {
     name: "Stability AI",
@@ -1537,10 +1537,12 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   GETTY_AI: {
     name: "Getty Images AI",
-    privacyEmail: "privacy@gettyimages.com",
-    removalMethod: "EMAIL",
+    optOutUrl: "https://www.gettyimages.com/company/privacy",
+    // Email bounced - privacy@gettyimages.com is invalid
+    removalMethod: "FORM",
     estimatedDays: 30,
     category: "AI_SERVICE",
+    notes: "Use the privacy form on their website - email address bounces.",
   },
   SHUTTERSTOCK_AI: {
     name: "Shutterstock AI",
@@ -1564,18 +1566,18 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   PIMEYES: {
     name: "PimEyes",
     optOutUrl: "https://pimeyes.com/en/opt-out-request",
-    privacyEmail: "privacy@pimeyes.com",
-    removalMethod: "BOTH",
+    // Email suppressed - privacy@pimeyes.com marked our emails as spam
+    removalMethod: "FORM",
     estimatedDays: 14,
-    notes: "Face search engine - submit opt-out to remove your face from search results",
+    notes: "Face search engine - use the opt-out form to remove your face from search results. Email requests not accepted.",
   },
   SOCIAL_CATFISH: {
     name: "Social Catfish",
     optOutUrl: "https://socialcatfish.com/opt-out/",
-    privacyEmail: "privacy@socialcatfish.com",
-    removalMethod: "BOTH",
+    // Email suppressed - privacy@socialcatfish.com marked our emails as spam
+    removalMethod: "FORM",
     estimatedDays: 14,
-    notes: "Reverse image and identity search - includes facial recognition",
+    notes: "Reverse image and identity search - use the opt-out form. Email requests not accepted.",
   },
   TINEYE: {
     name: "TinEye",
@@ -1666,9 +1668,10 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   SMARTBACKGROUNDCHECKS: {
     name: "Smart Background Checks",
     optOutUrl: "https://www.smartbackgroundchecks.com/optout",
-    privacyEmail: "privacy@smartbackgroundchecks.com",
-    removalMethod: "BOTH",
+    // Email bounced - privacy@smartbackgroundchecks.com is invalid
+    removalMethod: "FORM",
     estimatedDays: 7,
+    notes: "Use the opt-out form on their website - email address bounces.",
   },
   LOCATEFAMILY: {
     name: "LocateFamily",
