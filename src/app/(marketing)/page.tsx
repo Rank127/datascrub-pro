@@ -351,7 +351,7 @@ export default function HomePage() {
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/20 rounded-full border border-orange-500/30 mb-4">
               <Zap className="h-4 w-4 text-orange-400" />
               <span className="text-sm font-semibold text-orange-400">
-                Limited Time: 40% OFF Introductory Sale
+                Limited Time: 40% OFF Flash Sale
               </span>
             </div>
             <div className="mb-6">
