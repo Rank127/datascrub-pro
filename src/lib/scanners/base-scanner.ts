@@ -1,5 +1,54 @@
 import type { DataSource, ExposureType, Severity } from "@/lib/types";
 
+// ============================================================================
+// CONFIDENCE SCORING SYSTEM
+// Prevents false positives and blocks auto-removals for uncertain matches
+// ============================================================================
+
+export interface ConfidenceFactors {
+  nameMatch: number;       // 0-30: Exact=30, First+Last=28, Partial=15, Fuzzy=10
+  locationMatch: number;   // 0-25: City+State=25, State only=15
+  ageMatch: number;        // 0-20: Exact=20, ±2 years=15, ±5 years=10
+  dataCorrelation: number; // 0-15: Phone match=5, Email match=5
+  sourceReliability: number; // 0-10: Known broker=10, Unknown=7
+}
+
+export type MatchClassification =
+  | "CONFIRMED"   // 80-100: Auto-removal OK
+  | "LIKELY"      // 60-79: Auto-removal with caution
+  | "POSSIBLE"    // 40-59: Manual review required
+  | "UNLIKELY"    // 20-39: Manual review, likely false positive
+  | "REJECTED";   // 0-19: Don't create exposure
+
+export const CONFIDENCE_THRESHOLDS = {
+  AUTO_PROCEED: 80,   // Minimum score for auto-removal without confirmation
+  MANUAL_REVIEW: 40,  // Below this requires manual review
+  REJECT: 20,         // Below this don't create exposure at all
+} as const;
+
+export interface ConfidenceResult {
+  score: number;
+  classification: MatchClassification;
+  factors: ConfidenceFactors;
+  reasoning: string[];
+  validatedAt: Date;
+}
+
+/**
+ * Classify a confidence score into a match classification
+ */
+export function classifyConfidence(score: number): MatchClassification {
+  if (score >= 80) return "CONFIRMED";
+  if (score >= 60) return "LIKELY";
+  if (score >= 40) return "POSSIBLE";
+  if (score >= 20) return "UNLIKELY";
+  return "REJECTED";
+}
+
+// ============================================================================
+// SCAN INPUT/OUTPUT TYPES
+// ============================================================================
+
 export interface ScanInput {
   fullName?: string;
   aliases?: string[];
@@ -25,6 +74,7 @@ export interface ScanResult {
   dataPreview?: string;
   severity: Severity;
   rawData?: Record<string, unknown>;
+  confidence?: ConfidenceResult;
 }
 
 export interface Scanner {

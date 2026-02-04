@@ -1,12 +1,22 @@
-import { BaseScanner, type ScanInput, type ScanResult } from "../base-scanner";
+import {
+  BaseScanner,
+  type ScanInput,
+  type ScanResult,
+  CONFIDENCE_THRESHOLDS,
+} from "../base-scanner";
 import type { DataSource } from "@/lib/types";
 import { scrapeUrl, isScrapingServiceEnabled } from "../scraping-service";
+import { profileValidator, type ExtractedData } from "../validation/profile-validator";
 
 export interface BrokerSearchResult {
   found: boolean;
   profileUrl?: string;
   name?: string;
+  firstName?: string;
+  lastName?: string;
   location?: string;
+  city?: string;
+  state?: string;
   age?: string;
   relatives?: string[];
   addresses?: string[];
@@ -171,8 +181,13 @@ export abstract class BaseBrokerScanner extends BaseScanner {
       console.log(`[${this.config.name}] Parse result: found=${searchResult.found}, hasProfileUrl=${!!searchResult.profileUrl}, hasLocation=${!!searchResult.location}`);
 
       if (searchResult.found) {
-        results.push(this.createExposureResult(searchResult, input));
-        console.log(`[${this.config.name}] Created exposure result`);
+        const exposureResult = this.createExposureResult(searchResult, input);
+        if (exposureResult) {
+          results.push(exposureResult);
+          console.log(`[${this.config.name}] Created exposure result with confidence ${exposureResult.confidence?.score || 'N/A'}`);
+        } else {
+          console.log(`[${this.config.name}] Exposure REJECTED due to low confidence score`);
+        }
       } else {
         // Log why no result was found
         const hasName = input.fullName && html.toLowerCase().includes(input.fullName.toLowerCase().split(' ')[0]);
@@ -194,12 +209,46 @@ export abstract class BaseBrokerScanner extends BaseScanner {
   }
 
   /**
-   * Create a standardized exposure result
+   * Create a standardized exposure result with confidence validation
+   * Returns null if confidence score is below REJECT threshold
    */
   protected createExposureResult(
     searchResult: BrokerSearchResult,
     input: ScanInput
-  ): ScanResult {
+  ): ScanResult | null {
+    // Build extracted data for validation
+    const extractedData: ExtractedData = {
+      name: searchResult.name,
+      firstName: searchResult.firstName,
+      lastName: searchResult.lastName,
+      city: searchResult.city || this.extractCityFromLocation(searchResult.location),
+      state: searchResult.state || this.extractStateFromLocation(searchResult.location),
+      age: searchResult.age,
+      phones: searchResult.phones,
+      emails: searchResult.emails,
+    };
+
+    // Validate against user profile
+    const confidence = profileValidator.validate({
+      profile: input,
+      extracted: extractedData,
+      source: this.config.source,
+    });
+
+    console.log(
+      `[${this.config.name}] Confidence: ${confidence.score} (${confidence.classification})`
+    );
+    console.log(`[${this.config.name}] Factors: name=${confidence.factors.nameMatch}, location=${confidence.factors.locationMatch}, age=${confidence.factors.ageMatch}, correlation=${confidence.factors.dataCorrelation}, source=${confidence.factors.sourceReliability}`);
+
+    // REJECT if confidence too low - don't create exposure at all
+    if (confidence.score < CONFIDENCE_THRESHOLDS.REJECT) {
+      console.log(
+        `[${this.config.name}] REJECTED: Score ${confidence.score} < ${CONFIDENCE_THRESHOLDS.REJECT} threshold`
+      );
+      console.log(`[${this.config.name}] Reasoning: ${confidence.reasoning.join("; ")}`);
+      return null;
+    }
+
     const dataPreview = this.buildDataPreview(searchResult, input);
 
     return {
@@ -221,7 +270,26 @@ export abstract class BaseBrokerScanner extends BaseScanner {
         estimatedRemovalDays: this.config.estimatedRemovalDays,
         privacyEmail: this.config.privacyEmail,
       },
+      confidence,
     };
+  }
+
+  /**
+   * Extract city from location string like "Chicago, IL" or "Chicago, Illinois"
+   */
+  private extractCityFromLocation(location?: string): string | undefined {
+    if (!location) return undefined;
+    const parts = location.split(",").map((p) => p.trim());
+    return parts[0] || undefined;
+  }
+
+  /**
+   * Extract state from location string like "Chicago, IL" or "Chicago, Illinois"
+   */
+  private extractStateFromLocation(location?: string): string | undefined {
+    if (!location) return undefined;
+    const parts = location.split(",").map((p) => p.trim());
+    return parts[1] || undefined;
   }
 
   /**

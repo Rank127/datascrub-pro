@@ -10,59 +10,53 @@ datasource db {
 }
 
 model User {
-  id                     String            @id @default(cuid())
-  email                  String            @unique
+  id                     String             @id @default(cuid())
+  email                  String             @unique
   passwordHash           String
   name                   String?
-  plan                   String            @default("FREE")
+  plan                   String             @default("FREE")
   emailVerified          DateTime?
   image                  String?
-  createdAt              DateTime          @default(now())
-  updatedAt              DateTime          @updatedAt
-  emailNotifications     Boolean           @default(true)
-  marketingEmails        Boolean           @default(false)
-  newExposureAlerts      Boolean           @default(true)
-  removalUpdates         Boolean           @default(true)
-  reportFrequency        String            @default("weekly")
-  weeklyReports          Boolean           @default(true)
-  // SMS notifications
-  smsNotifications       Boolean           @default(false)
-  smsPhone               String?           // Verified phone for SMS alerts
-  smsPhoneVerified       Boolean           @default(false)
-  smsExposureAlerts      Boolean           @default(true)
-  smsRemovalUpdates      Boolean           @default(true)
-  smsBreachAlerts        Boolean           @default(true)
-  // Two-Factor Authentication
-  twoFactorEnabled       Boolean           @default(false)
-  twoFactorSecret        String?           // Encrypted TOTP secret
-  twoFactorBackupCodes   String?           // JSON array of hashed backup codes
-  role                   String            @default("USER")
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  emailNotifications     Boolean            @default(true)
+  marketingEmails        Boolean            @default(false)
+  newExposureAlerts      Boolean            @default(true)
+  removalUpdates         Boolean            @default(true)
+  reportFrequency        String             @default("weekly")
+  weeklyReports          Boolean            @default(true)
+  role                   String             @default("USER")
   lastExposureDigestSent DateTime?
   lastScanAt             DateTime?
+  smsBreachAlerts        Boolean            @default(true)
+  smsExposureAlerts      Boolean            @default(true)
+  smsNotifications       Boolean            @default(false)
+  smsPhone               String?
+  smsPhoneVerified       Boolean            @default(false)
+  smsRemovalUpdates      Boolean            @default(true)
+  twoFactorBackupCodes   String?
+  twoFactorEnabled       Boolean            @default(false)
+  twoFactorSecret        String?
   accounts               Account[]
   auditLogs              AuditLog[]
+  dripCampaign           DripCampaign?
+  dripEmailLogs          DripEmailLog[]
   exposures              Exposure[]
+  ownedFamilyGroup       FamilyGroup?       @relation("FamilyOwner")
+  sentFamilyInvites      FamilyInvitation[] @relation("SentFamilyInvitations")
+  familyMembership       FamilyMember?
   profiles               PersonalProfile[]
+  referredBy             Referral?          @relation("ReferredBy")
+  referralsMade          Referral[]         @relation("Referrals")
   removalRequests        RemovalRequest[]
   scans                  Scan[]
   sessions               Session[]
   subscription           Subscription?
-  whitelists             Whitelist[]
-  // Support tickets
-  tickets                SupportTicket[]   @relation("UserTickets")
-  assignedTickets        SupportTicket[]   @relation("AssignedTickets")
-  resolvedTickets        SupportTicket[]   @relation("ResolvedTickets")
+  assignedTickets        SupportTicket[]    @relation("AssignedTickets")
+  resolvedTickets        SupportTicket[]    @relation("ResolvedTickets")
+  tickets                SupportTicket[]    @relation("UserTickets")
   ticketComments         TicketComment[]
-  // Family Plan
-  ownedFamilyGroup       FamilyGroup?      @relation("FamilyOwner")
-  familyMembership       FamilyMember?
-  sentFamilyInvites      FamilyInvitation[] @relation("SentFamilyInvitations")
-  // Drip Campaign
-  dripCampaign           DripCampaign?
-  dripEmailLogs          DripEmailLog[]
-  // Referral Program
-  referralsMade          Referral[]        @relation("Referrals")
-  referredBy             Referral?         @relation("ReferredBy")
+  whitelists             Whitelist[]
 }
 
 model Account {
@@ -150,6 +144,14 @@ model Exposure {
   requiresManualAction Boolean         @default(false)
   proofScreenshot      String?
   proofScreenshotAt    DateTime?
+  // Confidence scoring fields
+  confidenceScore      Int?            // 0-100 confidence score
+  confidenceFactors    String?         // JSON: { nameMatch, locationMatch, ageMatch, dataCorrelation, sourceReliability }
+  matchClassification  String?         // CONFIRMED, LIKELY, POSSIBLE, UNLIKELY
+  confidenceReasoning  String?         // JSON array of reasoning strings
+  validatedAt          DateTime?       // When confidence was calculated
+  userConfirmed        Boolean         @default(false) // User manually confirmed this is their data
+  userConfirmedAt      DateTime?       // When user confirmed
   scan                 Scan?           @relation(fields: [scanId], references: [id])
   user                 User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   removalRequest       RemovalRequest?
@@ -157,6 +159,8 @@ model Exposure {
   @@index([userId])
   @@index([scanId])
   @@index([userId, requiresManualAction])
+  @@index([userId, userConfirmed])
+  @@index([confidenceScore])
 }
 
 model Whitelist {
@@ -178,7 +182,6 @@ model RemovalRequest {
   exposureId         String    @unique
   status             String    @default("PENDING")
   method             String
-  isProactive        Boolean   @default(false) // Proactive opt-out (not confirmed exposure)
   submittedAt        DateTime?
   completedAt        DateTime?
   attempts           Int       @default(0)
@@ -195,6 +198,7 @@ model RemovalRequest {
   beforeScreenshotAt DateTime?
   formScreenshot     String?
   formScreenshotAt   DateTime?
+  isProactive        Boolean   @default(false)
   exposure           Exposure  @relation(fields: [exposureId], references: [id])
   user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -232,9 +236,8 @@ model Alert {
 model DNCRegistration {
   id           String    @id @default(cuid())
   userId       String
-  phoneNumber  String    // Encrypted full phone number
-  phoneHash    String    // Hash for deduplication
-  phoneLast4   String?   // Last 4 digits for display
+  phoneNumber  String
+  phoneHash    String
   status       String    @default("PENDING")
   registeredAt DateTime?
   verifiedAt   DateTime?
@@ -245,6 +248,7 @@ model DNCRegistration {
   notes        String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  phoneLast4   String?
 
   @@unique([userId, phoneHash])
   @@index([userId])
@@ -333,24 +337,16 @@ model SupportTicket {
   id               String          @id @default(cuid())
   ticketNumber     String          @unique
   userId           String
-  type             String          // SCAN_ERROR, REMOVAL_FAILED, PAYMENT_ISSUE, ACCOUNT_ISSUE, FEATURE_REQUEST, OTHER
-  status           String          @default("OPEN") // OPEN, IN_PROGRESS, WAITING_USER, RESOLVED, CLOSED
-  priority         String          @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  type             String
+  status           String          @default("OPEN")
+  priority         String          @default("NORMAL")
   subject          String
   description      String
-  source           String          @default("USER") // USER, SYSTEM, ADMIN
-  attachments      String?         // JSON array of attachment URLs (screenshots, logs)
-  browserInfo      String?         // User's browser/device info for debugging
-  pageUrl          String?         // URL where error occurred
-  errorDetails     String?         // Technical error details (stack trace, error code)
-
-  // Linked records (for context)
+  source           String          @default("USER")
   scanId           String?
   exposureId       String?
   removalRequestId String?
   subscriptionId   String?
-
-  // Assignment & Resolution
   assignedToId     String?
   assignedAt       DateTime?
   resolution       String?
@@ -358,14 +354,15 @@ model SupportTicket {
   resolvedById     String?
   internalNotes    String?
   lastActivityAt   DateTime        @default(now())
-
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
-
-  // Relations
+  attachments      String?
+  browserInfo      String?
+  errorDetails     String?
+  pageUrl          String?
+  assignedTo       User?           @relation("AssignedTickets", fields: [assignedToId], references: [id])
+  resolvedBy       User?           @relation("ResolvedTickets", fields: [resolvedById], references: [id])
   user             User            @relation("UserTickets", fields: [userId], references: [id], onDelete: Cascade)
-  assignedTo       User?           @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
-  resolvedBy       User?           @relation("ResolvedTickets", fields: [resolvedById], references: [id], onDelete: SetNull)
   comments         TicketComment[]
 
   @@index([userId])
@@ -377,22 +374,17 @@ model SupportTicket {
 }
 
 model TicketComment {
-  id        String        @id @default(cuid())
-  ticketId  String
-  authorId  String
-  content   String
-  isInternal Boolean      @default(false) // Hidden from user, visible to staff only
-  createdAt DateTime      @default(now())
-
-  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  id         String        @id @default(cuid())
+  ticketId   String
+  authorId   String
+  content    String
+  isInternal Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+  author     User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  ticket     SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
   @@index([ticketId])
 }
-
-// ==========================================
-// FAMILY PLAN (Enterprise Feature)
-// ==========================================
 
 model FamilyGroup {
   id          String             @id @default(cuid())
@@ -401,19 +393,17 @@ model FamilyGroup {
   maxMembers  Int                @default(5)
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
-
   owner       User               @relation("FamilyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  members     FamilyMember[]
   invitations FamilyInvitation[]
+  members     FamilyMember[]
 }
 
 model FamilyMember {
   id            String      @id @default(cuid())
   familyGroupId String
   userId        String      @unique
-  role          String      @default("MEMBER") // OWNER or MEMBER
+  role          String      @default("MEMBER")
   joinedAt      DateTime    @default(now())
-
   familyGroup   FamilyGroup @relation(fields: [familyGroupId], references: [id], onDelete: Cascade)
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -425,12 +415,11 @@ model FamilyInvitation {
   familyGroupId String
   email         String
   token         String      @unique
-  status        String      @default("PENDING") // PENDING, ACCEPTED, EXPIRED, CANCELLED
+  status        String      @default("PENDING")
   invitedById   String
   expiresAt     DateTime
   createdAt     DateTime    @default(now())
   acceptedAt    DateTime?
-
   familyGroup   FamilyGroup @relation(fields: [familyGroupId], references: [id], onDelete: Cascade)
   invitedBy     User        @relation("SentFamilyInvitations", fields: [invitedById], references: [id], onDelete: Cascade)
 
@@ -439,49 +428,41 @@ model FamilyInvitation {
   @@index([email])
 }
 
-// ==========================================
-// SYSTEM MONITORING
-// ==========================================
-
 model CronLog {
-  id          String   @id @default(cuid())
-  jobName     String   // e.g., "health-check", "ticketing-agent", "process-removals"
-  status      String   // "SUCCESS", "FAILED", "SKIPPED"
-  duration    Int?     // Duration in milliseconds
-  message     String?  // Success message or error details
-  metadata    String?  // JSON string with additional data (items processed, etc.)
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  jobName   String
+  status    String
+  duration  Int?
+  message   String?
+  metadata  String?
+  createdAt DateTime @default(now())
 
   @@index([jobName])
   @@index([createdAt])
   @@index([jobName, createdAt])
 }
 
-// ==========================================
-// AGENT SYSTEM
-// ==========================================
-
 model AgentExecution {
-  id                String    @id @default(cuid())
-  agentId           String    // Agent identifier (e.g., "removal-agent", "scanning-agent")
-  capability        String    // Capability executed (e.g., "batch-process", "verify-removal")
-  requestId         String    @unique // Unique request ID for tracing
-  invocationType    String    // CRON, ON_DEMAND, EVENT, WEBHOOK, MANUAL
-  status            String    // PENDING, RUNNING, COMPLETED, FAILED, CANCELLED, TIMEOUT
-  input             String?   // JSON stringified input
-  output            String?   // JSON stringified output
-  error             String?   // JSON stringified error if failed
-  confidence        Float?    // AI confidence score (0-1)
-  needsHumanReview  Boolean   @default(false)
-  startedAt         DateTime
-  completedAt       DateTime?
-  duration          Int?      // Duration in milliseconds
-  tokensUsed        Int?      // AI tokens consumed
-  model             String?   // AI model used (e.g., "claude-sonnet-4-20250514")
-  usedFallback      Boolean   @default(false) // Whether rule-based fallback was used
-  parentRequestId   String?   // For chained/workflow executions
-  correlationId     String?   // For distributed tracing
-  createdAt         DateTime  @default(now())
+  id               String    @id @default(cuid())
+  agentId          String
+  capability       String
+  requestId        String    @unique
+  invocationType   String
+  status           String
+  input            String?
+  output           String?
+  error            String?
+  confidence       Float?
+  needsHumanReview Boolean   @default(false)
+  startedAt        DateTime
+  completedAt      DateTime?
+  duration         Int?
+  tokensUsed       Int?
+  model            String?
+  usedFallback     Boolean   @default(false)
+  parentRequestId  String?
+  correlationId    String?
+  createdAt        DateTime  @default(now())
 
   @@index([agentId])
   @@index([agentId, createdAt])
@@ -493,59 +474,59 @@ model AgentExecution {
 }
 
 model AgentHealth {
-  id                    String    @id @default(cuid())
-  agentId               String    @unique // Agent identifier
-  status                String    // HEALTHY, DEGRADED, UNHEALTHY, UNKNOWN
-  lastRun               DateTime?
-  lastSuccess           DateTime?
-  lastFailure           DateTime?
-  consecutiveFailures   Int       @default(0)
-  successRate24h        Float?    // Success rate over last 24 hours
-  avgExecutionTime      Int?      // Average execution time in ms
-  aiAvailable           Boolean   @default(true)
-  errorMessage          String?   // Current error message if unhealthy
-  executions24h         Int       @default(0)
-  successes24h          Int       @default(0)
-  failures24h           Int       @default(0)
-  tokensUsed24h         Int       @default(0)
-  estimatedCost24h      Float     @default(0)
-  avgConfidence         Float?    // Average AI confidence score
-  humanReviewRate       Float?    // Rate of results needing human review
-  updatedAt             DateTime  @updatedAt
-  createdAt             DateTime  @default(now())
+  id                  String    @id @default(cuid())
+  agentId             String    @unique
+  status              String
+  lastRun             DateTime?
+  lastSuccess         DateTime?
+  lastFailure         DateTime?
+  consecutiveFailures Int       @default(0)
+  successRate24h      Float?
+  avgExecutionTime    Int?
+  aiAvailable         Boolean   @default(true)
+  errorMessage        String?
+  executions24h       Int       @default(0)
+  successes24h        Int       @default(0)
+  failures24h         Int       @default(0)
+  tokensUsed24h       Int       @default(0)
+  estimatedCost24h    Float     @default(0)
+  avgConfidence       Float?
+  humanReviewRate     Float?
+  updatedAt           DateTime  @updatedAt
+  createdAt           DateTime  @default(now())
 
   @@index([status])
   @@index([lastRun])
 }
 
 model AgentConfig {
-  id              String   @id @default(cuid())
-  agentId         String   @unique // Agent identifier
-  enabled         Boolean  @default(true)
-  model           String?  // AI model override
-  maxTokens       Int?     // Max tokens per request
-  temperature     Float?   // AI temperature setting
-  rateLimits      String?  // JSON rate limit config
-  retryConfig     String?  // JSON retry config
-  features        String?  // JSON feature flags
-  customConfig    String?  // JSON custom configuration
-  updatedAt       DateTime @updatedAt
-  createdAt       DateTime @default(now())
+  id           String   @id @default(cuid())
+  agentId      String   @unique
+  enabled      Boolean  @default(true)
+  model        String?
+  maxTokens    Int?
+  temperature  Float?
+  rateLimits   String?
+  retryConfig  String?
+  features     String?
+  customConfig String?
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
 
   @@index([enabled])
 }
 
 model AgentEvent {
-  id              String   @id @default(cuid())
-  eventId         String   @unique // Unique event ID
-  type            String   // agent.started, agent.completed, agent.failed, etc.
-  sourceAgentId   String   // Agent that emitted the event
-  targetAgentId   String?  // Target agent if applicable
-  payload         String?  // JSON event payload
-  correlationId   String?  // For tracing related events
-  timestamp       DateTime @default(now())
-  processed       Boolean  @default(false)
-  processedAt     DateTime?
+  id            String    @id @default(cuid())
+  eventId       String    @unique
+  type          String
+  sourceAgentId String
+  targetAgentId String?
+  payload       String?
+  correlationId String?
+  timestamp     DateTime  @default(now())
+  processed     Boolean   @default(false)
+  processedAt   DateTime?
 
   @@index([type])
   @@index([sourceAgentId])
@@ -556,48 +537,44 @@ model AgentEvent {
 }
 
 model WorkflowExecution {
-  id              String    @id @default(cuid())
-  workflowId      String    // Workflow identifier
-  requestId       String    @unique // Unique request ID
-  status          String    // RUNNING, COMPLETED, FAILED, CANCELLED
-  currentStep     Int       @default(0)
-  totalSteps      Int
-  stepResults     String?   // JSON map of step results
-  input           String?   // JSON input data
-  output          String?   // JSON final output
-  error           String?   // Error message if failed
-  startedAt       DateTime
-  completedAt     DateTime?
-  duration        Int?      // Total duration in milliseconds
-  tokensUsed      Int       @default(0)
-  agentsInvoked   Int       @default(0)
-  usedFallbacks   Boolean   @default(false)
-  executionPath   String?   // JSON array of executed step IDs
-  createdAt       DateTime  @default(now())
+  id            String    @id @default(cuid())
+  workflowId    String
+  requestId     String    @unique
+  status        String
+  currentStep   Int       @default(0)
+  totalSteps    Int
+  stepResults   String?
+  input         String?
+  output        String?
+  error         String?
+  startedAt     DateTime
+  completedAt   DateTime?
+  duration      Int?
+  tokensUsed    Int       @default(0)
+  agentsInvoked Int       @default(0)
+  usedFallbacks Boolean   @default(false)
+  executionPath String?
+  createdAt     DateTime  @default(now())
 
   @@index([workflowId])
   @@index([status])
   @@index([createdAt])
 }
 
-// ==========================================
-// SEO KEYWORD INTELLIGENCE
-// ==========================================
-
 model KeywordIntelligence {
-  id                  String   @id @default(cuid())
-  keyword             String   @unique
-  source              String   // google, bing, duckduckgo, competitor, manual
-  relevance           Int      // 0-100
-  searchVolume        String?  // high, medium, low
-  difficulty          String?  // easy, medium, hard
-  timesFound          Int      @default(1)
-  competitor          String?  // Which competitor uses this (if source=competitor)
-  isTargeted          Boolean  @default(false) // Are we actively targeting this?
-  firstSeen           DateTime @default(now())
-  lastSeen            DateTime @default(now())
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id           String   @id @default(cuid())
+  keyword      String   @unique
+  source       String
+  relevance    Int
+  searchVolume String?
+  difficulty   String?
+  timesFound   Int      @default(1)
+  competitor   String?
+  isTargeted   Boolean  @default(false)
+  firstSeen    DateTime @default(now())
+  lastSeen     DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([source])
   @@index([relevance])
@@ -607,12 +584,12 @@ model KeywordIntelligence {
 
 model KeywordResearchRun {
   id                  String   @id @default(cuid())
-  searchEnginesUsed   String   // JSON array of engines used
+  searchEnginesUsed   String
   keywordsDiscovered  Int
   keywordGaps         Int
   competitorsAnalyzed Int
-  duration            Int      // milliseconds
-  status              String   @default("COMPLETED") // RUNNING, COMPLETED, FAILED
+  duration            Int
+  status              String   @default("COMPLETED")
   error               String?
   createdAt           DateTime @default(now())
 
@@ -620,19 +597,15 @@ model KeywordResearchRun {
   @@index([status])
 }
 
-// ==========================================
-// DRIP CAMPAIGN
-// ==========================================
-
 model DripCampaign {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  enrolledAt  DateTime @default(now())
-  nextEmailDay Int     @default(0)
-  status      String   @default("active") // active, paused, completed, unsubscribed
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  enrolledAt   DateTime @default(now())
+  nextEmailDay Int      @default(0)
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([enrolledAt])
@@ -641,32 +614,28 @@ model DripCampaign {
 model DripEmailLog {
   id         String   @id @default(cuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  templateId String   // welcome, scan_reminder, case_study, discount_offer, final_push
+  templateId String
   sentAt     DateTime @default(now())
   opened     Boolean  @default(false)
   clicked    Boolean  @default(false)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([templateId])
   @@index([sentAt])
 }
 
-// ==========================================
-// REFERRAL PROGRAM
-// ==========================================
-
 model Referral {
   id             String    @id @default(cuid())
-  referrerId     String    // User who referred
-  referrer       User      @relation("Referrals", fields: [referrerId], references: [id], onDelete: Cascade)
-  referredUserId String?   @unique // User who was referred (null until they sign up)
-  referredUser   User?     @relation("ReferredBy", fields: [referredUserId], references: [id], onDelete: SetNull)
+  referrerId     String
+  referredUserId String?   @unique
   referralCode   String    @unique
-  status         String    @default("pending") // pending, signed_up, converted, rewarded
-  rewardAmount   Int       @default(0) // cents
+  status         String    @default("pending")
+  rewardAmount   Int       @default(0)
   createdAt      DateTime  @default(now())
   convertedAt    DateTime?
+  referredUser   User?     @relation("ReferredBy", fields: [referredUserId], references: [id])
+  referrer       User      @relation("Referrals", fields: [referrerId], references: [id], onDelete: Cascade)
 
   @@index([referrerId])
   @@index([referredUserId])
@@ -674,27 +643,21 @@ model Referral {
   @@index([status])
 }
 
-// ==========================================
-// COMPLIANCE AGENT - Entity Classification & Complaints
-// ==========================================
-
-// Cache for entity classification results
-// Helps avoid repeated classifications of the same domain
 model EntityClassification {
-  id                  String    @id @default(cuid())
-  domain              String    // Domain that was classified (e.g., "syndigo.com")
-  classification      String    // DATA_BROKER, DATA_PROCESSOR, or UNKNOWN
-  confidence          Float     // 0-1 confidence score
-  source              String    // How classified: BLOCKLIST, DIRECTORY, RULE_BASED, AI_ANALYSIS, MANUAL_OVERRIDE, CACHED
-  reasoning           String    // Human-readable explanation
-  parentCompany       String?   // Parent company if known
-  blockedFromRemoval  Boolean   @default(false)
-  requestId           String?   // Request ID that triggered this classification
-  verifiedBy          String?   // User ID if manually verified
-  verifiedAt          DateTime?
-  expiresAt           DateTime? // When this classification should be re-evaluated
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  domain             String
+  classification     String
+  confidence         Float
+  source             String
+  reasoning          String
+  parentCompany      String?
+  blockedFromRemoval Boolean   @default(false)
+  requestId          String?
+  verifiedBy         String?
+  verifiedAt         DateTime?
+  expiresAt          DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@index([domain])
   @@index([classification])
@@ -702,45 +665,33 @@ model EntityClassification {
   @@index([domain, createdAt])
 }
 
-// Track inbound compliance complaints and legal notices
 model ComplianceComplaint {
-  id                    String    @id @default(cuid())
-  senderEmail           String    // Email address of sender
-  senderName            String?   // Name of sender
-  senderCompany         String?   // Company of sender
-  subject               String    // Email subject line
-  complaintType         String    // LEGAL_THREAT, CEASE_DESIST, CLASSIFICATION_DISPUTE, etc.
-  severity              String    // CRITICAL, HIGH, MEDIUM, LOW
-  requiresImmediateAction Boolean @default(false)
-
-  // Parsed content
-  keyPoints             String?   // JSON array of key points
-  requestedActions      String?   // JSON array of requested actions
-  mentionedEntities     String?   // JSON array of mentioned domains/companies
-  legalReferences       String?   // JSON array of legal citations
-  threats               String?   // JSON array of threats made
-  deadlines             String?   // JSON array of deadlines mentioned
-
-  // Raw content (for re-parsing if needed)
-  rawContent            String?   // Original email content (may be truncated)
-
-  // Processing info
-  parsedAt              DateTime  @default(now())
-  inboxType             String?   // DPO, LEGAL, COMPLIANCE, SUPPORT
-  requestId             String?   // Agent request ID
-
-  // Resolution tracking
-  status                String    @default("PENDING") // PENDING, IN_PROGRESS, RESOLVED, DISMISSED
-  resolvedAt            DateTime?
-  resolvedBy            String?   // User ID who resolved
-  resolution            String?   // Resolution notes
-
-  // Related records
-  ticketId              String?   // Support ticket created for this complaint
-  entityClassificationId String?  // If resulted in reclassification
-
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  id                      String    @id @default(cuid())
+  senderEmail             String
+  senderName              String?
+  senderCompany           String?
+  subject                 String
+  complaintType           String
+  severity                String
+  requiresImmediateAction Boolean   @default(false)
+  keyPoints               String?
+  requestedActions        String?
+  mentionedEntities       String?
+  legalReferences         String?
+  threats                 String?
+  deadlines               String?
+  rawContent              String?
+  parsedAt                DateTime  @default(now())
+  inboxType               String?
+  requestId               String?
+  status                  String    @default("PENDING")
+  resolvedAt              DateTime?
+  resolvedBy              String?
+  resolution              String?
+  ticketId                String?
+  entityClassificationId  String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 
   @@index([senderEmail])
   @@index([complaintType])
@@ -749,34 +700,25 @@ model ComplianceComplaint {
   @@index([createdAt])
 }
 
-// Audit log for blocklist changes
-// Tracks all additions, removals, and modifications to the blocklist
 model BlocklistAuditLog {
-  id              String    @id @default(cuid())
-  domain          String    // Domain affected
-  companyName     String?   // Company name
-  action          String    // ADD, REMOVE, UPDATE, REVIEW
-  reason          String    // Why this action was taken
-  previousValue   String?   // Previous state (JSON for updates)
-  newValue        String?   // New state (JSON for updates)
-
-  // Actor info
-  actorType       String    // SYSTEM, AGENT, USER
-  actorId         String?   // User ID or agent ID
-  actorEmail      String?   // Email of human actor
-
-  // Context
-  complaintId     String?   // If triggered by a complaint
-  classificationId String?  // If triggered by classification
-  ticketId        String?   // If triggered by a support ticket
-  requestId       String?   // Agent request ID
-
-  // Metadata
-  ipAddress       String?
-  userAgent       String?
-  notes           String?
-
-  createdAt       DateTime  @default(now())
+  id               String   @id @default(cuid())
+  domain           String
+  companyName      String?
+  action           String
+  reason           String
+  previousValue    String?
+  newValue         String?
+  actorType        String
+  actorId          String?
+  actorEmail       String?
+  complaintId      String?
+  classificationId String?
+  ticketId         String?
+  requestId        String?
+  ipAddress        String?
+  userAgent        String?
+  notes            String?
+  createdAt        DateTime @default(now())
 
   @@index([domain])
   @@index([action])

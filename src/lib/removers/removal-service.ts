@@ -6,6 +6,7 @@ import { attemptAutomatedOptOut, isAutomationEnabled } from "./browser-automatio
 import type { RemovalMethod } from "@/lib/types";
 import { createRemovalFailedTicket } from "@/lib/support/ticket-service";
 import { isDomainBlocklisted, getBlocklistEntry } from "./blocklist";
+import { CONFIDENCE_THRESHOLDS } from "@/lib/scanners/base-scanner";
 
 const MAX_REMOVAL_ATTEMPTS = 5;
 const MAX_REQUESTS_PER_BROKER_PER_DAY = 25; // Limit requests to any single broker per day (avoid spam flags)
@@ -319,6 +320,43 @@ export async function executeRemoval(
       success: false,
       method: "MANUAL_GUIDE",
       message: "Removal request not found",
+    };
+  }
+
+  // =========================================================================
+  // CONFIDENCE GATE: Block auto-removal for low-confidence unconfirmed matches
+  // This prevents sending CCPA requests for wrong person's data
+  // =========================================================================
+  const confidenceScore = removalRequest.exposure.confidenceScore;
+  const userConfirmed = removalRequest.exposure.userConfirmed;
+
+  if (
+    confidenceScore !== null &&
+    confidenceScore < CONFIDENCE_THRESHOLDS.AUTO_PROCEED &&
+    !userConfirmed
+  ) {
+    console.log(
+      `[Removal] BLOCKED: Confidence ${confidenceScore} < ${CONFIDENCE_THRESHOLDS.AUTO_PROCEED} and not user-confirmed`
+    );
+
+    // Update removal request status
+    await prisma.removalRequest.update({
+      where: { id: removalRequestId },
+      data: {
+        status: "PENDING",
+        notes: `Awaiting user confirmation. Confidence score (${confidenceScore}) below auto-removal threshold (${CONFIDENCE_THRESHOLDS.AUTO_PROCEED}). ` +
+          `Classification: ${removalRequest.exposure.matchClassification || "UNKNOWN"}`,
+      },
+    });
+
+    return {
+      success: false,
+      method: "MANUAL_GUIDE",
+      message: `User confirmation required - confidence score ${confidenceScore} below auto-removal threshold`,
+      instructions:
+        `This match has a confidence score of ${confidenceScore}/100 (${removalRequest.exposure.matchClassification || "POSSIBLE"} match). ` +
+        `To prevent sending removal requests for the wrong person, please review and confirm this is your data. ` +
+        `Once confirmed, the removal will proceed automatically.`,
     };
   }
 
