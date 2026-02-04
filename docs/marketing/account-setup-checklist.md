@@ -19,8 +19,13 @@
 | | ElevenLabs | $22/mo | Voice cloning | ✅ Active |
 | | CapCut | $90/yr | Video editing | ✅ Active |
 | | Creatify.ai | FREE | Ad/content creation | 🟡 Optional* |
-| **AI Images** | OpenAI DALL-E 3 | (incl. in $20) | Ad images, visuals | ✅ Active |
+| **AI Images** | DALL-E 3 | (incl. in GPT $20) | Ad images, visuals | ✅ Already have |
+| | Canva Pro Magic Media | (incl.) | Alternative AI images | ✅ Already have |
+| **Research** | Claude Web Search | (incl. in $200) | Real-time research | ✅ Already have |
+| | OpenClaw Research Skills | FREE | 148 skills - trends, competitors | 🔧 Install |
+| | Grok | FREE | Included with X/Twitter account | ✅ Already have |
 
+*\*No new tools needed - DALL-E 3 included with OpenAI, Research covered by Claude + OpenClaw*
 *\*Creatify is redundant - HeyGen + ElevenLabs + Claude + DALL-E + CapCut covers all ad creation*
 | **Orchestration** | **OpenClaw** | FREE | Central AI agent (self-hosted) | 🔧 Install |
 | | **Mixpost** | FREE | Social scheduling (self-hosted) | 🔧 Install |
