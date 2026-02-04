@@ -3,6 +3,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 
+// Data Processor sources to exclude from active removal lists
+const DATA_PROCESSOR_SOURCES = [
+  "SYNDIGO", "POWERREVIEWS", "POWER_REVIEWS", "1WORLDSYNC",
+  "BAZAARVOICE", "YOTPO", "YOTPO_DATA",
+];
+
 export async function GET() {
   try {
     const session = await auth();
@@ -11,8 +17,18 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Fetch removals, excluding cancelled data processor requests
     const removals = await prisma.removalRequest.findMany({
-      where: { userId: session.user.id },
+      where: {
+        userId: session.user.id,
+        // Exclude cancelled requests (typically data processors that were reclassified)
+        NOT: {
+          AND: [
+            { status: "CANCELLED" },
+            { exposure: { source: { in: DATA_PROCESSOR_SOURCES } } },
+          ],
+        },
+      },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -64,18 +80,33 @@ export async function GET() {
       };
     });
 
-    // Get stats
+    // Get stats (excluding cancelled data processor requests)
     const [stats, manualActionTotal, manualActionDone] = await Promise.all([
       prisma.removalRequest.groupBy({
         by: ["status"],
-        where: { userId: session.user.id },
+        where: {
+          userId: session.user.id,
+          // Exclude cancelled requests from stats
+          status: { notIn: ["CANCELLED"] },
+        },
         _count: true,
       }),
       prisma.exposure.count({
-        where: { userId: session.user.id, requiresManualAction: true },
+        where: {
+          userId: session.user.id,
+          requiresManualAction: true,
+          // Exclude data processors from manual action count
+          source: { notIn: DATA_PROCESSOR_SOURCES },
+          isWhitelisted: false,
+        },
       }),
       prisma.exposure.count({
-        where: { userId: session.user.id, requiresManualAction: true, manualActionTaken: true },
+        where: {
+          userId: session.user.id,
+          requiresManualAction: true,
+          manualActionTaken: true,
+          source: { notIn: DATA_PROCESSOR_SOURCES },
+        },
       }),
     ]);
 

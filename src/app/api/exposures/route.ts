@@ -3,6 +3,13 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 
+// Data Processor sources to exclude from exposures list by default
+// These are not Data Brokers and have been whitelisted
+const DATA_PROCESSOR_SOURCES = [
+  "SYNDIGO", "POWERREVIEWS", "POWER_REVIEWS", "1WORLDSYNC",
+  "BAZAARVOICE", "YOTPO", "YOTPO_DATA",
+];
+
 export async function GET(request: Request) {
   try {
     const session = await auth();
@@ -23,7 +30,16 @@ export async function GET(request: Request) {
 
     const where: Record<string, unknown> = {
       userId: session.user.id,
+      // Exclude data processors by default (they're not actionable)
+      source: { notIn: DATA_PROCESSOR_SOURCES },
+      isWhitelisted: false,
     };
+
+    // Allow viewing whitelisted if explicitly requested
+    if (status === "WHITELISTED") {
+      delete where.isWhitelisted;
+      delete where.source;
+    }
 
     if (status) {
       where.status = status;
@@ -63,6 +79,14 @@ export async function GET(request: Request) {
 
     // Build WHERE clause conditions for raw query
     const conditions: string[] = [`"userId" = '${session.user.id}'`];
+
+    // Exclude data processors unless viewing whitelisted
+    if (status !== "WHITELISTED") {
+      const excludedSources = DATA_PROCESSOR_SOURCES.map(s => `'${s}'`).join(", ");
+      conditions.push(`"source" NOT IN (${excludedSources})`);
+      conditions.push(`"isWhitelisted" = false`);
+    }
+
     if (status) conditions.push(`"status" = '${status}'`);
     if (severity) conditions.push(`"severity" = '${severity}'`);
     if (source) conditions.push(`"source" = '${source}'`);
@@ -130,16 +154,24 @@ export async function GET(request: Request) {
     // Restore the sorted order from the raw query
     const exposures = orderedIds.map(id => exposuresUnordered.find(e => e.id === id)!).filter(Boolean);
 
-    // Get stats
+    // Get stats (excluding data processors)
     const stats = await prisma.exposure.groupBy({
       by: ["status"],
-      where: { userId: session.user.id },
+      where: {
+        userId: session.user.id,
+        source: { notIn: DATA_PROCESSOR_SOURCES },
+        isWhitelisted: false,
+      },
       _count: true,
     });
 
     const severityStats = await prisma.exposure.groupBy({
       by: ["severity"],
-      where: { userId: session.user.id },
+      where: {
+        userId: session.user.id,
+        source: { notIn: DATA_PROCESSOR_SOURCES },
+        isWhitelisted: false,
+      },
       _count: true,
     });
 
@@ -147,7 +179,12 @@ export async function GET(request: Request) {
     // This shows users what still needs attention, not total historical count
     const activeSeverityStats = await prisma.exposure.groupBy({
       by: ["severity"],
-      where: { userId: session.user.id, status: "ACTIVE" },
+      where: {
+        userId: session.user.id,
+        status: "ACTIVE",
+        source: { notIn: DATA_PROCESSOR_SOURCES },
+        isWhitelisted: false,
+      },
       _count: true,
     });
 
@@ -159,8 +196,9 @@ export async function GET(request: Request) {
       "ELEVENLABS", "RESEMBLE_AI", "MURF_AI",
     ];
 
-    // Get manual action stats and removal stats (excluding AI sources for manual review)
+    // Get manual action stats and removal stats (excluding AI sources and data processors)
     // Stats are BROKER-CENTRIC (sites to visit) not exposure-centric
+    const excludedFromManual = [...AI_SOURCES, ...DATA_PROCESSOR_SOURCES];
     const [manualExposuresByBroker, totalRemovalRequests] = await Promise.all([
       // Get all manual exposures grouped by broker with pending/done counts
       prisma.exposure.groupBy({
@@ -168,23 +206,28 @@ export async function GET(request: Request) {
         where: {
           userId: session.user.id,
           requiresManualAction: true,
-          source: { notIn: AI_SOURCES },
+          source: { notIn: excludedFromManual },
+          isWhitelisted: false,
         },
         _count: { _all: true },
       }),
       prisma.removalRequest.count({
-        where: { userId: session.user.id },
+        where: {
+          userId: session.user.id,
+          status: { notIn: ["CANCELLED"] }, // Exclude cancelled requests
+        },
       }),
     ]);
 
-    // Get pending counts per broker
+    // Get pending counts per broker (excluding AI sources and data processors)
     const pendingByBroker = await prisma.exposure.groupBy({
       by: ["source"],
       where: {
         userId: session.user.id,
         requiresManualAction: true,
         manualActionTaken: false,
-        source: { notIn: AI_SOURCES },
+        source: { notIn: excludedFromManual },
+        isWhitelisted: false,
       },
       _count: { _all: true },
     });

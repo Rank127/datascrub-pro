@@ -4,6 +4,22 @@ import { prisma } from "@/lib/db";
 import { getEffectivePlan } from "@/lib/family/family-service";
 import { DataSourceNames } from "@/lib/types";
 import { getSubsidiaries, getConsolidationParent, isParentBroker, getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
+import { BLOCKLISTED_COMPANIES } from "@/lib/removers/blocklist";
+
+// Data Processor sources that should be excluded from analytics
+// These are not Data Brokers and shouldn't count as "exposures to remove"
+const DATA_PROCESSOR_SOURCES = [
+  "SYNDIGO",
+  "POWERREVIEWS",
+  "POWER_REVIEWS",
+  "1WORLDSYNC",
+  "BAZAARVOICE",
+  "YOTPO",
+  "YOTPO_DATA",
+];
+
+// Get all blocklisted domains for URL matching
+const BLOCKLISTED_DOMAINS = BLOCKLISTED_COMPANIES.flatMap(c => c.domains);
 
 // AI Protection source categories
 const AI_TRAINING_SOURCES = [
@@ -34,11 +50,13 @@ export async function GET() {
     const userPlan = await getEffectivePlan(userId);
 
     // Fetch all stats in parallel
+    // IMPORTANT: Exclude Data Processors from counts - they are not actionable exposures
     const [
       totalExposures,
       activeExposures,
       removedExposures,
       whitelistedItems,
+      dataProcessorCount,
       pendingRemovals,
       totalRemovalRequests,
       manualActionTotal,
@@ -50,51 +68,84 @@ export async function GET() {
       voiceCloningExposures,
       aiOptedOutExposures,
     ] = await Promise.all([
-      // Total exposures
+      // Total exposures (excluding data processors)
       prisma.exposure.count({
-        where: { userId },
+        where: {
+          userId,
+          source: { notIn: DATA_PROCESSOR_SOURCES },
+          isWhitelisted: false,
+        },
       }),
-      // Active exposures (not removed, not whitelisted)
+      // Active exposures (not removed, not whitelisted, not data processors)
       prisma.exposure.count({
         where: {
           userId,
           status: "ACTIVE",
           isWhitelisted: false,
+          source: { notIn: DATA_PROCESSOR_SOURCES },
         },
       }),
-      // Removed exposures
+      // Removed exposures (excluding data processors)
       prisma.exposure.count({
         where: {
           userId,
           status: "REMOVED",
+          source: { notIn: DATA_PROCESSOR_SOURCES },
         },
       }),
-      // Whitelisted items
+      // Whitelisted items (for display, includes data processors)
       prisma.whitelist.count({
         where: { userId },
       }),
-      // Pending removals (in progress)
+      // Data processors found (shown separately for transparency)
+      prisma.exposure.count({
+        where: {
+          userId,
+          OR: [
+            { source: { in: DATA_PROCESSOR_SOURCES } },
+            { isWhitelisted: true, status: "WHITELISTED" },
+          ],
+        },
+      }),
+      // Pending removals (in progress, excluding cancelled)
       prisma.removalRequest.count({
         where: {
           userId,
           status: { in: ["PENDING", "SUBMITTED", "IN_PROGRESS"] },
         },
       }),
-      // Total removal requests submitted
+      // Total removal requests submitted (excluding cancelled data processor requests)
       prisma.removalRequest.count({
-        where: { userId },
+        where: {
+          userId,
+          status: { notIn: ["CANCELLED"] },
+        },
       }),
-      // Manual action total
+      // Manual action total (excluding data processors)
       prisma.exposure.count({
-        where: { userId, requiresManualAction: true },
+        where: {
+          userId,
+          requiresManualAction: true,
+          source: { notIn: DATA_PROCESSOR_SOURCES },
+          isWhitelisted: false,
+        },
       }),
       // Manual action done
       prisma.exposure.count({
-        where: { userId, requiresManualAction: true, manualActionTaken: true },
+        where: {
+          userId,
+          requiresManualAction: true,
+          manualActionTaken: true,
+          source: { notIn: DATA_PROCESSOR_SOURCES },
+        },
       }),
-      // Recent exposures (last 5)
+      // Recent exposures (last 5, excluding whitelisted/data processors)
       prisma.exposure.findMany({
-        where: { userId },
+        where: {
+          userId,
+          isWhitelisted: false,
+          source: { notIn: DATA_PROCESSOR_SOURCES },
+        },
         orderBy: { firstFoundAt: "desc" },
         take: 5,
         select: {
@@ -110,23 +161,30 @@ export async function GET() {
           firstFoundAt: true,
           requiresManualAction: true,
           manualActionTaken: true,
+          // Include confidence data for UI
+          confidenceScore: true,
+          matchClassification: true,
+          userConfirmed: true,
         },
       }),
-      // Removal progress by category
+      // Removal progress by category (excluding cancelled)
       prisma.removalRequest.groupBy({
         by: ["status"],
-        where: { userId },
+        where: {
+          userId,
+          status: { notIn: ["CANCELLED"] },
+        },
         _count: true,
       }),
       // AI Protection stats
       prisma.exposure.count({
-        where: { userId, source: { in: AI_TRAINING_SOURCES } },
+        where: { userId, source: { in: AI_TRAINING_SOURCES }, isWhitelisted: false },
       }),
       prisma.exposure.count({
-        where: { userId, source: { in: FACIAL_RECOGNITION_SOURCES } },
+        where: { userId, source: { in: FACIAL_RECOGNITION_SOURCES }, isWhitelisted: false },
       }),
       prisma.exposure.count({
-        where: { userId, source: { in: VOICE_CLONING_SOURCES } },
+        where: { userId, source: { in: VOICE_CLONING_SOURCES }, isWhitelisted: false },
       }),
       prisma.exposure.count({
         where: { userId, source: { in: ALL_AI_SOURCES }, status: "REMOVED" },
@@ -213,9 +271,14 @@ export async function GET() {
     };
 
     // Per-Broker Stats - group exposures and removals by source
+    // EXCLUDE data processors from broker stats - they're not actionable
     const exposuresBySource = await prisma.exposure.groupBy({
       by: ["source"],
-      where: { userId },
+      where: {
+        userId,
+        source: { notIn: DATA_PROCESSOR_SOURCES },
+        isWhitelisted: false,
+      },
       _count: { id: true },
     });
 
@@ -376,6 +439,7 @@ export async function GET() {
         activeExposures,
         removedExposures,
         whitelistedItems,
+        dataProcessorsExcluded: dataProcessorCount, // Data Processors not counted as actionable exposures
         pendingRemovals,
         totalRemovalRequests,
         riskScore,
