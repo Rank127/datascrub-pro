@@ -322,50 +322,139 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
         </>
       )}
 
-      {/* Queue Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Pending Removals"
-          value={data.pendingRemovalRequests}
-          icon={Clock}
-          variant={data.pendingRemovalRequests > 100 ? "warning" : "default"}
-          subtitle="Awaiting processing"
-        />
-        <MetricCard
-          title="In Progress"
-          value={data.inProgressRemovals}
-          icon={Loader2}
-          variant="info"
-          subtitle="Currently processing"
-        />
-        <div className="relative">
+      {/* Queue Pipeline Overview */}
+      {data.queueBreakdown && (
+        <Card className="bg-slate-900/50 border-slate-800">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-medium text-white flex items-center gap-2">
+              <Activity className="h-5 w-5 text-purple-400" />
+              Removal Pipeline
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-5">
+              {/* To Process */}
+              <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-center">
+                <Clock className="h-6 w-6 text-amber-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-amber-400">{data.queueBreakdown.toProcess}</p>
+                <p className="text-xs text-slate-400 mt-1">To Send</p>
+                <p className="text-[10px] text-slate-500">Waiting for email</p>
+              </div>
+
+              {/* Awaiting Response */}
+              <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg text-center">
+                <Loader2 className="h-6 w-6 text-blue-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-blue-400">{data.queueBreakdown.awaitingResponse.toLocaleString()}</p>
+                <p className="text-xs text-slate-400 mt-1">Awaiting Response</p>
+                <p className="text-[10px] text-slate-500">Email sent to broker</p>
+              </div>
+
+              {/* Requires Manual */}
+              <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg text-center">
+                <AlertTriangle className="h-6 w-6 text-orange-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-orange-400">{data.queueBreakdown.requiresManual.toLocaleString()}</p>
+                <p className="text-xs text-slate-400 mt-1">No Email Option</p>
+                <p className="text-[10px] text-slate-500">Form-only brokers</p>
+              </div>
+
+              {/* Manual Exposures */}
+              <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg text-center relative">
+                <Eye className="h-6 w-6 text-rose-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-rose-400">{data.queueBreakdown.manualExposures}</p>
+                <p className="text-xs text-slate-400 mt-1">Manual Review</p>
+                <p className="text-[10px] text-slate-500">Needs human action</p>
+                {data.queueBreakdown.manualExposures > 0 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="absolute -bottom-3 left-1/2 -translate-x-1/2 gap-1 text-[10px] h-6 px-2 bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20"
+                    onClick={handleOpenAutomation}
+                  >
+                    <Zap className="h-3 w-3" />
+                    Auto
+                  </Button>
+                )}
+              </div>
+
+              {/* Completed */}
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center">
+                <CheckCircle className="h-6 w-6 text-emerald-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-emerald-400">{(data.removalsByStatus["COMPLETED"] || 0).toLocaleString()}</p>
+                <p className="text-xs text-slate-400 mt-1">Completed</p>
+                <p className="text-[10px] text-slate-500">Successfully removed</p>
+              </div>
+            </div>
+
+            {/* Pipeline Summary */}
+            <div className="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between">
+              <div className="text-sm text-slate-400">
+                Total in pipeline: <span className="text-white font-medium">{data.queueBreakdown.totalPipeline.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-4 text-xs">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-amber-400"></div>
+                  <span className="text-slate-500">Actionable</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                  <span className="text-slate-500">Waiting</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-orange-400"></div>
+                  <span className="text-slate-500">Blocked</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Legacy Queue Metrics (fallback if no queueBreakdown) */}
+      {!data.queueBreakdown && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
-            title="Manual Action Queue"
-            value={data.manualActionQueue}
-            icon={AlertTriangle}
-            variant={data.manualActionQueue > 50 ? "danger" : data.manualActionQueue > 20 ? "warning" : "default"}
-            subtitle="Requires human review"
+            title="Pending Removals"
+            value={data.pendingRemovalRequests}
+            icon={Clock}
+            variant={data.pendingRemovalRequests > 100 ? "warning" : "default"}
+            subtitle="Awaiting processing"
           />
-          {data.manualActionQueue > 0 && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="absolute bottom-2 right-2 gap-1 text-xs h-7 bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
-              onClick={handleOpenAutomation}
-            >
-              <Zap className="h-3 w-3" />
-              Automate
-            </Button>
-          )}
+          <MetricCard
+            title="In Progress"
+            value={data.inProgressRemovals}
+            icon={Loader2}
+            variant="info"
+            subtitle="Currently processing"
+          />
+          <div className="relative">
+            <MetricCard
+              title="Manual Action Queue"
+              value={data.manualActionQueue}
+              icon={AlertTriangle}
+              variant={data.manualActionQueue > 50 ? "danger" : data.manualActionQueue > 20 ? "warning" : "default"}
+              subtitle="Requires human review"
+            />
+            {data.manualActionQueue > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="absolute bottom-2 right-2 gap-1 text-xs h-7 bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
+                onClick={handleOpenAutomation}
+              >
+                <Zap className="h-3 w-3" />
+                Automate
+              </Button>
+            )}
+          </div>
+          <MetricCard
+            title="Custom Requests"
+            value={data.customRemovalBacklog}
+            icon={FileText}
+            variant="info"
+            subtitle="Enterprise backlog"
+          />
         </div>
-        <MetricCard
-          title="Custom Requests"
-          value={data.customRemovalBacklog}
-          icon={FileText}
-          variant="info"
-          subtitle="Enterprise backlog"
-        />
-      </div>
+      )}
 
       {/* Performance Metrics */}
       <div className="grid gap-4 md:grid-cols-2">

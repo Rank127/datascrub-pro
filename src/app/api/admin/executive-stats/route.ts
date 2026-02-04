@@ -481,15 +481,21 @@ async function getTrends(): Promise<{ users: TrendDataPoint[]; exposures: TrendD
 }
 
 async function getOperationsMetrics(): Promise<OperationsMetrics> {
-  // Pending and in-progress removals
-  const [pendingRemovalRequests, inProgressRemovals] = await Promise.all([
-    prisma.removalRequest.count({
-      where: { status: { in: ["PENDING", "SUBMITTED"] } },
-    }),
-    prisma.removalRequest.count({
-      where: { status: "IN_PROGRESS" },
-    }),
+  // Granular queue breakdown
+  const [
+    toProcessCount,
+    awaitingResponseCount,
+    requiresManualCount,
+    inProgressRemovals,
+  ] = await Promise.all([
+    prisma.removalRequest.count({ where: { status: "PENDING" } }),
+    prisma.removalRequest.count({ where: { status: "SUBMITTED" } }),
+    prisma.removalRequest.count({ where: { status: "REQUIRES_MANUAL" } }),
+    prisma.removalRequest.count({ where: { status: "IN_PROGRESS" } }),
   ]);
+
+  // Legacy combined count for backwards compatibility
+  const pendingRemovalRequests = toProcessCount + awaitingResponseCount;
 
   // Manual action queue
   const manualActionQueue = await prisma.exposure.count({
@@ -567,6 +573,9 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
     select: { createdAt: true },
   });
 
+  // Calculate total pipeline
+  const totalPipeline = toProcessCount + awaitingResponseCount + requiresManualCount + manualActionQueue;
+
   return {
     pendingRemovalRequests,
     inProgressRemovals,
@@ -580,6 +589,13 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
     },
     removalsByStatus,
     removalsByMethod,
+    queueBreakdown: {
+      toProcess: toProcessCount,
+      awaitingResponse: awaitingResponseCount,
+      requiresManual: requiresManualCount,
+      manualExposures: manualActionQueue,
+      totalPipeline,
+    },
   };
 }
 

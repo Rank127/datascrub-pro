@@ -85,7 +85,7 @@ export interface WebAnalyticsMetrics {
 export type AnalyticsMetrics = WebAnalyticsMetrics;
 
 export interface OperationsMetrics {
-  pendingRemovalRequests: number;
+  pendingRemovalRequests: number; // Legacy: PENDING + SUBMITTED combined
   inProgressRemovals: number;
   manualActionQueue: number;
   customRemovalBacklog: number; // Enterprise feature
@@ -97,6 +97,14 @@ export interface OperationsMetrics {
   };
   removalsByStatus: Record<string, number>;
   removalsByMethod: Record<string, number>;
+  // New granular queue breakdown
+  queueBreakdown?: {
+    toProcess: number;      // PENDING only - items waiting to be sent
+    awaitingResponse: number; // SUBMITTED - emails sent, waiting for broker
+    requiresManual: number;   // REQUIRES_MANUAL status
+    manualExposures: number;  // Exposures needing manual action
+    totalPipeline: number;    // Sum of all active items
+  };
 }
 
 export interface ActivitiesMetrics {

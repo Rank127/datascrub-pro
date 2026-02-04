@@ -269,20 +269,47 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
 
+            {/* Improved Queue Status Card with breakdown */}
             <Card
               className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20 hover:border-purple-500/40 cursor-pointer transition-all"
               onClick={() => setActiveTab("operations")}
             >
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="p-3 bg-purple-500/20 rounded-lg">
-                  <Settings className="h-6 w-6 text-purple-400" />
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-purple-500/20 rounded-lg">
+                    <Settings className="h-5 w-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400">Queue Status</p>
+                    <p className="text-lg font-bold text-white">
+                      {(data.operations.queueBreakdown?.totalPipeline ?? (data.operations.pendingRemovalRequests + data.operations.manualActionQueue)).toLocaleString()}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-slate-400">Pending Queue</p>
-                  <p className="text-xl font-bold text-white">
-                    {(data.operations.pendingRemovalRequests + data.operations.manualActionQueue).toLocaleString()}
-                  </p>
-                </div>
+                {data.operations.queueBreakdown && (
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3 w-3 text-amber-400" />
+                      <span className="text-slate-400">To Send:</span>
+                      <span className="text-amber-400 font-medium">{data.operations.queueBreakdown.toProcess}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Loader2 className="h-3 w-3 text-blue-400" />
+                      <span className="text-slate-400">Awaiting:</span>
+                      <span className="text-blue-400 font-medium">{data.operations.queueBreakdown.awaitingResponse.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <ShieldAlert className="h-3 w-3 text-orange-400" />
+                      <span className="text-slate-400">Manual:</span>
+                      <span className="text-orange-400 font-medium">{(data.operations.queueBreakdown.requiresManual + data.operations.queueBreakdown.manualExposures).toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                      <span className="text-slate-400">Done:</span>
+                      <span className="text-emerald-400 font-medium">{(data.operations.removalsByStatus?.["COMPLETED"] || 0).toLocaleString()}</span>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
