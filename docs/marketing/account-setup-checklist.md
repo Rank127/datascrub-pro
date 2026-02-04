@@ -1,7 +1,180 @@
 # GhostMyData Account Setup Checklist
 
 **Email to use:** ghostmydata@gmail.com
+**Alt Email:** developer@ghostmydata.com (for domain-verified accounts)
 **Password suggestion:** Use a password manager, create unique for each
+
+---
+
+## YOUR TOOL STACK (OpenClaw-Centric Architecture)
+
+### Core Stack (Active)
+
+| Category | Tool | Cost | Purpose | Status |
+|----------|------|------|---------|--------|
+| **AI Brain** | Claude | $200/mo | Primary AI for OpenClaw | ✅ Active |
+| | OpenAI/GPT | $20/mo | Backup AI, fallback | ✅ Active |
+| | Manus.ai | $380/yr | Autonomous agents | ✅ Active |
+| **AI Video** | HeyGen | $30/mo | Avatar video generation | ✅ Active |
+| | ElevenLabs | $22/mo | Voice cloning | ✅ Active |
+| | CapCut | $90/yr | Video editing | ✅ Active |
+| | Creatify.ai | FREE | Ad/content creation | 🟡 Optional* |
+| **AI Images** | OpenAI DALL-E 3 | (incl. in $20) | Ad images, visuals | ✅ Active |
+
+*\*Creatify is redundant - HeyGen + ElevenLabs + Claude + DALL-E + CapCut covers all ad creation*
+| **Orchestration** | **OpenClaw** | FREE | Central AI agent (self-hosted) | 🔧 Install |
+| | **Mixpost** | FREE | Social scheduling (self-hosted) | 🔧 Install |
+| **Alerts** | Resend | $20/mo | Email notifications | ✅ Active |
+| | Twilio | FREE | SMS/voice alerts | ✅ Active |
+| | Discord | FREE | Team communication + commands | ✅ Active |
+| **Management** | ClickUp | $90/yr | Project management | ✅ Active |
+| | Tracker | FREE | Self-hosted (127.0.0.1:5000) | ✅ Active |
+| **Other** | Hugging Face | $9/mo | ML models for OpenClaw | ✅ Active |
+| | Capsolver | $100/mo | CAPTCHA solving | ✅ Active |
+
+### Tools to Phase Out (OpenClaw Replaces)
+
+| Tool | Cost | Replaced By | Annual Savings |
+|------|------|-------------|----------------|
+| Publer | $21-42/mo | OpenClaw + Mixpost | $252-504 |
+| Zapier | $10/mo | OpenClaw automation | $120 |
+| ScrapingBee | $50/mo | OpenClaw browser scraping | $600 |
+
+**Potential Annual Savings: $972-1,224**
+
+### Cost Comparison
+
+| Metric | Before | After (OpenClaw) | Savings |
+|--------|--------|------------------|---------|
+| Monthly | ~$450 | ~$307 | $143/mo |
+| Yearly | ~$5,400 | ~$3,684 | **$1,716/yr** |
+
+---
+
+## OPENCLAW: THE BRAIN OF YOUR AUTOMATION
+
+### What is OpenClaw?
+
+OpenClaw (formerly Clawdbot/Moltbot) is an open-source autonomous AI agent:
+- **3,000+ community skills** in the registry
+- **50+ integrations** built-in
+- **24/7 operation** on your hardware
+- **Persistent memory** across weeks
+- **Self-improving** - creates its own skills
+- **Browser automation** - posts to ANY platform
+- **157,000+ GitHub stars**
+
+**Official:** https://openclaw.ai/
+**Skills:** https://github.com/VoltAgent/awesome-openclaw-skills
+**Docs:** https://docs.openclaw.ai/
+
+### OpenClaw Skill Categories (1,715+ Curated)
+
+| Category | Skills | Use Case |
+|----------|--------|----------|
+| Marketing & Sales | 94 | Content, campaigns, leads |
+| Productivity & Tasks | 93 | Scheduling, reminders |
+| Browser & Automation | 69 | Post to any platform |
+| Communication | 58 | Multi-platform messaging |
+| Calendar & Scheduling | 28 | Automated scheduling |
+| AI & LLMs | 159 | Content generation |
+| Search & Research | 148 | Trends, competitors |
+| DevOps & Cloud | 144 | Infrastructure |
+| Speech & Transcription | 44 | Video scripts |
+| Data & Analytics | 18 | Reporting |
+
+### Key OpenClaw Capabilities
+
+| Capability | What It Does | Replaces |
+|------------|--------------|----------|
+| **Mixpost skill** | Self-hosted social scheduling | Publer, Buffer, Hootsuite |
+| **Browser automation** | Post to ANY website | Platform-specific tools |
+| **Cron jobs** | Scheduled tasks | Zapier schedules |
+| **Webhook triggers** | React to events | Zapier triggers |
+| **Web scraping** | Monitor competitors | ScrapingBee |
+| **Persistent memory** | Remembers brand voice | Manual context |
+| **Self-improving** | Creates new skills | Developer time |
+| **Multi-chat control** | WhatsApp, Discord, Telegram | Multiple apps |
+
+---
+
+## MIXPOST: SELF-HOSTED SOCIAL SCHEDULER
+
+### What is Mixpost?
+
+Open-source, self-hosted social media scheduler (Buffer alternative):
+- **No subscriptions, no limits**
+- **Your data stays on your server**
+- Supports: Twitter/X, LinkedIn, Facebook, Instagram, TikTok, Bluesky, Threads, Mastodon
+
+**GitHub:** https://github.com/inovector/mixpost
+**Docs:** https://docs.mixpost.app/
+
+### Mixpost vs Publer
+
+| Feature | Publer Free | Publer Paid | Mixpost |
+|---------|-------------|-------------|---------|
+| Cost | $0 | $21-42/mo | **$0** |
+| Accounts | 3 | 10-50 | **Unlimited** |
+| Scheduled posts | 10 | 100-500 | **Unlimited** |
+| Team members | 1 | 1-5 | **Unlimited** |
+| Data location | Their servers | Their servers | **Your server** |
+| API access | Limited | Limited | **Full** |
+
+### Installation
+
+```bash
+# Install Mixpost skill in OpenClaw
+clawhub install mixpost
+
+# Self-host Mixpost (Docker)
+docker run -d -p 8080:80 mixpost/mixpost
+```
+
+### OpenClaw + Mixpost Workflow
+
+```
+You (via Discord): "Post about data brokers to Twitter tomorrow 9am"
+         ↓
+OpenClaw: Generates content using Claude API
+         ↓
+OpenClaw: Sends to Mixpost via skill
+         ↓
+Mixpost: Schedules post for 9am
+         ↓
+Mixpost: Auto-publishes at 9am
+         ↓
+OpenClaw: Confirms, logs to ClickUp
+```
+
+**Coverage: 100%** | **Quality Loss: 0%** | **Cost: $0 additional**
+
+---
+
+## QUICK REFERENCE: All Handles & URLs
+
+| Platform | Handle/Username | URL |
+|----------|----------------|-----|
+| Twitter/X | @GhostMyData | twitter.com/GhostMyData |
+| LinkedIn | ghostmydata | linkedin.com/company/ghostmydata |
+| Reddit | GhostMyData_Official | reddit.com/user/GhostMyData_Official |
+| YouTube | @GhostMyData | youtube.com/@GhostMyData |
+| Facebook | GhostMyData | facebook.com/GhostMyData |
+| Instagram | @GhostMyData | instagram.com/GhostMyData |
+| TikTok | @ghostmydata | tiktok.com/@ghostmydata |
+| Bluesky | @ghostmydata.bsky.social | bsky.app/profile/ghostmydata.bsky.social |
+| Product Hunt | GhostMyData | producthunt.com/products/ghostmydata |
+| Indie Hackers | GhostMyData | indiehackers.com/product/ghostmydata |
+| Medium | @ghostmydata | medium.com/@ghostmydata |
+| Substack | ghostmydata | ghostmydata.substack.com |
+| Quora | GhostMyData | quora.com/profile/GhostMyData |
+| Linktree | ghostmydata | linktr.ee/ghostmydata |
+| Trustpilot | ghostmydata.com | trustpilot.com/review/ghostmydata.com |
+| Capterra | GhostMyData | (pending approval) |
+| Crunchbase | GhostMyData | crunchbase.com/organization/ghostmydata |
+| AlternativeTo | GhostMyData | (pending signup) |
+
+**Website:** https://ghostmydata.com
 
 ---
 
@@ -1329,6 +1502,8 @@ The data broker removal is often overlooked but it's huge - that's where scammer
 ### 11. Trustpilot
 **URL:** https://business.trustpilot.com/
 **Time:** 15 min
+**Email:** developer@ghostmydata.com (use domain email for easier verification)
+**Review Link:** https://www.trustpilot.com/review/ghostmydata.com
 
 ---
 
@@ -1405,16 +1580,16 @@ The GhostMyData Team
 3. Thank positive reviewers
 4. Address concerns in negative reviews professionally
 
-**Review Request Link:** (get from Trustpilot dashboard after setup)
+**Review Request Link:** `https://www.trustpilot.com/review/ghostmydata.com`
 
-- [ ] Business account created
-- [ ] Email verified
-- [ ] Business claimed/created
+- [x] Business account created
+- [x] Email verified (developer@ghostmydata.com)
+- [x] Business claimed/created
 - [ ] Logo uploaded
 - [ ] Description added
 - [ ] Category set
-- [ ] Review link obtained
-- [ ] Invitation template created
+- [x] Review link obtained
+- [ ] Invitation template created (optional - set up Zapier later)
 
 ---
 
@@ -1423,6 +1598,9 @@ The GhostMyData Team
 ### 12. G2
 **URL:** https://sell.g2.com/create-a-profile
 **Time:** 15 min
+**STATUS:** ⛔ NOT APPLICABLE - G2 only accepts B2B products. GhostMyData is B2C (consumer-focused).
+
+*Skip this platform. If you later add a business plan (e.g., "Employee Privacy Protection for Companies"), revisit G2 with B2B positioning.*
 
 ---
 
@@ -1541,8 +1719,11 @@ Thank you!
 ---
 
 ### 13. Capterra
-**URL:** https://www.capterra.com/vendors/sign-up
+**URL:** https://www.capterra.com/vendors/sign-up (redirects to digitalmarkets.gartner.com)
 **Time:** 15 min
+**Email:** ghostmydata@gmail.com
+**Category:** Data Privacy
+**Status:** ✅ Submitted for review
 
 ---
 
@@ -1574,24 +1755,29 @@ Thank you!
 
 **STEP 4: Complete Product Details**
 1. Go to your product → **Edit listing**
-2. Fill in:
-   - **Product description:**
-```
-GhostMyData automatically removes your personal information from 400+ data broker websites. Our service scans for exposed data, submits opt-out requests, verifies each removal with screenshots, and continuously monitors for new listings.
+2. Fill in (DO NOT use auto-generated descriptions):
 
-Features:
-• Automated scanning of 400+ data broker sites
-• Automatic opt-out request submission
-• Screenshot verification of each removal
-• Weekly monitoring for new data exposure
-• Real-time dashboard to track progress
-• 40% cheaper than competitors
-
-Ideal for individuals concerned about privacy, spam calls, identity theft, and personal data exposure online.
+   - **Short description:**
 ```
-   - **Short description (tagline):** `Remove your data from 400+ data broker sites automatically`
+GhostMyData is privacy software that automatically removes personal data from 400+ data broker sites.
+```
+
+   - **Long description:**
+```
+GhostMyData is a privacy protection software that automatically removes personal information from 400+ data broker websites. The system scans sites like Spokeo, WhitePages, BeenVerified, and hundreds more to locate exposed details such as names, addresses, phone numbers, and relatives.
+
+The software features an automated removal process that submits opt-out requests to each data broker, verifies each removal with screenshots, and monitors weekly for new listings.
+
+GhostMyData provides an affordable solution for individuals seeking to control their digital footprint, reduce spam calls, prevent stalking, and protect against identity theft. Plans start at $11.99/month - 40% less than competitors.
+```
+
    - **Logo:** Upload `/public/logo.png`
 3. Click **Save**
+
+**Screenshot Captions:**
+- Dashboard: `Dashboard - Track removal progress and privacy protection status`
+- Scan Results: `Scan Results - See where your data is exposed on 400+ broker sites`
+- Removals: `Verified Removals - Screenshot proof of each successful removal`
 
 **STEP 5: Add Screenshots**
 1. Go to **Media** or **Screenshots** section
@@ -1605,11 +1791,19 @@ Ideal for individuals concerned about privacy, spam calls, identity theft, and p
 **STEP 6: Add Pricing**
 1. Go to **Pricing** section
 2. Select pricing model: **Subscription**
-3. Add starting price: `$11.99/month`
-4. Add pricing details:
-   - Free trial: Yes (free scan)
-   - Free version: No (limited free scan)
+3. Add plan:
+   - **Name:** Monthly
+   - **Price:** $11.99/month
+   - **Description:** Scan 400+ data broker sites, automated removal requests, screenshot verification, weekly monitoring
+4. Pricing options:
+   - Free Trial: ❌ No
+   - Free Version: ✅ Yes (free scan shows exposures)
 5. Click **Save**
+
+**Deployment:** Cloud, SaaS, Web-Based only
+**Support:** Email/Help Desk
+**Training:** Documentation
+**Open API:** No
 
 **STEP 7: Add Features**
 1. Go to **Features** section
@@ -1652,24 +1846,25 @@ Thanks,
 /public/banners/screenshot-removals.png
 ```
 
-**Category:** Cybersecurity Software, Privacy Software
+**Category:** Data Privacy
 
-- [ ] Vendor account created
-- [ ] Email verified
-- [ ] Product listing created
-- [ ] Category selected
-- [ ] Description complete
-- [ ] Logo uploaded
-- [ ] Screenshots uploaded
-- [ ] Pricing added
-- [ ] Features added
-- [ ] Review link obtained
+- [x] Vendor account created
+- [x] Email verified
+- [x] Product listing created
+- [x] Category selected (Data Privacy)
+- [x] Description complete (custom, not auto-generated)
+- [ ] Logo uploaded (upload after approval)
+- [x] Screenshots uploaded (3 screenshots with captions)
+- [x] Pricing added ($11.99/month)
+- [x] Features added (7+ features selected)
+- [ ] Review link obtained (after approval)
 
 ---
 
 ### 14. AlternativeTo
 **URL:** https://alternativeto.net/contribute/new-app/
 **Time:** 10 min
+**Status:** ⏸️ SKIPPED - Google signup disabled, try again later
 
 ---
 
@@ -1756,6 +1951,8 @@ GhostMyData offers similar data broker removal with screenshot verification at 4
 ### 15. Crunchbase
 **URL:** https://www.crunchbase.com/add-new
 **Time:** 10 min
+**Email:** ghostmydata@gmail.com
+**Status:** ✅ Submitted
 
 ---
 
@@ -1837,27 +2034,29 @@ GhostMyData is a privacy protection service that automatically removes personal 
 - SaaS
 - Software
 
-- [ ] Account created
-- [ ] Email verified
-- [ ] Organization added
-- [ ] Logo uploaded
-- [ ] Description complete
-- [ ] Founded date added
-- [ ] Industries selected
-- [ ] Social links added
-- [ ] Profile claimed/verified
+- [x] Account created (ghostmydata@gmail.com)
+- [x] Email verified
+- [x] Organization added
+- [ ] Logo uploaded (after approval)
+- [x] Description complete
+- [x] Founded date added (2024)
+- [x] Industries selected (Privacy, Cyber Security, Consumer, SaaS)
+- [x] Social links added (Facebook, LinkedIn, Twitter)
+- [ ] Profile claimed/verified (after approval)
 
 ---
 
 ### 16. HARO (Help A Reporter Out)
-**URL:** https://www.helpareporter.com/sources/
+**URL:** https://www.helpareporter.com/
 **Time:** 5 min to sign up, 15 min/day to respond
+**Email:** ghostmydata@gmail.com
+**Status:** ✅ Subscribed to daily queries
 
-**Note:** HARO is now part of Connectively. The process is similar.
+**Note:** HARO no longer allows full source profiles. Subscribe to free daily media queries instead.
 
 ---
 
-**STEP 1: Create Source Account**
+**STEP 1: Subscribe to Daily Queries**
 1. Go to https://www.helpareporter.com/sources/
 2. Or try https://www.connectively.us/ (new platform)
 3. Click **Sign up as a Source**
@@ -1970,11 +2169,9 @@ Services like GhostMyData automate this process - we submit opt-out requests to 
 - "data protection"
 - "personal information"
 
-- [ ] Source account created
-- [ ] Email verified
-- [ ] Profile complete with bio
-- [ ] Topics selected
-- [ ] Receiving daily emails
+- [x] Subscribed to daily queries (ghostmydata@gmail.com)
+- [x] Topics selected (Technology, Business, General)
+- [ ] Receiving daily emails (3x per day)
 - [ ] First query responded to
 - [ ] Second query responded to
 - [ ] Third query responded to
@@ -1986,6 +2183,9 @@ Services like GhostMyData automate this process - we submit opt-out requests to 
 ### 17. TikTok
 **URL:** https://www.tiktok.com/signup
 **Time:** 15 min setup + ongoing content
+**Email:** ghostmydata@gmail.com
+**Username:** ghostmydata
+**Status:** ✅ Account created
 
 **WHY TIKTOK:** Short-form videos about privacy tips can go viral. Great for reaching younger demographics who are increasingly privacy-conscious.
 
@@ -2009,11 +2209,10 @@ Services like GhostMyData automate this process - we submit opt-out requests to 
 2. Fill in:
    - **Username:** `ghostmydata`
    - **Name:** `GhostMyData`
-   - **Bio:**
+   - **Bio (80 char max):**
 ```
-🔒 Remove your data from 400+ sites
-🛡️ Privacy tips & data broker secrets
-👇 Free scan
+🔒 Remove your data from 400+ broker sites
+ghostmydata.com
 ```
    - **Website:** `https://ghostmydata.com`
    - **Profile photo:** Upload `/public/logo.png`
@@ -2060,10 +2259,10 @@ Video 5 - Shocking fact:
 
 **Profile Image:** `/public/logo.png`
 
-- [ ] Account created
-- [ ] Business account enabled
-- [ ] Profile complete
-- [ ] Bio with link added
+- [x] Account created (ghostmydata@gmail.com)
+- [x] Business account enabled
+- [x] Profile complete
+- [x] Bio with link added
 - [ ] First video posted
 - [ ] 5 videos posted
 
@@ -2072,6 +2271,9 @@ Video 5 - Shocking fact:
 ### 18. Bluesky
 **URL:** https://bsky.app/
 **Time:** 10 min
+**Email:** ghostmydata@gmail.com
+**Handle:** @ghostmydata.bsky.social
+**Status:** ✅ Account created
 
 **WHY BLUESKY:** Twitter/X alternative growing in popularity. Tech-savvy, privacy-conscious audience. Early presence = advantage.
 
@@ -2153,13 +2355,1014 @@ How many spam calls do you get per week?
 **Profile Image:** `/public/logo.png`
 **Banner:** `/public/banners/twitter-banner.png`
 
-- [ ] Account created
-- [ ] Handle claimed
-- [ ] Profile complete
-- [ ] Avatar uploaded
-- [ ] Banner uploaded
-- [ ] First post published
+- [x] Account created (ghostmydata@gmail.com)
+- [x] Handle claimed (@ghostmydata.bsky.social)
+- [x] Profile complete
+- [x] Avatar uploaded
+- [x] Banner uploaded
+- [x] First post published
 - [ ] Following relevant accounts
+- [ ] Post 2 (Day 2) - Data broker stats
+- [ ] Post 3 (Day 3-4) - Engagement question
+
+---
+
+## AGGRESSIVE GROWTH PLAYBOOK
+
+### 90-Day Targets (Manual vs AI-Powered)
+
+| Platform | Manual Target | AI-Powered Target | Traffic/Month |
+|----------|---------------|-------------------|---------------|
+| Twitter/X | 5,000 | **10,000** | 1,000 clicks |
+| LinkedIn | 2,000 | **4,000** | 600 clicks |
+| TikTok | 10,000 | **25,000** | 2,500 clicks |
+| Instagram | 3,000 | **7,000** | 800 clicks |
+| Reddit | 1,000 karma | **2,500 karma** | 1,000 clicks |
+| Bluesky | 2,000 | **5,000** | 500 clicks |
+| YouTube | 1,000 subs | **2,500 subs** | 600 clicks |
+| Quora | 100K views | **250K views** | 800 clicks |
+
+**Manual Goal:** 5,000 website visits/month by Day 90
+**AI-Powered Goal:** **15,000+ website visits/month** by Day 90
+
+### Why AI Goals Are 2-3x Higher
+
+| Factor | Manual | AI-Powered |
+|--------|--------|------------|
+| Posts/day | 5-10 | 20-50 |
+| Response time | Hours | Minutes |
+| Active hours | 8-10 hrs | 24/7 |
+| Platforms managed | 3-4 focus | All 10+ simultaneously |
+| Keyword monitoring | Sporadic | Continuous |
+| Trend catching | Often missed | Real-time alerts |
+| Consistency | Human error | 100% reliable |
+
+---
+
+### Content Mix
+
+| Type | % | Example |
+|------|---|---------|
+| Educational | 40% | "How to remove yourself from Spokeo" |
+| Shocking/Stats | 25% | "Your data is on 400+ sites" |
+| Personal Story | 20% | "I found my info on 87 sites..." |
+| Promotional | 15% | "Free scan at ghostmydata.com" |
+
+### Content Repurposing System
+```
+1 Long-form piece (blog/video)
+    ↓
+→ 5 Twitter threads
+→ 3 LinkedIn posts
+→ 10 TikTok/Reels scripts
+→ 5 Quora answers
+→ 2 Reddit comments
+→ 1 YouTube video
+→ 3 Bluesky posts
+→ 1 Newsletter issue
+```
+
+---
+
+### Daily Engagement Targets (Manual vs AI-Powered)
+
+**Manual (10-10-10 Rule):**
+- 10 genuine comments on others' posts
+- 10 replies to comments on your posts
+- 10 DMs to potential customers/partners
+
+**AI-Powered (50-50-30 Rule):**
+- 50 comments on relevant posts (AI drafts, you approve batch)
+- 50 replies to comments on your posts (AI handles routine, flags important)
+- 30 DMs to warm leads (AI identifies, drafts, you approve)
+
+| Platform | Manual Daily | AI-Powered Daily |
+|----------|--------------|------------------|
+| Twitter | 20 replies, 10 quote tweets | 100 replies, 30 quote tweets |
+| LinkedIn | 15 comments, 5 connections | 50 comments, 20 connections |
+| Reddit | 10 helpful comments | 30 comments (human tone required) |
+| Quora | 5 detailed answers | 15 answers (AI drafts, you edit) |
+| TikTok | 30 comments | 100 comments |
+| Instagram | 30 comments, 20 story replies | 100 comments, 50 story replies |
+| Bluesky | 15 replies | 50 replies |
+
+**Your daily AI review time: 15-30 minutes** (batch approve/edit)
+
+---
+
+### Keywords to Search & Engage Daily
+
+- "spam calls"
+- "data broker"
+- "remove my information"
+- "privacy protection"
+- "identity theft"
+- "doxxing"
+- "people search sites"
+- "DeleteMe" (competitor mentions)
+- "how do I stop telemarketers"
+
+---
+
+### Viral Hook Templates
+
+```
+"I analyzed 1,000 spam calls. Here's where they got my number..."
+"Stop scrolling if you've ever gotten a spam call"
+"Data brokers HATE this one trick..."
+"I removed myself from 87 sites. Here's what happened to my spam calls..."
+"Your address is public. Let me prove it."
+"POV: You just found your address on Google"
+```
+
+---
+
+### Comment Templates (Value First, Not Spammy)
+
+**Template 1 - Helpful Expert:**
+```
+Data brokers are the root cause - sites like Spokeo, WhitePages sell your info. You can opt out manually (takes 50+ hours) or use a removal service. I built one called GhostMyData if you want to check it out.
+```
+
+**Template 2 - Personal Experience:**
+```
+This happened to me too. Turns out my info was on 80+ sites. The spam calls dropped significantly after I removed myself from data brokers.
+```
+
+**Template 3 - Educational:**
+```
+Great question! The Do Not Call list only stops legitimate companies. Data brokers are the real source - they sell your number to anyone.
+```
+
+---
+
+### The "Value Ladder" Comment Strategy
+
+```
+Level 1: Helpful comment (no link)
+Level 2: Helpful + "I work in this space"
+Level 3: Helpful + soft mention of tool
+Level 4: Only when asked - share link
+```
+
+---
+
+### Weekly Schedule (Manual vs AI-Assisted)
+
+| Day | Focus | Manual | With AI/Clawdbot |
+|-----|-------|--------|------------------|
+| Monday | Content creation (batch) | 3 hrs | 30 min (review/approve) |
+| Tuesday | LinkedIn + Twitter engagement | 2 hrs | 15 min (approve drafts) |
+| Wednesday | TikTok videos + Reddit/Quora | 2 hrs | 30 min (record/approve) |
+| Thursday | Engagement + DMs + Outreach | 2 hrs | 15 min (approve drafts) |
+| Friday | Instagram + trend research | 2 hrs | 15 min (review alerts) |
+| Saturday | Schedule next week + analytics | 1 hr | 15 min (review dashboard) |
+| Sunday | Rest or bonus content | 0-1 hr | 0 hrs |
+
+**Manual Total: 12-15 hours/week**
+**AI-Assisted Total: 2-3 hours/week**
+
+---
+
+### Full Automation Stack
+
+| Task | Automation Level | Human Input |
+|------|------------------|-------------|
+| Content creation | 100% | None (AI generates) |
+| Post scheduling | 100% | None (AI optimizes timing) |
+| Keyword monitoring | 100% | None (AI alerts exceptions) |
+| Replies/comments | 95% | Review flagged only |
+| Trend detection | 100% | None (AI acts on trends) |
+| Analytics reporting | 100% | Weekly review |
+| Content repurposing | 100% | None (templates set) |
+| DM responses | 90% | Approve partnerships only |
+| Video creation | 100% | None (AI avatar) |
+
+---
+
+### Your Tool Stack (Active Memberships)
+
+**AI & Content Creation:**
+| Tool | Cost | Purpose |
+|------|------|---------|
+| Claude | $200/mo | Primary AI - content writing, strategy |
+| OpenAI/GPT | $20/mo | Backup AI, specific tasks |
+| Manus.ai | $380/yr | Autonomous AI agents |
+| Creatify.ai | $0/mo | AI ad & content creation |
+| HeyGen | $30/mo | AI avatar video generation |
+| ElevenLabs | $22/mo | Voice cloning & TTS |
+| CapCut | $90/yr | Video editing |
+| Hugging Face | $9/mo | ML models & datasets |
+
+**Automation & Scheduling:**
+| Tool | Cost | Purpose |
+|------|------|---------|
+| Publer | $0/mo | Social media scheduling (FREE!) |
+| Zapier | $10/mo | Workflow automation |
+| Capsolver | $100/mo | CAPTCHA solving for automation |
+
+**Communication & Alerts:**
+| Tool | Cost | Purpose |
+|------|------|---------|
+| Resend | $20/mo | Email notifications |
+| Twilio | $0/mo | SMS & voice alerts |
+| Discord | Free | Team communication & approvals |
+
+**Project Management & Monitoring:**
+| Tool | Cost | Purpose |
+|------|------|---------|
+| ClickUp | $90/yr | Task tracking, content pipeline |
+| ScrapingBee | $50/mo | Competitor monitoring |
+| Membership Tracker | Self-hosted | 127.0.0.1:5000 |
+
+**Infrastructure:**
+| Tool | Cost | Purpose |
+|------|------|---------|
+| Vercel | $20/mo | Frontend hosting |
+| Render | $0/mo | Backend hosting |
+| Heroku | $0/mo | Cloud platform |
+
+**Total Monthly Cost:** ~$450/mo (all tools included)
+**Coverage:** 100% - No additional tools needed
+
+---
+
+### AI Avatar & Video Automation (Your Stack)
+
+**Your Video Production Pipeline:**
+| Stage | Tool | Function |
+|-------|------|----------|
+| Script | Claude/Manus.ai | Generate video scripts |
+| Voice | ElevenLabs | Clone voice, generate audio |
+| Avatar | HeyGen | Render AI avatar video |
+| Edit | CapCut | Polish, add effects |
+| Ads | Creatify.ai | Create ad variations |
+| Schedule | Publer | Auto-post to platforms |
+
+**Avatar Video Workflow:**
+```
+1. Claude/Manus.ai generates video script
+2. Script sent to ElevenLabs for voice
+3. Voice + script sent to HeyGen for avatar render
+4. CapCut for final edits (if needed)
+5. Publer schedules to all platforms
+6. Zapier triggers notifications
+7. No human recording needed - 100% automated
+```
+
+**Video Output Capacity (Your Stack):**
+- TikTok: 3-5 videos/day
+- Instagram Reels: 2-3/day
+- YouTube Shorts: 1-2/day
+- YouTube Long-form: 2-3/week
+- Ad variations: 10+/day (Creatify.ai)
+
+---
+
+### AI-to-Team Communication System
+
+**Confidence-Based Auto-Approve:**
+
+| Confidence Level | Action | Example |
+|------------------|--------|---------|
+| 95-100% | Auto-post immediately | Scheduled content, replies to FAQs |
+| 80-94% | Auto-post + notify team | Trend responses, standard comments |
+| 60-79% | Queue for approval | New topics, competitor mentions |
+| <60% | Flag for human review | Controversial, complaints, partnerships |
+
+**Communication Channels:**
+
+| Channel | Use For | Frequency |
+|---------|---------|-----------|
+| Slack/Discord | Real-time alerts, approvals | Instant |
+| Dashboard (127.0.0.1:5000) | Review queues, analytics | Always on |
+| Email digest | Daily summary, metrics | 1x/day |
+| SMS/WhatsApp | Critical alerts only | Rare |
+
+**Slack/Discord Bot Commands:**
+```
+/approve [post-id]        → Approve queued post
+/reject [post-id]         → Reject with reason
+/edit [post-id] [text]    → Edit and approve
+/pause                    → Pause all posting
+/resume                   → Resume posting
+/stats                    → Show today's metrics
+/queue                    → Show pending approvals
+/confidence 90            → Set auto-approve threshold
+```
+
+**Daily Notification Flow:**
+```
+8:00 AM  → "Good morning! 47 posts scheduled today. 3 need approval."
+12:00 PM → "Midday update: 23 posts live, 2.3K engagements, 1 flagged reply."
+6:00 PM  → "Evening summary: 89% auto-approved, 2 viral posts detected."
+10:00 PM → "Day complete: 52 posts, 8.7K engagements, 127 new followers."
+```
+
+**Escalation Rules:**
+```yaml
+escalate_to_human:
+  - competitor_mention: true
+  - negative_sentiment: true
+  - legal_keywords: [lawsuit, lawyer, sue, attorney]
+  - partnership_request: true
+  - customer_complaint: true
+  - confidence_below: 60
+  - follower_count_above: 50000  # Big accounts
+  - media_request: true
+```
+
+---
+
+### Near-Zero Intervention Model
+
+**Your Weekly Time Investment:**
+
+| Task | Time | Frequency |
+|------|------|-----------|
+| Review flagged items | 10 min | Daily |
+| Approve partnerships | 5 min | As needed |
+| Weekly strategy review | 30 min | Weekly |
+| Monthly goal adjustment | 1 hr | Monthly |
+
+**Total: ~2-3 hours/week** (mostly optional)
+
+**What Triggers Human Review:**
+- Confidence < 60%
+- Competitor mentions
+- Potential partnerships (>10K followers)
+- Customer complaints
+- Legal/sensitive topics
+- Viral content (>10K impressions) - for amplification decisions
+
+**Everything Else:** AI handles autonomously
+
+---
+
+### Autonomous Mode Checklist
+
+- [ ] Clawdbot installed and connected to all platforms
+- [ ] AI avatar created (HeyGen - membership active)
+- [ ] Voice cloned (ElevenLabs - membership active)
+- [ ] Content templates loaded
+- [ ] Confidence thresholds set (recommend: 85%)
+- [ ] Escalation rules configured
+- [ ] Discord bot connected (team channel)
+- [ ] Dashboard tracking live (127.0.0.1:5000)
+- [ ] Auto-approve enabled
+- [ ] Team trained on approval commands
+- [ ] Content buffer established (N+7 days)
+
+---
+
+## CONTENT OPERATIONS & PIPELINE MANAGEMENT
+
+### The N+7 Buffer System
+
+**Never run dry. Always have 7 days of content ready.**
+
+```
+Day 0 (Today)     → Content posting (auto)
+Day 1-3           → Approved & scheduled
+Day 4-5           → In review queue
+Day 6-7           → AI generating
+Day 8+            → Ideas/briefs backlog
+```
+
+**Buffer Targets by Content Type:**
+
+| Content Type | Buffer (Days) | Why |
+|--------------|---------------|-----|
+| Text posts (Twitter, LinkedIn, Bluesky) | N+7 | Easy to generate, high volume |
+| Images/carousels | N+5 | Needs design review |
+| Short videos (TikTok, Reels) | N+5 | HeyGen render time |
+| Long videos (YouTube) | N+14 | More production, higher stakes |
+| Replies/comments | N+0 (real-time) | Must be timely |
+| Trend responses | N+0 (real-time) | Speed matters |
+
+---
+
+### Content Pipeline Stages
+
+```
+┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+│  BACKLOG    │ → │  GENERATE   │ → │   REVIEW    │ → │  SCHEDULED  │ → │   POSTED    │
+│  (Ideas)    │   │  (AI Work)  │   │  (Approval) │   │  (Queue)    │   │   (Live)    │
+└─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘
+    Day 8+           Day 6-7          Day 4-5           Day 1-3           Day 0
+```
+
+**Pipeline Health Indicators:**
+
+| Status | Backlog | Generate | Review | Scheduled | Action |
+|--------|---------|----------|--------|-----------|--------|
+| 🟢 Healthy | 20+ ideas | 10+ items | <5 items | 7+ days | None |
+| 🟡 Warning | 10-19 ideas | 5-9 items | 5-10 items | 4-6 days | Refill backlog |
+| 🔴 Critical | <10 ideas | <5 items | >10 items | <3 days | Emergency content |
+
+---
+
+### Discord Team Structure
+
+**Channels:**
+
+```
+#ghostmydata-social
+├── #announcements (read-only, system updates)
+├── #content-queue (pending approvals)
+├── #approved (auto-move after approval)
+├── #rejected (needs revision)
+├── #urgent (time-sensitive, <2hr response)
+├── #analytics (daily/weekly reports)
+├── #ideas (content brainstorming)
+├── #bugs (system issues)
+└── #general (team chat)
+```
+
+**Roles & Permissions:**
+
+| Role | Can Approve | Can Reject | Can Edit | Can Pause System |
+|------|-------------|------------|----------|------------------|
+| Admin (You) | ✅ | ✅ | ✅ | ✅ |
+| Content Manager | ✅ | ✅ | ✅ | ❌ |
+| Reviewer | ✅ | ✅ | ❌ | ❌ |
+| Viewer | ❌ | ❌ | ❌ | ❌ |
+| Clawdbot | Posts | N/A | N/A | N/A |
+
+---
+
+### Approval Workflow (Detailed)
+
+**Stage 1: AI Generates Content**
+```
+Clawdbot → Generates post
+        → Assigns confidence score
+        → Routes based on score
+```
+
+**Stage 2: Routing**
+```
+Confidence ≥85%  → Auto-approve → #approved → Schedule
+Confidence 60-84% → #content-queue → Await human
+Confidence <60%   → #urgent → Immediate review needed
+```
+
+**Stage 3: Human Review (when needed)**
+```
+Reviewer sees post in #content-queue
+  ├── /approve [id] → Moves to #approved → Scheduled
+  ├── /edit [id] [changes] → AI revises → Back to queue (v2)
+  ├── /reject [id] [reason] → Moves to #rejected → AI learns
+  └── /escalate [id] → Notifies Admin → #urgent
+```
+
+**Stage 4: Edit & Resubmit Loop**
+```
+Max revisions: 3
+  v1 (original) → Rejected → AI revises
+  v2 (revision) → Rejected → AI revises
+  v3 (final)    → Rejected → Human writes manually OR skip
+```
+
+**Auto-Skip Rules:**
+```yaml
+auto_skip_after:
+  max_revisions: 3
+  max_time_in_queue: 24h
+  action: move_to_rejected
+  notify: true
+  fallback: use_evergreen_content
+```
+
+---
+
+### SLA & Response Times
+
+| Queue | Max Wait Time | Escalation |
+|-------|---------------|------------|
+| #content-queue (normal) | 12 hours | Auto-bump to #urgent |
+| #urgent | 2 hours | SMS/call to Admin |
+| #rejected (resubmit) | 6 hours | Auto-skip after 3 tries |
+| Trend response | 30 minutes | Auto-approve if >80% confidence |
+
+**Notification Escalation:**
+```
+0-2 hrs   → Discord notification
+2-4 hrs   → Discord + Email
+4-6 hrs   → Discord + Email + SMS
+6+ hrs    → Auto-approve (if >70%) OR use fallback
+```
+
+---
+
+### Fallback & Emergency Content
+
+**Evergreen Content Bank (Always Ready):**
+
+Pre-approved posts that can auto-deploy if pipeline runs dry:
+
+| Type | Quantity | Refresh |
+|------|----------|---------|
+| Educational tips | 30 posts | Monthly |
+| Statistics/facts | 20 posts | Monthly |
+| Testimonials | 15 posts | As received |
+| Product features | 10 posts | Per release |
+| Humor/memes | 10 posts | Weekly |
+
+**Total: 85 evergreen posts = 2+ weeks of backup**
+
+**Emergency Triggers:**
+```yaml
+use_evergreen_when:
+  scheduled_buffer_below: 2 days
+  review_queue_above: 20 items
+  approval_rate_below: 50%
+  system_downtime: true
+```
+
+---
+
+### Failure Scenarios & Recovery
+
+| Scenario | Detection | Auto-Response | Human Action |
+|----------|-----------|---------------|--------------|
+| API down (Twitter, etc.) | Health check fails | Queue posts, retry in 1hr | Check #bugs |
+| HeyGen render fails | Timeout >10min | Skip video, use text post | Check HeyGen status |
+| Confidence all low (<60%) | Pattern detection | Pause, use evergreen | Review templates |
+| Review queue overflow (>20) | Count threshold | Auto-approve >75% confidence | Batch review |
+| Team unresponsive (>6hrs) | No activity | Auto-approve >70% | Check-in message |
+| Negative viral post | Sentiment spike | Auto-pause, alert Admin | Crisis response |
+| Account suspended | API auth fails | Pause platform, alert | Appeal/investigate |
+
+**Daily Health Check (Auto):**
+```
+6:00 AM → System check
+  ├── All API connections ✓
+  ├── Buffer levels ✓
+  ├── Queue status ✓
+  ├── Yesterday's performance ✓
+  └── Report to #analytics
+```
+
+---
+
+### Quality Control Loop
+
+**Weekly AI Training:**
+```
+Every Sunday:
+  1. Pull all rejected content
+  2. Analyze rejection reasons
+  3. Update AI templates/prompts
+  4. Adjust confidence thresholds
+  5. Add new examples to training
+```
+
+**Feedback Tags (for rejects):**
+```
+/reject [id] #tone        → Wrong voice/tone
+/reject [id] #accuracy    → Factually incorrect
+/reject [id] #timing      → Bad timing/insensitive
+/reject [id] #off-brand   → Doesn't fit brand
+/reject [id] #duplicate   → Too similar to recent
+/reject [id] #low-quality → Needs better writing
+```
+
+**AI learns from patterns:**
+```
+>3 #tone rejects      → Refresh tone guidelines
+>3 #accuracy rejects  → Fact-check database update
+>3 #duplicate rejects → Increase variation settings
+```
+
+---
+
+### Capacity Planning
+
+**Daily Volume Targets:**
+
+| Platform | Posts/Day | Videos/Day | Replies/Day | Total Actions |
+|----------|-----------|------------|-------------|---------------|
+| Twitter | 10 | 0 | 50 | 60 |
+| LinkedIn | 2 | 0 | 20 | 22 |
+| TikTok | 3 | 3 | 50 | 53 |
+| Instagram | 2 | 2 | 50 | 52 |
+| Bluesky | 5 | 0 | 30 | 35 |
+| Reddit | 2 | 0 | 15 | 17 |
+| Quora | 5 | 0 | 0 | 5 |
+| YouTube | 0.3 | 0.3 | 10 | 10 |
+| **TOTAL** | **29** | **5** | **225** | **254** |
+
+**Weekly Production Needs:**
+- Text posts: 200+
+- Short videos: 35+
+- Replies/comments: 1,500+
+- Review items (at 15% escalation): ~40
+
+**Team Capacity:**
+```
+1 person reviewing = ~50 items/day (10 min each)
+40 items/week ÷ 50/day = <1 day of review work
+```
+
+---
+
+### Project Management Dashboard (127.0.0.1:5000)
+
+**Views Needed:**
+
+| View | Purpose |
+|------|---------|
+| Pipeline Overview | See all stages at glance |
+| Review Queue | Items needing approval |
+| Scheduled Calendar | What's posting when |
+| Analytics | Performance metrics |
+| Content Bank | Evergreen inventory |
+| System Health | API status, buffer levels |
+| Team Activity | Who approved what |
+
+**Key Metrics to Display:**
+```
+- Buffer status (days remaining)
+- Queue depth (items pending)
+- Auto-approve rate (target: >85%)
+- Rejection rate (target: <10%)
+- Time-to-approve (target: <4 hrs)
+- Content velocity (posts/day)
+- Engagement rate (by platform)
+```
+
+---
+
+### Onboarding New Team Members
+
+**Day 1:**
+- [ ] Add to Discord with Reviewer role
+- [ ] Share this playbook
+- [ ] Review 10 sample posts together
+- [ ] Practice approval commands
+
+**Day 2-3:**
+- [ ] Shadow existing reviewer
+- [ ] Approve 20 posts with supervision
+- [ ] Learn rejection tags
+
+**Day 4-5:**
+- [ ] Independent reviewing
+- [ ] Escalation practice
+- [ ] Handle first edit loop
+
+**Week 2:**
+- [ ] Full autonomy
+- [ ] Upgrade to Content Manager (if earned)
+
+---
+
+### Full Automation Architecture (OpenClaw-Centric)
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    OPENCLAW (The Brain - 24/7)                       │
+│     Persistent Memory | 3,000+ Skills | Self-Improving | FREE        │
+│              Connected via: Discord, WhatsApp, Telegram              │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+          ┌───────────────────────┼───────────────────────┐
+          ▼                       ▼                       ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  CONTENT GEN    │     │   VIDEO GEN     │     │   SCHEDULING    │
+│  ─────────────  │     │   ───────────   │     │   ──────────    │
+│  Claude ($200)  │     │  HeyGen ($30)   │     │  Mixpost (FREE) │
+│  OpenAI ($20)   │     │  ElevenLabs($22)│     │  Self-hosted    │
+│  Manus.ai($380y)│     │  CapCut ($90y)  │     │  Unlimited      │
+│  Creatify (FREE)│     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+          │                       │                       │
+          └───────────────────────┼───────────────────────┘
+                                  ▼
+                    ┌─────────────────────────┐
+                    │   BROWSER AUTOMATION    │
+                    │   ───────────────────   │
+                    │  Posts to ANY platform  │
+                    │  No API limitations     │
+                    │  Twitter, LinkedIn,     │
+                    │  TikTok, Instagram,     │
+                    │  YouTube, Bluesky,      │
+                    │  Reddit, Quora, etc.    │
+                    └─────────────────────────┘
+                                  │
+          ┌───────────────────────┼───────────────────────┐
+          ▼                       ▼                       ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│    MONITOR      │     │     ALERTS      │     │     MANAGE      │
+│    ───────      │     │     ──────      │     │     ──────      │
+│ OpenClaw skills │     │  Resend ($20)   │     │  ClickUp ($90y) │
+│ (web scraping)  │     │  Twilio (FREE)  │     │  (pipeline)     │
+│ Replaces        │     │  Discord (FREE) │     │                 │
+│ ScrapingBee     │     │                 │     │  Tracker        │
+│                 │     │                 │     │  (127.0.0.1)    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
+
+---
+
+### Tool Integration Map (OpenClaw-Centric)
+
+| Workflow | Tools Used | Automation Level |
+|----------|------------|------------------|
+| Text content → Post | OpenClaw + Claude → Mixpost → Platforms | 100% auto |
+| Script → Video → Post | OpenClaw → ElevenLabs → HeyGen → Mixpost | 100% auto |
+| Video editing | CapCut (batch processing) | 95% auto |
+| Ad creation | Creatify.ai → Mixpost | 100% auto |
+| Scheduling | OpenClaw cron jobs + Mixpost | 100% auto |
+| Notifications | OpenClaw → Resend/Twilio/Discord | 100% auto |
+| Approvals | Discord commands to OpenClaw | Human-in-loop |
+| Task tracking | OpenClaw → ClickUp | 100% auto |
+| Competitor watch | OpenClaw browser scraping | 100% auto |
+| CAPTCHA bypass | Capsolver (for automation) | 100% auto |
+| Trend detection | OpenClaw research skills (148) | 100% auto |
+| Custom automations | OpenClaw creates own skills | Self-improving |
+
+---
+
+### OpenClaw + Mixpost Integration
+
+**Mixpost Capabilities (Self-Hosted - FREE):**
+- Schedule to: Twitter/X, LinkedIn, Facebook, Instagram, TikTok, Bluesky, Threads, Mastodon
+- Unlimited scheduled posts
+- Unlimited social accounts
+- Unlimited team members
+- Full API access
+- Your data on your server
+- No monthly fees
+
+**OpenClaw + Mixpost Workflow:**
+```
+1. You send command via Discord/WhatsApp/Telegram
+2. OpenClaw generates content using Claude API
+3. OpenClaw sends to Mixpost via clawhub skill
+4. Mixpost schedules at optimal times
+5. Mixpost auto-posts to all platforms
+6. OpenClaw monitors engagement
+7. OpenClaw logs to ClickUp + Tracker
+8. OpenClaw alerts team if needed
+```
+
+**OpenClaw Commands (via any chat):**
+```
+"Post about data brokers to all platforms tomorrow 9am"
+"Create 10 tweets about privacy for this week"
+"What's trending in cybersecurity? Create content about it"
+"Monitor competitor [DeleteMe] and alert me on new content"
+"Show me this week's engagement stats"
+"Pause all posting until further notice"
+```
+
+**Skill Installation:**
+```bash
+clawhub install mixpost       # Social scheduling
+clawhub install marketing     # Marketing automation
+clawhub install analytics     # Performance tracking
+clawhub install research      # Trend detection
+```
+
+---
+
+### Launch Checklist (Before Going Live)
+
+**Phase 1: OpenClaw Setup (Ubuntu Workstation)**
+- [ ] Docker installed on Ubuntu Dell 7670
+- [ ] OpenClaw installed (`git clone https://github.com/openclaw/openclaw`)
+- [ ] OpenClaw configured with environment variables
+- [ ] Claude API key connected to OpenClaw
+- [ ] OpenAI API key connected (fallback)
+- [ ] OpenClaw running 24/7 as service
+- [ ] Discord bot connected to team channel
+- [ ] WhatsApp/Telegram connected (optional)
+
+**Phase 2: Mixpost Setup (Self-Hosted)**
+- [ ] Mixpost installed via Docker
+- [ ] Mixpost skill installed (`clawhub install mixpost`)
+- [ ] All social accounts connected to Mixpost:
+  - [ ] Twitter/X
+  - [ ] LinkedIn
+  - [ ] Facebook
+  - [ ] Instagram
+  - [ ] TikTok
+  - [ ] Bluesky
+  - [ ] YouTube
+- [ ] Mixpost → OpenClaw connection tested
+
+**Phase 3: AI Video Pipeline**
+- [ ] HeyGen avatar created and tested
+- [ ] ElevenLabs voice cloned and tested
+- [ ] CapCut templates ready
+- [ ] Creatify.ai ad templates ready
+- [ ] OpenClaw → HeyGen workflow tested
+- [ ] OpenClaw → ElevenLabs workflow tested
+
+**Phase 4: Skills Installation**
+```bash
+clawhub install mixpost        # Social scheduling
+clawhub install marketing      # Marketing automation (94 skills)
+clawhub install browser        # Browser automation (69 skills)
+clawhub install research       # Trend detection (148 skills)
+clawhub install analytics      # Performance tracking
+clawhub install calendar       # Scheduling (28 skills)
+```
+- [ ] Marketing skills installed
+- [ ] Browser automation skills installed
+- [ ] Research skills installed
+- [ ] Custom skills created for GhostMyData
+
+**Phase 5: Content Ready**
+- [ ] 7 days of content scheduled in Mixpost (N+7)
+- [ ] 85 evergreen posts in content bank
+- [ ] Templates loaded into OpenClaw
+- [ ] Video scripts library created
+- [ ] Brand voice configured in OpenClaw memory
+- [ ] Confidence thresholds calibrated (85%)
+
+**Phase 6: Notifications & Alerts**
+- [ ] Resend email notifications configured
+- [ ] Twilio SMS alerts configured (critical only)
+- [ ] Discord notifications working
+- [ ] ClickUp integration configured
+- [ ] Tracker (127.0.0.1:5000) connected
+
+**Phase 7: Testing & Go-Live**
+- [ ] End-to-end posting test (Discord → OpenClaw → Mixpost → Platform)
+- [ ] Video generation test (Script → Voice → Avatar → Post)
+- [ ] Approval workflow tested
+- [ ] Fallback triggers tested
+- [ ] Competitor monitoring tested (replaces ScrapingBee)
+- [ ] Team trained on Discord commands
+- [ ] 24-hour test run completed
+- [ ] GO LIVE! 🚀
+
+**Tools Phased Out After Go-Live:**
+- [ ] Cancel Publer (if subscribed)
+- [ ] Cancel Zapier (OpenClaw replaces)
+- [ ] Cancel ScrapingBee (OpenClaw replaces)
+- [ ] **Savings: ~$80/mo = $960/yr**
+
+---
+
+### 90-Day Milestones (AI-Powered)
+
+**Days 1-30: Foundation & Automation Setup**
+- [ ] All accounts created and optimized
+- [ ] Clawdbot installed and configured
+- [ ] Content templates loaded into AI
+- [ ] First 200 posts across platforms (AI-generated, human-approved)
+- [ ] 2,000 total followers
+- [ ] 500 website visits from social
+- [ ] AI monitoring all keywords 24/7
+
+**Days 31-60: Momentum & Optimization**
+- [ ] 1,000 posts total
+- [ ] 10,000 total followers
+- [ ] 3,000 website visits from social
+- [ ] 5 viral posts (>10K impressions)
+- [ ] 200 email signups from social
+- [ ] AI response templates refined
+- [ ] Top-performing content identified & scaled
+
+**Days 61-90: Scale & Revenue**
+- [ ] 3,000 posts total
+- [ ] 30,000 total followers
+- [ ] 10,000 website visits from social
+- [ ] 15 viral posts
+- [ ] 500 email signups from social
+- [ ] 50+ paid customers from social
+- [ ] AI running 90% autonomously (you just approve)
+
+### AI vs Manual Milestone Comparison
+
+| Milestone | Manual (90 days) | AI-Assisted | Full Autonomous |
+|-----------|------------------|-------------|-----------------|
+| Total posts | 500 | 3,000 | **5,000+** |
+| Total followers | 10,000 | 30,000 | **50,000+** |
+| Website visits | 2,000 | 10,000 | **20,000+** |
+| Email signups | 200 | 500 | **1,000+** |
+| Paid customers | 5-10 | 50+ | **100+** |
+| Videos created | 20 | 100 | **500+** |
+| Your time spent | 180 hrs | 30-40 hrs | **10-15 hrs** |
+
+---
+
+### Metrics to Track Weekly
+
+| Metric | Target | Tool |
+|--------|--------|------|
+| Total followers | +10%/week | Native analytics |
+| Engagement rate | >3% | Native analytics |
+| Website clicks | +15%/week | UTM + Google Analytics |
+| Email signups | +20%/week | Membership tracker |
+| Conversion to paid | >2% | Stripe |
+
+---
+
+### Platform-Specific Playbooks
+
+**Twitter/X - Speed & Volume**
+- 5 original tweets/day
+- 3 threads/week
+- 20 replies to big accounts
+- 10 quote tweets with value-add
+- Post at 9 AM and 5 PM ET
+
+**TikTok - Virality**
+- 1-3 videos/day (30-60 sec)
+- 30 comments on trending videos
+- Hook in first 1 second
+- Use trending sounds
+- Show real scan results (blurred)
+
+**LinkedIn - Authority**
+- 1 post/day (text-only performs best)
+- 15 thoughtful comments
+- 5 connection requests with note
+- Tag relevant people
+
+**Reddit - Karma & Trust**
+- 10 helpful comments (NO LINKS for first 2 weeks)
+- Be genuinely helpful first
+- Only mention GhostMyData when directly relevant
+- Do AMA after building karma
+
+**Quora - SEO & Authority**
+- 5 detailed answers/day (300+ words)
+- Target high-traffic questions
+- Include "I'm the founder of GhostMyData"
+- Add images/screenshots
+
+---
+
+### Paid Amplification (When Ready)
+
+| Platform | Budget/Month | Use For |
+|----------|--------------|---------|
+| Twitter/X | $200 | Boost viral tweets |
+| TikTok | $300 | Spark Ads on top videos |
+| Reddit | $150 | Targeted subreddit ads |
+| LinkedIn | $200 | B2B decision makers |
+| Meta (FB/IG) | $300 | Retargeting website visitors |
+
+**Rule:** Only boost content already performing (>2x normal engagement)
+
+---
+
+### Secret Weapons
+
+1. **"First 60 Minutes" Rule** - Be first to reply on relevant posts (10x visibility)
+2. **"Screenshot Proof" Format** - Real screenshots get 3x engagement
+3. **"Controversial Take"** - Privacy opinions that spark debate
+4. **Trend Jacking** - Connect privacy angle to current events
+
+---
+
+## POSTING FREQUENCY & BEST TIMES
+
+| Platform | Posts/Day | Best Times (ET) | Notes |
+|----------|-----------|-----------------|-------|
+| **Twitter/X** | 3-5 | 9am, 12pm, 5pm | High frequency OK, use threads |
+| **LinkedIn** | 1-2 | 8am, 12pm, 5pm Tue-Thu | Weekdays only, professional tone |
+| **Reddit** | 1-2 comments | 9am, 1pm | Build karma first, no self-promo |
+| **YouTube** | 1-2/week | Fri 3-5pm, Sat 9-11am | Consistency > frequency |
+| **Facebook** | 1-2 | 1pm, 3pm | Declining reach, lower priority |
+| **Instagram** | 1-2 posts, 5-10 stories | 11am, 7pm | Reels get more reach |
+| **TikTok** | 1-3 | 7am, 12pm, 7pm | More = better for algorithm |
+| **Bluesky** | 2-4 | 9am, 12pm, 6pm | Similar to early Twitter |
+| **Product Hunt** | Launch day focus | 12:01am PT | One big launch |
+| **Indie Hackers** | 2-3/week | Weekday mornings | Quality > quantity |
+| **Medium** | 1-2/week | Tue, Thu mornings | Long-form only |
+| **Substack** | 1-2/week | Tue, Thu 10am | Consistency matters |
+| **Quora** | 1-3 answers/day | Anytime | Answer trending questions |
+
+### Frequency Summary:
+
+**High Frequency (daily):**
+- Twitter/X: 3-5 posts
+- TikTok: 1-3 videos
+- Bluesky: 2-4 posts
+- Quora: 1-3 answers
+
+**Medium Frequency (few times/week):**
+- LinkedIn: 3-5/week
+- Instagram: 5-7/week
+- Indie Hackers: 2-3/week
+
+**Low Frequency (weekly):**
+- YouTube: 1-2/week
+- Medium: 1-2/week
+- Substack: 1/week
+- Facebook: 3-5/week
+
+### Best Days:
+- **B2B (LinkedIn, Indie Hackers):** Tuesday - Thursday
+- **B2C (Instagram, TikTok, Twitter):** Tuesday - Sunday
+- **Worst day:** Monday (people catching up on work)
 
 ---
 
@@ -2178,14 +3381,14 @@ How many spam calls do you get per week?
 | Medium (free) | [ ] | [ ] | [ ] | ⏳ |
 | Substack | [ ] | [ ] | [ ] | ⏳ |
 | Quora | [ ] | [ ] | [ ] | ⏳ |
-| Trustpilot | [ ] | [ ] | [ ] | ⏳ |
-| G2 | [ ] | [ ] | [ ] | ⏳ |
-| Capterra | [ ] | [ ] | [ ] | ⏳ |
-| AlternativeTo | [ ] | [ ] | [ ] | ⏳ |
-| Crunchbase | [ ] | [ ] | [ ] | ⏳ |
-| HARO | [ ] | [ ] | [ ] | ⏳ |
-| TikTok | [ ] | [ ] | [ ] | ⏳ |
-| Bluesky | [ ] | [ ] | [ ] | ⏳ |
+| Trustpilot | [x] | [ ] | [ ] | 🟡 |
+| G2 | ⛔ | ⛔ | ⛔ | N/A (B2B only) |
+| Capterra | [x] | [x] | [x] | ✅ Submitted |
+| AlternativeTo | [ ] | [ ] | [ ] | ⏸️ Signup broken |
+| Crunchbase | [x] | [x] | [x] | ✅ Submitted |
+| HARO | [x] | [x] | [ ] | ✅ Subscribed |
+| TikTok | [x] | [x] | [ ] | ✅ Profile done |
+| Bluesky | [x] | [x] | [x] | ✅ Done |
 
 ---
 
