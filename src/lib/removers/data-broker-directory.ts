@@ -937,10 +937,10 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   FULLCONTACT: {
     name: "FullContact",
     optOutUrl: "https://platform.fullcontact.com/your-privacy-choices",
-    privacyEmail: "privacy@fullcontact.com",
-    removalMethod: "BOTH",
+    // Email requests require portal verification - use web form directly
+    removalMethod: "FORM",
     estimatedDays: 14,
-    notes: "Use 'Your Privacy Choices' form to opt out of data collection",
+    notes: "IMPORTANT: Email requests require identity verification via Privacy Choices portal. Use web form directly for faster processing.",
   },
 
   // ==========================================
@@ -970,12 +970,12 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   EPSILON: {
     name: "Epsilon",
-    optOutUrl: "https://www.epsilon.com/us/consumer-preference-center",
-    privacyEmail: "privacy@epsilon.com",
-    removalMethod: "BOTH",
+    optOutUrl: "https://legal.epsilon.com/dsr/",
+    // Email requests redirect to portal - must use Consumer Privacy Portal
+    removalMethod: "FORM",
     estimatedDays: 30,
-    notes: "Use the Consumer Preference Center to opt out of marketing data",
-  
+    notes: "IMPORTANT: Email requests redirect to portal. Use https://legal.epsilon.com/dsr/ or call 1-866-267-3861 (Mon-Fri 9AM-5PM ET).",
+
     parentCompany: "Epsilon (Publicis)",
     subsidiaries: ["EPSILON_DATA","CONVERSANT","ABACUS","EPSILON_TARGETING"],
   },
@@ -1160,12 +1160,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   STABILITY_AI: {
     name: "Stability AI",
-    optOutUrl: "https://stability.ai/privacy-policy",
-    optOutEmail: "legal@stability.ai",
-    privacyEmail: "legal@stability.ai",
-    removalMethod: "EMAIL",
+    optOutUrl: "https://stability.ai/privacy-center",
+    // Email requests redirect to portal - must use self-service options
+    removalMethod: "FORM",
     estimatedDays: 45,
-    notes: "Opt out of Stable Diffusion training - honors Spawning Do Not Train registry",
+    notes: "IMPORTANT: Email requests redirect to portal. Use https://stability.ai/privacy-center to delete account, opt-out of AI training, or fill out their data deletion form.",
   },
   SPAWNING_AI: {
     name: "Spawning AI (Do Not Train Registry)",
@@ -1259,11 +1258,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   HUGGINGFACE: {
     name: "Hugging Face",
     optOutUrl: "https://huggingface.co/settings/account",
-    privacyEmail: "privacy@huggingface.co",
-    removalMethod: "BOTH",
+    // Email requests redirect to account settings - user must self-delete
+    removalMethod: "FORM",
     estimatedDays: 14,
     category: "AI_SERVICE",
-    notes: "Delete account or request data removal via settings",
+    notes: "IMPORTANT: Email requests confirmed but user must delete account at https://huggingface.co/settings/account. Account deletion includes all personal information.",
   },
   DALL_E: {
     name: "DALL-E (OpenAI)",
@@ -1319,11 +1318,12 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   COMMON_CRAWL: {
     name: "Common Crawl",
+    optOutUrl: "https://commoncrawl.org/terms-of-use",
     privacyEmail: "info@commoncrawl.org",
-    removalMethod: "EMAIL",
+    removalMethod: "BOTH",
     estimatedDays: 90,
     category: "AI_SERVICE",
-    notes: "Historical web archive - new crawls may exclude requested domains",
+    notes: "IMPORTANT: Requires SPECIFIC URL where personal data is located. General requests are declined. User must provide exact page URL from Common Crawl archive containing their data.",
   },
   // Additional AI Image/Video Services
   SYNTHESIA: {
@@ -1440,11 +1440,12 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   // Image manipulation apps
   FACEAPP: {
     name: "FaceApp",
-    privacyEmail: "privacy@faceapp.com",
-    removalMethod: "EMAIL",
+    optOutUrl: "faceapp://send-privacy-request",
+    // Email removal not accepted - must use in-app "Send Privacy Request" feature
+    removalMethod: "FORM",
     estimatedDays: 30,
     category: "AI_SERVICE",
-    notes: "Request deletion of stored photos via email",
+    notes: "IMPORTANT: Email requests are rejected. Must use 'Send Privacy Request' feature within the FaceApp mobile app to delete data.",
   },
   REFACE: {
     name: "Reface",
@@ -1601,11 +1602,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   // ==========================================
   ELEVENLABS: {
     name: "ElevenLabs",
-    optOutUrl: "https://elevenlabs.io/privacy",
-    privacyEmail: "privacy@elevenlabs.io",
-    removalMethod: "EMAIL",
+    optOutUrl: "https://elevenlabs.io/app/account",
+    // Email removal not accepted - must use official DSR form or account deletion
+    removalMethod: "FORM",
     estimatedDays: 30,
-    notes: "AI voice cloning service - request voice sample removal",
+    notes: "IMPORTANT: Email requests are rejected. Delete account in app settings or submit formal Data Subject Request via official form.",
   },
   RESEMBLE_AI: {
     name: "Resemble AI",
@@ -2849,6 +2850,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@findymail.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    notes: "IMPORTANT: Only collects PROFESSIONAL/WORK email addresses. Personal emails (Gmail, etc.) are not in their database. User must provide work email address for removal.",
   },
   SKRAPP: {
     name: "Skrapp",
@@ -3161,6 +3163,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@zerobounce.net",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    notes: "IMPORTANT: Requires identity verification. If user is a customer, they must confirm last payment date. For non-customers, standard email removal may work.",
   },
   NEVERBOUNCE: {
     name: "NeverBounce",
@@ -3493,11 +3496,12 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   DUNS_BRADSTREET: {
     name: "Dun & Bradstreet",
-    optOutUrl: "https://www.dnb.com/utility-pages/privacy-policy.html",
+    optOutUrl: "https://www.dnb.com/privacy-trust-center",
     privacyEmail: "privacy@dnb.com",
-    removalMethod: "EMAIL",
+    removalMethod: "BOTH",
     estimatedDays: 30,
-  
+    notes: "IMPORTANT: Requires SPECIFIC identifying information. Name alone may match multiple business owners. User should provide company name, DUNS number, or other unique identifiers for accurate matching.",
+
     parentCompany: "Dun & Bradstreet",
     subsidiaries: ["DNB_HOOVERS","DNB_DATA","HOOVERS"],
   },

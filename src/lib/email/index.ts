@@ -1206,6 +1206,72 @@ export async function sendBulkRemovalSummaryEmail(
 }
 
 // ==========================================
+// Manual Action Required Email
+// ==========================================
+
+interface ManualActionRequiredData {
+  brokerName: string;
+  brokerKey: string;
+  optOutUrl?: string;
+  instructions: string;
+  responseFrom?: string; // Who responded (e.g., "FaceApp Privacy Team")
+  originalRequestDate?: Date;
+}
+
+/**
+ * Send email to user when a broker responds requiring manual action
+ */
+export async function sendManualActionRequiredEmail(
+  email: string,
+  name: string,
+  data: ManualActionRequiredData
+) {
+  const dateStr = data.originalRequestDate
+    ? data.originalRequestDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+    : "recently";
+
+  const html = baseTemplate(`
+    <h1 style="color: #f97316; margin-top: 0;">📋 Manual Action Required</h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      We received a response from <strong>${data.brokerName}</strong> regarding your data removal request submitted ${dateStr}.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #f97316;">
+      <h3 style="color: #f97316; margin-top: 0;">Why Manual Action?</h3>
+      <p style="color: #94a3b8; margin-bottom: 0;">
+        This broker requires you to take action through their specific process. Our automated email request wasn't sufficient for this particular service.
+      </p>
+    </div>
+
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <h3 style="color: #10b981; margin-top: 0;">📝 What You Need To Do</h3>
+      <p style="color: #e2e8f0; white-space: pre-wrap;">${data.instructions}</p>
+      ${data.optOutUrl ? `
+        <div style="margin-top: 16px;">
+          <a href="${data.optOutUrl}" style="display: inline-block; background-color: #10b981; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+            Go to ${data.brokerName} Opt-Out →
+          </a>
+        </div>
+      ` : ''}
+    </div>
+
+    <p style="font-size: 14px; color: #94a3b8;">
+      Once you've completed the manual removal, the exposure will be automatically verified as removed in your next scan.
+    </p>
+
+    ${buttonHtml("View Your Dashboard", `${APP_URL}/dashboard/removals`)}
+  `);
+
+  return sendEmail(email, `📋 Manual action needed for ${data.brokerName}`, html, {
+    emailType: "MANUAL_ACTION_REQUIRED",
+    context: { brokerKey: data.brokerKey },
+  });
+}
+
+// ==========================================
 // Admin Service Alert Emails
 // ==========================================
 
