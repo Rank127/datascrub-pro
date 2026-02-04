@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import { sendCCPARemovalRequest, sendRemovalStatusDigestEmail, queueRemovalStatusUpdate } from "@/lib/email";
 import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, getConsolidationParent, type DataBrokerInfo } from "./data-broker-directory";
 import { calculateVerifyAfterDate } from "./verification-service";
-import { attemptAutomatedOptOut, isAutomationEnabled } from "./browser-automation";
+import { attemptAutomatedOptOut, isAutomationEnabled, getBestAutomationMethod, canAutomateBroker } from "./browser-automation";
 import type { RemovalMethod } from "@/lib/types";
 import { createRemovalFailedTicket } from "@/lib/support/ticket-service";
 import { isDomainBlocklisted, getBlocklistEntry } from "./blocklist";
@@ -522,8 +522,13 @@ export async function executeRemoval(
       // Handle both new (AUTO_FORM) and legacy (FORM) method names
       case "AUTO_FORM":
       case "FORM": {
-        // Try browser automation if configured
-        if (isAutomationEnabled()) {
+        // Check the best automation method for this broker
+        const bestMethod = getBestAutomationMethod(source);
+        console.log(`[Removal] Best automation method for ${source}: ${bestMethod.method} (${bestMethod.reason})`);
+
+        // Try browser automation if configured AND form is actually automatable
+        const formCheck = canAutomateBroker(source);
+        if (isAutomationEnabled() && formCheck.canAutomate) {
           // Get full profile for form data
           const fullProfile = await prisma.personalProfile.findFirst({
             where: { userId },
@@ -575,11 +580,48 @@ export async function executeRemoval(
             };
           }
 
-          // Automation failed or not available for this broker
+          // Automation failed - log it but try email fallback below
           console.log(`[Removal] Browser automation failed for ${source}: ${automationResult.message}`);
         }
 
-        // Fall back to manual instructions
+        // =========================================================================
+        // SMART FALLBACK: Try email automation before falling back to manual
+        // This is the key enhancement - we don't give up just because form failed
+        // =========================================================================
+        if (bestMethod.method === "EMAIL" || (brokerInfo.privacyEmail && (brokerInfo.removalMethod === "BOTH" || brokerInfo.removalMethod === "EMAIL"))) {
+          console.log(`[Removal] Form blocked for ${source}, attempting email automation via ${brokerInfo.privacyEmail}`);
+
+          const emailResult = await sendCCPARemovalRequest({
+            toEmail: brokerInfo.privacyEmail!,
+            fromName: userName,
+            fromEmail: userEmail,
+            dataTypes: [formatDataType(dataType)],
+            sourceUrl: removalRequest.exposure.sourceUrl || undefined,
+          });
+
+          if (emailResult.success) {
+            await updateRemovalStatus(removalRequestId, "SUBMITTED");
+
+            if (!skipUserNotification) {
+              await queueRemovalStatusUpdate(userId, {
+                sourceName: brokerInfo.name,
+                source: source,
+                status: "SUBMITTED",
+                dataType: formatDataType(dataType),
+              });
+            }
+
+            return {
+              success: true,
+              method: "AUTO_EMAIL",
+              message: `CCPA/GDPR removal request sent to ${brokerInfo.name} (email fallback - form has Cloudflare protection)`,
+            };
+          }
+
+          console.log(`[Removal] Email fallback also failed for ${source}`);
+        }
+
+        // Both form and email failed - fall back to manual
         await updateRemovalStatus(removalRequestId, "REQUIRES_MANUAL");
 
         return {

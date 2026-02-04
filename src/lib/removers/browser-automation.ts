@@ -182,8 +182,8 @@ function getBrowserlessConfig(): BrowserlessConfig | null {
 }
 
 /**
- * Check if a broker can be automated (no blockers)
- * Use this to pre-check before attempting automation
+ * Check if a broker can be automated via FORM (no blockers)
+ * Use this to pre-check before attempting form automation
  */
 export function canAutomateBroker(brokerKey: string): {
   canAutomate: boolean;
@@ -204,6 +204,76 @@ export function canAutomateBroker(brokerKey: string): {
   }
 
   return { canAutomate: true };
+}
+
+/**
+ * Determine the best automation method for a broker
+ * Priority: Form (if possible) → Email (if available) → Manual
+ *
+ * This ensures we maximize automation before falling back to manual requests
+ */
+export function getBestAutomationMethod(brokerKey: string): {
+  method: "FORM" | "EMAIL" | "MANUAL";
+  reason: string;
+  canAutomate: boolean;
+} {
+  const broker = DATA_BROKER_DIRECTORY[brokerKey];
+
+  if (!broker) {
+    return {
+      method: "MANUAL",
+      reason: "Unknown broker - not in directory",
+      canAutomate: false,
+    };
+  }
+
+  // Check if form automation is possible
+  const formCheck = canAutomateBroker(brokerKey);
+
+  if (formCheck.canAutomate) {
+    return {
+      method: "FORM",
+      reason: "Form automation available",
+      canAutomate: true,
+    };
+  }
+
+  // Form blocked - check if email is available
+  const supportsEmail = broker.removalMethod === "EMAIL" || broker.removalMethod === "BOTH";
+  const hasPrivacyEmail = !!broker.privacyEmail;
+
+  if (supportsEmail && hasPrivacyEmail) {
+    return {
+      method: "EMAIL",
+      reason: `Form blocked (${formCheck.reason}), using email automation instead`,
+      canAutomate: true,
+    };
+  }
+
+  // Neither form nor email available
+  return {
+    method: "MANUAL",
+    reason: broker.removalMethod === "FORM"
+      ? `Form-only broker with Cloudflare protection`
+      : `No automation available - ${formCheck.reason}`,
+    canAutomate: false,
+  };
+}
+
+/**
+ * Check if a broker supports any form of automation (form OR email)
+ */
+export function canAutomateBrokerAny(brokerKey: string): {
+  canAutomate: boolean;
+  preferredMethod: "FORM" | "EMAIL" | "MANUAL";
+  reason: string;
+} {
+  const result = getBestAutomationMethod(brokerKey);
+  return {
+    canAutomate: result.canAutomate,
+    preferredMethod: result.method,
+    reason: result.reason,
+  };
 }
 
 /**
@@ -603,25 +673,70 @@ export async function attemptAutomatedOptOut(
 }
 
 /**
- * Get brokers that support automated opt-out
+ * Get brokers that support automated FORM opt-out (no Cloudflare)
  */
 export function getAutomatedOptOutBrokers(): string[] {
   return Object.entries(FORM_CONFIGS)
-    .filter(([, config]) => !config.requiresCaptcha)
+    .filter(([, config]) => !config.requiresCaptcha && !config.hasCloudflare)
     .map(([key]) => key);
 }
 
 /**
- * Get brokers that require manual opt-out
+ * Get brokers that require manual opt-out (no automation available)
  */
 export function getManualOptOutBrokers(): string[] {
-  const automatedBrokers = new Set(Object.keys(FORM_CONFIGS).filter(
-    key => !FORM_CONFIGS[key].requiresCaptcha
-  ));
+  return Object.keys(DATA_BROKER_DIRECTORY).filter(key => {
+    const best = getBestAutomationMethod(key);
+    return !best.canAutomate;
+  });
+}
 
-  return Object.keys(DATA_BROKER_DIRECTORY).filter(
-    key => !automatedBrokers.has(key)
-  );
+/**
+ * Get all brokers that can be automated (form OR email)
+ * This is the key metric - shows how many brokers we can handle without user intervention
+ */
+export function getAllAutomatableBrokers(): {
+  total: number;
+  formAutomated: string[];
+  emailAutomated: string[];
+  manualOnly: string[];
+  stats: {
+    formCount: number;
+    emailCount: number;
+    manualCount: number;
+    automationRate: number;
+  };
+} {
+  const formAutomated: string[] = [];
+  const emailAutomated: string[] = [];
+  const manualOnly: string[] = [];
+
+  for (const key of Object.keys(DATA_BROKER_DIRECTORY)) {
+    const best = getBestAutomationMethod(key);
+    if (best.method === "FORM") {
+      formAutomated.push(key);
+    } else if (best.method === "EMAIL") {
+      emailAutomated.push(key);
+    } else {
+      manualOnly.push(key);
+    }
+  }
+
+  const total = Object.keys(DATA_BROKER_DIRECTORY).length;
+  const automated = formAutomated.length + emailAutomated.length;
+
+  return {
+    total,
+    formAutomated,
+    emailAutomated,
+    manualOnly,
+    stats: {
+      formCount: formAutomated.length,
+      emailCount: emailAutomated.length,
+      manualCount: manualOnly.length,
+      automationRate: total > 0 ? Math.round((automated / total) * 100) : 0,
+    },
+  };
 }
 
 /**

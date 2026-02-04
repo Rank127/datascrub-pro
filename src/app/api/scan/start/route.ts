@@ -15,6 +15,7 @@ import { isAdmin } from "@/lib/admin";
 import { getEffectivePlan } from "@/lib/family/family-service";
 import { generateScreenshotUrl } from "@/lib/screenshots/screenshot-service";
 import { createScanErrorTicket } from "@/lib/support/ticket-service";
+import { getBestAutomationMethod } from "@/lib/removers/browser-automation";
 
 // Allow longer execution time for scans (Vercel Pro: up to 300s)
 export const maxDuration = 120; // 2 minutes should be enough with parallel scanning
@@ -301,14 +302,21 @@ export async function POST(request: Request) {
           const exposure = exposureMap.get(`${result.source}:${result.sourceName}`);
           if (!exposure) return Promise.resolve();
 
+          // Use smart method selection to maximize automation
+          const bestMethod = getBestAutomationMethod(result.source);
+          const method = bestMethod.method === "MANUAL" ? "MANUAL_GUIDE" :
+                        bestMethod.method === "EMAIL" ? "AUTO_EMAIL" : "AUTO_FORM";
+
+          console.log(`[Scan] Creating removal for ${result.source}: ${method} (${bestMethod.reason})`);
+
           return prisma.removalRequest.create({
             data: {
               userId: session.user.id,
               exposureId: exposure.id,
               status: "PENDING",
-              method: result.rawData?.privacyEmail ? "EMAIL" : "FORM",
+              method,
               isProactive: true, // Mark as proactive opt-out
-              notes: `Proactive opt-out request. Confidence: ${result.confidence?.score ?? 'N/A'}. ${result.rawData?.optOutInstructions || ''}`,
+              notes: `Proactive opt-out request. Method: ${bestMethod.reason}. Confidence: ${result.confidence?.score ?? 'N/A'}. ${result.rawData?.optOutInstructions || ''}`,
             },
           });
         })
