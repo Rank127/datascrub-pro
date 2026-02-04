@@ -960,7 +960,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   ORACLE_DATACLOUD: {
     name: "Oracle Data Cloud",
     optOutUrl: "https://www.oracle.com/marketingcloud/opt-status.html",
-    privacyEmail: "privacy@oracle.com",
+    privacyEmail: "privacy_ww@oracle.com", // Updated: privacy@oracle.com was suppressed
     removalMethod: "BOTH",
     estimatedDays: 45,
     notes: "Use the Oracle Marketing Cloud opt-out status page to submit removal request",
@@ -1507,7 +1507,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   READY_PLAYER_ME: {
     name: "Ready Player Me",
-    privacyEmail: "privacy@readyplayer.me",
+    privacyEmail: "support@readyplayer.me", // Updated: privacy@readyplayer.me was suppressed
     removalMethod: "EMAIL",
     estimatedDays: 30,
     category: "AI_SERVICE",
@@ -1611,7 +1611,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   RESEMBLE_AI: {
     name: "Resemble AI",
     optOutUrl: "https://www.resemble.ai/privacy",
-    privacyEmail: "privacy@resemble.ai",
+    privacyEmail: "support@resemble.ai", // Updated: privacy@resemble.ai was suppressed
     removalMethod: "EMAIL",
     estimatedDays: 30,
     notes: "Voice cloning platform - contact for voice data removal",
@@ -1641,7 +1641,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   PEEKYOU: {
     name: "PeekYou",
     optOutUrl: "https://www.peekyou.com/about/contact/optout/",
-    privacyEmail: "privacy@peekyou.com",
+    privacyEmail: "support@peekyou.com", // Updated: privacy@peekyou.com was suppressed
     removalMethod: "BOTH",
     estimatedDays: 14,
   },
@@ -2024,7 +2024,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   TRUECALLER: {
     name: "Truecaller",
     optOutUrl: "https://www.truecaller.com/unlisting",
-    privacyEmail: "privacy@truecaller.com",
+    privacyEmail: "support@truecaller.com", // Updated: privacy@truecaller.com was suppressed
     removalMethod: "BOTH",
     estimatedDays: 1,
     notes: "Unlist from Truecaller directory - usually instant",
@@ -2032,14 +2032,14 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   MR_NUMBER: {
     name: "Mr. Number",
     optOutUrl: "https://mrnumber.com/remove",
-    privacyEmail: "privacy@mrnumber.com",
+    privacyEmail: "support@mrnumber.com", // Updated: privacy@mrnumber.com was suppressed
     removalMethod: "BOTH",
     estimatedDays: 7,
   },
   CALLERIDTEST: {
     name: "CallerIDTest",
     optOutUrl: "https://calleridtest.com/opt-out",
-    privacyEmail: "privacy@calleridtest.com",
+    privacyEmail: "support@calleridtest.com", // Updated: privacy@calleridtest.com was suppressed
     removalMethod: "BOTH",
     estimatedDays: 5,
   },
@@ -2057,7 +2057,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   LIVERAMP: {
     name: "LiveRamp",
     optOutUrl: "https://liveramp.com/opt_out/",
-    privacyEmail: "privacy@liveramp.com",
+    privacyEmail: "optout@liveramp.com", // Updated: privacy@liveramp.com was suppressed
     removalMethod: "BOTH",
     estimatedDays: 30,
     notes: "Major data broker for advertising - opt out of identity graph",
@@ -2081,7 +2081,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   NIELSEN: {
     name: "Nielsen",
     optOutUrl: "https://www.nielsen.com/us/en/legal/privacy-statement/digital-measurement-privacy-statement/",
-    privacyEmail: "privacy.department@nielsen.com",
+    privacyEmail: "privacy@nielsen.com", // Updated: privacy.department@nielsen.com bounced
     removalMethod: "BOTH",
     estimatedDays: 45,
   },
@@ -2095,7 +2095,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   DATALOGIX: {
     name: "Datalogix (Oracle)",
     optOutUrl: "https://www.oracle.com/legal/privacy/marketing-cloud-data-cloud-privacy-policy.html",
-    privacyEmail: "privacy@oracle.com",
+    privacyEmail: "privacy_ww@oracle.com", // Updated: privacy@oracle.com was suppressed
     removalMethod: "BOTH",
     estimatedDays: 45,
   
@@ -2104,7 +2104,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   BLUEKAI: {
     name: "BlueKai (Oracle)",
     optOutUrl: "https://www.oracle.com/legal/privacy/marketing-cloud-data-cloud-privacy-policy.html",
-    privacyEmail: "privacy@oracle.com",
+    privacyEmail: "privacy_ww@oracle.com", // Updated: privacy@oracle.com was suppressed
     removalMethod: "BOTH",
     estimatedDays: 45,
 
@@ -2113,7 +2113,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   INFOGROUP: {
     name: "Infogroup (Data.com)",
     optOutUrl: "https://www.infogroup.com/privacy-policy",
-    privacyEmail: "privacy@infogroup.com",
+    privacyEmail: "optout@data-axle.com", // Updated: privacy@infogroup.com was suppressed
     removalMethod: "EMAIL",
     estimatedDays: 30,
   },
@@ -3685,7 +3685,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   TRUECALLER_IN: {
     name: "Truecaller India",
     optOutUrl: "https://www.truecaller.com/unlisting",
-    privacyEmail: "privacy@truecaller.com",
+    privacyEmail: "support@truecaller.com", // Updated: privacy@truecaller.com was suppressed
     removalMethod: "BOTH",
     estimatedDays: 1,
   },
@@ -4483,7 +4483,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   INFOGROUP_DATA: {
     name: "Infogroup (Data.com)",
     optOutUrl: "https://www.data.com/privacy",
-    privacyEmail: "privacy@infogroup.com",
+    privacyEmail: "optout@data-axle.com", // Updated: privacy@infogroup.com was suppressed
     removalMethod: "EMAIL",
     estimatedDays: 30,
   },
@@ -4576,7 +4576,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   ORACLE_MARKETING: {
     name: "Oracle Data Cloud",
     optOutUrl: "https://www.oracle.com/legal/privacy/marketing-cloud-data-cloud-privacy-policy.html",
-    privacyEmail: "privacy@oracle.com",
+    privacyEmail: "privacy_ww@oracle.com", // Updated: privacy@oracle.com was suppressed
     removalMethod: "BOTH",
     estimatedDays: 30,
   },
@@ -4592,7 +4592,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   LIVERAMP_DATA: {
     name: "LiveRamp Data Services",
     optOutUrl: "https://liveramp.com/opt_out/",
-    privacyEmail: "privacy@liveramp.com",
+    privacyEmail: "optout@liveramp.com", // Updated: privacy@liveramp.com was suppressed
     removalMethod: "BOTH",
     estimatedDays: 14,
   },
