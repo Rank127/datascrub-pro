@@ -673,3 +673,114 @@ model Referral {
   @@index([referralCode])
   @@index([status])
 }
+
+// ==========================================
+// COMPLIANCE AGENT - Entity Classification & Complaints
+// ==========================================
+
+// Cache for entity classification results
+// Helps avoid repeated classifications of the same domain
+model EntityClassification {
+  id                  String    @id @default(cuid())
+  domain              String    // Domain that was classified (e.g., "syndigo.com")
+  classification      String    // DATA_BROKER, DATA_PROCESSOR, or UNKNOWN
+  confidence          Float     // 0-1 confidence score
+  source              String    // How classified: BLOCKLIST, DIRECTORY, RULE_BASED, AI_ANALYSIS, MANUAL_OVERRIDE, CACHED
+  reasoning           String    // Human-readable explanation
+  parentCompany       String?   // Parent company if known
+  blockedFromRemoval  Boolean   @default(false)
+  requestId           String?   // Request ID that triggered this classification
+  verifiedBy          String?   // User ID if manually verified
+  verifiedAt          DateTime?
+  expiresAt           DateTime? // When this classification should be re-evaluated
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([domain])
+  @@index([classification])
+  @@index([createdAt])
+  @@index([domain, createdAt])
+}
+
+// Track inbound compliance complaints and legal notices
+model ComplianceComplaint {
+  id                    String    @id @default(cuid())
+  senderEmail           String    // Email address of sender
+  senderName            String?   // Name of sender
+  senderCompany         String?   // Company of sender
+  subject               String    // Email subject line
+  complaintType         String    // LEGAL_THREAT, CEASE_DESIST, CLASSIFICATION_DISPUTE, etc.
+  severity              String    // CRITICAL, HIGH, MEDIUM, LOW
+  requiresImmediateAction Boolean @default(false)
+
+  // Parsed content
+  keyPoints             String?   // JSON array of key points
+  requestedActions      String?   // JSON array of requested actions
+  mentionedEntities     String?   // JSON array of mentioned domains/companies
+  legalReferences       String?   // JSON array of legal citations
+  threats               String?   // JSON array of threats made
+  deadlines             String?   // JSON array of deadlines mentioned
+
+  // Raw content (for re-parsing if needed)
+  rawContent            String?   // Original email content (may be truncated)
+
+  // Processing info
+  parsedAt              DateTime  @default(now())
+  inboxType             String?   // DPO, LEGAL, COMPLIANCE, SUPPORT
+  requestId             String?   // Agent request ID
+
+  // Resolution tracking
+  status                String    @default("PENDING") // PENDING, IN_PROGRESS, RESOLVED, DISMISSED
+  resolvedAt            DateTime?
+  resolvedBy            String?   // User ID who resolved
+  resolution            String?   // Resolution notes
+
+  // Related records
+  ticketId              String?   // Support ticket created for this complaint
+  entityClassificationId String?  // If resulted in reclassification
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([senderEmail])
+  @@index([complaintType])
+  @@index([severity])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Audit log for blocklist changes
+// Tracks all additions, removals, and modifications to the blocklist
+model BlocklistAuditLog {
+  id              String    @id @default(cuid())
+  domain          String    // Domain affected
+  companyName     String?   // Company name
+  action          String    // ADD, REMOVE, UPDATE, REVIEW
+  reason          String    // Why this action was taken
+  previousValue   String?   // Previous state (JSON for updates)
+  newValue        String?   // New state (JSON for updates)
+
+  // Actor info
+  actorType       String    // SYSTEM, AGENT, USER
+  actorId         String?   // User ID or agent ID
+  actorEmail      String?   // Email of human actor
+
+  // Context
+  complaintId     String?   // If triggered by a complaint
+  classificationId String?  // If triggered by classification
+  ticketId        String?   // If triggered by a support ticket
+  requestId       String?   // Agent request ID
+
+  // Metadata
+  ipAddress       String?
+  userAgent       String?
+  notes           String?
+
+  createdAt       DateTime  @default(now())
+
+  @@index([domain])
+  @@index([action])
+  @@index([actorId])
+  @@index([createdAt])
+  @@index([domain, createdAt])
+}

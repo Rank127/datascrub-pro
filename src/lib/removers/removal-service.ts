@@ -5,6 +5,7 @@ import { calculateVerifyAfterDate } from "./verification-service";
 import { attemptAutomatedOptOut, isAutomationEnabled } from "./browser-automation";
 import type { RemovalMethod } from "@/lib/types";
 import { createRemovalFailedTicket } from "@/lib/support/ticket-service";
+import { isDomainBlocklisted, getBlocklistEntry } from "./blocklist";
 
 const MAX_REMOVAL_ATTEMPTS = 5;
 const MAX_REQUESTS_PER_BROKER_PER_DAY = 25; // Limit requests to any single broker per day (avoid spam flags)
@@ -134,6 +135,162 @@ What you SHOULD do:
 
 interface ExecuteRemovalOptions {
   skipUserNotification?: boolean; // Skip sending notification email to user (for bulk operations)
+  skipEntityValidation?: boolean; // Skip entity classification check (for retries where already validated)
+}
+
+// ============================================================================
+// ENTITY VALIDATION - Prevents sending removals to Data Processors
+// ============================================================================
+
+interface EntityValidationResult {
+  shouldProceed: boolean;
+  classification: "DATA_BROKER" | "DATA_PROCESSOR" | "UNKNOWN";
+  confidence: number;
+  reason: string;
+  blockedByBlocklist: boolean;
+}
+
+/**
+ * Validate an entity before sending a removal request.
+ * This prevents the Syndigo incident from recurring - we should NOT send
+ * deletion requests to Data Processors (only Data Controllers/Brokers).
+ *
+ * Design: FAIL OPEN - if validation fails, we proceed with removal
+ * to avoid blocking legitimate removals due to system errors.
+ */
+export async function validateEntityBeforeRemoval(
+  domain: string,
+  options: { sourceUrl?: string | null; source?: string } = {}
+): Promise<EntityValidationResult> {
+  const normalizedDomain = domain.toLowerCase().trim();
+
+  try {
+    // Step 1: Quick blocklist check (highest confidence, fastest)
+    const blocklistEntry = getBlocklistEntry(normalizedDomain);
+    if (blocklistEntry) {
+      console.log(`[Removal Validation] BLOCKED: ${normalizedDomain} is blocklisted as Data Processor`);
+
+      // Log to database for audit trail
+      try {
+        await prisma.entityClassification.create({
+          data: {
+            domain: normalizedDomain,
+            classification: "DATA_PROCESSOR",
+            confidence: 1.0,
+            source: "BLOCKLIST",
+            reasoning: `Blocklisted: ${blocklistEntry.reason}`,
+            parentCompany: blocklistEntry.name,
+            blockedFromRemoval: true,
+          },
+        });
+      } catch {
+        // Database table might not exist yet
+      }
+
+      return {
+        shouldProceed: false,
+        classification: "DATA_PROCESSOR",
+        confidence: 1.0,
+        reason: `${blocklistEntry.name} is a Data Processor: ${blocklistEntry.reason}`,
+        blockedByBlocklist: true,
+      };
+    }
+
+    // Step 2: Check if domain or any parent domain is blocklisted
+    // e.g., api.powerreviews.com should match powerreviews.com
+    const domainParts = normalizedDomain.split(".");
+    for (let i = 1; i < domainParts.length - 1; i++) {
+      const parentDomain = domainParts.slice(i).join(".");
+      const parentBlocklist = getBlocklistEntry(parentDomain);
+      if (parentBlocklist) {
+        console.log(`[Removal Validation] BLOCKED: ${normalizedDomain} - parent ${parentDomain} is blocklisted`);
+
+        try {
+          await prisma.entityClassification.create({
+            data: {
+              domain: normalizedDomain,
+              classification: "DATA_PROCESSOR",
+              confidence: 0.95,
+              source: "BLOCKLIST",
+              reasoning: `Parent domain ${parentDomain} is blocklisted: ${parentBlocklist.reason}`,
+              parentCompany: parentBlocklist.name,
+              blockedFromRemoval: true,
+            },
+          });
+        } catch {
+          // Database table might not exist yet
+        }
+
+        return {
+          shouldProceed: false,
+          classification: "DATA_PROCESSOR",
+          confidence: 0.95,
+          reason: `Parent domain ${parentDomain} (${parentBlocklist.name}) is a Data Processor`,
+          blockedByBlocklist: true,
+        };
+      }
+    }
+
+    // Step 3: Check data broker directory (known brokers = safe to send)
+    const brokerKey = (options.source || normalizedDomain).toUpperCase().replace(/[.\-]/g, "_");
+    const brokerInfo = getDataBrokerInfo(brokerKey);
+    if (brokerInfo) {
+      // It's a known data broker - safe to proceed
+      return {
+        shouldProceed: true,
+        classification: "DATA_BROKER",
+        confidence: 0.95,
+        reason: `${brokerInfo.name} is a known data broker in our directory`,
+        blockedByBlocklist: false,
+      };
+    }
+
+    // Step 4: Check cached classification from database
+    try {
+      const cachedClassification = await prisma.entityClassification.findFirst({
+        where: {
+          domain: normalizedDomain,
+          createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, // 30 day cache
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      if (cachedClassification) {
+        const shouldProceed = cachedClassification.classification !== "DATA_PROCESSOR";
+        console.log(`[Removal Validation] Cached classification for ${normalizedDomain}: ${cachedClassification.classification}`);
+        return {
+          shouldProceed,
+          classification: cachedClassification.classification as EntityValidationResult["classification"],
+          confidence: cachedClassification.confidence,
+          reason: cachedClassification.reasoning,
+          blockedByBlocklist: false,
+        };
+      }
+    } catch {
+      // Database table might not exist yet
+    }
+
+    // Step 5: Unknown entity - FAIL OPEN (proceed with removal)
+    // Better to attempt a removal that bounces than to block legitimate removals
+    console.log(`[Removal Validation] Unknown entity ${normalizedDomain} - proceeding (fail open)`);
+    return {
+      shouldProceed: true,
+      classification: "UNKNOWN",
+      confidence: 0.5,
+      reason: "Entity not in blocklist or broker directory - proceeding with removal",
+      blockedByBlocklist: false,
+    };
+  } catch (error) {
+    // FAIL OPEN - if validation itself fails, proceed with removal
+    console.error(`[Removal Validation] Error validating ${normalizedDomain}:`, error);
+    return {
+      shouldProceed: true,
+      classification: "UNKNOWN",
+      confidence: 0,
+      reason: "Validation error - proceeding with removal (fail open)",
+      blockedByBlocklist: false,
+    };
+  }
 }
 
 // Execute a removal request
@@ -142,7 +299,7 @@ export async function executeRemoval(
   userId: string,
   options: ExecuteRemovalOptions = {}
 ): Promise<RemovalExecutionResult> {
-  const { skipUserNotification = false } = options;
+  const { skipUserNotification = false, skipEntityValidation = false } = options;
   // Get the removal request with exposure and user details
   const removalRequest = await prisma.removalRequest.findUnique({
     where: { id: removalRequestId },
@@ -179,6 +336,58 @@ export async function executeRemoval(
 
   // Get data broker info
   const brokerInfo = getDataBrokerInfo(source);
+
+  // =========================================================================
+  // PRE-FLIGHT VALIDATION: Check if entity is a Data Processor
+  // This prevents sending deletion requests to companies like Syndigo/PowerReviews
+  // =========================================================================
+  if (!skipEntityValidation && sourceUrl) {
+    try {
+      const domain = new URL(sourceUrl).hostname.replace(/^www\./, "");
+      const validation = await validateEntityBeforeRemoval(domain, { sourceUrl, source });
+
+      if (!validation.shouldProceed) {
+        console.log(`[Removal] BLOCKED: ${source} classified as ${validation.classification}`);
+
+        // Mark the removal as blocked with explanation
+        await prisma.removalRequest.update({
+          where: { id: removalRequestId },
+          data: {
+            status: "BLOCKED",
+            notes: `Removal blocked: ${validation.reason}. ` +
+              `This entity is classified as a Data Processor (not a Data Broker). ` +
+              `Per GDPR Articles 28/29, deletion requests should be sent to the Data Controller, not the Processor.`,
+          },
+        });
+
+        // Update exposure status to indicate why removal didn't proceed
+        await prisma.exposure.update({
+          where: { id: removalRequest.exposureId },
+          data: {
+            status: "MONITORING",
+            requiresManualAction: true,
+          },
+        });
+
+        return {
+          success: false,
+          method: "MANUAL_GUIDE",
+          message: `Removal blocked: ${validation.reason}`,
+          instructions: `This entity (${domain}) is classified as a Data Processor, not a Data Broker. ` +
+            `Data Processors only process data on behalf of their clients (Data Controllers). ` +
+            `Sending deletion requests to Data Processors can:\n` +
+            `1. Not be actioned (they need Controller authorization)\n` +
+            `2. Actually increase data exposure (adding data to systems where it didn't exist)\n` +
+            `3. Bypass the proper legal channel (the Data Controller)\n\n` +
+            `If you believe this classification is incorrect, please contact support.`,
+          isNonRemovable: true,
+        };
+      }
+    } catch (validationError) {
+      // FAIL OPEN - if validation errors, proceed with removal
+      console.warn(`[Removal] Entity validation error for ${source}, proceeding:`, validationError);
+    }
+  }
 
   // Check if this is a non-removable source (breach database, dark web, etc.)
   if (isNonRemovableSource(source, brokerInfo)) {
