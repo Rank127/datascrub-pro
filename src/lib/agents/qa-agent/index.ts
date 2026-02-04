@@ -792,12 +792,14 @@ class QAAgent extends BaseAgent {
 
       // =========================================================================
       // CHECK 5: Duplicate Exposures (same user, source, sourceUrl)
+      // Only count active duplicates - exclude REMOVED and WHITELISTED
       // =========================================================================
       const duplicateCheck = await prisma.$queryRaw<Array<{ count: bigint }>>`
         SELECT COUNT(*) as count FROM (
           SELECT "userId", "source", "sourceUrl"
           FROM "Exposure"
           WHERE "sourceUrl" IS NOT NULL
+            AND status NOT IN ('REMOVED', 'WHITELISTED')
           GROUP BY "userId", "source", "sourceUrl"
           HAVING COUNT(*) > 1
         ) as duplicates
