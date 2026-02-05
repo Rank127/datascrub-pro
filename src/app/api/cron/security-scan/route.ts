@@ -142,20 +142,28 @@ export async function GET(request: Request) {
 
     // Step 2: Detect security threats
     console.log(`[${JOB_NAME}] Running threat detection...`);
-    const threats = await detectThreats("day");
-
-    if (threats.summary.critical > 0 || threats.summary.high > 0) {
-      console.warn(
-        `[${JOB_NAME}] Security threats detected: ${threats.summary.critical} critical, ${threats.summary.high} high`
-      );
+    let threats: Awaited<ReturnType<typeof detectThreats>> | null = null;
+    try {
+      threats = await detectThreats("day");
+      if (threats?.summary?.critical > 0 || threats?.summary?.high > 0) {
+        console.warn(
+          `[${JOB_NAME}] Security threats detected: ${threats.summary.critical} critical, ${threats.summary.high} high`
+        );
+      }
+    } catch (threatError) {
+      console.error(`[${JOB_NAME}] Threat detection failed:`, threatError);
     }
 
     // Step 3: Fraud prevention scan
     console.log(`[${JOB_NAME}] Running fraud prevention scan...`);
-    const fraud = await preventFraud("scan");
-
-    if (fraud.flagged.length > 0) {
-      console.log(`[${JOB_NAME}] ${fraud.flagged.length} accounts flagged for fraud`);
+    let fraud: Awaited<ReturnType<typeof preventFraud>> | null = null;
+    try {
+      fraud = await preventFraud("scan");
+      if (fraud?.flagged?.length > 0) {
+        console.log(`[${JOB_NAME}] ${fraud.flagged.length} accounts flagged for fraud`);
+      }
+    } catch (fraudError) {
+      console.error(`[${JOB_NAME}] Fraud prevention failed:`, fraudError);
     }
 
     // Step 4: Log security events
@@ -202,16 +210,16 @@ export async function GET(request: Request) {
         failures: configFailures.length,
       },
       threats: {
-        total: threats.threats.length,
-        critical: threats.summary.critical,
-        high: threats.summary.high,
-        medium: threats.summary.medium,
-        low: threats.summary.low,
+        total: threats?.threats?.length ?? 0,
+        critical: threats?.summary?.critical ?? 0,
+        high: threats?.summary?.high ?? 0,
+        medium: threats?.summary?.medium ?? 0,
+        low: threats?.summary?.low ?? 0,
       },
       fraud: {
-        analyzed: fraud.analyzed,
-        flagged: fraud.flagged.length,
-        blocked: fraud.flagged.filter((f) => f.status === "BLOCKED").length,
+        analyzed: fraud?.analyzed ?? 0,
+        flagged: fraud?.flagged?.length ?? 0,
+        blocked: fraud?.flagged?.filter((f) => f.status === "BLOCKED").length ?? 0,
       },
       activity: {
         failedEvents,
@@ -221,14 +229,12 @@ export async function GET(request: Request) {
     };
 
     // Log the execution
+    const hasCriticalIssues = configFailures.length > 0 || (threats?.summary?.critical ?? 0) > 0;
     await logCronExecution({
       jobName: JOB_NAME,
-      status:
-        configFailures.length > 0 || threats.summary.critical > 0
-          ? "FAILED"
-          : "SUCCESS",
+      status: hasCriticalIssues ? "FAILED" : "SUCCESS",
       duration,
-      message: `Config: ${summary.configStatus.passed}/${summary.configStatus.total} passed, Threats: ${threats.threats.length} detected, Fraud: ${fraud.flagged.length} flagged`,
+      message: `Config: ${summary.configStatus.passed}/${summary.configStatus.total} passed, Threats: ${summary.threats.total} detected, Fraud: ${summary.fraud.flagged} flagged`,
       metadata: summary,
     });
 
@@ -239,12 +245,12 @@ export async function GET(request: Request) {
       summary,
       configChecks,
       threats: {
-        count: threats.threats.length,
-        items: threats.threats.slice(0, 10),
+        count: threats?.threats?.length ?? 0,
+        items: threats?.threats?.slice(0, 10) ?? [],
       },
       fraud: {
-        flaggedCount: fraud.flagged.length,
-        items: fraud.flagged.slice(0, 10),
+        flaggedCount: fraud?.flagged?.length ?? 0,
+        items: fraud?.flagged?.slice(0, 10) ?? [],
       },
       suspiciousDomains,
       duration,
