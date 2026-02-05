@@ -48,12 +48,14 @@ let upstashRatelimiters: Map<string, Ratelimit> = new Map();
 
 /**
  * Initialize Upstash Redis connection
+ * Supports both Vercel KV (KV_REST_API_*) and direct Upstash (UPSTASH_REDIS_REST_*) env vars
  */
 function getRedis(): Redis | null {
   if (redis) return redis;
 
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Check for Vercel KV env vars first, then fall back to direct Upstash vars
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (!url || !token) {
     return null;

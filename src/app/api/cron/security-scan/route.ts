@@ -45,16 +45,17 @@ async function checkSecurityConfiguration(): Promise<SecurityConfigCheck[]> {
       : "CRON_SECRET not set - cron endpoints are vulnerable",
   });
 
-  // Check Upstash Redis is configured
-  const upstashConfigured = !!(
-    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  // Check Upstash Redis is configured (supports both Vercel KV and direct Upstash)
+  const redisConfigured = !!(
+    (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) ||
+    (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
   );
   checks.push({
-    name: "UPSTASH_REDIS",
-    status: upstashConfigured ? "PASS" : "WARN",
-    message: upstashConfigured
-      ? "Upstash Redis configured for rate limiting"
-      : "Upstash Redis not configured - using in-memory fallback",
+    name: "REDIS_RATE_LIMIT",
+    status: redisConfigured ? "PASS" : "WARN",
+    message: redisConfigured
+      ? "Redis configured for rate limiting"
+      : "Redis not configured - using in-memory fallback",
   });
 
   // Check admin IP allowlist
