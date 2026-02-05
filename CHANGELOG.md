@@ -12,6 +12,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real dark web scanner integrations
 - Mobile app (React Native)
 - Browser automation for form-based opt-outs (Browserless.io)
+- Corporate Plans (TEAM, BUSINESS, ENTERPRISE tiers)
+
+---
+
+## [1.28.0] - 2026-02-05
+
+### Changed
+- **AI Scanner Refactored**: Now returns empty array - AI sources are informational only, no exposures created during scans
+  - AI opt-out resources remain available at `/dashboard/ai-protection`
+  - Prevents misleading exposures without actual evidence of user data
+- **Exposure Status**: All new exposures start with `ACTIVE` status (removed automatic `REMOVAL_PENDING`)
+- **Removals Page Sorting**: Items now sorted by priority (attention-seekers first)
+  - Priority order: REQUIRES_MANUAL → FAILED → PENDING → IN_PROGRESS → SUBMITTED → ACKNOWLEDGED → COMPLETED
+- **Manual Action Count**: Only counts ACTIVE exposures (not ones already in removal pipeline)
+- **Exposures Pagination**: Improved with clickable page numbers, input field for direct navigation
+  - Pagination now appears at top AND bottom of the All Exposures card
+  - First/Last page buttons on desktop
+  - Mobile-responsive design
+
+### Removed
+- **Proactive Opt-Outs**: Removed auto-creation of RemovalRequest records during scans
+  - Users now manually initiate removals (more transparent, user-driven)
+- **Misleading AI Exposures**: Cleaned up 22 "Opt-out available" exposures from database
+  - These showed opt-out links without actual evidence of user data
+
+### Fixed
+- Manual action card showing incorrect count (was including non-ACTIVE exposures)
+- Removals page showing items needing attention at bottom instead of top
+
+### Technical Details
+- `src/lib/scanners/ai-protection/ai-scanner.ts`: `scan()` method returns empty array
+- `src/app/api/scan/start/route.ts`: Removed ~70 lines of proactive opt-out logic
+- `src/app/api/removals/status/route.ts`: Added status priority sorting, fixed manual action count
+- `src/app/(dashboard)/dashboard/exposures/page.tsx`: New `Pagination` component with page selection
 
 ---
 
