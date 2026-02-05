@@ -117,7 +117,8 @@ export async function GET() {
         where: {
           userId: session.user.id,
           requiresManualAction: true,
-          // Exclude data processors from manual action count
+          // Only count ACTIVE exposures - ones already in removal don't need action
+          status: "ACTIVE",
           source: { notIn: DATA_PROCESSOR_SOURCES },
           isWhitelisted: false,
         },
@@ -127,6 +128,7 @@ export async function GET() {
           userId: session.user.id,
           requiresManualAction: true,
           manualActionTaken: true,
+          status: "ACTIVE",
           source: { notIn: DATA_PROCESSOR_SOURCES },
         },
       }),
