@@ -63,73 +63,23 @@ export async function sendSMS(
 }
 
 /**
- * Send verification code using Twilio Verify (bypasses carrier filtering)
+ * Generate a random 6-digit verification code
  */
-export async function sendVerificationCode(
-  phone: string,
-  _code?: string // Ignored - Twilio Verify generates its own code
-): Promise<SMSResult> {
-  const client = getClient();
-  const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
-
-  if (!client) {
-    return { success: false, error: "Twilio not configured" };
-  }
-
-  if (!verifyServiceSid) {
-    // Fallback to regular SMS if Verify not configured
-    const body = `${APP_NAME}: Your verification code is ${_code}. This code expires in 10 minutes.`;
-    return sendSMS(phone, body);
-  }
-
-  try {
-    const verification = await client.verify.v2
-      .services(verifyServiceSid)
-      .verifications.create({ to: phone, channel: "sms" });
-
-    console.log(`[SMS] Verify sent to ${phone}: ${verification.sid}`);
-    return { success: true, messageId: verification.sid };
-  } catch (error) {
-    console.error("[SMS] Verify failed:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
-  }
+export function generateVerificationCode(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 /**
- * Check verification code using Twilio Verify
+ * Send verification code via regular SMS (cost-effective alternative to Twilio Verify)
+ *
+ * Cost: ~$0.0079 per SMS vs $0.05 per Twilio Verify
  */
-export async function checkVerificationCode(
+export async function sendVerificationCode(
   phone: string,
   code: string
-): Promise<{ success: boolean; valid: boolean; error?: string }> {
-  const client = getClient();
-  const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
-
-  if (!client || !verifyServiceSid) {
-    return { success: false, valid: false, error: "Twilio Verify not configured" };
-  }
-
-  try {
-    const verificationCheck = await client.verify.v2
-      .services(verifyServiceSid)
-      .verificationChecks.create({ to: phone, code });
-
-    console.log(`[SMS] Verify check for ${phone}: ${verificationCheck.status}`);
-    return {
-      success: true,
-      valid: verificationCheck.status === "approved"
-    };
-  } catch (error) {
-    console.error("[SMS] Verify check failed:", error);
-    return {
-      success: false,
-      valid: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
-  }
+): Promise<SMSResult> {
+  const body = `${APP_NAME}: Your verification code is ${code}. This code expires in 10 minutes. Do not share this code.`;
+  return sendSMS(phone, body);
 }
 
 /**

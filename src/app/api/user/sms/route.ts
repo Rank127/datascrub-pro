@@ -3,15 +3,15 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import {
   sendVerificationCode,
-  checkVerificationCode,
+  generateVerificationCode,
   formatPhoneE164,
   isValidPhoneNumber,
   isUSPhoneNumber,
   isSMSConfigured,
 } from "@/lib/sms";
 
-// Store pending phone numbers for verification (Twilio Verify handles the codes)
-const pendingVerifications = new Map<string, { phone: string; expires: Date }>();
+// Store pending phone numbers and codes for verification
+const pendingVerifications = new Map<string, { phone: string; code: string; expires: Date }>();
 
 /**
  * GET /api/user/sms - Get SMS settings
@@ -173,17 +173,8 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Verify code with Twilio Verify
-      const verifyResult = await checkVerificationCode(pending.phone, code);
-
-      if (!verifyResult.success) {
-        return NextResponse.json(
-          { error: verifyResult.error || "Verification failed" },
-          { status: 500 }
-        );
-      }
-
-      if (!verifyResult.valid) {
+      // Verify code locally (cost-effective vs Twilio Verify)
+      if (code !== pending.code) {
         return NextResponse.json(
           { error: "Invalid verification code" },
           { status: 400 }
@@ -233,8 +224,11 @@ export async function POST(request: NextRequest) {
 
     const formattedPhone = formatPhoneE164(phone);
 
-    // Send verification via Twilio Verify
-    const result = await sendVerificationCode(formattedPhone);
+    // Generate verification code
+    const verificationCode = generateVerificationCode();
+
+    // Send verification code via regular SMS (cost-effective)
+    const result = await sendVerificationCode(formattedPhone, verificationCode);
 
     if (!result.success) {
       return NextResponse.json(
@@ -243,9 +237,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Store pending verification with 10-minute expiration
+    // Store pending verification with code and 10-minute expiration
     pendingVerifications.set(session.user.id, {
       phone: formattedPhone,
+      code: verificationCode,
       expires: new Date(Date.now() + 10 * 60 * 1000),
     });
 
