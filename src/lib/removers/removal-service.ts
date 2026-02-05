@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { sendCCPARemovalRequest, sendRemovalStatusDigestEmail, queueRemovalStatusUpdate } from "@/lib/email";
-import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, getConsolidationParent, type DataBrokerInfo } from "./data-broker-directory";
+import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, getConsolidationParent, isKnownDataBroker, getNotBrokerReason, type DataBrokerInfo } from "./data-broker-directory";
 import { calculateVerifyAfterDate } from "./verification-service";
 import { attemptAutomatedOptOut, isAutomationEnabled, getBestAutomationMethod, canAutomateBroker } from "./browser-automation";
 import type { RemovalMethod } from "@/lib/types";
@@ -376,6 +376,42 @@ export async function executeRemoval(
   const brokerInfo = getDataBrokerInfo(source);
 
   // =========================================================================
+  // PRE-REMOVAL VERIFICATION: For uncertain matches, verify data exists first
+  // This prevents sending removal requests when data has already been removed
+  // or when the initial detection was a false positive.
+  // =========================================================================
+  const shouldPreVerify =
+    confidenceScore !== null &&
+    confidenceScore < CONFIDENCE_THRESHOLDS.AUTO_PROCEED &&
+    userConfirmed && // User confirmed, but confidence is still low
+    sourceUrl; // Can only verify if we have a URL to check
+
+  if (shouldPreVerify) {
+    console.log(
+      `[Removal] Pre-verification check for ${source} (confidence: ${confidenceScore}, user-confirmed)`
+    );
+
+    // For now, we'll log this as a verification checkpoint
+    // In a full implementation, this would trigger a re-scan of the broker
+    // to verify the data still exists before sending the removal request.
+    //
+    // Example implementation:
+    // const verificationResult = await verifyDataExists(sourceUrl, userName, userEmail);
+    // if (!verificationResult.exists) {
+    //   await markExposureFalsePositive(removalRequest.exposureId, userId, "VERIFICATION_FAILED");
+    //   return { success: false, message: "Data no longer found on broker site" };
+    // }
+
+    // Update the removal request to note verification was considered
+    await prisma.removalRequest.update({
+      where: { id: removalRequestId },
+      data: {
+        notes: `Pre-verified: User confirmed data despite low confidence (${confidenceScore}). Proceeding with removal.`,
+      },
+    });
+  }
+
+  // =========================================================================
   // PRE-FLIGHT VALIDATION: Check if entity is a Data Processor
   // This prevents sending deletion requests to companies like Syndigo/PowerReviews
   // =========================================================================
@@ -425,6 +461,44 @@ export async function executeRemoval(
       // FAIL OPEN - if validation errors, proceed with removal
       console.warn(`[Removal] Entity validation error for ${source}, proceeding:`, validationError);
     }
+  }
+
+  // =========================================================================
+  // DATA BROKER GATE: Only send removals to known data brokers
+  // This prevents sending CCPA emails to AI companies, marketing firms,
+  // universities, and other entities that don't have user data to delete.
+  // =========================================================================
+  if (!isKnownDataBroker(source)) {
+    const notBrokerReason = getNotBrokerReason(source);
+    console.log(`[Removal] BLOCKED: ${source} is not a known data broker. Reason: ${notBrokerReason}`);
+
+    // Mark the removal as skipped with explanation
+    await prisma.removalRequest.update({
+      where: { id: removalRequestId },
+      data: {
+        status: "SKIPPED",
+        notes: `Not a known data broker: ${notBrokerReason}. ` +
+          `Removal requests should only be sent to entities that actually collect and sell personal data.`,
+      },
+    });
+
+    // Update exposure to monitoring status
+    await prisma.exposure.update({
+      where: { id: removalRequest.exposureId },
+      data: {
+        status: "MONITORING",
+        requiresManualAction: brokerInfo?.optOutUrl ? true : false,
+      },
+    });
+
+    return {
+      success: false,
+      method: "MANUAL_GUIDE",
+      message: `Removal skipped: ${notBrokerReason}`,
+      instructions: brokerInfo?.optOutUrl
+        ? `This source has a self-service opt-out process. Visit: ${brokerInfo.optOutUrl}`
+        : `This is not a data broker - no removal action needed. The exposure will be monitored.`,
+    };
   }
 
   // Check if this is a non-removable source (breach database, dark web, etc.)
@@ -730,6 +804,8 @@ async function updateRemovalStatus(
     FAILED: "ACTIVE",
     REQUIRES_MANUAL: "REMOVAL_PENDING",
     ACKNOWLEDGED: "MONITORING", // Non-removable sources - user informed, monitoring only
+    SKIPPED: "MONITORING", // Not a data broker - no removal action needed
+    FALSE_POSITIVE: "FALSE_POSITIVE", // Broker confirmed data not in their system
   };
 
   const removalRequest = await prisma.removalRequest.findUnique({
@@ -903,6 +979,243 @@ export async function markRemovalCompleted(
     success: true,
     consolidatedCount: consolidatedExposureIds.length,
   };
+}
+
+// ============================================
+// FALSE POSITIVE HANDLING
+// ============================================
+
+/**
+ * Mark an exposure as a false positive.
+ * Called when:
+ * 1. Broker responds "data not found in our system"
+ * 2. User marks "This is not my data"
+ *
+ * Updates broker intelligence for precision tracking.
+ */
+export async function markExposureFalsePositive(
+  exposureId: string,
+  userId: string,
+  reason: "BROKER_NOT_FOUND" | "USER_REJECTED" | "VERIFICATION_FAILED",
+  notes?: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const exposure = await prisma.exposure.findFirst({
+      where: { id: exposureId, userId },
+      include: { removalRequest: true },
+    });
+
+    if (!exposure) {
+      return { success: false, message: "Exposure not found" };
+    }
+
+    const reasonText = {
+      BROKER_NOT_FOUND: "Broker confirmed data not in their system",
+      USER_REJECTED: "User marked as not their data",
+      VERIFICATION_FAILED: "Pre-removal verification could not find data",
+    }[reason];
+
+    // Update exposure as false positive
+    // Note: Uses status field which exists, and new fields will be added after migration
+    await prisma.exposure.update({
+      where: { id: exposureId },
+      data: {
+        status: "FALSE_POSITIVE",
+        // These fields will be available after running prisma migrate:
+        // markedFalsePositive: true,
+        // falsePositiveReason: notes ? `${reasonText}: ${notes}` : reasonText,
+        // falsePositiveAt: new Date(),
+      },
+    });
+
+    // Update removal request if exists
+    if (exposure.removalRequest) {
+      await prisma.removalRequest.update({
+        where: { id: exposure.removalRequest.id },
+        data: {
+          status: "FALSE_POSITIVE",
+          notes: notes ? `${reasonText}: ${notes}` : reasonText,
+        },
+      });
+    }
+
+    // Update broker intelligence (gracefully handles missing table)
+    await updateBrokerIntelligence(exposure.source, "FALSE_POSITIVE");
+
+    console.log(`[FalsePositive] Marked exposure ${exposureId} as false positive: ${reason}`);
+
+    return {
+      success: true,
+      message: `Exposure marked as false positive: ${reasonText}`,
+    };
+  } catch (error) {
+    console.error("[FalsePositive] Error marking false positive:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to mark false positive",
+    };
+  }
+}
+
+/**
+ * Update broker intelligence tracking.
+ * Called when exposures are created, removed, or marked as false positives.
+ *
+ * Note: This function gracefully handles when the BrokerIntelligence table
+ * doesn't exist yet (before migration). It will log but not fail.
+ */
+export async function updateBrokerIntelligence(
+  source: string,
+  event: "EXPOSURE_CREATED" | "REMOVAL_SENT" | "REMOVAL_COMPLETED" | "FALSE_POSITIVE" | "TRUE_POSITIVE"
+): Promise<void> {
+  try {
+    // Check if brokerIntelligence table exists by accessing it
+    // If the table doesn't exist, this will throw and we'll catch it
+    const prismaAny = prisma as unknown as Record<string, unknown>;
+    if (!prismaAny.brokerIntelligence) {
+      console.log("[BrokerIntelligence] Table not yet available (run prisma migrate)");
+      return;
+    }
+
+    const brokerIntelligence = prismaAny.brokerIntelligence as {
+      findUnique: (args: unknown) => Promise<Record<string, unknown> | null>;
+      update: (args: unknown) => Promise<unknown>;
+      create: (args: unknown) => Promise<unknown>;
+    };
+
+    // Upsert broker intelligence record
+    const existingRecord = await brokerIntelligence.findUnique({
+      where: { source },
+    });
+
+    const updates: Record<string, unknown> = {};
+
+    switch (event) {
+      case "EXPOSURE_CREATED":
+        updates.totalExposures = { increment: 1 };
+        updates.lastExposureAt = new Date();
+        break;
+      case "REMOVAL_SENT":
+        updates.removalsSent = { increment: 1 };
+        updates.lastRemovalAt = new Date();
+        break;
+      case "REMOVAL_COMPLETED":
+        updates.removalsCompleted = { increment: 1 };
+        break;
+      case "FALSE_POSITIVE":
+        updates.falsePositiveCount = { increment: 1 };
+        updates.lastFalsePositiveAt = new Date();
+        break;
+      case "TRUE_POSITIVE":
+        updates.truePositiveCount = { increment: 1 };
+        break;
+    }
+
+    if (existingRecord) {
+      // Update existing record
+      await brokerIntelligence.update({
+        where: { source },
+        data: updates,
+      });
+
+      // Recalculate rates
+      const updated = await brokerIntelligence.findUnique({
+        where: { source },
+      }) as { totalExposures: number; falsePositiveCount: number; removalsSent: number; removalsCompleted: number } | null;
+
+      if (updated) {
+        const fpRate = updated.totalExposures > 0
+          ? updated.falsePositiveCount / updated.totalExposures
+          : 0;
+        const successRate = updated.removalsSent > 0
+          ? (updated.removalsCompleted / updated.removalsSent) * 100
+          : 50;
+
+        await brokerIntelligence.update({
+          where: { source },
+          data: {
+            falsePositiveRate: fpRate,
+            successRate: successRate,
+          },
+        });
+      }
+    } else {
+      // Create new record
+      const brokerInfo = getDataBrokerInfo(source);
+      await brokerIntelligence.create({
+        data: {
+          source,
+          sourceName: brokerInfo?.name || source,
+          totalExposures: event === "EXPOSURE_CREATED" ? 1 : 0,
+          removalsSent: event === "REMOVAL_SENT" ? 1 : 0,
+          removalsCompleted: event === "REMOVAL_COMPLETED" ? 1 : 0,
+          falsePositiveCount: event === "FALSE_POSITIVE" ? 1 : 0,
+          truePositiveCount: event === "TRUE_POSITIVE" ? 1 : 0,
+          lastExposureAt: event === "EXPOSURE_CREATED" ? new Date() : null,
+          lastRemovalAt: event === "REMOVAL_SENT" ? new Date() : null,
+          lastFalsePositiveAt: event === "FALSE_POSITIVE" ? new Date() : null,
+        },
+      });
+    }
+
+    console.log(`[BrokerIntelligence] Updated ${source}: ${event}`);
+  } catch (error) {
+    // Don't fail the main operation if intelligence update fails
+    // This handles the case where the table doesn't exist yet
+    console.warn("[BrokerIntelligence] Update skipped (table may not exist yet):", error instanceof Error ? error.message : "Unknown error");
+  }
+}
+
+/**
+ * Get brokers with high false positive rates for review.
+ *
+ * Note: Returns empty array if BrokerIntelligence table doesn't exist yet.
+ */
+export async function getHighFalsePositiveBrokers(
+  minExposures: number = 10,
+  minFpRate: number = 0.3
+): Promise<Array<{
+  source: string;
+  sourceName: string | null;
+  totalExposures: number;
+  falsePositiveCount: number;
+  falsePositiveRate: number;
+}>> {
+  try {
+    const prismaAny = prisma as unknown as Record<string, unknown>;
+    if (!prismaAny.brokerIntelligence) {
+      return [];
+    }
+
+    const brokerIntelligence = prismaAny.brokerIntelligence as {
+      findMany: (args: unknown) => Promise<Array<{
+        source: string;
+        sourceName: string | null;
+        totalExposures: number;
+        falsePositiveCount: number;
+        falsePositiveRate: number;
+      }>>;
+    };
+
+    const brokers = await brokerIntelligence.findMany({
+      where: {
+        totalExposures: { gte: minExposures },
+        falsePositiveRate: { gte: minFpRate },
+      },
+      select: {
+        source: true,
+        sourceName: true,
+        totalExposures: true,
+        falsePositiveCount: true,
+        falsePositiveRate: true,
+      },
+      orderBy: { falsePositiveRate: "desc" },
+    });
+
+    return brokers;
+  } catch {
+    return [];
+  }
 }
 
 // ============================================

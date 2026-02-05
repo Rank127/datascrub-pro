@@ -18,6 +18,7 @@ import { getEffectivePlan } from "@/lib/family/family-service";
 import { generateScreenshotUrl } from "@/lib/screenshots/screenshot-service";
 import { createScanErrorTicket } from "@/lib/support/ticket-service";
 import { getBestAutomationMethod } from "@/lib/removers/browser-automation";
+import { isKnownDataBroker } from "@/lib/removers/data-broker-directory";
 
 // Allow longer execution time for scans (Vercel Pro: up to 300s)
 export const maxDuration = 120; // 2 minutes should be enough with parallel scanning
@@ -288,12 +289,20 @@ export async function POST(request: Request) {
     );
 
     // Create proactive opt-out removal requests for items that would have been "manual review"
-    // ONLY for high-confidence matches (AUTO_PROCEED threshold or above)
+    // ONLY for:
+    // 1. High-confidence matches (AUTO_PROCEED threshold or above)
+    // 2. Known data brokers (not AI companies, marketing firms, universities, etc.)
     const proactiveOptOuts = newExposures.filter(r => {
       const isManualCheck = r.rawData?.manualCheckRequired === true;
       const confidenceScore = r.confidence?.score ?? 100;
       const isHighConfidence = confidenceScore >= CONFIDENCE_THRESHOLDS.AUTO_PROCEED;
-      return isManualCheck && isHighConfidence;
+      // NEW: Only create proactive opt-outs for known data brokers
+      const isBroker = isKnownDataBroker(r.source);
+
+      // Skip if marked as informational (OPT_OUT_RECOMMENDED sources)
+      const isInformational = r.rawData?.isInformational === true;
+
+      return isManualCheck && isHighConfidence && isBroker && !isInformational;
     });
 
     if (proactiveOptOuts.length > 0) {

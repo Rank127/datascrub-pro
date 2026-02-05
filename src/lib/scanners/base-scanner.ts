@@ -22,8 +22,9 @@ export type MatchClassification =
 
 export const CONFIDENCE_THRESHOLDS = {
   AUTO_PROCEED: 80,   // Minimum score for auto-removal without confirmation
-  MANUAL_REVIEW: 40,  // Below this requires manual review
-  REJECT: 20,         // Below this don't create exposure at all
+  MANUAL_REVIEW: 50,  // Raised from 40 - below this requires manual review
+  REJECT: 35,         // Raised from 20 - below this don't create exposure at all
+  MIN_FACTORS: 2,     // Minimum number of matching factors required (prevents name-only matches)
 } as const;
 
 export interface ConfidenceResult {

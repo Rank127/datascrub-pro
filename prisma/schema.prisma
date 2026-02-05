@@ -125,6 +125,13 @@ model Scan {
   user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// Exposure status values:
+// ACTIVE - Exposure is active and visible
+// REMOVAL_PENDING - Waiting for removal to be processed
+// REMOVAL_IN_PROGRESS - Removal request has been sent
+// REMOVED - Data has been removed from the source
+// MONITORING - Being monitored but no removal action needed
+// FALSE_POSITIVE - Broker confirmed user's data is not in their system (NEW)
 model Exposure {
   id                   String          @id @default(cuid())
   userId               String
@@ -152,6 +159,11 @@ model Exposure {
   validatedAt          DateTime?       // When confidence was calculated
   userConfirmed        Boolean         @default(false) // User manually confirmed this is their data
   userConfirmedAt      DateTime?       // When user confirmed
+  // Precision tracking fields (NEW)
+  factorsMatched       Int?            // Number of confidence factors that matched (2+ required)
+  markedFalsePositive  Boolean         @default(false) // User or broker marked as false positive
+  falsePositiveReason  String?         // Why this was marked false positive
+  falsePositiveAt      DateTime?       // When marked false positive
   scan                 Scan?           @relation(fields: [scanId], references: [id])
   user                 User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   removalRequest       RemovalRequest?
@@ -161,6 +173,7 @@ model Exposure {
   @@index([userId, requiresManualAction])
   @@index([userId, userConfirmed])
   @@index([confidenceScore])
+  @@index([markedFalsePositive])
 }
 
 model Whitelist {
@@ -725,4 +738,33 @@ model BlocklistAuditLog {
   @@index([actorId])
   @@index([createdAt])
   @@index([domain, createdAt])
+}
+
+// Track broker intelligence for precision improvement
+// This helps identify brokers with high false positive rates
+model BrokerIntelligence {
+  id                  String   @id @default(cuid())
+  source              String   @unique  // Broker source key (e.g., "SPOKEO")
+  sourceName          String?           // Human-readable name
+  // Counts for calculating rates
+  totalExposures      Int      @default(0) // Total exposures created for this broker
+  truePositiveCount   Int      @default(0) // User confirmed or successfully removed
+  falsePositiveCount  Int      @default(0) // Broker said "not found" or user said "not me"
+  removalsSent        Int      @default(0) // Total removal requests sent
+  removalsCompleted   Int      @default(0) // Removals confirmed completed
+  // Calculated rates (updated periodically)
+  falsePositiveRate   Float    @default(0) // falsePositiveCount / totalExposures
+  successRate         Float    @default(50) // removalsCompleted / removalsSent
+  // Metadata
+  lastExposureAt      DateTime?
+  lastRemovalAt       DateTime?
+  lastFalsePositiveAt DateTime?
+  notes               String?
+  // Timestamps
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([source])
+  @@index([falsePositiveRate])
+  @@index([successRate])
 }

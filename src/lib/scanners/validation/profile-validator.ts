@@ -10,6 +10,9 @@
  * - Age Match (0-20): Exact=20, ±2 years=15, ±5 years=10
  * - Data Correlation (0-15): Phone match=5, Email match=5
  * - Source Reliability (0-10): Known broker=10, Unknown=7
+ *
+ * PRECISION IMPROVEMENT: Requires 2+ matching factors to create exposure.
+ * Name-only matches are rejected to prevent false positives.
  */
 
 import type { ScanInput } from "../base-scanner";
@@ -17,6 +20,7 @@ import {
   type ConfidenceFactors,
   type ConfidenceResult,
   classifyConfidence,
+  CONFIDENCE_THRESHOLDS,
 } from "../base-scanner";
 
 // Known data broker sources (more reliable than unknown sources)
@@ -82,6 +86,9 @@ export class ProfileValidator {
   /**
    * Validate extracted data against user's profile
    * Returns confidence score with detailed reasoning
+   *
+   * PRECISION IMPROVEMENT: Requires 2+ matching factors to avoid false positives.
+   * Name-only matches are rejected even if confidence score would otherwise pass.
    */
   validate(input: ValidationInput): ConfidenceResult {
     const { profile, extracted, source } = input;
@@ -120,7 +127,7 @@ export class ProfileValidator {
     reasoning.push(...reliabilityResult.reasoning);
 
     // Calculate total score
-    const score = Math.min(
+    let score = Math.min(
       100,
       factors.nameMatch +
         factors.locationMatch +
@@ -128,6 +135,33 @@ export class ProfileValidator {
         factors.dataCorrelation +
         factors.sourceReliability
     );
+
+    // PRECISION IMPROVEMENT: Count matching factors (excluding sourceReliability)
+    // Require at least MIN_FACTORS (2) matching factors to avoid false positives
+    const factorsMatched = this.countMatchingFactors(factors);
+
+    // If only one factor matched (e.g., name-only), penalize the score
+    // This prevents "John Smith in New York" from matching just because of a common name
+    if (factorsMatched < CONFIDENCE_THRESHOLDS.MIN_FACTORS) {
+      reasoning.push(
+        `PRECISION CHECK: Only ${factorsMatched} factor(s) matched (need ${CONFIDENCE_THRESHOLDS.MIN_FACTORS}+). ` +
+        `Reducing confidence to prevent false positive.`
+      );
+
+      // Cap the score below REJECT threshold if less than MIN_FACTORS matched
+      // This ensures single-factor matches don't create exposures
+      const maxScoreForSingleFactor = CONFIDENCE_THRESHOLDS.REJECT - 1;
+      if (score > maxScoreForSingleFactor) {
+        score = maxScoreForSingleFactor;
+        reasoning.push(
+          `Score capped to ${maxScoreForSingleFactor} due to insufficient matching factors.`
+        );
+      }
+    } else {
+      reasoning.push(
+        `PRECISION CHECK: ${factorsMatched} factors matched - sufficient for exposure creation.`
+      );
+    }
 
     const classification = classifyConfidence(score);
 
@@ -138,6 +172,36 @@ export class ProfileValidator {
       reasoning,
       validatedAt: new Date(),
     };
+  }
+
+  /**
+   * Count the number of factors that actually matched (have a positive score).
+   * Excludes sourceReliability since that's not a match factor.
+   *
+   * A factor is considered "matched" if it has a meaningful score:
+   * - nameMatch: > 0 (any name match)
+   * - locationMatch: > 0 (any location match)
+   * - ageMatch: > 0 (any age match)
+   * - dataCorrelation: > 0 (phone or email matched)
+   */
+  private countMatchingFactors(factors: ConfidenceFactors): number {
+    let count = 0;
+
+    // Name match (any positive score counts)
+    if (factors.nameMatch > 0) count++;
+
+    // Location match (any positive score counts)
+    if (factors.locationMatch > 0) count++;
+
+    // Age match (any positive score counts)
+    if (factors.ageMatch > 0) count++;
+
+    // Data correlation (phone/email match)
+    if (factors.dataCorrelation > 0) count++;
+
+    // Note: sourceReliability is NOT counted - it's not a match factor
+
+    return count;
   }
 
   /**

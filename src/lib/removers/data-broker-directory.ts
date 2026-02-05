@@ -13387,6 +13387,78 @@ export function getDataBrokerInfo(source: string): DataBrokerInfo | null {
   return DATA_BROKER_DIRECTORY[source] || null;
 }
 
+/**
+ * Check if a source is a known data broker that we should send removals to.
+ *
+ * PRECISION IMPROVEMENT: Only returns true for actual data brokers.
+ * Returns false for:
+ * - AI services (category: AI_SERVICE) - they don't have user data to delete
+ * - Unknown sources not in our directory
+ * - Sources explicitly marked as not removable
+ *
+ * This prevents sending removal requests to:
+ * - Stability AI, LAION, etc. (AI training datasets)
+ * - Epsilon, Verisk (marketing data processors)
+ * - Universities, random companies
+ */
+export function isKnownDataBroker(source: string): boolean {
+  const brokerInfo = DATA_BROKER_DIRECTORY[source];
+
+  // Not in directory = not a known broker
+  if (!brokerInfo) {
+    return false;
+  }
+
+  // AI_SERVICE category = not a data broker
+  if (brokerInfo.category === "AI_SERVICE") {
+    return false;
+  }
+
+  // Explicitly marked as not removable = not a valid removal target
+  if (brokerInfo.isRemovable === false || brokerInfo.removalMethod === "NOT_REMOVABLE") {
+    return false;
+  }
+
+  // Breach databases and dark web sources aren't "data brokers" in the removal sense
+  if (brokerInfo.category === "BREACH_DATABASE" || brokerInfo.category === "DARK_WEB") {
+    return false;
+  }
+
+  // Has a valid opt-out method = is a data broker we can send removals to
+  return true;
+}
+
+/**
+ * Get the reason why a source is not a known data broker.
+ * Useful for logging and user feedback.
+ */
+export function getNotBrokerReason(source: string): string | null {
+  const brokerInfo = DATA_BROKER_DIRECTORY[source];
+
+  if (!brokerInfo) {
+    return `"${source}" is not in our data broker directory`;
+  }
+
+  if (brokerInfo.category === "AI_SERVICE") {
+    return `${brokerInfo.name} is an AI service, not a data broker`;
+  }
+
+  if (brokerInfo.isRemovable === false || brokerInfo.removalMethod === "NOT_REMOVABLE") {
+    return `${brokerInfo.name} data cannot be removed through standard opt-out procedures`;
+  }
+
+  if (brokerInfo.category === "BREACH_DATABASE") {
+    return `${brokerInfo.name} is a breach database - historical breaches cannot be "removed"`;
+  }
+
+  if (brokerInfo.category === "DARK_WEB") {
+    return `${brokerInfo.name} is a dark web source - data cannot be removed through normal channels`;
+  }
+
+  // It is a known broker
+  return null;
+}
+
 // Get all broker keys
 export function getAllBrokerKeys(): string[] {
   return Object.keys(DATA_BROKER_DIRECTORY);
