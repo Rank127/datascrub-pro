@@ -860,22 +860,6 @@ function SettingsContent() {
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label className="text-slate-200">Removal Updates</Label>
-                        <p className="text-sm text-slate-500">
-                          Get texted when removals complete
-                        </p>
-                      </div>
-                      <Checkbox
-                        checked={smsRemovalUpdates}
-                        onCheckedChange={(checked) =>
-                          setSmsRemovalUpdates(checked as boolean)
-                        }
-                        disabled={!smsNotifications}
-                        className="border-slate-600 data-[state=checked]:bg-emerald-600"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
                         <Label className="text-slate-200">Breach Alerts</Label>
                         <p className="text-sm text-slate-500">
                           Urgent texts for data breaches (recommended)

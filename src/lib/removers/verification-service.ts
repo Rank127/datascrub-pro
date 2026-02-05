@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption/crypto";
 import { sendRemovalStatusDigestEmail } from "@/lib/email";
-import { sendRemovalComplete, isSMSConfigured } from "@/lib/sms";
+// SMS for removal updates disabled - only exposure and breach alerts
 import { LeakCheckScanner } from "@/lib/scanners/breaches/leakcheck";
 import { HaveIBeenPwnedScanner } from "@/lib/scanners/breaches/haveibeenpwned";
 import { getScannerBySource as getDataBrokerScanner } from "@/lib/scanners/data-brokers";
@@ -596,37 +596,8 @@ export async function runVerificationBatch(): Promise<{
       stats.emailsSent++;
       console.log(`[Verification] Sent digest to ${userData.email}: ${userData.completed.length} completed, ${userData.failed.length} failed`);
 
-      // Send SMS notification if user has it enabled
-      if (isSMSConfigured() && userData.completed.length > 0) {
-        try {
-          const userSmsSettings = await prisma.user.findUnique({
-            where: { id: userId },
-            select: {
-              smsPhone: true,
-              smsPhoneVerified: true,
-              smsNotifications: true,
-              smsRemovalUpdates: true,
-            },
-          });
-
-          if (
-            userSmsSettings?.smsPhone &&
-            userSmsSettings?.smsPhoneVerified &&
-            userSmsSettings?.smsNotifications &&
-            userSmsSettings?.smsRemovalUpdates
-          ) {
-            const sourceNames = userData.completed.map(u => u.sourceName).join(", ");
-            await sendRemovalComplete(
-              userSmsSettings.smsPhone,
-              sourceNames,
-              userData.completed.length
-            );
-            console.log(`[Verification] Sent SMS to user ${userId}: ${userData.completed.length} removals completed`);
-          }
-        } catch (smsError) {
-          console.error(`[Verification] Failed to send SMS to user ${userId}:`, smsError);
-        }
-      }
+      // SMS for removal updates disabled - only email notifications sent
+      // Users receive SMS for exposures and breach alerts only
     } catch (error) {
       console.error(`[Verification] Failed to send digest to ${userData.email}:`, error);
     }
