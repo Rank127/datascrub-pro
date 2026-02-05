@@ -618,78 +618,13 @@ export class AIProtectionScanner extends BaseScanner {
   }
 
   async scan(input: ScanInput): Promise<ScanResult[]> {
-    const results: ScanResult[] = [];
+    // AI sources are informational-only - they don't have actual evidence of user data
+    // Opt-out resources are still available at /dashboard/ai-protection
+    console.log("[AIShieldScanner] AI sources are informational-only - no exposures created");
+    console.log("[AIShieldScanner] AI opt-out resources available at /dashboard/ai-protection");
 
-    console.log("[AIShieldScanner] Scanning AI sources with precision filtering");
-
-    // Track counts by category for logging
-    const categoryCounts = {
-      DATA_BROKER: 0,
-      OPT_OUT_RECOMMENDED: 0,
-      MONITORING_ONLY: 0,
-    };
-
-    for (const service of AI_SERVICES) {
-      const checkUrl = service.checkUrl(input);
-
-      if (!checkUrl) {
-        continue;
-      }
-
-      categoryCounts[service.sourceCategory]++;
-
-      // PRECISION FILTER: Only create exposures for actual data brokers
-      // Skip MONITORING_ONLY sources entirely (generic datasets, no personal data index)
-      if (service.sourceCategory === "MONITORING_ONLY") {
-        continue;
-      }
-
-      // Get broker info for opt-out details
-      const brokerInfo = DATA_BROKER_DIRECTORY[service.source];
-
-      // Determine severity based on category
-      const severity = this.getSeverityForCategory(service.category);
-
-      // DATA_BROKER sources: Create exposure with manual check required (will trigger removal)
-      // OPT_OUT_RECOMMENDED sources: Create informational exposure (no auto-removal)
-      const isDataBroker = service.sourceCategory === "DATA_BROKER";
-
-      results.push({
-        source: service.source,
-        sourceName: service.name,
-        sourceUrl: checkUrl,
-        dataType: service.exposureType,
-        dataPreview: isDataBroker
-          ? "Face/data indexed - opt-out recommended"
-          : "Opt-out available - visit link to manage",
-        severity: isDataBroker ? severity : "LOW", // Reduce severity for informational
-        rawData: {
-          // Only trigger removal process for actual data brokers
-          manualCheckRequired: isDataBroker,
-          isInformational: !isDataBroker, // Flag for UI to show differently
-          sourceCategory: service.sourceCategory,
-          category: service.category,
-          checkUrl,
-          optOutUrl: brokerInfo?.optOutUrl || checkUrl,
-          optOutEmail: brokerInfo?.privacyEmail,
-          estimatedDays: brokerInfo?.estimatedDays || 30,
-          description: service.description,
-          notes: brokerInfo?.notes,
-          reason: isDataBroker
-            ? `${service.description}. Your data may be indexed - click to verify and request removal.`
-            : `${service.description}. Visit the link to manage your data preferences.`,
-        },
-      });
-    }
-
-    console.log(
-      `[AIShieldScanner] Scanned ${AI_SERVICES.length} sources: ` +
-      `${categoryCounts.DATA_BROKER} data brokers, ` +
-      `${categoryCounts.OPT_OUT_RECOMMENDED} opt-out recommended, ` +
-      `${categoryCounts.MONITORING_ONLY} monitoring-only (skipped). ` +
-      `Created ${results.length} exposures.`
-    );
-    return results;
+    // Return empty array - AI sources don't have actual evidence of user data
+    return [];
   }
 
   private getSeverityForCategory(category: AICategory): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {

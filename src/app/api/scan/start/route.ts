@@ -17,8 +17,6 @@ import { isAdmin } from "@/lib/admin";
 import { getEffectivePlan } from "@/lib/family/family-service";
 import { generateScreenshotUrl } from "@/lib/screenshots/screenshot-service";
 import { createScanErrorTicket } from "@/lib/support/ticket-service";
-import { getBestAutomationMethod } from "@/lib/removers/browser-automation";
-import { isKnownDataBroker } from "@/lib/removers/data-broker-directory";
 
 // Allow longer execution time for scans (Vercel Pro: up to 300s)
 export const maxDuration = 120; // 2 minutes should be enough with parallel scanning
@@ -246,8 +244,7 @@ export async function POST(request: Request) {
     }
 
     // Create only NEW exposures (with proof screenshots for URLs)
-    // For "manual check required" items, we auto-create proactive opt-out requests
-    // For low-confidence matches, set requiresManualAction = true
+    // All exposures start as ACTIVE - users manually initiate removals
     const exposures = await Promise.all(
       newExposures.map((result) => {
         // Generate proof screenshot URL if we have a source URL
@@ -259,8 +256,6 @@ export async function POST(request: Request) {
             console.error(`[Scan] Failed to generate screenshot URL for ${result.sourceName}:`, e);
           }
         }
-
-        const isProactiveOptOut = result.rawData?.manualCheckRequired === true;
 
         // Determine if manual review is required based on confidence score
         const confidenceScore = result.confidence?.score ?? 100; // Default high if no confidence data
@@ -283,8 +278,8 @@ export async function POST(request: Request) {
             dataType: result.dataType,
             dataPreview: result.dataPreview || null,
             severity: result.severity,
-            // Proactive opt-outs go straight to REMOVAL_PENDING (only if high confidence)
-            status: isProactiveOptOut && !requiresManualReview ? "REMOVAL_PENDING" : "ACTIVE",
+            // All exposures start as ACTIVE - users manually initiate removals
+            status: "ACTIVE",
             isWhitelisted: false,
             // Require manual action for low-confidence matches
             requiresManualAction: requiresManualReview,
@@ -307,79 +302,6 @@ export async function POST(request: Request) {
         });
       })
     );
-
-    // Create proactive opt-out removal requests for items that would have been "manual review"
-    // ONLY for:
-    // 1. High-confidence matches (AUTO_PROCEED threshold or above)
-    // 2. Known data brokers (not AI companies, marketing firms, universities, etc.)
-    console.log(`[Scan] Filtering ${newExposures.length} exposures for proactive opt-out...`);
-
-    const proactiveOptOuts = newExposures.filter(r => {
-      const isManualCheck = r.rawData?.manualCheckRequired === true;
-      const confidenceScore = r.confidence?.score ?? 100;
-      const isHighConfidence = confidenceScore >= CONFIDENCE_THRESHOLDS.AUTO_PROCEED;
-      // NEW: Only create proactive opt-outs for known data brokers
-      const isBroker = isKnownDataBroker(r.source);
-
-      // Skip if marked as informational (OPT_OUT_RECOMMENDED sources)
-      const isInformational = r.rawData?.isInformational === true;
-
-      const shouldInclude = isManualCheck && isHighConfidence && isBroker && !isInformational;
-
-      // Log why each exposure was included or excluded
-      if (!shouldInclude) {
-        const reasons: string[] = [];
-        if (!isManualCheck) reasons.push("not manual check");
-        if (!isHighConfidence) reasons.push(`low confidence (${confidenceScore})`);
-        if (!isBroker) reasons.push("not a data broker");
-        if (isInformational) reasons.push("informational only");
-        console.log(`[Scan] ⊘ ${r.sourceName}: Skipped for removal - ${reasons.join(", ")}`);
-      } else {
-        console.log(`[Scan] ✓ ${r.sourceName}: Eligible for removal (confidence: ${confidenceScore})`);
-      }
-
-      return shouldInclude;
-    });
-
-    if (proactiveOptOuts.length > 0) {
-      const exposureMap = new Map(exposures.map(e => [`${e.source}:${e.sourceName}`, e]));
-
-      await Promise.all(
-        proactiveOptOuts.map((result) => {
-          const exposure = exposureMap.get(`${result.source}:${result.sourceName}`);
-          if (!exposure) return Promise.resolve();
-
-          // Use smart method selection to maximize automation
-          const bestMethod = getBestAutomationMethod(result.source);
-          const method = bestMethod.method === "MANUAL" ? "MANUAL_GUIDE" :
-                        bestMethod.method === "EMAIL" ? "AUTO_EMAIL" : "AUTO_FORM";
-
-          console.log(`[Scan] Creating removal for ${result.source}: ${method} (${bestMethod.reason})`);
-
-          return prisma.removalRequest.create({
-            data: {
-              userId: session.user.id,
-              exposureId: exposure.id,
-              status: "PENDING",
-              method,
-              isProactive: true, // Mark as proactive opt-out
-              notes: `Proactive opt-out request. Method: ${bestMethod.reason}. Confidence: ${result.confidence?.score ?? 'N/A'}. ${result.rawData?.optOutInstructions || ''}`,
-            },
-          });
-        })
-      );
-
-      console.log(`[Scan] Created ${proactiveOptOuts.length} proactive opt-out requests (high confidence only)`);
-    }
-
-    // Log low-confidence matches that were skipped for auto-removal
-    const lowConfidenceCount = newExposures.filter(r => {
-      const confidenceScore = r.confidence?.score ?? 100;
-      return confidenceScore < CONFIDENCE_THRESHOLDS.AUTO_PROCEED;
-    }).length;
-    if (lowConfidenceCount > 0) {
-      console.log(`[Scan] ${lowConfidenceCount} exposures require manual confirmation (confidence < ${CONFIDENCE_THRESHOLDS.AUTO_PROCEED})`);
-    }
 
     console.log(`[Scan] New: ${exposures.length}, Updated: ${updatedExposureIds.length}, Skipped: ${scanResults.length - newExposures.length - updatedExposureIds.length}`);
 
