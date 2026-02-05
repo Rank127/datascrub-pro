@@ -80,6 +80,28 @@ export async function GET() {
       };
     });
 
+    // Sort by priority: items needing attention first, then by date
+    const statusPriority: Record<string, number> = {
+      REQUIRES_MANUAL: 1,  // Needs user to fill form - highest priority
+      FAILED: 2,           // Failed, needs attention
+      PENDING: 3,          // Queued, waiting to be processed
+      IN_PROGRESS: 4,      // Being processed
+      SUBMITTED: 5,        // Email sent, waiting for response
+      ACKNOWLEDGED: 6,     // Breach alert
+      COMPLETED: 7,        // Done - lowest priority
+      CANCELLED: 8,
+    };
+
+    enrichedRemovals.sort((a, b) => {
+      const priorityA = statusPriority[a.status] ?? 99;
+      const priorityB = statusPriority[b.status] ?? 99;
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+      // Same priority: sort by date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
     // Get stats (excluding cancelled data processor requests)
     const [stats, manualActionTotal, manualActionDone] = await Promise.all([
       prisma.removalRequest.groupBy({
