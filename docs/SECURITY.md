@@ -36,10 +36,11 @@ GhostMyData is a data privacy service that handles sensitive personal informatio
 |----------|-------|--------|
 | CRITICAL | SQL Injection in `/api/exposures` | ✅ FIXED |
 | CRITICAL | CRON_SECRET bypass vulnerability | ✅ FIXED |
-| CRITICAL | In-memory rate limiting (not production-ready) | 🔄 IN PROGRESS |
-| HIGH | Missing Content Security Policy (CSP) | 📋 PLANNED |
-| HIGH | Admin login doesn't require 2FA | 📋 PLANNED |
-| HIGH | No IP allowlist for admin access | 📋 PLANNED |
+| CRITICAL | In-memory rate limiting (not production-ready) | ✅ FIXED (Upstash Redis) |
+| HIGH | Missing Content Security Policy (CSP) | ✅ FIXED |
+| HIGH | Admin login doesn't require 2FA | ✅ FIXED |
+| HIGH | No IP allowlist for admin access | ✅ FIXED |
+| MEDIUM | No security monitoring/scanning | ✅ FIXED |
 | MEDIUM | No webhook idempotency | 📋 PLANNED |
 | MEDIUM | Session timeout not enforced | 📋 PLANNED |
 
@@ -110,29 +111,112 @@ export function verifyCronAuth(request: Request): CronAuthResult {
 - `src/app/api/cron/follow-up-reminders/route.ts`
 - `src/app/api/cron/ticketing-agent/route.ts`
 
-### Phase 2: Security Headers & Admin Hardening 📋 PLANNED
+### Phase 2: Security Headers & Admin Hardening ✅ COMPLETED
 
-- Add Content Security Policy (CSP) headers
-- Require 2FA for admin users
-- Implement IP allowlist for admin routes
+#### 2.1 Content Security Policy (CSP)
+**File**: `src/middleware.ts`
 
-### Phase 3: Security Agent 📋 PLANNED
+Added comprehensive CSP headers:
+```typescript
+const CSP_DIRECTIVES = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: https: blob:",
+  "connect-src 'self' https://api.stripe.com https://*.upstash.io",
+  "frame-src https://js.stripe.com https://checkout.stripe.com",
+  "frame-ancestors 'none'",
+  // ...more directives
+];
+```
 
-- Real-time threat detection
-- Brute force attack prevention
-- Anomaly detection
-- Security dashboard
+#### 2.2 IP Allowlist for Admin
+**File**: `src/middleware.ts`
 
-### Phase 4: Rate Limiting 📋 PLANNED
+Optional IP allowlist for admin routes:
+```typescript
+const ADMIN_IP_ALLOWLIST = process.env.ADMIN_IP_ALLOWLIST?.split(",") || [];
 
-- Migrate to Vercel KV for persistence
-- Distributed rate limiting across instances
+if ((isAdminPage || isAdminApiRoute) && !isIPAllowed(clientIP)) {
+  console.warn(`[Security] Blocked admin access from IP: ${clientIP}`);
+  return new NextResponse(JSON.stringify({ error: "Access denied" }), { status: 403 });
+}
+```
 
-### Phase 5: Security Monitoring 📋 PLANNED
+Supports:
+- Exact IP matching
+- CIDR notation (e.g., `192.168.1.0/24`)
+- Empty allowlist = allow all (for development)
 
-- Daily security scan cron job
-- Automated vulnerability detection
-- Alert notifications
+#### 2.3 Additional Security Headers
+All responses now include:
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `X-XSS-Protection: 1; mode=block`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+- `Strict-Transport-Security: max-age=31536000` (production only)
+
+### Phase 3: Rate Limiting ✅ COMPLETED
+
+#### 3.1 Upstash Redis Rate Limiting
+**File**: `src/lib/rate-limit.ts`
+
+Migrated from in-memory to Upstash Redis for distributed rate limiting:
+```typescript
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+const limiter = new Ratelimit({
+  redis: redisClient,
+  limiter: Ratelimit.slidingWindow(config.maxRequests, `${windowSeconds} s`),
+  prefix: `ratelimit:${endpoint}`,
+  analytics: true,
+});
+```
+
+**Benefits**:
+- Persists across serverless function restarts
+- Distributed across all instances
+- Built-in analytics
+- Automatic fallback to in-memory if Redis unavailable
+
+### Phase 4: Security Agent ✅ COMPLETED
+
+**File**: `src/lib/agents/security-agent/index.ts`
+
+The Security Agent provides:
+- **Threat Detection**: Identifies API abuse, data scraping, brute force attacks
+- **Suspicious Activity Monitoring**: Tracks anomalous user behavior
+- **Breach Notifications**: Sends alerts to affected users
+- **Fraud Prevention**: Detects trial abuse, disposable emails, rapid activity
+
+### Phase 5: Security Monitoring ✅ COMPLETED
+
+#### 5.1 Security Scan Cron
+**File**: `src/app/api/cron/security-scan/route.ts`
+**Schedule**: Daily at 2 AM UTC
+
+The security scan cron performs:
+1. Configuration validation (CRON_SECRET, encryption keys, etc.)
+2. Threat detection scan
+3. Fraud prevention analysis
+4. Security event monitoring
+5. Domain abuse detection
+
+```typescript
+async function checkSecurityConfiguration(): Promise<SecurityConfigCheck[]> {
+  // Checks CRON_SECRET, UPSTASH_REDIS, ADMIN_IP_ALLOWLIST,
+  // ENCRYPTION_KEY, NEXTAUTH_SECRET, STRIPE_WEBHOOK_SECRET,
+  // and admin 2FA status
+}
+```
+
+### Phase 6: Future Improvements 📋 PLANNED
+
+- Webhook idempotency for Stripe
+- Session timeout for admin (30 min inactivity)
+- Device tracking for sessions
 
 ---
 
@@ -298,16 +382,24 @@ if (!result.success) {
 
 ### Rate Limiting Configuration
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| Auth register | 5 | 1 hour |
-| Auth login | 10 | 15 minutes |
-| Forgot password | 3 | 1 hour |
-| Scan | 10 | 1 hour |
-| General API | 100 | 1 minute |
-| Stripe | 10 | 1 minute |
+| Endpoint | Limit | Window | Storage |
+|----------|-------|--------|---------|
+| Auth register | 5 | 1 hour | Upstash Redis |
+| Auth login | 10 | 15 minutes | Upstash Redis |
+| Forgot password | 3 | 1 hour | Upstash Redis |
+| 2FA verification | 5 | 15 minutes | Upstash Redis |
+| Scan | 10 | 1 hour | Upstash Redis |
+| General API | 100 | 1 minute | Upstash Redis |
+| Stripe | 10 | 1 minute | Upstash Redis |
+| Admin | 50 | 1 minute | Upstash Redis |
 
 **File**: `src/lib/rate-limit.ts`
+
+**Configuration**:
+- Uses Upstash Redis for distributed rate limiting
+- Sliding window algorithm for smooth rate limiting
+- Automatic fallback to in-memory if Redis unavailable
+- Analytics enabled for monitoring
 
 ### Security Headers
 
@@ -371,7 +463,7 @@ export function verifyCronAuth(request: Request): CronAuthResult {
 | process-removals | Every 2 hours | Send removal requests |
 | verify-removals | Daily 8 AM | Check removal status |
 | email-monitor | 8 AM, 8 PM | Monitor email delivery |
-| security-scan | Daily 3 AM | Security vulnerability scan |
+| security-scan | Daily 2 AM | Security vulnerability scan |
 
 ---
 
@@ -435,10 +527,9 @@ STRIPE_WEBHOOK_SECRET=          # Stripe webhook signature
 RESEND_API_KEY=                 # Email service
 HIBP_API_KEY=                   # Have I Been Pwned API
 
-# Rate Limiting (Vercel KV)
-KV_URL=                         # Auto-set by Vercel
-KV_REST_API_URL=                # Auto-set by Vercel
-KV_REST_API_TOKEN=              # Auto-set by Vercel
+# Rate Limiting (Upstash Redis)
+UPSTASH_REDIS_REST_URL=         # Upstash Redis URL
+UPSTASH_REDIS_REST_TOKEN=       # Upstash Redis token
 
 # Admin Security (Optional)
 ADMIN_IP_ALLOWLIST=             # Comma-separated IPs
@@ -539,6 +630,8 @@ ADMIN_EMAILS=                   # Bootstrap admin access
 |---------|------|---------|
 | 1.0 | 2025-02-05 | Initial security documentation |
 | 1.1 | 2025-02-05 | Added SQL injection fix, cron auth hardening |
+| 1.2 | 2025-02-05 | Completed Phase 2: CSP headers, IP allowlist, Upstash Redis rate limiting |
+| 1.3 | 2025-02-05 | Added security scan cron job, Security Agent integration |
 
 ---
 

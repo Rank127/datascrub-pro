@@ -150,6 +150,10 @@
     {
       "path": "/api/cron/auto-process-manual-queue",
       "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron/security-scan",
+      "schedule": "0 2 * * *"
     }
   ]
 }

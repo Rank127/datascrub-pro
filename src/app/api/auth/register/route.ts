@@ -16,9 +16,9 @@ const registerSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  // Rate limiting
+  // Rate limiting (uses Upstash Redis in production)
   const identifier = getClientIdentifier(request);
-  const rateLimitResult = rateLimit(identifier, "auth-register");
+  const rateLimitResult = await rateLimit(identifier, "auth-register");
   if (!rateLimitResult.success) {
     return rateLimitResponse(rateLimitResult);
   }

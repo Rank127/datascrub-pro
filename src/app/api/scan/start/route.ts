@@ -32,8 +32,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Rate limiting (per user)
-    const rateLimitResult = rateLimit(session.user.id, "scan");
+    // Rate limiting (per user) - uses Upstash Redis in production
+    const rateLimitResult = await rateLimit(session.user.id, "scan");
     if (!rateLimitResult.success) {
       return rateLimitResponse(rateLimitResult);
     }
