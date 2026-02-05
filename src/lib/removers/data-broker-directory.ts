@@ -13409,7 +13409,7 @@ export function isKnownDataBroker(source: string): boolean {
     return false;
   }
 
-  // AI_SERVICE category = not a data broker
+  // Check category field if it exists
   if (brokerInfo.category === "AI_SERVICE") {
     return false;
   }
@@ -13419,8 +13419,29 @@ export function isKnownDataBroker(source: string): boolean {
     return false;
   }
 
-  // Breach databases and dark web sources aren't "data brokers" in the removal sense
+  // Check category field if it exists
   if (brokerInfo.category === "BREACH_DATABASE" || brokerInfo.category === "DARK_WEB") {
+    return false;
+  }
+
+  // Check BROKER_CATEGORIES arrays for proper categorization
+  // AI training services are not data brokers
+  if ((BROKER_CATEGORIES.AI_TRAINING as readonly string[]).includes(source)) {
+    return false;
+  }
+
+  // AI image/video tools are not data brokers (they generate, not collect)
+  if ((BROKER_CATEGORIES.AI_IMAGE_VIDEO as readonly string[]).includes(source)) {
+    return false;
+  }
+
+  // Breach databases are historical records, can't be "removed"
+  if ((BROKER_CATEGORIES.BREACH_DATABASE as readonly string[]).includes(source)) {
+    return false;
+  }
+
+  // Non-removable sources
+  if ((BROKER_CATEGORIES.NON_REMOVABLE as readonly string[]).includes(source)) {
     return false;
   }
 
@@ -13439,6 +13460,7 @@ export function getNotBrokerReason(source: string): string | null {
     return `"${source}" is not in our data broker directory`;
   }
 
+  // Check category field if it exists
   if (brokerInfo.category === "AI_SERVICE") {
     return `${brokerInfo.name} is an AI service, not a data broker`;
   }
@@ -13453,6 +13475,23 @@ export function getNotBrokerReason(source: string): string | null {
 
   if (brokerInfo.category === "DARK_WEB") {
     return `${brokerInfo.name} is a dark web source - data cannot be removed through normal channels`;
+  }
+
+  // Check BROKER_CATEGORIES arrays
+  if ((BROKER_CATEGORIES.AI_TRAINING as readonly string[]).includes(source)) {
+    return `${brokerInfo.name} is an AI training service, not a data broker`;
+  }
+
+  if ((BROKER_CATEGORIES.AI_IMAGE_VIDEO as readonly string[]).includes(source)) {
+    return `${brokerInfo.name} is an AI image/video tool, not a data broker`;
+  }
+
+  if ((BROKER_CATEGORIES.BREACH_DATABASE as readonly string[]).includes(source)) {
+    return `${brokerInfo.name} is a breach database - historical breaches cannot be "removed"`;
+  }
+
+  if ((BROKER_CATEGORIES.NON_REMOVABLE as readonly string[]).includes(source)) {
+    return `${brokerInfo.name} data cannot be removed - this is a non-removable source`;
   }
 
   // It is a known broker
