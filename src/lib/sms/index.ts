@@ -229,10 +229,23 @@ export function formatPhoneE164(phone: string, countryCode: string = "1"): strin
 }
 
 /**
- * Validate phone number format
+ * Validate phone number format (US only)
  */
 export function isValidPhoneNumber(phone: string): boolean {
   const cleaned = phone.replace(/\D/g, "");
-  // Valid US number: 10 digits, or 11 with country code
-  return cleaned.length >= 10 && cleaned.length <= 15;
+  // Valid US number: 10 digits, or 11 with country code 1
+  if (cleaned.length === 10) return true;
+  if (cleaned.length === 11 && cleaned.startsWith("1")) return true;
+  return false;
+}
+
+/**
+ * Check if phone number is US-based
+ */
+export function isUSPhoneNumber(phone: string): boolean {
+  const cleaned = phone.replace(/\D/g, "");
+  // US numbers: 10 digits or 11 digits starting with 1
+  if (cleaned.length === 10) return true;
+  if (cleaned.length === 11 && cleaned.startsWith("1")) return true;
+  return false;
 }

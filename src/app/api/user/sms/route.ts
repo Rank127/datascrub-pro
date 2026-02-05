@@ -6,6 +6,7 @@ import {
   checkVerificationCode,
   formatPhoneE164,
   isValidPhoneNumber,
+  isUSPhoneNumber,
   isSMSConfigured,
 } from "@/lib/sms";
 
@@ -218,6 +219,14 @@ export async function POST(request: NextRequest) {
     if (!isValidPhoneNumber(phone)) {
       return NextResponse.json(
         { error: "Invalid phone number format" },
+        { status: 400 }
+      );
+    }
+
+    // US numbers only
+    if (!isUSPhoneNumber(phone)) {
+      return NextResponse.json(
+        { error: "SMS notifications are only available for US phone numbers" },
         { status: 400 }
       );
     }

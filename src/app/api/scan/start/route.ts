@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption/crypto";
 import { sendExposureAlertEmail } from "@/lib/email";
+import { sendExposureAlert, sendScanComplete, isSMSConfigured } from "@/lib/sms";
 import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
 import {
   ScanOrchestrator,
@@ -377,6 +378,54 @@ export async function POST(request: Request) {
           metadata: JSON.stringify({ scanId: scan.id, exposuresFound: exposures.length }),
         },
       });
+
+      // Send SMS notification if enabled (Enterprise users only)
+      if (isSMSConfigured()) {
+        const userSmsSettings = await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: {
+            smsPhone: true,
+            smsPhoneVerified: true,
+            smsNotifications: true,
+            smsExposureAlerts: true,
+          },
+        });
+
+        if (
+          userSmsSettings?.smsPhone &&
+          userSmsSettings?.smsPhoneVerified &&
+          userSmsSettings?.smsNotifications &&
+          userSmsSettings?.smsExposureAlerts
+        ) {
+          sendExposureAlert(
+            userSmsSettings.smsPhone,
+            exposures.length,
+            critical
+          ).catch((err) => console.error("[SMS] Exposure alert failed:", err));
+        }
+      }
+    } else if (isSMSConfigured()) {
+      // Send scan complete SMS even if no exposures (if user has SMS enabled)
+      const userSmsSettings = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          smsPhone: true,
+          smsPhoneVerified: true,
+          smsNotifications: true,
+          smsExposureAlerts: true,
+        },
+      });
+
+      if (
+        userSmsSettings?.smsPhone &&
+        userSmsSettings?.smsPhoneVerified &&
+        userSmsSettings?.smsNotifications &&
+        userSmsSettings?.smsExposureAlerts
+      ) {
+        sendScanComplete(userSmsSettings.smsPhone, 0).catch((err) =>
+          console.error("[SMS] Scan complete notification failed:", err)
+        );
+      }
     }
 
     const sourcesChecked = orchestrator.getSourcesCheckedCount();
