@@ -1,28 +1,14 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { batchSyncAllSubscriptions, cleanupDuplicateSubscriptions } from "@/lib/stripe/subscription-intelligence";
 import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/rbac/audit-log";
-
-// Verify cron secret to prevent unauthorized access
-function verifyCronSecret(request: Request): boolean {
-  const headersList = headers();
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  // If no CRON_SECRET is set, only allow from localhost in development
-  if (!cronSecret) {
-    const host = request.headers.get("host") || "";
-    return process.env.NODE_ENV === "development" && host.includes("localhost");
-  }
-
-  return authHeader === `Bearer ${cronSecret}`;
-}
+import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
 // POST /api/cron/sync-subscriptions - Batch sync all subscriptions
 export async function POST(request: Request) {
-  if (!verifyCronSecret(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = verifyCronAuth(request);
+  if (!authResult.authorized) {
+    return cronUnauthorizedResponse(authResult.reason);
   }
 
   try {
@@ -104,8 +90,9 @@ export async function POST(request: Request) {
 
 // GET /api/cron/sync-subscriptions - Check sync status (no changes)
 export async function GET(request: Request) {
-  if (!verifyCronSecret(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = verifyCronAuth(request);
+  if (!authResult.authorized) {
+    return cronUnauthorizedResponse(authResult.reason);
   }
 
   try {

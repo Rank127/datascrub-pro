@@ -9,6 +9,7 @@ import {
   analyzePatternsAndPredict,
   getCoordinatorStatus,
 } from "@/lib/agents/intelligence-coordinator";
+import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
 const ADMIN_EMAIL = "developer@ghostmydata.com";
 const JOB_NAME = "health-check";
@@ -38,20 +39,11 @@ interface HealthReport {
   };
 }
 
-// Verify cron secret to prevent unauthorized access
-function verifyCronSecret(request: Request): boolean {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  // Allow Vercel cron (no auth needed) or manual with secret
-  if (!cronSecret) return true;
-  return authHeader === `Bearer ${cronSecret}`;
-}
-
 export async function GET(request: Request) {
-  // Verify authorization
-  if (!verifyCronSecret(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // SECURITY: Verify cron authorization (fails closed if CRON_SECRET not set)
+  const authResult = verifyCronAuth(request);
+  if (!authResult.authorized) {
+    return cronUnauthorizedResponse(authResult.reason);
   }
 
   const tests: TestResult[] = [];

@@ -4,6 +4,7 @@ import {
   sendFollowUpReminderEmail,
   sendBatchFollowUpEmail,
 } from "@/lib/email";
+import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
 // Cron job to send follow-up reminders for pending removal requests
 // Runs daily at 9 AM UTC
@@ -15,13 +16,10 @@ const BATCH_THRESHOLD = 5; // If user has more than this many pending, send batc
 export async function GET(request: Request) {
   const startTime = Date.now();
 
-  // Verify cron secret in production
-  const authHeader = request.headers.get("authorization");
-  if (process.env.NODE_ENV === "production") {
-    const cronSecret = process.env.CRON_SECRET;
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  // Verify cron secret
+  const authResult = verifyCronAuth(request);
+  if (!authResult.authorized) {
+    return cronUnauthorizedResponse(authResult.reason);
   }
 
   console.log("[Follow-up Cron] Starting follow-up reminder job...");

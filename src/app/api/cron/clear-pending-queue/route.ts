@@ -7,6 +7,7 @@ import {
 } from "@/lib/removers/removal-service";
 import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 import { processEmailQueue, getEmailQuotaStatus } from "@/lib/email";
+import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
 /**
  * Aggressive Queue Clearer - Ensures pending queue is emptied within 24 hours
@@ -29,11 +30,9 @@ const RETRY_BATCH_SIZE = 50;
 export async function POST(request: Request) {
   try {
     // Verify cron secret
-    const authHeader = request.headers.get("authorization");
-    const cronSecret = process.env.CRON_SECRET;
-
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authResult = verifyCronAuth(request);
+    if (!authResult.authorized) {
+      return cronUnauthorizedResponse(authResult.reason);
     }
 
     console.log("[Cron: Clear Pending Queue] Starting aggressive queue processing...");

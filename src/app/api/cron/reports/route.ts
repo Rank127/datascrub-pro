@@ -1,23 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendWeeklyReportEmail } from "@/lib/email";
-
-// Verify cron secret to prevent unauthorized calls
-function verifyCronSecret(request: Request): boolean {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  // If no CRON_SECRET is set, allow the request (for development)
-  if (!cronSecret) return true;
-
-  return authHeader === `Bearer ${cronSecret}`;
-}
+import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
 // GET /api/cron/reports - Send periodic report emails
 export async function GET(request: Request) {
   // Verify this is a legitimate cron request
-  if (!verifyCronSecret(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = verifyCronAuth(request);
+  if (!authResult.authorized) {
+    return cronUnauthorizedResponse(authResult.reason);
   }
 
   try {

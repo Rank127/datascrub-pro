@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendRescanReminderEmail } from "@/lib/email";
+import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
 // Cron job to remind FREE users to run monthly scans and auto-trigger scans for paid users
 // Runs on the 1st of each month at 10 AM UTC
@@ -9,13 +10,10 @@ import { sendRescanReminderEmail } from "@/lib/email";
 export async function GET(request: Request) {
   const startTime = Date.now();
 
-  // Verify cron secret in production
-  const authHeader = request.headers.get("authorization");
-  if (process.env.NODE_ENV === "production") {
-    const cronSecret = process.env.CRON_SECRET;
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  // Verify cron secret
+  const authResult = verifyCronAuth(request);
+  if (!authResult.authorized) {
+    return cronUnauthorizedResponse(authResult.reason);
   }
 
   console.log("[Monthly Rescan] Starting monthly rescan job...");

@@ -1,16 +1,6 @@
 import { NextResponse } from "next/server";
 import { DATA_BROKER_DIRECTORY } from "@/lib/removers/data-broker-directory";
-
-// Verify cron secret for security
-function verifyCronSecret(request: Request): boolean {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  // Allow Vercel cron (no auth needed in production) or manual with secret
-  if (!cronSecret) return true;
-  if (process.env.NODE_ENV === "production" && !authHeader) return true;
-  return authHeader === `Bearer ${cronSecret}`;
-}
+import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
 interface LinkCheckResult {
   broker: string;
@@ -72,8 +62,9 @@ const URL_CORRECTIONS: Record<string, string> = {
 export async function GET(request: Request) {
   const startTime = Date.now();
 
-  if (!verifyCronSecret(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = verifyCronAuth(request);
+  if (!authResult.authorized) {
+    return cronUnauthorizedResponse(authResult.reason);
   }
 
   console.log("[LinkChecker] Starting daily link check...");
@@ -156,8 +147,9 @@ export async function GET(request: Request) {
 
 // POST endpoint for manual trigger with options
 export async function POST(request: Request) {
-  if (!verifyCronSecret(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = verifyCronAuth(request);
+  if (!authResult.authorized) {
+    return cronUnauthorizedResponse(authResult.reason);
   }
 
   // Reuse GET logic

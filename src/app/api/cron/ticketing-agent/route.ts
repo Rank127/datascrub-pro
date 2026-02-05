@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { processNewTicket } from "@/lib/agents/ticketing-agent";
 import { logCronExecution } from "@/lib/cron-logger";
+import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
 /**
  * Cron job to automatically process open support tickets using AI agent
@@ -15,11 +16,9 @@ import { logCronExecution } from "@/lib/cron-logger";
 export async function POST(request: Request) {
   try {
     // Verify cron secret
-    const authHeader = request.headers.get("authorization");
-    const cronSecret = process.env.CRON_SECRET;
-
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authResult = verifyCronAuth(request);
+    if (!authResult.authorized) {
+      return cronUnauthorizedResponse(authResult.reason);
     }
 
     // Check if Anthropic API key is configured

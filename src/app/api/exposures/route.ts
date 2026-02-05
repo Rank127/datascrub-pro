@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 // Data Processor sources to exclude from exposures list by default
@@ -9,6 +10,14 @@ const DATA_PROCESSOR_SOURCES = [
   "SYNDIGO", "POWERREVIEWS", "POWER_REVIEWS", "1WORLDSYNC",
   "BAZAARVOICE", "YOTPO", "YOTPO_DATA",
 ];
+
+// Valid enum values for query params (SQL injection prevention)
+const VALID_STATUSES = [
+  "ACTIVE", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS",
+  "REMOVAL_FAILED", "REMOVED", "MONITORING", "WHITELISTED"
+];
+const VALID_SEVERITIES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
+const VALID_MANUAL_ACTIONS = ["required", "pending", "done", "all"];
 
 export async function GET(request: Request) {
   try {
@@ -77,39 +86,49 @@ export async function GET(request: Request) {
       where.manualActionTaken = true;
     }
 
-    // Build WHERE clause conditions for raw query
-    const conditions: string[] = [`"userId" = '${session.user.id}'`];
+    // SECURITY: Validate query params against allowed values (SQL injection prevention)
+    const safeStatus = status && VALID_STATUSES.includes(status) ? status : null;
+    const safeSeverity = severity && VALID_SEVERITIES.includes(severity) ? severity : null;
+    const safeManualAction = manualAction && VALID_MANUAL_ACTIONS.includes(manualAction) ? manualAction : null;
+    // Source is validated by checking it exists in database later
+    const safeSource = source ? source.replace(/[^a-zA-Z0-9_-]/g, '') : null;
+    const safeSearch = search ? search.trim().substring(0, 100) : null; // Limit length
+
+    // Build parameterized WHERE clause using Prisma.sql
+    const conditions: Prisma.Sql[] = [Prisma.sql`"userId" = ${session.user.id}`];
 
     // Exclude data processors unless viewing whitelisted
-    if (status !== "WHITELISTED") {
-      const excludedSources = DATA_PROCESSOR_SOURCES.map(s => `'${s}'`).join(", ");
-      conditions.push(`"source" NOT IN (${excludedSources})`);
-      conditions.push(`"isWhitelisted" = false`);
+    if (safeStatus !== "WHITELISTED") {
+      conditions.push(Prisma.sql`"source" NOT IN (${Prisma.join(DATA_PROCESSOR_SOURCES)})`);
+      conditions.push(Prisma.sql`"isWhitelisted" = false`);
     }
 
-    if (status) conditions.push(`"status" = '${status}'`);
-    if (severity) conditions.push(`"severity" = '${severity}'`);
-    if (source) conditions.push(`"source" = '${source}'`);
-    // Search by source name (case-insensitive)
-    if (search && search.trim()) {
-      const escapedSearch = search.trim().replace(/'/g, "''");
-      conditions.push(`"sourceName" ILIKE '%${escapedSearch}%'`);
+    if (safeStatus) conditions.push(Prisma.sql`"status" = ${safeStatus}`);
+    if (safeSeverity) conditions.push(Prisma.sql`"severity" = ${safeSeverity}`);
+    if (safeSource) conditions.push(Prisma.sql`"source" = ${safeSource}`);
+    // Search by source name (case-insensitive) - parameterized
+    if (safeSearch) {
+      conditions.push(Prisma.sql`"sourceName" ILIKE ${'%' + safeSearch + '%'}`);
     }
-    if (excludeManual) conditions.push(`"requiresManualAction" = false`);
-    if (manualAction === "required" || manualAction === "all") {
-      conditions.push(`"requiresManualAction" = true`);
-    } else if (manualAction === "pending") {
-      conditions.push(`"requiresManualAction" = true`);
-      conditions.push(`"manualActionTaken" = false`);
-    } else if (manualAction === "done") {
-      conditions.push(`"requiresManualAction" = true`);
-      conditions.push(`"manualActionTaken" = true`);
+    if (excludeManual) conditions.push(Prisma.sql`"requiresManualAction" = false`);
+    if (safeManualAction === "required" || safeManualAction === "all") {
+      conditions.push(Prisma.sql`"requiresManualAction" = true`);
+    } else if (safeManualAction === "pending") {
+      conditions.push(Prisma.sql`"requiresManualAction" = true`);
+      conditions.push(Prisma.sql`"manualActionTaken" = false`);
+    } else if (safeManualAction === "done") {
+      conditions.push(Prisma.sql`"requiresManualAction" = true`);
+      conditions.push(Prisma.sql`"manualActionTaken" = true`);
     }
-    const whereClause = conditions.join(" AND ");
+
+    // Use Prisma.sql for safe parameterized query
+    // This prevents SQL injection by using prepared statements
+    const whereClause = Prisma.join(conditions, ' AND ');
+    const offsetValue = (page - 1) * limit;
 
     // Use raw SQL to sort by status priority, severity, then date - BEFORE pagination
     // This ensures sorting works across all pages, not just per-page
-    const exposureIds = await prisma.$queryRawUnsafe<{ id: string }[]>(`
+    const exposureIds = await prisma.$queryRaw<{ id: string }[]>`
       SELECT id FROM "Exposure"
       WHERE ${whereClause}
       ORDER BY
@@ -131,8 +150,8 @@ export async function GET(request: Request) {
           ELSE 4
         END ASC,
         "firstFoundAt" DESC
-      LIMIT ${limit} OFFSET ${(page - 1) * limit}
-    `);
+      LIMIT ${limit} OFFSET ${offsetValue}
+    `;
 
     const total = await prisma.exposure.count({ where });
 

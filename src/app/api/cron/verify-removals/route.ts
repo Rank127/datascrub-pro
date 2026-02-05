@@ -1,15 +1,6 @@
 import { NextResponse } from "next/server";
 import { runVerificationBatch } from "@/lib/removers/verification-service";
-
-// Verify cron secret to prevent unauthorized access
-function verifyCronSecret(request: Request): boolean {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  // Allow Vercel cron (no auth needed) or manual with secret
-  if (!cronSecret) return true;
-  return authHeader === `Bearer ${cronSecret}`;
-}
+import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
 /**
  * Cron endpoint to verify removal requests
@@ -27,8 +18,9 @@ function verifyCronSecret(request: Request): boolean {
  */
 export async function GET(request: Request) {
   // Verify authorization
-  if (!verifyCronSecret(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = verifyCronAuth(request);
+  if (!authResult.authorized) {
+    return cronUnauthorizedResponse(authResult.reason);
   }
 
   console.log("[Verify Removals] Starting verification batch...");
