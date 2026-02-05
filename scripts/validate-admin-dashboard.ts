@@ -34,12 +34,8 @@ async function validate() {
     console.log(`  ${s.status.padEnd(22)} ${s._count}`);
   }
 
-  // Removal requests
+  // Removal requests by status
   const totalRemovals = await prisma.removalRequest.count();
-  const pendingRemovals = await prisma.removalRequest.count({
-    where: { status: "PENDING" },
-  });
-
   const removalsByStatus = await prisma.removalRequest.groupBy({
     by: ["status"],
     _count: true,
@@ -49,46 +45,59 @@ async function validate() {
   console.log("REMOVAL REQUESTS:");
   console.log("-".repeat(40));
   console.log(`Total Requests:        ${totalRemovals}`);
-  console.log(`Pending Queue:         ${pendingRemovals}`);
   console.log();
   console.log("By Status:");
   for (const s of removalsByStatus.sort((a, b) => b._count - a._count)) {
     console.log(`  ${s.status.padEnd(22)} ${s._count}`);
   }
 
-  // Calculate ACTUAL Pending Queue as dashboard does
-  const pendingRemovalRequests = await prisma.removalRequest.count({
-    where: { status: { in: ["PENDING", "SUBMITTED"] } },
-  });
+  // NEW: Queue Pipeline Breakdown (matches dashboard)
+  const [toProcess, awaitingResponse, requiresManual, manualExposures, completed] = await Promise.all([
+    prisma.removalRequest.count({ where: { status: "PENDING" } }),
+    prisma.removalRequest.count({ where: { status: "SUBMITTED" } }),
+    prisma.removalRequest.count({ where: { status: "REQUIRES_MANUAL" } }),
+    prisma.exposure.count({ where: { requiresManualAction: true, manualActionTaken: false } }),
+    prisma.removalRequest.count({ where: { status: "COMPLETED" } }),
+  ]);
 
-  const manualActionQueue = await prisma.exposure.count({
-    where: {
-      requiresManualAction: true,
-      manualActionTaken: false,
-    },
-  });
+  const totalPipeline = toProcess + awaitingResponse + requiresManual + manualExposures;
 
-  const actualPendingQueue = pendingRemovalRequests + manualActionQueue;
-
-  console.log();
-  console.log("DASHBOARD 'PENDING QUEUE' BREAKDOWN:");
-  console.log("-".repeat(40));
-  console.log(`Pending+Submitted Removals: ${pendingRemovalRequests}`);
-  console.log(`Manual Action Queue:        ${manualActionQueue}`);
-  console.log(`Total (Dashboard Logic):    ${actualPendingQueue}`);
-
-  // Dashboard comparison
   console.log();
   console.log("=".repeat(60));
-  console.log("DASHBOARD COMPARISON:");
-  console.log("-".repeat(40));
-  console.log(`Dashboard shows "Exposures Found": 10,166`);
-  console.log(`Database Total Exposures:          ${totalExposures}`);
-  console.log(`Match: ${totalExposures === 10166 ? "✅ YES" : "❌ NO (off by " + (totalExposures - 10166) + ")"}`);
+  console.log("QUEUE PIPELINE (Dashboard View)");
+  console.log("=".repeat(60));
   console.log();
-  console.log(`Dashboard shows "Pending Queue": 8,515`);
-  console.log(`Database Pending Queue:          ${actualPendingQueue}`);
-  console.log(`Match: ${actualPendingQueue === 8515 ? "✅ YES" : "❌ NO (off by " + (actualPendingQueue - 8515) + ")"}`);
+  console.log("┌────────────┬────────────┬────────────┬────────────┬────────────┐");
+  console.log("│  To Send   │  Awaiting  │  No Email  │   Manual   │ Completed  │");
+  console.log("│  (PENDING) │ (SUBMITTED)│ (REQ_MAN)  │  (Review)  │            │");
+  console.log("├────────────┼────────────┼────────────┼────────────┼────────────┤");
+  console.log(`│ ${toProcess.toString().padStart(8)}   │ ${awaitingResponse.toString().padStart(8)}   │ ${requiresManual.toString().padStart(8)}   │ ${manualExposures.toString().padStart(8)}   │ ${completed.toString().padStart(8)}   │`);
+  console.log("└────────────┴────────────┴────────────┴────────────┴────────────┘");
+  console.log();
+  console.log(`Total in Pipeline: ${totalPipeline.toLocaleString()}`);
+  console.log();
+
+  // Status indicators
+  console.log("Status:");
+  if (toProcess === 0) {
+    console.log("  ✅ All items processed - no pending emails to send");
+  } else if (toProcess < 100) {
+    console.log(`  ✅ Queue nearly clear - only ${toProcess} items to process`);
+  } else {
+    console.log(`  ⚠️  ${toProcess} items waiting to be processed`);
+  }
+
+  if (awaitingResponse > 0) {
+    console.log(`  📧 ${awaitingResponse.toLocaleString()} emails sent, awaiting broker response`);
+  }
+
+  if (requiresManual > 0) {
+    console.log(`  🔧 ${requiresManual.toLocaleString()} items need form submission (no email option)`);
+  }
+
+  if (manualExposures > 0) {
+    console.log(`  👁️  ${manualExposures} exposures need manual review`);
+  }
 
   await prisma.$disconnect();
 }
