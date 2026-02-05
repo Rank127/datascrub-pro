@@ -140,6 +140,12 @@ export class ProfileValidator {
     // Require at least MIN_FACTORS (2) matching factors to avoid false positives
     const factorsMatched = this.countMatchingFactors(factors);
 
+    // Log factor breakdown for debugging
+    console.log(
+      `[ProfileValidator] ${source}: Factors matched: ${factorsMatched} ` +
+      `(name=${factors.nameMatch}, loc=${factors.locationMatch}, age=${factors.ageMatch}, data=${factors.dataCorrelation})`
+    );
+
     // If only one factor matched (e.g., name-only), penalize the score
     // This prevents "John Smith in New York" from matching just because of a common name
     if (factorsMatched < CONFIDENCE_THRESHOLDS.MIN_FACTORS) {
@@ -152,14 +158,25 @@ export class ProfileValidator {
       // This ensures single-factor matches don't create exposures
       const maxScoreForSingleFactor = CONFIDENCE_THRESHOLDS.REJECT - 1;
       if (score > maxScoreForSingleFactor) {
+        const originalScore = score;
         score = maxScoreForSingleFactor;
         reasoning.push(
           `Score capped to ${maxScoreForSingleFactor} due to insufficient matching factors.`
+        );
+        console.log(
+          `[ProfileValidator] ${source}: ⚠️ REJECTED - Score ${originalScore} capped to ${score} (only ${factorsMatched} factor)`
+        );
+      } else {
+        console.log(
+          `[ProfileValidator] ${source}: ⚠️ LOW CONFIDENCE - Score ${score}, only ${factorsMatched} factor`
         );
       }
     } else {
       reasoning.push(
         `PRECISION CHECK: ${factorsMatched} factors matched - sufficient for exposure creation.`
+      );
+      console.log(
+        `[ProfileValidator] ${source}: ✓ Score ${score}, ${factorsMatched} factors matched`
       );
     }
 

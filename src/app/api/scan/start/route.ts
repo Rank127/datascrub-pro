@@ -167,7 +167,27 @@ export async function POST(request: Request) {
     });
 
     // Run scan
+    console.log(`[Scan] Starting ${type} scan for user ${session.user.id}...`);
     const scanResults = await orchestrator.runScan(scanInput);
+
+    // Log scan results summary
+    const resultsByConfidence = {
+      confirmed: scanResults.filter(r => (r.confidence?.score ?? 100) >= 80).length,
+      likely: scanResults.filter(r => {
+        const score = r.confidence?.score ?? 100;
+        return score >= 60 && score < 80;
+      }).length,
+      possible: scanResults.filter(r => {
+        const score = r.confidence?.score ?? 100;
+        return score >= 40 && score < 60;
+      }).length,
+      rejected: scanResults.filter(r => (r.confidence?.score ?? 100) < 40).length,
+    };
+    console.log(
+      `[Scan] Raw results: ${scanResults.length} total ` +
+      `(${resultsByConfidence.confirmed} confirmed, ${resultsByConfidence.likely} likely, ` +
+      `${resultsByConfidence.possible} possible, ${resultsByConfidence.rejected} rejected)`
+    );
 
     // Get existing exposures for this user to avoid duplicates
     const existingExposures = await prisma.exposure.findMany({
@@ -292,6 +312,8 @@ export async function POST(request: Request) {
     // ONLY for:
     // 1. High-confidence matches (AUTO_PROCEED threshold or above)
     // 2. Known data brokers (not AI companies, marketing firms, universities, etc.)
+    console.log(`[Scan] Filtering ${newExposures.length} exposures for proactive opt-out...`);
+
     const proactiveOptOuts = newExposures.filter(r => {
       const isManualCheck = r.rawData?.manualCheckRequired === true;
       const confidenceScore = r.confidence?.score ?? 100;
@@ -302,7 +324,21 @@ export async function POST(request: Request) {
       // Skip if marked as informational (OPT_OUT_RECOMMENDED sources)
       const isInformational = r.rawData?.isInformational === true;
 
-      return isManualCheck && isHighConfidence && isBroker && !isInformational;
+      const shouldInclude = isManualCheck && isHighConfidence && isBroker && !isInformational;
+
+      // Log why each exposure was included or excluded
+      if (!shouldInclude) {
+        const reasons: string[] = [];
+        if (!isManualCheck) reasons.push("not manual check");
+        if (!isHighConfidence) reasons.push(`low confidence (${confidenceScore})`);
+        if (!isBroker) reasons.push("not a data broker");
+        if (isInformational) reasons.push("informational only");
+        console.log(`[Scan] ⊘ ${r.sourceName}: Skipped for removal - ${reasons.join(", ")}`);
+      } else {
+        console.log(`[Scan] ✓ ${r.sourceName}: Eligible for removal (confidence: ${confidenceScore})`);
+      }
+
+      return shouldInclude;
     });
 
     if (proactiveOptOuts.length > 0) {
