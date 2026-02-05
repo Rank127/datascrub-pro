@@ -76,13 +76,14 @@ async function checkSecurityConfiguration(): Promise<SecurityConfigCheck[]> {
       : "ENCRYPTION_KEY not set - data encryption will fail",
   });
 
-  // Check NextAuth secret
+  // Check NextAuth secret (v5 uses AUTH_SECRET, v4 uses NEXTAUTH_SECRET)
+  const authSecretConfigured = !!(process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET);
   checks.push({
-    name: "NEXTAUTH_SECRET",
-    status: process.env.NEXTAUTH_SECRET ? "PASS" : "FAIL",
-    message: process.env.NEXTAUTH_SECRET
-      ? "NextAuth secret configured"
-      : "NEXTAUTH_SECRET not set - sessions are insecure",
+    name: "AUTH_SECRET",
+    status: authSecretConfigured ? "PASS" : "FAIL",
+    message: authSecretConfigured
+      ? "Auth secret configured"
+      : "AUTH_SECRET not set - sessions are insecure",
   });
 
   // Check Stripe webhook secret
