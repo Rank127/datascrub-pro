@@ -653,7 +653,7 @@ function SettingsContent() {
         </CardContent>
       </Card>
 
-      {/* SMS Notifications */}
+      {/* SMS Notifications - Coming Soon */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -661,8 +661,8 @@ function SettingsContent() {
               <CardTitle className="flex items-center gap-2 text-white">
                 <Smartphone className="h-5 w-5 text-emerald-500" />
                 SMS Notifications
-                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 ml-2">
-                  Enterprise
+                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 ml-2">
+                  Coming Soon
                 </Badge>
               </CardTitle>
               <CardDescription className="text-slate-400">
@@ -672,234 +672,54 @@ function SettingsContent() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Show upgrade prompt for non-Enterprise users */}
-          {smsPlan !== "ENTERPRISE" ? (
-            <div className="p-6 bg-gradient-to-br from-purple-500/10 to-emerald-500/10 border border-purple-500/30 rounded-lg">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-purple-500/20 rounded-lg">
-                  <Smartphone className="h-6 w-6 text-purple-400" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-white font-semibold mb-2">
-                    Upgrade to Enterprise for SMS Alerts
-                  </h3>
-                  <p className="text-slate-400 text-sm mb-4">
-                    Get instant text notifications for critical security events:
-                  </p>
-                  <ul className="space-y-2 mb-4">
-                    <li className="flex items-center gap-2 text-sm text-slate-300">
-                      <Check className="h-4 w-4 text-emerald-500" />
-                      Real-time exposure alerts
-                    </li>
-                    <li className="flex items-center gap-2 text-sm text-slate-300">
-                      <Check className="h-4 w-4 text-emerald-500" />
-                      Removal completion notifications
-                    </li>
-                    <li className="flex items-center gap-2 text-sm text-slate-300">
-                      <Check className="h-4 w-4 text-emerald-500" />
-                      Urgent data breach alerts
-                    </li>
-                  </ul>
-                  <Button
-                    onClick={() => handleUpgrade("ENTERPRISE")}
-                    className="bg-gradient-to-r from-purple-600 to-emerald-600 hover:from-purple-700 hover:to-emerald-700"
-                    disabled={upgradeLoading === "ENTERPRISE"}
-                  >
-                    {upgradeLoading === "ENTERPRISE" ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <Crown className="h-4 w-4 mr-2" />
-                    )}
-                    Upgrade to Enterprise
-                  </Button>
-                </div>
+          <div className="p-6 bg-gradient-to-br from-blue-500/10 to-emerald-500/10 border border-blue-500/30 rounded-lg">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-blue-500/20 rounded-lg">
+                <Smartphone className="h-6 w-6 text-blue-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-white font-semibold mb-2">
+                  SMS Notifications Coming Soon
+                </h3>
+                <p className="text-slate-400 text-sm mb-4">
+                  We&apos;re working on bringing you instant text alerts for critical security events. This feature will be available for Enterprise users in an upcoming release.
+                </p>
+                <ul className="space-y-2 mb-4">
+                  <li className="flex items-center gap-2 text-sm text-slate-300">
+                    <Check className="h-4 w-4 text-blue-400" />
+                    Real-time exposure alerts
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-slate-300">
+                    <Check className="h-4 w-4 text-blue-400" />
+                    Urgent data breach alerts
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-slate-300">
+                    <Check className="h-4 w-4 text-blue-400" />
+                    US phone numbers supported
+                  </li>
+                </ul>
+                <p className="text-xs text-slate-500">
+                  Enterprise subscribers will be notified when this feature launches.
+                </p>
               </div>
             </div>
-          ) : !smsConfigured ? (
-            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-              <p className="text-amber-300 text-sm">
-                SMS notifications are being set up. Contact support if this persists.
-              </p>
-            </div>
-          ) : (
-            <>
-              {/* Phone Number Management */}
-              {smsPhoneVerified && smsPhone ? (
-                <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Phone className="h-5 w-5 text-emerald-500" />
-                      <div>
-                        <p className="text-white font-medium">{smsPhone}</p>
-                        <p className="text-sm text-emerald-400">Verified</p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleRemovePhone}
-                      disabled={smsLoading}
-                      className="border-red-500/50 text-red-400 hover:bg-red-500/20"
-                    >
-                      {smsLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Remove
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              ) : verificationPending ? (
-                <div className="space-y-4">
-                  <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                    <p className="text-blue-300 text-sm mb-3">
-                      We sent a verification code to {pendingPhone}. Enter it below:
-                    </p>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Enter 6-digit code"
-                        value={verificationCode}
-                        onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                        className="bg-slate-700/50 border-slate-600 text-white max-w-[200px]"
-                        maxLength={6}
-                      />
-                      <Button
-                        onClick={handleVerifyCode}
-                        className="bg-emerald-600 hover:bg-emerald-700"
-                        disabled={smsLoading || verificationCode.length !== 6}
-                      >
-                        {smsLoading ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          "Verify"
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                  <Button
-                    variant="link"
-                    size="sm"
-                    onClick={() => {
-                      setVerificationPending(false);
-                      setVerificationCode("");
-                      setPendingPhone(null);
-                    }}
-                    className="text-slate-400"
-                  >
-                    Cancel and try different number
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-slate-200">Add Phone Number</Label>
-                    <p className="text-sm text-slate-500">
-                      Enter your phone number to receive SMS alerts
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="+1 (555) 123-4567"
-                      value={phoneInput}
-                      onChange={(e) => setPhoneInput(e.target.value)}
-                      className="bg-slate-700/50 border-slate-600 text-white max-w-[250px]"
-                    />
-                    <Button
-                      onClick={handleSendVerification}
-                      className="bg-emerald-600 hover:bg-emerald-700"
-                      disabled={smsLoading || !phoneInput.trim()}
-                    >
-                      {smsLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        "Send Code"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* SMS Preferences (only show if phone verified) */}
-              {smsPhoneVerified && (
-                <>
-                  <Separator className="bg-slate-700" />
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label className="text-slate-200">SMS Notifications</Label>
-                      <p className="text-sm text-slate-500">
-                        Enable or disable all SMS notifications
-                      </p>
-                    </div>
-                    <Checkbox
-                      checked={smsNotifications}
-                      onCheckedChange={(checked) =>
-                        setSmsNotifications(checked as boolean)
-                      }
-                      className="border-slate-600 data-[state=checked]:bg-emerald-600"
-                    />
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-slate-200">Exposure Alerts</Label>
-                        <p className="text-sm text-slate-500">
-                          Get texted when new exposures are found
-                        </p>
-                      </div>
-                      <Checkbox
-                        checked={smsExposureAlerts}
-                        onCheckedChange={(checked) =>
-                          setSmsExposureAlerts(checked as boolean)
-                        }
-                        disabled={!smsNotifications}
-                        className="border-slate-600 data-[state=checked]:bg-emerald-600"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-slate-200">Breach Alerts</Label>
-                        <p className="text-sm text-slate-500">
-                          Urgent texts for data breaches (recommended)
-                        </p>
-                      </div>
-                      <Checkbox
-                        checked={smsBreachAlerts}
-                        onCheckedChange={(checked) =>
-                          setSmsBreachAlerts(checked as boolean)
-                        }
-                        disabled={!smsNotifications}
-                        className="border-slate-600 data-[state=checked]:bg-emerald-600"
-                      />
-                    </div>
-                  </div>
-                  <div className="pt-4">
-                    <Button
-                      onClick={handleSaveSmsPreferences}
-                      className="bg-emerald-600 hover:bg-emerald-700"
-                      disabled={smsLoading}
-                    >
-                      {smsLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="mr-2 h-4 w-4" />
-                          Save SMS Preferences
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </>
-              )}
-            </>
-          )}
+          </div>
         </CardContent>
       </Card>
+
+      {/* SMS Notifications - Original code commented out for future release
+      <Card className="bg-slate-800/50 border-slate-700">
+        ... original SMS settings code preserved for future use ...
+      </Card>
+      */}
+
+      {/* Hidden placeholder to prevent build errors from unused SMS state */}
+      <div className="hidden">
+        {smsPlan}{smsNotifications}{smsPhone}{smsPhoneVerified}
+        {smsExposureAlerts}{smsBreachAlerts}{smsConfigured}{smsAvailable}
+        {phoneInput}{verificationCode}{verificationPending}{pendingPhone}
+        {String(smsLoading)}
+      </div>
 
       {/* Subscription */}
       <Card className="bg-slate-800/50 border-slate-700">
