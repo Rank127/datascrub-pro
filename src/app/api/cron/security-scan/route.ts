@@ -170,7 +170,7 @@ export async function GET(request: Request) {
     const securityEvents = await prisma.$queryRaw<{ count: bigint }[]>`
       SELECT COUNT(*) as count FROM "AuditLog"
       WHERE action LIKE '%FAILED%'
-      AND "timestamp" >= NOW() - INTERVAL '24 hours'
+      AND "createdAt" >= NOW() - INTERVAL '24 hours'
     `;
     const failedEvents = Number(securityEvents[0]?.count || 0);
 
