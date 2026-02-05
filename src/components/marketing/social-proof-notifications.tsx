@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Shield, X } from "lucide-react";
 
 // Realistic-looking names and locations
@@ -17,14 +17,38 @@ const notifications = [
   { name: "Chris B.", location: "San Diego, CA", action: "upgraded to Pro" },
   { name: "Nicole S.", location: "Atlanta, GA", action: "removed 63 exposures" },
   { name: "Kevin D.", location: "Boston, MA", action: "started their free scan" },
+  { name: "Patricia H.", location: "Dallas, TX", action: "removed 91 exposures" },
+  { name: "Andrew C.", location: "San Francisco, CA", action: "upgraded to Pro" },
+  { name: "Michelle T.", location: "Nashville, TN", action: "started their free scan" },
+  { name: "Brandon W.", location: "Charlotte, NC", action: "removed 38 exposures" },
 ];
 
+// Track recently shown notifications to avoid repetition
+let recentlyShown: number[] = [];
+const MAX_RECENT = 8; // Don't repeat until at least 8 others shown
+
 function getRandomNotification() {
-  const index = Math.floor(Math.random() * notifications.length);
+  // Get available indices (exclude recently shown)
+  const availableIndices = notifications
+    .map((_, i) => i)
+    .filter((i) => !recentlyShown.includes(i));
+
+  // If all have been shown recently, reset
+  const indices = availableIndices.length > 0 ? availableIndices : notifications.map((_, i) => i);
+
+  const randomIndex = Math.floor(Math.random() * indices.length);
+  const index = indices[randomIndex];
   const notification = notifications[index];
-  // Add a random time ago (1-15 minutes)
-  const minutesAgo = Math.floor(Math.random() * 14) + 1;
-  return { ...notification, minutesAgo };
+
+  // Track this notification
+  recentlyShown.push(index);
+  if (recentlyShown.length > MAX_RECENT) {
+    recentlyShown.shift();
+  }
+
+  // Add a random time ago (1-7 days)
+  const daysAgo = Math.floor(Math.random() * 7) + 1;
+  return { ...notification, daysAgo };
 }
 
 export function SocialProofNotifications() {
@@ -32,7 +56,7 @@ export function SocialProofNotifications() {
     name: string;
     location: string;
     action: string;
-    minutesAgo: number;
+    daysAgo: number;
   } | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -99,7 +123,7 @@ export function SocialProofNotifications() {
             </p>
             <p className="text-sm text-slate-600">{notification.action}</p>
             <p className="text-xs text-slate-400 mt-1">
-              {notification.minutesAgo} minute{notification.minutesAgo !== 1 ? "s" : ""} ago
+              {notification.daysAgo} day{notification.daysAgo !== 1 ? "s" : ""} ago
             </p>
           </div>
         </div>
