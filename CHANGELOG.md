@@ -14,6 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Browser automation for form-based opt-outs (Browserless.io)
 - Corporate Plans (TEAM, BUSINESS, ENTERPRISE tiers)
 
+## [1.29.1] - 2026-02-06
+
+### Fixed
+- **Family Plan Invitation Flow** - Fixed bug where invited family members ended up on FREE plan instead of joining the family
+  - Registration page was discarding the `callbackUrl` parameter
+  - New users registering via invitation link were redirected to `/dashboard` instead of `/family/join/[token]`
+  - Now properly preserves callback URL through registration → login → invitation acceptance
+  - Affected file: `src/app/(auth)/register/page.tsx`
+
+---
+
 ## [1.29.0] - 2026-02-06
 
 ### Added
