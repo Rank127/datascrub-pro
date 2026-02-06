@@ -9,7 +9,8 @@
 | [corporate-plans.md](corporate-plans.md) | Corporate tier pricing, features, revenue projections | Ready to implement |
 | [competitive-research-2026.md](competitive-research-2026.md) | Competitor analysis (Optery, DeleteMe, Incogni, etc.) | Complete |
 | [executive-white-glove-analysis.md](executive-white-glove-analysis.md) | Human-assisted service pricing, staffing model | Awaiting decision |
-| [mobile-app-planning.md](mobile-app-planning.md) | iOS/Android app (Expo), costs, feature roadmap | Awaiting decision |
+| [mobile-app-planning.md](mobile-app-planning.md) | iOS/Android app (Expo), costs, feature roadmap | Ready to start |
+| [mobile-app-technical-spec.md](mobile-app-technical-spec.md) | Full technical spec, legal, compliance, infrastructure | Ready to start |
 
 ---
 
