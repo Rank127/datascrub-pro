@@ -14,6 +14,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Browser automation for form-based opt-outs (Browserless.io)
 - Corporate Plans (TEAM, BUSINESS, ENTERPRISE tiers)
 
+## [1.29.3] - 2026-02-06
+
+### Added
+- **National Public Data** - Added to data broker directory
+  - Major data broker that suffered massive 2.9 billion record breach in August 2024
+  - Operated by Jerico Pictures Inc.
+  - Collected SSNs, addresses, phone numbers from public records without consumer consent
+  - Opt-out URL: https://nationalpublicdata.com/removal
+
+- **CSV Export Functions** for data broker directory
+  - `exportDirectoryToCSV()` - Full directory export for compliance documentation
+  - `exportRemovableBrokersToCSV()` - Export only actionable data brokers
+  - `getDirectoryStats()` - Directory statistics for reporting
+
+- **Legal Disclaimer** to data broker directory header
+  - Documents Cal. Civ. Code § 1798.99.80(d) and Vermont 9 V.S.A. § 2430(4)
+  - Clarifies what qualifies as a "data broker" vs direct relationship platforms
+  - References to California and Vermont data broker registries
+
+### Removed
+- **Service Platforms** (NOT data brokers - direct user relationship):
+  - Muck Rack (PR/journalism platform - journalists opt-in)
+  - RateMyProfessors (review platform - user-generated content)
+  - Apartments.com, Zumper (rental platforms - users search/apply directly)
+  - TheKnot, WeddingWire, Zola (wedding planning - couples voluntarily share info)
+
+### Changed
+- **Expanded Blocklist** - Added 7 service platforms with legal documentation
+  - Updated `BLOCKLISTED_EMAIL_DOMAINS` with new domains
+  - Categorized as "SERVICE PLATFORMS (DIRECT RELATIONSHIP)"
+
+---
+
 ## [1.29.2] - 2026-02-06
 
 ### Changed

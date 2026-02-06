@@ -124,6 +124,60 @@ export const BLOCKLISTED_COMPANIES: BlocklistedCompany[] = [
   },
 
   // ============================================================================
+  // SERVICE PLATFORMS (DIRECT RELATIONSHIP - NOT DATA BROKERS)
+  // Users create accounts and provide their own data voluntarily.
+  // ============================================================================
+  {
+    name: "Muck Rack",
+    domains: ["muckrack.com"],
+    reason: "NOT a data broker - PR/journalism platform. Journalists create profiles; PR pros subscribe. Direct user relationships.",
+    dateAdded: "2026-02-06",
+    notes: "Media database for PR professionals. Journalists opt-in to be discoverable. Users delete accounts via settings.",
+  },
+  {
+    name: "RateMyProfessors",
+    domains: ["ratemyprofessors.com"],
+    reason: "NOT a data broker - Review platform with direct user relationships. Users submit their own reviews.",
+    dateAdded: "2026-02-06",
+    notes: "Professor review site. Reviews are user-generated content. Professors can claim profiles.",
+  },
+  {
+    name: "Apartments.com",
+    domains: ["apartments.com"],
+    reason: "NOT a data broker - Rental listing platform. Users search and contact landlords directly.",
+    dateAdded: "2026-02-06",
+    notes: "Owned by CoStar Group. Users create accounts to save searches. Landlords list properties directly.",
+  },
+  {
+    name: "Zumper",
+    domains: ["zumper.com"],
+    reason: "NOT a data broker - Rental listing platform. Users search and apply for rentals directly.",
+    dateAdded: "2026-02-06",
+    notes: "Rental platform. Users create accounts to apply for apartments. Direct landlord-tenant matching.",
+  },
+  {
+    name: "TheKnot",
+    domains: ["theknot.com"],
+    reason: "NOT a data broker - Wedding planning platform. Couples create accounts and share their own wedding details.",
+    dateAdded: "2026-02-06",
+    notes: "Wedding planning site. Couples voluntarily share wedding info. Users delete accounts via settings.",
+  },
+  {
+    name: "WeddingWire",
+    domains: ["weddingwire.com"],
+    reason: "NOT a data broker - Wedding planning platform. Couples create accounts and share their own wedding details.",
+    dateAdded: "2026-02-06",
+    notes: "Wedding planning site (owned by The Knot Worldwide). Couples voluntarily share info.",
+  },
+  {
+    name: "Zola",
+    domains: ["zola.com"],
+    reason: "NOT a data broker - Wedding registry and planning platform. Couples create accounts and registries.",
+    dateAdded: "2026-02-06",
+    notes: "Wedding registry platform. Couples voluntarily create registries and share with guests.",
+  },
+
+  // ============================================================================
   // DATA PROCESSORS (NOT DATA BROKERS)
   // Per GDPR Articles 28/29, Data Processors only process data on behalf of
   // Data Controllers (their clients). Deletion requests should go to the
@@ -173,7 +227,7 @@ export const BLOCKLISTED_COMPANIES: BlocklistedCompany[] = [
  * Blocklisted email domains - never send automated emails to these
  */
 export const BLOCKLISTED_EMAIL_DOMAINS: string[] = [
-  // Direct relationship platforms (not data brokers)
+  // Job platforms (direct relationship)
   "ziprecruiter.com",
   "indeed.com",
   "linkedin.com",
@@ -186,6 +240,14 @@ export const BLOCKLISTED_EMAIL_DOMAINS: string[] = [
   "smartrecruiters.com",
   "jobvite.com",
   "workday.com",
+  // Service platforms (direct relationship)
+  "muckrack.com",
+  "ratemyprofessors.com",
+  "apartments.com",
+  "zumper.com",
+  "theknot.com",
+  "weddingwire.com",
+  "zola.com",
   // Data processors
   "syndigo.com",
   "powerreviews.com",

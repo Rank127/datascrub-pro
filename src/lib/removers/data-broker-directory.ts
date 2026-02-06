@@ -1,5 +1,33 @@
-// Data broker contact information for removal requests
-// This directory contains opt-out URLs and contact emails for major data brokers
+/**
+ * DATA BROKER DIRECTORY
+ * Opt-out URLs and contact information for verified data brokers
+ *
+ * LEGAL DISCLAIMER:
+ * This directory ONLY contains entities that meet the legal definition of "data broker"
+ * under applicable privacy laws:
+ *
+ * - California Civil Code § 1798.99.80(d): "a business that knowingly collects and
+ *   sells to third parties the personal information of a consumer with whom the
+ *   business does NOT have a direct relationship"
+ *
+ * - Vermont 9 V.S.A. § 2430(4): "a business, or unit or units of a business,
+ *   separately or together, that knowingly collects and sells or licenses to
+ *   third parties the brokered personal information of a consumer with whom
+ *   the business does not have a direct relationship"
+ *
+ * EXCLUDED FROM THIS DIRECTORY:
+ * - Direct relationship platforms (job sites, social networks, service platforms)
+ *   where users create accounts and provide their own data voluntarily
+ * - Data Processors under GDPR Articles 28/29 that only process data on behalf
+ *   of Data Controllers (their clients)
+ * - Platforms where the data subject has a direct account/user relationship
+ *
+ * See src/lib/removers/blocklist.ts for companies that should NOT receive
+ * automated removal requests.
+ *
+ * @see https://oag.ca.gov/data-brokers - California Data Broker Registry
+ * @see https://sos.vermont.gov/data-brokers/ - Vermont Data Broker Registry
+ */
 
 export type RemovalMethod = "FORM" | "EMAIL" | "BOTH" | "MONITOR" | "NOT_REMOVABLE";
 export type SourceCategory = "DATA_BROKER" | "BREACH_DATABASE" | "SOCIAL_MEDIA" | "AI_SERVICE" | "DARK_WEB" | "OTHER";
@@ -73,6 +101,15 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 5,
     notes: "Use web form - email addresses bounce.",
+  },
+  NATIONALPUBLICDATA: {
+    name: "National Public Data",
+    optOutUrl: "https://nationalpublicdata.com/removal",
+    privacyEmail: "privacy@nationalpublicdata.com",
+    removalMethod: "BOTH",
+    estimatedDays: 45,
+    notes: "Major data broker - suffered massive 2.9 billion record breach in 2024. Operated by Jerico Pictures Inc. Collected SSNs, addresses, phone numbers from public records without consumer consent. Company filed bankruptcy after breach but data may persist elsewhere.",
+    parentCompany: "Jerico Pictures Inc",
   },
   TRUEPEOPLESEARCH: {
     name: "TruePeopleSearch",
@@ -487,20 +524,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "EMAIL",
     estimatedDays: 14,
   },
-  MUCK_RACK: {
-    name: "Muck Rack",
-    optOutUrl: "https://muckrack.com/settings",
-    privacyEmail: "privacy@muckrack.com",
-    removalMethod: "BOTH",
-    estimatedDays: 14,
-  },
-  RATEMYPROFESSORS: {
-    name: "RateMyProfessors.com",
-    optOutUrl: "https://www.ratemyprofessors.com/account/settings",
-    privacyEmail: "privacy@ratemyprofessors.com",
-    removalMethod: "BOTH",
-    estimatedDays: 14,
-  },
+  // REMOVED: MUCK_RACK - NOT a data broker (journalists create/claim their own profiles)
+  // REMOVED: RATEMYPROFESSORS - NOT a data broker (user-generated reviews platform)
   OPENCORPORATES: {
     name: "OpenCorporates.com",
     privacyEmail: "privacy@opencorporates.com",
@@ -545,47 +570,15 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
 
   // ==========================================
-  // REAL ESTATE & PROPERTY SITES
+  // REMOVED: REAL ESTATE SERVICE SITES (NOT DATA BROKERS)
+  // Apartments.com, Zumper - Users search and apply directly, direct relationship
   // ==========================================
-  APARTMENTS: {
-    name: "Apartments.com",
-    optOutUrl: "https://www.apartments.com/about/privacy",
-    privacyEmail: "privacy@apartments.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  ZUMPER: {
-    name: "Zumper.com",
-    optOutUrl: "https://www.zumper.com/settings",
-    privacyEmail: "privacy@zumper.com",
-    removalMethod: "BOTH",
-    estimatedDays: 14,
-  },
 
   // ==========================================
-  // WEDDING & EVENT SITES
+  // REMOVED: WEDDING & EVENT SITES (NOT DATA BROKERS)
+  // TheKnot, WeddingWire, Zola - Users create accounts voluntarily for planning
+  // These are service platforms with direct user relationships
   // ==========================================
-  THEKNOT: {
-    name: "The Knot",
-    optOutUrl: "https://www.theknot.com/settings",
-    privacyEmail: "privacy@theknot.com",
-    removalMethod: "BOTH",
-    estimatedDays: 14,
-  },
-  WEDDINGWIRE: {
-    name: "WeddingWire",
-    optOutUrl: "https://www.weddingwire.com/settings",
-    privacyEmail: "privacy@weddingwire.com",
-    removalMethod: "BOTH",
-    estimatedDays: 14,
-  },
-  ZOLA: {
-    name: "Zola.com",
-    optOutUrl: "https://www.zola.com/settings",
-    privacyEmail: "privacy@zola.com",
-    removalMethod: "BOTH",
-    estimatedDays: 14,
-  },
 
   // ==========================================
   // OBITUARY & MEMORIAL SITES
@@ -13624,4 +13617,151 @@ export function getFormRemovalBrokers(): Record<string, DataBrokerInfo> {
       ([, broker]) => broker.removalMethod === "FORM" || broker.removalMethod === "BOTH"
     )
   );
+}
+
+// ============================================
+// CSV EXPORT FUNCTIONS
+// ============================================
+
+/**
+ * Escape a value for CSV output
+ */
+function escapeCSVValue(value: string | number | boolean | undefined): string {
+  if (value === undefined || value === null) return "";
+  const str = String(value);
+  // Escape quotes and wrap in quotes if contains comma, quote, or newline
+  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+/**
+ * Export the data broker directory to CSV format
+ * Useful for compliance documentation, audits, and sharing with legal teams
+ */
+export function exportDirectoryToCSV(): string {
+  const headers = [
+    "Key",
+    "Name",
+    "Category",
+    "Opt-Out URL",
+    "Opt-Out Email",
+    "Privacy Email",
+    "Removal Method",
+    "Estimated Days",
+    "Parent Company",
+    "Consolidates To",
+    "Subsidiaries",
+    "Is Removable",
+    "Notes",
+  ];
+
+  const rows: string[][] = [headers];
+
+  for (const [key, broker] of Object.entries(DATA_BROKER_DIRECTORY)) {
+    rows.push([
+      key,
+      broker.name,
+      broker.category || "DATA_BROKER",
+      broker.optOutUrl || "",
+      broker.optOutEmail || "",
+      broker.privacyEmail || "",
+      broker.removalMethod,
+      String(broker.estimatedDays),
+      broker.parentCompany || "",
+      broker.consolidatesTo || "",
+      broker.subsidiaries?.join("; ") || "",
+      broker.isRemovable === false ? "No" : "Yes",
+      broker.notes || "",
+    ]);
+  }
+
+  return rows.map(row => row.map(escapeCSVValue).join(",")).join("\n");
+}
+
+/**
+ * Export only removable data brokers to CSV (excludes monitors, breach DBs, etc.)
+ */
+export function exportRemovableBrokersToCSV(): string {
+  const headers = [
+    "Name",
+    "Opt-Out URL",
+    "Privacy Email",
+    "Removal Method",
+    "Estimated Days",
+    "Parent Company",
+    "Notes",
+  ];
+
+  const rows: string[][] = [headers];
+
+  for (const [, broker] of Object.entries(DATA_BROKER_DIRECTORY)) {
+    // Skip non-removable entries
+    if (broker.isRemovable === false) continue;
+    if (broker.removalMethod === "NOT_REMOVABLE" || broker.removalMethod === "MONITOR") continue;
+    if (broker.category === "BREACH_DATABASE" || broker.category === "DARK_WEB") continue;
+
+    rows.push([
+      broker.name,
+      broker.optOutUrl || "",
+      broker.privacyEmail || "",
+      broker.removalMethod,
+      String(broker.estimatedDays),
+      broker.parentCompany || "",
+      broker.notes || "",
+    ]);
+  }
+
+  return rows.map(row => row.map(escapeCSVValue).join(",")).join("\n");
+}
+
+/**
+ * Get directory statistics for reporting
+ */
+export function getDirectoryStats(): {
+  totalEntries: number;
+  removableBrokers: number;
+  monitoringSources: number;
+  byCategory: Record<string, number>;
+  byRemovalMethod: Record<string, number>;
+  withParentCompany: number;
+  withSubsidiaries: number;
+} {
+  let removableBrokers = 0;
+  let monitoringSources = 0;
+  let withParentCompany = 0;
+  let withSubsidiaries = 0;
+  const byCategory: Record<string, number> = {};
+  const byRemovalMethod: Record<string, number> = {};
+
+  for (const broker of Object.values(DATA_BROKER_DIRECTORY)) {
+    // Count by category
+    const category = broker.category || "DATA_BROKER";
+    byCategory[category] = (byCategory[category] || 0) + 1;
+
+    // Count by removal method
+    byRemovalMethod[broker.removalMethod] = (byRemovalMethod[broker.removalMethod] || 0) + 1;
+
+    // Count removable vs monitoring
+    if (broker.removalMethod === "MONITOR" || broker.removalMethod === "NOT_REMOVABLE") {
+      monitoringSources++;
+    } else if (broker.isRemovable !== false) {
+      removableBrokers++;
+    }
+
+    // Count consolidation relationships
+    if (broker.parentCompany) withParentCompany++;
+    if (broker.subsidiaries && broker.subsidiaries.length > 0) withSubsidiaries++;
+  }
+
+  return {
+    totalEntries: Object.keys(DATA_BROKER_DIRECTORY).length,
+    removableBrokers,
+    monitoringSources,
+    byCategory,
+    byRemovalMethod,
+    withParentCompany,
+    withSubsidiaries,
+  };
 }
