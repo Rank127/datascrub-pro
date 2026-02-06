@@ -2,6 +2,26 @@
 
 ---
 
+## Planning Documents
+
+| Document | Description | Status |
+|----------|-------------|--------|
+| [corporate-plans.md](corporate-plans.md) | Corporate tier pricing, features, revenue projections | Ready to implement |
+| [competitive-research-2026.md](competitive-research-2026.md) | Competitor analysis (Optery, DeleteMe, Incogni, etc.) | Complete |
+| [executive-white-glove-analysis.md](executive-white-glove-analysis.md) | Human-assisted service pricing, staffing model | Awaiting decision |
+| [mobile-app-planning.md](mobile-app-planning.md) | iOS/Android app (Expo), costs, feature roadmap | Awaiting decision |
+
+---
+
+## Priority Order
+
+1. **Corporate Plans** - New revenue stream (4-6 weeks)
+2. **Mobile App** - After corporate launch (8-12 weeks)
+3. **Executive White-Glove** - When executive customers exist
+4. **SMS Alerts** - When 10DLC approved
+
+---
+
 ## Corporate Plans Implementation (Next Priority)
 
 **Status:** Planning
@@ -53,6 +73,62 @@
 - [ ] Self-service signup for TEAM tier
 - [ ] Demo booking for BUSINESS/ENTERPRISE
 - [ ] Domain verification for organization
+
+---
+
+## Mobile App (iOS + Android)
+
+**Status:** Planning Complete
+**Reference:** [docs/mobile-app-planning.md](mobile-app-planning.md)
+**Start:** After Corporate Plans launch (Month 3-4)
+**Technology:** Expo (React Native)
+**Cost:** ~$1,400/year (Apple + Expo EAS)
+
+### Pre-Development
+- [ ] Register Apple Developer Account ($99/year)
+- [ ] Register Google Play Developer Account ($25 one-time)
+- [ ] Apply for D-U-N-S Number (if needed)
+- [ ] Set up Expo account and EAS Build
+
+### Phase 1: MVP (8-10 weeks)
+- [ ] Authentication (email/password + biometric)
+- [ ] Dashboard with protection score
+- [ ] Exposures list and detail views
+- [ ] Removals list and status tracking
+- [ ] Push notifications (new exposures, removal complete)
+- [ ] Settings and account info
+
+### Phase 2: Enhanced Features (4-6 weeks)
+- [ ] Initiate scan from mobile
+- [ ] Dark web alert details
+- [ ] Family member quick view
+- [ ] iOS/Android widgets
+
+### Phase 3: Corporate Mobile (4-6 weeks)
+- [ ] Organization switcher
+- [ ] Team dashboard (admin view)
+- [ ] Member protection status
+- [ ] Approve removal requests
+
+---
+
+## Executive White-Glove Service
+
+**Status:** Awaiting Decision
+**Reference:** [docs/executive-white-glove-analysis.md](executive-white-glove-analysis.md)
+
+### Proposed Pricing (Option C - Recommended)
+- EXECUTIVE INDIVIDUAL: $199/mo (~50% margin)
+- EXECUTIVE FAMILY: $349/mo (~43% margin)
+- EXECUTIVE COMPLETE: $499/mo (~34% margin)
+
+### Implementation (When Ready)
+- [ ] Decide on pricing tier structure
+- [ ] Define family coverage policies
+- [ ] Create SOP documentation for manual removals
+- [ ] Hire first privacy specialist (offshore)
+- [ ] Build internal dashboard for specialist workflow
+- [ ] Create executive onboarding flow
 
 ---
 
