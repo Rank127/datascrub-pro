@@ -39,7 +39,7 @@
 
 ### Tier 1: TEAM (Small Business)
 
-**Pricing:** $15/user/month (billed annually: $180/user/year)
+**Pricing:** $12/user/month (billed annually: $144/user/year)
 
 **Minimum:** 5 seats
 
@@ -60,9 +60,9 @@
 | Dedicated CSM | No |
 
 **Annual Cost Examples:**
-- 5 users: $900/year
-- 10 users: $1,800/year
-- 25 users: $4,500/year
+- 5 users: $720/year
+- 10 users: $1,440/year
+- 25 users: $3,600/year
 
 **Target Market:** Startups, small agencies, professional services firms
 
@@ -70,7 +70,7 @@
 
 ### Tier 2: BUSINESS (Mid-Market)
 
-**Pricing:** $25/user/month (billed annually: $300/user/year)
+**Pricing:** $20/user/month (billed annually: $240/user/year)
 
 **Minimum:** 10 seats
 
@@ -86,7 +86,7 @@
 | Onboarding | Guided setup call |
 | Custom Removals | 20/month |
 | API Access | Read-only |
-| SSO/SAML | Yes |
+| SSO/SAML | Yes (included, not extra) |
 | Compliance Reports | Basic (GDPR, CCPA) |
 | Dedicated CSM | No |
 | Dark Web Monitoring | Yes |
@@ -94,10 +94,10 @@
 | Do Not Call Registry | Yes |
 
 **Annual Cost Examples:**
-- 10 users: $3,000/year
-- 25 users: $7,500/year
-- 50 users: $15,000/year
-- 100 users: $30,000/year
+- 10 users: $2,400/year
+- 25 users: $6,000/year
+- 50 users: $12,000/year
+- 100 users: $24,000/year
 
 **Target Market:** Mid-size companies, law firms, healthcare organizations, financial services
 
@@ -105,7 +105,7 @@
 
 ### Tier 3: ENTERPRISE (Large Organizations)
 
-**Pricing:** $40/user/month (billed annually: $480/user/year)
+**Pricing:** $35/user/month (billed annually: $420/user/year)
 
 **Minimum:** 25 seats
 
@@ -141,10 +141,10 @@
 | 500+ | 20% off + custom pricing |
 
 **Annual Cost Examples:**
-- 25 users: $12,000/year
-- 100 users: $43,200/year (10% discount)
-- 250 users: $102,000/year (15% discount)
-- 500 users: $192,000/year (20% discount)
+- 25 users: $10,500/year
+- 100 users: $37,800/year (10% discount)
+- 250 users: $89,250/year (15% discount)
+- 500 users: $168,000/year (20% discount)
 
 **Target Market:** Fortune 500, government agencies, large healthcare systems, financial institutions
 
@@ -152,7 +152,7 @@
 
 ### Add-on: EXECUTIVE PROTECTION (C-Suite)
 
-**Pricing:** $199/person/month ($2,388/year)
+**Pricing:** $149/person/month ($1,788/year)
 
 *Available as add-on to any corporate plan*
 
@@ -181,16 +181,18 @@
 
 | Feature | Team | Business | Enterprise | Executive |
 |---------|------|----------|------------|-----------|
-| **Pricing** | $15/user/mo | $25/user/mo | $40/user/mo | $199/person/mo |
+| **Pricing** | $12/user/mo | $20/user/mo | $35/user/mo | $149/person/mo |
+| **Annual Cost** | $144/user/yr | $240/user/yr | $420/user/yr | $1,788/person/yr |
 | **Min Seats** | 5 | 10 | 25 | 1 (add-on) |
 | **Broker Coverage** | 400+ | 600+ | 750+ | 1,000+ |
 | **Scan Frequency** | Weekly | Daily | Continuous | Continuous + Manual |
 | **Custom Removals** | 5/mo | 20/mo | Unlimited | Unlimited |
 | **API Access** | No | Read-only | Full | Full |
-| **SSO/SAML** | No | Yes | Yes | Yes |
+| **SSO/SAML** | No | Yes (included) | Yes | Yes |
 | **SCIM Provisioning** | No | No | Yes | Yes |
 | **Dark Web Monitoring** | No | Yes | Advanced | Deep Dive |
 | **AI Shield** | No | No | Yes | Yes |
+| **Screenshot Verification** | Yes | Yes | Yes | Yes |
 | **Do Not Call** | No | Yes | Yes | Yes |
 | **Compliance Reports** | No | Basic | Full | Full |
 | **Dedicated CSM** | No | No | Yes | Yes |
@@ -203,21 +205,49 @@
 
 ## Competitive Positioning
 
-### Price Comparison
-| Service | Per-User Corporate | Our Equivalent | Advantage |
-|---------|-------------------|----------------|-----------|
-| DeleteMe Business | $129-229/user/yr | Team: $180/yr | Similar price, more automation |
-| Incogni Ironwall | $199/user/yr | Business: $300/yr | More features justify premium |
-| Privacy Duck VIP | $999/user/yr | Enterprise: $480/yr | 50% cheaper, similar coverage |
-| Optery Business | Custom (est. $300+) | Business: $300/yr | Competitive with AI Shield |
+*See [competitive-research-2026.md](competitive-research-2026.md) for detailed analysis*
 
-### Our Differentiators
-1. **AI Shield** - Unique deepfake and voice cloning protection
-2. **Integrated Support Tickets** - Built-in issue resolution
-3. **Transparent Dashboard** - Real-time progress tracking
-4. **CCPA/GDPR Automation** - Legal compliance built-in
-5. **Screenshot Verification** - Proof of removal
-6. **Executive Protection** - Specialized C-suite offering
+### Price Comparison (February 2026)
+| Service | Per-User/Year | GhostMyData | Our Advantage |
+|---------|--------------|-------------|---------------|
+| Optery Core Pro | $42 | Team: $144 | 3x more features, AI Shield |
+| Optery Ultimate Pro | $252 | Business: $240 | Cheaper with SSO included |
+| Incogni Ironwall | $199 | Business: $240 | More coverage (600+ vs custom) |
+| DeleteMe Business | ~$100-150 (est.) | Team: $144 | Competitive, more automation |
+| Privacy Bee Enterprise | Custom | Enterprise: $420 | Transparent pricing |
+
+### Our Key Differentiators
+
+1. **AI Shield Protection** (Unique)
+   - Deepfake detection and prevention
+   - Voice cloning protection
+   - Facial recognition opt-outs
+   - No competitor offers this as integrated feature
+
+2. **Screenshot Verification**
+   - Before/after proof of removal
+   - Form submission screenshots
+   - Evidence for audits and compliance
+
+3. **Transparent Pricing**
+   - All tiers published (like Optery)
+   - No "contact sales" for basic plans
+   - Self-service signup for TEAM tier
+
+4. **SSO Included in BUSINESS**
+   - Optery charges $150/month extra for Core Pro
+   - We include SSO free in BUSINESS tier
+   - Major differentiator for mid-market
+
+5. **Executive Protection Add-on**
+   - Specialized C-suite offering at $149/mo
+   - Competes with Ironwall at $199/user/year
+   - Includes family coverage
+
+6. **Integrated Support System**
+   - Built-in ticket resolution
+   - Real-time progress tracking
+   - Transparency dashboard
 
 ---
 
@@ -226,14 +256,14 @@
 ### Phase 1: Stripe Products
 Create these Stripe price IDs:
 ```
-TEAM_MONTHLY: $15/user/month
-TEAM_ANNUAL: $180/user/year
-BUSINESS_MONTHLY: $25/user/month
-BUSINESS_ANNUAL: $300/user/year
-ENTERPRISE_MONTHLY: $40/user/month
-ENTERPRISE_ANNUAL: $480/user/year
-EXECUTIVE_MONTHLY: $199/person/month
-EXECUTIVE_ANNUAL: $2,388/person/year
+TEAM_MONTHLY: $12/user/month
+TEAM_ANNUAL: $144/user/year
+BUSINESS_MONTHLY: $20/user/month
+BUSINESS_ANNUAL: $240/user/year
+ENTERPRISE_MONTHLY: $35/user/month
+ENTERPRISE_ANNUAL: $420/user/year
+EXECUTIVE_MONTHLY: $149/person/month
+EXECUTIVE_ANNUAL: $1,788/person/year
 ```
 
 ### Phase 2: Database Schema
@@ -302,31 +332,33 @@ model OrganizationMember {
 
 ## Revenue Projections
 
+*Note: Lower per-user pricing aims to capture more market share*
+
 ### Conservative Scenario (Year 1)
 | Tier | Customers | Avg Seats | Monthly | Annual |
 |------|-----------|-----------|---------|--------|
-| Team | 15 | 8 | $1,800 | $21,600 |
-| Business | 8 | 25 | $5,000 | $60,000 |
-| Enterprise | 2 | 50 | $4,000 | $48,000 |
-| **Total** | **25** | - | **$10,800** | **$129,600** |
+| Team | 15 | 8 | $1,440 | $17,280 |
+| Business | 8 | 25 | $4,000 | $48,000 |
+| Enterprise | 2 | 50 | $3,500 | $42,000 |
+| **Total** | **25** | - | **$8,940** | **$107,280** |
 
 ### Moderate Scenario (Year 1)
 | Tier | Customers | Avg Seats | Monthly | Annual |
 |------|-----------|-----------|---------|--------|
-| Team | 40 | 10 | $6,000 | $72,000 |
-| Business | 20 | 35 | $17,500 | $210,000 |
-| Enterprise | 5 | 75 | $15,000 | $180,000 |
-| Executive | 10 | 1 | $1,990 | $23,880 |
-| **Total** | **75** | - | **$40,490** | **$485,880** |
+| Team | 40 | 10 | $4,800 | $57,600 |
+| Business | 20 | 35 | $14,000 | $168,000 |
+| Enterprise | 5 | 75 | $13,125 | $157,500 |
+| Executive | 10 | 1 | $1,490 | $17,880 |
+| **Total** | **75** | - | **$33,415** | **$400,980** |
 
 ### Aggressive Scenario (Year 1)
 | Tier | Customers | Avg Seats | Monthly | Annual |
 |------|-----------|-----------|---------|--------|
-| Team | 80 | 12 | $14,400 | $172,800 |
-| Business | 50 | 40 | $50,000 | $600,000 |
-| Enterprise | 15 | 100 | $54,000 | $648,000 |
-| Executive | 30 | 1 | $5,970 | $71,640 |
-| **Total** | **175** | - | **$124,370** | **$1,492,440** |
+| Team | 80 | 12 | $11,520 | $138,240 |
+| Business | 50 | 40 | $40,000 | $480,000 |
+| Enterprise | 15 | 100 | $47,250 | $567,000 |
+| Executive | 30 | 1 | $4,470 | $53,640 |
+| **Total** | **175** | - | **$103,240** | **$1,238,880** |
 
 ---
 
@@ -384,6 +416,14 @@ model OrganizationMember {
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: January 2026*
+---
+
+## References
+
+- [Competitive Research 2026](competitive-research-2026.md) - Detailed competitor analysis and pricing
+
+---
+
+*Document Version: 2.0*
+*Last Updated: February 2026*
 *Author: GhostMyData Product Team*

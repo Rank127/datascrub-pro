@@ -14,10 +14,10 @@
 - [ ] Create migration and deploy
 
 ### Phase 2: Stripe Products (Week 1)
-- [ ] Create TEAM plan products in Stripe ($15/user/month, $180/user/year)
-- [ ] Create BUSINESS plan products ($25/user/month, $300/user/year)
-- [ ] Create ENTERPRISE plan products ($40/user/month, $480/user/year)
-- [ ] Create EXECUTIVE add-on products ($199/person/month)
+- [ ] Create TEAM plan products in Stripe ($12/user/month, $144/user/year)
+- [ ] Create BUSINESS plan products ($20/user/month, $240/user/year)
+- [ ] Create ENTERPRISE plan products ($35/user/month, $420/user/year)
+- [ ] Create EXECUTIVE add-on products ($149/person/month, $1,788/year)
 - [ ] Add price IDs to environment variables
 
 ### Phase 3: Organization Management API (Week 2)

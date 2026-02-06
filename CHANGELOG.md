@@ -14,6 +14,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Browser automation for form-based opt-outs (Browserless.io)
 - Corporate Plans (TEAM, BUSINESS, ENTERPRISE tiers)
 
+## [1.28.1] - 2026-02-05
+
+### Documentation
+- **Competitive Research**: Added comprehensive competitor analysis (`docs/competitive-research-2026.md`)
+  - Analyzed 8 competitors: Optery, DeleteMe, Incogni, Kanary, Privacy Bee, OneRep, Aura
+  - Detailed pricing comparisons for consumer and business plans
+  - Key market insights and differentiation opportunities
+- **Corporate Plans Revised**: Updated pricing based on competitive research (`docs/corporate-plans.md`)
+  - TEAM: $15 → $12/user/mo (competitive with Optery Core Pro at $3.50)
+  - BUSINESS: $25 → $20/user/mo (undercuts Optery Ultimate at $21)
+  - ENTERPRISE: $40 → $35/user/mo
+  - EXECUTIVE: $199 → $149/person/mo (competes with Ironwall at $199/yr)
+  - Added SSO included in BUSINESS tier (Optery charges $150/mo extra)
+  - Updated competitive positioning and differentiators
+- **TODO Updated**: Revised Stripe product prices in implementation roadmap
+
 ---
 
 ## [1.28.0] - 2026-02-05
