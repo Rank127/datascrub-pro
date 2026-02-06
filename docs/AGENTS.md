@@ -4,231 +4,491 @@ This document provides comprehensive documentation for all AI-powered agents in 
 
 ## Overview
 
-AI agents are located in `/src/lib/agents/` and provide intelligent automation for various platform operations.
+The platform has **24 AI-powered agents** located in `/src/lib/agents/`. They provide intelligent automation across 8 domains using a hybrid AI + rule-based approach.
 
-## Available Agents
+## Agent Architecture
 
-| Agent | Purpose | Trigger |
-|-------|---------|---------|
-| Ticketing Agent | Auto-respond to support tickets | Event-driven |
-| SEO Agent | SEO optimization and reporting | Weekly cron |
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   ORCHESTRATOR (Router)                      │
+├─────────────────────────────────────────────────────────────┤
+│ ├─ Routes requests to appropriate agents                     │
+│ ├─ Manages circuit breakers for failed agents               │
+│ ├─ Coordinates multi-agent workflows                        │
+│ └─ Emits events for inter-agent communication               │
+└──────────────┬────────────────────────────────────────────┘
+               │
+   ┌───────────┼───────────┬──────────────┬──────────────┐
+   ▼           ▼           ▼              ▼              ▼
+CORE (7)   INTEL (3)  SUCCESS (2)    COMPLIANCE (2)  GROWTH (3)
+USER (3)   SPECIAL (3)  META (1)
+```
 
 ---
 
-## 1. Ticketing Agent
+## Agent Summary Table
 
-**Location:** `/src/lib/agents/ticketing-agent.ts`
+| # | Agent | Domain | Mode | Purpose |
+|---|-------|--------|------|---------|
+| 1 | RemovalAgent | Core | HYBRID | Data removal requests, batch processing |
+| 2 | ScanningAgent | Core | HYBRID | Privacy scans, deduplication, rescans |
+| 3 | SupportAgent | Core | AI | Ticket classification, auto-responses |
+| 4 | InsightsAgent | Core | HYBRID | Analytics, risk scoring, predictions |
+| 5 | CommunicationsAgent | Core | HYBRID | Email personalization, digests |
+| 6 | OperationsAgent | Core | HYBRID | Health checks, cleanup, monitoring |
+| 7 | BillingAgent | Core | HYBRID | Subscription sync, churn prediction |
+| 8 | BrokerIntelAgent | Intelligence | HYBRID | Broker monitoring, new broker detection |
+| 9 | ThreatIntelAgent | Intelligence | HYBRID | Dark web, breach detection |
+| 10 | CompetitiveIntelAgent | Intelligence | HYBRID | Competitor monitoring, pricing tracking |
+| 11 | ComplianceAgent | Compliance | HYBRID | GDPR/CCPA tracking, legal templates |
+| 12 | SecurityAgent | Security | HYBRID | Threat detection, fraud prevention |
+| 13 | ContentAgent | User Experience | AI | Blog posts, help articles, SEO content |
+| 14 | OnboardingAgent | User Experience | HYBRID | Personalized onboarding flows |
+| 15 | SEOAgent | User Experience | HYBRID | Technical audits, content optimization |
+| 16 | GrowthAgent | Growth | HYBRID | Referral optimization, viral loops |
+| 17 | PricingAgent | Growth | HYBRID | Dynamic discounts, plan recommendations |
+| 18 | PartnerAgent | Growth | HYBRID | Affiliate management, B2B outreach |
+| 19 | SuccessAgent | Customer Success | HYBRID | Health scoring, at-risk detection |
+| 20 | FeedbackAgent | Customer Success | AI | Sentiment analysis, NPS tracking |
+| 21 | EscalationAgent | Specialized | HYBRID | Stubborn brokers, legal escalation |
+| 22 | VerificationAgent | Specialized | HYBRID | Re-appearance monitoring, proof |
+| 23 | RegulatoryAgent | Specialized | HYBRID | Privacy law tracking, jurisdiction |
+| 24 | QAAgent | Meta | HYBRID | Validates all agents, regression testing |
+
+---
+
+## Core Operations Agents (7)
+
+### 1. RemovalAgent
+
+**Location:** `src/lib/agents/removal-agent/index.ts`
+**Mode:** HYBRID (AI + Rule-based fallback)
+
+**Capabilities:**
+- Strategy selection for optimal removal method
+- Batch processing of removal requests
+- Individual removal handling
+- Verification of completed removals
+
+**Replaces cron jobs:** `process-removals`, `verify-removals`
+
+---
+
+### 2. ScanningAgent
+
+**Location:** `src/lib/agents/scanning-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- Scan orchestration across multiple sources
+- Result analysis and deduplication
+- Monthly rescan automation
+- Exposure confidence scoring
+
+**Replaces cron jobs:** `monthly-rescan`
+
+---
+
+### 3. SupportAgent
+
+**Location:** `src/lib/agents/support-agent/index.ts`
+**Mode:** AI (Claude Sonnet 4)
+
+**Capabilities:**
+- Ticket classification and prioritization
+- AI response generation
+- Escalation detection
+- Auto-resolution for simple issues
+
 **Trigger:** Event-driven (on ticket creation and user comments)
 
-### Purpose
+**Response Guidelines:**
 
-AI-powered ticket analysis and response system using Claude that:
-- Automatically reviews new support tickets
-- Analyzes user comments on existing tickets
-- Generates professional, brand-aligned responses
-- Auto-resolves simple issues
-- Flags complex issues for human review
-- Creates manager review queue for important items
-
-### Trigger Points
-
-| Event | Endpoint | Action |
-|-------|----------|--------|
-| New ticket created | `POST /api/support/tickets` | `processNewTicket()` |
-| User adds comment | `POST /api/support/tickets/[id]/comments` | `processNewComment()` |
-
-### Response Flow
-
-```
-User creates ticket / adds comment
-              ↓
-     AI Agent analyzes content
-              ↓
-    ┌─────────┴─────────┐
-    │                   │
- Simple              Complex
-    │                   │
-Auto-resolve      Draft response
-Email user        Flag for review
-    │                   │
-    └─────────┬─────────┘
-              ↓
-   Log manager review items
-   (if applicable)
-```
-
-### AI Model
-
-- **Model:** Claude Sonnet 4
-- **Max tokens:** 1024
-- **API:** Anthropic SDK
-
-### Response Guidelines
-
-The agent follows strict professional guidelines:
-
-**DO:**
-- Maintain professional, positive, courteous tone
-- Thank users for patience and choosing GhostMyData
-- Frame issues positively
-- End responses with confidence in resolution
-
-**DON'T:**
-- Speak negatively about GhostMyData
-- Acknowledge shortcomings directly
-- Promise specific timeframes
-- Share technical implementation details
-
-### Response Framing Examples
-
-| Issue Type | Framing |
-|------------|---------|
-| Missing feature | "This capability is on our product roadmap" |
-| Bug/Error | "Our technical team is prioritizing this" |
-| Delay | "We appreciate your patience as we work diligently" |
-| Scan failure | "We're experiencing high demand. Please try again shortly" |
-| Removal taking long | "Data brokers have varying response times. We're persistently working on your behalf" |
-
-### Manager Review Queue
-
-The agent flags items for manager attention:
-
-**Items Flagged:**
-- Feature requests/gaps
-- Customer complaints
-- Recurring bugs or issues
-- Negative sentiment
-- Escalation-worthy issues
-
-**Notification:**
-- Internal comment with `[MANAGER REVIEW QUEUE]` tag
-- Email sent to `ADMIN_EMAILS` recipients
-- Retrievable via `getManagerReviewItems()` function
-
-### Exported Functions
-
-```typescript
-// Analyze a ticket and generate response
-analyzeTicket(context: TicketContext): Promise<AgentResponse>
-
-// Process a new ticket
-processNewTicket(ticketId: string): Promise<{
-  success: boolean;
-  autoResolved: boolean;
-  message: string;
-}>
-
-// Process a new user comment
-processNewComment(ticketId: string, commentContent: string): Promise<{
-  success: boolean;
-  responded: boolean;
-  message: string;
-}>
-
-// Get agent statistics
-getAgentStats(): Promise<{
-  totalProcessed: number;
-  autoResolved: number;
-  pendingReview: number;
-  averageResponseTime: number;
-}>
-
-// Get manager review items for dashboard
-getManagerReviewItems(): Promise<Array<{
-  ticketId: string;
-  ticketNumber: string;
-  items: string[];
-  createdAt: Date;
-}>>
-```
-
-### AgentResponse Interface
-
-```typescript
-interface AgentResponse {
-  canAutoResolve: boolean;      // Can resolve without human
-  response: string;             // Message to send to user
-  suggestedActions: string[];   // Internal actions to take
-  priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
-  needsHumanReview: boolean;    // Needs human review before sending
-  internalNote: string;         // Note for support staff
-  managerReviewItems: string[]; // Items for manager attention
-}
-```
-
-### Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `ANTHROPIC_API_KEY` | Yes | Claude API access key |
-| `ADMIN_EMAILS` | No | Comma-separated admin emails for alerts |
-| `RESEND_API_KEY` | No | For sending manager alert emails |
-| `RESEND_FROM_EMAIL` | No | Sender email for alerts |
-
-### Internal Comments
-
-The agent creates internal comments (not visible to users):
-
-| Tag | Purpose |
-|-----|---------|
-| `[AI AGENT ANALYSIS]` | Analysis of ticket/comment |
-| `[AI DRAFT RESPONSE]` | Draft response needing human review |
-| `[MANAGER REVIEW QUEUE]` | Items flagged for manager |
+| DO | DON'T |
+|----|-------|
+| Be professional and courteous | Speak negatively about GhostMyData |
+| Thank users for patience | Promise specific timeframes |
+| Frame issues positively | Share technical implementation details |
 
 ---
 
-## 2. SEO Agent
+### 4. InsightsAgent
 
-**Location:** `/src/lib/seo-agent/`
-**Trigger:** Weekly cron (`/api/cron/seo-agent`)
-**Schedule:** Sunday @ 09:00 UTC
+**Location:** `src/lib/agents/insights-agent/index.ts`
+**Mode:** HYBRID
 
-### Components
+**Capabilities:**
+- Risk scoring (0-100)
+- Report generation
+- Trend predictions
+- Personalized recommendations
 
-| File | Purpose | Lines |
-|------|---------|-------|
-| `technical-audit.ts` | Technical SEO analysis | ~516 |
-| `content-optimizer.ts` | Content quality analysis | ~396 |
-| `blog-generator.ts` | Blog topic generation | ~291 |
-| `report-generator.ts` | Report compilation | ~318 |
-| `index.ts` | Module exports | ~7 |
+**Replaces cron jobs:** `reports`
 
-### What It Does
+---
 
-1. **Technical Audit**
-   - Checks metadata, structured data
-   - Analyzes performance metrics
-   - Evaluates mobile responsiveness
+### 5. CommunicationsAgent
 
-2. **Content Analysis**
-   - Analyzes 27 priority pages
-   - Checks keyword optimization
-   - Evaluates content quality
+**Location:** `src/lib/agents/communications-agent/index.ts`
+**Mode:** HYBRID
 
-3. **Blog Generation**
-   - Generates topic ideas
-   - Analyzes keyword gaps
-   - Creates content calendar
+**Capabilities:**
+- Email personalization
+- Send timing optimization
+- Digest generation
+- Follow-up reminders
 
-4. **Reporting**
-   - Calculates overall SEO score (0-100)
-   - Identifies critical issues
-   - Stores reports to database
-   - Sends alerts if score < 70
+**Replaces cron jobs:** `follow-up-reminders`, `removal-digest`, `free-user-digest`
 
-### Manual Trigger
+---
 
+### 6. OperationsAgent
+
+**Location:** `src/lib/agents/operations-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- System health checks
+- Link validation
+- Database cleanup
+- Anomaly detection
+
+**Replaces cron jobs:** `health-check`, `link-checker`
+
+---
+
+### 7. BillingAgent
+
+**Location:** `src/lib/agents/billing-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- Subscription synchronization with Stripe
+- Churn prediction
+- Upsell opportunity detection
+
+**Replaces cron jobs:** `sync-subscriptions`
+
+---
+
+## Intelligence Agents (3)
+
+### 8. BrokerIntelAgent
+
+**Location:** `src/lib/agents/broker-intel-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- Monitor data brokers for changes
+- Detect new brokers entering the market
+- Track opt-out URL and process changes
+- Alert on broker policy updates
+
+---
+
+### 9. ThreatIntelAgent
+
+**Location:** `src/lib/agents/threat-intel-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- Dark web surveillance
+- Breach detection and correlation
+- Emerging threat tracking
+- User exposure correlation
+
+---
+
+### 10. CompetitiveIntelAgent
+
+**Location:** `src/lib/agents/competitive-intel-agent/index.ts`
+**Mode:** HYBRID
+
+**Monitored Competitors:**
+- DeleteMe, Privacy Duck, Kanary, Incogni, Optery
+
+**Capabilities:**
+- Pricing change detection
+- Feature gap analysis
+- Market trend analysis
+- Competitor monitoring
+
+---
+
+## Compliance & Security Agents (2)
+
+### 11. ComplianceAgent
+
+**Location:** `src/lib/agents/compliance-agent/index.ts`
+**Mode:** HYBRID
+
+**Covered Jurisdictions:**
+- GDPR (EU/UK)
+- CCPA/CPRA (California)
+- VCDPA (Virginia)
+- CPA (Colorado)
+- CTDPA (Connecticut)
+- LGPD (Brazil)
+
+**Capabilities:**
+- Compliance checking
+- Legal template generation
+- Regulatory monitoring
+- Policy enforcement
+
+---
+
+### 12. SecurityAgent
+
+**Location:** `src/lib/agents/security-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- Threat detection
+- Suspicious activity monitoring
+- Breach notifications
+- Fraud prevention
+
+---
+
+## User Experience Agents (3)
+
+### 13. ContentAgent
+
+**Location:** `src/lib/agents/content-agent/index.ts`
+**Mode:** AI
+
+**Capabilities:**
+- Blog post generation
+- Help article creation
+- Marketing copy
+- SEO content optimization
+
+---
+
+### 14. OnboardingAgent
+
+**Location:** `src/lib/agents/onboarding-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- Personalized onboarding flows
+- First-scan guidance
+- Feature recommendations
+- Milestone tracking
+
+---
+
+### 15. SEOAgent
+
+**Location:** `src/lib/agents/seo-agent/index.ts`
+**Mode:** HYBRID
+**Schedule:** Weekly (Sunday @ 09:00 UTC)
+
+**Components:**
+| File | Purpose |
+|------|---------|
+| `technical-audit.ts` | Technical SEO analysis |
+| `content-optimizer.ts` | Content quality analysis |
+| `blog-generator.ts` | Blog topic generation |
+| `report-generator.ts` | Report compilation |
+
+**Manual Trigger:**
 ```bash
 curl -X POST "https://ghostmydata.com/api/cron/seo-agent" \
-  -H "Authorization: Bearer YOUR_CRON_SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "runTechnicalAudit": true,
-    "runContentAnalysis": true,
-    "generateBlogIdeas": true,
-    "sendEmailReport": true
-  }'
+  -H "Authorization: Bearer YOUR_CRON_SECRET"
 ```
+
+---
+
+## Growth & Revenue Agents (3)
+
+### 16. GrowthAgent
+
+**Location:** `src/lib/agents/growth-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- Referral program optimization
+- Viral loop analysis
+- Power user identification
+- Testimonial collection
+
+---
+
+### 17. PricingAgent
+
+**Location:** `src/lib/agents/pricing-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+| Capability | Description |
+|------------|-------------|
+| `optimize-discounts` | Calculate optimal discounts for conversion |
+| `recommend-plan` | Recommend best plan for user |
+| `manage-ab-tests` | Manage pricing experiments |
+
+**Usage:**
+```typescript
+import { recommendPlan } from "@/lib/agents/pricing-agent";
+
+const recommendation = await recommendPlan("user_123");
+// Returns: { recommendedPlan: "PRO", reasons: [...], valueProps: [...] }
+```
+
+---
+
+### 18. PartnerAgent
+
+**Location:** `src/lib/agents/partner-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- Affiliate management
+- B2B relationship tracking
+- Enterprise prospect identification
+- Partnership outreach
+
+---
+
+## Customer Success Agents (2)
+
+### 19. SuccessAgent
+
+**Location:** `src/lib/agents/success-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- User health score calculation (0-100)
+- Proactive outreach triggers
+- Milestone detection
+- At-risk user identification
+
+---
+
+### 20. FeedbackAgent
+
+**Location:** `src/lib/agents/feedback-agent/index.ts`
+**Mode:** AI
+
+**Capabilities:**
+- Feedback analysis
+- Sentiment tracking
+- Feature prioritization suggestions
+- NPS tracking and analysis
+
+---
+
+## Specialized Operations Agents (3)
+
+### 21. EscalationAgent
+
+**Location:** `src/lib/agents/escalation-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- Stubborn broker handling
+- Legal escalation path determination
+- Complex case management
+- Attorney general complaint preparation
+
+---
+
+### 22. VerificationAgent
+
+**Location:** `src/lib/agents/verification-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- Re-appearance monitoring
+- Screenshot proof collection
+- Long-term removal tracking
+- Verification scheduling
+
+---
+
+### 23. RegulatoryAgent
+
+**Location:** `src/lib/agents/regulatory-agent/index.ts`
+**Mode:** HYBRID
+
+**Capabilities:**
+- Privacy law tracking by state/country
+- Jurisdiction-specific handling
+- International expansion support
+- Regulatory update monitoring
+
+---
+
+## Meta Agent (1)
+
+### 24. QAAgent
+
+**Location:** `src/lib/agents/qa-agent/index.ts`
+**Mode:** HYBRID
+
+**Scope:** Monitors and validates all 24 agents
+
+**Capabilities:**
+- Agent validation and testing
+- Regression testing
+- Anomaly detection across agents
+- QA report generation
+- Performance monitoring
+
+---
+
+## Supporting Infrastructure
+
+### Intelligence Coordinator
+
+**Location:** `src/lib/agents/intelligence-coordinator/index.ts`
+
+Coordinates agent-to-agent communication:
+- Job locking to prevent race conditions
+- Dependency management between agents
+- Broker intelligence aggregation
+- Predictive insights generation
+
+### Agent Orchestrator
+
+**Location:** `src/lib/agents/orchestrator/index.ts`
+
+Central router for all agent requests:
+- Request routing to appropriate agents
+- Workflow management
+- Circuit breaker for failed agents
+- Event emission for logging
+
+---
+
+## Agent Distribution
+
+### By Mode
+
+| Mode | Count | Description |
+|------|-------|-------------|
+| HYBRID | 21 | AI with rule-based fallback |
+| AI | 3 | Pure AI (Support, Content, Feedback) |
+
+### By Automation
+
+| Type | Count | Mechanism |
+|------|-------|-----------|
+| Automated (CRON) | 20+ | Scheduled background jobs |
+| Event-Driven | 24 | All support event triggers |
+| On-Demand | 24 | All support manual invocation |
+
+---
+
+## Environment Variables
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `ANTHROPIC_API_KEY` | Yes | Claude API for AI agents |
+| `ADMIN_EMAILS` | No | Alert recipients |
+| `RESEND_API_KEY` | No | Email notifications |
+| `CRON_SECRET` | Yes | Cron job authentication |
 
 ---
 
@@ -237,43 +497,51 @@ curl -X POST "https://ghostmydata.com/api/cron/seo-agent" \
 ### Template
 
 ```typescript
-// src/lib/agents/my-agent.ts
+// src/lib/agents/my-agent/index.ts
 
-import { PrismaClient } from "@prisma/client";
-import Anthropic from "@anthropic-ai/sdk";
+import { BaseAgent } from "../base-agent";
+import { AgentCapability, AgentDomains, AgentModes } from "../types";
+import { registerAgent } from "../registry";
 
-const prisma = new PrismaClient();
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || "",
-});
+class MyAgent extends BaseAgent {
+  readonly id = "my-agent";
+  readonly name = "My Agent";
+  readonly domain = AgentDomains.CORE;
+  readonly mode = AgentModes.HYBRID;
+  readonly version = "1.0.0";
+  readonly description = "Does something useful";
 
-const SYSTEM_PROMPT = `Your agent instructions here...`;
+  readonly capabilities: AgentCapability[] = [
+    { id: "do-thing", name: "Do Thing", description: "...", requiresAI: true },
+  ];
 
-export async function processTask(input: TaskInput): Promise<TaskOutput> {
-  try {
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: buildPrompt(input) }],
-    });
-
-    // Parse and return response
-    return parseResponse(message);
-  } catch (error) {
-    console.error("Agent error:", error);
-    return fallbackResponse(error);
+  protected getSystemPrompt(): string {
+    return `You are My Agent. Your job is to...`;
   }
+
+  protected registerHandlers(): void {
+    this.handlers.set("do-thing", this.handleDoThing.bind(this));
+  }
+
+  private async handleDoThing(input: unknown, context: AgentContext) {
+    // Implementation
+  }
+}
+
+export function getMyAgent(): MyAgent {
+  const agent = new MyAgent();
+  registerAgent(agent);
+  return agent;
 }
 ```
 
 ### Best Practices
 
 1. **Error Handling** - Always provide fallback responses
-2. **Non-Blocking** - Call agents asynchronously where possible
-3. **Logging** - Log agent actions for debugging
-4. **Rate Limiting** - Consider API rate limits
-5. **Testing** - Test prompts thoroughly before deployment
+2. **Non-Blocking** - Call agents asynchronously
+3. **Logging** - Log actions for debugging
+4. **Rate Limiting** - Respect API limits
+5. **Testing** - Test prompts thoroughly
 6. **Monitoring** - Track success/failure rates
 
 ---
@@ -282,70 +550,26 @@ export async function processTask(input: TaskInput): Promise<TaskOutput> {
 
 ### Agent Statistics
 
-Access via `getAgentStats()`:
-- Total tickets processed
-- Auto-resolved count
-- Pending human review count
+Access via agent's `getStats()` method:
+- Total requests processed
+- Success/failure rates
 - Average response time
+- Circuit breaker status
 
 ### Logs
 
-Agent actions are logged:
+All agents log:
 - Console logs for debugging
-- Internal ticket comments for audit trail
-- Manager review queue for escalations
+- Database records for audit trail
+- Error tracking via Sentry (if configured)
 
 ### Alerts
 
-- Manager review emails for flagged items
-- SEO agent alerts for low scores (<70)
+- Manager review emails for escalations
+- SEO alerts for low scores (<70)
+- Security alerts for threats
 
 ---
 
-## Real-Time Dashboard Updates
-
-The platform uses React Query for polling-based real-time updates.
-
-### Setup
-
-**Provider:** `/src/lib/query-provider.tsx`
-- Wraps app in `QueryClientProvider`
-- Default stale time: 10 seconds
-- Refetch on window focus enabled
-
-### Available Hooks
-
-**Location:** `/src/hooks/`
-
-| Hook | Purpose | Polling Interval |
-|------|---------|------------------|
-| `useAlerts()` | User alerts | 30 seconds |
-| `useAdminTickets()` | Admin ticket list | 20 seconds |
-| `useTicketStats()` | Ticket statistics | 30 seconds |
-| `useUserTickets()` | User's own tickets | 30 seconds |
-
-### Toast Notifications
-
-Hooks automatically show toast notifications for:
-- New tickets (admin)
-- Ticket status changes
-- New responses on tickets
-- New alerts
-
-### Usage Example
-
-```typescript
-import { useAlerts, useAdminTickets } from "@/hooks";
-
-function Dashboard() {
-  const { alerts, unreadCount } = useAlerts();
-  const { tickets, total } = useAdminTickets({ status: "OPEN" });
-
-  return (
-    <div>
-      <span>Unread: {unreadCount}</span>
-      <span>Open tickets: {total}</span>
-    </div>
-  );
-}
-```
+*Last Updated: February 2026*
+*Agents Count: 24*

@@ -14,6 +14,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Browser automation for form-based opt-outs (Browserless.io)
 - Corporate Plans (TEAM, BUSINESS, ENTERPRISE tiers)
 
+## [1.29.0] - 2026-02-06
+
+### Added
+- **Mobile App Project** - Created Expo/React Native mobile app
+  - Repository: https://github.com/Rank127/ghostmydata-mobile
+  - Expo SDK 54 with TypeScript
+  - Expo Router for file-based navigation
+  - Screens: Login (with 2FA + biometrics), Dashboard, Exposures, Removals, Settings
+  - Zustand for state management, React Query for API caching
+  - Secure token storage with expo-secure-store
+  - iOS and Android support from single codebase
+
+### Documentation
+- **Mobile App Planning** (`docs/mobile-app-planning.md`) - Timeline, costs, feature phases
+- **Mobile App Technical Spec** (`docs/mobile-app-technical-spec.md`) - Full technical specification
+  - Market research: Most competitors (DeleteMe, Incogni, Optery) have NO mobile apps
+  - Legal/compliance: GDPR, CCPA, App Store requirements
+  - 40+ existing API endpoints ready for mobile consumption
+  - Cost breakdown: ~$1,400/year for DIY approach
+- **Executive White-Glove Analysis** (`docs/executive-white-glove-analysis.md`)
+  - Human-assisted service pricing model
+  - Staffing and margin analysis
+  - Recommended tiers: $199/$349/$499 per month
+
+---
+
 ## [1.28.1] - 2026-02-05
 
 ### Documentation
