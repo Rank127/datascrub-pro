@@ -25,6 +25,7 @@ function RegisterForm() {
   const searchParams = useSearchParams();
   const discount = searchParams?.get("discount");
   const referralCode = searchParams?.get("ref");
+  const callbackUrl = searchParams?.get("callbackUrl");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -79,8 +80,11 @@ function RegisterForm() {
       trackSignUp("email");
       trackEvents.completeRegistration();
 
-      // Redirect to login with success message
-      router.push("/login?registered=true");
+      // Redirect to login with success message, preserving callbackUrl for family invitations
+      const loginUrl = callbackUrl
+        ? `/login?registered=true&callbackUrl=${encodeURIComponent(callbackUrl)}`
+        : "/login?registered=true";
+      router.push(loginUrl);
     } catch {
       setError("An error occurred. Please try again.");
     } finally {
