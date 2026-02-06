@@ -477,28 +477,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   // ==========================================
   // B2B & PROFESSIONAL DATA SITES
   // ==========================================
-  INDEED: {
-    name: "Indeed.com",
-    optOutUrl: "https://www.indeed.com/settings/account",
-    privacyEmail: "privacy@indeed.com",
-    removalMethod: "BOTH",
-    estimatedDays: 30,
-    notes: "Requires account deletion through settings",
-  },
-  ZIPRECRUITER: {
-    name: "ZipRecruiter.com",
-    optOutUrl: "https://www.ziprecruiter.com/profile",
-    privacyEmail: "privacy@ziprecruiter.com",
-    removalMethod: "BOTH",
-    estimatedDays: 30,
-  },
-  LADDERS: {
-    name: "TheLadders.com",
-    optOutUrl: "https://www.theladders.com/settings",
-    privacyEmail: "privacy@theladders.com",
-    removalMethod: "BOTH",
-    estimatedDays: 30,
-  },
+  // REMOVED: Indeed, ZipRecruiter, TheLadders - NOT data brokers (direct user relationship)
+  // Users create accounts directly, provide their own data voluntarily
+  // See: Cal. Civ. Code § 1798.99.80(d) - data broker requires NO direct relationship
   OWLER: {
     name: "Owler.com",
     optOutUrl: "https://www.owler.com/optout",
@@ -4944,41 +4925,10 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "EMAIL",
     estimatedDays: 14,
   },
-  GREENHOUSE_DATA: {
-    name: "Greenhouse Recruiting",
-    optOutUrl: "https://www.greenhouse.io/privacy-policy",
-    privacyEmail: "privacy@greenhouse.io",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  LEVER_DATA: {
-    name: "Lever (Employ Inc.)",
-    optOutUrl: "https://www.lever.co/privacy-policy/",
-    privacyEmail: "privacy@lever.co",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  SMARTRECRUITERS: {
-    name: "SmartRecruiters",
-    optOutUrl: "https://www.smartrecruiters.com/legal/privacy-policy/",
-    privacyEmail: "privacy@smartrecruiters.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  JOBVITE_DATA: {
-    name: "Jobvite",
-    optOutUrl: "https://www.jobvite.com/privacy-policy/",
-    privacyEmail: "privacy@jobvite.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  WORKDAY_DATA: {
-    name: "Workday",
-    optOutUrl: "https://www.workday.com/en-us/company/about-workday/privacy.html",
-    privacyEmail: "privacy@workday.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 30,
-  },
+  // REMOVED: Greenhouse, Lever, SmartRecruiters, Jobvite, Workday
+  // NOT data brokers - these are HR/ATS platforms where users apply for jobs directly
+  // Users have direct relationship through job applications
+  // See: Cal. Civ. Code § 1798.99.80(d) - data broker requires NO direct relationship
 
   // Legal & Court Records
   PACER_RECORDS: {
@@ -6427,8 +6377,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   ALIGNABLE: { name: "Alignable", optOutUrl: "https://alignable.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
   MEETUP_DATA: { name: "Meetup", optOutUrl: "https://meetup.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
   EVENTBRITE_DATA: { name: "Eventbrite", optOutUrl: "https://eventbrite.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
-  ANGELLIST: { name: "AngelList", optOutUrl: "https://angel.co/privacy", removalMethod: "FORM", estimatedDays: 14 },
-  WELLFOUND: { name: "Wellfound", optOutUrl: "https://wellfound.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
+  // REMOVED: AngelList, Wellfound - NOT data brokers (job platforms with direct user accounts)
   FHUNT: { name: "F6S", optOutUrl: "https://f6s.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
   GUST: { name: "Gust", optOutUrl: "https://gust.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
   STARTUPNATION: { name: "StartupNation", optOutUrl: "https://startupnation.com/privacy", removalMethod: "FORM", estimatedDays: 14 },
@@ -13143,8 +13092,9 @@ export const BROKER_CATEGORIES = {
   ],
   EMPLOYMENT_DATA: [
     "THE_WORK_NUMBER", "ADP_VERIFICATION", "PAYCHEX_DATA", "TALENTIQ",
-    "HIBOB_DATA", "GREENHOUSE_DATA", "LEVER_DATA", "SMARTRECRUITERS",
-    "JOBVITE_DATA", "WORKDAY_DATA"
+    "HIBOB_DATA"
+    // REMOVED: GREENHOUSE_DATA, LEVER_DATA, SMARTRECRUITERS, JOBVITE_DATA, WORKDAY_DATA
+    // These are ATS/recruiting platforms with direct user relationships, not data brokers
   ],
   LEGAL_RECORDS: [
     "PACER_RECORDS", "COURTLINK_LN", "WESTLAW_COURT", "COURTRECORDS_ORG",

@@ -36,6 +36,99 @@ export interface BlocklistedCompany {
  * Companies that must NOT receive automated deletion/opt-out requests
  */
 export const BLOCKLISTED_COMPANIES: BlocklistedCompany[] = [
+  // ============================================================================
+  // DIRECT RELATIONSHIP PLATFORMS (NOT DATA BROKERS)
+  // Per Cal. Civ. Code § 1798.99.80(d) and similar state laws, a "data broker"
+  // is a business that collects and sells personal info of consumers with whom
+  // the business does NOT have a direct relationship.
+  // These platforms have direct user relationships - users create accounts and
+  // provide their own data voluntarily.
+  // ============================================================================
+  {
+    name: "ZipRecruiter",
+    domains: ["ziprecruiter.com"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts and provide their own data. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-06",
+    contactedBy: "Crystal Skelton, VP Corporate Counsel",
+    notes: "Received C&D letter on 2026-02-06. Users delete accounts directly via settings or privacy@ziprecruiter.com.",
+  },
+  {
+    name: "Indeed",
+    domains: ["indeed.com"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts and provide their own job search data.",
+    dateAdded: "2026-02-06",
+    notes: "Job search platform. Users delete accounts directly via settings.",
+  },
+  {
+    name: "LinkedIn",
+    domains: ["linkedin.com"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts and manage their own professional profiles.",
+    dateAdded: "2026-02-06",
+    notes: "Professional networking platform. Users delete accounts directly via settings.",
+  },
+  {
+    name: "TheLadders",
+    domains: ["theladders.com"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts for job searching.",
+    dateAdded: "2026-02-06",
+    notes: "Job search platform. Users delete accounts directly via settings.",
+  },
+  {
+    name: "Glassdoor",
+    domains: ["glassdoor.com"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts for job searching and company reviews.",
+    dateAdded: "2026-02-06",
+    notes: "Job search and company review platform. Users delete accounts directly via settings.",
+  },
+  {
+    name: "AngelList / Wellfound",
+    domains: ["angel.co", "wellfound.com"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts for startup jobs and investing.",
+    dateAdded: "2026-02-06",
+    notes: "Startup job platform. Wellfound is rebranded AngelList Talent. Users delete accounts directly.",
+  },
+  {
+    name: "Greenhouse",
+    domains: ["greenhouse.io"],
+    reason: "NOT a data broker - ATS platform where users apply for jobs directly. Direct relationship through job applications.",
+    dateAdded: "2026-02-06",
+    notes: "Applicant Tracking System. Users apply through employer career pages. Delete via employer or privacy@greenhouse.io.",
+  },
+  {
+    name: "Lever",
+    domains: ["lever.co"],
+    reason: "NOT a data broker - ATS platform where users apply for jobs directly. Direct relationship through job applications.",
+    dateAdded: "2026-02-06",
+    notes: "Applicant Tracking System. Users apply through employer career pages. Delete via employer or privacy@lever.co.",
+  },
+  {
+    name: "SmartRecruiters",
+    domains: ["smartrecruiters.com"],
+    reason: "NOT a data broker - ATS platform where users apply for jobs directly. Direct relationship through job applications.",
+    dateAdded: "2026-02-06",
+    notes: "Applicant Tracking System. Users apply through employer career pages.",
+  },
+  {
+    name: "Jobvite",
+    domains: ["jobvite.com"],
+    reason: "NOT a data broker - ATS platform where users apply for jobs directly. Direct relationship through job applications.",
+    dateAdded: "2026-02-06",
+    notes: "Applicant Tracking System. Users apply through employer career pages.",
+  },
+  {
+    name: "Workday",
+    domains: ["workday.com"],
+    reason: "NOT a data broker - HR/ATS platform where users apply for jobs directly. Direct relationship through job applications.",
+    dateAdded: "2026-02-06",
+    notes: "HR and Applicant Tracking System. Users apply through employer career pages.",
+  },
+
+  // ============================================================================
+  // DATA PROCESSORS (NOT DATA BROKERS)
+  // Per GDPR Articles 28/29, Data Processors only process data on behalf of
+  // Data Controllers (their clients). Deletion requests should go to the
+  // Data Controller, not the Processor.
+  // ============================================================================
   {
     name: "Syndigo",
     domains: ["syndigo.com"],
@@ -80,6 +173,20 @@ export const BLOCKLISTED_COMPANIES: BlocklistedCompany[] = [
  * Blocklisted email domains - never send automated emails to these
  */
 export const BLOCKLISTED_EMAIL_DOMAINS: string[] = [
+  // Direct relationship platforms (not data brokers)
+  "ziprecruiter.com",
+  "indeed.com",
+  "linkedin.com",
+  "theladders.com",
+  "glassdoor.com",
+  "angel.co",
+  "wellfound.com",
+  "greenhouse.io",
+  "lever.co",
+  "smartrecruiters.com",
+  "jobvite.com",
+  "workday.com",
+  // Data processors
   "syndigo.com",
   "powerreviews.com",
   "1worldsync.com",
