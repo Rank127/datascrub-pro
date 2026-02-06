@@ -9,30 +9,47 @@
 
 This document outlines the plan to launch GhostMyData on iOS and Android. The recommended approach is **Expo (React Native)** for cost efficiency and code reuse with our existing Next.js/TypeScript stack.
 
-**Recommended Timeline:** Start after Corporate Plans launch (Month 3-4)
+**Recommended Timeline:** Start NOW - Parallel with Corporate Plans (Week 1)
 
 ---
 
 ## Strategic Timing
 
-### Why Wait for Corporate Plans First?
+### Parallel Approach (Recommended)
 
 | Factor | Rationale |
 |--------|-----------|
-| **Revenue** | Corporate plans generate immediate revenue to fund app development |
-| **API Stability** | Corporate features will finalize our API structure |
-| **Focus** | Splitting focus delays both projects |
-| **Dependencies** | Mobile app consumes same API - better if API is stable |
+| **App Store Discovery** | Passive user acquisition channel - people searching for data removal |
+| **Credibility** | Having an app builds trust for corporate sales ("10K users") |
+| **Same API** | Mobile app consumes existing API - no backend changes needed |
+| **Different Work** | Mobile = UI work, Corporate = backend + billing - can run in parallel |
 
-### Suggested Timeline
+### Parallel Timeline
 
 ```
-Month 1-2:  Corporate Plans implementation
-Month 2-3:  Corporate launch, first B2B customers
-Month 3-4:  Mobile app development begins
-Month 5:    Mobile app MVP launch (iOS + Android)
-Month 6+:   Iterate based on user feedback, add corporate mobile features
+Week 1-2:   Mobile: Expo setup, auth, dashboard
+            Corporate: Stripe products, DB schema
+
+Week 2-4:   Mobile: Exposures list, removals, push notifications
+            Corporate: Organization API, member management
+
+Week 4-5:   Mobile: Polish, submit to App Store + Google Play
+            Corporate: Dashboard UI, billing webhooks
+
+Week 5-6:   Mobile: In review (1-7 days)
+            Corporate: SSO integration, testing
+
+Week 6:     LAUNCH BOTH
+            - Mobile app live in stores
+            - Corporate plans available
 ```
+
+### Why Parallel Works
+
+1. **Mobile app is mostly UI** - consumes existing `/api/*` endpoints
+2. **Corporate is mostly backend** - new billing logic, org management
+3. **Minimal overlap** - different codebases, different concerns
+4. **App store review takes time** - submit early, iterate while waiting
 
 ---
 

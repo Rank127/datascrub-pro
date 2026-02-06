@@ -13,12 +13,24 @@
 
 ---
 
-## Priority Order
+## Priority Order (Parallel Approach)
 
-1. **Corporate Plans** - New revenue stream (4-6 weeks)
-2. **Mobile App** - After corporate launch (8-12 weeks)
-3. **Executive White-Glove** - When executive customers exist
-4. **SMS Alerts** - When 10DLC approved
+```
+Week 1-2:  Start Mobile App MVP + Stripe corporate products setup
+Week 2-4:  Mobile MVP (login, dashboard, exposures) + Corporate DB schema
+Week 4-5:  Submit app to stores + Corporate API development
+Week 5-6:  App in review + Corporate dashboard UI
+Week 6:    LAUNCH BOTH
+```
+
+| Track | Timeline | Owner |
+|-------|----------|-------|
+| **Mobile App MVP** | Weeks 1-5 | Dev 1 / You |
+| **Corporate Plans** | Weeks 1-6 | Dev 2 / You |
+| **Executive White-Glove** | After launch | When customers exist |
+| **SMS Alerts** | When ready | After 10DLC approved |
+
+**Why parallel:** App stores provide discovery; corporate provides revenue. Both use same API.
 
 ---
 
@@ -78,9 +90,9 @@
 
 ## Mobile App (iOS + Android)
 
-**Status:** Planning Complete
+**Status:** Ready to Start (Parallel with Corporate)
 **Reference:** [docs/mobile-app-planning.md](mobile-app-planning.md)
-**Start:** After Corporate Plans launch (Month 3-4)
+**Start:** NOW (Week 1)
 **Technology:** Expo (React Native)
 **Cost:** ~$1,400/year (Apple + Expo EAS)
 
