@@ -14,6 +14,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Browser automation for form-based opt-outs (Browserless.io)
 - Corporate Plans (TEAM, BUSINESS, ENTERPRISE tiers)
 
+## [1.29.2] - 2026-02-06
+
+### Changed
+- **Data Broker Directory Compliance** - Removed non-data-brokers in response to ZipRecruiter C&D letter
+  - **Legal basis**: Per Cal. Civ. Code § 1798.99.80(d), a "data broker" must have NO direct relationship with consumers
+  - Job platforms and ATS systems have direct user relationships (users create accounts, provide their own data)
+  - This is fundamentally different from actual data brokers who aggregate data without user consent
+
+### Removed
+- **Job Platforms** (NOT data brokers - direct user relationship):
+  - ZipRecruiter, Indeed, TheLadders, Glassdoor
+  - AngelList, Wellfound (startup job platforms)
+- **ATS/HR Platforms** (NOT data brokers - users apply directly):
+  - Greenhouse, Lever, SmartRecruiters, Jobvite, Workday
+
+### Added
+- **Expanded Blocklist** (`src/lib/removers/blocklist.ts`)
+  - Added 11 job/HR platforms to blocklist with legal documentation
+  - Added domains to `BLOCKLISTED_EMAIL_DOMAINS` to prevent automated emails
+  - Documented legal basis for each entry
+
+### Documentation
+- Created response letter template for ZipRecruiter C&D compliance
+  - `Emails-Returns/Response-to-ZipRecruiter-CeaseDesist-2026-02-06.md`
+
+---
+
 ## [1.29.1] - 2026-02-06
 
 ### Fixed
