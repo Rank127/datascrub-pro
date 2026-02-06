@@ -91,10 +91,10 @@ Week 6:    LAUNCH BOTH
 
 ## Mobile App (iOS + Android)
 
-**Status:** Ready to Start (Parallel with Corporate)
-**Reference:** [docs/mobile-app-planning.md](mobile-app-planning.md)
-**Start:** NOW (Week 1)
-**Technology:** Expo (React Native)
+**Status:** Project Created - In Development
+**Repository:** https://github.com/Rank127/ghostmydata-mobile
+**Reference:** [docs/mobile-app-planning.md](mobile-app-planning.md) | [docs/mobile-app-technical-spec.md](mobile-app-technical-spec.md)
+**Technology:** Expo SDK 54 (React Native + TypeScript)
 **Cost:** ~$1,400/year (Apple + Expo EAS)
 
 ### Pre-Development
