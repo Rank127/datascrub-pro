@@ -599,11 +599,23 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
   };
 }
 
+// Helper to calculate effective plan considering family membership
+function calculateEffectivePlan(
+  userPlan: string,
+  familyMembership: { familyGroup: { owner: { subscription: { plan: string } | null } } } | null
+): string {
+  // If user is a family member, check if owner has Enterprise
+  if (familyMembership?.familyGroup?.owner?.subscription?.plan === "ENTERPRISE") {
+    return "ENTERPRISE";
+  }
+  return userPlan;
+}
+
 async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMetrics> {
   const sevenDaysAgo = getDaysAgo(7);
   const thirtyDaysAgo = getDaysAgo(30);
 
-  // Recent signups
+  // Recent signups - include family membership to calculate effective plan
   const recentSignups = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
     take: 10,
@@ -613,6 +625,21 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
       name: true,
       plan: true,
       createdAt: true,
+      familyMembership: {
+        select: {
+          familyGroup: {
+            select: {
+              owner: {
+                select: {
+                  subscription: {
+                    select: { plan: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
 
@@ -734,7 +761,7 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
     },
   });
 
-  // Top users by activity
+  // Top users by activity - include family membership to calculate effective plan
   const topUsers = await prisma.user.findMany({
     take: 10,
     select: {
@@ -742,6 +769,21 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
       email: true,
       name: true,
       plan: true,
+      familyMembership: {
+        select: {
+          familyGroup: {
+            select: {
+              owner: {
+                select: {
+                  subscription: {
+                    select: { plan: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       _count: {
         select: {
           scans: true,
@@ -768,7 +810,7 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
       id: u.id,
       email: maskFn(u.email),
       name: u.name,
-      plan: u.plan,
+      plan: calculateEffectivePlan(u.plan, u.familyMembership),
       createdAt: u.createdAt.toISOString(),
     })),
     recentScans: recentScans.map((s) => ({
@@ -799,7 +841,7 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
       id: u.id,
       email: maskFn(u.email),
       name: u.name,
-      plan: u.plan,
+      plan: calculateEffectivePlan(u.plan, u.familyMembership),
       scansCount: u._count.scans,
       exposuresCount: u._count.exposures,
       lastActive: u.scans[0]?.createdAt.toISOString() || "",
