@@ -44,6 +44,9 @@ interface User {
   name: string | null;
   role: string;
   plan: string;
+  effectivePlan: string;
+  planSource: "DIRECT" | "FAMILY" | "FREE";
+  familyOwner: string | null;
   createdAt: string;
   emailVerified: string | null;
   _count: {
@@ -251,9 +254,16 @@ export function UserManagementSection() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={planColors[user.plan] || planColors.FREE}>
-                            {user.plan}
-                          </Badge>
+                          <div className="flex flex-col gap-1">
+                            <Badge variant="outline" className={planColors[user.effectivePlan] || planColors.FREE}>
+                              {user.effectivePlan}
+                            </Badge>
+                            {user.planSource === "FAMILY" && (
+                              <span className="text-xs text-slate-500">
+                                via {user.familyOwner}
+                              </span>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="text-sm text-slate-400">
