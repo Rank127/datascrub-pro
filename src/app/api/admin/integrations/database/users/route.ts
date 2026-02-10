@@ -42,6 +42,21 @@ export async function GET(request: Request) {
         name: true,
         plan: true,
         createdAt: true,
+        familyMembership: {
+          select: {
+            familyGroup: {
+              select: {
+                owner: {
+                  select: {
+                    subscription: {
+                      select: { plan: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
         _count: {
           select: {
             scans: true,
@@ -54,15 +69,25 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json({
-      users: users.map((u) => ({
-        id: u.id,
-        email: u.email,
-        name: u.name,
-        plan: u.plan,
-        createdAt: u.createdAt,
-        scanCount: u._count.scans,
-        exposureCount: u._count.exposures,
-      })),
+      users: users.map((u) => {
+        let effectivePlan = u.plan;
+        if (effectivePlan !== "ENTERPRISE" && u.familyMembership) {
+          const ownerPlan = u.familyMembership.familyGroup.owner.subscription?.plan;
+          if (ownerPlan === "ENTERPRISE") {
+            effectivePlan = "ENTERPRISE";
+          }
+        }
+        return {
+          id: u.id,
+          email: u.email,
+          name: u.name,
+          plan: u.plan,
+          effectivePlan,
+          createdAt: u.createdAt,
+          scanCount: u._count.scans,
+          exposureCount: u._count.exposures,
+        };
+      }),
       total: users.length,
     });
   } catch (error) {

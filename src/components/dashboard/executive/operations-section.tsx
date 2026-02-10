@@ -53,6 +53,7 @@ interface UserWithExposures {
   email: string;
   name: string | null;
   plan: string;
+  effectivePlan?: string;
   createdAt: string;
   _count?: {
     exposures: number;
@@ -127,7 +128,7 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
       // Sort by plan: ENTERPRISE > PRO > FREE
       const planOrder: Record<string, number> = { ENTERPRISE: 0, PRO: 1, FREE: 2 };
       let sortedUsers = (result.users || []).sort((a: UserWithExposures, b: UserWithExposures) => {
-        return (planOrder[a.plan] ?? 3) - (planOrder[b.plan] ?? 3);
+        return (planOrder[a.effectivePlan || a.plan] ?? 3) - (planOrder[b.effectivePlan || b.plan] ?? 3);
       });
 
       // For submitted/completed, sort by relevant count descending
@@ -618,14 +619,14 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
                       <TableCell>
                         <Badge
                           className={
-                            user.plan === "ENTERPRISE"
+                            (user.effectivePlan || user.plan) === "ENTERPRISE"
                               ? "bg-emerald-500/20 text-emerald-400"
-                              : user.plan === "PRO"
+                              : (user.effectivePlan || user.plan) === "PRO"
                               ? "bg-blue-500/20 text-blue-400"
                               : "bg-slate-500/20 text-slate-400"
                           }
                         >
-                          {user.plan}
+                          {user.effectivePlan || user.plan}
                         </Badge>
                       </TableCell>
                       {(dialogType === "submitted" || dialogType === "completed") ? (

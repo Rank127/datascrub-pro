@@ -36,6 +36,7 @@ interface UserDetails {
   email: string | null;
   name: string | null;
   plan: string;
+  effectivePlan?: string;
   createdAt: string;
   scanCount: number;
   exposureCount: number;
@@ -423,11 +424,11 @@ export function DatabaseSection({
                     variant="outline"
                     className={cn(
                       "ml-2 flex-shrink-0",
-                      user.plan === "PRO" && "border-emerald-500/50 text-emerald-400",
-                      user.plan === "ENTERPRISE" && "border-purple-500/50 text-purple-400"
+                      (user.effectivePlan || user.plan) === "PRO" && "border-emerald-500/50 text-emerald-400",
+                      (user.effectivePlan || user.plan) === "ENTERPRISE" && "border-purple-500/50 text-purple-400"
                     )}
                   >
-                    {user.plan}
+                    {user.effectivePlan || user.plan}
                   </Badge>
                 </div>
               ))

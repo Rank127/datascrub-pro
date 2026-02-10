@@ -40,6 +40,7 @@ interface UserListItem {
   email: string;
   name: string | null;
   plan: string;
+  effectivePlan?: string;
   createdAt: string;
 }
 
@@ -332,14 +333,14 @@ export function FinanceSection({ data }: FinanceSectionProps) {
                       <TableCell>
                         <Badge
                           className={
-                            user.plan === "ENTERPRISE"
+                            (user.effectivePlan || user.plan) === "ENTERPRISE"
                               ? "bg-emerald-500/20 text-emerald-400"
-                              : user.plan === "PRO"
+                              : (user.effectivePlan || user.plan) === "PRO"
                               ? "bg-blue-500/20 text-blue-400"
                               : "bg-slate-500/20 text-slate-400"
                           }
                         >
-                          {user.plan}
+                          {user.effectivePlan || user.plan}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-slate-400">
