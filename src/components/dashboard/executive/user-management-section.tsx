@@ -47,6 +47,7 @@ interface User {
   effectivePlan: string;
   planSource: "DIRECT" | "FAMILY" | "FREE";
   familyOwner: string | null;
+  familyGroupInfo: { memberCount: number; maxMembers: number } | null;
   createdAt: string;
   emailVerified: string | null;
   _count: {
@@ -258,7 +259,11 @@ export function UserManagementSection() {
                             <Badge variant="outline" className={planColors[user.effectivePlan] || planColors.FREE}>
                               {user.effectivePlan}
                             </Badge>
-                            {user.planSource === "FAMILY" && (
+                            {user.familyGroupInfo ? (
+                              <span className="text-xs text-emerald-500">
+                                Owner ({user.familyGroupInfo.memberCount}/{user.familyGroupInfo.maxMembers})
+                              </span>
+                            ) : user.planSource === "FAMILY" && (
                               <span className="text-xs text-slate-500">
                                 via {user.familyOwner}
                               </span>

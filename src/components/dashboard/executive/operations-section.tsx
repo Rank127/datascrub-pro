@@ -54,6 +54,10 @@ interface UserWithExposures {
   name: string | null;
   plan: string;
   effectivePlan?: string;
+  planSource?: "DIRECT" | "FAMILY" | "FREE";
+  familyOwner?: string | null;
+  familyRole?: string | null;
+  familyGroupInfo?: { memberCount: number; maxMembers: number } | null;
   createdAt: string;
   _count?: {
     exposures: number;
@@ -592,6 +596,7 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
                     <TableHead className="text-slate-400">Email</TableHead>
                     <TableHead className="text-slate-400">Name</TableHead>
                     <TableHead className="text-slate-400">Plan</TableHead>
+                    <TableHead className="text-slate-400">Family</TableHead>
                     {(dialogType === "submitted" || dialogType === "completed") ? (
                       <>
                         <TableHead className="text-slate-400 text-center">Total</TableHead>
@@ -628,6 +633,19 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
                         >
                           {user.effectivePlan || user.plan}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {user.familyGroupInfo ? (
+                          <span className="text-xs text-emerald-400">
+                            Owner ({user.familyGroupInfo.memberCount}/{user.familyGroupInfo.maxMembers})
+                          </span>
+                        ) : user.planSource === "FAMILY" && user.familyOwner ? (
+                          <span className="text-xs text-slate-400">
+                            via {user.familyOwner}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-slate-600">—</span>
+                        )}
                       </TableCell>
                       {(dialogType === "submitted" || dialogType === "completed") ? (
                         <>
