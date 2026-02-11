@@ -619,7 +619,7 @@ function ExposuresPageContent() {
             </div>
             <div className="space-y-1">
               <label className="text-xs text-slate-500">Status</label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
                 <SelectTrigger className="w-48 bg-slate-700/50 border-slate-600">
                   <SelectValue />
                 </SelectTrigger>
@@ -636,7 +636,7 @@ function ExposuresPageContent() {
             </div>
             <div className="space-y-1">
               <label className="text-xs text-slate-500">Severity</label>
-              <Select value={severityFilter} onValueChange={setSeverityFilter}>
+              <Select value={severityFilter} onValueChange={(value) => { setSeverityFilter(value); setPage(1); }}>
                 <SelectTrigger className="w-40 bg-slate-700/50 border-slate-600">
                   <SelectValue />
                 </SelectTrigger>

@@ -3,6 +3,7 @@
 
 import { prisma } from "@/lib/db";
 import { encrypt, decrypt, hashData } from "@/lib/encryption/crypto";
+import { getEffectivePlan } from "@/lib/family/family-service";
 
 export interface DNCRegistrationInput {
   phoneNumber: string;
@@ -78,18 +79,12 @@ export function displayPhoneNumber(phone: string): string {
 
 /**
  * Check if user has Enterprise plan (required for DNC feature)
+ * Uses effective plan to support family members who inherit Enterprise access
  */
 export async function checkDNCAccess(userId: string): Promise<{ hasAccess: boolean; reason?: string }> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { plan: true },
-  });
+  const effectivePlan = await getEffectivePlan(userId);
 
-  if (!user) {
-    return { hasAccess: false, reason: "User not found" };
-  }
-
-  if (user.plan !== "ENTERPRISE") {
+  if (effectivePlan !== "ENTERPRISE") {
     return { hasAccess: false, reason: "DNC registration requires Enterprise plan" };
   }
 

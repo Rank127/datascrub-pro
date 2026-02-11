@@ -165,13 +165,17 @@ function generateMonthlyReports(exposures: ExposureWithRequest[]) {
   });
 
   // Convert to array and sort by date (newest first)
+  const today = new Date();
   const reports = Object.entries(monthlyData)
     .map(([monthKey, data]) => {
       const date = new Date(monthKey + "-01");
+      const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+      // Cap at today's date so current/future months don't show a future date
+      const generatedDate = lastDayOfMonth > today ? today : lastDayOfMonth;
       return {
         id: monthKey,
         period: date.toLocaleDateString("en-US", { month: "long", year: "numeric" }),
-        generatedAt: new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split("T")[0], // Last day of month
+        generatedAt: generatedDate.toISOString().split("T")[0],
         stats: {
           newExposures: data.newExposures,
           removedExposures: data.removedExposures,
