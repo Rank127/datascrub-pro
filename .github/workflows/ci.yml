@@ -35,8 +35,10 @@ jobs:
       - name: E2E Tests
         run: npm run test:e2e
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          AUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          # Use real secrets if configured, otherwise use test values
+          # Login/register page tests only need auth middleware to work (no real DB)
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'ci-test-secret-not-for-production-use' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://ci:ci@localhost:5432/ci_test' }}
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
