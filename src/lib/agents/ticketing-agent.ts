@@ -63,7 +63,7 @@ Return your response as JSON with this structure:
   "managerReviewItems": string[] // items that need manager attention (feature gaps, complaints, bugs, trends)
 }`;
 
-interface TicketContext {
+export interface TicketContext {
   id: string;
   ticketNumber: string;
   type: string;

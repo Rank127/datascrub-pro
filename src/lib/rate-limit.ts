@@ -44,7 +44,7 @@ const defaultConfigs: Record<string, RateLimitConfig> = {
 // ============================================================================
 
 let redis: Redis | null = null;
-let upstashRatelimiters: Map<string, Ratelimit> = new Map();
+const upstashRatelimiters: Map<string, Ratelimit> = new Map();
 
 /**
  * Initialize Upstash Redis connection

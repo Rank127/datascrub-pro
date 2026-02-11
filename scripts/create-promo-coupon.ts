@@ -30,8 +30,8 @@ async function createPromoCoupon() {
       console.log(`   - Duration: ${existing.duration}`);
       console.log(`   - Name: ${existing.name}`);
       return;
-    } catch (e: any) {
-      if (e.code !== "resource_missing") {
+    } catch (e: unknown) {
+      if (e instanceof Error && (e as Error & { code?: string }).code !== "resource_missing") {
         throw e;
       }
       // Coupon doesn't exist, continue to create
@@ -68,8 +68,8 @@ async function createPromoCoupon() {
     console.log(`   - Code: ${promoCode.code}`);
     console.log(`   - Active: ${promoCode.active}`);
 
-  } catch (error: any) {
-    console.error("❌ Error creating coupon:", error.message);
+  } catch (error: unknown) {
+    console.error("❌ Error creating coupon:", error instanceof Error ? error.message : error);
     process.exit(1);
   }
 }

@@ -5,6 +5,7 @@
  */
 
 import { PrismaClient } from "@prisma/client";
+import type { TicketContext } from "../src/lib/agents/ticketing-agent";
 
 const prisma = new PrismaClient();
 
@@ -135,7 +136,7 @@ async function main() {
     console.log("\n⏳ Analyzing with AI...\n");
 
     try {
-      const result = await analyzeTicket(testCase.context as any);
+      const result = await analyzeTicket(testCase.context as TicketContext);
 
       console.log("📤 AI Response:");
       console.log("-".repeat(30));

@@ -24,7 +24,7 @@ const notifications = [
 ];
 
 // Track recently shown notifications to avoid repetition
-let recentlyShown: number[] = [];
+const recentlyShown: number[] = [];
 const MAX_RECENT = 8; // Don't repeat until at least 8 others shown
 
 function getRandomNotification() {

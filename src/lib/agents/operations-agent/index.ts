@@ -702,7 +702,7 @@ class OperationsAgent extends BaseAgent {
       }
 
       const actionsToken: EmailDeliveryResult["actionsToken"] = [];
-      let removalRequestsUpdated = 0;
+      const removalRequestsUpdated = 0;
 
       // If we found problem emails, update affected removal requests
       if (problemEmails.length > 0) {

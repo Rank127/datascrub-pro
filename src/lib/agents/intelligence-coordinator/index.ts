@@ -383,7 +383,7 @@ class IntelligenceCoordinator {
       brokers.map(async (broker) => {
         const intel = await this.getBrokerIntelligence(broker.source);
         let priority = 50; // Base priority
-        let reasons: string[] = [];
+        const reasons: string[] = [];
 
         // Higher success rate = higher priority
         if (intel.successRate >= 80) {
