@@ -11,7 +11,7 @@ import type { HealthStatus } from "@/lib/standup";
 
 export const maxDuration = 60;
 
-const ADMIN_EMAIL = "developer@ghostmydata.com";
+const ADMIN_EMAIL = "rocky@ghostmydata.com";
 const JOB_NAME = "daily-standup";
 
 function getResend() {
