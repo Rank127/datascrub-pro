@@ -190,7 +190,7 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
                           <p className="text-xs text-slate-500">{user.email}</p>
                         </div>
                       </TableCell>
-                      <TableCell>{getPlanBadge(user.plan)}</TableCell>
+                      <TableCell>{getPlanBadge(user.effectivePlan || user.plan)}</TableCell>
                       <TableCell className="text-slate-400 text-sm">
                         {formatDate(user.createdAt)}
                       </TableCell>
@@ -314,7 +314,7 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
                         <p className="text-xs text-slate-500">{user.email}</p>
                       </div>
                     </TableCell>
-                    <TableCell>{getPlanBadge(user.plan)}</TableCell>
+                    <TableCell>{getPlanBadge(user.effectivePlan || user.plan)}</TableCell>
                     <TableCell className="text-center">
                       <span className="text-blue-400 font-medium">{user.scansCount}</span>
                     </TableCell>
@@ -452,7 +452,7 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-800/50 rounded-lg p-3">
                   <p className="text-xs text-slate-400 mb-1">Plan</p>
-                  {getPlanBadge(selectedItem.plan)}
+                  {getPlanBadge(selectedItem.effectivePlan || selectedItem.plan)}
                 </div>
                 <div className="bg-slate-800/50 rounded-lg p-3">
                   <p className="text-xs text-slate-400 mb-1">Joined</p>
@@ -775,13 +775,13 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
               </div>
               <div className="bg-slate-800/50 rounded-lg p-3 text-center">
                 <p className="text-2xl font-bold text-blue-400">
-                  {data.recentSignups.filter(u => u.plan === "PRO").length}
+                  {data.recentSignups.filter(u => (u.effectivePlan || u.plan) === "PRO").length}
                 </p>
                 <p className="text-xs text-slate-400">Pro</p>
               </div>
               <div className="bg-slate-800/50 rounded-lg p-3 text-center">
                 <p className="text-2xl font-bold text-emerald-400">
-                  {data.recentSignups.filter(u => u.plan === "ENTERPRISE").length}
+                  {data.recentSignups.filter(u => (u.effectivePlan || u.plan) === "ENTERPRISE").length}
                 </p>
                 <p className="text-xs text-slate-400">Enterprise</p>
               </div>

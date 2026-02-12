@@ -248,6 +248,21 @@ async function getFinanceMetrics(): Promise<FinanceMetrics> {
     const totalUsers = await prisma.user.count();
     planCounts.FREE = Math.max(0, totalUsers - planCounts.PRO - planCounts.ENTERPRISE);
 
+    // Adjust for family members who inherit ENTERPRISE through family group
+    const familyEnterpriseMembers = await prisma.familyMember.count({
+      where: {
+        familyGroup: {
+          owner: {
+            subscription: { plan: "ENTERPRISE" },
+          },
+        },
+      },
+    });
+    if (familyEnterpriseMembers > 0) {
+      planCounts.ENTERPRISE += familyEnterpriseMembers;
+      planCounts.FREE = Math.max(0, planCounts.FREE - familyEnterpriseMembers);
+    }
+
     return {
       mrr,
       mrrGrowth: Math.round(mrrGrowth * 100) / 100,
@@ -274,6 +289,21 @@ async function getFinanceMetrics(): Promise<FinanceMetrics> {
         planCounts[item.plan as keyof typeof planCounts] = item._count;
       }
     });
+
+    // Adjust for family members who inherit ENTERPRISE through family group
+    const familyEnterpriseMembers = await prisma.familyMember.count({
+      where: {
+        familyGroup: {
+          owner: {
+            subscription: { plan: "ENTERPRISE" },
+          },
+        },
+      },
+    });
+    if (familyEnterpriseMembers > 0) {
+      planCounts.ENTERPRISE += familyEnterpriseMembers;
+      planCounts.FREE = Math.max(0, planCounts.FREE - familyEnterpriseMembers);
+    }
 
     // Use hardcoded prices as fallback
     const FALLBACK_PRICES = { PRO: 1199, ENTERPRISE: 2999 };
@@ -810,7 +840,8 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
       id: u.id,
       email: maskFn(u.email),
       name: u.name,
-      plan: calculateEffectivePlan(u.plan, u.familyMembership),
+      plan: u.plan,
+      effectivePlan: calculateEffectivePlan(u.plan, u.familyMembership),
       createdAt: u.createdAt.toISOString(),
     })),
     recentScans: recentScans.map((s) => ({
@@ -841,7 +872,8 @@ async function getActivitiesMetrics(isSuperAdmin: boolean): Promise<ActivitiesMe
       id: u.id,
       email: maskFn(u.email),
       name: u.name,
-      plan: calculateEffectivePlan(u.plan, u.familyMembership),
+      plan: u.plan,
+      effectivePlan: calculateEffectivePlan(u.plan, u.familyMembership),
       scansCount: u._count.scans,
       exposuresCount: u._count.exposures,
       lastActive: u.scans[0]?.createdAt.toISOString() || "",

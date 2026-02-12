@@ -139,6 +139,7 @@ export interface UserActivity {
   email: string; // Masked for non-SUPER_ADMIN
   name: string | null;
   plan: string;
+  effectivePlan?: string; // Effective plan considering family membership
   createdAt: string;
 }
 
@@ -167,6 +168,7 @@ export interface TopUser {
   email: string; // Masked
   name: string | null;
   plan: string;
+  effectivePlan?: string; // Effective plan considering family membership
   scansCount: number;
   exposuresCount: number;
   lastActive: string;
