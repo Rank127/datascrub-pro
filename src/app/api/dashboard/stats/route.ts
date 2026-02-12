@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectivePlan } from "@/lib/family/family-service";
 import { DataSourceNames } from "@/lib/types";
-import { getSubsidiaries, getConsolidationParent, isParentBroker, getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
+import { getSubsidiaries, getConsolidationParent, isParentBroker, getDataBrokerInfo, getBrokerCount } from "@/lib/removers/data-broker-directory";
 import { BLOCKLISTED_COMPANIES } from "@/lib/removers/blocklist";
 
 // Data Processor sources that should be excluded from analytics
@@ -462,6 +462,11 @@ export async function GET() {
       timeSaved,
       trends,
       brokerStats,
+      // Max exposure context: how many brokers exist vs how many have user data
+      maxExposure: {
+        found: brokerStatsMap.size,
+        totalKnown: getBrokerCount(),
+      },
       // Existing
       recentExposures,
       removalProgress: {

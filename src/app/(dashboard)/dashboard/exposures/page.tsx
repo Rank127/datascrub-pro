@@ -41,10 +41,14 @@ import {
   Crown,
   Zap,
   Shield,
+  Globe,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trackRemovalRequested } from "@/components/analytics/google-analytics";
+import { getBrokerCount } from "@/lib/removers/data-broker-directory";
 import type { DataSource, Severity, ExposureStatus } from "@/lib/types";
+
+const TOTAL_KNOWN_BROKERS = getBrokerCount();
 
 interface Exposure {
   id: string;
@@ -509,7 +513,7 @@ function ExposuresPageContent() {
                   Your Data is Exposed - Take Action Now
                 </h3>
                 <p className="text-slate-300 mt-1 max-w-xl">
-                  Free accounts can only view exposures. <strong className="text-amber-300">Upgrade to Pro</strong> to automatically remove your personal information from data brokers and protect your privacy.
+                  Your data is exposed on <strong className="text-amber-300">{totalExposures}</strong> of <strong className="text-amber-300">{TOTAL_KNOWN_BROKERS.toLocaleString()}+</strong> known broker sites. <strong className="text-amber-300">Upgrade to Pro</strong> to start removing it automatically and protect your privacy.
                 </p>
                 <div className="flex items-center gap-4 mt-3 text-sm">
                   <span className="flex items-center gap-1 text-emerald-400">
@@ -531,6 +535,20 @@ function ExposuresPageContent() {
               </Button>
             </Link>
           </div>
+        </div>
+      )}
+
+      {/* Monitoring context for paid users */}
+      {!showUpgradeBanner && totalExposures > 0 && (
+        <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-sm text-slate-400">
+          <Globe className="h-4 w-4 text-blue-400 shrink-0" />
+          <span>
+            Monitoring <strong className="text-slate-300">{TOTAL_KNOWN_BROKERS.toLocaleString()}+</strong> data broker sites
+            {" "}&bull;{" "}
+            <strong className="text-orange-400">{stats?.byStatus?.ACTIVE || 0}</strong> active exposures
+            {" "}&bull;{" "}
+            <strong className="text-emerald-400">{stats?.byStatus?.REMOVED || 0}</strong> removed
+          </span>
         </div>
       )}
 

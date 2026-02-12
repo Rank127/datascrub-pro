@@ -25,7 +25,10 @@ import {
   Crown,
 } from "lucide-react";
 import Link from "next/link";
+import { getBrokerCount } from "@/lib/removers/data-broker-directory";
 import { trackScanStarted, trackScanCompleted } from "@/components/analytics/google-analytics";
+
+const TOTAL_KNOWN_BROKERS = getBrokerCount();
 
 interface Scan {
   id: string;
@@ -387,6 +390,40 @@ export default function ScanPage() {
                       <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">
                         {scanResult.severityCounts.low} Low
                       </Badge>
+                    )}
+                  </div>
+                )}
+
+                {/* Max Exposure Warning */}
+                {scanResult.exposuresFound > 0 && (
+                  <div className="mx-auto max-w-lg p-4 rounded-lg border border-orange-500/30 bg-orange-500/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-5 w-5 text-orange-400" />
+                      <span className="font-semibold text-orange-300">Your Data Exposure is Significant</span>
+                    </div>
+                    <p className="text-sm text-slate-300 mb-3">
+                      We found your data on <strong className="text-white">{scanResult.exposuresFound} sites</strong> out of <strong className="text-white">{TOTAL_KNOWN_BROKERS.toLocaleString()}+</strong> known data broker sites.
+                      {isFreePlan
+                        ? " Without protection, your data stays exposed and continues to spread."
+                        : " We're actively working to remove your data from these sites."}
+                    </p>
+                    <div className="w-full bg-slate-700 rounded-full h-2">
+                      <div
+                        className="bg-orange-500 h-2 rounded-full transition-all"
+                        style={{ width: `${Math.max(1, (scanResult.exposuresFound / TOTAL_KNOWN_BROKERS) * 100)}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-slate-500 mt-1">
+                      <span>{scanResult.exposuresFound} found</span>
+                      <span>{TOTAL_KNOWN_BROKERS.toLocaleString()}+ known sites</span>
+                    </div>
+                    {isFreePlan && (
+                      <Link href="/pricing" className="block mt-3">
+                        <Button size="sm" className="w-full bg-orange-600 hover:bg-orange-700">
+                          <Shield className="mr-2 h-4 w-4" />
+                          Upgrade to remove your data automatically
+                        </Button>
+                      </Link>
                     )}
                   </div>
                 )}

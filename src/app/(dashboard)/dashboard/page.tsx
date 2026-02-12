@@ -84,6 +84,7 @@ interface DashboardData {
     estimatedValue: number;
   };
   brokerStats: BrokerStat[];
+  maxExposure?: { found: number; totalKnown: number };
 }
 
 export default function DashboardPage() {
@@ -214,6 +215,7 @@ export default function DashboardPage() {
         totalCount={stats.totalExposures}
         timeSaved={timeSaved}
         riskScore={stats.riskScore}
+        maxExposure={data?.maxExposure}
       />
 
       {/* 2. Quick Stats - Collapsible inline stats */}

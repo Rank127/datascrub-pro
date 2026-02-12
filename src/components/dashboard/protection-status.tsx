@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Shield, Clock, AlertTriangle } from "lucide-react";
+import { Shield, Clock, AlertTriangle, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
@@ -16,6 +16,7 @@ interface ProtectionStatusProps {
     estimatedValue: number;
   };
   riskScore: number;
+  maxExposure?: { found: number; totalKnown: number };
   className?: string;
 }
 
@@ -25,6 +26,7 @@ export function ProtectionStatus({
   totalCount,
   timeSaved,
   riskScore,
+  maxExposure,
   className,
 }: ProtectionStatusProps) {
   // Protection score color
@@ -74,7 +76,7 @@ export function ProtectionStatus({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Protection Score */}
           <Link
             href="/dashboard/exposures"
@@ -129,6 +131,26 @@ export function ProtectionStatus({
                   )}
                 />
               ))}
+            </div>
+          </Link>
+
+          {/* Exposure Reach */}
+          <Link
+            href="/dashboard/exposures"
+            className="p-3 bg-slate-900/50 rounded-lg hover:bg-slate-900/70 transition-colors cursor-pointer"
+          >
+            <div className="text-xs text-slate-400 mb-1">Exposure Reach</div>
+            <div className="text-2xl font-bold text-orange-400 flex items-center gap-1">
+              <Globe className="h-4 w-4" />
+              {maxExposure?.found ?? 0}
+            </div>
+            <Progress
+              value={maxExposure ? (maxExposure.found / maxExposure.totalKnown) * 100 : 0}
+              className="h-1.5 mt-2 bg-slate-700"
+              indicatorClassName="bg-orange-500"
+            />
+            <div className="text-xs text-slate-500 mt-1">
+              of {maxExposure?.totalKnown?.toLocaleString() ?? "2,000"}+ broker sites
             </div>
           </Link>
         </div>
