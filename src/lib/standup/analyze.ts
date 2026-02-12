@@ -41,7 +41,7 @@ Respond ONLY with valid JSON matching this schema:
   "concerns": ["0-5 issues needing attention, with specific numbers"],
   "actionItems": [{"priority": "HIGH"|"MEDIUM"|"LOW", "action": "specific action to take", "rationale": "why this matters"}],
   "suggestions": ["2-3 improvement recommendations based on trends, with specific context from the data"],
-  "agentReport": "1-2 paragraph summary of agent fleet health and performance",
+  "agentReport": "1-2 paragraph summary of agent fleet health and performance. Call out specific agents by name — highlight any with low confidence (<70%), high fallback rates, high human review rates, or that appear idle. Recommend specific improvements for underperforming agents.",
   "operationsReport": "1-2 paragraph summary of removal pipeline and scan activity",
   "financialReport": "1-2 paragraph summary of plan distribution and growth",
   "brokerReport": "1-2 paragraph summary of broker performance and trends"
@@ -128,6 +128,35 @@ function generateRuleBasedAnalysis(metrics: StandupMetrics): StandupAnalysis {
     concerns.push(
       `${metrics.agents.degraded} agent(s) degraded — monitoring recommended`
     );
+  }
+
+  // --- Per-agent insights ---
+  for (const agent of metrics.agents.agents) {
+    if (agent.avgConfidence !== null && agent.avgConfidence < 70 && agent.executions24h > 0) {
+      concerns.push(
+        `Agent "${agent.agentId}" has low confidence (${agent.avgConfidence.toFixed(0)}%) — outputs may need review`
+      );
+    }
+    if (agent.executions24h > 0 && agent.fallbackCount / agent.executions24h > 0.3) {
+      concerns.push(
+        `Agent "${agent.agentId}" used fallback in ${agent.fallbackCount}/${agent.executions24h} executions (${((agent.fallbackCount / agent.executions24h) * 100).toFixed(0)}%)`
+      );
+    }
+    if (agent.humanReviewRate !== null && agent.humanReviewRate > 20) {
+      suggestions.push(
+        `Agent "${agent.agentId}" has a ${agent.humanReviewRate.toFixed(0)}% human review rate. Consider tuning its prompts or thresholds to reduce manual intervention.`
+      );
+    }
+    if (agent.executions24h === 0 && agent.lastRun && agent.status !== "HEALTHY") {
+      concerns.push(
+        `Agent "${agent.agentId}" has not run in 24h but is in ${agent.status} state`
+      );
+    }
+    if (agent.estimatedCost24h > 0.50) {
+      suggestions.push(
+        `Agent "${agent.agentId}" is the most expensive at $${agent.estimatedCost24h.toFixed(2)} in 24h. Review for cost optimization.`
+      );
+    }
   }
 
   // --- Cron health ---

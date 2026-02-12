@@ -143,6 +143,65 @@ export function formatStandupEmail(
     : "";
 
   // --- Agent Performance ---
+  // Build per-agent detail table (show agents that executed or are non-healthy)
+  const visibleAgents = metrics.agents.agents.filter(
+    (a) => a.executions24h > 0 || a.status !== "HEALTHY"
+  );
+
+  function formatAgentName(agentId: string): string {
+    return agentId
+      .replace(/-agent$/i, "")
+      .split("-")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  }
+
+  const agentDetailRows = visibleAgents
+    .sort((a, b) => b.executions24h - a.executions24h)
+    .map((agent) => {
+      let statusColor: string;
+      if (agent.status === "HEALTHY") statusColor = "#10b981";
+      else if (agent.status === "DEGRADED") statusColor = "#f59e0b";
+      else statusColor = "#ef4444";
+
+      const successStr = agent.successRate24h !== null
+        ? `${agent.successRate24h.toFixed(0)}%`
+        : "—";
+      const confidenceStr = agent.avgConfidence !== null
+        ? `${agent.avgConfidence.toFixed(0)}%`
+        : "—";
+      const costStr = `$${agent.estimatedCost24h.toFixed(2)}`;
+      const capsStr = agent.recentCapabilities.length > 0
+        ? agent.recentCapabilities.join(", ")
+        : "(idle)";
+
+      return `<tr style="border-bottom: 1px solid #1e293b;">
+        <td style="padding: 4px 8px; color: ${statusColor}; font-size: 12px;">&#9679;</td>
+        <td style="padding: 4px 8px; color: #e2e8f0; font-size: 12px; font-weight: 600;">${formatAgentName(agent.agentId)}</td>
+        <td style="padding: 4px 8px; color: #94a3b8; font-size: 12px; text-align: center;">${agent.executions24h}</td>
+        <td style="padding: 4px 8px; color: ${agent.successRate24h !== null && agent.successRate24h < 80 ? "#f59e0b" : "#94a3b8"}; font-size: 12px; text-align: center;">${successStr}</td>
+        <td style="padding: 4px 8px; color: ${agent.avgConfidence !== null && agent.avgConfidence < 70 ? "#f59e0b" : "#94a3b8"}; font-size: 12px; text-align: center;">${confidenceStr}</td>
+        <td style="padding: 4px 8px; color: #94a3b8; font-size: 12px; text-align: right;">${costStr}</td>
+        <td style="padding: 4px 8px; color: #64748b; font-size: 11px;">${capsStr}</td>
+      </tr>`;
+    })
+    .join("");
+
+  const agentDetailTable = visibleAgents.length > 0
+    ? `<table style="width: 100%; border-collapse: collapse; margin: 12px 0;">
+        <tr style="border-bottom: 1px solid #334155;">
+          <th style="text-align: left; padding: 4px 8px; color: #94a3b8; font-size: 11px;"></th>
+          <th style="text-align: left; padding: 4px 8px; color: #94a3b8; font-size: 11px;">Agent</th>
+          <th style="text-align: center; padding: 4px 8px; color: #94a3b8; font-size: 11px;">Execs</th>
+          <th style="text-align: center; padding: 4px 8px; color: #94a3b8; font-size: 11px;">Success</th>
+          <th style="text-align: center; padding: 4px 8px; color: #94a3b8; font-size: 11px;">Confidence</th>
+          <th style="text-align: right; padding: 4px 8px; color: #94a3b8; font-size: 11px;">Cost</th>
+          <th style="text-align: left; padding: 4px 8px; color: #94a3b8; font-size: 11px;">What It Did</th>
+        </tr>
+        ${agentDetailRows}
+      </table>`
+    : "";
+
   const agentSection = card(
     "Agent Performance",
     `<div style="display: flex; justify-content: space-around; margin-bottom: 16px;">
@@ -156,6 +215,7 @@ export function formatStandupEmail(
       ${statBox("Cost", `$${metrics.agents.totalCost24h.toFixed(4)}`, "#94a3b8")}
       <!--[if mso]></td></tr></table><![endif]-->
     </div>
+    ${agentDetailTable}
     <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 0;">${analysis.agentReport}</p>`
   );
 

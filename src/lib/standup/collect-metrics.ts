@@ -26,6 +26,14 @@ export interface AgentHealthMetrics {
     estimatedCost24h: number;
     consecutiveFailures: number;
     lastRun: Date | null;
+    avgExecutionTime: number | null;
+    avgConfidence: number | null;
+    humanReviewRate: number | null;
+    errorMessage: string | null;
+    failures24h: number;
+    successes24h: number;
+    recentCapabilities: string[];
+    fallbackCount: number;
   }>;
 }
 
@@ -160,9 +168,29 @@ export async function collectStandupMetrics(): Promise<StandupMetrics> {
 }
 
 async function collectAgentHealth(): Promise<AgentHealthMetrics> {
-  const allAgents = await prisma.agentHealth.findMany({
-    orderBy: { updatedAt: "desc" },
-  });
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+  const [allAgents, recentExecutions] = await Promise.all([
+    prisma.agentHealth.findMany({
+      orderBy: { updatedAt: "desc" },
+    }),
+    prisma.agentExecution.findMany({
+      where: { createdAt: { gte: twentyFourHoursAgo } },
+      select: { agentId: true, capability: true, usedFallback: true },
+    }),
+  ]);
+
+  // Group execution data by agentId
+  const execsByAgent = new Map<string, { capabilities: Set<string>; fallbackCount: number }>();
+  for (const exec of recentExecutions) {
+    let entry = execsByAgent.get(exec.agentId);
+    if (!entry) {
+      entry = { capabilities: new Set(), fallbackCount: 0 };
+      execsByAgent.set(exec.agentId, entry);
+    }
+    entry.capabilities.add(exec.capability);
+    if (exec.usedFallback) entry.fallbackCount++;
+  }
 
   const healthy = allAgents.filter((a) => a.status === "HEALTHY").length;
   const degraded = allAgents.filter((a) => a.status === "DEGRADED").length;
@@ -178,15 +206,26 @@ async function collectAgentHealth(): Promise<AgentHealthMetrics> {
     totalCost24h: allAgents.reduce((sum, a) => sum + a.estimatedCost24h, 0),
     totalTokens24h: allAgents.reduce((sum, a) => sum + a.tokensUsed24h, 0),
     totalExecutions24h: allAgents.reduce((sum, a) => sum + a.executions24h, 0),
-    agents: allAgents.map((a) => ({
-      agentId: a.agentId,
-      status: a.status,
-      successRate24h: a.successRate24h,
-      executions24h: a.executions24h,
-      estimatedCost24h: a.estimatedCost24h,
-      consecutiveFailures: a.consecutiveFailures,
-      lastRun: a.lastRun,
-    })),
+    agents: allAgents.map((a) => {
+      const execData = execsByAgent.get(a.agentId);
+      return {
+        agentId: a.agentId,
+        status: a.status,
+        successRate24h: a.successRate24h,
+        executions24h: a.executions24h,
+        estimatedCost24h: a.estimatedCost24h,
+        consecutiveFailures: a.consecutiveFailures,
+        lastRun: a.lastRun,
+        avgExecutionTime: a.avgExecutionTime,
+        avgConfidence: a.avgConfidence,
+        humanReviewRate: a.humanReviewRate,
+        errorMessage: a.errorMessage,
+        failures24h: a.failures24h,
+        successes24h: a.successes24h,
+        recentCapabilities: execData ? Array.from(execData.capabilities) : [],
+        fallbackCount: execData?.fallbackCount ?? 0,
+      };
+    }),
   };
 }
 
