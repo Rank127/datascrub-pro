@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runVerificationBatch } from "@/lib/removers/verification-service";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { logCronExecution } from "@/lib/cron-logger";
 
 /**
  * Cron endpoint to verify removal requests
@@ -33,6 +34,14 @@ export async function GET(request: Request) {
 
     console.log(`[Verify Removals] Completed in ${duration}ms:`, stats);
 
+    await logCronExecution({
+      jobName: "verify-removals",
+      status: "SUCCESS",
+      duration,
+      message: `Verified batch in ${duration}ms`,
+      metadata: stats as Record<string, unknown>,
+    });
+
     return NextResponse.json({
       success: true,
       stats,
@@ -41,6 +50,13 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("[Verify Removals] Error:", error);
+
+    await logCronExecution({
+      jobName: "verify-removals",
+      status: "FAILED",
+      duration: Date.now() - startTime,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
 
     return NextResponse.json(
       {

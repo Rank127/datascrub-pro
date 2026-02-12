@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { DATA_BROKER_DIRECTORY } from "@/lib/removers/data-broker-directory";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { logCronExecution } from "@/lib/cron-logger";
 
 interface LinkCheckResult {
   broker: string;
@@ -136,6 +137,13 @@ export async function GET(request: Request) {
       console.error("[LinkChecker] Failed to send alert email:", emailError);
     }
   }
+
+  await logCronExecution({
+    jobName: "link-checker",
+    status: "SUCCESS",
+    duration,
+    message: `${report.checked} checked, ${report.working} working, ${report.broken} broken`,
+  });
 
   return NextResponse.json({
     success: true,

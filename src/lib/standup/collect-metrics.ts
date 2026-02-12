@@ -29,6 +29,16 @@ export interface AgentHealthMetrics {
   }>;
 }
 
+export interface CronJobDetail {
+  name: string;
+  label: string;
+  successCount: number;
+  failureCount: number;
+  lastRun: Date | null;
+  isOverdue: boolean;
+  isLogging: boolean;
+}
+
 export interface CronHealthMetrics {
   totalJobs: number;
   successCount24h: number;
@@ -39,6 +49,7 @@ export interface CronHealthMetrics {
     message: string | null;
     createdAt: Date;
   }>;
+  jobDetails: CronJobDetail[];
 }
 
 export interface RemovalMetrics {
@@ -205,12 +216,27 @@ async function collectCronHealth(
       createdAt: l.createdAt,
     }));
 
+  // Build per-job detail from cronStatus + recent logs
+  const jobDetails: CronJobDetail[] = cronStatus.jobs.map((job) => {
+    const jobLogs = recentLogs.filter((l) => l.jobName === job.name);
+    return {
+      name: job.name,
+      label: job.expectedInterval,
+      successCount: jobLogs.filter((l) => l.status === "SUCCESS").length,
+      failureCount: jobLogs.filter((l) => l.status === "FAILED").length,
+      lastRun: job.lastRun,
+      isOverdue: job.isOverdue && !!job.lastRun,
+      isLogging: job.lastRun !== null || jobLogs.length > 0,
+    };
+  });
+
   return {
     totalJobs: cronStatus.jobs.length,
     successCount24h: successCount,
     failureCount24h: failureCount,
     overdueJobs,
     recentFailures,
+    jobDetails,
   };
 }
 

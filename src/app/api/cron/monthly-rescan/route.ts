@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendRescanReminderEmail } from "@/lib/email";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { logCronExecution } from "@/lib/cron-logger";
 
 // Cron job to remind FREE users to run monthly scans and auto-trigger scans for paid users
 // Runs on the 1st of each month at 10 AM UTC
@@ -163,8 +164,17 @@ profiles: {
       }
     }
 
-    const duration = `${Date.now() - startTime}ms`;
+    const durationMs = Date.now() - startTime;
+    const duration = `${durationMs}ms`;
     console.log(`[Monthly Rescan] Completed in ${duration}:`, stats);
+
+    await logCronExecution({
+      jobName: "monthly-rescan",
+      status: stats.errors > 0 ? "FAILED" : "SUCCESS",
+      duration: durationMs,
+      message: `Reminded ${stats.freeUsersReminded} free users, queued ${stats.scansQueued} scans`,
+      metadata: stats as unknown as Record<string, unknown>,
+    });
 
     return NextResponse.json({
       success: true,
@@ -174,6 +184,12 @@ profiles: {
     });
   } catch (error) {
     console.error("[Monthly Rescan] Fatal error:", error);
+    await logCronExecution({
+      jobName: "monthly-rescan",
+      status: "FAILED",
+      duration: Date.now() - startTime,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     return NextResponse.json(
       {
         success: false,

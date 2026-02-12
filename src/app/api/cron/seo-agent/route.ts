@@ -5,6 +5,7 @@ import { getContentAgent } from "@/lib/agents/content-agent";
 import { createAgentContext } from "@/lib/agents/base-agent";
 import { InvocationTypes } from "@/lib/agents/types";
 import { getRemediationEngine } from "@/lib/agents";
+import { logCronExecution } from "@/lib/cron-logger";
 import { nanoid } from "nanoid";
 
 // Initialize Resend for email notifications
@@ -236,6 +237,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const startTime = Date.now();
     console.log("[SEO Agent Cron] Starting automated SEO optimization run...");
 
     // IMPORTANT: Initialize agents and remediation engine BEFORE SEO scan
@@ -312,6 +314,13 @@ export async function GET(request: Request) {
     // Send remediation summary email to support
     await sendRemediationSummaryEmail(remediationSummary, result.report.overallScore);
 
+    await logCronExecution({
+      jobName: "seo-agent",
+      status: "SUCCESS",
+      duration: Date.now() - startTime,
+      message: `Score: ${result.report.overallScore}/100, ${remediationStats.totalAutoRemediated} auto-remediated`,
+    });
+
     return NextResponse.json({
       success: true,
       report: result.formatted,
@@ -325,6 +334,11 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("[SEO Agent Cron] Error:", error);
+    await logCronExecution({
+      jobName: "seo-agent",
+      status: "FAILED",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     return NextResponse.json(
       {
         success: false,

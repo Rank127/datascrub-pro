@@ -5,6 +5,7 @@ import {
   sendBatchFollowUpEmail,
 } from "@/lib/email";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { logCronExecution } from "@/lib/cron-logger";
 
 // Cron job to send follow-up reminders for pending removal requests
 // Runs daily at 9 AM UTC
@@ -165,8 +166,17 @@ export async function GET(request: Request) {
       }
     }
 
-    const duration = `${Date.now() - startTime}ms`;
+    const durationMs = Date.now() - startTime;
+    const duration = `${durationMs}ms`;
     console.log(`[Follow-up Cron] Completed in ${duration}:`, stats);
+
+    await logCronExecution({
+      jobName: "follow-up-reminders",
+      status: stats.errors > 0 ? "FAILED" : "SUCCESS",
+      duration: durationMs,
+      message: `Sent ${stats.emailsSent} emails to ${stats.usersProcessed} users`,
+      metadata: stats as unknown as Record<string, unknown>,
+    });
 
     return NextResponse.json({
       success: true,
@@ -176,6 +186,12 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("[Follow-up Cron] Fatal error:", error);
+    await logCronExecution({
+      jobName: "follow-up-reminders",
+      status: "FAILED",
+      duration: Date.now() - startTime,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     return NextResponse.json(
       {
         success: false,

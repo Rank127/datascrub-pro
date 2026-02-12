@@ -8,6 +8,7 @@ import {
 import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 import { processEmailQueue, getEmailQuotaStatus } from "@/lib/email";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { logCronExecution } from "@/lib/cron-logger";
 
 /**
  * Aggressive Queue Clearer - Ensures pending queue is emptied within 24 hours
@@ -28,6 +29,7 @@ const AGGRESSIVE_BATCH_SIZE = 150;
 const RETRY_BATCH_SIZE = 50;
 
 export async function POST(request: Request) {
+  const startTime = Date.now();
   try {
     // Verify cron secret
     const authResult = verifyCronAuth(request);
@@ -36,7 +38,6 @@ export async function POST(request: Request) {
     }
 
     console.log("[Cron: Clear Pending Queue] Starting aggressive queue processing...");
-    const startTime = Date.now();
 
     // Step 1: Mark non-automatable items as REQUIRES_MANUAL
     const markedManual = await markNonAutomatableAsManual();
@@ -98,9 +99,23 @@ export async function POST(request: Request) {
     };
 
     console.log("[Cron: Clear Pending Queue] Complete:", JSON.stringify(response, null, 2));
+
+    await logCronExecution({
+      jobName: "clear-pending-queue",
+      status: "SUCCESS",
+      duration: duration,
+      message: `Cleared ${queueStatus.pending - finalQueueStatus.pending} items, ${pendingResults.successful} processed`,
+    });
+
     return NextResponse.json(response);
   } catch (error) {
     console.error("[Cron: Clear Pending Queue] Error:", error);
+    await logCronExecution({
+      jobName: "clear-pending-queue",
+      status: "FAILED",
+      duration: Date.now() - startTime,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     return NextResponse.json(
       {
         success: false,

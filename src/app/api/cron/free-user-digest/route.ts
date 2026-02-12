@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendFreeUserExposureDigest } from "@/lib/email";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { logCronExecution } from "@/lib/cron-logger";
 
 // Average time per manual removal (in minutes)
 const MINUTES_PER_REMOVAL = 45;
@@ -14,6 +15,7 @@ export async function GET(request: Request) {
     return cronUnauthorizedResponse(authResult.reason);
   }
 
+  const startTime = Date.now();
   try {
     // Find FREE users with exposures who:
     // 1. Have email notifications enabled
@@ -113,6 +115,13 @@ export async function GET(request: Request) {
       }
     }
 
+    await logCronExecution({
+      jobName: "free-user-digest",
+      status: errorCount > 0 ? "FAILED" : "SUCCESS",
+      duration: Date.now() - startTime,
+      message: `Sent ${sentCount} digests, ${errorCount} errors, ${skippedCount} skipped`,
+    });
+
     return NextResponse.json({
       success: true,
       message: `Sent ${sentCount} digests, ${errorCount} errors, ${skippedCount} skipped`,
@@ -123,6 +132,12 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("Cron free-user-digest error:", error);
+    await logCronExecution({
+      jobName: "free-user-digest",
+      status: "FAILED",
+      duration: Date.now() - startTime,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     return NextResponse.json(
       { error: "Failed to process free user digests" },
       { status: 500 }

@@ -18,6 +18,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { acquireJobLock, releaseJobLock, getBrokerIntelligence } from "@/lib/agents/intelligence-coordinator/index";
 import { getBestAutomationMethod } from "@/lib/removers/browser-automation";
+import { logCronExecution } from "@/lib/cron-logger";
 
 const prisma = new PrismaClient();
 const JOB_NAME = "auto-process-manual-queue";
@@ -210,6 +211,13 @@ export async function GET() {
     console.log(`[AutoManualQueue] Processed: ${result.processed}, Created: ${result.removalRequestsCreated}`);
     console.log(`[AutoManualQueue] Remaining manual queue: ${remainingManualQueue}`);
 
+    await logCronExecution({
+      jobName: "auto-process-manual-queue",
+      status: result.errors > 0 ? "FAILED" : "SUCCESS",
+      duration,
+      message: `Processed ${result.processed}, created ${result.removalRequestsCreated} removals, ${result.errors} errors`,
+    });
+
     return NextResponse.json({
       success: true,
       duration: `${duration}ms`,
@@ -220,6 +228,12 @@ export async function GET() {
   } catch (error) {
     await releaseJobLock(JOB_NAME);
     console.error("[AutoManualQueue] Error:", error);
+    await logCronExecution({
+      jobName: "auto-process-manual-queue",
+      status: "FAILED",
+      duration: Date.now() - startTime,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     return NextResponse.json(
       {
         success: false,

@@ -22,6 +22,7 @@ export interface StandupAnalysis {
   highlights: string[];
   concerns: string[];
   actionItems: ActionItem[];
+  suggestions: string[];
   agentReport: string;
   operationsReport: string;
   financialReport: string;
@@ -39,6 +40,7 @@ Respond ONLY with valid JSON matching this schema:
   "highlights": ["3-5 things working well, with specific numbers"],
   "concerns": ["0-5 issues needing attention, with specific numbers"],
   "actionItems": [{"priority": "HIGH"|"MEDIUM"|"LOW", "action": "specific action to take", "rationale": "why this matters"}],
+  "suggestions": ["2-3 improvement recommendations based on trends, with specific context from the data"],
   "agentReport": "1-2 paragraph summary of agent fleet health and performance",
   "operationsReport": "1-2 paragraph summary of removal pipeline and scan activity",
   "financialReport": "1-2 paragraph summary of plan distribution and growth",
@@ -82,6 +84,11 @@ export async function analyzeStandupMetrics(
       throw new Error("Incomplete analysis response");
     }
 
+    // Ensure suggestions array exists (backward compat with older AI responses)
+    if (!parsed.suggestions) {
+      parsed.suggestions = [];
+    }
+
     return parsed;
   } catch (error) {
     console.error(
@@ -96,6 +103,7 @@ function generateRuleBasedAnalysis(metrics: StandupMetrics): StandupAnalysis {
   const highlights: string[] = [];
   const concerns: string[] = [];
   const actionItems: ActionItem[] = [];
+  const suggestions: string[] = [];
 
   // --- Agent health ---
   const agentSuccessRate =
@@ -218,6 +226,27 @@ function generateRuleBasedAnalysis(metrics: StandupMetrics): StandupAnalysis {
     overallHealth = "EXCELLENT";
   }
 
+  // --- Generate suggestions ---
+  const nonLoggingJobs = metrics.crons.jobDetails?.filter((j) => !j.isLogging) || [];
+  if (nonLoggingJobs.length > 0) {
+    suggestions.push(
+      `${nonLoggingJobs.length} cron job(s) have never logged execution data (${nonLoggingJobs.map((j) => j.name).slice(0, 3).join(", ")}${nonLoggingJobs.length > 3 ? "..." : ""}). Investigate whether they are running or need logging added.`
+    );
+  }
+  if (metrics.removals.pending > 100) {
+    suggestions.push(
+      `Removal queue has ${metrics.removals.pending} pending items. Consider increasing batch sizes or adding more processing runs to reduce backlog.`
+    );
+  }
+  if (metrics.agents.totalCost24h > 1.0) {
+    suggestions.push(
+      `AI agent costs are $${metrics.agents.totalCost24h.toFixed(2)} in the last 24h. Review high-cost agents for optimization opportunities.`
+    );
+  }
+  if (suggestions.length === 0) {
+    suggestions.push("System is running well. Continue monitoring for trends over the coming days.");
+  }
+
   // --- Build reports ---
   const agentReport = `Agent fleet: ${metrics.agents.healthy} healthy, ${metrics.agents.degraded} degraded, ${metrics.agents.failed} failed out of ${metrics.agents.total} total. ${metrics.agents.totalExecutions24h} executions in the last 24h consuming ${metrics.agents.totalTokens24h.toLocaleString()} tokens ($${metrics.agents.totalCost24h.toFixed(4)} estimated cost).`;
 
@@ -237,6 +266,7 @@ function generateRuleBasedAnalysis(metrics: StandupMetrics): StandupAnalysis {
     highlights,
     concerns,
     actionItems,
+    suggestions,
     agentReport,
     operationsReport,
     financialReport,

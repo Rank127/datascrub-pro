@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { processPendingRemovalDigests } from "@/lib/email";
-import { prisma } from "@/lib/db";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { logCronExecution } from "@/lib/cron-logger";
 
 /**
  * GET /api/cron/removal-digest
@@ -30,19 +30,16 @@ export async function GET(request: Request) {
 
     const duration = Date.now() - startTime;
 
-    // Log to CronLog for monitoring
-    await prisma.cronLog.create({
-      data: {
-        jobName: "removal-digest",
-        status: result.errors > 0 ? "PARTIAL" : "SUCCESS",
-        duration,
-        message: `Sent ${result.emailsSent} digest emails to ${result.usersProcessed} users`,
-        metadata: JSON.stringify({
-          usersProcessed: result.usersProcessed,
-          emailsSent: result.emailsSent,
-          updatesProcessed: result.updatesProcessed,
-          errors: result.errors,
-        }),
+    await logCronExecution({
+      jobName: "removal-digest",
+      status: result.errors > 0 ? "FAILED" : "SUCCESS",
+      duration,
+      message: `Sent ${result.emailsSent} digest emails to ${result.usersProcessed} users`,
+      metadata: {
+        usersProcessed: result.usersProcessed,
+        emailsSent: result.emailsSent,
+        updatesProcessed: result.updatesProcessed,
+        errors: result.errors,
       },
     });
 
@@ -58,15 +55,12 @@ export async function GET(request: Request) {
     const duration = Date.now() - startTime;
     console.error("[Cron: removal-digest] Error:", error);
 
-    // Log failure to CronLog
-    await prisma.cronLog.create({
-      data: {
-        jobName: "removal-digest",
-        status: "FAILED",
-        duration,
-        message: error instanceof Error ? error.message : "Unknown error",
-      },
-    }).catch(console.error);
+    await logCronExecution({
+      jobName: "removal-digest",
+      status: "FAILED",
+      duration,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
 
     return NextResponse.json(
       {

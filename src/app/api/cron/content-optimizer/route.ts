@@ -8,6 +8,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { prisma } from "@/lib/db";
+import { logCronExecution } from "@/lib/cron-logger";
 import { runFullSEOReport } from "@/lib/agents/seo-agent";
 import {
   optimizePage,
@@ -707,6 +708,7 @@ async function sendOptimizationReport(result: {
 // ============================================================================
 
 export async function GET(request: Request) {
+  const startTime = Date.now();
   try {
     // Verify authorization
     const authHeader = request.headers.get("authorization");
@@ -723,6 +725,13 @@ export async function GET(request: Request) {
 
     console.log(`[Content Optimizer] Complete. Score: ${result.seoScore}/100, Pages optimized: ${result.pagesOptimized}`);
 
+    await logCronExecution({
+      jobName: "content-optimizer",
+      status: "SUCCESS",
+      duration: Date.now() - startTime,
+      message: `Score: ${result.seoScore}/100, ${result.pagesOptimized} pages optimized`,
+    });
+
     return NextResponse.json({
       success: true,
       seoScore: result.seoScore,
@@ -733,6 +742,12 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("[Content Optimizer] Error:", error);
+    await logCronExecution({
+      jobName: "content-optimizer",
+      status: "FAILED",
+      duration: Date.now() - startTime,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     return NextResponse.json(
       {
         success: false,

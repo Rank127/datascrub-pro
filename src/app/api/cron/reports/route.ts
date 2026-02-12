@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendWeeklyReportEmail } from "@/lib/email";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { logCronExecution } from "@/lib/cron-logger";
 
 // GET /api/cron/reports - Send periodic report emails
 export async function GET(request: Request) {
@@ -11,6 +12,7 @@ export async function GET(request: Request) {
     return cronUnauthorizedResponse(authResult.reason);
   }
 
+  const startTime = Date.now();
   try {
     // Determine which frequencies to process based on current day
     const now = new Date();
@@ -117,6 +119,14 @@ export async function GET(request: Request) {
       }
     }
 
+    await logCronExecution({
+      jobName: "reports",
+      status: errorCount > 0 ? "FAILED" : "SUCCESS",
+      duration: Date.now() - startTime,
+      message: `Sent ${sentCount} reports, ${errorCount} errors`,
+      metadata: { frequencies: frequenciesToProcess, usersProcessed: users.length },
+    });
+
     return NextResponse.json({
       success: true,
       message: `Sent ${sentCount} reports, ${errorCount} errors`,
@@ -125,6 +135,12 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("Cron reports error:", error);
+    await logCronExecution({
+      jobName: "reports",
+      status: "FAILED",
+      duration: Date.now() - startTime,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     return NextResponse.json(
       { error: "Failed to process reports" },
       { status: 500 }

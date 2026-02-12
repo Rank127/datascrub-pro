@@ -69,17 +69,26 @@ export async function getCronHealthStatus(): Promise<{
   const cronSchedules: Record<string, { interval: number; label: string }> = {
     "health-check": { interval: 25, label: "Daily" },
     "ticketing-agent": { interval: 25, label: "Daily" },
-    "process-removals": { interval: 5, label: "Every 4 hours" },
+    "process-removals": { interval: 3, label: "Every 2 hours" },
     "verify-removals": { interval: 25, label: "Daily" },
-    "monitoring": { interval: 25, label: "Daily" },
     "reports": { interval: 170, label: "Weekly" },
     "follow-up-reminders": { interval: 25, label: "Daily" },
     "link-checker": { interval: 25, label: "Daily" },
     "close-resolved-tickets": { interval: 25, label: "Daily" },
-    "seo-agent": { interval: 170, label: "Weekly" },
+    "seo-agent": { interval: 6, label: "Every 4 hours" },
     "free-user-digest": { interval: 170, label: "Weekly" },
     "monthly-rescan": { interval: 750, label: "Monthly" },
     "daily-standup": { interval: 25, label: "Daily" },
+    "removal-digest": { interval: 25, label: "Daily" },
+    "content-optimizer": { interval: 25, label: "Daily" },
+    "clear-pending-queue": { interval: 2, label: "Hourly" },
+    "drip-campaigns": { interval: 25, label: "Daily" },
+    "email-monitor": { interval: 13, label: "12-hour" },
+    "dashboard-validation": { interval: 25, label: "Daily" },
+    "auto-verify-fast-brokers": { interval: 25, label: "Daily" },
+    "cleanup-data-processors": { interval: 25, label: "Daily" },
+    "auto-process-manual-queue": { interval: 9, label: "8-hour" },
+    "security-scan": { interval: 25, label: "Daily" },
   };
 
   const jobs: Array<{
@@ -108,9 +117,9 @@ export async function getCronHealthStatus(): Promise<{
         ? Date.now() - lastRun.getTime() > (schedule.interval + 1) * 60 * 60 * 1000
         : true; // Never ran = overdue (but only after system has been deployed)
 
-      // Don't mark as overdue if we have no logs at all (new deployment)
-      const hasAnyLogs = await prisma.cronLog.count() > 0;
-      const effectiveOverdue = hasAnyLogs ? isOverdue : false;
+      // Don't mark as overdue if this specific job has never logged (new job)
+      const hasJobLogged = await prisma.cronLog.count({ where: { jobName } }) > 0;
+      const effectiveOverdue = hasJobLogged ? isOverdue : false;
 
       if (effectiveOverdue && lastRun) {
         hasOverdueJobs = true;

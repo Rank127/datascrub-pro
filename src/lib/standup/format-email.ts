@@ -125,6 +125,23 @@ export function formatStandupEmail(
       )
     : "";
 
+  // --- Suggestions ---
+  const suggestionsHtml = (analysis.suggestions || []).length > 0
+    ? card(
+        "Suggestions",
+        `<div style="border-left: 3px solid #3b82f6; padding-left: 12px;">
+          <ul style="margin: 0; padding-left: 16px;">
+            ${analysis.suggestions
+              .map(
+                (s) =>
+                  `<li style="color: #93c5fd; font-size: 13px; margin-bottom: 6px; line-height: 1.5;">${s}</li>`
+              )
+              .join("")}
+          </ul>
+        </div>`
+      )
+    : "";
+
   // --- Agent Performance ---
   const agentSection = card(
     "Agent Performance",
@@ -147,6 +164,49 @@ export function formatStandupEmail(
     ? `<p style="color: #fca5a5; font-size: 13px; margin: 0 0 8px 0;">Overdue: ${metrics.crons.overdueJobs.join(", ")}</p>`
     : "";
 
+  // Build per-job detail table
+  const jobDetailRows = (metrics.crons.jobDetails || [])
+    .map((job) => {
+      let statusIcon: string;
+      let statusColor: string;
+      if (!job.isLogging) {
+        statusIcon = "&#9679;"; // gray circle
+        statusColor = "#64748b";
+      } else if (job.isOverdue || job.failureCount > 0) {
+        statusIcon = "&#9679;"; // red circle
+        statusColor = "#ef4444";
+      } else {
+        statusIcon = "&#9679;"; // green circle
+        statusColor = "#10b981";
+      }
+      const lastRunStr = job.lastRun
+        ? new Date(job.lastRun).toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+        : "Never";
+      return `<tr style="border-bottom: 1px solid #1e293b;">
+        <td style="padding: 4px 8px; color: ${statusColor}; font-size: 12px;">${statusIcon}</td>
+        <td style="padding: 4px 8px; color: #e2e8f0; font-size: 12px;">${job.name}</td>
+        <td style="padding: 4px 8px; color: #94a3b8; font-size: 12px;">${job.label}</td>
+        <td style="padding: 4px 8px; color: #94a3b8; font-size: 12px;">${lastRunStr}</td>
+        <td style="padding: 4px 8px; color: #10b981; font-size: 12px; text-align: center;">${job.successCount}</td>
+        <td style="padding: 4px 8px; color: ${job.failureCount > 0 ? '#ef4444' : '#94a3b8'}; font-size: 12px; text-align: center;">${job.failureCount}</td>
+      </tr>`;
+    })
+    .join("");
+
+  const cronDetailTable = (metrics.crons.jobDetails || []).length > 0
+    ? `<table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+        <tr style="border-bottom: 1px solid #334155;">
+          <th style="text-align: left; padding: 4px 8px; color: #94a3b8; font-size: 11px;"></th>
+          <th style="text-align: left; padding: 4px 8px; color: #94a3b8; font-size: 11px;">Job</th>
+          <th style="text-align: left; padding: 4px 8px; color: #94a3b8; font-size: 11px;">Schedule</th>
+          <th style="text-align: left; padding: 4px 8px; color: #94a3b8; font-size: 11px;">Last Run</th>
+          <th style="text-align: center; padding: 4px 8px; color: #94a3b8; font-size: 11px;">OK</th>
+          <th style="text-align: center; padding: 4px 8px; color: #94a3b8; font-size: 11px;">Fail</th>
+        </tr>
+        ${jobDetailRows}
+      </table>`
+    : "";
+
   const cronSection = card(
     "Cron Jobs",
     `<div style="display: flex; justify-content: space-around; margin-bottom: 12px;">
@@ -158,7 +218,8 @@ export function formatStandupEmail(
       ${statBox("Total Jobs", metrics.crons.totalJobs, "#94a3b8")}
       <!--[if mso]></td></tr></table><![endif]-->
     </div>
-    ${overdueWarning}`
+    ${overdueWarning}
+    ${cronDetailTable}`
   );
 
   // --- Operations Dashboard ---
@@ -277,6 +338,7 @@ export function formatStandupEmail(
         ${highlightsHtml}
         ${concernsHtml}
         ${actionItemsHtml}
+        ${suggestionsHtml}
         ${agentSection}
         ${cronSection}
         ${operationsSection}
