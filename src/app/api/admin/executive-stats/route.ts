@@ -138,7 +138,6 @@ async function getFinanceMetrics(): Promise<FinanceMetrics> {
 
     // Calculate MRR from active subscriptions
     let mrr = 0;
-    const planCounts = { FREE: 0, PRO: 0, ENTERPRISE: 0 };
 
     for (const sub of activeSubscriptions.data) {
       for (const item of sub.items.data) {
@@ -150,14 +149,6 @@ async function getFinanceMetrics(): Promise<FinanceMetrics> {
             monthlyAmount = Math.round(monthlyAmount / 12);
           }
           mrr += monthlyAmount;
-
-          // Count by plan based on price
-          const priceId = price.id;
-          if (priceId.includes("pro") || (price.unit_amount && price.unit_amount <= 1500)) {
-            planCounts.PRO++;
-          } else if (priceId.includes("enterprise") || (price.unit_amount && price.unit_amount > 1500)) {
-            planCounts.ENTERPRISE++;
-          }
         }
       }
     }
@@ -244,24 +235,14 @@ async function getFinanceMetrics(): Promise<FinanceMetrics> {
     const totalPaidUsers = totalActive;
     const arpu = totalPaidUsers > 0 ? Math.round(mrr / totalPaidUsers) : 0;
 
-    // Get FREE users from database (users without active Stripe subscription)
-    const totalUsers = await prisma.user.count();
-    planCounts.FREE = Math.max(0, totalUsers - planCounts.PRO - planCounts.ENTERPRISE);
-
-    // Adjust for family members who inherit ENTERPRISE through family group
-    const familyEnterpriseMembers = await prisma.familyMember.count({
-      where: {
-        familyGroup: {
-          owner: {
-            subscription: { plan: "ENTERPRISE" },
-          },
-        },
-      },
+    // Get plan distribution from database (matches the popup data source)
+    const planDistribution = await prisma.user.groupBy({ by: ["plan"], _count: true });
+    const planCounts = { FREE: 0, PRO: 0, ENTERPRISE: 0 };
+    planDistribution.forEach((item) => {
+      if (item.plan in planCounts) {
+        planCounts[item.plan as keyof typeof planCounts] = item._count;
+      }
     });
-    if (familyEnterpriseMembers > 0) {
-      planCounts.ENTERPRISE += familyEnterpriseMembers;
-      planCounts.FREE = Math.max(0, planCounts.FREE - familyEnterpriseMembers);
-    }
 
     return {
       mrr,
@@ -289,21 +270,6 @@ async function getFinanceMetrics(): Promise<FinanceMetrics> {
         planCounts[item.plan as keyof typeof planCounts] = item._count;
       }
     });
-
-    // Adjust for family members who inherit ENTERPRISE through family group
-    const familyEnterpriseMembers = await prisma.familyMember.count({
-      where: {
-        familyGroup: {
-          owner: {
-            subscription: { plan: "ENTERPRISE" },
-          },
-        },
-      },
-    });
-    if (familyEnterpriseMembers > 0) {
-      planCounts.ENTERPRISE += familyEnterpriseMembers;
-      planCounts.FREE = Math.max(0, planCounts.FREE - familyEnterpriseMembers);
-    }
 
     // Use hardcoded prices as fallback
     const FALLBACK_PRICES = { PRO: 1199, ENTERPRISE: 2999 };
