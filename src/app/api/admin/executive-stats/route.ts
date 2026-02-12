@@ -123,6 +123,9 @@ export async function GET(request: Request) {
   }
 }
 
+// Test accounts excluded from plan distribution counts (not from functionality)
+const TEST_ACCOUNT_EMAILS = ["rank1its@gmail.com", "rocky@ghostmydata.com"];
+
 async function getFinanceMetrics(): Promise<FinanceMetrics> {
   const startOfMonth = getStartOfMonth();
 
@@ -236,7 +239,11 @@ async function getFinanceMetrics(): Promise<FinanceMetrics> {
     const arpu = totalPaidUsers > 0 ? Math.round(mrr / totalPaidUsers) : 0;
 
     // Get plan distribution from database (matches the popup data source)
-    const planDistribution = await prisma.user.groupBy({ by: ["plan"], _count: true });
+    const planDistribution = await prisma.user.groupBy({
+      by: ["plan"],
+      _count: true,
+      where: { email: { notIn: TEST_ACCOUNT_EMAILS } },
+    });
     const planCounts = { FREE: 0, PRO: 0, ENTERPRISE: 0 };
     planDistribution.forEach((item) => {
       if (item.plan in planCounts) {
@@ -262,6 +269,7 @@ async function getFinanceMetrics(): Promise<FinanceMetrics> {
     const subscriptionsByPlan = await prisma.user.groupBy({
       by: ["plan"],
       _count: true,
+      where: { email: { notIn: TEST_ACCOUNT_EMAILS } },
     });
 
     const planCounts = { FREE: 0, PRO: 0, ENTERPRISE: 0 };
