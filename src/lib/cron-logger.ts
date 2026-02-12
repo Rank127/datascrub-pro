@@ -79,6 +79,7 @@ export async function getCronHealthStatus(): Promise<{
     "seo-agent": { interval: 170, label: "Weekly" },
     "free-user-digest": { interval: 170, label: "Weekly" },
     "monthly-rescan": { interval: 750, label: "Monthly" },
+    "daily-standup": { interval: 25, label: "Daily" },
   };
 
   const jobs: Array<{
