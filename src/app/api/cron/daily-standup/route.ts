@@ -43,7 +43,15 @@ export async function GET(request: Request) {
     // 3. Format the email
     const emailHtml = formatStandupEmail(metrics, analysis);
 
-    // 4. Send via Resend
+    // 4. Preview mode — return HTML without sending
+    const url = new URL(request.url);
+    if (url.searchParams.get("preview") === "1") {
+      return new Response(emailHtml, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // 5. Send via Resend
     const dateStr = new Date().toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
