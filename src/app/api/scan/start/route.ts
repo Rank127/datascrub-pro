@@ -326,9 +326,10 @@ export async function POST(request: Request) {
 
     // Send exposure alert email if exposures found (non-blocking)
     if (exposures.length > 0 && session.user.email) {
-      const critical = scanResults.filter(r => r.severity === "CRITICAL").length;
-      const high = scanResults.filter(r => r.severity === "HIGH").length;
-      const sources = [...new Set(scanResults.map(r => r.sourceName))];
+      // Count severity from new exposures only (not all scan results)
+      const critical = exposures.filter(e => e.severity === "CRITICAL").length;
+      const high = exposures.filter(e => e.severity === "HIGH").length;
+      const sources = [...new Set(exposures.map(e => e.sourceName))];
 
       sendExposureAlertEmail(
         session.user.email,
