@@ -88,7 +88,7 @@ interface OptimizationProgress {
   targetProgress: number; // Percentage toward 100% goal
 }
 
-const PROGRESS_FILE = path.join(process.cwd(), "content-optimization-progress.json");
+const PROGRESS_FILE = path.join("/tmp", "content-optimization-progress.json");
 
 async function loadProgress(): Promise<OptimizationProgress[]> {
   try {

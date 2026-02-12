@@ -3,6 +3,8 @@ import { DATA_BROKER_DIRECTORY } from "@/lib/removers/data-broker-directory";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { logCronExecution } from "@/lib/cron-logger";
 
+export const maxDuration = 300;
+
 interface LinkCheckResult {
   broker: string;
   url: string;
@@ -19,8 +21,25 @@ interface BrokenLinkReport {
   brokenLinks: LinkCheckResult[];
 }
 
+const CONCURRENCY = 20; // Check 20 URLs in parallel
+
+async function checkUrlBatch<T>(
+  items: T[],
+  fn: (item: T) => Promise<void>,
+  concurrency: number
+): Promise<void> {
+  let i = 0;
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (i < items.length) {
+      const idx = i++;
+      await fn(items[idx]);
+    }
+  });
+  await Promise.all(workers);
+}
+
 // Check a single URL with timeout
-async function checkUrl(url: string, timeout: number = 10000): Promise<{ status: number | "error"; error?: string }> {
+async function checkUrl(url: string, timeout: number = 5000): Promise<{ status: number | "error"; error?: string }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -73,14 +92,13 @@ export async function GET(request: Request) {
   const results: LinkCheckResult[] = [];
   const brokers = Object.entries(DATA_BROKER_DIRECTORY);
 
-  // Check all broker opt-out URLs
-  for (const [key, broker] of brokers) {
-    if (!broker.optOutUrl) continue;
+  // Filter to brokers with opt-out URLs
+  const checkable = brokers.filter(([, b]) => b.optOutUrl);
+  console.log(`[LinkChecker] Checking ${checkable.length} URLs (${CONCURRENCY} concurrent)...`);
 
-    // Add small delay between requests to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    const checkResult = await checkUrl(broker.optOutUrl);
+  // Check all broker opt-out URLs in parallel batches
+  await checkUrlBatch(checkable, async ([key, broker]) => {
+    const checkResult = await checkUrl(broker.optOutUrl!);
 
     // Consider 2xx and 3xx as working, 403 might be bot protection (mark as working)
     const isWorking =
@@ -89,7 +107,7 @@ export async function GET(request: Request) {
 
     results.push({
       broker: key,
-      url: broker.optOutUrl,
+      url: broker.optOutUrl!,
       status: checkResult.status,
       error: checkResult.error,
       working: isWorking,
@@ -99,7 +117,7 @@ export async function GET(request: Request) {
     if (!isWorking) {
       console.log(`[LinkChecker] Broken: ${key} - ${broker.optOutUrl} (${checkResult.status})`);
     }
-  }
+  }, CONCURRENCY);
 
   const report: BrokenLinkReport = {
     checked: results.length,
