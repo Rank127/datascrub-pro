@@ -64,3 +64,13 @@ OPERATIONS_GUIDE.md
 *.optimized.md
 *.draft.md
 content-optimization-progress.json
+
+# Playwright test artifacts
+/playwright-report/
+/test-results/
+
+# Local backups
+backup-from-7670/
+
+# Claude Code local settings (contains permission patterns with secrets)
+.claude/settings.local.json
