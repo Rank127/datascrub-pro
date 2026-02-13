@@ -11,7 +11,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getEffectiveRole, checkPermission } from "@/lib/admin";
+import { getEffectiveRole } from "@/lib/admin";
 import { buildMastermindPrompt } from "@/lib/mastermind";
 import type { MissionDomain } from "@/lib/mastermind";
 
@@ -30,7 +30,8 @@ export async function POST(request: Request) {
       select: { email: true, role: true },
     });
 
-    if (!checkPermission(currentUser?.email, currentUser?.role, "view_analytics")) {
+    const role = getEffectiveRole(currentUser?.email, currentUser?.role);
+    if (!["ADMIN", "LEGAL", "SUPER_ADMIN"].includes(role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -133,7 +134,7 @@ Respond with valid JSON:
       data: {
         actorId: session.user.id,
         actorEmail: currentUser?.email || "unknown",
-        actorRole: currentUser?.role || "ADMIN",
+        actorRole: role,
         action: "MASTERMIND_QUERY",
         resource: "mastermind",
         details: JSON.stringify({
@@ -153,9 +154,10 @@ Respond with valid JSON:
       queriesRemaining: DAILY_LIMIT - todayCount - 1,
     });
   } catch (error) {
-    console.error("[Mastermind API] Error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[Mastermind API] Error:", message, error);
     return NextResponse.json(
-      { error: "Failed to generate mastermind advice" },
+      { error: `Failed to generate mastermind advice: ${message}` },
       { status: 500 }
     );
   }
