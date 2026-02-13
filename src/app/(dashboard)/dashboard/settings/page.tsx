@@ -33,6 +33,8 @@ import {
   Phone,
   Trash2,
 } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 import { FamilySection } from "@/components/dashboard/family";
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
 import { TwoFactorSetupDialog } from "@/components/settings/two-factor-setup-dialog";
@@ -41,7 +43,7 @@ import { TwoFactorDisableDialog } from "@/components/settings/two-factor-disable
 // Wrapper component to handle Suspense for useSearchParams
 export default function SettingsPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-slate-400" /></div>}>
+    <Suspense fallback={<LoadingSpinner />}>
       <SettingsContent />
     </Suspense>
   );
@@ -405,12 +407,10 @@ function SettingsContent() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-slate-400">
-          Manage your account and preferences
-        </p>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Manage your account and preferences"
+      />
 
       {/* Status Message */}
       {message && (

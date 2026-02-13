@@ -26,6 +26,8 @@ import {
   Crown,
 } from "lucide-react";
 import Link from "next/link";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 import { getBrokerCount } from "@/lib/removers/data-broker-directory";
 import { trackScanStarted, trackScanCompleted } from "@/components/analytics/google-analytics";
 
@@ -204,12 +206,10 @@ export default function ScanPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Data Scan</h1>
-        <p className="text-slate-400">
-          Scan the web to find where your personal data is exposed
-        </p>
-      </div>
+      <PageHeader
+        title="Data Scan"
+        description="Scan the web to find where your personal data is exposed"
+      />
 
       {/* Scan Type Selection */}
       <div className={`grid gap-4 ${isFreePlan ? "md:grid-cols-1 max-w-xl" : "md:grid-cols-2"}`}>
@@ -517,9 +517,7 @@ export default function ScanPage() {
         </CardHeader>
         <CardContent>
           {loadingScans ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-            </div>
+            <LoadingSpinner className="flex items-center justify-center py-8" />
           ) : recentScans.length === 0 ? (
             <div className="text-center py-8 text-slate-500">
               No scans yet. Start your first scan above.

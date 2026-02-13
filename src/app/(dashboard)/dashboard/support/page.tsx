@@ -43,6 +43,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow, format } from "date-fns";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 
 interface Ticket {
   id: string;
@@ -230,29 +233,27 @@ export default function SupportPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Support</h1>
-          <p className="text-slate-400">
-            Get help with your account, scans, or removals
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="border-slate-600"
-            onClick={fetchTickets}
-            disabled={loading}
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          </Button>
-          <Button onClick={() => setShowNewTicket(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Ticket
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Support"
+        description="Get help with your account, scans, or removals"
+        actions={
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="border-slate-600"
+              onClick={fetchTickets}
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            </Button>
+            <Button onClick={() => setShowNewTicket(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Ticket
+            </Button>
+          </div>
+        }
+      />
 
       {/* Summary Card */}
       <Card className="bg-slate-800/50 border-slate-700">
@@ -281,23 +282,19 @@ export default function SupportPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-            </div>
+            <LoadingSpinner />
           ) : tickets.length === 0 ? (
-            <div className="text-center py-12">
-              <Headphones className="mx-auto h-12 w-12 text-slate-600 mb-4" />
-              <h3 className="text-lg font-medium text-slate-300">
-                No support tickets
-              </h3>
-              <p className="text-slate-500 mt-1">
-                Need help? Create a new support ticket.
-              </p>
-              <Button className="mt-4" onClick={() => setShowNewTicket(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Ticket
-              </Button>
-            </div>
+            <EmptyState
+              icon={<Headphones className="mx-auto h-12 w-12 text-slate-600 mb-4" />}
+              title="No support tickets"
+              description="Need help? Create a new support ticket."
+              action={
+                <Button onClick={() => setShowNewTicket(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Ticket
+                </Button>
+              }
+            />
           ) : (
             <div className="space-y-4">
               {/* Open Tickets */}

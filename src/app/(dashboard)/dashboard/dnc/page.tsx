@@ -42,6 +42,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 
 interface DNCRegistration {
   id: string;
@@ -214,12 +217,10 @@ export default function DNCPage() {
   if (!isEnterprise) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Do Not Call Registry</h1>
-          <p className="text-slate-400 mt-1">
-            Register your phone numbers on the National Do Not Call Registry
-          </p>
-        </div>
+        <PageHeader
+          title="Do Not Call Registry"
+          description="Register your phone numbers on the National Do Not Call Registry"
+        />
 
         <Card className="bg-slate-800/50 border-slate-700">
           <CardContent className="pt-6">
@@ -249,21 +250,17 @@ export default function DNCPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-      </div>
+      <LoadingSpinner className="flex items-center justify-center py-24" />
     );
   }
 
   if (error) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Do Not Call Registry</h1>
-          <p className="text-slate-400 mt-1">
-            Register your phone numbers to reduce telemarketing calls
-          </p>
-        </div>
+        <PageHeader
+          title="Do Not Call Registry"
+          description="Register your phone numbers to reduce telemarketing calls"
+        />
         <Card className="bg-red-500/10 border-red-500/30">
           <CardContent className="pt-6">
             <div className="text-center py-8">
@@ -289,21 +286,19 @@ export default function DNCPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Do Not Call Registry</h1>
-          <p className="text-slate-400 mt-1">
-            Register your phone numbers to reduce telemarketing calls
-          </p>
-        </div>
-        <Button
-          onClick={() => setShowAddForm(true)}
-          className="bg-emerald-600 hover:bg-emerald-700"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Phone Number
-        </Button>
-      </div>
+      <PageHeader
+        title="Do Not Call Registry"
+        description="Register your phone numbers to reduce telemarketing calls"
+        actions={
+          <Button
+            onClick={() => setShowAddForm(true)}
+            className="bg-emerald-600 hover:bg-emerald-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Phone Number
+          </Button>
+        }
+      />
 
 
       {/* Add Phone Form */}
@@ -453,11 +448,11 @@ export default function DNCPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-slate-400">
-              <PhoneOff className="h-12 w-12 mx-auto mb-4 text-slate-600" />
-              <p>No phone numbers registered yet</p>
-              <p className="text-sm">Add a phone number to get started</p>
-            </div>
+            <EmptyState
+              icon={<PhoneOff className="mx-auto h-12 w-12 text-slate-600 mb-4" />}
+              title="No phone numbers registered yet"
+              description="Add a phone number to get started"
+            />
           )}
         </CardContent>
       </Card>

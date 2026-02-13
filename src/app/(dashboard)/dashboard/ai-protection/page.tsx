@@ -15,6 +15,9 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExposureCard } from "@/components/dashboard/exposure-card";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 import {
   Bot,
   Scan,
@@ -22,7 +25,6 @@ import {
   Shield,
   Lock,
   ExternalLink,
-  Loader2,
   AlertTriangle,
   CheckCircle2,
   Search,
@@ -155,9 +157,7 @@ export default function AIProtectionPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-      </div>
+      <LoadingSpinner className="flex items-center justify-center min-h-[400px]" />
     );
   }
 
@@ -168,15 +168,10 @@ export default function AIProtectionPage() {
   if (!isEnterprise) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <Bot className="h-7 w-7 text-purple-400" />
-            AI Shield
-          </h1>
-          <p className="text-slate-400 mt-1">
-            Protect yourself from AI training datasets, facial recognition, and voice cloning
-          </p>
-        </div>
+        <PageHeader
+          title={<span className="flex items-center gap-3"><Bot className="h-7 w-7 text-purple-400" />AI Shield</span>}
+          description="Protect yourself from AI training datasets, facial recognition, and voice cloning"
+        />
 
         {/* Upgrade CTA */}
         <Card className="bg-gradient-to-br from-purple-900/50 to-slate-900 border-purple-500/30">
@@ -344,26 +339,26 @@ export default function AIProtectionPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+      <PageHeader
+        title={
+          <span className="flex items-center gap-3">
             <Bot className="h-7 w-7 text-purple-400" />
             AI Shield
             <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
               Enterprise
             </Badge>
-          </h1>
-          <p className="text-slate-400 mt-1">
-            Monitor and protect your data from AI training, facial recognition, and voice cloning
-          </p>
-        </div>
-        <Link href="/dashboard/scan">
-          <Button className="bg-purple-600 hover:bg-purple-700">
-            <Search className="mr-2 h-4 w-4" />
-            Run AI Scan
-          </Button>
-        </Link>
-      </div>
+          </span>
+        }
+        description="Monitor and protect your data from AI training, facial recognition, and voice cloning"
+        actions={
+          <Link href="/dashboard/scan">
+            <Button className="bg-purple-600 hover:bg-purple-700">
+              <Search className="mr-2 h-4 w-4" />
+              Run AI Scan
+            </Button>
+          </Link>
+        }
+      />
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -415,19 +410,20 @@ export default function AIProtectionPage() {
         <TabsContent value="overview">
           {allExposures.length === 0 ? (
             <Card className="bg-slate-800/50 border-slate-700">
-              <CardContent className="py-12 text-center">
-                <Shield className="h-12 w-12 text-emerald-500 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">No AI Exposures Found</h3>
-                <p className="text-slate-400 mb-4">
-                  Run a Full scan to check for your data in AI training datasets,
-                  facial recognition databases, and voice cloning services.
-                </p>
-                <Link href="/dashboard/scan">
-                  <Button className="bg-purple-600 hover:bg-purple-700">
-                    <Search className="mr-2 h-4 w-4" />
-                    Start Full Scan
-                  </Button>
-                </Link>
+              <CardContent className="py-0">
+                <EmptyState
+                  icon={<Shield className="mx-auto h-12 w-12 text-emerald-500 mb-4" />}
+                  title="No AI Exposures Found"
+                  description="Run a Full scan to check for your data in AI training datasets, facial recognition databases, and voice cloning services."
+                  action={
+                    <Link href="/dashboard/scan">
+                      <Button className="bg-purple-600 hover:bg-purple-700">
+                        <Search className="mr-2 h-4 w-4" />
+                        Start Full Scan
+                      </Button>
+                    </Link>
+                  }
+                />
               </CardContent>
             </Card>
           ) : (

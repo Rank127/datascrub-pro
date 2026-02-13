@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   Trash2,
-  Loader2,
   CheckCircle,
   Clock,
   AlertCircle,
@@ -39,6 +38,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 import { DataSourceNames, type DataSource, type Severity } from "@/lib/types";
 
 interface RemovalRequest {
@@ -289,12 +291,10 @@ export default function RemovalsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Removal Requests</h1>
-        <p className="text-slate-400">
-          Track the status of your data removal requests
-        </p>
-      </div>
+      <PageHeader
+        title="Removal Requests"
+        description="Track the status of your data removal requests"
+      />
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-5">
@@ -415,19 +415,13 @@ export default function RemovalsPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-            </div>
+            <LoadingSpinner />
           ) : removals.length === 0 ? (
-            <div className="text-center py-12">
-              <Trash2 className="mx-auto h-12 w-12 text-slate-600 mb-4" />
-              <h3 className="text-lg font-medium text-slate-300">
-                No removal requests
-              </h3>
-              <p className="text-slate-500 mt-1">
-                Request removal from the Exposures page
-              </p>
-            </div>
+            <EmptyState
+              icon={<Trash2 className="mx-auto h-12 w-12 text-slate-600 mb-4" />}
+              title="No removal requests"
+              description="Request removal from the Exposures page"
+            />
           ) : (
             <div className="space-y-4">
               {removals.map((removal) => {

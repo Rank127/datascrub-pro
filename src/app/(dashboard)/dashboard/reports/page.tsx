@@ -20,9 +20,11 @@ import {
   Shield,
   AlertTriangle,
   CheckCircle,
-  Loader2,
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 import { toast } from "sonner";
 
 interface ReportStats {
@@ -162,9 +164,7 @@ export default function ReportsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-      </div>
+      <LoadingSpinner className="flex items-center justify-center min-h-[400px]" />
     );
   }
 
@@ -187,22 +187,20 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Reports</h1>
-          <p className="text-slate-400">
-            View your monthly data protection reports
-          </p>
-        </div>
-        <Button
-          className="bg-emerald-600 hover:bg-emerald-700"
-          onClick={() => exportAllReports(reports, summary)}
-          disabled={reports.length === 0}
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Export All
-        </Button>
-      </div>
+      <PageHeader
+        title="Reports"
+        description="View your monthly data protection reports"
+        actions={
+          <Button
+            className="bg-emerald-600 hover:bg-emerald-700"
+            onClick={() => exportAllReports(reports, summary)}
+            disabled={reports.length === 0}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Export All
+          </Button>
+        }
+      />
 
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -263,13 +261,11 @@ export default function ReportsPage() {
         </CardHeader>
         <CardContent>
           {reports.length === 0 ? (
-            <div className="text-center py-8">
-              <FileText className="h-12 w-12 text-slate-600 mx-auto mb-4" />
-              <p className="text-slate-400">No reports available yet</p>
-              <p className="text-sm text-slate-500 mt-1">
-                Reports will appear here after you run your first scan
-              </p>
-            </div>
+            <EmptyState
+              icon={<FileText className="mx-auto h-12 w-12 text-slate-600 mb-4" />}
+              title="No reports available yet"
+              description="Reports will appear here after you run your first scan"
+            />
           ) : (
             <div className="space-y-4">
               {reports.map((report) => (
