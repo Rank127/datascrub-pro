@@ -7,7 +7,7 @@
 ---
 
 **[HOOK - 0:00-0:05]**
-"Right now, your personal information is for sale on over 400 data broker websites. Your name, address, phone number, even your family members."
+"Right now, your personal information is for sale on over 2,100 data broker websites. Your name, address, phone number, even your family members."
 
 **[PROBLEM - 0:05-0:15]**
 "These sites collect and sell your data to anyone willing to pay. Stalkers, scammers, telemarketers, even identity thieves. And the worst part? It's completely legal."
@@ -38,7 +38,7 @@
 "Shocked? Your home address, phone number, age, and relatives are all public. Data brokers collected this and sell it to anyone."
 
 **[SOLUTION - 0:15-0:25]**
-"GhostMyData removes your info from 400+ data broker sites automatically."
+"GhostMyData removes your info from 2,100+ data broker sites automatically."
 
 **[CTA - 0:25-0:30]**
 "Free scan at GhostMyData.com. See what's exposed."
@@ -92,7 +92,7 @@
 "Thinking about DeleteMe or Incogni? Let me save you some research."
 
 **[COMPARISON - 0:05-0:25]**
-"DeleteMe costs $129 per year and covers 750 data brokers. Incogni is $78 but only 180 brokers. GhostMyData? We cover 400+ brokers, include dark web monitoring, and start at just $11.99 per month. That's 40% less than the competition."
+"DeleteMe costs $129 per year and covers 750 data brokers. Incogni is $78 but only 180 brokers. GhostMyData? We cover 2,100+ brokers, include dark web monitoring, and start at just $11.99 per month. That's 40% less than the competition."
 
 **[DIFFERENTIATOR - 0:25-0:35]**
 "Plus, we're the only service with real-time SMS alerts and automated removal verification with screenshots."

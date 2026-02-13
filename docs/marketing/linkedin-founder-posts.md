@@ -17,7 +17,7 @@ I spent 60+ hours manually removing myself from these "data broker" sites. Each 
 
 That's when I decided to build GhostMyData.
 
-We now automatically remove people from 400+ data broker sites. No forms. No faxing. No 60-hour weekends.
+We now automatically remove people from 2,100+ data broker sites. No forms. No faxing. No 60-hour weekends.
 
 If you've never Googled yourself, do it now. You might be surprised what strangers can find.
 
@@ -135,7 +135,7 @@ The wins feel great.
 The losses teach more.
 
 3 months ago, I was removing data brokers manually.
-Now we've automated 400+ sites.
+Now we've automated 2,100+ sites.
 
 Still a long way to go.
 

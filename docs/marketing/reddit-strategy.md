@@ -188,7 +188,7 @@ Take 5 minutes to see what's out there about you. You might be surprised.
 **Title:** "I've processed 50,000+ data broker removal requests. AMA about the data broker industry."
 
 ```
-I work in the privacy/data removal space and have submitted opt-out requests to over 400 data broker websites.
+I work in the privacy/data removal space and have submitted opt-out requests to over 2,100 data broker websites.
 
 Some things I've learned:
 - The average person appears on 80+ data broker sites

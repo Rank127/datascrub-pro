@@ -30,7 +30,7 @@ GhostMyData is a data privacy service that handles sensitive personal informatio
 
 ## Security Audit Findings
 
-### Audit Date: February 2025
+### Audit Date: February 2026
 
 | Severity | Issue | Status |
 |----------|-------|--------|
@@ -97,19 +97,10 @@ export function verifyCronAuth(request: Request): CronAuthResult {
 }
 ```
 
-**Updated Files** (12 cron routes):
-- `src/app/api/cron/health-check/route.ts`
-- `src/app/api/cron/email-monitor/route.ts`
-- `src/app/api/cron/process-removals/route.ts`
-- `src/app/api/cron/verify-removals/route.ts`
-- `src/app/api/cron/free-user-digest/route.ts`
-- `src/app/api/cron/link-checker/route.ts`
-- `src/app/api/cron/removal-digest/route.ts`
-- `src/app/api/cron/reports/route.ts`
-- `src/app/api/cron/sync-subscriptions/route.ts`
-- `src/app/api/cron/monthly-rescan/route.ts`
-- `src/app/api/cron/follow-up-reminders/route.ts`
-- `src/app/api/cron/ticketing-agent/route.ts`
+**Updated Files** (27 cron routes — all use centralized `verifyCronAuth`):
+- All 27 cron endpoints under `src/app/api/cron/*/route.ts`
+- Every cron has `maxDuration` configured (60s or 300s) to prevent silent Vercel timeout deaths
+- Critical crons use time-boxing: `deadline = startTime + 240_000` with PARTIAL status logging
 
 ### Phase 2: Security Headers & Admin Hardening ✅ COMPLETED
 
@@ -212,11 +203,45 @@ async function checkSecurityConfiguration(): Promise<SecurityConfigCheck[]> {
 }
 ```
 
-### Phase 6: Future Improvements 📋 PLANNED
+### Phase 6: Auto-Remediation & Self-Healing ✅ COMPLETED (Feb 2026)
+
+#### 6.1 Health Check Auto-Remediation
+**File**: `src/app/api/cron/health-check/route.ts`
+**Tests**: 24 automated tests with auto-fix capabilities
+
+Auto-fixes include:
+- Stuck scans (>30 min) → reset to PENDING
+- Stuck removals (>24h) → reset to PENDING
+- Orphaned user profiles → cleanup
+- Dead critical crons → auto-retrigger via HTTP
+- Stale tickets → priority escalation
+
+#### 6.2 Operations Agent Anomaly Detection
+**File**: `src/lib/agents/operations-agent/detect-anomalies.ts`
+**Export**: `runDetectAnomalies()`
+
+Catches silent cron deaths by monitoring:
+- Missing cron runs (>2x expected interval)
+- High failure rates (>50%)
+- Auto-retriggers dead critical crons
+
+#### 6.3 Remediation Engine v2
+**File**: `src/lib/agents/orchestrator/remediation-engine.ts`
+
+Event-driven rules for: `seo.*`, `cron.*`, `ticket.*`, `security.*`, `compliance.*`, `performance.*`
+
+#### 6.4 Ticket Self-Healing
+- `tryAutoResolve()` handles common issues before AI processing
+- Stale ticket detection (OPEN 4h+ → escalate, WAITING_USER 48h+ → reopen)
+- 24h escalation cooldown prevents priority storms
+
+### Phase 7: Future Improvements 📋 PLANNED
 
 - Webhook idempotency for Stripe
 - Session timeout for admin (30 min inactivity)
 - Device tracking for sessions
+- SOC 2 Type II certification
+- Penetration testing
 
 ---
 
@@ -457,13 +482,22 @@ export function verifyCronAuth(request: Request): CronAuthResult {
 
 ### Cron Job Schedule
 
-| Job | Schedule | Purpose |
-|-----|----------|---------|
-| health-check | Daily 7 AM | System health validation |
-| process-removals | Every 2 hours | Send removal requests |
-| verify-removals | Daily 8 AM | Check removal status |
-| email-monitor | 8 AM, 8 PM | Monitor email delivery |
-| security-scan | Daily 2 AM | Security vulnerability scan |
+All 27 cron endpoints use `verifyCronAuth()` and have `maxDuration` configured.
+
+| Job | Schedule | maxDuration | Purpose |
+|-----|----------|-------------|---------|
+| health-check | Daily 7 AM | 300s | System health (24 tests + auto-fix) |
+| process-removals | Every 2 hours | 300s | Send removal requests |
+| verify-removals | Daily 8 AM | 300s | Check removal status |
+| clear-pending-queue | Hourly | 300s | Stale queue cleanup |
+| email-monitor | 8 AM, 8 PM | 60s | Monitor email delivery |
+| security-scan | Daily 2 AM | 300s | Security vulnerability scan |
+| ticketing-agent | Daily 9 AM | 300s | AI ticket resolution |
+| daily-standup | Daily 12 PM | 300s | System health report |
+| seo-agent | 6x daily | 300s | SEO optimization |
+| content-optimizer | Daily 3 AM | 300s | Content quality |
+| link-checker | Daily 4 AM | 300s | Broken link detection |
+| *...and 16 more* | Various | 60-300s | See `docs/CRON_JOBS.md` |
 
 ---
 
@@ -628,12 +662,13 @@ ADMIN_EMAILS=                   # Bootstrap admin access
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0 | 2025-02-05 | Initial security documentation |
-| 1.1 | 2025-02-05 | Added SQL injection fix, cron auth hardening |
-| 1.2 | 2025-02-05 | Completed Phase 2: CSP headers, IP allowlist, Upstash Redis rate limiting |
-| 1.3 | 2025-02-05 | Added security scan cron job, Security Agent integration |
+| 1.0 | 2026-02-05 | Initial security documentation |
+| 1.1 | 2026-02-05 | Added SQL injection fix, cron auth hardening |
+| 1.2 | 2026-02-05 | Completed Phase 2: CSP headers, IP allowlist, Upstash Redis rate limiting |
+| 1.3 | 2026-02-05 | Added security scan cron job, Security Agent integration |
+| 1.4 | 2026-02-13 | All 27 crons secured with maxDuration + time-boxing; added auto-remediation (Phase 6): health check auto-fix, Operations Agent anomaly detection, Remediation Engine v2, ticket self-healing |
 
 ---
 
-*Last Updated: February 5, 2025*
+*Last Updated: February 13, 2026*
 *Document Owner: Security Team*

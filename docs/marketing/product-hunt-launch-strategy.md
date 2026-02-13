@@ -37,12 +37,12 @@ Product Hunt can drive 5,000-20,000 visitors in a single day. A top 5 finish get
 
 **Tagline (60 chars max):**
 ```
-Remove your personal data from 400+ sites automatically
+Remove your personal data from 2,100+ sites automatically
 ```
 
 **Description (260 chars):**
 ```
-Data brokers sell your personal information to anyone. GhostMyData scans 400+ data broker sites, finds your exposed data, automatically submits removal requests, verifies each removal, and monitors weekly. Take back your privacy with a free scan.
+Data brokers sell your personal information to anyone. GhostMyData scans 2,100+ data broker sites, finds your exposed data, automatically submits removal requests, verifies each removal, and monitors weekly. Take back your privacy with a free scan.
 ```
 
 **Full Description (for "About" section):**
@@ -63,7 +63,7 @@ Removing yourself manually takes 100+ hours. Each site has different opt-out pro
 
 GhostMyData automates the entire process:
 
-🔍 **Scan** - We check 400+ data broker sites for your information
+🔍 **Scan** - We check 2,100+ data broker sites for your information
 📋 **Find** - See exactly where you're exposed with detailed reports
 🗑️ **Remove** - We automatically submit opt-out requests on your behalf
 ✅ **Verify** - Every removal is verified with screenshot proof
@@ -71,11 +71,12 @@ GhostMyData automates the entire process:
 
 ## Why GhostMyData?
 
-- **More coverage**: 400+ data brokers (vs 180-750 for competitors)
+- **More coverage**: 2,100+ data sources across 92 categories (vs 200-1,000 for competitors)
 - **Better pricing**: Starting at $11.99/mo (40% less than alternatives)
-- **Real verification**: Screenshot proof of every removal
-- **Dark web monitoring**: Enterprise plan includes breach detection
-- **SMS alerts**: Instant notifications for new exposures
+- **AI-powered**: 24 AI agents for scanning, removal, and monitoring
+- **AI Shield**: 60 sources covering facial recognition, voice cloning, and deepfakes
+- **Dark web monitoring**: 365 sources + breach database integration (HIBP + LeakCheck)
+- **Family plans**: Protect up to 5 family members (Enterprise)
 
 ## Get Started
 
@@ -152,7 +153,7 @@ I spent 60+ hours manually opting out from data broker sites. Each one had a dif
 I thought: there has to be a better way.
 
 So I built GhostMyData to automate the entire process:
-- Scan 400+ data broker sites
+- Scan 2,100+ data broker sites
 - Auto-submit opt-out requests
 - Verify removals with screenshots
 - Monitor for new listings weekly
@@ -175,7 +176,7 @@ What's the craziest thing you've found when Googling yourself? 👇
 ```
 Hey [Name]!
 
-Quick heads up - I'm launching GhostMyData on Product Hunt on [DATE]. It's a privacy tool that removes your data from 400+ data broker sites automatically.
+Quick heads up - I'm launching GhostMyData on Product Hunt on [DATE]. It's a privacy tool that removes your data from 2,100+ data broker sites automatically.
 
 Would really appreciate your support on launch day! I'll send you the link when it's live.
 
@@ -187,7 +188,7 @@ Thanks!
 ```
 🚀 We're LIVE on Product Hunt!
 
-GhostMyData: Remove your personal data from 400+ sites automatically
+GhostMyData: Remove your personal data from 2,100+ sites automatically
 
 Would mean the world if you could:
 1. Check it out: [PH LINK]
@@ -226,7 +227,7 @@ Thanks for being part of our journey!
 ```
 🚀 We just launched on @ProductHunt!
 
-GhostMyData removes your personal data from 400+ data broker websites automatically.
+GhostMyData removes your personal data from 2,100+ data broker websites automatically.
 
 Here's why this matters: 🧵
 
@@ -246,7 +247,7 @@ Each site has different opt-out procedures. Some require mail. Some re-list you 
 
 4/ GhostMyData automates everything:
 
-🔍 Scan 400+ data broker sites
+🔍 Scan 2,100+ data broker sites
 📋 Find where you're exposed
 🗑️ Auto-submit removal requests
 ✅ Verify with screenshot proof
@@ -270,7 +271,7 @@ I built this because of a personal experience - finding my home address, phone n
 These sites sell your personal information to anyone willing to pay. The result? Spam calls, stalking, identity theft.
 
 GhostMyData fights back by:
-✓ Scanning 400+ data broker sites
+✓ Scanning 2,100+ data broker sites
 ✓ Automatically submitting removal requests
 ✓ Verifying each removal with screenshots
 ✓ Monitoring weekly for new listings
@@ -291,16 +292,17 @@ And if you know anyone concerned about their online privacy, please share!
 **Q: How is this different from DeleteMe?**
 ```
 Great question! A few key differences:
-1. Coverage: We scan 400+ sites vs their ~750, but we're adding more monthly
-2. Price: $11.99/mo vs their ~$10/mo (similar), but we include features they charge extra for
-3. Verification: We provide screenshot proof of every removal
-4. Monitoring: Weekly vs quarterly scans
-5. Alerts: SMS notifications for new exposures (Enterprise)
+1. Coverage: We scan 2,100+ sources across 92 categories vs their ~750
+2. Price: $11.99/mo vs their ~$10/mo, but we include dark web monitoring and AI Shield
+3. AI-Powered: 24 AI agents handle scanning, removal, and monitoring automatically
+4. AI Shield: We protect against facial recognition, voice cloning, and deepfake threats
+5. Family Plans: Protect up to 5 family members on our Enterprise plan
+6. Breach Monitoring: Integrated HIBP + LeakCheck (most competitors don't include this)
 ```
 
 **Q: How do you actually remove the data?**
 ```
-Each data broker has an opt-out process (legally required under CCPA, GDPR, etc.). We've mapped out the process for 400+ sites and automated the submission. Some require email verification, which we handle. Some require waiting periods. We track all of this and verify removal after the expected timeframe.
+Each data broker has an opt-out process (legally required under CCPA, GDPR, etc.). We've mapped out the process for 2,100+ sites and automated the submission. Some require email verification, which we handle. Some require waiting periods. We track all of this and verify removal after the expected timeframe.
 ```
 
 **Q: Does this really work?**

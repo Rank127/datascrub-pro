@@ -192,27 +192,27 @@ GhostMyData
 
 ### Tagline (Short)
 ```
-Remove Your Data From 400+ Data Broker Sites
+Remove Your Data From 2,100+ Data Broker Sites
 ```
 
 ### Tagline (Medium)
 ```
-Automated data removal from 400+ data broker sites. Protect your privacy.
+Automated data removal from 2,100+ data broker sites. Protect your privacy.
 ```
 
 ### Bio (Short - 160 chars)
 ```
-We remove your personal data from 400+ data broker sites automatically. Stop spam calls, prevent stalking, protect your identity. Free scan available.
+We remove your personal data from 2,100+ data broker sites automatically. Stop spam calls, prevent stalking, protect your identity. Free scan available.
 ```
 
 ### Bio (Medium - 300 chars)
 ```
-GhostMyData automatically removes your personal information from 400+ data broker websites. Our service scans for exposed data, submits opt-out requests, verifies removals, and monitors for new listings. Protect yourself from spam calls, stalkers, and identity theft. Start with a free scan.
+GhostMyData automatically removes your personal information from 2,100+ data broker websites. Our service scans for exposed data, submits opt-out requests, verifies removals, and monitors for new listings. Protect yourself from spam calls, stalkers, and identity theft. Start with a free scan.
 ```
 
 ### Bio (Long - 500 chars)
 ```
-Data brokers collect and sell your personal information - your name, address, phone number, relatives, and more. GhostMyData fights back. We scan 400+ data broker sites to find your exposed information, automatically submit removal requests, verify each removal with screenshots, and continuously monitor for new listings. Our users see an average of 80+ exposures removed. Plans start at $11.99/month - 40% less than competitors. Take back your privacy with a free scan at ghostmydata.com.
+Data brokers collect and sell your personal information - your name, address, phone number, relatives, and more. GhostMyData fights back. We scan 2,100+ data broker sites to find your exposed information, automatically submit removal requests, verify each removal with screenshots, and continuously monitor for new listings. Our users see an average of 80+ exposures removed. Plans start at $11.99/month - 40% less than competitors. Take back your privacy with a free scan at ghostmydata.com.
 ```
 
 ### Website
@@ -275,7 +275,7 @@ United States
 4. **Name:** `GhostMyData`
 5. **Bio (160 chars):**
 ```
-Remove your data from 400+ data broker sites automatically. Stop spam calls, prevent stalking, protect your identity. Free scan available.
+Remove your data from 2,100+ data broker sites automatically. Stop spam calls, prevent stalking, protect your identity. Free scan available.
 ```
 6. **Location:** `United States`
 7. **Website:** `https://ghostmydata.com`
@@ -285,7 +285,7 @@ Remove your data from 400+ data broker sites automatically. Stop spam calls, pre
 1. Click **Post** button
 2. Paste this tweet:
 ```
-Your personal data is on 400+ websites right now. We remove it automatically.
+Your personal data is on 2,100+ websites right now. We remove it automatically.
 
 🔍 Scan for exposures
 🗑️ Automatic removal requests
@@ -342,10 +342,10 @@ Free scan → ghostmydata.com
 1. On your new page, click **Edit page**
 2. **Logo:** Upload `/public/logo.png` (300x300 recommended)
 3. **Cover image:** Upload `/public/banners/linkedin-banner.png` (1128x191)
-4. **Tagline:** `Remove Your Data From 400+ Data Broker Sites`
+4. **Tagline:** `Remove Your Data From 2,100+ Data Broker Sites`
 5. **About section (description):**
 ```
-Data brokers collect and sell your personal information - your name, address, phone number, relatives, and more. GhostMyData fights back. We scan 400+ data broker sites to find your exposed information, automatically submit removal requests, verify each removal with screenshots, and continuously monitor for new listings. Our users see an average of 80+ exposures removed. Plans start at $11.99/month - 40% less than competitors. Take back your privacy with a free scan at ghostmydata.com.
+Data brokers collect and sell your personal information - your name, address, phone number, relatives, and more. GhostMyData fights back. We scan 2,100+ data broker sites to find your exposed information, automatically submit removal requests, verify each removal with screenshots, and continuously monitor for new listings. Our users see an average of 80+ exposures removed. Plans start at $11.99/month - 40% less than competitors. Take back your privacy with a free scan at ghostmydata.com.
 ```
 6. **Location:** Add your city/state
 7. **Founded:** `2024`
@@ -366,7 +366,7 @@ Introducing GhostMyData - Automated Privacy Protection
 In 2024, the average person's data appears on 80+ data broker websites. These sites sell your personal information to anyone willing to pay.
 
 We built GhostMyData to fight back:
-✓ Scan 400+ data broker sites
+✓ Scan 2,100+ data broker sites
 ✓ Automatic opt-out submissions
 ✓ Verified removals with screenshots
 ✓ Continuous monitoring
@@ -514,7 +514,7 @@ For identity theft threads:
 3. **Handle:** `@GhostMyData` (if available)
 4. **Description:**
 ```
-GhostMyData removes your personal data from 400+ data broker websites automatically.
+GhostMyData removes your personal data from 2,100+ data broker websites automatically.
 
 Data brokers collect and sell your information - your name, address, phone number, relatives, and more. We fight back with automated opt-out requests, verified removals, and continuous monitoring.
 
@@ -539,7 +539,7 @@ Data brokers collect and sell your information - your name, address, phone numbe
 **STEP 6: Upload First Video**
 1. Click **Create** (top right) → **Upload video**
 2. Upload product explainer video
-3. Add title: `How GhostMyData Removes Your Data From 400+ Broker Sites`
+3. Add title: `How GhostMyData Removes Your Data From 2,100+ Broker Sites`
 4. Add description with links
 5. Add tags: privacy, data broker, data removal, identity protection
 6. Set thumbnail (create in Canva or use screenshot)
@@ -578,7 +578,7 @@ Data brokers collect and sell your information - your name, address, phone numbe
    - `Internet Company` (add second category)
 5. **Bio (short):**
 ```
-We remove your personal data from 400+ data broker sites automatically. Stop spam calls, prevent stalking, protect your identity.
+We remove your personal data from 2,100+ data broker sites automatically. Stop spam calls, prevent stalking, protect your identity.
 ```
 6. Click **Create Page**
 
@@ -595,7 +595,7 @@ We remove your personal data from 400+ data broker sites automatically. Stop spa
 2. Fill in:
    - **Description (About):**
 ```
-GhostMyData automatically removes your personal information from 400+ data broker websites. Our service scans for exposed data, submits opt-out requests, verifies removals, and monitors for new listings. Protect yourself from spam calls, stalkers, and identity theft. Start with a free scan.
+GhostMyData automatically removes your personal information from 2,100+ data broker websites. Our service scans for exposed data, submits opt-out requests, verifies removals, and monitors for new listings. Protect yourself from spam calls, stalkers, and identity theft. Start with a free scan.
 ```
    - **Categories:** Software Company, Internet Company
    - **Phone:** (optional)
@@ -620,7 +620,7 @@ GhostMyData automatically removes your personal information from 400+ data broke
 1. On your page, click **Create post**
 2. Paste:
 ```
-Your personal information is for sale on 400+ data broker websites right now.
+Your personal information is for sale on 2,100+ data broker websites right now.
 
 Your name ✓
 Your address ✓
@@ -687,7 +687,7 @@ Option B - New account:
 4. **Username:** `GhostMyData`
 5. **Bio:**
 ```
-🔒 Remove your data from 400+ sites
+🔒 Remove your data from 2,100+ sites
 🛡️ Automated privacy protection
 📊 Free scan available
 👇 Protect yourself now
@@ -718,7 +718,7 @@ Option B - New account:
 2. Go to **Appearance** tab:
    - Upload profile photo: `/public/logo.png`
    - Choose theme (dark recommended)
-   - Add bio: `Remove your data from 400+ sites`
+   - Add bio: `Remove your data from 2,100+ sites`
 
 3. Copy your Linktree URL: `linktr.ee/ghostmydata`
 
@@ -762,7 +762,7 @@ Option C - AirDrop (Mac/iPhone):
 8. Tap **Next**
 9. Paste caption:
 ```
-Your personal data is on 400+ websites right now. 😱
+Your personal data is on 2,100+ websites right now. 😱
 
 Data brokers are selling:
 📍 Your home address
@@ -774,7 +774,7 @@ Data brokers are selling:
 This is how spam calls find you. This is how stalkers find you. This is how scammers target you.
 
 GhostMyData removes your data automatically:
-✅ Scan 400+ data broker sites
+✅ Scan 2,100+ data broker sites
 ✅ Auto-submit removal requests
 ✅ Verify each removal with screenshots
 ✅ Weekly monitoring for new listings
@@ -788,7 +788,7 @@ Take back your privacy. Free scan at ghostmydata.com (link in bio)
 
 **Carousel Images:**
 ```
-/public/banners/instagram-carousel-1.png (Hook - "Your data is on 400+ sites")
+/public/banners/instagram-carousel-1.png (Hook - "Your data is on 2,100+ sites")
 /public/banners/instagram-carousel-2.png (Problem - Data brokers sell...)
 /public/banners/instagram-carousel-3.png (Solution - GhostMyData features)
 /public/banners/instagram-carousel-4.png (CTA - Free scan)
@@ -828,7 +828,7 @@ Take back your privacy. Free scan at ghostmydata.com (link in bio)
    - **Headline:** `Founder @ GhostMyData | Privacy Advocate`
    - **Bio:**
 ```
-Building GhostMyData - removing personal data from 400+ data broker sites automatically. Passionate about privacy and protecting people from spam calls, stalkers, and identity theft.
+Building GhostMyData - removing personal data from 2,100+ data broker sites automatically. Passionate about privacy and protecting people from spam calls, stalkers, and identity theft.
 ```
    - **Website:** `https://ghostmydata.com`
    - **Twitter:** `@GhostMyData`
@@ -888,11 +888,11 @@ How to engage:
 1. Go to https://www.producthunt.com/posts/new
 2. Fill in:
    - **Name:** `GhostMyData`
-   - **Tagline:** `Remove your data from 400+ broker sites` (40 chars max)
+   - **Tagline:** `Remove your data from 2,100+ broker sites` (40 chars max)
    - **Links:** `https://ghostmydata.com`
    - **Description:**
 ```
-Data brokers collect and sell your personal information - your name, address, phone number, relatives, and more. GhostMyData fights back. We scan 400+ data broker sites to find your exposed information, automatically submit removal requests, verify each removal with screenshots, and continuously monitor for new listings. Our users see an average of 80+ exposures removed. Plans start at $11.99/month - 40% less than competitors. Take back your privacy with a free scan at ghostmydata.com.
+Data brokers collect and sell your personal information - your name, address, phone number, relatives, and more. GhostMyData fights back. We scan 2,100+ data broker sites to find your exposed information, automatically submit removal requests, verify each removal with screenshots, and continuously monitor for new listings. Our users see an average of 80+ exposures removed. Plans start at $11.99/month - 40% less than competitors. Take back your privacy with a free scan at ghostmydata.com.
 ```
    - **Topics:** Privacy, Security, SaaS, Productivity
    - **Thumbnail:** Upload `/public/banners/producthunt-icon.png` (240x240)
@@ -914,7 +914,7 @@ Hi [Name],
 
 I've been following your hunts - loved [specific product they hunted].
 
-I'm launching GhostMyData, a privacy tool that removes personal data from 400+ data broker sites automatically.
+I'm launching GhostMyData, a privacy tool that removes personal data from 2,100+ data broker sites automatically.
 
 Would you be interested in hunting it? Happy to share early access and provide all assets.
 
@@ -933,7 +933,7 @@ I built GhostMyData because I was shocked to find my personal data on 80+ data b
 Removing myself manually would have taken 100+ hours. So I built a tool to do it automatically.
 
 What GhostMyData does:
-🔍 Scans 400+ data broker sites
+🔍 Scans 2,100+ data broker sites
 🗑️ Submits opt-out requests automatically
 📸 Verifies each removal with screenshots
 📊 Monitors weekly for new listings
@@ -1028,7 +1028,7 @@ Option B - Indie Hackers Plus (paid):
    - Username: GhostMyData
    - Bio (copy-paste):
    ```
-   Founder of GhostMyData - removing personal data from 400+ data broker sites automatically. Building in public. Privacy advocate.
+   Founder of GhostMyData - removing personal data from 2,100+ data broker sites automatically. Building in public. Privacy advocate.
    ```
    - Location: United States
    - Website: https://ghostmydata.com
@@ -1041,7 +1041,7 @@ Option B - Indie Hackers Plus (paid):
 2. Click **Add Product**
 3. Fill in:
    - Name: `GhostMyData`
-   - Tagline: `Remove your data from 400+ data broker sites automatically`
+   - Tagline: `Remove your data from 2,100+ data broker sites automatically`
    - Website: `https://ghostmydata.com`
    - Description: [Use long bio from Pre-Written Content]
    - Logo: Upload from `/public/logo.png`
@@ -1121,7 +1121,7 @@ Hey IH! 👋
 I built GhostMyData to solve a problem I had - my personal information was on 80+ data broker websites, and removing myself manually would have taken 100+ hours.
 
 What it does:
-- Scans 400+ data broker sites
+- Scans 2,100+ data broker sites
 - Automatically submits opt-out requests
 - Verifies removals with screenshots
 - Monitors for new listings weekly
@@ -1161,7 +1161,7 @@ Would love feedback from the community. What privacy tools do you use?
    - **Name:** `GhostMyData`
    - **Bio:**
 ```
-Founder of GhostMyData | Removing personal data from 400+ data broker sites | Privacy advocate | ghostmydata.com
+Founder of GhostMyData | Removing personal data from 2,100+ data broker sites | Privacy advocate | ghostmydata.com
 ```
    - **Photo:** Upload `/public/logo.png` or professional photo
 3. Click **Save**
@@ -1238,7 +1238,7 @@ After researching solutions, I found three options:
 2. **Paid services** — Companies like DeleteMe ($129/year) or Incogni ($77/year) automate the process
 3. **Build your own tool** — What I ended up doing
 
-I built GhostMyData because I was frustrated with the options. It scans 400+ data broker sites, submits opt-out requests automatically, verifies each removal with screenshots, and monitors weekly for new listings.
+I built GhostMyData because I was frustrated with the options. It scans 2,100+ data broker sites, submits opt-out requests automatically, verifies each removal with screenshots, and monitors weekly for new listings.
 
 ## 5 things you can do right now
 
@@ -1260,7 +1260,7 @@ Your privacy is worth protecting.
 
 ---
 
-*If you want to see what data brokers know about you, I built a free scan at ghostmydata.com. It checks 400+ sites and shows you exactly where your data is exposed.*
+*If you want to see what data brokers know about you, I built a free scan at ghostmydata.com. It checks 2,100+ sites and shows you exactly where your data is exposed.*
 ```
 
 **Future Article Ideas:**
@@ -1406,7 +1406,7 @@ Founder at GhostMyData | Privacy Expert
 ```
    - **Description:**
 ```
-Founder of GhostMyData (ghostmydata.com) - a service that removes personal data from 400+ data broker websites. I'm passionate about privacy and helping people protect their identity online. Ask me about data brokers, opt-out processes, or privacy protection.
+Founder of GhostMyData (ghostmydata.com) - a service that removes personal data from 2,100+ data broker websites. I'm passionate about privacy and helping people protect their identity online. Ask me about data brokers, opt-out processes, or privacy protection.
 ```
    - **Employment:** Add `Founder at GhostMyData`
 4. Click **Save**
@@ -1543,7 +1543,7 @@ The data broker removal is often overlooked but it's huge - that's where scammer
    - **Logo:** Upload `/public/logo.png`
    - **Company description:**
 ```
-GhostMyData automatically removes your personal information from 400+ data broker websites. We scan for exposed data, submit opt-out requests, verify removals with screenshots, and monitor for new listings. Protect yourself from spam calls, stalkers, and identity theft.
+GhostMyData automatically removes your personal information from 2,100+ data broker websites. We scan for exposed data, submit opt-out requests, verify removals with screenshots, and monitor for new listings. Protect yourself from spam calls, stalkers, and identity theft.
 ```
    - **Contact email:** `ghostmydata@gmail.com`
    - **Address:** (optional - can use registered agent or leave blank)
@@ -1640,10 +1640,10 @@ The GhostMyData Team
 2. Fill in:
    - **Product description:**
 ```
-GhostMyData automatically removes your personal information from 400+ data broker websites. Our service scans for exposed data, submits opt-out requests, verifies each removal with screenshots, and continuously monitors for new listings.
+GhostMyData automatically removes your personal information from 2,100+ data broker websites. Our service scans for exposed data, submits opt-out requests, verifies each removal with screenshots, and continuously monitors for new listings.
 
 Key Features:
-• Scan 400+ data broker sites
+• Scan 2,100+ data broker sites
 • Automatic opt-out request submission
 • Screenshot verification of removals
 • Weekly monitoring for new listings
@@ -1652,7 +1652,7 @@ Key Features:
 
 Perfect for individuals concerned about privacy, spam calls, identity theft, stalking, and personal data exposure.
 ```
-   - **Tagline:** `Remove your data from 400+ data broker sites automatically`
+   - **Tagline:** `Remove your data from 2,100+ data broker sites automatically`
    - **Logo:** Upload `/public/logo.png`
    - **Year founded:** `2024`
    - **Headquarters:** `United States`
@@ -1764,12 +1764,12 @@ Thank you!
 
    - **Short description:**
 ```
-GhostMyData is privacy software that automatically removes personal data from 400+ data broker sites.
+GhostMyData is privacy software that automatically removes personal data from 2,100+ data broker sites.
 ```
 
    - **Long description:**
 ```
-GhostMyData is a privacy protection software that automatically removes personal information from 400+ data broker websites. The system scans sites like Spokeo, WhitePages, BeenVerified, and hundreds more to locate exposed details such as names, addresses, phone numbers, and relatives.
+GhostMyData is a privacy protection software that automatically removes personal information from 2,100+ data broker websites. The system scans sites like Spokeo, WhitePages, BeenVerified, and hundreds more to locate exposed details such as names, addresses, phone numbers, and relatives.
 
 The software features an automated removal process that submits opt-out requests to each data broker, verifies each removal with screenshots, and monitors weekly for new listings.
 
@@ -1781,7 +1781,7 @@ GhostMyData provides an affordable solution for individuals seeking to control t
 
 **Screenshot Captions:**
 - Dashboard: `Dashboard - Track removal progress and privacy protection status`
-- Scan Results: `Scan Results - See where your data is exposed on 400+ broker sites`
+- Scan Results: `Scan Results - See where your data is exposed on 2,100+ broker sites`
 - Removals: `Verified Removals - Screenshot proof of each successful removal`
 
 **STEP 5: Add Screenshots**
@@ -1799,7 +1799,7 @@ GhostMyData provides an affordable solution for individuals seeking to control t
 3. Add plan:
    - **Name:** Monthly
    - **Price:** $11.99/month
-   - **Description:** Scan 400+ data broker sites, automated removal requests, screenshot verification, weekly monitoring
+   - **Description:** Scan 2,100+ data broker sites, automated removal requests, screenshot verification, weekly monitoring
 4. Pricing options:
    - Free Trial: ❌ No
    - Free Version: ✅ Yes (free scan shows exposures)
@@ -1890,7 +1890,7 @@ Thanks,
    - **Website:** `https://ghostmydata.com`
    - **Description:**
 ```
-GhostMyData automatically removes your personal information from 400+ data broker websites. The service scans for your exposed data, submits opt-out requests automatically, verifies each removal with screenshots, and monitors for new listings weekly. An affordable alternative to DeleteMe and Incogni at $11.99/month - 40% less than competitors.
+GhostMyData automatically removes your personal information from 2,100+ data broker websites. The service scans for your exposed data, submits opt-out requests automatically, verifies each removal with screenshots, and monitors for new listings weekly. An affordable alternative to DeleteMe and Incogni at $11.99/month - 40% less than competitors.
 ```
    - **License:** Commercial
    - **Platforms:** Web-based
@@ -1982,11 +1982,11 @@ GhostMyData offers similar data broker removal with screenshot verification at 4
 2. **Organization type:** Company
 3. **Short description:**
 ```
-GhostMyData removes personal data from 400+ data broker websites automatically.
+GhostMyData removes personal data from 2,100+ data broker websites automatically.
 ```
 4. **Full description:**
 ```
-GhostMyData is a privacy protection service that automatically removes personal information from data broker websites. The platform scans 400+ data broker sites, submits opt-out requests automatically, verifies each removal with screenshots, and continuously monitors for new listings. Founded to help individuals protect their privacy from spam calls, stalkers, and identity theft at an affordable price point.
+GhostMyData is a privacy protection service that automatically removes personal information from data broker websites. The platform scans 2,100+ data broker sites, submits opt-out requests automatically, verifies each removal with screenshots, and continuously monitors for new listings. Founded to help individuals protect their privacy from spam calls, stalkers, and identity theft at an affordable price point.
 ```
 5. Click **Continue**
 
@@ -2080,7 +2080,7 @@ GhostMyData is a privacy protection service that automatically removes personal 
    - **Website:** `https://ghostmydata.com`
    - **Bio:**
 ```
-[Your Name], Founder of GhostMyData (ghostmydata.com), a privacy protection service that removes personal data from 400+ data broker websites. Expert in data privacy, identity protection, and the data broker industry.
+[Your Name], Founder of GhostMyData (ghostmydata.com), a privacy protection service that removes personal data from 2,100+ data broker websites. Expert in data privacy, identity protection, and the data broker industry.
 ```
    - **Photo:** Upload professional headshot
 3. Click **Save**
@@ -2120,7 +2120,7 @@ Subject: Re: [Query Title] - [Your Name], Privacy Expert
 
 Hi [Reporter Name],
 
-I'm [Your Name], Founder of GhostMyData, a privacy protection service that removes personal data from 400+ data broker websites.
+I'm [Your Name], Founder of GhostMyData, a privacy protection service that removes personal data from 2,100+ data broker websites.
 
 [Answer their specific question with 2-3 paragraphs]
 
@@ -2153,7 +2153,7 @@ Most spam calls originate from data brokers selling your phone number. While app
 
 The most effective solution is removing your information from data broker sites like Spokeo, WhitePages, BeenVerified, and the hundreds of others that sell your data. Each site has a different opt-out process, and they often re-add your information after a few months.
 
-Services like GhostMyData automate this process - we submit opt-out requests to 400+ data brokers, verify each removal with screenshots, and monitor weekly for new listings. Our users see significant reductions in spam calls within 2-4 weeks of their data being removed.
+Services like GhostMyData automate this process - we submit opt-out requests to 2,100+ data brokers, verify each removal with screenshots, and monitor weekly for new listings. Our users see significant reductions in spam calls within 2-4 weeks of their data being removed.
 ```
 
 **Tips for Success:**
@@ -2216,7 +2216,7 @@ Services like GhostMyData automate this process - we submit opt-out requests to 
    - **Name:** `GhostMyData`
    - **Bio (80 char max):**
 ```
-🔒 Remove your data from 400+ broker sites
+🔒 Remove your data from 2,100+ broker sites
 ghostmydata.com
 ```
    - **Website:** `https://ghostmydata.com`
@@ -2227,7 +2227,7 @@ ghostmydata.com
 
 Video 1 - Hook:
 ```
-"Your personal data is on 400+ websites right now. Here's how I know..."
+"Your personal data is on 2,100+ websites right now. Here's how I know..."
 [Show screen recording of searching yourself on Spokeo/WhitePages]
 ```
 
@@ -2299,7 +2299,7 @@ Video 5 - Shocking fact:
    - **Handle:** `@ghostmydata.bsky.social`
    - **Bio:**
 ```
-Remove your personal data from 400+ data broker sites automatically. Stop spam calls, prevent stalking, protect your identity. 🔒
+Remove your personal data from 2,100+ data broker sites automatically. Stop spam calls, prevent stalking, protect your identity. 🔒
 
 Free scan → ghostmydata.com
 ```
@@ -2315,7 +2315,7 @@ Hey Bluesky! 👋
 
 I built GhostMyData to solve a problem: my personal data was on 87 websites without my consent.
 
-We remove your data from 400+ data broker sites automatically.
+We remove your data from 2,100+ data broker sites automatically.
 
 If you're getting spam calls, this is probably why.
 
@@ -2409,7 +2409,7 @@ How many spam calls do you get per week?
 | Type | % | Example |
 |------|---|---------|
 | Educational | 40% | "How to remove yourself from Spokeo" |
-| Shocking/Stats | 25% | "Your data is on 400+ sites" |
+| Shocking/Stats | 25% | "Your data is on 2,100+ sites" |
 | Personal Story | 20% | "I found my info on 87 sites..." |
 | Promotional | 15% | "Free scan at ghostmydata.com" |
 

@@ -25,13 +25,13 @@
 4. "The $200B industry profiting from your data"
 5. "Why strangers know your home address"
 6. "What data brokers know about you"
-7. "I removed myself from 400+ websites"
+7. "I removed myself from 2,100+ websites"
 8. "The privacy trick nobody talks about"
 9. "This search will shock you"
 10. "Why your spam calls increased"
 
 ### Solution Hooks
-1. "Remove your data from 400+ websites"
+1. "Remove your data from 2,100+ websites"
 2. "Stop data brokers from selling your info"
 3. "Disappear from people search sites"
 4. "Delete your data broker profiles"
@@ -47,7 +47,7 @@
 ## HEADLINES
 
 ### Primary Headlines
-1. "Remove Your Personal Data From 400+ Websites"
+1. "Remove Your Personal Data From 2,100+ Websites"
 2. "Stop Data Brokers From Selling Your Info"
 3. "Your Privacy, Protected Automatically"
 4. "Disappear From Data Broker Sites"
@@ -74,13 +74,13 @@
 ### Short (Under 50 words)
 
 **Version A:**
-Data brokers collect and sell your personal information to anyone. Your name, address, phone, and more - all public. GhostMyData removes you from 400+ data broker sites automatically. Free scan shows exactly where you're exposed.
+Data brokers collect and sell your personal information to anyone. Your name, address, phone, and more - all public. GhostMyData removes you from 2,100+ data broker sites automatically. Free scan shows exactly where you're exposed.
 
 **Version B:**
-Your home address is on dozens of websites right now. Stalkers, scammers, and telemarketers can find you in seconds. We remove your data from 400+ sites and monitor for new exposures weekly.
+Your home address is on dozens of websites right now. Stalkers, scammers, and telemarketers can find you in seconds. We remove your data from 2,100+ sites and monitor for new exposures weekly.
 
 **Version C:**
-Tired of spam calls? Data brokers sell your phone number. We remove it from the source - 400+ data broker websites. One service. Automatic removal. Continuous protection.
+Tired of spam calls? Data brokers sell your phone number. We remove it from the source - 2,100+ data broker websites. One service. Automatic removal. Continuous protection.
 
 ### Medium (50-100 words)
 
@@ -89,7 +89,7 @@ Right now, your personal information is listed on an average of 80+ data broker 
 
 Data brokers profit billions selling your data. GhostMyData fights back.
 
-We scan 400+ data broker sites, find your exposed information, and automatically submit removal requests. Then we monitor weekly to catch new listings.
+We scan 2,100+ data broker sites, find your exposed information, and automatically submit removal requests. Then we monitor weekly to catch new listings.
 
 Free scan shows exactly where you're exposed. See for yourself.
 
@@ -98,7 +98,7 @@ Why do strangers keep calling you? Data brokers.
 
 These companies scrape public records, aggregate your information, and sell it to telemarketers, scammers, and anyone willing to pay.
 
-GhostMyData removes your data from 400+ of these sites automatically. No forms to fill out. No hours of research. We handle the entire opt-out process for you.
+GhostMyData removes your data from 2,100+ of these sites automatically. No forms to fill out. No hours of research. We handle the entire opt-out process for you.
 
 Start with a free scan. See how exposed you really are.
 
@@ -113,7 +113,7 @@ Removing yourself manually takes 100+ hours. Each site has different opt-out pro
 
 GhostMyData solves this permanently.
 
-We scan 400+ data broker sites to find your exposed information. We automatically submit removal requests on your behalf. We verify each removal with screenshots. And we monitor weekly to catch new listings before they spread.
+We scan 2,100+ data broker sites to find your exposed information. We automatically submit removal requests on your behalf. We verify each removal with screenshots. And we monitor weekly to catch new listings before they spread.
 
 Plans start at $11.99/month - 40% less than competitors like DeleteMe and Incogni.
 
@@ -157,7 +157,7 @@ Take back your privacy. Start with a free scan.
 - CTA: "See Your Exposure"
 
 **Ad 2 - Solution/Features**
-- Hook: "Remove your data from 400+ sites"
+- Hook: "Remove your data from 2,100+ sites"
 - Image: Before/after comparison
 - Body: Short Version C
 - CTA: "Start Free Scan"
@@ -172,11 +172,11 @@ Take back your privacy. Start with a free scan.
 
 **Ad 1 (300x250):**
 - Headline: "Your Data Is For Sale"
-- Subhead: "Remove it from 400+ sites"
+- Subhead: "Remove it from 2,100+ sites"
 - CTA: "Free Scan"
 
 **Ad 2 (728x90):**
-- Headline: "Data Brokers Sell Your Info | Remove Yourself From 400+ Sites | Free Scan"
+- Headline: "Data Brokers Sell Your Info | Remove Yourself From 2,100+ Sites | Free Scan"
 
 **Ad 3 (300x600):**
 - Headline: "Stop Data Brokers"
@@ -189,7 +189,7 @@ Take back your privacy. Start with a free scan.
 "Your data is for sale. GhostMyData removes it. Free scan at GhostMyData.com"
 
 **15-second:**
-"Right now, your home address, phone number, and personal details are on dozens of websites. Data brokers sell this to anyone. GhostMyData removes you from 400+ sites automatically. Free scan at GhostMyData.com."
+"Right now, your home address, phone number, and personal details are on dozens of websites. Data brokers sell this to anyone. GhostMyData removes you from 2,100+ sites automatically. Free scan at GhostMyData.com."
 
 ---
 
