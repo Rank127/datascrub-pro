@@ -15,6 +15,12 @@ import { logCronExecution } from "@/lib/cron-logger";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { getDirective } from "@/lib/mastermind/directives";
 
+// Vercel Pro max timeout: 300 seconds (5 minutes)
+export const maxDuration = 300;
+
+// Stop processing at 4 minutes — 60s safety buffer for cleanup, logging, response
+const PROCESSING_DEADLINE_MS = 240_000;
+
 const JOB_NAME = "process-removals";
 
 /**
@@ -93,13 +99,23 @@ export async function POST(request: Request) {
       const pendingBatchSize = Math.floor(basePendingBatch * adaptiveMultiplier);
       const retryBatchSize = Math.floor(baseRetryBatch * adaptiveMultiplier);
 
-      // Step 4: Process pending removals with smart prioritization
-      console.log(`[Cron: ${JOB_NAME}] Processing ${pendingBatchSize} pending removals...`);
-      const pendingResults = await processPendingRemovalsBatch(pendingBatchSize);
+      // Calculate deadline for time-boxed processing
+      const deadline = startTime + PROCESSING_DEADLINE_MS;
 
-      // Step 5: Retry failed removals
-      console.log(`[Cron: ${JOB_NAME}] Retrying ${retryBatchSize} failed removals...`);
-      const retryResults = await retryFailedRemovalsBatch(retryBatchSize);
+      // Step 4: Process pending removals with smart prioritization
+      console.log(`[Cron: ${JOB_NAME}] Processing ${pendingBatchSize} pending removals (deadline: ${new Date(deadline).toISOString()})...`);
+      const pendingResults = await processPendingRemovalsBatch(pendingBatchSize, deadline);
+
+      // Step 5: Retry failed removals (only if we still have time)
+      let retryResults = { processed: 0, retried: 0, stillFailed: 0, emailsSent: 0, skippedDueToLimit: 0, timeBoxed: false };
+      if (Date.now() < deadline) {
+        console.log(`[Cron: ${JOB_NAME}] Retrying ${retryBatchSize} failed removals...`);
+        retryResults = await retryFailedRemovalsBatch(retryBatchSize, deadline);
+      } else {
+        console.log(`[Cron: ${JOB_NAME}] Skipping retries — time-box reached during pending processing`);
+      }
+
+      const wasTimeBoxed = pendingResults.timeBoxed || retryResults.timeBoxed || Date.now() >= deadline;
 
       // Step 6: Get automation stats
       const stats = await getAutomationStats();
@@ -122,6 +138,7 @@ export async function POST(request: Request) {
       const response = {
         success: true,
         duration: `${(duration / 1000).toFixed(1)}s`,
+        timeBoxed: wasTimeBoxed,
         intelligence: {
           prioritizedBrokers: topBrokers.length,
           predictionsGenerated: predictions.length,
@@ -160,12 +177,17 @@ export async function POST(request: Request) {
         })),
       };
 
-      // Log execution
+      // Log execution — ALWAYS log, even partial completions
+      const cronStatus = pendingResults.failed > pendingResults.successful
+        ? "FAILED"
+        : wasTimeBoxed
+          ? "PARTIAL"
+          : "SUCCESS";
       await logCronExecution({
         jobName: JOB_NAME,
-        status: pendingResults.failed > pendingResults.successful ? "FAILED" : "SUCCESS",
+        status: cronStatus,
         duration,
-        message: `Processed ${pendingResults.processed} pending, ${retryResults.processed} retries. Intelligence: ${priorities.length} brokers analyzed.`,
+        message: `Processed ${pendingResults.processed} pending, ${retryResults.processed} retries. Time-boxed: ${wasTimeBoxed}. Intelligence: ${priorities.length} brokers analyzed.`,
       });
 
       console.log(`[Cron: ${JOB_NAME}] Complete:`, JSON.stringify(response, null, 2));

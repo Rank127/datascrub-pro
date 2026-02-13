@@ -1571,13 +1571,14 @@ export async function retryFailedRemoval(
  * Respects per-broker daily limits (max 10/broker/day) and spacing (30min between same broker)
  * Returns summary of results
  */
-export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
+export async function processPendingRemovalsBatch(limit: number = 20, deadline?: number): Promise<{
   processed: number;
   successful: number;
   failed: number;
   skipped: number;
   emailsSent: number;
   brokerDistribution: Record<string, number>;
+  timeBoxed: boolean;
 }> {
   const stats = {
     processed: 0,
@@ -1586,6 +1587,7 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
     skipped: 0,
     emailsSent: 0,
     brokerDistribution: {} as Record<string, number>,
+    timeBoxed: false,
   };
 
   // Collect updates per user for batched digest emails
@@ -1599,6 +1601,12 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
   console.log(`[Batch Removal] Processing ${pendingIds.length} pending removals`);
 
   for (const id of pendingIds) {
+    // TIME-BOX CHECK: Stop gracefully if approaching deadline
+    if (deadline && Date.now() > deadline) {
+      console.log(`[Batch Removal] Time-box reached after ${stats.processed} items, stopping gracefully`);
+      stats.timeBoxed = true;
+      break;
+    }
     const request = await prisma.removalRequest.findUnique({
       where: { id },
       include: {
@@ -1665,8 +1673,8 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
       stats.failed++;
     }
 
-    // Small delay between requests to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Small delay between requests to avoid rate limiting (reduced from 2000ms for faster backlog processing)
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
 
   // Send ONE digest email per user with all their submitted removals
@@ -1703,14 +1711,15 @@ export async function processPendingRemovalsBatch(limit: number = 20): Promise<{
  * Auto-retry all failed removals that haven't exceeded retry limit
  * Respects per-broker daily limits
  */
-export async function retryFailedRemovalsBatch(limit: number = 20): Promise<{
+export async function retryFailedRemovalsBatch(limit: number = 20, deadline?: number): Promise<{
   processed: number;
   retried: number;
   stillFailed: number;
   emailsSent: number;
   skippedDueToLimit: number;
+  timeBoxed: boolean;
 }> {
-  const stats = { processed: 0, retried: 0, stillFailed: 0, emailsSent: 0, skippedDueToLimit: 0 };
+  const stats = { processed: 0, retried: 0, stillFailed: 0, emailsSent: 0, skippedDueToLimit: 0, timeBoxed: false };
 
   // Collect updates per user for batched digest emails
   const userUpdates = new Map<string, {
@@ -1742,6 +1751,13 @@ export async function retryFailedRemovalsBatch(limit: number = 20): Promise<{
   for (const removal of failedRemovals) {
     // Stop if we've processed enough
     if (processedCount >= limit) break;
+
+    // TIME-BOX CHECK: Stop gracefully if approaching deadline
+    if (deadline && Date.now() > deadline) {
+      console.log(`[Retry Batch] Time-box reached after ${stats.processed} items, stopping gracefully`);
+      stats.timeBoxed = true;
+      break;
+    }
 
     const source = removal.exposure.source;
 
@@ -1794,8 +1810,8 @@ export async function retryFailedRemovalsBatch(limit: number = 20): Promise<{
       stats.stillFailed++;
     }
 
-    // Delay between retries
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Delay between retries (reduced from 3000ms for faster backlog processing)
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
   // Send ONE digest email per user with all their retried removals

@@ -25,6 +25,12 @@ import { logCronExecution } from "@/lib/cron-logger";
  * Email quota: 90/day limit, but emails are queued and processed over time
  */
 
+// Vercel Pro max timeout: 300 seconds (5 minutes)
+export const maxDuration = 300;
+
+// Stop processing at 4 minutes — 60s safety buffer for cleanup, logging, response
+const PROCESSING_DEADLINE_MS = 240_000;
+
 const AGGRESSIVE_BATCH_SIZE = 150;
 const RETRY_BATCH_SIZE = 50;
 
@@ -56,13 +62,23 @@ export async function POST(request: Request) {
       emailQueueProcessed = await processEmailQueue(Math.min(emailQuota.remaining, 20));
     }
 
-    // Step 4: Process pending removals
-    console.log(`[Cron: Clear Pending Queue] Processing pending removals (batch size: ${AGGRESSIVE_BATCH_SIZE})...`);
-    const pendingResults = await processPendingRemovalsBatch(AGGRESSIVE_BATCH_SIZE);
+    // Calculate deadline for time-boxed processing
+    const deadline = startTime + PROCESSING_DEADLINE_MS;
 
-    // Step 5: Retry failed removals
-    console.log(`[Cron: Clear Pending Queue] Retrying failed removals...`);
-    const retryResults = await retryFailedRemovalsBatch(RETRY_BATCH_SIZE);
+    // Step 4: Process pending removals
+    console.log(`[Cron: Clear Pending Queue] Processing pending removals (batch size: ${AGGRESSIVE_BATCH_SIZE}, deadline: ${new Date(deadline).toISOString()})...`);
+    const pendingResults = await processPendingRemovalsBatch(AGGRESSIVE_BATCH_SIZE, deadline);
+
+    // Step 5: Retry failed removals (only if we still have time)
+    let retryResults = { retried: 0, stillFailed: 0, processed: 0, emailsSent: 0, skippedDueToLimit: 0, timeBoxed: false };
+    if (Date.now() < deadline) {
+      console.log(`[Cron: Clear Pending Queue] Retrying failed removals...`);
+      retryResults = await retryFailedRemovalsBatch(RETRY_BATCH_SIZE, deadline);
+    } else {
+      console.log(`[Cron: Clear Pending Queue] Skipping retries — time-box reached during pending processing`);
+    }
+
+    const wasTimeBoxed = pendingResults.timeBoxed || retryResults.timeBoxed || Date.now() >= deadline;
 
     // Step 6: Get final stats
     const stats = await getAutomationStats();
@@ -73,6 +89,7 @@ export async function POST(request: Request) {
     const response = {
       success: true,
       duration: `${(duration / 1000).toFixed(1)}s`,
+      timeBoxed: wasTimeBoxed,
       markedAsManual: markedManual,
       queueBefore: queueStatus,
       queueAfter: finalQueueStatus,
@@ -102,9 +119,9 @@ export async function POST(request: Request) {
 
     await logCronExecution({
       jobName: "clear-pending-queue",
-      status: "SUCCESS",
+      status: wasTimeBoxed ? "PARTIAL" : "SUCCESS",
       duration: duration,
-      message: `Cleared ${queueStatus.pending - finalQueueStatus.pending} items, ${pendingResults.successful} processed`,
+      message: `Cleared ${queueStatus.pending - finalQueueStatus.pending} items, ${pendingResults.successful} processed. Time-boxed: ${wasTimeBoxed}`,
     });
 
     return NextResponse.json(response);

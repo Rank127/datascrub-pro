@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 
 export interface CronLogEntry {
   jobName: string;
-  status: "SUCCESS" | "FAILED" | "SKIPPED";
+  status: "SUCCESS" | "FAILED" | "SKIPPED" | "PARTIAL";
   duration?: number;
   message?: string;
   metadata?: Record<string, unknown>;
