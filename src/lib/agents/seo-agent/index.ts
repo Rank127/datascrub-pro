@@ -60,6 +60,7 @@ import {
   getKeywordStats,
 } from "../shared/keyword-intelligence";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
+import { carlsenPositionalScore } from "@/lib/mastermind/frameworks";
 
 // ============================================================================
 // CONSTANTS
@@ -539,6 +540,9 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
     try {
       console.log(`[${this.name}] Starting multi-engine keyword research...`);
 
+      // Read directive for minimum keyword relevance threshold
+      const keywordRelevanceMin = await this.getDirective<number>("seo_keyword_relevance_min", 60);
+
       // Run full keyword research
       const research = await runKeywordResearch();
 
@@ -557,9 +561,25 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
         });
       }
 
-      // Extract top opportunities (high relevance, not targeted)
+      // Enhance keyword ranking with Carlsen Positional Score
+      // Score each keyword by strategic value, not just raw relevance
+      const scoredKeywords = research.discoveredKeywords.map(k => {
+        const positional = carlsenPositionalScore({
+          shortTermGain: Math.min(10, k.relevance / 10),
+          longTermPosition: k.currentlyTargeted ? 4 : 7,
+          opponentOptions: k.source === "competitor" ? 7 : 3,
+          flexibility: k.relevance >= 70 ? 8 : 5,
+        });
+        return { ...k, positionalScore: positional };
+      });
+
+      // Sort by positional score for strategic ordering
+      scoredKeywords.sort((a, b) => b.positionalScore - a.positionalScore);
+      research.discoveredKeywords = scoredKeywords;
+
+      // Extract top opportunities using directive-driven relevance threshold
       const topOpportunities = research.discoveredKeywords
-        .filter(k => k.relevance >= 60 && !k.currentlyTargeted)
+        .filter(k => k.relevance >= keywordRelevanceMin && !k.currentlyTargeted)
         .slice(0, 15)
         .map(k => k.keyword);
 

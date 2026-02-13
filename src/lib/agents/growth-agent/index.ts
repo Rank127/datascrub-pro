@@ -21,6 +21,7 @@ import {
 } from "../types";
 import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
+import { hormoziValueScore, mrbeastRemarkabilityScore } from "@/lib/mastermind/frameworks";
 
 // ============================================================================
 // CONSTANTS
@@ -368,6 +369,9 @@ class GrowthAgent extends BaseAgent {
     const { limit = 50, criteria = "all" } = input as PowerUserInput;
 
     try {
+      // Read directive for minimum upsell confidence threshold
+      const upsellConfidenceMin = await this.getDirective<number>("growth_upsell_confidence_min", 0.7);
+
       const users = await prisma.user.findMany({
         take: limit * 3, // Get more to filter
         include: {
@@ -432,6 +436,20 @@ class GrowthAgent extends BaseAgent {
           continue;
         }
 
+        // Use Hormozi Value Equation to assess upsell potential
+        const upsellValue = hormoziValueScore({
+          dreamOutcome: user.plan === "FREE" ? 8 : user.plan === "PRO" ? 6 : 4,
+          likelihood: Math.min(1, score / 100),
+          timeDelay: tenure < 30 ? 3 : tenure < 90 ? 5 : 7,
+          effort: user._count.scans > 5 ? 2 : 5,
+        });
+
+        // Mark as upsell candidate if value score exceeds directive threshold
+        const isUpsellCandidate = (upsellValue / 100) >= upsellConfidenceMin;
+        if (isUpsellCandidate) {
+          segments.push("upsell_candidate");
+        }
+
         powerUsers.push({
           userId: user.id,
           email: user.email,
@@ -455,6 +473,10 @@ class GrowthAgent extends BaseAgent {
       const advocateCandidates = topPowerUsers.filter((u) => u.potentialAsAdvocate).length;
       if (advocateCandidates > 0) {
         insights.push(`${advocateCandidates} users ready for advocacy program`);
+      }
+      const upsellCandidates = topPowerUsers.filter((u) => u.segments.includes("upsell_candidate")).length;
+      if (upsellCandidates > 0) {
+        insights.push(`${upsellCandidates} users identified as upsell candidates (confidence >= ${upsellConfidenceMin})`);
       }
       if (topPowerUsers.filter((u) => u.segments.includes("enterprise")).length > 5) {
         insights.push("Strong enterprise power user base");

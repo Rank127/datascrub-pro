@@ -21,6 +21,7 @@ import {
 } from "../types";
 import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
+import { carlsenPositionalScore } from "@/lib/mastermind/frameworks";
 
 // ============================================================================
 // CONSTANTS
@@ -404,10 +405,22 @@ class CompetitiveIntelAgent extends BaseAgent {
             .filter(([, features]) => features.includes(feature))
             .map(([name]) => name);
 
+          // Use Carlsen Positional Score to rank gaps by strategic value
+          const positionalScore = carlsenPositionalScore({
+            shortTermGain: Math.min(10, competitorsWithFeature.length * 2.5),
+            longTermPosition: this.isHighValueFeature(feature) ? 8 : 5,
+            opponentOptions: Math.min(10, competitorsWithFeature.length * 2),
+            flexibility: competitorsWithFeature.length <= 2 ? 8 : 5,
+          });
+
+          // Derive priority from positional score
+          const priority: "LOW" | "MEDIUM" | "HIGH" =
+            positionalScore >= 65 ? "HIGH" : positionalScore >= 40 ? "MEDIUM" : "LOW";
+
           gaps.push({
             feature,
             competitors: competitorsWithFeature,
-            priority: this.calculateFeaturePriority(feature, competitorsWithFeature.length),
+            priority,
             estimatedImpact: this.estimateFeatureImpact(feature),
           });
         }
@@ -470,6 +483,18 @@ class CompetitiveIntelAgent extends BaseAgent {
         },
       };
     }
+  }
+
+  private isHighValueFeature(feature: string): boolean {
+    const highValueFeatures = [
+      "Dark web monitoring",
+      "Identity theft insurance",
+      "Credit monitoring",
+      "Real-time monitoring",
+      "HIPAA compliance",
+      "Enterprise API",
+    ];
+    return highValueFeatures.includes(feature);
   }
 
   private calculateFeaturePriority(

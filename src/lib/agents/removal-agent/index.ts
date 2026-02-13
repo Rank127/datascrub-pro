@@ -25,6 +25,7 @@ import { registerAgent } from "../registry";
 import { executeRemoval as executeRemovalService } from "@/lib/removers/removal-service";
 import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
+import { dalioRiskAssessment } from "@/lib/mastermind/frameworks";
 
 // ============================================================================
 // CONSTANTS
@@ -265,6 +266,19 @@ class RemovalAgent extends BaseAgent {
         }
       }
 
+      // Dalio risk assessment — adjust confidence based on broker risk profile
+      const riskAssessment = dalioRiskAssessment({
+        failureRate: brokerInfo ? (1 - (confidence || 0.5)) : 0.5,
+        trend: "stable",
+        exposureLevel: method === "MANUAL_GUIDE" ? 6 : 3,
+        hasBeenAddressed: !!brokerInfo,
+      });
+
+      // If risk is HIGH or CRITICAL, reduce confidence and flag for review
+      if (riskAssessment.riskLevel === "CRITICAL" || riskAssessment.riskLevel === "HIGH") {
+        confidence = Math.max(0.3, confidence - 0.15);
+      }
+
       return this.createSuccessResult<StrategyResult>(
         {
           strategy: method.toLowerCase().replace("_", "-"),
@@ -279,8 +293,8 @@ class RemovalAgent extends BaseAgent {
               }
             : undefined,
           reasoning: brokerInfo
-            ? `Using ${method} based on ${brokerInfo.name} broker configuration`
-            : "Unknown broker, defaulting to manual removal guide",
+            ? `Using ${method} based on ${brokerInfo.name} broker configuration. Risk: ${riskAssessment.riskLevel}`
+            : `Unknown broker, defaulting to manual removal guide. Risk: ${riskAssessment.riskLevel}`,
         },
         {
           capability: "select-strategy",
@@ -322,12 +336,17 @@ class RemovalAgent extends BaseAgent {
   ): Promise<AgentResult<BatchProcessResult>> {
     const startTime = Date.now();
     const {
-      batchSize = DEFAULT_BATCH_SIZE,
+      batchSize: inputBatchSize,
       prioritizeUserId,
       dryRun = false,
     } = input as BatchProcessInput;
 
     try {
+      // Read directive-driven parameters (falls back to constants if no directive exists)
+      const directiveBatchSize = await this.getDirective<number>("removal_batch_pending", DEFAULT_BATCH_SIZE);
+      const batchSize = inputBatchSize ?? directiveBatchSize;
+      const maxPerBrokerPerDay = await this.getDirective<number>("removal_rate_per_broker", MAX_REQUESTS_PER_BROKER_PER_DAY);
+
       // Get pending removal requests
       const now = new Date();
       const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -366,8 +385,8 @@ class RemovalAgent extends BaseAgent {
         const source = removal.exposure.source;
         const count = brokerCounts.get(source) || 0;
 
-        // Check daily limit
-        if (count >= MAX_REQUESTS_PER_BROKER_PER_DAY) {
+        // Check daily limit (directive-driven)
+        if (count >= maxPerBrokerPerDay) {
           return false;
         }
 

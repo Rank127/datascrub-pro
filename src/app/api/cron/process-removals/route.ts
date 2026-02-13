@@ -13,6 +13,7 @@ import {
 } from "@/lib/agents/intelligence-coordinator";
 import { logCronExecution } from "@/lib/cron-logger";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { getDirective } from "@/lib/mastermind/directives";
 
 const JOB_NAME = "process-removals";
 
@@ -85,9 +86,10 @@ export async function POST(request: Request) {
 
       // Step 3: Calculate adaptive batch size based on predictions
       // Maxed out batch sizes for aggressive backlog clearance (was 100/25, then 500/100)
-      const basePendingBatch = 1000;
-      const baseRetryBatch = 200;
-      const adaptiveMultiplier = criticalPredictions.length > 0 ? 0.5 : 1;
+      const basePendingBatch = await getDirective("removal_batch_pending", 1000);
+      const baseRetryBatch = await getDirective("removal_batch_retries", 200);
+      const anomalyMultiplier = await getDirective("removal_anomaly_multiplier", 0.5);
+      const adaptiveMultiplier = criticalPredictions.length > 0 ? anomalyMultiplier : 1;
       const pendingBatchSize = Math.floor(basePendingBatch * adaptiveMultiplier);
       const retryBatchSize = Math.floor(baseRetryBatch * adaptiveMultiplier);
 

@@ -86,3 +86,31 @@ export {
   getPlaybook,
   getAllPlaybooks,
 } from "./playbooks";
+
+// Strategic Directives
+export {
+  type DirectiveInput,
+  type MastermindDirectiveOutput,
+  getDirective,
+  getDirectivesForDomain,
+  setDirective,
+  applyMastermindDirectives,
+} from "./directives";
+
+// Decision Frameworks
+export {
+  type HormoziValueParams,
+  type CarlsenPositionalParams,
+  type VossEmpathyParams,
+  type DalioRiskParams,
+  type DalioRiskResult,
+  type MrBeastRemarkabilityParams,
+  type BuffettCompetenceParams,
+  type BuffettCompetenceResult,
+  hormoziValueScore,
+  carlsenPositionalScore,
+  vossEmpathyScore,
+  dalioRiskAssessment,
+  mrbeastRemarkabilityScore,
+  buffettCompetenceCheck,
+} from "./frameworks";

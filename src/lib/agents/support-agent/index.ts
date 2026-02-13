@@ -25,6 +25,7 @@ import {
 } from "../types";
 import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
+import { vossEmpathyScore } from "@/lib/mastermind/frameworks";
 
 // ============================================================================
 // CONSTANTS
@@ -640,7 +641,10 @@ Generate a helpful, empathetic response in JSON format.`,
     context: AgentContext
   ): Promise<AgentResult<BatchResult>> {
     const startTime = Date.now();
-    const { limit = 20, statuses = ["OPEN", "IN_PROGRESS"] } = input as ProcessBatchInput;
+    const inputOpts = input as ProcessBatchInput;
+    const directiveBatchSize = await this.getDirective<number>("support_batch_size", 20);
+    const limit = inputOpts.limit ?? directiveBatchSize;
+    const statuses = inputOpts.statuses ?? ["OPEN", "IN_PROGRESS"];
 
     try {
       // Get pending tickets
@@ -749,11 +753,11 @@ USER CONTEXT:
 - Previous Resolved Tickets: ${ticketCount}`;
   }
 
-  private ruleBasedAnalysis(
+  private async ruleBasedAnalysis(
     ticket: { id: string; type: string; priority: string; description: string },
     context: AgentContext,
     startTime: number
-  ): AgentResult<AnalysisResult> {
+  ): Promise<AgentResult<AnalysisResult>> {
     // Simple rule-based classification
     const description = ticket.description.toLowerCase();
     let priority = ticket.priority;
@@ -769,9 +773,15 @@ USER CONTEXT:
       suggestedActions.push("review_security_concern");
     }
 
-    // Simple auto-resolve detection
+    // Read directive-driven auto-resolve types
+    const autoResolveTypes = await this.getDirective<string[]>(
+      "support_auto_resolve_types",
+      ["FEATURE_REQUEST"]
+    );
+
+    // Auto-resolve detection (directive-driven)
     if (
-      ticket.type === "FEATURE_REQUEST" ||
+      autoResolveTypes.includes(ticket.type) ||
       description.includes("suggestion")
     ) {
       canAutoResolve = true;

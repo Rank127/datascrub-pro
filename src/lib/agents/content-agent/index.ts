@@ -20,6 +20,7 @@ import {
 } from "../types";
 import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
+import { mrbeastRemarkabilityScore } from "@/lib/mastermind/frameworks";
 
 // ============================================================================
 // CONSTANTS
@@ -223,6 +224,10 @@ class ContentAgent extends BaseAgent {
     } = input as BlogPostInput;
 
     try {
+      // Read directives for content configuration
+      const directiveWordCount = await this.getDirective<number>("content_target_wordcount", 1000);
+      const focusTopics = await this.getDirective<string[]>("content_focus_topics", []);
+
       // In production, would use AI to generate content
       // For now, generate structured template
       const slug = topic
@@ -230,18 +235,33 @@ class ContentAgent extends BaseAgent {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
-      const wordCounts = { short: 500, medium: 1000, long: 2000 };
+      const wordCounts = { short: 500, medium: directiveWordCount, long: 2000 };
       const targetWords = wordCounts[targetLength];
 
-      const content = this.generateBlogTemplate(topic, keywords, tone);
+      // Merge focus topics from directive into keywords
+      const mergedKeywords = [...new Set([...keywords, ...focusTopics])];
+
+      const content = this.generateBlogTemplate(topic, mergedKeywords, tone);
       const metaDescription = `Learn about ${topic}. Discover how to protect your personal information and maintain your privacy online with GhostMyData.`;
 
       const seoKeywords = [
-        ...keywords,
+        ...mergedKeywords,
         "data privacy",
         "personal information",
         "data removal",
       ].slice(0, 10);
+
+      // Score content quality with MrBeast Remarkability framework
+      const remarkability = mrbeastRemarkabilityScore({
+        hasHook: content.includes("?") || content.includes("!"),
+        hasStakes: content.toLowerCase().includes("protect") || content.toLowerCase().includes("risk"),
+        hasSurprise: content.toLowerCase().includes("surprising") || content.toLowerCase().includes("discover"),
+        isShareWorthy: seoKeywords.length >= 3 && targetWords >= 800,
+        scaleMultiplier: Math.min(10, Math.ceil(targetWords / 200)),
+      });
+
+      // Use remarkability to influence seoScore
+      const seoScore = Math.min(100, Math.round(85 * 0.6 + remarkability * 0.4));
 
       return this.createSuccessResult<BlogPostResult>(
         {
@@ -252,7 +272,7 @@ class ContentAgent extends BaseAgent {
           metaDescription,
           keywords: seoKeywords,
           estimatedReadTime: Math.ceil(targetWords / 200),
-          seoScore: 85,
+          seoScore,
         },
         {
           capability: "generate-blog",

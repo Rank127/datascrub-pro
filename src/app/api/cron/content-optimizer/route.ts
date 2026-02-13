@@ -22,6 +22,7 @@ import {
   getKeywordStats,
   getKeywordGaps,
 } from "@/lib/agents/shared/keyword-intelligence";
+import { getDirective } from "@/lib/mastermind/directives";
 import * as fs from "fs/promises";
 import * as path from "path";
 
@@ -44,6 +45,7 @@ const DEFAULT_KEYWORDS = [
 
 // Target configuration - aiming for 100% over a week
 // Keywords are loaded dynamically from the shared intelligence store
+// Thresholds are overridable via strategic directives
 async function getTargetConfig(): Promise<OptimizationConfig> {
   // Try to get keywords from the shared intelligence store
   let targetKeywords = DEFAULT_KEYWORDS;
@@ -54,9 +56,20 @@ async function getTargetConfig(): Promise<OptimizationConfig> {
     console.log("[Content Optimizer] Using default keywords (intelligence store not available)");
   }
 
+  // Read targets from strategic directives (falls back to hardcoded defaults)
+  const targetWordCount = await getDirective("content_target_wordcount", 1000);
+  const targetReadability = await getDirective("content_target_readability", 65);
+  const focusTopics = await getDirective<string[]>("content_focus_topics", []);
+
+  if (focusTopics.length > 0) {
+    console.log(`[Content Optimizer] Focus topics from directives: ${focusTopics.join(", ")}`);
+    // Prepend focus topics to keywords so they take priority
+    targetKeywords = [...focusTopics, ...targetKeywords.filter(kw => !focusTopics.includes(kw))];
+  }
+
   return {
-    targetWordCount: 1000, // Minimum words for comprehensive content
-    targetReadability: 65, // Good readability (60-70 is ideal)
+    targetWordCount, // Minimum words for comprehensive content
+    targetReadability, // Good readability (60-70 is ideal)
     targetKeywords,
   };
 }

@@ -700,6 +700,15 @@ Please process this request and return a JSON response.
   }
 
   /**
+   * Read a strategic directive with typed fallback.
+   * Returns defaultValue if directive doesn't exist or DB is unavailable.
+   */
+  protected async getDirective<T>(key: string, defaultValue: T): Promise<T> {
+    const { getDirective } = await import("@/lib/mastermind/directives");
+    return getDirective(key, defaultValue);
+  }
+
+  /**
    * Get agent configuration value
    */
   protected getConfigValue<T>(key: string, defaultValue: T): T {

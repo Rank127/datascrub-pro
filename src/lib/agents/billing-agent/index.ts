@@ -22,6 +22,7 @@ import {
 } from "../types";
 import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
+import { hormoziValueScore, buffettCompetenceCheck } from "@/lib/mastermind/frameworks";
 
 // ============================================================================
 // CONSTANTS
@@ -303,10 +304,26 @@ class BillingAgent extends BaseAgent {
           riskScore += 0.2;
         }
 
+        // Hormozi Value Equation: low perceived value = high churn risk
+        const valueScore = hormoziValueScore({
+          dreamOutcome: user._count.exposures > 5 ? 8 : 5, // More exposures = higher dream outcome
+          likelihood: user._count.removalRequests > 0 ? 0.7 : 0.3, // Completed removals = higher confidence
+          timeDelay: user._count.scans < 2 ? 7 : 3, // Low engagement = feels slow
+          effort: user.plan === "ENTERPRISE" ? 2 : 5, // Higher plan = lower friction
+        });
+        // Low value score (< 30) adds churn risk
+        if (valueScore < 30) {
+          riskScore += 0.15;
+          factors.push(`Low Hormozi value score (${valueScore}/100)`);
+        }
+
+        // Read directive for churn risk threshold
+        const churnThreshold = await this.getDirective<number>("billing_churn_risk_threshold", 0.5);
+
         // Normalize risk score
         const churnRisk = Math.min(riskScore, 1);
 
-        if (churnRisk > 0.5) {
+        if (churnRisk > churnThreshold) {
           atRisk++;
         }
 
@@ -408,14 +425,27 @@ class BillingAgent extends BaseAgent {
           reason = "Recently active - good time to present upgrade options";
         }
 
-        if (confidence >= 0.4) {
-          recommendations.push({
-            userId: user.id,
-            currentPlan: "FREE",
-            recommendedPlan: "PRO",
-            reason,
-            confidence,
+        // Read directive for minimum upsell confidence
+        const minConfidence = await this.getDirective<number>("growth_upsell_confidence_min", 0.4);
+
+        if (confidence >= minConfidence) {
+          // Buffett competence check: is this upsell within our circle?
+          const competenceResult = buffettCompetenceCheck({
+            isWithinExpertise: true, // Privacy protection is our core competence
+            hasMarginOfSafety: user._count.exposures >= 5, // Real value to deliver
+            frontPageTest: true, // We'd be proud of this recommendation
+            isSimpleToExplain: confidence >= 0.6, // High confidence = clear reason
           });
+
+          if (competenceResult.proceed) {
+            recommendations.push({
+              userId: user.id,
+              currentPlan: "FREE",
+              recommendedPlan: "PRO",
+              reason: `${reason}${competenceResult.confidence === "HIGH" ? " (high-confidence recommendation)" : ""}`,
+              confidence,
+            });
+          }
         }
       }
 
