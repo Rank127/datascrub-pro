@@ -44,6 +44,7 @@ import {
   Radio,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PlanBadge } from "../plan-badge";
 
 interface OperationsSectionProps {
   data: OperationsMetrics;
@@ -757,17 +758,7 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
                       <TableCell className="text-white">{user.email}</TableCell>
                       <TableCell className="text-slate-300">{user.name || "-"}</TableCell>
                       <TableCell>
-                        <Badge
-                          className={
-                            (user.effectivePlan || user.plan) === "ENTERPRISE"
-                              ? "bg-emerald-500/20 text-emerald-400"
-                              : (user.effectivePlan || user.plan) === "PRO"
-                              ? "bg-blue-500/20 text-blue-400"
-                              : "bg-slate-500/20 text-slate-400"
-                          }
-                        >
-                          {user.effectivePlan || user.plan}
-                        </Badge>
+                        <PlanBadge plan={user.effectivePlan || user.plan} />
                       </TableCell>
                       <TableCell>
                         {user.familyGroupInfo ? (

@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { FinanceMetrics } from "@/lib/executive/types";
+import { MetricCard } from "./metric-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PlanBadge } from "../plan-badge";
 import {
   Dialog,
   DialogContent,
@@ -26,8 +28,6 @@ import {
   UserPlus,
   Percent,
   Loader2,
-  TrendingUp,
-  TrendingDown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -96,77 +96,6 @@ export function FinanceSection({ data }: FinanceSectionProps) {
       case "all": return "All Paying Users";
       default: return "Users";
     }
-  };
-
-  const MetricCard = ({
-    title,
-    value,
-    subtitle,
-    icon: Icon,
-    variant = "default",
-    trend,
-    onClick,
-    format,
-  }: {
-    title: string;
-    value: number;
-    subtitle?: string;
-    icon: React.ElementType;
-    variant?: "default" | "success" | "warning" | "info";
-    trend?: { value: number; isPositive: boolean };
-    onClick?: () => void;
-    format?: "currency" | "percentage";
-  }) => {
-    const variantStyles = {
-      default: "from-slate-500/10 to-slate-500/5 border-slate-500/20",
-      success: "from-emerald-500/10 to-emerald-500/5 border-emerald-500/20",
-      warning: "from-amber-500/10 to-amber-500/5 border-amber-500/20",
-      info: "from-blue-500/10 to-blue-500/5 border-blue-500/20",
-    };
-
-    const iconStyles = {
-      default: "bg-slate-500/20 text-slate-400",
-      success: "bg-emerald-500/20 text-emerald-400",
-      warning: "bg-amber-500/20 text-amber-400",
-      info: "bg-blue-500/20 text-blue-400",
-    };
-
-    let displayValue: string;
-    if (format === "currency") {
-      displayValue = `$${(value / 100).toLocaleString()}`;
-    } else if (format === "percentage") {
-      displayValue = `${value}%`;
-    } else {
-      displayValue = value.toLocaleString();
-    }
-
-    return (
-      <Card
-        className={`bg-gradient-to-br ${variantStyles[variant]} ${onClick ? "cursor-pointer hover:opacity-80 transition-opacity" : ""}`}
-        onClick={onClick}
-      >
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${iconStyles[variant]}`}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-slate-400 truncate">{title}</p>
-              <div className="flex items-center gap-2">
-                <p className="text-xl font-bold text-white">{displayValue}</p>
-                {trend && (
-                  <span className={`text-xs flex items-center ${trend.isPositive ? "text-emerald-400" : "text-red-400"}`}>
-                    {trend.isPositive ? <TrendingUp className="h-3 w-3 mr-0.5" /> : <TrendingDown className="h-3 w-3 mr-0.5" />}
-                    {trend.value >= 0 ? "+" : ""}{trend.value}%
-                  </span>
-                )}
-              </div>
-              {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
   };
 
   return (
@@ -331,17 +260,7 @@ export function FinanceSection({ data }: FinanceSectionProps) {
                       <TableCell className="text-white">{user.email}</TableCell>
                       <TableCell className="text-slate-300">{user.name || "-"}</TableCell>
                       <TableCell>
-                        <Badge
-                          className={
-                            (user.effectivePlan || user.plan) === "ENTERPRISE"
-                              ? "bg-emerald-500/20 text-emerald-400"
-                              : (user.effectivePlan || user.plan) === "PRO"
-                              ? "bg-blue-500/20 text-blue-400"
-                              : "bg-slate-500/20 text-slate-400"
-                          }
-                        >
-                          {user.effectivePlan || user.plan}
-                        </Badge>
+                        <PlanBadge plan={user.effectivePlan || user.plan} />
                       </TableCell>
                       <TableCell className="text-slate-400">
                         {new Date(user.createdAt).toLocaleDateString()}

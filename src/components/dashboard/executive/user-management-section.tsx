@@ -37,6 +37,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PlanBadge } from "../plan-badge";
 
 interface User {
   id: string;
@@ -72,12 +73,6 @@ const roleLabels: Record<string, string> = {
   ADMIN: "Admin",
   LEGAL: "Legal/DPO",
   SUPER_ADMIN: "Super Admin",
-};
-
-const planColors: Record<string, string> = {
-  FREE: "border-slate-600 text-slate-400",
-  PRO: "border-blue-500/50 text-blue-400 bg-blue-500/10",
-  ENTERPRISE: "border-emerald-500/50 text-emerald-400 bg-emerald-500/10",
 };
 
 export function UserManagementSection() {
@@ -256,9 +251,7 @@ export function UserManagementSection() {
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col gap-1">
-                            <Badge variant="outline" className={planColors[user.effectivePlan] || planColors.FREE}>
-                              {user.effectivePlan}
-                            </Badge>
+                            <PlanBadge plan={user.effectivePlan} variant="outline" />
                             {user.familyGroupInfo ? (
                               <span className="text-xs text-emerald-500">
                                 Owner ({user.familyGroupInfo.memberCount}/{user.familyGroupInfo.maxMembers})

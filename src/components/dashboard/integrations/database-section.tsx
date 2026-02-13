@@ -30,6 +30,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PlanBadge } from "../plan-badge";
 
 interface UserDetails {
   id: string;
@@ -420,16 +421,7 @@ export function DatabaseSection({
                       <span>{user.exposureCount} exposures</span>
                     </div>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "ml-2 flex-shrink-0",
-                      (user.effectivePlan || user.plan) === "PRO" && "border-emerald-500/50 text-emerald-400",
-                      (user.effectivePlan || user.plan) === "ENTERPRISE" && "border-purple-500/50 text-purple-400"
-                    )}
-                  >
-                    {user.effectivePlan || user.plan}
-                  </Badge>
+                  <PlanBadge plan={user.effectivePlan || user.plan} variant="outline" className="ml-2 flex-shrink-0" />
                 </div>
               ))
             )}

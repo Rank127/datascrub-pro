@@ -38,6 +38,7 @@ import {
   Gift,
   MessageSquare,
 } from "lucide-react";
+import { PlanBadge } from "../plan-badge";
 
 interface UserActivitiesSectionProps {
   data: ActivitiesMetrics;
@@ -58,17 +59,6 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  const getPlanBadge = (plan: string) => {
-    switch (plan) {
-      case "ENTERPRISE":
-        return <Badge className="bg-emerald-500/20 text-emerald-400">Enterprise</Badge>;
-      case "PRO":
-        return <Badge className="bg-blue-500/20 text-blue-400">Pro</Badge>;
-      default:
-        return <Badge variant="secondary">Free</Badge>;
-    }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -190,7 +180,7 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
                           <p className="text-xs text-slate-500">{user.email}</p>
                         </div>
                       </TableCell>
-                      <TableCell>{getPlanBadge(user.effectivePlan || user.plan)}</TableCell>
+                      <TableCell><PlanBadge plan={user.effectivePlan || user.plan} /></TableCell>
                       <TableCell className="text-slate-400 text-sm">
                         {formatDate(user.createdAt)}
                       </TableCell>
@@ -243,9 +233,9 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1 text-sm">
-                            {getPlanBadge(change.previousPlan)}
+                            <PlanBadge plan={change.previousPlan} />
                             <ArrowRight className="h-3 w-3 text-slate-500" />
-                            {getPlanBadge(change.newPlan)}
+                            <PlanBadge plan={change.newPlan} />
                           </div>
                         </TableCell>
                         <TableCell>{getChangeTypeBadge(change.changeType)}</TableCell>
@@ -314,7 +304,7 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
                         <p className="text-xs text-slate-500">{user.email}</p>
                       </div>
                     </TableCell>
-                    <TableCell>{getPlanBadge(user.effectivePlan || user.plan)}</TableCell>
+                    <TableCell><PlanBadge plan={user.effectivePlan || user.plan} /></TableCell>
                     <TableCell className="text-center">
                       <span className="text-blue-400 font-medium">{user.scansCount}</span>
                     </TableCell>
@@ -452,7 +442,7 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-800/50 rounded-lg p-3">
                   <p className="text-xs text-slate-400 mb-1">Plan</p>
-                  {getPlanBadge(selectedItem.effectivePlan || selectedItem.plan)}
+                  <PlanBadge plan={selectedItem.effectivePlan || selectedItem.plan} />
                 </div>
                 <div className="bg-slate-800/50 rounded-lg p-3">
                   <p className="text-xs text-slate-400 mb-1">Joined</p>
@@ -541,9 +531,9 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
               <div className="bg-slate-800/50 rounded-lg p-4">
                 <p className="text-xs text-slate-400 mb-2">Plan Change</p>
                 <div className="flex items-center gap-3">
-                  {getPlanBadge(selectedItem.previousPlan)}
+                  <PlanBadge plan={selectedItem.previousPlan} />
                   <ArrowRight className="h-4 w-4 text-slate-500" />
-                  {getPlanBadge(selectedItem.newPlan)}
+                  <PlanBadge plan={selectedItem.newPlan} />
                   <span className="ml-auto">{getChangeTypeBadge(selectedItem.changeType)}</span>
                 </div>
               </div>
@@ -607,9 +597,9 @@ export function UserActivitiesSection({ data }: UserActivitiesSectionProps) {
               <div className="bg-slate-800/50 rounded-lg p-4">
                 <p className="text-sm text-slate-400 mb-2">Customer changed from</p>
                 <div className="flex items-center gap-3">
-                  {getPlanBadge(selectedItem.previousPlan)}
+                  <PlanBadge plan={selectedItem.previousPlan} />
                   <ArrowRight className="h-4 w-4 text-slate-500" />
-                  {getPlanBadge(selectedItem.newPlan)}
+                  <PlanBadge plan={selectedItem.newPlan} />
                 </div>
               </div>
 
