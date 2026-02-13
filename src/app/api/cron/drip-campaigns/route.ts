@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { processDripCampaigns } from "@/lib/email/drip-campaigns";
 import { logCronExecution } from "@/lib/cron-logger";
 
+export const maxDuration = 120;
+
 // Verify cron secret to prevent unauthorized access
 const CRON_SECRET = process.env.CRON_SECRET;
 

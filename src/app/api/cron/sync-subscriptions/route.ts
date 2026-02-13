@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/rbac/audit-log";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
+export const maxDuration = 120;
+
 // POST /api/cron/sync-subscriptions - Batch sync all subscriptions
 export async function POST(request: Request) {
   const authResult = verifyCronAuth(request);

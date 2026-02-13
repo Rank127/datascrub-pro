@@ -11,6 +11,8 @@ import { logCronExecution } from "@/lib/cron-logger";
 // Runs daily at 9 AM UTC
 // Vercel cron: "0 9 * * *"
 
+export const maxDuration = 120;
+
 const REMINDER_THRESHOLDS = [30, 45]; // Days after submission to send reminders
 const BATCH_THRESHOLD = 5; // If user has more than this many pending, send batch email
 

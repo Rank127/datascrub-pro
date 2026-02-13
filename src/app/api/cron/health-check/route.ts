@@ -11,6 +11,8 @@ import {
 } from "@/lib/agents/intelligence-coordinator";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
+export const maxDuration = 300;
+
 const ADMIN_EMAIL = "developer@ghostmydata.com";
 const JOB_NAME = "health-check";
 
@@ -945,9 +947,56 @@ export async function GET(request: Request) {
     });
   }
 
+  // ========== TICKET HEALTH ==========
+
+  // Test 21: Support Ticket Health
+  try {
+    const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000);
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+
+    const [staleOpenCount, staleWaitingCount, totalOpen] = await Promise.all([
+      prisma.supportTicket.count({
+        where: { status: "OPEN", lastActivityAt: { lt: fourHoursAgo } },
+      }),
+      prisma.supportTicket.count({
+        where: { status: "WAITING_USER", lastActivityAt: { lt: fortyEightHoursAgo } },
+      }),
+      prisma.supportTicket.count({
+        where: { status: "OPEN" },
+      }),
+    ]);
+
+    if (staleOpenCount > 10 || staleWaitingCount > 5) {
+      tests.push({
+        name: "Ticket Health",
+        status: "FAIL",
+        message: `${staleOpenCount} stale OPEN tickets (4h+), ${staleWaitingCount} stale WAITING_USER (48h+), ${totalOpen} total open`,
+        actionRequired: "Stale tickets need attention — customers may be waiting for responses",
+      });
+    } else if (staleOpenCount > 5 || staleWaitingCount > 2) {
+      tests.push({
+        name: "Ticket Health",
+        status: "WARN",
+        message: `${staleOpenCount} stale OPEN tickets (4h+), ${staleWaitingCount} stale WAITING_USER (48h+), ${totalOpen} total open`,
+      });
+    } else {
+      tests.push({
+        name: "Ticket Health",
+        status: "PASS",
+        message: `${totalOpen} open tickets, ${staleOpenCount} stale OPEN, ${staleWaitingCount} stale WAITING_USER — all healthy`,
+      });
+    }
+  } catch (error) {
+    tests.push({
+      name: "Ticket Health",
+      status: "WARN",
+      message: `Could not check ticket health: ${error instanceof Error ? error.message : "Unknown error"}`,
+    });
+  }
+
   // ========== OPERATIONS AGENT ANOMALY DETECTION ==========
 
-  // Test 21: Run Operations Agent's enhanced anomaly detection
+  // Test 22: Run Operations Agent's enhanced anomaly detection
   try {
     const { runDetectAnomalies } = await import("@/lib/agents/operations-agent");
     const anomalyResult = await runDetectAnomalies();

@@ -26,6 +26,8 @@ import { getDirective } from "@/lib/mastermind/directives";
 import * as fs from "fs/promises";
 import * as path from "path";
 
+export const maxDuration = 300;
+
 // ============================================================================
 // CONFIGURATION
 // ============================================================================

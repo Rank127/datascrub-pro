@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { processNewTicket } from "@/lib/agents/ticketing-agent";
+import { tryAutoResolve, getSystemUserId } from "@/lib/support/ticket-service";
 import { logCronExecution } from "@/lib/cron-logger";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 
@@ -13,6 +14,8 @@ import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
  * 2. Runs the AI ticketing agent on each to analyze and auto-resolve if possible
  * 3. Tracks statistics on auto-resolved vs human review needed
  */
+export const maxDuration = 300;
+
 export async function POST(request: Request) {
   try {
     // Verify cron secret
@@ -38,6 +41,8 @@ export async function POST(request: Request) {
 
     console.log("[Cron: Ticketing Agent] Starting...");
     const startTime = Date.now();
+    const PROCESSING_DEADLINE_MS = 240_000; // 4 minutes — leave 1 min buffer for logging
+    const deadline = startTime + PROCESSING_DEADLINE_MS;
 
     // Find all open and in-progress tickets that haven't been processed recently
     // Avoid processing tickets updated in the last 5 minutes to prevent duplicate processing
@@ -70,10 +75,15 @@ export async function POST(request: Request) {
 
     console.log(`[Cron: Ticketing Agent] Found ${ticketsToProcess.length} tickets to process`);
 
+    // Get system user ID for automated actions
+    const systemUserId = await getSystemUserId();
+
     let processed = 0;
     let autoResolved = 0;
+    let autoFixed = 0;
     let needsReview = 0;
     let failed = 0;
+    let timeBoxed = false;
     const results: Array<{
       ticketNumber: string;
       status: string;
@@ -81,9 +91,36 @@ export async function POST(request: Request) {
     }> = [];
 
     for (const ticket of ticketsToProcess) {
+      // Time-boxing: break if approaching Vercel timeout
+      if (Date.now() >= deadline) {
+        console.log(`[Cron: Ticketing Agent] Deadline reached after ${processed} tickets, stopping`);
+        timeBoxed = true;
+        break;
+      }
+
       try {
         console.log(`[Cron: Ticketing Agent] Processing ${ticket.ticketNumber}...`);
 
+        // Step 1: Try auto-resolve first (cheaper than AI call)
+        try {
+          const autoResult = await tryAutoResolve(ticket.id, systemUserId);
+          if (autoResult.resolved) {
+            autoFixed++;
+            processed++;
+            results.push({
+              ticketNumber: ticket.ticketNumber,
+              status: "auto_fixed",
+              result: `Auto-resolved: ${autoResult.actionsAttempted.join(", ")}`,
+            });
+            console.log(`[Cron: Ticketing Agent] ${ticket.ticketNumber} auto-fixed (${autoResult.actionsAttempted.join(", ")})`);
+            continue; // Skip AI processing — saved cost + time
+          }
+        } catch (autoErr) {
+          console.error(`[Cron: Ticketing Agent] tryAutoResolve failed for ${ticket.ticketNumber}:`, autoErr);
+          // Fall through to AI processing
+        }
+
+        // Step 2: AI-powered analysis (for tickets that couldn't be auto-resolved)
         const result = await processNewTicket(ticket.id);
         processed++;
 
@@ -131,9 +168,11 @@ export async function POST(request: Request) {
     const response = {
       success: true,
       duration: `${(duration / 1000).toFixed(1)}s`,
+      timeBoxed,
       stats: {
         found: ticketsToProcess.length,
         processed,
+        autoFixed,
         autoResolved,
         needsReview,
         failed,
@@ -141,23 +180,101 @@ export async function POST(request: Request) {
       results,
     };
 
+    // ===== STALE TICKET DETECTION =====
+    // Only run if we haven't been time-boxed (still have time budget)
+    let staleStats = { escalatedOpen: 0, reopenedWaiting: 0 };
+    if (!timeBoxed && Date.now() < deadline) {
+      try {
+        const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000);
+        const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+
+        // 1. OPEN tickets with no activity for 4+ hours → escalate priority
+        const staleOpen = await prisma.supportTicket.findMany({
+          where: {
+            status: "OPEN",
+            lastActivityAt: { lt: fourHoursAgo },
+            priority: { not: "URGENT" },
+          },
+          select: { id: true, ticketNumber: true, priority: true },
+          take: 20,
+        });
+
+        for (const stale of staleOpen) {
+          if (Date.now() >= deadline) break;
+          const newPriority = stale.priority === "LOW" ? "NORMAL" : stale.priority === "NORMAL" ? "HIGH" : "URGENT";
+          await prisma.supportTicket.update({
+            where: { id: stale.id },
+            data: { priority: newPriority, lastActivityAt: new Date() },
+          });
+          await prisma.ticketComment.create({
+            data: {
+              ticketId: stale.id,
+              authorId: systemUserId,
+              content: `Priority escalated from ${stale.priority} to ${newPriority} due to 4+ hours of inactivity.`,
+              isInternal: true,
+            },
+          });
+          staleStats.escalatedOpen++;
+          console.log(`[Cron: Ticketing Agent] Escalated stale ${stale.ticketNumber}: ${stale.priority} → ${newPriority}`);
+        }
+
+        // 2. WAITING_USER tickets inactive 48+ hours → reopen
+        const staleWaiting = await prisma.supportTicket.findMany({
+          where: {
+            status: "WAITING_USER",
+            lastActivityAt: { lt: fortyEightHoursAgo },
+          },
+          select: { id: true, ticketNumber: true },
+          take: 20,
+        });
+
+        for (const stale of staleWaiting) {
+          if (Date.now() >= deadline) break;
+          await prisma.supportTicket.update({
+            where: { id: stale.id },
+            data: { status: "OPEN", lastActivityAt: new Date() },
+          });
+          await prisma.ticketComment.create({
+            data: {
+              ticketId: stale.id,
+              authorId: systemUserId,
+              content: "Auto-reopened: No user response after 48 hours. Returning to operations queue.",
+              isInternal: false,
+            },
+          });
+          staleStats.reopenedWaiting++;
+          console.log(`[Cron: Ticketing Agent] Reopened stale WAITING_USER ${stale.ticketNumber}`);
+        }
+
+        if (staleStats.escalatedOpen > 0 || staleStats.reopenedWaiting > 0) {
+          console.log(`[Cron: Ticketing Agent] Stale detection: ${staleStats.escalatedOpen} escalated, ${staleStats.reopenedWaiting} reopened`);
+        }
+      } catch (staleErr) {
+        console.error("[Cron: Ticketing Agent] Stale ticket detection error:", staleErr);
+      }
+    }
+
     console.log("[Cron: Ticketing Agent] Complete:", JSON.stringify({
       ...response,
+      staleStats,
       results: `${results.length} tickets (details omitted)`,
     }, null, 2));
 
-    // Log successful execution
+    // Log execution — PARTIAL if time-boxed before finishing all tickets
+    const cronStatus = timeBoxed ? "PARTIAL" : (failed > 0 && autoResolved === 0 && autoFixed === 0 ? "FAILED" : "SUCCESS");
     await logCronExecution({
       jobName: "ticketing-agent",
-      status: failed > 0 && autoResolved === 0 ? "FAILED" : "SUCCESS",
+      status: cronStatus as "SUCCESS" | "FAILED",
       duration,
-      message: `Processed ${processed} tickets: ${autoResolved} auto-resolved, ${needsReview} need review, ${failed} failed`,
+      message: `${timeBoxed ? "PARTIAL: " : ""}Processed ${processed}/${ticketsToProcess.length} tickets: ${autoFixed} auto-fixed, ${autoResolved} AI-resolved, ${needsReview} need review, ${failed} failed`,
       metadata: {
         found: ticketsToProcess.length,
         processed,
+        autoFixed,
         autoResolved,
         needsReview,
         failed,
+        timeBoxed,
       },
     });
 

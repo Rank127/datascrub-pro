@@ -324,6 +324,25 @@ export function formatStandupEmail(
     <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 12px 0 0 0;">${analysis.operationsReport}</p>`
   );
 
+  // --- Support Tickets ---
+  const ticketSection = metrics.tickets ? card(
+    "Support Tickets",
+    `<div style="display: flex; justify-content: space-around; margin-bottom: 12px;">
+      <!--[if mso]><table role="presentation" cellspacing="0" cellpadding="0"><tr><td><![endif]-->
+      ${statBox("Open", metrics.tickets.openCount, metrics.tickets.openCount > 10 ? "#ef4444" : "#e2e8f0")}
+      <!--[if mso]></td><td><![endif]-->
+      ${statBox("In Progress", metrics.tickets.inProgressCount, "#3b82f6")}
+      <!--[if mso]></td><td><![endif]-->
+      ${statBox("Waiting User", metrics.tickets.waitingUserCount, "#f59e0b")}
+      <!--[if mso]></td><td><![endif]-->
+      ${statBox("Resolved 24h", metrics.tickets.resolvedClosed24h, "#10b981")}
+      <!--[if mso]></td></tr></table><![endif]-->
+    </div>
+    ${metrics.tickets.staleCount > 0 ? `<p style="color: #fca5a5; font-size: 13px; margin: 0 0 8px 0;">Stale (4h+ idle): ${metrics.tickets.staleCount} tickets</p>` : ""}
+    ${metrics.tickets.avgResolutionHours ? `<p style="color: #94a3b8; font-size: 12px; margin: 0 0 8px 0;">Avg resolution time: ${metrics.tickets.avgResolutionHours}h</p>` : ""}
+    ${analysis.ticketReport ? `<p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 0;">${analysis.ticketReport}</p>` : ""}`
+  ) : "";
+
   // --- Financial Snapshot ---
   const financialSection = card(
     "Financial Snapshot",
@@ -412,6 +431,7 @@ export function formatStandupEmail(
         ${agentSection}
         ${cronSection}
         ${operationsSection}
+        ${ticketSection}
         ${financialSection}
         ${brokerSection}
         ${footer}

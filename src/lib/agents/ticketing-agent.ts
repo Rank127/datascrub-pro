@@ -7,6 +7,7 @@
 
 import { PrismaClient } from "@prisma/client";
 import Anthropic from "@anthropic-ai/sdk";
+import { getSystemUserId } from "@/lib/support/ticket-service";
 
 const prisma = new PrismaClient();
 
@@ -594,11 +595,12 @@ export async function processNewTicket(ticketId: string): Promise<{
 
     // If can auto-resolve and no human review needed, send response
     if (analysis.canAutoResolve && !analysis.needsHumanReview && analysis.response) {
-      // Add the response as a comment
+      // Add the response as a system comment (not as the ticket owner)
+      const systemId = await getSystemUserId(ticket.userId);
       await prisma.ticketComment.create({
         data: {
           ticketId: ticket.id,
-          authorId: ticket.userId, // Will be updated to system user
+          authorId: systemId,
           content: analysis.response,
           isInternal: false,
         },

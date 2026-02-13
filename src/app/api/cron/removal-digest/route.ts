@@ -13,6 +13,8 @@ import { logCronExecution } from "@/lib/cron-logger";
  * - Only sends to users with emailNotifications: true AND removalUpdates: true
  * - Batches all updates from the past 24 hours into a single email per user
  */
+export const maxDuration = 120;
+
 export async function GET(request: Request) {
   // Verify this is a legitimate cron request
   const authResult = verifyCronAuth(request);

@@ -11,6 +11,8 @@ import { nanoid } from "nanoid";
 // Initialize Resend for email notifications
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
+export const maxDuration = 300;
+
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@ghostmydata.com";
 
 async function sendSEOAlertEmail(to: string, subject: string, content: string): Promise<boolean> {

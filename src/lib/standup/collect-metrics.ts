@@ -106,6 +106,15 @@ export interface BrokerMetrics {
   }>;
 }
 
+export interface TicketMetrics {
+  openCount: number;
+  inProgressCount: number;
+  waitingUserCount: number;
+  resolvedClosed24h: number;
+  staleCount: number;
+  avgResolutionHours: number | null;
+}
+
 export interface SecurityMetrics {
   adminActions24h: number;
   planChanges24h: number;
@@ -128,6 +137,7 @@ export interface StandupMetrics {
   users: UserMetrics;
   brokers: BrokerMetrics;
   security: SecurityMetrics;
+  tickets: TicketMetrics;
 }
 
 export async function collectStandupMetrics(): Promise<StandupMetrics> {
@@ -143,6 +153,7 @@ export async function collectStandupMetrics(): Promise<StandupMetrics> {
     users,
     brokers,
     security,
+    tickets,
   ] = await Promise.all([
     collectAgentHealth(),
     collectCronHealth(twentyFourHoursAgo),
@@ -151,6 +162,7 @@ export async function collectStandupMetrics(): Promise<StandupMetrics> {
     collectUserMetrics(twentyFourHoursAgo, sevenDaysAgo),
     collectBrokerMetrics(),
     collectSecurityMetrics(twentyFourHoursAgo),
+    collectTicketMetrics(twentyFourHoursAgo),
   ]);
 
   return {
@@ -164,6 +176,7 @@ export async function collectStandupMetrics(): Promise<StandupMetrics> {
     users,
     brokers,
     security,
+    tickets,
   };
 }
 
@@ -452,5 +465,54 @@ async function collectSecurityMetrics(
     planChanges24h: planChanges,
     failedActions24h: failedActions,
     recentAdminActions: recentActions,
+  };
+}
+
+async function collectTicketMetrics(
+  since: Date
+): Promise<TicketMetrics> {
+  const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000);
+
+  const [openCount, inProgressCount, waitingUserCount, resolvedClosed24h, staleCount, resolvedTickets] =
+    await Promise.all([
+      prisma.supportTicket.count({ where: { status: "OPEN" } }),
+      prisma.supportTicket.count({ where: { status: "IN_PROGRESS" } }),
+      prisma.supportTicket.count({ where: { status: "WAITING_USER" } }),
+      prisma.supportTicket.count({
+        where: {
+          status: { in: ["RESOLVED", "CLOSED"] },
+          updatedAt: { gte: since },
+        },
+      }),
+      prisma.supportTicket.count({
+        where: {
+          status: "OPEN",
+          lastActivityAt: { lt: fourHoursAgo },
+        },
+      }),
+      prisma.supportTicket.findMany({
+        where: {
+          resolvedAt: { gte: since },
+        },
+        select: { createdAt: true, resolvedAt: true },
+      }),
+    ]);
+
+  let avgResolutionHours: number | null = null;
+  if (resolvedTickets.length > 0) {
+    const totalHours = resolvedTickets.reduce((sum, t) => {
+      if (!t.resolvedAt) return sum;
+      return sum + (t.resolvedAt.getTime() - t.createdAt.getTime()) / (1000 * 60 * 60);
+    }, 0);
+    avgResolutionHours = Math.round((totalHours / resolvedTickets.length) * 10) / 10;
+  }
+
+  return {
+    openCount,
+    inProgressCount,
+    waitingUserCount,
+    resolvedClosed24h,
+    staleCount,
+    avgResolutionHours,
   };
 }

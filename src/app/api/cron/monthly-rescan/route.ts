@@ -8,6 +8,8 @@ import { logCronExecution } from "@/lib/cron-logger";
 // Runs on the 1st of each month at 10 AM UTC
 // Vercel cron: "0 10 1 * *"
 
+export const maxDuration = 300;
+
 export async function GET(request: Request) {
   const startTime = Date.now();
 

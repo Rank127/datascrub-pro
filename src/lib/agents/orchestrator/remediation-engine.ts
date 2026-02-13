@@ -401,6 +401,87 @@ const DEFAULT_REMEDIATION_RULES: RemediationRule[] = [
       },
     ],
   },
+
+  // Cron Issues - Auto-retrigger dead crons via HTTP
+  {
+    id: "cron-failed",
+    issueTypePattern: /^cron\.(failed|dead|overdue)$/,
+    severityLevels: ["critical", "high"],
+    autoRemediate: true,
+    maxAttempts: 2,
+    enabled: true,
+    generateActions: (issue) => [
+      {
+        id: nanoid(),
+        type: "fix",
+        targetAgentId: "operations-agent",
+        capability: "retrigger-cron",
+        input: {
+          cronName: issue.details?.cronName || issue.affectedResource,
+          reason: issue.description,
+        },
+        priority: Priority.CRITICAL,
+        autoExecute: true,
+        description: `Auto-retrigger dead cron: ${issue.details?.cronName || issue.affectedResource}`,
+      },
+    ],
+  },
+
+  // Cron Timeout - Create ticket for investigation
+  {
+    id: "cron-timeout",
+    issueTypePattern: /^cron\.timeout$/,
+    severityLevels: ["critical", "high", "medium"],
+    autoRemediate: true,
+    maxAttempts: 1,
+    enabled: true,
+    generateActions: (issue) => [
+      {
+        id: nanoid(),
+        type: "escalate",
+        targetAgentId: "ticket-creator",
+        capability: "create-ticket",
+        input: {
+          issueType: issue.type,
+          severity: issue.severity,
+          title: `Cron Timeout: ${issue.details?.cronName || issue.affectedResource}`,
+          description: issue.description,
+          recommendation: "Review Vercel function logs, consider increasing maxDuration or adding time-boxing",
+        },
+        priority: Priority.HIGH,
+        autoExecute: true,
+        description: `Create ticket for cron timeout investigation`,
+      },
+    ],
+  },
+
+  // Ticket Issues - Auto-escalate stale tickets
+  {
+    id: "ticket-stale",
+    issueTypePattern: /^ticket\.(stale|stuck|abandoned)$/,
+    severityLevels: ["high", "medium"],
+    autoRemediate: true,
+    maxAttempts: 1,
+    enabled: true,
+    generateActions: (issue) => [
+      {
+        id: nanoid(),
+        type: "escalate",
+        targetAgentId: "ticket-creator",
+        capability: "create-ticket",
+        input: {
+          issueType: issue.type,
+          severity: issue.severity,
+          title: `Stale Ticket Alert: ${issue.details?.ticketCount || "multiple"} tickets need attention`,
+          description: issue.description,
+          recommendation: "Review stale tickets and either respond, escalate, or close",
+        },
+        priority: Priority.HIGH,
+        autoExecute: true,
+        description: `Escalate stale tickets for review`,
+      },
+    ],
+  },
 ];
 
 // ============================================================================
@@ -597,15 +678,22 @@ class RemediationEngine {
     // Convert certain alerts to issues for remediation
     if (payload.alertType?.startsWith("seo_") ||
         payload.alertType?.startsWith("security_") ||
-        payload.alertType?.startsWith("compliance_")) {
+        payload.alertType?.startsWith("compliance_") ||
+        payload.alertType?.startsWith("cron_") ||
+        payload.alertType?.startsWith("ticket_")) {
+      // Normalize alert type: convert underscores to dots for rule matching
+      // e.g., "cron_failed" → "cron.failed", "ticket_stale" → "ticket.stale"
+      const normalizedType = payload.alertType.replace(/_/g, ".");
+      const isCronOrTicket = normalizedType.startsWith("cron.") || normalizedType.startsWith("ticket.");
+
       await this.processIssue({
         id: nanoid(),
-        type: payload.alertType,
+        type: normalizedType,
         severity: "high",
         description: payload.message || "Alert triggered",
         sourceAgentId: event.sourceAgentId,
         details: payload.data as Record<string, unknown>,
-        canAutoRemediate: false,
+        canAutoRemediate: isCronOrTicket, // cron and ticket alerts can be auto-remediated
         detectedAt: new Date(),
       });
     }

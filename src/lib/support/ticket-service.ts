@@ -1000,6 +1000,18 @@ export async function executeAutoFix(
 }
 
 /**
+ * Get a system/admin user ID for automated comments.
+ * Falls back to the provided fallbackId if no admin user exists.
+ */
+export async function getSystemUserId(fallbackId?: string): Promise<string> {
+  const admin = await prisma.user.findFirst({
+    where: { role: { in: ["SUPER_ADMIN", "ADMIN"] } },
+    select: { id: true },
+  });
+  return admin?.id || fallbackId || "system";
+}
+
+/**
  * Auto-resolve actions by ticket type
  */
 const AUTO_RESOLVE_ACTIONS: Record<string, string[]> = {

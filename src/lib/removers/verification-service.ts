@@ -511,14 +511,15 @@ interface UserUpdateInfo {
   dataType: string;
 }
 
-export async function runVerificationBatch(): Promise<{
+export async function runVerificationBatch(deadline?: number): Promise<{
   processed: number;
   completed: number;
   failed: number;
   pending: number;
   emailsSent: number;
+  timeBoxed: boolean;
 }> {
-  const stats = { processed: 0, completed: 0, failed: 0, pending: 0, emailsSent: 0 };
+  const stats = { processed: 0, completed: 0, failed: 0, pending: 0, emailsSent: 0, timeBoxed: false };
 
   // Collect updates per user for batched emails
   const userUpdates = new Map<string, {
@@ -532,6 +533,13 @@ export async function runVerificationBatch(): Promise<{
   console.log(`[Verification] Found ${removalIds.length} removals due for verification`);
 
   for (const id of removalIds) {
+    // Time-boxing: stop processing if approaching Vercel timeout
+    if (deadline && Date.now() >= deadline) {
+      console.log(`[Verification] Deadline reached after ${stats.processed} verifications, stopping`);
+      stats.timeBoxed = true;
+      break;
+    }
+
     const result = await verifyRemovalRequest(id);
     stats.processed++;
 

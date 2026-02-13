@@ -4,6 +4,8 @@ import { sendFreeUserExposureDigest } from "@/lib/email";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { logCronExecution } from "@/lib/cron-logger";
 
+export const maxDuration = 120;
+
 // Average time per manual removal (in minutes)
 const MINUTES_PER_REMOVAL = 45;
 

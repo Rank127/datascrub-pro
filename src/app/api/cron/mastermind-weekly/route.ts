@@ -20,6 +20,8 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
+export const maxDuration = 120;
+
 const JOB_NAME = "mastermind-weekly";
 const RECIPIENT = "rocky@ghostmydata.com";
 

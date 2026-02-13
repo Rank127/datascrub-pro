@@ -28,6 +28,7 @@ export interface StandupAnalysis {
   operationsReport: string;
   financialReport: string;
   brokerReport: string;
+  ticketReport: string;
   mastermindInsight?: string;
 }
 
@@ -47,6 +48,7 @@ Respond ONLY with valid JSON matching this schema:
   "operationsReport": "1-2 paragraph summary of removal pipeline and scan activity",
   "financialReport": "1-2 paragraph summary of plan distribution and growth",
   "brokerReport": "1-2 paragraph summary of broker performance and trends",
+  "ticketReport": "1-2 paragraph summary of support ticket health — open count, resolution rate, stale tickets, avg resolution time. Flag any tickets sitting idle too long.",
   "mastermindInsight": "2-3 sentence strategic observation from the Nucleus advisory council (Jensen Huang, Buffett, Nadella, Hassabis, Amodei). What would these 5 minds say about today's operations?"
 }
 
@@ -87,9 +89,12 @@ export async function analyzeStandupMetrics(
       throw new Error("Incomplete analysis response");
     }
 
-    // Ensure suggestions array exists (backward compat with older AI responses)
+    // Ensure optional arrays/fields exist (backward compat with older AI responses)
     if (!parsed.suggestions) {
       parsed.suggestions = [];
+    }
+    if (!parsed.ticketReport) {
+      parsed.ticketReport = "";
     }
 
     return parsed;
@@ -243,6 +248,30 @@ function generateRuleBasedAnalysis(metrics: StandupMetrics): StandupAnalysis {
     });
   }
 
+  // --- Tickets ---
+  if (metrics.tickets) {
+    if (metrics.tickets.resolvedClosed24h > 0) {
+      highlights.push(
+        `${metrics.tickets.resolvedClosed24h} tickets resolved/closed in 24h${metrics.tickets.avgResolutionHours ? ` (avg ${metrics.tickets.avgResolutionHours}h)` : ""}`
+      );
+    }
+    if (metrics.tickets.staleCount > 5) {
+      concerns.push(
+        `${metrics.tickets.staleCount} stale tickets (OPEN, no activity 4+ hours)`
+      );
+      actionItems.push({
+        priority: metrics.tickets.staleCount > 10 ? "HIGH" : "MEDIUM",
+        action: "Review stale support tickets",
+        rationale: `${metrics.tickets.staleCount} tickets sitting idle — customers may be waiting`,
+      });
+    }
+    if (metrics.tickets.waitingUserCount > 10) {
+      concerns.push(
+        `${metrics.tickets.waitingUserCount} tickets in WAITING_USER status`
+      );
+    }
+  }
+
   // --- Determine overall health ---
   let overallHealth: HealthStatus;
   const hasHighPriority = actionItems.some((a) => a.priority === "HIGH");
@@ -290,6 +319,10 @@ function generateRuleBasedAnalysis(metrics: StandupMetrics): StandupAnalysis {
     ? `Tracking ${metrics.brokers.totalBrokers} brokers with removal history. Top performers: ${metrics.brokers.topPerformers.map((b) => `${b.sourceName || b.source} (${b.successRate.toFixed(0)}%)`).join(", ") || "N/A"}. Worst performers: ${metrics.brokers.worstPerformers.map((b) => `${b.sourceName || b.source} (${b.successRate.toFixed(0)}%)`).join(", ") || "N/A"}.`
     : "No broker intelligence data available yet.";
 
+  const ticketReport = metrics.tickets
+    ? `Support tickets: ${metrics.tickets.openCount} open, ${metrics.tickets.inProgressCount} in progress, ${metrics.tickets.waitingUserCount} waiting on user. ${metrics.tickets.resolvedClosed24h} resolved/closed in 24h.${metrics.tickets.staleCount > 0 ? ` ${metrics.tickets.staleCount} stale (4+ hours idle).` : ""}${metrics.tickets.avgResolutionHours ? ` Avg resolution time: ${metrics.tickets.avgResolutionHours}h.` : ""}`
+    : "No ticket data available.";
+
   const executiveSummary = `System is ${overallHealth.toLowerCase().replace("_", " ")} with ${highlights.length} highlights and ${concerns.length} concern(s). ${metrics.agents.healthy}/${metrics.agents.total} agents operational, ${metrics.removals.completed24h} removals processed, ${metrics.scans.completed24h} scans completed.`;
 
   return {
@@ -303,5 +336,6 @@ function generateRuleBasedAnalysis(metrics: StandupMetrics): StandupAnalysis {
     operationsReport,
     financialReport,
     brokerReport,
+    ticketReport,
   };
 }

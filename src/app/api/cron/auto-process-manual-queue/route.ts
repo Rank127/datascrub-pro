@@ -20,6 +20,8 @@ import { acquireJobLock, releaseJobLock, getBrokerIntelligence } from "@/lib/age
 import { getBestAutomationMethod } from "@/lib/removers/browser-automation";
 import { logCronExecution } from "@/lib/cron-logger";
 
+export const maxDuration = 300;
+
 const prisma = new PrismaClient();
 const JOB_NAME = "auto-process-manual-queue";
 

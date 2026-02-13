@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { logCronExecution } from "@/lib/cron-logger";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { getSystemUserId } from "@/lib/support/ticket-service";
 
 /**
  * Cron job to automatically close resolved tickets after 24 hours
@@ -12,6 +13,8 @@ import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
  * 2. Updates their status to CLOSED
  * 3. Adds a system comment noting the auto-closure
  */
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   try {
     // Verify cron secret
@@ -43,6 +46,9 @@ export async function POST(request: Request) {
 
     console.log(`[Cron: Close Resolved Tickets] Found ${ticketsToClose.length} tickets to close`);
 
+    // Get system user for automated comments (not ticket owner)
+    const systemUserId = await getSystemUserId();
+
     let closed = 0;
     let failed = 0;
 
@@ -61,7 +67,7 @@ export async function POST(request: Request) {
           prisma.ticketComment.create({
             data: {
               ticketId: ticket.id,
-              authorId: ticket.userId, // Use ticket owner as author for system message
+              authorId: systemUserId,
               content: "This ticket was automatically closed after 24 hours with no further activity.",
               isInternal: false,
             },

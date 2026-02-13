@@ -17,6 +17,8 @@ import { logCronExecution } from "@/lib/cron-logger";
  * 3. If data no longer found → mark as COMPLETED
  * 4. If data still found → schedule next verification or mark FAILED
  */
+export const maxDuration = 300;
+
 export async function GET(request: Request) {
   // Verify authorization
   const authResult = verifyCronAuth(request);
@@ -26,25 +28,29 @@ export async function GET(request: Request) {
 
   console.log("[Verify Removals] Starting verification batch...");
   const startTime = Date.now();
+  const PROCESSING_DEADLINE_MS = 240_000; // 4 minutes — leave 1 min buffer
+  const deadline = startTime + PROCESSING_DEADLINE_MS;
 
   try {
-    const stats = await runVerificationBatch();
+    const stats = await runVerificationBatch(deadline);
 
     const duration = Date.now() - startTime;
+    const timeBoxed = stats.timeBoxed || false;
 
-    console.log(`[Verify Removals] Completed in ${duration}ms:`, stats);
+    console.log(`[Verify Removals] ${timeBoxed ? "PARTIAL" : "Completed"} in ${duration}ms:`, stats);
 
     await logCronExecution({
       jobName: "verify-removals",
-      status: "SUCCESS",
+      status: timeBoxed ? ("PARTIAL" as "SUCCESS" | "FAILED") : "SUCCESS",
       duration,
-      message: `Verified batch in ${duration}ms`,
+      message: `${timeBoxed ? "PARTIAL: " : ""}Verified ${stats.processed} removals in ${duration}ms`,
       metadata: stats as Record<string, unknown>,
     });
 
     return NextResponse.json({
       success: true,
       stats,
+      timeBoxed,
       duration: `${duration}ms`,
       timestamp: new Date().toISOString(),
     });
