@@ -20,6 +20,7 @@ import {
   Check,
   RefreshCw,
 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 import { EmptyState } from "@/components/dashboard/empty-state";
@@ -140,25 +141,6 @@ export default function AlertsPage() {
 
   const unreadCount = alerts.filter((a) => !a.isRead).length;
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-
-    if (diff < 1000 * 60 * 60) {
-      const minutes = Math.floor(diff / (1000 * 60));
-      return `${minutes}m ago`;
-    }
-    if (diff < 1000 * 60 * 60 * 24) {
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      return `${hours}h ago`;
-    }
-    if (diff < 1000 * 60 * 60 * 24 * 7) {
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      return `${days}d ago`;
-    }
-    return date.toLocaleDateString();
-  };
 
   return (
     <div className="space-y-6">
@@ -293,7 +275,7 @@ export default function AlertsPage() {
                         {alert.message}
                       </p>
                       <p className="text-xs text-slate-500 mt-2">
-                        {formatDate(alert.createdAt)}
+                        {formatDistanceToNow(new Date(alert.createdAt), { addSuffix: true })}
                       </p>
                     </div>
                   </div>

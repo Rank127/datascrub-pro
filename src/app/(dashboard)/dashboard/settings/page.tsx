@@ -30,8 +30,6 @@ import {
   CheckCircle,
   XCircle,
   Smartphone,
-  Phone,
-  Trash2,
 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
@@ -71,21 +69,6 @@ function SettingsContent() {
   const [reportFrequency, setReportFrequency] = useState("weekly");
   const [notificationLoading, setNotificationLoading] = useState(false);
 
-  // SMS notification settings
-  const [smsConfigured, setSmsConfigured] = useState(false);
-  const [smsAvailable, setSmsAvailable] = useState(false);
-  const [smsPlan, setSmsPlan] = useState<string>("FREE");
-  const [smsNotifications, setSmsNotifications] = useState(false);
-  const [smsPhone, setSmsPhone] = useState<string | null>(null);
-  const [smsPhoneVerified, setSmsPhoneVerified] = useState(false);
-  const [smsExposureAlerts, setSmsExposureAlerts] = useState(true);
-  const [smsRemovalUpdates, setSmsRemovalUpdates] = useState(true);
-  const [smsBreachAlerts, setSmsBreachAlerts] = useState(true);
-  const [smsLoading, setSmsLoading] = useState(false);
-  const [phoneInput, setPhoneInput] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [verificationPending, setVerificationPending] = useState(false);
-  const [pendingPhone, setPendingPhone] = useState<string | null>(null);
 
   // Security section
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -156,133 +139,6 @@ function SettingsContent() {
     }
   };
 
-  // Fetch SMS settings
-  const fetchSmsSettings = async () => {
-    try {
-      const response = await fetch("/api/user/sms");
-      if (response.ok) {
-        const data = await response.json();
-        setSmsConfigured(data.smsConfigured ?? false);
-        setSmsAvailable(data.smsAvailable ?? false);
-        setSmsPlan(data.plan ?? "FREE");
-        setSmsNotifications(data.smsNotifications ?? false);
-        setSmsPhone(data.smsPhone);
-        setSmsPhoneVerified(data.smsPhoneVerified ?? false);
-        setSmsExposureAlerts(data.smsExposureAlerts ?? true);
-        setSmsRemovalUpdates(data.smsRemovalUpdates ?? true);
-        setSmsBreachAlerts(data.smsBreachAlerts ?? true);
-      }
-    } catch (error) {
-      console.error("Failed to fetch SMS settings:", error);
-    }
-  };
-
-  // Save SMS preferences
-  const handleSaveSmsPreferences = async () => {
-    setSmsLoading(true);
-    try {
-      const response = await fetch("/api/user/sms", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          smsNotifications,
-          smsExposureAlerts,
-          smsRemovalUpdates,
-          smsBreachAlerts,
-        }),
-      });
-      if (response.ok) {
-        setMessage({ type: "success", text: "SMS preferences saved!" });
-      } else {
-        setMessage({ type: "error", text: "Failed to save SMS preferences." });
-      }
-    } catch (error) {
-      setMessage({ type: "error", text: "Failed to save SMS preferences." });
-    } finally {
-      setSmsLoading(false);
-    }
-  };
-
-  // Send verification code to phone
-  const handleSendVerification = async () => {
-    if (!phoneInput.trim()) {
-      setMessage({ type: "error", text: "Please enter a phone number." });
-      return;
-    }
-    setSmsLoading(true);
-    try {
-      const response = await fetch("/api/user/sms", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phoneInput }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setVerificationPending(true);
-        setPendingPhone(data.phone);
-        setMessage({ type: "success", text: "Verification code sent! Check your phone." });
-      } else {
-        setMessage({ type: "error", text: data.error || "Failed to send verification code." });
-      }
-    } catch (error) {
-      setMessage({ type: "error", text: "Failed to send verification code." });
-    } finally {
-      setSmsLoading(false);
-    }
-  };
-
-  // Verify the code
-  const handleVerifyCode = async () => {
-    if (!verificationCode.trim() || verificationCode.length !== 6) {
-      setMessage({ type: "error", text: "Please enter a 6-digit verification code." });
-      return;
-    }
-    setSmsLoading(true);
-    try {
-      const response = await fetch("/api/user/sms", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify", code: verificationCode }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setVerificationPending(false);
-        setVerificationCode("");
-        setPhoneInput("");
-        setPendingPhone(null);
-        fetchSmsSettings();
-        setMessage({ type: "success", text: "Phone number verified successfully!" });
-      } else {
-        setMessage({ type: "error", text: data.error || "Invalid verification code." });
-      }
-    } catch (error) {
-      setMessage({ type: "error", text: "Failed to verify code." });
-    } finally {
-      setSmsLoading(false);
-    }
-  };
-
-  // Remove phone number
-  const handleRemovePhone = async () => {
-    setSmsLoading(true);
-    try {
-      const response = await fetch("/api/user/sms", {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        setSmsPhone(null);
-        setSmsPhoneVerified(false);
-        setSmsNotifications(false);
-        setMessage({ type: "success", text: "Phone number removed." });
-      } else {
-        setMessage({ type: "error", text: "Failed to remove phone number." });
-      }
-    } catch (error) {
-      setMessage({ type: "error", text: "Failed to remove phone number." });
-    } finally {
-      setSmsLoading(false);
-    }
-  };
 
   // Check for success/canceled URL params from Stripe redirect
   useEffect(() => {
@@ -295,7 +151,6 @@ function SettingsContent() {
 
   useEffect(() => {
     fetchNotificationPrefs();
-    fetchSmsSettings();
     fetch2FAStatus();
   }, []);
 
@@ -685,19 +540,6 @@ function SettingsContent() {
         </CardContent>
       </Card>
 
-      {/* SMS Notifications - Original code commented out for future release
-      <Card className="bg-slate-800/50 border-slate-700">
-        ... original SMS settings code preserved for future use ...
-      </Card>
-      */}
-
-      {/* Hidden placeholder to prevent build errors from unused SMS state */}
-      <div className="hidden">
-        {smsPlan}{smsNotifications}{smsPhone}{smsPhoneVerified}
-        {smsExposureAlerts}{smsBreachAlerts}{smsConfigured}{smsAvailable}
-        {phoneInput}{verificationCode}{verificationPending}{pendingPhone}
-        {String(smsLoading)}
-      </div>
 
       {/* Subscription */}
       <Card className="bg-slate-800/50 border-slate-700">
