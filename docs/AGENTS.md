@@ -161,6 +161,7 @@ Catches silent infrastructure failures and auto-remediates:
   - `verify-removals`: alerts after 25h silence
   - `health-check`: alerts after 25h silence
 - **Auto-remediation** - Retriggers dead crons via HTTP request
+- **Retrigger rate limiting** - Max 3 retriggers per cron per 24 hours (via `getRetriggerCount()` from cron-logger). Rate-limited retriggers are logged as `[RETRIGGER RATE-LIMITED]` alerts.
 - **High failure rates** - Alerts if >30% removal failures in 24h
 - **Unusual signups** - Alerts if >50 signups in 1 hour
 - **Export:** `runDetectAnomalies()` for programmatic use
@@ -471,6 +472,20 @@ Central router for all agent requests:
 - Workflow management
 - Circuit breaker for failed agents
 - Event emission for logging
+
+### Remediation Engine Safety (Feb 2026)
+
+**Location:** `src/lib/agents/orchestrator/remediation-engine.ts`
+
+The remediation engine includes three safety mechanisms:
+- **Issue Deduplication** — `recentIssues` Map with 30-minute TTL. Fingerprint: `type:affectedResource`. Duplicate issues logged as `DEDUP_SKIP`.
+- **Circuit Breaker** — `circuitBreaker` Map tracks failures per fingerprint. After 3 failures within 6 hours, state flips to OPEN (skips remediation, emits `remediation.circuit_breaker_open` escalation event). Auto-resets to CLOSED after 6h inactivity. Successful remediation resets the counter.
+
+### Event Bus Deduplication (Feb 2026)
+
+**Location:** `src/lib/agents/orchestrator/event-bus.ts`
+
+- **Event Deduplication** — `recentEventHashes` Map with 10-minute TTL. Hash computed from `type|sourceAgentId|alertType|eventName|capability|cronName|correlationId`. Duplicate events are silently dropped.
 
 ---
 

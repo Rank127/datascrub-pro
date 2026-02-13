@@ -230,6 +230,13 @@ Catches silent cron deaths by monitoring:
 
 Event-driven rules for: `seo.*`, `cron.*`, `ticket.*`, `security.*`, `compliance.*`, `performance.*`
 
+**Safety mechanisms (added Feb 2026):**
+- **Issue Deduplication** — `recentIssues` Map with 30-min TTL. Fingerprint: `type:affectedResource`. Prevents runaway remediation loops.
+- **Circuit Breaker** — After 3 failed remediation attempts for same fingerprint within 6h, state flips OPEN (skips remediation, emits escalation event). Auto-resets after 6h inactivity.
+- **Event Deduplication** — Event bus `recentEventHashes` Map with 10-min TTL. Hash-based fingerprinting prevents duplicate events from triggering duplicate remediations.
+- **Retrigger Rate Limiting** — Max 3 auto-retriggers per cron per 24h via CronLog `status='RETRIGGER'` entries. Applied in both health-check and operations-agent.
+- **Cascading Fix Cooldown** — 500ms delay after DB-modifying health check tests to prevent read-after-write races.
+
 #### 6.4 Ticket Self-Healing
 - `tryAutoResolve()` handles common issues before AI processing
 - Stale ticket detection (OPEN 4h+ → escalate, WAITING_USER 48h+ → reopen)
@@ -667,6 +674,7 @@ ADMIN_EMAILS=                   # Bootstrap admin access
 | 1.2 | 2026-02-05 | Completed Phase 2: CSP headers, IP allowlist, Upstash Redis rate limiting |
 | 1.3 | 2026-02-05 | Added security scan cron job, Security Agent integration |
 | 1.4 | 2026-02-13 | All 27 crons secured with maxDuration + time-boxing; added auto-remediation (Phase 6): health check auto-fix, Operations Agent anomaly detection, Remediation Engine v2, ticket self-healing |
+| 1.5 | 2026-02-13 | Safety hardening: remediation engine circuit breaker (3 fails/6h → OPEN), issue dedup (30min), event bus dedup (10min), retrigger rate limiting (max 3/cron/24h), cascading fix cooldowns (500ms) |
 
 ---
 

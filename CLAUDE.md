@@ -10,6 +10,20 @@
 - SSH keys not configured on this machine; always use HTTPS remote URL
 - Remote origin: `https://github.com/Rank127/datascrub-pro.git`
 
+## Safety Mechanisms (Feb 2026)
+- **Issue Deduplication**: Remediation engine skips duplicate issues (same `type:affectedResource`) within 30-minute window
+- **Circuit Breaker**: After 3 failed remediation attempts for same fingerprint within 6 hours, state flips to OPEN (skips remediation, emits escalation). Auto-resets after 6h inactivity.
+- **Event Deduplication**: Event bus deduplicates publish calls via hash-based fingerprinting (10-minute TTL)
+- **Retrigger Rate Limiting**: Max 3 auto-retriggers per cron per 24 hours. Tracked via CronLog `status='RETRIGGER'`. Applied in both health-check and operations-agent `detect-anomalies`.
+- **Cascading Fix Cooldown**: 500ms delay after database-modifying health check tests (3, 9, 10) to prevent read-after-write races
+
+## Ops Visibility (Admin Dashboard)
+The Operations tab (`/dashboard/executive?tab=operations`) includes:
+- **Agent Performance Widget** — execution count, cost, active/degraded/failed agents from `AgentHealth` table
+- **Broker Intelligence Widget** — top 5 / worst 5 brokers by success rate from `BrokerIntelligence` table
+- **Auto-Remediation Savings** — autoFixed, aiCallsAvoided counts from ticketing-agent CronLog metadata
+- **Queue Velocity** — items processed per hour, 24h/7d totals from removal requests + cron runs
+
 ## Architecture: Admin Dashboard
 The admin dashboard has 6+ independent sections, each with its own user table and API calls:
 - `src/components/dashboard/executive/user-management-section.tsx` — User Management tab (uses `/api/admin/users`)

@@ -1,10 +1,10 @@
 # GhostMyData — TODO & Roadmap
 
-*Last Updated: February 13, 2026 | v1.31.0*
+*Last Updated: February 13, 2026 | v1.32.0*
 
 ---
 
-## Recently Completed (v1.30.0–v1.31.0, February 2026)
+## Recently Completed (v1.30.0–v1.32.0, February 2026)
 
 | Feature | Description | Version |
 |---------|-------------|---------|
@@ -17,6 +17,18 @@
 | Mastermind Advisory | 75+ advisors, 5-layer model, 7-step protocol, weekly cron | 1.30.0 |
 | Dashboard Cron/SLA Widgets | Real-time cron health + ticket SLA in Operations tab | 1.31.0 |
 | Remediation Engine v2 | Event-driven rules for `cron.*`, `ticket.*` patterns | 1.31.0 |
+| Safety: Circuit Breakers | Issue dedup (30min), circuit breaker (3 fails/6h), event dedup (10min) | 1.32.0 |
+| Safety: Retrigger Rate Limits | Max 3 auto-retriggers per cron per 24h in health-check + ops agent | 1.32.0 |
+| Safety: Cascading Cooldowns | 500ms delay between DB-modifying health check tests | 1.32.0 |
+| Ops: Agent Performance Widget | Execution count, cost, status from AgentHealth table | 1.32.0 |
+| Ops: Broker Intelligence Widget | Top/worst 5 brokers by success rate from BrokerIntelligence | 1.32.0 |
+| Ops: Remediation Savings | autoFixed, aiCallsAvoided from ticketing-agent CronLog metadata | 1.32.0 |
+| Ops: Queue Velocity | Items/hour, 24h/7d totals from removals + cron runs | 1.32.0 |
+| Conversion: Personalized Banner | Exposure data in upgrade banner, urgency messaging | 1.32.0 |
+| Conversion: Scan Urgency | Manual burden calc, time-decay messaging, last scan context | 1.32.0 |
+| Conversion: Settings Value Notes | Identity theft stats, guarantee badge, introductory pricing | 1.32.0 |
+| Conversion: Pricing Social Proof | Trust bar (2,100+ sources, guarantee, reviews), guarantee section | 1.32.0 |
+| Conversion: Protection Micro-CTA | "Upgrade to auto-fix" on risk tile for FREE users with high risk | 1.32.0 |
 
 ### Previously Completed (v1.25.0–v1.29.3)
 
@@ -242,7 +254,7 @@
 - **24 AI agents** across 8 domains with auto-remediation
 - **60 AI Shield sources** (facial recognition, voice cloning, deepfake defense)
 - **365 dark web monitoring sources**
-- **Self-healing infrastructure** (27 crons with maxDuration, anomaly detection, auto-retrigger)
+- **Self-healing infrastructure** (27 crons with maxDuration, anomaly detection, rate-limited auto-retrigger, circuit breakers)
 - **Family plans** (up to 5 members, Enterprise)
 - **Breach database integration** (HIBP + LeakCheck)
 - **Automated verification** via re-scanning

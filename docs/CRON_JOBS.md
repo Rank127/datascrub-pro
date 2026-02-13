@@ -141,6 +141,8 @@ System health monitoring with 24 tests and auto-remediation capabilities.
 - Resets stuck removals (>24 hours in PENDING status)
 - Deletes orphaned profiles
 - Auto-retriggers dead critical crons (`process-removals`, `clear-pending-queue`, `verify-removals`) via HTTP
+- **Retrigger rate limiting** — Max 3 retriggers per cron per 24 hours (via `getRetriggerCount()`). Rate-limited retriggers are logged as escalation instead of attempted.
+- **Cascading fix cooldown** — 500ms delay after database-modifying auto-fix tests (Test 3: orphan profiles, Test 9: stuck scans, Test 10: stuck removals) to prevent read-after-write consistency issues
 - Emits remediation engine events (`cron.failed`, `ticket.stale`)
 - Sends alert email with detailed report
 
@@ -561,12 +563,14 @@ Used by: `ticketing-agent`, `verify-removals`
 When health-check or detect-anomalies detects a dead critical cron, it retriggers via HTTP:
 - Monitored crons: `process-removals` (3h threshold), `clear-pending-queue` (2h), `verify-removals` (25h), `health-check` (25h)
 - Retrigger sends GET request with `CRON_SECRET` authorization
+- **Rate limited**: Max 3 retriggers per cron per 24 hours. Tracked via `CronLog` entries with `status='RETRIGGER'`. Functions: `getRetriggerCount(jobName, windowHours)` and `logRetriggerAttempt(jobName, success)` in `src/lib/cron-logger.ts`.
 
 ### Status Logging
 All cron executions are logged to the `CronLog` table with:
 - `SUCCESS` — completed normally
 - `PARTIAL` — deadline hit, some items unprocessed
 - `FAIL` — error occurred
+- `RETRIGGER` — auto-retrigger attempt (success or failure tracked in metadata)
 - Duration, items processed, and error details
 
 ---
