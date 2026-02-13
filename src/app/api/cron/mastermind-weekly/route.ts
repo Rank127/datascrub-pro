@@ -85,12 +85,17 @@ Respond with valid JSON:
       throw new Error("No text response from Claude");
     }
 
-    // Strip markdown code fences if present
+    // Extract JSON from response (handles code fences, trailing text, etc.)
     let analysisJson = textBlock.text.trim();
     if (analysisJson.startsWith("```")) {
       analysisJson = analysisJson.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     }
-    const analysis = JSON.parse(analysisJson);
+    // Extract first complete JSON object if there's trailing text
+    const jsonMatch = analysisJson.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("No JSON object found in Claude response");
+    }
+    const analysis = JSON.parse(jsonMatch[0]);
 
     // Generate strategic directives from the analysis
     let directivesApplied = 0;
@@ -149,7 +154,9 @@ Only adjust numerical parameters if the data clearly warrants it.`,
         if (dirJson.startsWith("```")) {
           dirJson = dirJson.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
         }
-        const parsed = JSON.parse(dirJson);
+        const dirJsonMatch = dirJson.match(/\{[\s\S]*\}/);
+        if (!dirJsonMatch) throw new Error("No JSON in directive response");
+        const parsed = JSON.parse(dirJsonMatch[0]);
         directivesList = parsed.directives || [];
         directivesApplied = await applyMastermindDirectives(directivesList, "mastermind-weekly");
       }
