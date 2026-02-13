@@ -327,15 +327,27 @@ export async function GET(request: Request) {
   // ========== CRON JOB MONITORING ==========
 
   // Test 8c: Cron Job Execution Status
+  // Critical crons that must never miss a run — overdue = FAIL (CRITICAL overall)
+  const CRITICAL_CRONS = new Set(["process-removals", "clear-pending-queue", "verify-removals", "health-check"]);
+
   try {
     const cronStatus = await getCronHealthStatus();
+    const overdueJobs = cronStatus.jobs.filter(j => j.isOverdue && j.lastRun);
+    const overdueCritical = overdueJobs.filter(j => CRITICAL_CRONS.has(j.name));
+    const overdueNonCritical = overdueJobs.filter(j => !CRITICAL_CRONS.has(j.name));
 
-    if (cronStatus.hasOverdueJobs) {
-      const overdueJobs = cronStatus.jobs.filter(j => j.isOverdue && j.lastRun);
+    if (overdueCritical.length > 0) {
+      tests.push({
+        name: "Cron Job Monitoring",
+        status: "FAIL",
+        message: `${overdueCritical.length} CRITICAL cron(s) overdue: ${overdueCritical.map(j => `${j.name} (last: ${j.lastRun ? Math.floor((Date.now() - j.lastRun.getTime()) / 3600000) + "h ago" : "never"})`).join(", ")}${overdueNonCritical.length > 0 ? `. Also ${overdueNonCritical.length} non-critical overdue.` : ""}`,
+        actionRequired: `CRITICAL: ${overdueCritical.map(j => j.name).join(", ")} stopped running. Check Vercel logs immediately.`,
+      });
+    } else if (overdueNonCritical.length > 0) {
       tests.push({
         name: "Cron Job Monitoring",
         status: "WARN",
-        message: `${overdueJobs.length} cron job(s) are overdue: ${overdueJobs.map(j => j.name).join(", ")}`,
+        message: `${overdueNonCritical.length} non-critical cron(s) overdue: ${overdueNonCritical.map(j => j.name).join(", ")}`,
         actionRequired: "Check Vercel cron configuration and deployment status",
       });
     } else {
@@ -831,6 +843,73 @@ export async function GET(request: Request) {
     });
   }
 
+  // Test 20: Removal Processing Stagnation Detection
+  try {
+    const pendingForStagnation = await prisma.removalRequest.count({
+      where: { status: "PENDING" },
+    });
+
+    if (pendingForStagnation > 50) {
+      // There's a meaningful backlog — check if process-removals is making progress
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const lastProcessRemovalsLog = await prisma.cronLog.findFirst({
+        where: {
+          jobName: "process-removals",
+          createdAt: { gte: oneDayAgo },
+        },
+        orderBy: { createdAt: "desc" },
+        select: { message: true, createdAt: true },
+      });
+
+      if (!lastProcessRemovalsLog) {
+        tests.push({
+          name: "Removal Processing Health",
+          status: "FAIL",
+          message: `${pendingForStagnation} removals in PENDING queue but process-removals hasn't logged in 24 hours`,
+          actionRequired: "process-removals cron is dead. Check Vercel function logs for timeout or crash.",
+        });
+      } else {
+        // Parse "Processed X pending" from log message
+        const processedMatch = lastProcessRemovalsLog.message?.match(/Processed (\d+) pending/);
+        const processedCount = processedMatch ? parseInt(processedMatch[1], 10) : -1;
+
+        if (processedCount === 0) {
+          tests.push({
+            name: "Removal Processing Health",
+            status: "FAIL",
+            message: `${pendingForStagnation} removals in PENDING queue but last process-removals run processed 0 items`,
+            actionRequired: "process-removals is running but not processing. Check batch logic and broker rate limits.",
+          });
+        } else if (processedCount > 0) {
+          tests.push({
+            name: "Removal Processing Health",
+            status: "PASS",
+            message: `Queue active: ${pendingForStagnation} pending, last run processed ${processedCount}`,
+          });
+        } else {
+          // Couldn't parse — at least it logged, so WARN
+          tests.push({
+            name: "Removal Processing Health",
+            status: "WARN",
+            message: `${pendingForStagnation} pending, process-removals logged but couldn't parse processing count`,
+          });
+        }
+      }
+    } else {
+      tests.push({
+        name: "Removal Processing Health",
+        status: "PASS",
+        message: `Queue healthy: ${pendingForStagnation} pending (threshold: 50)`,
+      });
+    }
+  } catch (error) {
+    tests.push({
+      name: "Removal Processing Health",
+      status: "WARN",
+      message: `Could not check removal processing: ${error instanceof Error ? error.message : "Unknown error"}`,
+    });
+  }
+
   // ========== COMPILE REPORT ==========
 
   const summary = {
@@ -958,11 +1037,17 @@ export async function GET(request: Request) {
     }
   }
 
-  // Log this health check execution
+  // Log this health check execution — include which tests failed/warned for quick diagnosis
+  const failedTestNames = tests.filter(t => t.status === "FAIL").map(t => t.name);
+  const warnedTestNames = tests.filter(t => t.status === "WARN").map(t => t.name);
+  let logMessage = `${overall}: ${summary.passed} passed, ${summary.failed} failed, ${summary.warnings} warnings`;
+  if (failedTestNames.length > 0) logMessage += `. FAIL: ${failedTestNames.join(", ")}`;
+  if (warnedTestNames.length > 0) logMessage += `. WARN: ${warnedTestNames.join(", ")}`;
+
   await logCronExecution({
     jobName: "health-check",
     status: summary.failed > 0 ? "FAILED" : "SUCCESS",
-    message: `${overall}: ${summary.passed} passed, ${summary.failed} failed, ${summary.warnings} warnings`,
+    message: logMessage,
     metadata: {
       overall,
       passed: summary.passed,
