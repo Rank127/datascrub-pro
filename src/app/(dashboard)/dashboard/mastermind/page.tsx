@@ -1,30 +1,19 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { MastermindOrgChart } from "@/components/dashboard/mastermind/org-chart";
 import { AdvisorPanel } from "@/components/dashboard/mastermind/advisor-panel";
 
-const ADMIN_ROLES = ["ADMIN", "LEGAL", "SUPER_ADMIN"];
-
 export default function MastermindPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   if (status === "loading") {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-slate-400">Loading...</div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
       </div>
     );
-  }
-
-  if (!session?.user) {
-    redirect("/login");
-  }
-
-  const userRole = (session.user as { role?: string }).role || "USER";
-  if (!ADMIN_ROLES.includes(userRole)) {
-    redirect("/dashboard");
   }
 
   return (
