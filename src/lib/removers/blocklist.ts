@@ -178,6 +178,100 @@ export const BLOCKLISTED_COMPANIES: BlocklistedCompany[] = [
   },
 
   // ============================================================================
+  // REAL ESTATE BROKERAGES & iBUYERS (DIRECT RELATIONSHIP - NOT DATA BROKERS)
+  // Users hire agents, sell/buy homes directly. Per Cal. Civ. Code § 1798.99.80(d).
+  // ============================================================================
+  {
+    name: "RE/MAX",
+    domains: ["remax.com", "remax.net"],
+    reason: "NOT a data broker - real estate brokerage with direct client relationships. Users hire agents directly.",
+    dateAdded: "2026-02-13",
+    notes: "Real estate franchise. Clients engage agents directly for buying/selling homes.",
+  },
+  {
+    name: "Century 21",
+    domains: ["century21.com"],
+    reason: "NOT a data broker - real estate brokerage with direct client relationships. Users hire agents directly.",
+    dateAdded: "2026-02-13",
+    notes: "Real estate franchise. Clients engage agents directly for buying/selling homes.",
+  },
+  {
+    name: "Coldwell Banker",
+    domains: ["coldwellbanker.com"],
+    reason: "NOT a data broker - real estate brokerage with direct client relationships. Users hire agents directly.",
+    dateAdded: "2026-02-13",
+    notes: "Real estate franchise. Clients engage agents directly for buying/selling homes.",
+  },
+  {
+    name: "Keller Williams",
+    domains: ["kw.com"],
+    reason: "NOT a data broker - real estate brokerage with direct client relationships. Users hire agents directly.",
+    dateAdded: "2026-02-13",
+    notes: "Real estate franchise. Clients engage agents directly for buying/selling homes.",
+  },
+  {
+    name: "Compass Real Estate",
+    domains: ["compass.com"],
+    reason: "NOT a data broker - real estate brokerage with direct client relationships. Users hire agents directly.",
+    dateAdded: "2026-02-13",
+    notes: "Real estate brokerage. Clients engage agents directly for buying/selling homes.",
+  },
+  {
+    name: "Opendoor",
+    domains: ["opendoor.com"],
+    reason: "NOT a data broker - iBuyer platform with direct seller relationships. Users sell homes directly to Opendoor.",
+    dateAdded: "2026-02-13",
+    notes: "iBuyer platform. Sellers interact directly with Opendoor to sell their homes.",
+  },
+  {
+    name: "Offerpad",
+    domains: ["offerpad.com"],
+    reason: "NOT a data broker - iBuyer platform with direct seller relationships. Users sell homes directly to Offerpad.",
+    dateAdded: "2026-02-13",
+    notes: "iBuyer platform. Sellers interact directly with Offerpad to sell their homes.",
+  },
+  {
+    name: "HomeLight",
+    domains: ["homelight.com"],
+    reason: "NOT a data broker - real estate referral platform with direct user relationships. Users request agent matches.",
+    dateAdded: "2026-02-13",
+    notes: "Agent matching platform. Users create accounts and request agent recommendations.",
+  },
+
+  // ============================================================================
+  // GENEALOGY & HEALTHCARE PLATFORMS (DIRECT RELATIONSHIP - NOT DATA BROKERS)
+  // Users create accounts, upload personal data, and interact directly.
+  // ============================================================================
+  {
+    name: "Ancestry",
+    domains: ["ancestry.com"],
+    reason: "NOT a data broker - genealogy platform with direct user relationships. Users create accounts, upload family trees, and submit DNA samples.",
+    dateAdded: "2026-02-13",
+    notes: "Genealogy platform. Users voluntarily create accounts and provide their own data including DNA. Delete via account settings.",
+  },
+  {
+    name: "MyHeritage",
+    domains: ["myheritage.com"],
+    reason: "NOT a data broker - genealogy platform with direct user relationships. Users create accounts, upload family trees, and submit DNA samples.",
+    dateAdded: "2026-02-13",
+    notes: "Genealogy platform. Users voluntarily create accounts and provide their own data including DNA. Delete via account settings.",
+  },
+  {
+    name: "Zocdoc",
+    domains: ["zocdoc.com"],
+    reason: "NOT a data broker - healthcare appointment platform with direct user relationships. Patients and doctors create accounts.",
+    dateAdded: "2026-02-13",
+    notes: "Healthcare appointment booking. Patients create accounts to book appointments with doctors who also have accounts.",
+  },
+  {
+    name: "Doximity",
+    domains: ["doximity.com"],
+    reason: "NOT a data broker - physician networking platform with direct user relationships. Doctors create and manage their own profiles.",
+    dateAdded: "2026-02-13",
+    notes: "Physician networking platform. Doctors create accounts and manage their professional profiles directly.",
+  },
+
+  // ============================================================================
   // DATA PROCESSORS (NOT DATA BROKERS)
   // Per GDPR Articles 28/29, Data Processors only process data on behalf of
   // Data Controllers (their clients). Deletion requests should go to the
@@ -240,6 +334,22 @@ export const BLOCKLISTED_EMAIL_DOMAINS: string[] = [
   "smartrecruiters.com",
   "jobvite.com",
   "workday.com",
+  // Real estate brokerages (direct relationship)
+  "remax.com",
+  "remax.net",
+  "century21.com",
+  "coldwellbanker.com",
+  "kw.com",
+  "compass.com",
+  "opendoor.com",
+  "offerpad.com",
+  "homelight.com",
+  // Genealogy platforms (direct relationship)
+  "ancestry.com",
+  "myheritage.com",
+  // Healthcare platforms (direct relationship)
+  "zocdoc.com",
+  "doximity.com",
   // Service platforms (direct relationship)
   "muckrack.com",
   "ratemyprofessors.com",

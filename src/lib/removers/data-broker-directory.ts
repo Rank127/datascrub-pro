@@ -30,7 +30,7 @@
  */
 
 export type RemovalMethod = "FORM" | "EMAIL" | "BOTH" | "MONITOR" | "NOT_REMOVABLE";
-export type SourceCategory = "DATA_BROKER" | "BREACH_DATABASE" | "SOCIAL_MEDIA" | "AI_SERVICE" | "DARK_WEB" | "OTHER";
+export type SourceCategory = "DATA_BROKER" | "BREACH_DATABASE" | "SOCIAL_MEDIA" | "AI_SERVICE" | "DARK_WEB" | "SERVICE_PROVIDER" | "OTHER";
 
 export interface DataBrokerInfo {
   name: string;
@@ -1052,6 +1052,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 30,
     notes: "Account must be deleted manually through settings",
+    category: "SOCIAL_MEDIA",
   },
   FACEBOOK: {
     name: "Facebook",
@@ -1060,6 +1061,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 30,
     notes: "Account deletion requires 30-day waiting period",
+    category: "SOCIAL_MEDIA",
   },
   TWITTER: {
     name: "Twitter/X",
@@ -1068,6 +1070,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 30,
     notes: "Use account settings - email addresses bounce. Deactivation required before permanent deletion.",
+    category: "SOCIAL_MEDIA",
   },
   INSTAGRAM: {
     name: "Instagram",
@@ -1075,6 +1078,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@instagram.com",
     removalMethod: "BOTH",
     estimatedDays: 30,
+    category: "SOCIAL_MEDIA",
   },
   TIKTOK: {
     name: "TikTok",
@@ -1082,6 +1086,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@tiktok.com",
     removalMethod: "BOTH",
     estimatedDays: 30,
+    category: "SOCIAL_MEDIA",
   },
   REDDIT: {
     name: "Reddit",
@@ -1089,6 +1094,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@reddit.com",
     removalMethod: "BOTH",
     estimatedDays: 30,
+    category: "SOCIAL_MEDIA",
   },
   PINTEREST: {
     name: "Pinterest",
@@ -1097,6 +1103,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 30,
     notes: "Use account settings - email addresses bounce.",
+    category: "SOCIAL_MEDIA",
   },
   YOUTUBE: {
     name: "YouTube",
@@ -1105,6 +1112,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "FORM",
     estimatedDays: 30,
     notes: "Use Google account settings - email addresses bounce. Requires deleting Google account or removing YouTube data specifically.",
+    category: "SOCIAL_MEDIA",
   },
   SNAPCHAT: {
     name: "Snapchat",
@@ -1112,6 +1120,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@snap.com",
     removalMethod: "BOTH",
     estimatedDays: 30,
+    category: "SOCIAL_MEDIA",
   },
   DISCORD: {
     name: "Discord",
@@ -1119,6 +1128,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@discord.com",
     removalMethod: "BOTH",
     estimatedDays: 30,
+    category: "SOCIAL_MEDIA",
   },
 
   // ==========================================
@@ -2245,6 +2255,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 30,
     notes: "Request removal of public records from Ancestry.com",
+    category: "SERVICE_PROVIDER",
   },
   MYHERITAGE: {
     name: "MyHeritage",
@@ -2252,6 +2263,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@myheritage.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+    category: "SERVICE_PROVIDER",
   },
   FINDAGRAVE: {
     name: "FindAGrave",
@@ -2402,6 +2414,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@zocdoc.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+    category: "SERVICE_PROVIDER",
   },
   DOXIMITY: {
     name: "Doximity",
@@ -2410,6 +2423,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "EMAIL",
     estimatedDays: 30,
     notes: "Physician network",
+    category: "SERVICE_PROVIDER",
   },
   NPPES: {
     name: "NPPES (NPI Registry)",
@@ -2757,6 +2771,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@opendoor.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    category: "SERVICE_PROVIDER",
   },
   ESTATELY: {
     name: "Estately",
@@ -2764,6 +2779,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@estately.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    category: "SERVICE_PROVIDER",
   },
   XOME: {
     name: "Xome",
@@ -2771,6 +2787,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@xome.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    category: "SERVICE_PROVIDER",
   },
   FORECLOSURE_COM: {
     name: "Foreclosure.com",
@@ -3586,6 +3603,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@remax.net",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    category: "SERVICE_PROVIDER",
   },
   CENTURY21: {
     name: "Century 21",
@@ -3593,6 +3611,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@century21.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    category: "SERVICE_PROVIDER",
   },
   COLDWELLBANKER: {
     name: "Coldwell Banker",
@@ -3600,6 +3619,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@coldwellbanker.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    category: "SERVICE_PROVIDER",
   },
   KELLER_WILLIAMS: {
     name: "Keller Williams",
@@ -3607,6 +3627,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@kw.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    category: "SERVICE_PROVIDER",
   },
   COMPASS_RE: {
     name: "Compass Real Estate",
@@ -3614,6 +3635,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@compass.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    category: "SERVICE_PROVIDER",
   },
   HOMELIGHT: {
     name: "HomeLight",
@@ -3621,6 +3643,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@homelight.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    category: "SERVICE_PROVIDER",
   },
   OFFERPAD: {
     name: "Offerpad",
@@ -3628,6 +3651,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@offerpad.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    category: "SERVICE_PROVIDER",
   },
   SUNDAE: {
     name: "Sundae",
@@ -3635,6 +3659,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@sundae.com",
     removalMethod: "EMAIL",
     estimatedDays: 14,
+    category: "SERVICE_PROVIDER",
   },
 
   // ==========================================
@@ -12793,6 +12818,25 @@ export const BROKER_CATEGORIES = {
     "LINKEDIN", "FACEBOOK", "TWITTER", "INSTAGRAM", "TIKTOK", "REDDIT",
     "PINTEREST", "YOUTUBE", "SNAPCHAT", "DISCORD"
   ],
+  SERVICE_PROVIDER_SOURCES: [
+    // Real estate brokerages & iBuyers (users hire agents / sell homes directly)
+    "REMAX", "CENTURY21", "COLDWELLBANKER", "KELLER_WILLIAMS", "COMPASS_RE",
+    "HOMELIGHT", "OPENDOOR", "OFFERPAD", "SUNDAE", "ESTATELY", "XOME",
+    // Genealogy user platforms (users create accounts, upload family trees, DNA)
+    "ANCESTRY", "MYHERITAGE",
+    // Healthcare appointment/networking (doctors & patients create accounts)
+    "ZOCDOC", "DOXIMITY",
+  ],
+  GRAY_AREA_SOURCES: [
+    // Property data aggregators — aggregate public county records about people
+    // who never created accounts, BUT also have user-facing features
+    "ZILLOW", "REDFIN", "REALTOR_COM", "TRULIA",
+    "HOMES_COM", "HOMESNAP", "MOVOTO",
+    // Healthcare directories — aggregate doctor data from public license records
+    "HEALTHGRADES", "VITALS",
+    // Review platforms — user-generated content but also aggregate business data
+    "YELP_DATA", "TRIPADVISOR_DATA",
+  ],
   AI_TRAINING: [
     "LAION_AI", "STABILITY_AI", "OPENAI", "MIDJOURNEY", "META_AI",
     "GOOGLE_AI", "LINKEDIN_AI", "ADOBE_AI", "AMAZON_AI", "ANTHROPIC",
@@ -13388,6 +13432,23 @@ export function isKnownDataBroker(source: string): boolean {
     return false;
   }
 
+  // Social media platforms have direct user relationships - NOT data brokers
+  if (brokerInfo.category === "SOCIAL_MEDIA") {
+    return false;
+  }
+  if ((BROKER_CATEGORIES.SOCIAL_MEDIA as readonly string[]).includes(source)) {
+    return false;
+  }
+
+  // Service providers have direct user relationships - NOT data brokers
+  // Per CA Civil Code § 1798.99.80(d) "direct relationship" test
+  if (brokerInfo.category === "SERVICE_PROVIDER") {
+    return false;
+  }
+  if ((BROKER_CATEGORIES.SERVICE_PROVIDER_SOURCES as readonly string[]).includes(source)) {
+    return false;
+  }
+
   // Has a valid opt-out method = is a data broker we can send removals to
   return true;
 }
@@ -13437,8 +13498,53 @@ export function getNotBrokerReason(source: string): string | null {
     return `${brokerInfo.name} data cannot be removed - this is a non-removable source`;
   }
 
+  if (brokerInfo.category === "SOCIAL_MEDIA" ||
+      (BROKER_CATEGORIES.SOCIAL_MEDIA as readonly string[]).includes(source)) {
+    return `${brokerInfo.name} is a social media platform with direct user relationships, not a data broker`;
+  }
+
+  if (brokerInfo.category === "SERVICE_PROVIDER" ||
+      (BROKER_CATEGORIES.SERVICE_PROVIDER_SOURCES as readonly string[]).includes(source)) {
+    return `${brokerInfo.name} is a service provider with direct user relationships, not a statutory data broker per CA Civil Code § 1798.99.80(d)`;
+  }
+
   // It is a known broker
   return null;
+}
+
+/**
+ * Legal classification for source audit.
+ * Used to categorize sources against the statutory "direct relationship" test
+ * from CA Civil Code § 1798.99.80(d).
+ */
+export type LegalClassification =
+  | "STATUTORY_DATA_BROKER"
+  | "SERVICE_PROVIDER"
+  | "SOCIAL_PLATFORM"
+  | "MONITORING_ONLY"
+  | "GRAY_AREA"
+  | "UNKNOWN";
+
+/**
+ * Get the legal classification for any source.
+ * Returns the classification based on the statutory "direct relationship" test.
+ */
+export function getLegalClassification(source: string): LegalClassification {
+  // Check explicit category arrays first
+  if ((BROKER_CATEGORIES.SOCIAL_MEDIA as readonly string[]).includes(source)) return "SOCIAL_PLATFORM";
+  if ((BROKER_CATEGORIES.SERVICE_PROVIDER_SOURCES as readonly string[]).includes(source)) return "SERVICE_PROVIDER";
+  if ((BROKER_CATEGORIES.GRAY_AREA_SOURCES as readonly string[]).includes(source)) return "GRAY_AREA";
+  // Breach/dark web/AI = monitoring only
+  if ((BROKER_CATEGORIES.BREACH_DATABASE as readonly string[]).includes(source)) return "MONITORING_ONLY";
+  if ((BROKER_CATEGORIES.NON_REMOVABLE as readonly string[]).includes(source)) return "MONITORING_ONLY";
+  // Check category field on the entry
+  const info = DATA_BROKER_DIRECTORY[source];
+  if (!info) return "UNKNOWN";
+  if (info.category === "AI_SERVICE" || info.category === "DARK_WEB" || info.category === "BREACH_DATABASE") return "MONITORING_ONLY";
+  if (info.category === "SOCIAL_MEDIA") return "SOCIAL_PLATFORM";
+  if (info.category === "SERVICE_PROVIDER") return "SERVICE_PROVIDER";
+  // Default for entries in directory with valid opt-out
+  return "STATUTORY_DATA_BROKER";
 }
 
 // Get all broker keys
@@ -13458,12 +13564,13 @@ export function getBrokersByCategory(category: keyof typeof BROKER_CATEGORIES): 
     .filter(Boolean);
 }
 
-// Get all data brokers (excluding social media and breach databases)
+// Get all data brokers (excluding social media, breach databases, and service providers)
 export function getDataBrokersOnly(): Record<string, DataBrokerInfo> {
   const excludeCategories = ["SOCIAL_MEDIA", "BREACH_DATABASE"] as const;
-  const excludeKeys = new Set<string>(
-    excludeCategories.flatMap(cat => BROKER_CATEGORIES[cat])
-  );
+  const excludeKeys = new Set<string>([
+    ...excludeCategories.flatMap(cat => BROKER_CATEGORIES[cat]),
+    ...BROKER_CATEGORIES.SERVICE_PROVIDER_SOURCES,
+  ]);
 
   return Object.fromEntries(
     Object.entries(DATA_BROKER_DIRECTORY).filter(([key]) => !excludeKeys.has(key))
