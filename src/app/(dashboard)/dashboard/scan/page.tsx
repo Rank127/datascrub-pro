@@ -284,7 +284,7 @@ export default function ScanPage() {
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle className="h-3 w-3 text-emerald-500" />
-                8+ data broker searches
+                2,000+ data source searches
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle className="h-3 w-3 text-emerald-500" />
