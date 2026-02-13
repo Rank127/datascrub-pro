@@ -182,7 +182,7 @@ export async function POST(request: Request) {
 
     // ===== STALE TICKET DETECTION =====
     // Only run if we haven't been time-boxed (still have time budget)
-    let staleStats = { escalatedOpen: 0, reopenedWaiting: 0 };
+    const staleStats = { escalatedOpen: 0, reopenedWaiting: 0 };
     if (!timeBoxed && Date.now() < deadline) {
       try {
         const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000);
