@@ -255,6 +255,12 @@ function generateRuleBasedAnalysis(metrics: StandupMetrics): StandupAnalysis {
         `${metrics.tickets.resolvedClosed24h} tickets resolved/closed in 24h${metrics.tickets.avgResolutionHours ? ` (avg ${metrics.tickets.avgResolutionHours}h)` : ""}`
       );
     }
+    if (metrics.tickets.aiCallsAvoided24h > 0) {
+      const estimatedSaving = (metrics.tickets.aiCallsAvoided24h * 0.02).toFixed(2); // ~$0.02/call estimate
+      highlights.push(
+        `${metrics.tickets.aiCallsAvoided24h} tickets auto-fixed without AI ($${estimatedSaving} saved)`
+      );
+    }
     if (metrics.tickets.staleCount > 5) {
       concerns.push(
         `${metrics.tickets.staleCount} stale tickets (OPEN, no activity 4+ hours)`
@@ -320,7 +326,7 @@ function generateRuleBasedAnalysis(metrics: StandupMetrics): StandupAnalysis {
     : "No broker intelligence data available yet.";
 
   const ticketReport = metrics.tickets
-    ? `Support tickets: ${metrics.tickets.openCount} open, ${metrics.tickets.inProgressCount} in progress, ${metrics.tickets.waitingUserCount} waiting on user. ${metrics.tickets.resolvedClosed24h} resolved/closed in 24h.${metrics.tickets.staleCount > 0 ? ` ${metrics.tickets.staleCount} stale (4+ hours idle).` : ""}${metrics.tickets.avgResolutionHours ? ` Avg resolution time: ${metrics.tickets.avgResolutionHours}h.` : ""}`
+    ? `Support tickets: ${metrics.tickets.openCount} open, ${metrics.tickets.inProgressCount} in progress, ${metrics.tickets.waitingUserCount} waiting on user. ${metrics.tickets.resolvedClosed24h} resolved/closed in 24h.${metrics.tickets.staleCount > 0 ? ` ${metrics.tickets.staleCount} stale (4+ hours idle).` : ""}${metrics.tickets.avgResolutionHours ? ` Avg resolution time: ${metrics.tickets.avgResolutionHours}h.` : ""}${metrics.tickets.aiCallsAvoided24h > 0 ? ` Cost savings: ${metrics.tickets.aiCallsAvoided24h} AI calls avoided via auto-fix.` : ""}`
     : "No ticket data available.";
 
   const executiveSummary = `System is ${overallHealth.toLowerCase().replace("_", " ")} with ${highlights.length} highlights and ${concerns.length} concern(s). ${metrics.agents.healthy}/${metrics.agents.total} agents operational, ${metrics.removals.completed24h} removals processed, ${metrics.scans.completed24h} scans completed.`;

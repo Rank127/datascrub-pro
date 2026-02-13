@@ -40,6 +40,8 @@ import {
   Scan,
   Zap,
   Play,
+  Headphones,
+  Radio,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -504,6 +506,139 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Cron Health + Ticket SLA */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Cron Health */}
+        {data.cronHealth && (
+          <Card className="bg-slate-900/50 border-slate-800">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-slate-400 flex items-center gap-2">
+                <Radio className="h-4 w-4" />
+                Cron Health
+                {data.cronHealth.overdue > 0 ? (
+                  <Badge className="bg-red-500/20 text-red-400 ml-auto">{data.cronHealth.overdue} Overdue</Badge>
+                ) : data.cronHealth.failed > 0 ? (
+                  <Badge className="bg-amber-500/20 text-amber-400 ml-auto">{data.cronHealth.failed} Failed</Badge>
+                ) : (
+                  <Badge className="bg-emerald-500/20 text-emerald-400 ml-auto">All Healthy</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-3 mb-3">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-emerald-400">{data.cronHealth.healthy}</div>
+                  <div className="text-xs text-slate-500">Healthy</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-amber-400">{data.cronHealth.overdue}</div>
+                  <div className="text-xs text-slate-500">Overdue</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-red-400">{data.cronHealth.failed}</div>
+                  <div className="text-xs text-slate-500">Failed</div>
+                </div>
+              </div>
+              {data.cronHealth.criticalJobs.length > 0 && (
+                <div className="space-y-1.5 border-t border-slate-800 pt-2">
+                  {data.cronHealth.criticalJobs.map((job) => (
+                    <div key={job.name} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5">
+                        {job.isOverdue ? (
+                          <AlertTriangle className="h-3 w-3 text-red-400" />
+                        ) : job.lastStatus === "FAILED" ? (
+                          <XCircle className="h-3 w-3 text-amber-400" />
+                        ) : (
+                          <CheckCircle className="h-3 w-3 text-emerald-400" />
+                        )}
+                        <span className="text-slate-300">{job.name}</span>
+                      </div>
+                      <span className="text-slate-500">
+                        {job.lastRun
+                          ? new Date(job.lastRun).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                          : "Never"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {data.cronHealth.criticalJobs.length === 0 && (
+                <p className="text-xs text-slate-500 text-center pt-2">All {data.cronHealth.total} crons running on schedule</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Ticket SLA */}
+        {data.ticketSLA && (
+          <Card className="bg-slate-900/50 border-slate-800">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-slate-400 flex items-center gap-2">
+                <Headphones className="h-4 w-4" />
+                Ticket SLA
+                {data.ticketSLA.breachedSLAs > 0 ? (
+                  <Badge className="bg-red-500/20 text-red-400 ml-auto">{data.ticketSLA.breachedSLAs} Breached</Badge>
+                ) : data.ticketSLA.openTickets > 0 ? (
+                  <Badge className="bg-amber-500/20 text-amber-400 ml-auto">{data.ticketSLA.openTickets} Open</Badge>
+                ) : (
+                  <Badge className="bg-emerald-500/20 text-emerald-400 ml-auto">Clear</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-4 gap-2 mb-3">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-amber-400">{data.ticketSLA.openTickets}</div>
+                  <div className="text-xs text-slate-500">Open</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-blue-400">{data.ticketSLA.inProgressTickets}</div>
+                  <div className="text-xs text-slate-500">In Progress</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-slate-400">{data.ticketSLA.waitingUserTickets}</div>
+                  <div className="text-xs text-slate-500">Waiting</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-emerald-400">{data.ticketSLA.resolvedToday}</div>
+                  <div className="text-xs text-slate-500">Resolved</div>
+                </div>
+              </div>
+              <div className="space-y-2 border-t border-slate-800 pt-2">
+                {data.ticketSLA.breachedSLAs > 0 && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-red-400 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" /> SLA Breaches
+                    </span>
+                    <span className="text-red-400 font-medium">{data.ticketSLA.breachedSLAs}</span>
+                  </div>
+                )}
+                {data.ticketSLA.avgResponseHours !== null && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Avg Response Time</span>
+                    <span className="text-white font-medium">{data.ticketSLA.avgResponseHours}h</span>
+                  </div>
+                )}
+                {data.ticketSLA.avgResolutionHours !== null && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Avg Resolution Time</span>
+                    <span className="text-white font-medium">{data.ticketSLA.avgResolutionHours}h</span>
+                  </div>
+                )}
+                {data.ticketSLA.autoFixedToday > 0 && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-teal-400 flex items-center gap-1">
+                      <Zap className="h-3 w-3" /> Auto-Fixed Today
+                    </span>
+                    <span className="text-teal-400 font-medium">{data.ticketSLA.autoFixedToday}</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Removal Status Breakdown */}

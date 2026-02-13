@@ -189,11 +189,22 @@ export async function POST(request: Request) {
         const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
 
         // 1. OPEN tickets with no activity for 4+ hours → escalate priority
+        //    Cooldown: skip tickets already escalated in the last 24h
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const staleOpen = await prisma.supportTicket.findMany({
           where: {
             status: "OPEN",
             lastActivityAt: { lt: fourHoursAgo },
             priority: { not: "URGENT" },
+            // Cooldown: exclude tickets with a recent escalation comment
+            NOT: {
+              comments: {
+                some: {
+                  content: { contains: "Priority escalated" },
+                  createdAt: { gte: twentyFourHoursAgo },
+                },
+              },
+            },
           },
           select: { id: true, ticketNumber: true, priority: true },
           take: 20,
@@ -219,10 +230,19 @@ export async function POST(request: Request) {
         }
 
         // 2. WAITING_USER tickets inactive 48+ hours → reopen
+        //    Cooldown: skip tickets already reopened in the last 24h
         const staleWaiting = await prisma.supportTicket.findMany({
           where: {
             status: "WAITING_USER",
             lastActivityAt: { lt: fortyEightHoursAgo },
+            NOT: {
+              comments: {
+                some: {
+                  content: { contains: "Auto-reopened" },
+                  createdAt: { gte: twentyFourHoursAgo },
+                },
+              },
+            },
           },
           select: { id: true, ticketNumber: true },
           take: 20,

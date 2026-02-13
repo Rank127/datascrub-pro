@@ -5,6 +5,7 @@ import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
 import { maskEmail } from "@/lib/rbac/pii-masking";
 import { getStripe } from "@/lib/stripe";
+import { getCronHealthStatus } from "@/lib/cron-logger";
 import {
   ExecutiveStatsResponse,
   FinanceMetrics,
@@ -580,6 +581,116 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
   // Calculate total pipeline
   const totalPipeline = toProcessCount + awaitingResponseCount + requiresManualCount + manualActionQueue;
 
+  // --- Cron Health ---
+  let cronHealth: OperationsMetrics["cronHealth"];
+  try {
+    const cronStatus = await getCronHealthStatus();
+    const failedJobs = cronStatus.jobs.filter(j => j.lastStatus === "FAILED");
+    const overdueJobs = cronStatus.jobs.filter(j => j.isOverdue);
+    const healthyJobs = cronStatus.jobs.filter(j => !j.isOverdue && j.lastStatus !== "FAILED");
+    // Show critical crons first: overdue, then failed, then healthy — limit to 8
+    const criticalJobs = [
+      ...overdueJobs,
+      ...failedJobs.filter(j => !j.isOverdue),
+    ].slice(0, 8).map(j => ({
+      name: j.name,
+      lastRun: j.lastRun?.toISOString() || null,
+      lastStatus: j.lastStatus,
+      isOverdue: j.isOverdue,
+      expectedInterval: j.expectedInterval,
+    }));
+    cronHealth = {
+      total: cronStatus.jobs.length,
+      healthy: healthyJobs.length,
+      overdue: overdueJobs.length,
+      failed: failedJobs.length,
+      criticalJobs,
+    };
+  } catch (err) {
+    console.error("[Executive Stats] Cron health fetch failed:", err);
+  }
+
+  // --- Ticket SLA ---
+  let ticketSLA: OperationsMetrics["ticketSLA"];
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000);
+
+    const [openCount, inProgressCount, waitingUserCount, resolvedToday] = await Promise.all([
+      prisma.supportTicket.count({ where: { status: "OPEN" } }),
+      prisma.supportTicket.count({ where: { status: "IN_PROGRESS" } }),
+      prisma.supportTicket.count({ where: { status: "WAITING_USER" } }),
+      prisma.supportTicket.count({
+        where: { status: { in: ["RESOLVED", "CLOSED"] }, resolvedAt: { gte: twentyFourHoursAgo } },
+      }),
+    ]);
+
+    // SLA breaches: OPEN or IN_PROGRESS tickets older than 4 hours with no resolution
+    const breachedSLAs = await prisma.supportTicket.count({
+      where: {
+        status: { in: ["OPEN", "IN_PROGRESS"] },
+        lastActivityAt: { lt: fourHoursAgo },
+      },
+    });
+
+    // Average response time (time from creation to first comment)
+    const recentResolved = await prisma.supportTicket.findMany({
+      where: {
+        resolvedAt: { gte: twentyFourHoursAgo },
+      },
+      select: { createdAt: true, resolvedAt: true, assignedAt: true },
+      take: 50,
+    });
+
+    let avgResponseHours: number | null = null;
+    const withAssignment = recentResolved.filter(t => t.assignedAt);
+    if (withAssignment.length > 0) {
+      const totalHrs = withAssignment.reduce((sum, t) => {
+        return sum + (t.assignedAt!.getTime() - t.createdAt.getTime()) / (1000 * 60 * 60);
+      }, 0);
+      avgResponseHours = Math.round((totalHrs / withAssignment.length) * 10) / 10;
+    }
+
+    let avgResolutionHours: number | null = null;
+    const withResolution = recentResolved.filter(t => t.resolvedAt);
+    if (withResolution.length > 0) {
+      const totalHrs = withResolution.reduce((sum, t) => {
+        return sum + (t.resolvedAt!.getTime() - t.createdAt.getTime()) / (1000 * 60 * 60);
+      }, 0);
+      avgResolutionHours = Math.round((totalHrs / withResolution.length) * 10) / 10;
+    }
+
+    // Auto-fixed today from cron logs
+    let autoFixedToday = 0;
+    try {
+      const cronLogs = await prisma.cronLog.findMany({
+        where: {
+          jobName: "ticketing-agent",
+          createdAt: { gte: twentyFourHoursAgo },
+          status: { in: ["SUCCESS", "PARTIAL"] },
+        },
+        select: { metadata: true },
+      });
+      for (const log of cronLogs) {
+        const meta = log.metadata as Record<string, number> | null;
+        if (meta?.autoFixed) autoFixedToday += meta.autoFixed;
+      }
+    } catch { /* metadata parsing failure is non-critical */ }
+
+    ticketSLA = {
+      openTickets: openCount,
+      inProgressTickets: inProgressCount,
+      waitingUserTickets: waitingUserCount,
+      breachedSLAs,
+      avgResponseHours,
+      avgResolutionHours,
+      resolvedToday,
+      autoFixedToday,
+    };
+  } catch (err) {
+    console.error("[Executive Stats] Ticket SLA fetch failed:", err);
+  }
+
   return {
     pendingRemovalRequests,
     inProgressRemovals,
@@ -600,6 +711,8 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
       manualExposures: manualActionQueue,
       totalPipeline,
     },
+    cronHealth,
+    ticketSLA,
   };
 }
 

@@ -10,6 +10,7 @@ import {
   getCoordinatorStatus,
 } from "@/lib/agents/intelligence-coordinator";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { reportIssue } from "@/lib/agents/orchestrator/remediation-engine";
 
 export const maxDuration = 300;
 
@@ -380,6 +381,22 @@ export async function GET(request: Request) {
         actionRequired: `CRITICAL: ${overdueCritical.map(j => j.name).join(", ")} stopped running.${retriggered.length > 0 ? " Auto-retrigger attempted." : " Check Vercel logs immediately."}`,
         autoFixed: retriggered.length > 0,
       });
+
+      // Emit remediation events for failed retriggers so the engine can track/escalate
+      for (const failedCron of retriggerFailed) {
+        const cronName = failedCron.split("(")[0];
+        try {
+          await reportIssue({
+            type: "cron.failed",
+            severity: "critical",
+            description: `Critical cron "${cronName}" is overdue and retrigger failed`,
+            sourceAgentId: "health-check",
+            affectedResource: cronName,
+            details: { cronName, retriggered: false },
+            canAutoRemediate: true,
+          });
+        } catch { /* non-blocking */ }
+      }
     } else if (overdueNonCritical.length > 0) {
       tests.push({
         name: "Cron Job Monitoring",
@@ -973,6 +990,18 @@ export async function GET(request: Request) {
         message: `${staleOpenCount} stale OPEN tickets (4h+), ${staleWaitingCount} stale WAITING_USER (48h+), ${totalOpen} total open`,
         actionRequired: "Stale tickets need attention — customers may be waiting for responses",
       });
+
+      // Emit remediation event for stale tickets
+      try {
+        await reportIssue({
+          type: "ticket.stale",
+          severity: "high",
+          description: `${staleOpenCount} stale OPEN tickets (4h+) and ${staleWaitingCount} stale WAITING_USER (48h+) need attention`,
+          sourceAgentId: "health-check",
+          details: { staleOpenCount, staleWaitingCount, totalOpen, ticketCount: staleOpenCount + staleWaitingCount },
+          canAutoRemediate: true,
+        });
+      } catch { /* non-blocking */ }
     } else if (staleOpenCount > 5 || staleWaitingCount > 2) {
       tests.push({
         name: "Ticket Health",

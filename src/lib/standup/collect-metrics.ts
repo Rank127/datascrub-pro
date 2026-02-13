@@ -113,6 +113,9 @@ export interface TicketMetrics {
   resolvedClosed24h: number;
   staleCount: number;
   avgResolutionHours: number | null;
+  autoFixedCount24h: number;
+  aiResolvedCount24h: number;
+  aiCallsAvoided24h: number;
 }
 
 export interface SecurityMetrics {
@@ -473,7 +476,7 @@ async function collectTicketMetrics(
 ): Promise<TicketMetrics> {
   const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000);
 
-  const [openCount, inProgressCount, waitingUserCount, resolvedClosed24h, staleCount, resolvedTickets] =
+  const [openCount, inProgressCount, waitingUserCount, resolvedClosed24h, staleCount, resolvedTickets, ticketingLogs] =
     await Promise.all([
       prisma.supportTicket.count({ where: { status: "OPEN" } }),
       prisma.supportTicket.count({ where: { status: "IN_PROGRESS" } }),
@@ -496,6 +499,14 @@ async function collectTicketMetrics(
         },
         select: { createdAt: true, resolvedAt: true },
       }),
+      // Query cron logs for ticketing-agent to extract auto-fix savings
+      prisma.cronLog.findMany({
+        where: {
+          jobName: "ticketing-agent",
+          createdAt: { gte: since },
+        },
+        select: { metadata: true },
+      }),
     ]);
 
   let avgResolutionHours: number | null = null;
@@ -507,6 +518,17 @@ async function collectTicketMetrics(
     avgResolutionHours = Math.round((totalHours / resolvedTickets.length) * 10) / 10;
   }
 
+  // Aggregate auto-fix savings from ticketing-agent cron logs
+  let autoFixedCount24h = 0;
+  let aiResolvedCount24h = 0;
+  for (const log of ticketingLogs) {
+    const meta = log.metadata as Record<string, unknown> | null;
+    if (meta) {
+      autoFixedCount24h += (meta.autoFixed as number) || 0;
+      aiResolvedCount24h += (meta.autoResolved as number) || 0;
+    }
+  }
+
   return {
     openCount,
     inProgressCount,
@@ -514,5 +536,8 @@ async function collectTicketMetrics(
     resolvedClosed24h,
     staleCount,
     avgResolutionHours,
+    autoFixedCount24h,
+    aiResolvedCount24h,
+    aiCallsAvoided24h: autoFixedCount24h, // Each auto-fix = 1 AI call saved
   };
 }

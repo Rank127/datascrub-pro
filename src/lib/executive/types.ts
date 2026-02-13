@@ -105,6 +105,30 @@ export interface OperationsMetrics {
     manualExposures: number;  // Exposures needing manual action
     totalPipeline: number;    // Sum of all active items
   };
+  // Real-time cron health + ticket SLA
+  cronHealth?: {
+    total: number;
+    healthy: number;
+    overdue: number;
+    failed: number;
+    criticalJobs: Array<{
+      name: string;
+      lastRun: string | null;
+      lastStatus: string | null;
+      isOverdue: boolean;
+      expectedInterval: string;
+    }>;
+  };
+  ticketSLA?: {
+    openTickets: number;
+    inProgressTickets: number;
+    waitingUserTickets: number;
+    breachedSLAs: number;
+    avgResponseHours: number | null;
+    avgResolutionHours: number | null;
+    resolvedToday: number;
+    autoFixedToday: number;
+  };
 }
 
 export interface ActivitiesMetrics {

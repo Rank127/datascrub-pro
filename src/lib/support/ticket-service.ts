@@ -1017,8 +1017,10 @@ export async function getSystemUserId(fallbackId?: string): Promise<string> {
 const AUTO_RESOLVE_ACTIONS: Record<string, string[]> = {
   SCAN_ERROR: ["retry_scan"],
   REMOVAL_FAILED: ["retry_removal", "retry_alternate_emails"],
-  PAYMENT_ISSUE: ["send_payment_link"],
+  PAYMENT_ISSUE: ["check_stripe", "send_payment_link"],
   ACCOUNT_ISSUE: ["reset_sessions", "verify_email"],
+  FEATURE_REQUEST: ["log_feature", "check_roadmap"],
+  OTHER: ["check_status"],
 };
 
 /**

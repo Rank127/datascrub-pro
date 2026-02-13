@@ -338,6 +338,18 @@ export function formatStandupEmail(
       ${statBox("Resolved 24h", metrics.tickets.resolvedClosed24h, "#10b981")}
       <!--[if mso]></td></tr></table><![endif]-->
     </div>
+    ${metrics.tickets.aiCallsAvoided24h > 0 ? `
+    <div style="background-color: #164e63; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-around;">
+        <!--[if mso]><table role="presentation" cellspacing="0" cellpadding="0"><tr><td><![endif]-->
+        ${statBox("Auto-Fixed", metrics.tickets.autoFixedCount24h, "#06b6d4")}
+        <!--[if mso]></td><td><![endif]-->
+        ${statBox("AI-Resolved", metrics.tickets.aiResolvedCount24h, "#8b5cf6")}
+        <!--[if mso]></td><td><![endif]-->
+        ${statBox("AI Calls Saved", metrics.tickets.aiCallsAvoided24h, "#10b981")}
+        <!--[if mso]></td></tr></table><![endif]-->
+      </div>
+    </div>` : ""}
     ${metrics.tickets.staleCount > 0 ? `<p style="color: #fca5a5; font-size: 13px; margin: 0 0 8px 0;">Stale (4h+ idle): ${metrics.tickets.staleCount} tickets</p>` : ""}
     ${metrics.tickets.avgResolutionHours ? `<p style="color: #94a3b8; font-size: 12px; margin: 0 0 8px 0;">Avg resolution time: ${metrics.tickets.avgResolutionHours}h</p>` : ""}
     ${analysis.ticketReport ? `<p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 0;">${analysis.ticketReport}</p>` : ""}`
