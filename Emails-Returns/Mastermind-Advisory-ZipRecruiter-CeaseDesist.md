@@ -244,14 +244,41 @@ This is the **first C&D GhostMyData has received**. How we handle it sets the te
 
 ---
 
+## Competitive Intelligence (Verified Feb 13, 2026)
+
+**Question:** Do competitors list ZipRecruiter as a data broker?
+
+| Competitor | ZipRecruiter Listed? | Source | Implication |
+|-----------|---------------------|--------|-------------|
+| **DeleteMe** | **NO** | [976-site public list](https://joindeleteme.com/sites-we-remove-from/) | Correctly excluded job platforms from the start |
+| **Incogni** | **Likely NO** | [Opt-out guides](https://blog.incogni.com/opt-out-guides/) | Mentions "recruitment data brokers" category but no job platforms listed |
+| **Optery** | **YES** | [Data Broker Directory](https://www.optery.com/data-brokers/) | Lists "ZipRecruiter, Inc." as a "Profile Data Broker" under Custom Removals |
+
+### Analysis
+
+- **DeleteMe** had the correct classification from the beginning — they've been operating since 2010 and likely learned this lesson years ago.
+- **Optery still lists ZipRecruiter** and is likely to receive the same C&D from Crystal Skelton's team. This means GhostMyData is now **ahead of Optery** on legal compliance for source classification.
+- **Incogni** (Surfshark-owned) appears to have properly excluded job platforms, likely due to European GDPR experience with "direct relationship" definitions.
+
+### Carlsen: Positional Advantage Confirmed
+
+> "We fixed this on day one. Optery hasn't. This is exactly the kind of small positional advantage that compounds — when the next industry review or legal analysis compares data broker classification accuracy, we're on the right side. Don't publicize Optery's mistake, but do document our correct classification methodology publicly."
+
+### Hormozi: Competitive Angle
+
+> "When Optery gets their C&D — and they will — their response time becomes a public data point. We responded same-day. If they take weeks, that's a trust differential we can reference without naming names: 'GhostMyData maintains a legally verified data broker directory, reviewed against statutory definitions in CA, OR, TX, and VT.'"
+
+---
+
 ## Risk Register
 
 | Risk | Likelihood | Impact | Owner | Status |
 |------|-----------|--------|-------|--------|
 | ZipRecruiter escalates despite compliance | 5% | Medium | Legal | Mitigated — same-day response |
-| Second C&D from another company | 30% | Medium | Legal/Ops | **OPEN — audit needed** |
-| Competitor PR attack | 15% | Medium | Marketing | Mitigated — transparency approach |
+| Second C&D from another company | 20% | Medium | Legal/Ops | Reduced — proactive removal of 11 similar platforms already done; full audit recommended |
+| Competitor PR attack | 10% | Medium | Marketing | Mitigated — Optery still lists ZipRecruiter, we're ahead |
 | Consumer complaint about coverage reduction | 5% | Low | Support | Mitigated — ~11 of 2,100+ removed |
+| Optery gets same C&D, highlights industry issue | 40% | Low (positive for us) | Competitive Intel | Monitor — validates our proactive compliance |
 
 ---
 

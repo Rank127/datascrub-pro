@@ -158,7 +158,7 @@ This is fundamentally different from data brokers like Spokeo, BeenVerified, etc
 - [ ] **Add sourceType taxonomy**: DATA_BROKER / SERVICE_PROVIDER / SOCIAL_PLATFORM / GOVERNMENT_RECORD
 - [ ] **Pre-send validation**: Verify target is classified DATA_BROKER before sending any automated removal email
 - [ ] **Transparency page**: Create `/data-sources` showing methodology and categories
-- [ ] **Check competitors**: Do DeleteMe, Incogni, Optery list ZipRecruiter? (competitive intel)
+- [x] **Check competitors**: ✅ Done Feb 13 — DeleteMe: NO (correct), Incogni: Likely NO, **Optery: YES** (still lists ZipRecruiter as "Profile Data Broker"). We are ahead of Optery on compliance.
 - [ ] **30-day follow-up**: Consider brief professional outreach exploring whether ZipRecruiter would link to GhostMyData as a privacy resource for their users (Hormozi: warm lead for partnership)
 
 ### Mastermind Advisory Reference:
