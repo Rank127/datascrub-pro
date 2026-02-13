@@ -147,7 +147,7 @@ See `DEPLOYMENT.md` for full list of required environment variables.
 - `docs/AGENTS.md` - AI agent fleet documentation (24 agents)
 - `docs/CRON_JOBS.md` - Cron job registry (27 endpoints)
 - `docs/REFUND_GUIDE.md` - Refund processing procedures
-- `docs/UAT-TESTING-PLAN.md` - Testing checklist
+- `docs/TODO.md` - Combined TODO & roadmap
 
 ## Deployment
 
