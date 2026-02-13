@@ -556,7 +556,7 @@ class OperationsAgent extends BaseAgent {
         });
       }
 
-      // Check for cron job failures
+      // Check for cron job failures (explicit FAILED status)
       const recentCronFailures = await prisma.cronLog.count({
         where: {
           createdAt: { gte: oneHourAgo },
@@ -571,6 +571,72 @@ class OperationsAgent extends BaseAgent {
           message: `Multiple cron failures in last hour: ${recentCronFailures}`,
           data: { count: recentCronFailures },
         });
+      }
+
+      // Check for silent cron deaths (critical crons that stopped logging entirely)
+      const CRITICAL_CRONS_INTERVALS: Record<string, number> = {
+        "process-removals": 3,       // expected every 2h, overdue at 3h
+        "clear-pending-queue": 2,    // expected every 1h, overdue at 2h
+        "verify-removals": 25,       // expected daily, overdue at 25h
+        "health-check": 25,          // expected daily, overdue at 25h
+      };
+
+      const deadCrons: string[] = [];
+
+      for (const [cronName, maxHours] of Object.entries(CRITICAL_CRONS_INTERVALS)) {
+        const cutoff = new Date(Date.now() - maxHours * 60 * 60 * 1000);
+        const recentLog = await prisma.cronLog.findFirst({
+          where: { jobName: cronName, createdAt: { gte: cutoff } },
+          orderBy: { createdAt: "desc" },
+        });
+
+        if (!recentLog) {
+          // Only alert if this cron has ever logged (avoid false positives for new crons)
+          const hasEverLogged = await prisma.cronLog.count({ where: { jobName: cronName } }) > 0;
+          if (hasEverLogged) {
+            deadCrons.push(cronName);
+            alerts.push({
+              type: "silent_cron_death",
+              severity: "CRITICAL",
+              message: `Critical cron '${cronName}' hasn't logged in ${maxHours}+ hours — likely silently dead`,
+              data: { cronName, maxHours },
+            });
+          }
+        }
+      }
+
+      // Auto-remediate: attempt to re-trigger dead critical crons
+      if (deadCrons.length > 0) {
+        const baseUrl = process.env.AUTH_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://ghostmydata.com");
+        const cronSecret = process.env.CRON_SECRET;
+
+        if (cronSecret) {
+          for (const cronName of deadCrons) {
+            try {
+              const response = await fetch(`${baseUrl}/api/cron/${cronName}`, {
+                method: "GET",
+                headers: { Authorization: `Bearer ${cronSecret}` },
+                signal: AbortSignal.timeout(10000), // 10s timeout — just need to confirm request accepted
+              });
+
+              const matchingAlert = alerts.find(
+                a => a.type === "silent_cron_death" && (a.data as { cronName: string })?.cronName === cronName
+              );
+              if (matchingAlert) {
+                matchingAlert.message += response.ok
+                  ? ` [AUTO-FIX: Re-triggered successfully]`
+                  : ` [AUTO-FIX FAILED: HTTP ${response.status}]`;
+              }
+            } catch (error) {
+              const matchingAlert = alerts.find(
+                a => a.type === "silent_cron_death" && (a.data as { cronName: string })?.cronName === cronName
+              );
+              if (matchingAlert) {
+                matchingAlert.message += ` [AUTO-FIX FAILED: ${error instanceof Error ? error.message : "Unknown error"}]`;
+              }
+            }
+          }
+        }
       }
 
       // Check for unusual user signups (spam detection)
@@ -1292,6 +1358,28 @@ export async function processReturnEmails(emailContent: string): Promise<ReturnE
   throw new Error(result.error?.message || "Return email processing failed");
 }
 
+export async function runDetectAnomalies(): Promise<AnomalyResult> {
+  const agent = getOperationsAgent();
+  await agent.initialize();
+
+  const context = createAgentContext({
+    requestId: nanoid(),
+    invocationType: InvocationTypes.CRON,
+  });
+
+  const result = await agent.execute<AnomalyResult>(
+    "detect-anomalies",
+    {},
+    context
+  );
+
+  if (result.success && result.data) {
+    return result.data;
+  }
+
+  throw new Error(result.error?.message || "Anomaly detection failed");
+}
+
 export { OperationsAgent };
-export type { EmailDeliveryResult, ReturnEmailProcessResult };
+export type { AnomalyResult, EmailDeliveryResult, ReturnEmailProcessResult };
 export default getOperationsAgent;

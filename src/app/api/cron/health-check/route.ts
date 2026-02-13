@@ -337,11 +337,46 @@ export async function GET(request: Request) {
     const overdueNonCritical = overdueJobs.filter(j => !CRITICAL_CRONS.has(j.name));
 
     if (overdueCritical.length > 0) {
+      // Auto-remediate: attempt to re-trigger dead critical crons
+      const baseUrl = process.env.AUTH_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://ghostmydata.com");
+      const cronSecret = process.env.CRON_SECRET;
+      const retriggered: string[] = [];
+      const retriggerFailed: string[] = [];
+
+      if (cronSecret) {
+        for (const job of overdueCritical) {
+          // Don't re-trigger health-check (that's us!)
+          if (job.name === "health-check") continue;
+          try {
+            const response = await fetch(`${baseUrl}/api/cron/${job.name}`, {
+              method: "GET",
+              headers: { Authorization: `Bearer ${cronSecret}` },
+              signal: AbortSignal.timeout(10000),
+            });
+            if (response.ok) {
+              retriggered.push(job.name);
+            } else {
+              retriggerFailed.push(`${job.name}(${response.status})`);
+            }
+          } catch (error) {
+            retriggerFailed.push(`${job.name}(${error instanceof Error ? error.message : "timeout"})`);
+          }
+        }
+      }
+
+      const autoFixNote = retriggered.length > 0
+        ? ` Auto-retriggered: ${retriggered.join(", ")}.`
+        : "";
+      const failNote = retriggerFailed.length > 0
+        ? ` Retrigger failed: ${retriggerFailed.join(", ")}.`
+        : "";
+
       tests.push({
         name: "Cron Job Monitoring",
         status: "FAIL",
-        message: `${overdueCritical.length} CRITICAL cron(s) overdue: ${overdueCritical.map(j => `${j.name} (last: ${j.lastRun ? Math.floor((Date.now() - j.lastRun.getTime()) / 3600000) + "h ago" : "never"})`).join(", ")}${overdueNonCritical.length > 0 ? `. Also ${overdueNonCritical.length} non-critical overdue.` : ""}`,
-        actionRequired: `CRITICAL: ${overdueCritical.map(j => j.name).join(", ")} stopped running. Check Vercel logs immediately.`,
+        message: `${overdueCritical.length} CRITICAL cron(s) overdue: ${overdueCritical.map(j => `${j.name} (last: ${j.lastRun ? Math.floor((Date.now() - j.lastRun.getTime()) / 3600000) + "h ago" : "never"})`).join(", ")}${overdueNonCritical.length > 0 ? `. Also ${overdueNonCritical.length} non-critical overdue.` : ""}${autoFixNote}${failNote}`,
+        actionRequired: `CRITICAL: ${overdueCritical.map(j => j.name).join(", ")} stopped running.${retriggered.length > 0 ? " Auto-retrigger attempted." : " Check Vercel logs immediately."}`,
+        autoFixed: retriggered.length > 0,
       });
     } else if (overdueNonCritical.length > 0) {
       tests.push({
@@ -907,6 +942,53 @@ export async function GET(request: Request) {
       name: "Removal Processing Health",
       status: "WARN",
       message: `Could not check removal processing: ${error instanceof Error ? error.message : "Unknown error"}`,
+    });
+  }
+
+  // ========== OPERATIONS AGENT ANOMALY DETECTION ==========
+
+  // Test 21: Run Operations Agent's enhanced anomaly detection
+  try {
+    const { runDetectAnomalies } = await import("@/lib/agents/operations-agent");
+    const anomalyResult = await runDetectAnomalies();
+
+    if (anomalyResult.anomaliesDetected > 0) {
+      const criticalAnomalies = anomalyResult.alerts.filter(a => a.severity === "CRITICAL");
+      const highAnomalies = anomalyResult.alerts.filter(a => a.severity === "HIGH");
+
+      if (criticalAnomalies.length > 0) {
+        tests.push({
+          name: "Operations Agent Anomalies",
+          status: "FAIL",
+          message: `${criticalAnomalies.length} critical anomalies: ${criticalAnomalies.map(a => a.message).join("; ")}`,
+          actionRequired: "Critical system anomalies detected — check Operations Agent alerts",
+          autoFixed: criticalAnomalies.some(a => a.message.includes("AUTO-FIX: Re-triggered")),
+        });
+      } else if (highAnomalies.length > 0) {
+        tests.push({
+          name: "Operations Agent Anomalies",
+          status: "WARN",
+          message: `${highAnomalies.length} high-severity anomalies: ${highAnomalies.map(a => a.message).join("; ")}`,
+        });
+      } else {
+        tests.push({
+          name: "Operations Agent Anomalies",
+          status: "WARN",
+          message: `${anomalyResult.anomaliesDetected} anomalies: ${anomalyResult.alerts.map(a => a.message).join("; ")}`,
+        });
+      }
+    } else {
+      tests.push({
+        name: "Operations Agent Anomalies",
+        status: "PASS",
+        message: "No anomalies detected by Operations Agent",
+      });
+    }
+  } catch (error) {
+    tests.push({
+      name: "Operations Agent Anomalies",
+      status: "WARN",
+      message: `Operations Agent anomaly detection failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     });
   }
 
