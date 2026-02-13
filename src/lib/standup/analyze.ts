@@ -63,7 +63,7 @@ export async function analyzeStandupMetrics(
     const anthropic = new Anthropic();
 
     const message = await anthropic.messages.create({
-      model: "claude-haiku-3-5-20241022",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 1500,
       temperature: 0.3,
       system: `${SYSTEM_PROMPT}\n\n${buildMastermindPrompt({ orgLayer: "nucleus", maxAdvisors: 5 })}`,

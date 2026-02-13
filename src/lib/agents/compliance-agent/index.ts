@@ -1310,7 +1310,7 @@ Respond in JSON format:
 }`;
 
     const response = await this.anthropic.messages.create({
-      model: this.config.model || "claude-sonnet-4-20250514",
+      model: this.config.model || "claude-sonnet-4-5-20250929",
       max_tokens: 500,
       temperature: 0.1,
       messages: [{ role: "user", content: prompt }],
@@ -2067,7 +2067,7 @@ Please analyze and provide:
 Respond in JSON format.`;
 
     const response = await this.anthropic.messages.create({
-      model: this.config.model || "claude-sonnet-4-20250514",
+      model: this.config.model || "claude-sonnet-4-5-20250929",
       max_tokens: 1000,
       temperature: 0.1,
       messages: [{ role: "user", content: prompt }],

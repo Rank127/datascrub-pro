@@ -269,7 +269,7 @@ class SupportAgent extends BaseAgent {
       }
 
       const message = await this.anthropic.messages.create({
-        model: this.config.model || "claude-sonnet-4-20250514",
+        model: this.config.model || "claude-sonnet-4-5-20250929",
         max_tokens: MAX_TOKENS,
         system: this.getSystemPrompt(),
         messages: [
@@ -404,7 +404,7 @@ Provide a detailed analysis in JSON format.`,
       }
 
       const message = await this.anthropic.messages.create({
-        model: this.config.model || "claude-sonnet-4-20250514",
+        model: this.config.model || "claude-sonnet-4-5-20250929",
         max_tokens: MAX_TOKENS,
         system: this.getSystemPrompt(),
         messages: [

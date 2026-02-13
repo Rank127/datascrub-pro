@@ -35,7 +35,7 @@ import {
 // CONSTANTS
 // ============================================================================
 
-const DEFAULT_MODEL = "claude-sonnet-4-20250514";
+const DEFAULT_MODEL = "claude-sonnet-4-5-20250929";
 const DEFAULT_MAX_TOKENS = 4096;
 const DEFAULT_TEMPERATURE = 0.3;
 const MAX_CONSECUTIVE_FAILURES = 5;

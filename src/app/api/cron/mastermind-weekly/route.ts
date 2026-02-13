@@ -46,7 +46,7 @@ export async function GET(request: Request) {
     // Run the protocol via Claude Haiku
     const anthropic = new Anthropic();
     const message = await anthropic.messages.create({
-      model: "claude-haiku-3-5-20241022",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 2000,
       temperature: 0.4,
       system: `You are the Strategic Advisor for GhostMyData, conducting a weekly Mastermind Board Meeting.
