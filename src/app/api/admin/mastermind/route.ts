@@ -18,24 +18,29 @@ import type { MissionDomain } from "@/lib/mastermind";
 const DAILY_LIMIT = 10;
 
 export async function POST(request: Request) {
+  let step = "init";
   try {
     // Auth
+    step = "auth";
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    step = "fetch-user";
     const currentUser = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { email: true, role: true },
     });
 
+    step = "check-role";
     const role = getEffectiveRole(currentUser?.email, currentUser?.role);
     if (!["ADMIN", "LEGAL", "SUPER_ADMIN"].includes(role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Parse body
+    step = "parse-body";
     const body = await request.json();
     const { question, mission, invocation } = body as {
       question?: string;
@@ -50,7 +55,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Rate limiting (simple: count AI calls today via audit log)
+    // Rate limiting
+    step = "rate-limit";
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
@@ -70,6 +76,7 @@ export async function POST(request: Request) {
     }
 
     // Build mastermind prompt
+    step = "build-prompt";
     const promptOptions: Parameters<typeof buildMastermindPrompt>[0] = {
       maxAdvisors: 5,
       includeBusinessContext: true,
@@ -85,20 +92,18 @@ export async function POST(request: Request) {
     const mastermindPrompt = buildMastermindPrompt(promptOptions);
 
     // Fetch some live context
-    const [userCount, removalStats] = await Promise.all([
-      prisma.user.count(),
-      prisma.removalRequest.groupBy({
-        by: ["status"],
-        _count: true,
-      }),
-    ]);
+    step = "fetch-metrics";
+    const userCount = await prisma.user.count();
 
-    const liveContext = `Live metrics: ${userCount} total users. Removals: ${removalStats.map((r) => `${r.status}: ${r._count}`).join(", ")}.`;
+    const liveContext = `Live metrics: ${userCount} total users.`;
 
     // Call Claude
+    step = "anthropic-init";
     const anthropic = new Anthropic();
+
+    step = "anthropic-call";
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-haiku-3-5-20241022",
       max_tokens: 1500,
       temperature: 0.4,
       system: `You are the Mastermind Advisory Council for GhostMyData. Channel the assigned advisors' thinking styles to provide strategic advice.
@@ -107,7 +112,7 @@ ${mastermindPrompt}
 
 ${liveContext}
 
-Respond with valid JSON:
+Respond with valid JSON only (no markdown, no code fences):
 {
   "advice": "3-5 paragraph strategic advice channeling the advisors' perspectives",
   "advisors": ["List of advisor names whose perspectives you channeled"],
@@ -122,14 +127,22 @@ Respond with valid JSON:
       ],
     });
 
+    step = "parse-response";
     const textBlock = message.content.find((b) => b.type === "text");
     if (!textBlock || textBlock.type !== "text") {
       throw new Error("No text response from Claude");
     }
 
-    const result = JSON.parse(textBlock.text);
+    // Strip markdown code fences if present
+    let jsonText = textBlock.text.trim();
+    if (jsonText.startsWith("```")) {
+      jsonText = jsonText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+    }
+
+    const result = JSON.parse(jsonText);
 
     // Log the query
+    step = "audit-log";
     await prisma.auditLog.create({
       data: {
         actorId: session.user.id,
@@ -154,10 +167,10 @@ Respond with valid JSON:
       queriesRemaining: DAILY_LIMIT - todayCount - 1,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    console.error("[Mastermind API] Error:", message, error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error(`[Mastermind API] Failed at step "${step}":`, errorMessage, error);
     return NextResponse.json(
-      { error: `Failed to generate mastermind advice: ${message}` },
+      { error: `Mastermind failed at ${step}: ${errorMessage}` },
       { status: 500 }
     );
   }
