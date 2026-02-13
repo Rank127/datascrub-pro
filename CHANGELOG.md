@@ -14,6 +14,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Browser automation for form-based opt-outs (Browserless.io)
 - Corporate Plans (TEAM, BUSINESS, ENTERPRISE tiers)
 
+## [1.31.0] - 2026-02-13
+
+### Added
+- **Dashboard Cron Health Widget** - Real-time cron status display in Operations tab
+- **Dashboard Ticket SLA Widget** - Ticket SLA compliance tracking in Operations tab
+- **Standup Auto-Resolve Savings** - Tracks `autoFixed`, `aiResolved`, `aiCallsAvoided` metrics
+- **Escalation Cooldown** - 24h cooldown prevents ticket priority escalation storms
+- **Expanded AUTO_RESOLVE_ACTIONS** - Now handles FEATURE_REQUEST and OTHER ticket categories
+- **Health Check Remediation Events** - Emits `cron.failed` and `ticket.stale` events to Remediation Engine
+- **Remediation Engine v2** - Event-driven rules for `cron.*` and `ticket.*` patterns
+
+---
+
+## [1.30.0] - 2026-02-13
+
+### Added
+- **Operations Agent `detect-anomalies`** - Catches silent cron deaths and auto-retriggers via HTTP
+- **Remediation Engine** - Event-driven auto-fix rules for `seo.*`, `cron.*`, `ticket.*` issues
+- **`tryAutoResolve()`** - Ticketing agent auto-fixes common issues before AI call (saves API cost)
+- **Stale Ticket Detection** - OPEN tickets idle 4h+ get escalated; WAITING_USER idle 48h+ get reopened
+- **`getSystemUserId()` Helper** - Centralized system user lookup for automated comments
+- **Daily Standup Ticket Health** - Open tickets, stale count, and resolution time in standup emails
+- **Health Check Expansions** - Now runs 24 tests (added Ticket Health, Critical Cron Monitoring)
+- **Health Check Auto-Retrigger** - Dead critical crons automatically retried via HTTP
+
+### Changed
+- **All 24 Cron Jobs** now have `maxDuration` set (prevents silent Vercel timeout deaths)
+- **Ticketing Agent** - Time-boxed with 4-minute deadline and `PARTIAL` status logging
+- **Verify-Removals** - Time-boxed with deadline parameter
+- **Fixed System Comment Authorship** - `close-resolved-tickets` and `ticketing-agent` now use correct system user
+- **Health Check** - Expanded from 8 to 24 tests with auto-fix capabilities
+
+---
+
 ## [1.29.3] - 2026-02-06
 
 ### Added
@@ -1268,6 +1302,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.31.0 | 2026-02-13 | Dashboard cron/SLA widgets, auto-resolve savings, escalation cooldown, Remediation Engine v2 |
+| 1.30.0 | 2026-02-13 | maxDuration for all crons, ticket self-healing, Operations Agent anomaly detection, 24 health tests |
 | 1.9.0 | 2026-01-23 | Removal proof screenshots with before/after comparison |
 | 1.8.0 | 2026-01-23 | Manual action tracking, opt-out URL fixes, Submitted for Removal card |
 | 1.7.0 | 2026-01-23 | LeakCheck paid API, 58 data brokers, follow-up emails, monthly re-scans |

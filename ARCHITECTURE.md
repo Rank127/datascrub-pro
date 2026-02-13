@@ -152,6 +152,15 @@ src/
 │   ├── stripe/                   # Stripe utilities
 │   ├── executive/                # Executive dashboard types
 │   ├── rbac/                     # Role-based access control
+│   ├── agents/                   # 24 AI agents (see docs/AGENTS.md)
+│   │   ├── orchestrator/         # Agent router + remediation engine
+│   │   ├── operations-agent/     # Health checks, anomaly detection
+│   │   ├── support-agent/        # Ticket classification, AI responses
+│   │   ├── removal-agent/        # Data removal automation
+│   │   └── ...                   # 20+ more agent directories
+│   ├── mastermind/               # Advisory system (75+ advisors)
+│   ├── standup/                  # Daily standup metrics + email
+│   ├── support/                  # Ticket service (58KB)
 │   ├── scanners/                 # Data source scanners
 │   │   ├── data-brokers/         # Broker integrations
 │   │   ├── breaches/             # Breach checkers
@@ -220,15 +229,46 @@ src/
        │         └──────────────┘
        │
        │  1:N    ┌──────────────┐
-       └────────▶│    Alert     │
-                 ├──────────────┤
-                 │ id           │
-                 │ userId       │
-                 │ type         │
-                 │ title        │
-                 │ message      │
-                 │ read         │
-                 └──────────────┘
+       ├────────▶│    Alert     │
+       │         ├──────────────┤
+       │         │ id           │
+       │         │ userId       │
+       │         │ type         │
+       │         │ title        │
+       │         │ message      │
+       │         │ read         │
+       │         └──────────────┘
+       │
+       │  1:N    ┌───────────────────┐       ┌──────────────────┐
+       ├────────▶│  SupportTicket    │──────▶│  TicketComment   │
+       │         ├───────────────────┤  1:N  ├──────────────────┤
+       │         │ id                │       │ id               │
+       │         │ userId            │       │ ticketId         │
+       │         │ subject           │       │ authorId         │
+       │         │ status            │       │ content          │
+       │         │ priority          │       │ isStaff          │
+       │         │ category          │       └──────────────────┘
+       │         └───────────────────┘
+       │
+       │  owner  ┌──────────────────┐       ┌──────────────────┐
+       ├────────▶│   FamilyGroup    │──────▶│  FamilyMember    │
+       │         ├──────────────────┤  1:N  ├──────────────────┤
+       │         │ id               │       │ id               │
+       │         │ ownerId          │       │ userId           │
+       │         │ name             │       │ groupId          │
+       │         │ maxMembers       │       │ role             │
+       │         └──────────────────┘       └──────────────────┘
+       │
+       │         ┌──────────────────┐       ┌──────────────────┐
+       │         │    CronLog       │       │ AgentExecution   │
+       │         ├──────────────────┤       ├──────────────────┤
+       │         │ id               │       │ id               │
+       │         │ jobName          │       │ agentId          │
+       │         │ status           │       │ capability       │
+       │         │ startedAt        │       │ status           │
+       │         │ completedAt      │       │ tokensUsed       │
+       │         │ details          │       │ duration         │
+       │         └──────────────────┘       └──────────────────┘
 ```
 
 ### Key Enums
@@ -447,34 +487,168 @@ enum RemovalStatus {
 
 ---
 
+## AI Agent Fleet
+
+The platform includes **24 AI-powered agents** across 8 domains, using a hybrid AI + rule-based approach. See `docs/AGENTS.md` for complete documentation.
+
+| Domain | Agents | Examples |
+|--------|--------|----------|
+| Core Operations | 7 | RemovalAgent, ScanningAgent, SupportAgent, OperationsAgent |
+| Intelligence | 3 | BrokerIntelAgent, ThreatIntelAgent, CompetitiveIntelAgent |
+| Compliance & Security | 2 | ComplianceAgent, SecurityAgent |
+| User Experience | 3 | ContentAgent, OnboardingAgent, SEOAgent |
+| Growth & Revenue | 3 | GrowthAgent, PricingAgent, PartnerAgent |
+| Customer Success | 2 | SuccessAgent, FeedbackAgent |
+| Specialized | 3 | EscalationAgent, VerificationAgent, RegulatoryAgent |
+| Meta | 1 | QAAgent (validates all other agents) |
+
+**Architecture:** All agents extend `BaseAgent` and are coordinated by the Agent Orchestrator (`src/lib/agents/orchestrator/`). The orchestrator routes requests, manages circuit breakers, and emits events for inter-agent communication.
+
+---
+
+## Auto-Remediation System
+
+The platform has a multi-layered self-healing system:
+
+### 1. Health Check Auto-Fixes
+- Resets stuck scans (>1h in SCANNING status)
+- Resets stuck removals (>24h in PENDING status)
+- Deletes orphaned profiles
+- Auto-retriggers dead critical crons via HTTP
+
+### 2. Operations Agent `detect-anomalies`
+- Monitors critical crons for silent deaths (`process-removals`, `clear-pending-queue`, `verify-removals`, `health-check`)
+- Alerts on high removal failure rates (>30% in 24h)
+- Detects unusual signup patterns (>50/hour)
+- Auto-retriggers dead crons via HTTP request
+- Exported as `runDetectAnomalies()` for programmatic use
+
+### 3. Remediation Engine v2
+**Location:** `src/lib/agents/orchestrator/remediation-engine.ts`
+
+Event-driven rules engine that handles:
+- `seo.*` - SEO issues (broken links, low scores)
+- `cron.*` - Cron failures and timeouts
+- `ticket.*` - Stale tickets, escalation storms
+- `security.*` - Security incidents
+- `compliance.*` - Compliance violations
+- `performance.*` - Performance degradation
+
+### 4. Ticketing Agent Self-Healing
+- `tryAutoResolve()` runs before AI call to save API cost
+- Stale ticket detection: OPEN 4h+ escalates priority, WAITING_USER 48h+ reopens
+- 24h escalation cooldown prevents priority storms
+- Time-boxed execution with 4-minute deadline
+
+---
+
+## Mastermind Advisory System
+
+Strategic advisory AI powered by 75+ modern advisors and 70+ historical minds, organized in a 5-layer organism model.
+
+### 5-Layer Model
+| Layer | Name | Description |
+|-------|------|-------------|
+| 1 | Nucleus | 5 Architects: Huang, Hassabis, Buffett, Nadella, Amodei |
+| 2 | Mission Teams | 10 domain squads (Growth, Product, Legal, etc.) |
+| 3 | AI Agent Layer | 24 AI agents mapped to mission domains |
+| 4 | Network Layer | Expert network, advisory circles |
+| 5 | Governance Mesh | Ethics, AI Safety, Transparency, Wisdom |
+
+### 7-Step Decision Protocol
+`MAP → ANALYZE → DESIGN → SAFETY CHECK → BUILD & SHIP → SELL → GOVERN`
+
+### Key Files
+Located in `src/lib/mastermind/` (11 files). Central engine: `prompt-builder.ts` (`buildMastermindPrompt`).
+
+### Weekly Cron
+`mastermind-weekly` runs Mondays 2 PM UTC - sends "Weekly Board Meeting Minutes" email using full 7-step protocol via Claude Haiku.
+
+---
+
+## Daily Standup System
+
+Automated daily system health report sent at 12 PM UTC.
+
+**Pipeline:**
+```
+collect-metrics.ts → analyze.ts (AI/fallback) → format-email.ts → send
+```
+
+**Metrics Collected:**
+- User growth and churn
+- Scan/removal pipeline status
+- Cron job health and failures
+- Ticket health (open, stale, resolution time)
+- Auto-resolve savings (autoFixed, aiResolved, aiCallsAvoided)
+- Revenue and subscription metrics
+
+**Location:** `src/lib/standup/`
+
+---
+
 ## Cron Jobs
 
-| Job | Schedule | Purpose |
-|-----|----------|---------|
-| Health Check | Daily 7 AM UTC | System validation |
-| Monitoring | Daily 6 AM UTC | Check for new exposures |
-| Reports | Monday 8 AM UTC | Send weekly reports |
-| SEO Agent | Every 4 hours | Keyword research, site audits |
-| Process Removals | 6x daily (2,6,10,14,18,22 UTC) | Submit removal requests |
-| Verify Removals | Daily 8 AM UTC | Verify completed removals |
-| Drip Campaigns | Daily 10 AM UTC | Send nurture emails |
-| Content Optimizer | Daily 3 AM UTC | Optimize page content |
-| Link Checker | Daily 5 AM UTC | Find broken links |
-| Ticketing Agent | Daily 9 AM UTC | AI ticket resolution |
-| Free User Digest | Wednesday 10 AM UTC | Weekly digest for free users |
-| Close Resolved Tickets | Daily 11 AM UTC | Auto-close stale tickets |
-| Monthly Rescan | 1st of month 10 AM UTC | Trigger monthly scans |
-| Clear Pending Queue | Hourly | Clean stale queue items |
+The platform runs **27 cron endpoints** with **39 schedule entries** in `vercel.json`. All crons have `maxDuration` set to prevent silent Vercel timeout deaths.
 
-### Health Check Tests
-- Database connectivity
-- Encryption system
-- Auth configuration
-- Email service (Resend)
-- Stripe configuration
-- HIBP API access
-- Stuck scans detection
-- Admin configuration
+| Job | Schedule | maxDuration | Purpose |
+|-----|----------|-------------|---------|
+| Process Removals | Every 2h (12x daily) | 300s | Submit removal requests |
+| Clear Pending Queue | Hourly | 60s | Clean stale queue items |
+| Content Optimizer | Daily 3 AM UTC | 60s | Optimize page content |
+| Link Checker | Daily 5 AM UTC | 60s | Find broken links |
+| Email Monitor | Daily 5 AM UTC | 60s | Monitor email deliverability |
+| Monitoring | Daily 6 AM UTC | 60s | Check for new exposures |
+| Health Check | Daily 7 AM UTC | 300s | 24 system tests + auto-fix |
+| Verify Removals | Daily 8 AM UTC | 300s | Verify completed removals |
+| Reports | Monday 8 AM UTC | 60s | Send weekly reports |
+| Follow-Up Reminders | Daily 9 AM UTC | 60s | 30/45 day follow-ups |
+| Ticketing Agent | Daily 9 AM UTC | 300s | AI ticket resolution + auto-resolve |
+| SEO Agent | 6x daily (every 4h) | 300s | Keyword research, site audits |
+| Monthly Rescan | 1st of month 10 AM UTC | 60s | Trigger monthly scans |
+| Free User Digest | Wednesday 10 AM UTC | 60s | Weekly digest for free users |
+| Drip Campaigns | Daily 10 AM UTC | 60s | Send nurture emails |
+| Removal Digest | Daily 10 AM UTC | 60s | Removal status digest |
+| Close Resolved Tickets | Daily 11 AM UTC | 60s | Auto-close stale tickets |
+| Daily Standup | Daily 12 PM UTC | 300s | Collect metrics + AI analysis + email |
+| Mastermind Weekly | Monday 2 PM UTC | 300s | Board meeting minutes via AI |
+| Sync Subscriptions | Daily | 60s | Stripe subscription sync |
+| Security Scan | Daily | 60s | Security threat scanning |
+| Dashboard Validation | Daily | 60s | Validate dashboard data integrity |
+| Auto-Process Manual Queue | Daily | 60s | Process manual removal queue |
+| Auto-Verify Fast Brokers | Daily | 60s | Quick verification for fast brokers |
+| Cleanup Data Processors | Daily | 60s | Clean up stale data processors |
+| Monthly Board | Monthly | 300s | Monthly strategic board report |
+| Weekly Strategy | Weekly | 300s | Weekly strategy analysis |
+
+### Health Check Tests (24)
+
+| # | Test | Auto-Fix |
+|---|------|----------|
+| 1 | Database connection | No |
+| 2 | User table schema | No |
+| 3 | Orphaned profiles | Yes - deletes |
+| 4 | Encryption system | No |
+| 5 | Auth configuration | No |
+| 6 | Email service (Resend) | No |
+| 7 | Stripe configuration | No |
+| 8 | HIBP API access | No |
+| 9 | Stuck scans (>1h) | Yes - marks failed |
+| 10 | Stuck removals (>24h) | Yes - resets to pending |
+| 11 | Past due subscriptions | No |
+| 12 | Admin configuration | No |
+| 13 | Users without password | No |
+| 14 | Expired subscriptions | No |
+| 15 | Profile-user integrity | No |
+| 16 | Scan-profile integrity | No |
+| 17 | Exposure statistics | No |
+| 18 | Removal request stats | No |
+| 19 | Daily activity metrics | No |
+| 20 | Ticket health (open/stale) | Yes - emits `ticket.stale` event |
+| 21 | Critical cron monitoring | Yes - auto-retriggers dead crons |
+| 22 | Stagnation detection | No |
+| 23 | Data processor health | No |
+| 24 | Agent execution health | No |
 
 ---
 

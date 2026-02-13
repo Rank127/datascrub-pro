@@ -39,8 +39,13 @@ Personal data removal service that helps users find and remove their personal in
 - **Executive Dashboard** (`/dashboard/executive`)
   - Finance: MRR, subscriptions, churn rate, ARPU
   - Analytics: User growth, exposures, removals, success rates
-  - Operations: Queue sizes, system health, removal status
+  - Operations: Queue sizes, system health, cron health widget, ticket SLA widget
   - Activities: Recent signups, scans, audit logs, top users
+  - Support: Full ticket management with AI draft review
+- **24 AI Agents** across 8 domains (removal, scanning, support, operations, intelligence, growth, compliance, QA)
+- **27 Automated Cron Jobs** with maxDuration protection and auto-remediation
+- **Daily Standup** with AI-powered system health analysis
+- **Mastermind Advisory System** with 75+ strategic advisors
 - Role-based access control (ADMIN, LEGAL, SUPER_ADMIN)
 - User management and audit logging
 - PII masking for data protection
@@ -137,8 +142,10 @@ See `DEPLOYMENT.md` for full list of required environment variables.
 ## Documentation
 
 - `DEPLOYMENT.md` - Production deployment guide
-- `DEPLOY.md` - Quick start deployment
 - `OPERATIONS_GUIDE.md` - Full operations manual
+- `ARCHITECTURE.md` - System architecture and design
+- `docs/AGENTS.md` - AI agent fleet documentation (24 agents)
+- `docs/CRON_JOBS.md` - Cron job registry (27 endpoints)
 - `docs/REFUND_GUIDE.md` - Refund processing procedures
 - `docs/UAT-TESTING-PLAN.md` - Testing checklist
 
@@ -179,10 +186,14 @@ git push origin master
 ### Webhooks
 - `POST /api/stripe/webhook` - Stripe events
 
-### Cron Jobs
-- `GET /api/cron/monitoring` - Daily exposure checks
-- `GET /api/cron/reports` - Weekly email reports
-- `GET /api/cron/health-check` - System health check
+### Cron Jobs (27 endpoints)
+- `GET /api/cron/health-check` - System health (24 tests + auto-remediation)
+- `GET /api/cron/process-removals` - Removal request processing
+- `GET /api/cron/verify-removals` - Removal verification
+- `GET /api/cron/ticketing-agent` - AI ticket resolution
+- `GET /api/cron/daily-standup` - Daily system standup email
+- `GET /api/cron/clear-pending-queue` - Stale queue cleanup
+- See `docs/CRON_JOBS.md` for all 27 endpoints
 
 ## License
 

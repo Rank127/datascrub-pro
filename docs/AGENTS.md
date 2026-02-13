@@ -148,10 +148,22 @@ USER (3)   SPECIAL (3)  META (1)
 **Mode:** HYBRID
 
 **Capabilities:**
-- System health checks
+- System health checks (24 tests with auto-fix)
 - Link validation
 - Database cleanup
-- Anomaly detection
+- Anomaly detection (`detect-anomalies`)
+
+**`detect-anomalies` Capability (added Feb 2026):**
+Catches silent infrastructure failures and auto-remediates:
+- **Silent cron deaths** - Monitors critical crons for missing logs:
+  - `process-removals`: alerts after 3h silence
+  - `clear-pending-queue`: alerts after 2h silence
+  - `verify-removals`: alerts after 25h silence
+  - `health-check`: alerts after 25h silence
+- **Auto-remediation** - Retriggers dead crons via HTTP request
+- **High failure rates** - Alerts if >30% removal failures in 24h
+- **Unusual signups** - Alerts if >50 signups in 1 hour
+- **Export:** `runDetectAnomalies()` for programmatic use
 
 **Replaces cron jobs:** `health-check`, `link-checker`
 
@@ -568,6 +580,32 @@ All agents log:
 - Manager review emails for escalations
 - SEO alerts for low scores (<70)
 - Security alerts for threats
+
+---
+
+## Mastermind Advisory Integration
+
+Agents are mapped to Mastermind mission domains for strategic context injection. When agents process complex decisions, they can receive guidance from domain-specific advisors.
+
+| Agent | Mission Domain | Key Advisors |
+|-------|---------------|--------------|
+| RemovalAgent | legal-compliance | Clooney, Katyal, Voss |
+| SupportAgent | customer-culture | Peterson, Van Edwards, Nadella |
+| BillingAgent | commerce-sales | Voss, Hormozi, Buffett |
+| CompetitiveIntelAgent | competitive-intel | Carlsen, Caruana, Dalio |
+| GrowthAgent | growth-revenue | Hormozi, Brunson, Patel |
+| ContentAgent | brand-media | MrBeast, Gary Vee, Patel |
+| SEOAgent | product-platform | Altman, Patel, Brunson |
+
+**Usage:**
+```typescript
+import { buildAgentMastermindPrompt } from "@/lib/mastermind";
+
+// Inject strategic context into agent processing
+const agentPrompt = buildAgentMastermindPrompt("legal-compliance", 3);
+```
+
+See `CLAUDE.md` for full Mastermind documentation including invocation commands and the 5-layer organism model.
 
 ---
 
