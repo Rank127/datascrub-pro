@@ -89,6 +89,7 @@ export async function getCronHealthStatus(): Promise<{
     "cleanup-data-processors": { interval: 25, label: "Daily" },
     "auto-process-manual-queue": { interval: 9, label: "8-hour" },
     "security-scan": { interval: 25, label: "Daily" },
+    "mastermind-weekly": { interval: 170, label: "Weekly" },
   };
 
   const jobs: Array<{

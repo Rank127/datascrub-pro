@@ -21,6 +21,7 @@ import {
   InvocationTypes,
 } from "../types";
 import { registerAgent } from "../registry";
+import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 
 // ============================================================================
 // CONSTANTS
@@ -121,7 +122,9 @@ class BillingAgent extends BaseAgent {
   ];
 
   protected getSystemPrompt(): string {
-    return `You are the Billing Agent for GhostMyData. Analyze user behavior to predict churn and identify upsell opportunities.`;
+    const base = `You are the Billing Agent for GhostMyData. Analyze user behavior to predict churn and identify upsell opportunities.`;
+    const mastermind = buildAgentMastermindPrompt("commerce-sales", 3);
+    return `${base}${mastermind}`;
   }
 
   protected registerHandlers(): void {

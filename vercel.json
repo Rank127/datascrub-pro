@@ -154,6 +154,10 @@
     {
       "path": "/api/cron/daily-standup",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/mastermind-weekly",
+      "schedule": "0 14 * * 1"
     }
   ]
 }

@@ -7,6 +7,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import type { StandupMetrics } from "./collect-metrics";
+import { buildMastermindPrompt } from "@/lib/mastermind";
 
 export type HealthStatus = "EXCELLENT" | "GOOD" | "ATTENTION_NEEDED" | "CRITICAL";
 
@@ -27,6 +28,7 @@ export interface StandupAnalysis {
   operationsReport: string;
   financialReport: string;
   brokerReport: string;
+  mastermindInsight?: string;
 }
 
 const SYSTEM_PROMPT = `You are the Chief Operations Analyst for GhostMyData, a data privacy platform that removes users' personal information from data brokers. You run 24 AI agents and 33 cron jobs autonomously.
@@ -44,7 +46,8 @@ Respond ONLY with valid JSON matching this schema:
   "agentReport": "1-2 paragraph summary of agent fleet health and performance. Call out specific agents by name — highlight any with low confidence (<70%), high fallback rates, high human review rates, or that appear idle. Recommend specific improvements for underperforming agents.",
   "operationsReport": "1-2 paragraph summary of removal pipeline and scan activity",
   "financialReport": "1-2 paragraph summary of plan distribution and growth",
-  "brokerReport": "1-2 paragraph summary of broker performance and trends"
+  "brokerReport": "1-2 paragraph summary of broker performance and trends",
+  "mastermindInsight": "2-3 sentence strategic observation from the Nucleus advisory council (Jensen Huang, Buffett, Nadella, Hassabis, Amodei). What would these 5 minds say about today's operations?"
 }
 
 Health status guide:
@@ -63,7 +66,7 @@ export async function analyzeStandupMetrics(
       model: "claude-haiku-3-5-20241022",
       max_tokens: 1500,
       temperature: 0.3,
-      system: SYSTEM_PROMPT,
+      system: `${SYSTEM_PROMPT}\n\n${buildMastermindPrompt({ orgLayer: "nucleus", maxAdvisors: 5 })}`,
       messages: [
         {
           role: "user",

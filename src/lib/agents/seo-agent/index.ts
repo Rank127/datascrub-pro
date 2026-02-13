@@ -59,6 +59,7 @@ import {
   updateFromKeywordResearch,
   getKeywordStats,
 } from "../shared/keyword-intelligence";
+import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 
 // ============================================================================
 // CONSTANTS
@@ -211,13 +212,15 @@ class SEOAgent extends BaseAgent {
   ];
 
   protected getSystemPrompt(): string {
-    return `You are the SEO Agent for GhostMyData. Your role is to optimize the website for search engines by:
+    const base = `You are the SEO Agent for GhostMyData. Your role is to optimize the website for search engines by:
 1. Identifying technical SEO issues
 2. Analyzing content quality and keyword optimization
 3. Suggesting new content opportunities
 4. Generating actionable recommendations
 
 Focus on privacy and data protection related keywords. Prioritize high-impact issues.`;
+    const mastermind = buildAgentMastermindPrompt("product-platform", 3);
+    return `${base}${mastermind}`;
   }
 
   protected registerHandlers(): void {

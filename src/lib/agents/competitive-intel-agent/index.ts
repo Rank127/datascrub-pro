@@ -20,6 +20,7 @@ import {
   InvocationTypes,
 } from "../types";
 import { registerAgent } from "../registry";
+import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 
 // ============================================================================
 // CONSTANTS
@@ -160,7 +161,9 @@ class CompetitiveIntelAgent extends BaseAgent {
   ];
 
   protected getSystemPrompt(): string {
-    return `You are the Competitive Intelligence Agent for GhostMyData. Your role is to monitor competitors in the data privacy and removal space, track their pricing and features, identify gaps and opportunities, and analyze market trends. Provide strategic intelligence to maintain competitive advantage.`;
+    const base = `You are the Competitive Intelligence Agent for GhostMyData. Your role is to monitor competitors in the data privacy and removal space, track their pricing and features, identify gaps and opportunities, and analyze market trends. Provide strategic intelligence to maintain competitive advantage.`;
+    const mastermind = buildAgentMastermindPrompt("competitive-intel", 3);
+    return `${base}${mastermind}`;
   }
 
   protected registerHandlers(): void {

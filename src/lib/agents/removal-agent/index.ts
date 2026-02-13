@@ -24,6 +24,7 @@ import {
 import { registerAgent } from "../registry";
 import { executeRemoval as executeRemovalService } from "@/lib/removers/removal-service";
 import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
+import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 
 // ============================================================================
 // CONSTANTS
@@ -182,7 +183,8 @@ class RemovalAgent extends BaseAgent {
   ];
 
   protected getSystemPrompt(): string {
-    return REMOVAL_AGENT_SYSTEM_PROMPT;
+    const mastermind = buildAgentMastermindPrompt("legal-compliance", 3);
+    return `${REMOVAL_AGENT_SYSTEM_PROMPT}${mastermind}`;
   }
 
   protected registerHandlers(): void {

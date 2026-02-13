@@ -142,6 +142,15 @@ export function formatStandupEmail(
       )
     : "";
 
+  // --- Nucleus Advisory Insight ---
+  const mastermindHtml = analysis.mastermindInsight
+    ? `<div style="background-color: #1e293b; border-radius: 8px; padding: 24px; margin-bottom: 16px; border-left: 4px solid #f59e0b;">
+        <h2 style="color: #f59e0b; font-size: 16px; margin: 0 0 12px 0;">Nucleus Advisory Insight</h2>
+        <p style="color: #e2e8f0; font-size: 14px; line-height: 1.6; margin: 0 0 8px 0; font-style: italic;">${analysis.mastermindInsight}</p>
+        <p style="color: #94a3b8; font-size: 11px; margin: 0;">— Mastermind Nucleus (Huang, Buffett, Nadella, Hassabis, Amodei)</p>
+      </div>`
+    : "";
+
   // --- Agent Performance ---
   // Build per-agent detail table (show agents that executed or are non-healthy)
   const visibleAgents = metrics.agents.agents.filter(
@@ -399,6 +408,7 @@ export function formatStandupEmail(
         ${concernsHtml}
         ${actionItemsHtml}
         ${suggestionsHtml}
+        ${mastermindHtml}
         ${agentSection}
         ${cronSection}
         ${operationsSection}

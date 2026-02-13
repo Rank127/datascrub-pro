@@ -24,6 +24,7 @@ import {
   ManagerReviewItem,
 } from "../types";
 import { registerAgent } from "../registry";
+import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 
 // ============================================================================
 // CONSTANTS
@@ -196,7 +197,8 @@ class SupportAgent extends BaseAgent {
   ];
 
   protected getSystemPrompt(): string {
-    return SUPPORT_AGENT_SYSTEM_PROMPT;
+    const mastermind = buildAgentMastermindPrompt("customer-culture", 3);
+    return `${SUPPORT_AGENT_SYSTEM_PROMPT}${mastermind}`;
   }
 
   protected registerHandlers(): void {

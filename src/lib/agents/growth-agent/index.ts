@@ -20,6 +20,7 @@ import {
   InvocationTypes,
 } from "../types";
 import { registerAgent } from "../registry";
+import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 
 // ============================================================================
 // CONSTANTS
@@ -168,7 +169,9 @@ class GrowthAgent extends BaseAgent {
   ];
 
   protected getSystemPrompt(): string {
-    return `You are the Growth Agent for GhostMyData. Your role is to drive organic growth through referrals, viral loops, and customer advocacy. Identify opportunities to amplify word-of-mouth and turn satisfied users into brand advocates.`;
+    const base = `You are the Growth Agent for GhostMyData. Your role is to drive organic growth through referrals, viral loops, and customer advocacy. Identify opportunities to amplify word-of-mouth and turn satisfied users into brand advocates.`;
+    const mastermind = buildAgentMastermindPrompt("growth-revenue", 3);
+    return `${base}${mastermind}`;
   }
 
   protected registerHandlers(): void {

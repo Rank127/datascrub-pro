@@ -71,7 +71,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 <body>
   <div class="container">
     <h1>Welcome to ${APP_NAME}, ${firstName}! 🎉</h1>
-    <p>You've taken the first step toward taking control of your personal data. We're here to help you every step of the way.</p>
+    <p>You've taken the first step toward taking control of your personal data. Here's what makes this decision a no-brainer:</p>
 
     <div class="stats">
       <div class="stat">
@@ -80,9 +80,13 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
       </div>
     </div>
 
-    <p><span class="highlight">Your next step:</span> Run your first scan to see exactly where your personal information is exposed online.</p>
+    <p>Most people have their personal info scattered across 50-200 data broker sites — and every day it sits there, the risk of identity theft, spam, and harassment grows.</p>
+
+    <p><span class="highlight">Your next step:</span> Run your first scan to see exactly where your personal information is exposed. It takes 60 seconds and the results will surprise you.</p>
 
     <a href="${APP_URL}/dashboard" class="btn">Run Your First Scan →</a>
+
+    <p>You're getting access to 24 AI agents that work around the clock to find and remove your data. That's the kind of protection that used to require a team of lawyers.</p>
 
     <p>If you have any questions, just reply to this email. We're here to help!</p>
 
@@ -126,17 +130,19 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <p>Hey ${firstName},</p>
 
-    <p>Did you know that the average person has their personal information listed on <span class="highlight">over 50 data broker sites</span>?</p>
+    <p>Let me ask you something: <strong>How comfortable are you with strangers being able to look up your home address, phone number, and family members' names in seconds?</strong></p>
+
+    <p>Because right now, the average person has their personal information listed on <span class="highlight">over 50 data broker sites</span>.</p>
 
     <div class="warning-box">
       <p>⚠️ Right now, your name, address, phone number, and email could be available for anyone to find - including scammers and identity thieves.</p>
     </div>
 
-    <p>The good news? Finding out takes less than 60 seconds.</p>
+    <p>The good news? Finding out exactly what's exposed takes less than 60 seconds.</p>
 
     <a href="${APP_URL}/dashboard" class="btn">See My Exposed Data →</a>
 
-    <p>Once you run your scan, you'll see exactly which sites have your information and how to remove it.</p>
+    <p>Once you run your scan, you'll see exactly which sites have your information — and our AI agents can start removing it immediately.</p>
 
     <p>Your privacy matters,<br>The ${APP_NAME} Team</p>
 
@@ -184,11 +190,11 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <p>Hey ${firstName},</p>
 
-    <p>I wanted to share a real success story from one of our customers - because seeing real results is the best way to understand what ${APP_NAME} can do for you.</p>
+    <p>People don't believe it until they see it. So instead of telling you what ${APP_NAME} can do — let me show you what happened to someone just like you.</p>
 
     <h2>Meet Sarah from Los Angeles</h2>
 
-    <p>Sarah discovered her personal information - including her home address, phone number, and family members' names - was listed on <span class="highlight">over 150 data broker websites</span>.</p>
+    <p>Sarah discovered her personal information — including her home address, phone number, and family members' names — was listed on <span class="highlight">over 150 data broker websites</span>. She couldn't believe it.</p>
 
     <div class="quote-box">
       <p class="quote">"I was shocked to see how much of my personal information was out there. ${APP_NAME} removed it from over 150 sites in just a few weeks. The peace of mind is priceless."</p>
@@ -263,7 +269,9 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <p>Hey ${firstName},</p>
 
-    <p>I noticed you haven't upgraded to Pro yet. I wanted to give you a special offer that I don't usually share...</p>
+    <p>Here's the math: The average identity theft costs victims $1,300 and 200+ hours to resolve. Our Pro plan costs $5.99/mo with this deal. That's the price of one coffee to protect everything.</p>
+
+    <p>I noticed you haven't upgraded to Pro yet. So I'm making you an offer that's genuinely hard to say no to...</p>
 
     <div class="offer-box">
       <div class="offer-title">Exclusive 50% Off</div>
@@ -334,9 +342,11 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <p>Hey ${firstName},</p>
 
-    <p>I've been sending you emails about protecting your privacy, but I haven't heard back from you.</p>
+    <p>I'm going to be honest with you — this is the last email I'll send about this.</p>
 
-    <p>I get it - we're all busy. But I want to be real with you about what's at stake...</p>
+    <p>I've been reaching out because your data is still exposed, and every day it sits out there, the risk compounds. I'm not going to pretend otherwise.</p>
+
+    <p>Here's what's at stake...</p>
 
     <div class="warning-box">
       <h3>While you wait, your exposed data can be used for:</h3>

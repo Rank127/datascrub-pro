@@ -38,3 +38,87 @@ Invite acceptance can silently fail, leaving invitation PENDING with no FamilyMe
 ## Key Users (Production)
 - **Family Owner**: sandeepgupta@bellsouth.net (Sandeep Gupta) — ENTERPRISE
 - **Family Members**: sgmgsg@hotmail.com (Manisha Gupta), suhanigupta97@gmail.com (Suhani Gupta)
+
+---
+
+## Mastermind Advisory System
+
+### 5-Layer Organism Model
+The organization is modeled as a living organism with 5 layers (defined in `src/lib/mastermind/org-structure.ts`):
+
+| Layer | Name | Description |
+|-------|------|-------------|
+| 1 | **Nucleus** | 5 Architects: Huang (Vision), Hassabis (Systems), Buffett (Capital), Nadella (Culture), Amodei (Safety) |
+| 2 | **Mission Teams** | 10 domain squads: Growth, Product, Commerce, Legal, Customer, Competitive Intel, Brand, Science, Global Strategy, Economics |
+| 3 | **AI Agent Layer** | 24 AI agents mapped to mission domains, inspired by Wenfeng, Karpathy, LeCun, Ng |
+| 4 | **Network Layer** | Expert network, creator partners, advisory circles (Cialdini, Adams, Weiss) |
+| 5 | **Governance Mesh** | Ethics (Singer), AI Safety (Hinton, Amodei), Transparency (Dalio), Wisdom (Han, Bostrom, Cowen), Ombudsman (Zelenskyy) |
+
+### 7-Step Decision Protocol
+`MAP → ANALYZE → DESIGN → SAFETY CHECK → BUILD & SHIP → SELL → GOVERN`
+
+Each step has assigned modern minds (see `src/lib/mastermind/decision-protocol.ts`).
+
+### Agent-to-Mission Mapping
+| Agent | Mission Domain | Key Minds |
+|-------|---------------|-----------|
+| removal-agent | legal-compliance | Clooney, Katyal, Voss |
+| support-agent | customer-culture | Peterson, Van Edwards, Nadella |
+| billing-agent | commerce-sales | Voss, Hormozi, Buffett |
+| competitive-intel-agent | competitive-intel | Carlsen, Caruana, Dalio |
+| growth-agent | growth-revenue | Hormozi, Brunson, Patel |
+| content-agent | brand-media | MrBeast, Gary Vee, Patel |
+| seo-agent | product-platform | Altman, Patel, Brunson |
+
+### Invocation Commands
+Quick-access commands for specific advisor perspectives:
+- `Jensen lens` — Infrastructure/platform thinking
+- `Hormozi offer` — Irresistible offer design
+- `Voss mode` — Tactical empathy negotiation
+- `Altman deploy` — Ship fast, iterate responsibly
+- `Buffett test` — Circle of competence + front-page test
+- `Carlsen intuition` — Pattern recognition beyond data
+- `MrBeast scale` — Biggest possible version
+- `Amodei safety` — What could go catastrophically wrong?
+- `Board Meeting` — Full Nucleus deliberation (5 architects)
+- `Modern Board Meeting` — Full analysis from 10+ minds
+- See `src/lib/mastermind/invocations.ts` for all ~25 commands
+
+### Key Files
+```
+src/lib/mastermind/
+  advisors.ts        — ~75 modern + ~70 historical advisors
+  org-structure.ts   — 5-layer organism model + mission mappings
+  layers.ts          — 5 operating principle layers
+  decision-protocol.ts — 7-step protocol
+  invocations.ts     — ~25 invocation commands
+  prompt-builder.ts  — Central prompt engine (buildMastermindPrompt)
+  playbooks.ts       — Pre-built scenario combos
+  business-context.ts — Static business data
+  index.ts           — Barrel exports
+```
+
+### Usage Pattern
+```typescript
+import { buildMastermindPrompt, buildAgentMastermindPrompt } from "@/lib/mastermind";
+
+// Full prompt for strategic queries
+const prompt = buildMastermindPrompt({
+  mission: "growth-revenue",
+  protocol: ["MAP", "DESIGN", "SELL"],
+  includeBusinessContext: true,
+  scenario: "How to increase free-to-pro conversion?",
+});
+
+// Lightweight prompt for agent injection
+const agentPrompt = buildAgentMastermindPrompt("legal-compliance", 3);
+```
+
+### Weekly Cron
+- `mastermind-weekly` runs Mondays 9am ET (`0 14 * * 1` UTC)
+- Sends "Weekly Board Meeting Minutes" email to rocky@ghostmydata.com
+- Uses full 7-step protocol via Claude Haiku
+
+### Admin Dashboard
+- `/dashboard/mastermind` — Org chart + interactive advisor panel
+- `POST /api/admin/mastermind` — AI-powered strategic advice (10/day limit)
