@@ -1,0 +1,697 @@
+From: Dumitru Martea <dumitru.martea@zerobounce.net>
+To: "sandeepgupta@bellsouth.net" <sandeepgupta@bellsouth.net>
+Cc: "privacy@zerobounce.net" <privacy@zerobounce.net>
+Sent: Wednesday, January 28, 2026 at 07:07:38 AM EST
+Subject: Re: Data Deletion Request - CCPA/GDPR - Sandeep Gupta (2 records)
+
+Hi Sandeep,
+
+In order to process your below request, we need to verify your identity as the request originated from a noreply mailbox.
+
+Please confirm your intention of deletion and when was the last payment you made to ZeroBounce.
+
+Thank you
+
+On Wed, Jan 28, 2026 at 1:27 PM GhostMyData <noreply@send.ghostmydata.com> wrote:
+To Whom It May Concern,
+
+I am writing to exercise my rights under the California Consumer Privacy Act (CCPA) and/or the General Data Protection Regulation (GDPR) to request the deletion of all my personal information from your systems and any affiliated/subsidiary services.
+
+Request Details:
+
+Full Name: Sandeep Gupta
+Email: sandeepgupta@bellsouth.net
+Number of Records Found: 2
+Data Types to Remove:
+Combined Personal Profile
+Profile URLs (if applicable):
+https://www.zerobounce.net/privacy-policy/
+https://www.zerobounce.net/privacy
+Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. This includes all records across your platform(s) and any subsidiary or affiliated services that share data.
+
+Please delete ALL records associated with:
+
+My name: Sandeep Gupta
+My email: sandeepgupta@bellsouth.net
+Any variations or associated records
+Please confirm receipt of this request and provide written confirmation once my data has been deleted. According to applicable regulations, you must respond to this request within 45 days (CCPA) or 30 days (GDPR).
+
+If you require any additional information to verify my identity or process this request, please contact me at sandeepgupta@bellsouth.net.
+
+Thank you for your prompt attention to this matter.
+
+Sincerely,
+Sandeep Gupta
+
+This request was sent via GhostMyData on behalf of Sandeep Gupta.
+For questions about this service, visit https://ghostmydata.com
+
+
+
+--
+Dumitru Martea
+HEAD OF COMPLIANCE
+
++40 721 652 730
+dumitru.martea@zerobounce.net
+www.zerobounce.net
+*******************************************
+Re: Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+Inbox
+
+Stability AI Privacy <privacy@stability.ai>
+Thu, Jan 29, 6:03 PM (5 days ago)
+to GhostMyData, me, Legal
+
+Hi there,
+
+Thank you for your request.
+
+API or Dream Studio: If you are seeking to delete your account for API or Dream Studio, please click the “delete account” button in that application (which will delete both the API and Dream Studio accounts).
+
+Stable Audio: If you are seeking to delete your account for Stable Audio, please click the “delete account” button.
+
+Delete All Data: If you are seeking to delete or access all of your Stability AI accounts and your personal data, please fill out this form (here).
+
+To cancel your subscription: So that your account isn’t charged anymore, please visit https://stability.ai/privacy-center.
+For those seeking to unsubscribe from service emails, we understand you may prefer not to receive service-related or transactional emails (e.g., updates to our Terms and Privacy Policy, or pricing updates). However, these updates inform you of changes that affect your rights or our obligations. If you no longer wish to receive these emails, please stop using the service and close your account by following the above steps.
+Please note, we may need to continue to retain certain data to comply with our legal and regulatory obligations and for purposes of trust and safety, fraud prevention and security, and to fulfill our contractual obligations to you. In cases we retain personal data, we do so in accordance with any limitations period and record retention obligations imposed by law. Please note that if you integrated with a third party application as a part of our service, please reach out to that third party to seek data deletion. Please review our Privacy Policy.
+AI Training:
+If you would like to opt-out of AI training, please set your user preferences to indicate that SAI may not train on your inputs and outputs (Learn more. See the FAQ: “Can I opt out of the use of my inputs and outputs for training Stability AI’s models?”).
+
+-Your friends at Stability AI
+
+
+On Thu, Jan 29, 2026 at 2:39 PM GhostMyData <noreply@send.ghostmydata.com> wrote:
+To Whom It May Concern,
+
+I am writing to exercise my rights under the California Consumer Privacy Act (CCPA) and/or the General Data Protection Regulation (GDPR) to request the deletion of my personal information from your systems.
+
+Request Details:
+
+Full Name: Rakesh Kathuria
+Email: rank1its@gmail.com
+Data Types to Remove: AI_TRAINING_DATA
+Profile URL (if applicable): https://spawning.ai/
+Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. I am making such a request now.
+
+Please confirm receipt of this request and provide written confirmation once my data has been deleted. According to applicable regulations, you must respond to this request within 45 days (CCPA) or 30 days (GDPR).
+
+If you require any additional information to verify my identity or process this request, please contact me at rank1its@gmail.com.
+
+Thank you for your prompt attention to this matter.
+
+Sincerely,
+Rakesh Kathuria
+
+
+*********************************************************
+
+Re: Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+Inbox
+
+Jen English <jen@commoncrawl.org>
+Thu, Jan 29, 6:17 PM (5 days ago)
+to GhostMyData, me, info
+
+Rakesh,
+
+Thank you for your email requesting removal of your personal data from Common Crawl’s archive and the addition of your domain and likeness to Common Crawl’s opt-out registry.  From the little information you have provided, we do not believe the GDPR or CCPA requires Common Crawl to remove any web crawl data it has collected and archived.  Nevertheless, as a courtesy, if you provide us with the exact location where your personal data is located, Common Crawl will include the URL in the opt-out registry.
+
+Best, 
+Jen English, Common Crawl
+
+On Thu, Jan 29, 2026 at 2:40 PM GhostMyData <noreply@send.ghostmydata.com> wrote:
+To Whom It May Concern,
+
+I am writing to exercise my rights under the California Consumer Privacy Act (CCPA) and/or the General Data Protection Regulation (GDPR) to request the deletion of my personal information from your systems.
+
+Request Details:
+
+Full Name: Rakesh Kathuria
+Email: rank1its@gmail.com
+Data Types to Remove: AI_TRAINING_DATA
+Profile URL (if applicable): https://commoncrawl.org/terms-of-use
+Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. I am making such a request now.
+
+Please confirm receipt of this request and provide written confirmation once my data has been deleted. According to applicable regulations, you must respond to this request within 45 days (CCPA) or 30 days (GDPR).
+
+If you require any additional information to verify my identity or process this request, please contact me at rank1its@gmail.com.
+
+Thank you for your prompt attention to this matter.
+
+Sincerely,
+Rakesh Kathuria
+
+
+*************************************************************
+
+[FaceApp] Re: FaceApp Support - regarding your recent request
+Inbox
+
+Greg (FaceApp) <support@faceapp.zendesk.com>
+Fri, Jan 30, 9:04 AM (4 days ago)
+to me
+
+##- Please type your reply above this line -##
+Your request (1837013) has been updated. To add additional comments, reply to this email.
+
+	
+Greg (FaceApp)
+
+Jan 30, 2026, 16:04 GMT+2
+
+Hello,
+ 
+We have received a data erasure request submitted on your behalf via GhostMyData (https://ghostmydata.com/).
+ 
+Unfortunately, we are unable to process this request for the following reasons:
+ 
+FaceApp does not use email-based accounts or require user registration. As a result, we cannot locate, identify, or verify any user data based solely on an email address. It remains unclear how GhostMyData generated this request, as we have no means of identifying FaceApp users by email.
+ 
+How to submit a valid erasure request:
+ 
+If you wish to exercise your right to erasure, please use the Send Privacy Request feature within the FaceApp application. This is the only method that allows us to verify your identity as the data subject and process your request accordingly.
+ 
+We have also contacted GhostMyData regarding the submission of such requests through their platform.
+ 
+Kind regards,
+FaceApp Privacy Team
+
+This email is a service from FaceApp. Delivered by Zendesk
+[JKED1D-7JY9N]
+
+***************************************************
+
+Re: Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+Inbox
+
+Megan Riley <megan@huggingface.co>
+Fri, Jan 30, 2:27 PM (4 days ago)
+to me, privacy
+
+Hi Rakesh,
+
+We've received a data erasure request from noreply@send.ghostmydata.com on your behalf. If you did not request this, please let us know.
+
+Please feel free to delete your account at any time in your account settings: https://huggingface.co/settings/account. Account deletion includes all personal information.
+
+Let us know if there's any questions or feedback we can help address!
+
+Best,
+Megan
+
+On Thu, Jan 29, 2026 at 4:35 PM GhostMyData <noreply@send.ghostmydata.com> wrote:
+To Whom It May Concern,
+
+I am writing to exercise my rights under the California Consumer Privacy Act (CCPA) and/or the General Data Protection Regulation (GDPR) to request the deletion of my personal information from your systems.
+
+Request Details:
+
+Full Name: Rakesh Kathuria
+Email: rank1its@gmail.com
+Data Types to Remove: AI_TRAINING_DATA
+Profile URL (if applicable): https://huggingface.co/privacy
+Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. I am making such a request now.
+
+Please confirm receipt of this request and provide written confirmation once my data has been deleted. According to applicable regulations, you must respond to this request within 45 days (CCPA) or 30 days (GDPR).
+
+If you require any additional information to verify my identity or process this request, please contact me at rank1its@gmail.com.
+
+Thank you for your prompt attention to this matter.
+
+Sincerely,
+Rakesh Kathuria
+
+This request was sent via GhostMyData on behalf of Rakesh Kathuria.
+For questions about this service, visit https://ghostmydata.com
+
+****************************************
+
+Data Deletion Request
+Inbox
+
+Legal <legal@elevenlabs.io>
+Fri, Jan 30, 2:30 PM (4 days ago)
+to me
+
+Hello,
+
+Thank you for reaching out to us. Unfortunately, we noticed that you contacted us through an unofficial channel for Data Subject Requests (DSRs). To help you efficiently, please follow the guidelines below:
+
+To Access Your Data:
+You can log in to your account on ElevenLabs.io and navigate to the History tab to find all of your generated data.
+To Amend or Delete Data:
+If you wish to amend or edit data, you can do so directly on the platform. You also have the option to delete data if necessary.
+To Delete Data:
+To delete your data, please follow the steps outlined in this guide: How to delete your data.
+To Submit a Formal Data Subject Request (DSR):
+For formal DSR submissions, please use the official form: Submit a Data Subject Request. This is the only official way to open such a request.
+If you have any questions or need further assistance, feel free to let us know.
+
+
+All the best,
+
+ElevenLabs
+
+Please also see our Terms of Service and Privacy Policy.
+
+**************************************************
+
+Re:[## 382675 ##] Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+Inbox
+
+Akshay V <privacy@fullcontact.com>
+Mon, Jan 26, 3:23 PM (8 days ago)
+to GhostMyData, me, privacy
+
+Hello Rakesh Kathuria,
+
+Thank you for reaching out to FullContact. 
+
+We are happy to help you with your request, but first, we need you to verify your identity.
+
+You can visit our Privacy Choices portal, where you can quickly and easily exercise your rights over your personal data, including both access and opt-out. 
+
+Please let us know if further assistance is needed.
+
+Thank you!
+
+FullContact Support | fullcontact.com
+
+
+
+---- on Tue, 27 Jan 2026 01:46:01 +0530 "GhostMyData"<noreply@send.ghostmydata.com> wrote ----
+To Whom It May Concern,
+
+I am writing to exercise my rights under the California Consumer Privacy Act (CCPA) and/or the General Data Protection Regulation (GDPR) to request the deletion of my personal information from your systems.
+
+Request Details:
+
+Full Name: Rakesh Kathuria
+Email: trail7@gmail.com
+Data Types to Remove: Combined Personal Profile
+Profile URL (if applicable): https://platform.fullcontact.com/your-privacy-choices
+Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. I am making such a request now.
+
+Please confirm receipt of this request and provide written confirmation once my data has been deleted. According to applicable regulations, you must respond to this request within 45 days (CCPA) or 30 days (GDPR).
+
+If you require any additional information to verify my identity or process this request, please contact me at trail7@gmail.com.
+
+Thank you for your prompt attention to this matter.
+
+Sincerely,
+Rakesh Kathuria
+
+This request was sent via GhostMyData on behalf of Rakesh Kathuria.
+For questions about this service, visit https://ghostmydata.com
+
+
+
+This email, its contents and attachments contain information from Ziff Davis, Inc. and/or its affiliates which may be privileged, confidential or otherwise protected from disclosure. The information is intended to be for the addressee(s) only. If you are not an addressee, any disclosure, copy, distribution or use of the contents of this message is prohibited. If you have received this email in error, please notify the sender by reply email and delete the original message and any copies.
+
+
+******************************
+
+RE: Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+Inbox
+
+Epsilon Privacy_EPS_WW <privacy_EPS@publicisresources.com>
+Mon, Jan 26, 3:23 PM (8 days ago)
+to GhostMyData, me
+
+Thank you for contacting Epsilon.
+
+ 
+
+Consumers may request access to the personal information Epsilon may have collected about you, deletion of your information or to request that Epsilon not sell your personal information as required by applicable law, via our Consumer Privacy Portal https://legal.epsilon.com/dsr/
+
+ 
+
+If you prefer not to submit your request online, you can call our privacy support team at 1-866-267-3861 (Monday – Friday from 9:00AM-5:00PM ET, excluding holidays).
+
+ 
+
+Please note responses to this message will not be answered.
+
+ 
+
+Sincerely,
+
+
+Epsilon Global Privacy & Compliance
+
+ 
+
+ 
+
+From: GhostMyData <noreply@send.ghostmydata.com>
+Sent: Monday, January 26, 2026 1:08 PM
+To: Epsilon Privacy_EPS_WW <privacy_EPS@publicisresources.com>
+Subject: Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+
+ 
+
+You don't often get email from noreply@send.ghostmydata.com. Learn why this is important
+
+External to the Groupe / en provenance de l'extérieur du Groupe
+
+ 
+
+To Whom It May Concern,
+
+I am writing to exercise my rights under the California Consumer Privacy Act (CCPA) and/or the General Data Protection Regulation (GDPR) to request the deletion of my personal information from your systems.
+
+Request Details:
+
+Full Name: Rakesh Kathuria
+Email: trail7@gmail.com
+Data Types to Remove: Combined Personal Profile
+Profile URL (if applicable): https://www.epsilon.com/us/consumer-preference-center
+Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. I am making such a request now.
+
+Please confirm receipt of this request and provide written confirmation once my data has been deleted. According to applicable regulations, you must respond to this request within 45 days (CCPA) or 30 days (GDPR).
+
+If you require any additional information to verify my identity or process this request, please contact me at trail7@gmail.com.
+
+Thank you for your prompt attention to this matter.
+
+Sincerely,
+Rakesh Kathuria
+
+This request was sent via GhostMyData on behalf of Rakesh Kathuria.
+For questions about this service, visit https://ghostmydata.com
+
+
+
+
+
+------------------------------------------------------------------------
+Disclaimer The information in this email and any attachments may contain proprietary and confidential information that is intended for the addressee(s) only. If you are not the intended recipient, you are hereby notified that any disclosure, copying, distribution, retention or use of the contents of this information is prohibited. When addressed to our clients or vendors, any information contained in this e-mail or any attachments is subject to the terms and conditions in any governing contract. If you have received this e-mail in error, please immediately contact the sender and delete the e-mail.
+
+
+*********************************************************
+
+Re: Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+Inbox
+
+Stability AI Privacy <privacy@stability.ai>
+Mon, Jan 26, 4:02 PM (8 days ago)
+to GhostMyData, me, Legal
+
+Hi there,
+
+Thank you for your request.
+
+API or Dream Studio: If you are seeking to delete your account for API or Dream Studio, please click the “delete account” button in that application (which will delete both the API and Dream Studio accounts).
+
+Stable Audio: If you are seeking to delete your account for Stable Audio, please click the “delete account” button.
+
+Delete All Data: If you are seeking to delete or access all of your Stability AI accounts and your personal data, please fill out this form (here).
+
+To cancel your subscription: So that your account isn’t charged anymore, please visit https://stability.ai/privacy-center.
+For those seeking to unsubscribe from service emails, we understand you may prefer not to receive service-related or transactional emails (e.g., updates to our Terms and Privacy Policy, or pricing updates). However, these updates inform you of changes that affect your rights or our obligations. If you no longer wish to receive these emails, please stop using the service and close your account by following the above steps.
+Please note, we may need to continue to retain certain data to comply with our legal and regulatory obligations and for purposes of trust and safety, fraud prevention and security, and to fulfill our contractual obligations to you. In cases we retain personal data, we do so in accordance with any limitations period and record retention obligations imposed by law. Please note that if you integrated with a third party application as a part of our service, please reach out to that third party to seek data deletion. Please review our Privacy Policy.
+AI Training:
+If you would like to opt-out of AI training, please set your user preferences to indicate that SAI may not train on your inputs and outputs (Learn more. See the FAQ: “Can I opt out of the use of my inputs and outputs for training Stability AI’s models?”).
+
+-Your friends at Stability AI
+
+
+On Mon, Jan 26, 2026 at 12:16 PM GhostMyData <noreply@send.ghostmydata.com> wrote:
+To Whom It May Concern,
+
+I am writing to exercise my rights under the California Consumer Privacy Act (CCPA) and/or the General Data Protection Regulation (GDPR) to request the deletion of my personal information from your systems.
+
+Request Details:
+
+Full Name: Rakesh Kathuria
+Email: trail7@gmail.com
+Data Types to Remove: Combined Personal Profile
+Profile URL (if applicable): https://stability.ai/opt-out
+Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. I am making such a request now.
+
+Please confirm receipt of this request and provide written confirmation once my data has been deleted. According to applicable regulations, you must respond to this request within 45 days (CCPA) or 30 days (GDPR).
+
+If you require any additional information to verify my identity or process this request, please contact me at trail7@gmail.com.
+
+Thank you for your prompt attention to this matter.
+
+Sincerely,
+Rakesh Kathuria
+
+This request was sent via GhostMyData on behalf of Rakesh Kathuria.
+For questions about this service, visit https://ghostmydata.com
+
+
+**************************************************************************
+Fwd: Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+Inbox
+
+Faye (RealtyHop) <faye@realtyhop.com>
+Mon, Jan 26, 9:44 PM (8 days ago)
+to me, RealtyHop
+
+Hi Rakesh,
+
+Forwarding our response to your request to your direct email trail7@gmail.com.
+
+Best,
+Faye
+---------- Forwarded message ---------
+From: Faye (RealtyHop) <faye@realtyhop.com>
+Date: Mon, Jan 26, 2026 at 9:40 PM
+Subject: Re: Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+To: GhostMyData <noreply@send.ghostmydata.com>
+Cc: <privacy@realtyhop.com>
+
+
+Hi Rakesh,
+
+We attempted to process your Request to Delete. However, we do not have a record of you in our system. If you previously interacted with us using a different email address, please resubmit a request using that email address at the link below.
+
+https://privacy.realtyhop.com/privacy-request
+
+Note, real estate transactions are not considered personal information. RealtyHop does not collect or display private data, nor do we sell information to third parties. Redact your name from the public information via our redaction tool: www.realtyhop.com/resources/realtyhop-redaction-request-system
+
+Thank you,
+Faye
+
+On Mon, Jan 26, 2026 at 3:13 PM GhostMyData <noreply@send.ghostmydata.com> wrote:
+To Whom It May Concern,
+
+I am writing to exercise my rights under the California Consumer Privacy Act (CCPA) and/or the General Data Protection Regulation (GDPR) to request the deletion of my personal information from your systems.
+
+Request Details:
+
+Full Name: Rakesh Kathuria
+Email: trail7@gmail.com
+Data Types to Remove: Combined Personal Profile
+Profile URL (if applicable): https://www.realtyhop.com/privacy
+Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. I am making such a request now.
+
+Please confirm receipt of this request and provide written confirmation once my data has been deleted. According to applicable regulations, you must respond to this request within 45 days (CCPA) or 30 days (GDPR).
+
+If you require any additional information to verify my identity or process this request, please contact me at trail7@gmail.com.
+
+Thank you for your prompt attention to this matter.
+
+Sincerely,
+Rakesh Kathuria
+
+This request was sent via GhostMyData on behalf of Rakesh Kathuria.
+For questions about this service, visit https://ghostmydata.com
+
+
+
+--
+Faye Chou
+Support Operations
+faye@realtyhop.com
+Normal response hours are between 9 am-5 pm EST
+Weekend issues? Please email support@realtyhop.com!
+
+
+--
+Faye Chou
+Support Operations
+faye@realtyhop.com
+Normal response hours are between 9 am-5 pm EST
+Weekend issues? Please email support@realtyhop.com!
+
+************************************************
+
+
+Privacy @Lusha <privacy@lusha.com> (sent by arnav.rana@lusha.com)
+Tue, Jan 27, 6:05 AM (7 days ago)
+to me, GhostMyData
+
+Hello Rakesh,
+
+Many thanks for your email.
+
+Lusha conducts its operation in accordance with all applicable laws, including without limitation, privacy and data protection regulations. 
+
+As part of our policy, we respect requests for erasure and removal and we have therefore initiated the process to delete your details (as provided) from our Platform. This process will be completed within the next few days. Any of Lusha's customers who have purchased your data will be notified that you have opted out of Lusha's Platform in due course.
+
+Sincerely,
+Lusha Privacy Team
+
+
+
+
+On Tue, Jan 27, 2026 at 1:44 AM GhostMyData <noreply@send.ghostmydata.com> wrote:
+ 	
+This is the first email you've received from this external sender.
+Do not click links or open attachments unless it is an email you expected to receive.
+
+To Whom It May Concern,
+
+I am writing to exercise my rights under the California Consumer Privacy Act (CCPA) and/or the General Data Protection Regulation (GDPR) to request the deletion of my personal information from your systems.
+
+Request Details:
+
+Full Name: Rakesh Kathuria
+Email: trail7@gmail.com
+Data Types to Remove: Combined Personal Profile
+Profile URL (if applicable): https://privacy.lusha.com/hc/en-us/requests/new
+Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. I am making such a request now.
+
+Please confirm receipt of this request and provide written confirmation once my data has been deleted. According to applicable regulations, you must respond to this request within 45 days (CCPA) or 30 days (GDPR).
+
+If you require any additional information to verify my identity or process this request, please contact me at trail7@gmail.com.
+
+Thank you for your prompt attention to this matter.
+
+Sincerely,
+Rakesh Kathuria
+
+******************************************************
+Re: Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+Inbox
+
+Wilhelm Reich <wilhelm@findymail.com>
+Tue, Jan 27, 9:47 AM (7 days ago)
+to me, privacy
+
+Hello Rakesh,
+
+We received your email regarding the deletion of your personal information from our systems. Since we don’t process personal emails (including Gmail), I need your professional email address so I can delete it accordingly.
+
+Best regards,
+Wilhelm Reich
+
+On 26. Jan 2026, at 21:17, GhostMyData <noreply@send.ghostmydata.com> wrote:
+
+To Whom It May Concern,
+
+I am writing to exercise my rights under the California Consumer Privacy Act (CCPA) and/or the General Data Protection Regulation (GDPR) to request the deletion of my personal information from your systems.
+
+Request Details:
+
+Full Name: Rakesh Kathuria
+Email: trail7@gmail.com
+Data Types to Remove: Combined Personal Profile
+Profile URL (if applicable): https://findymail.com/privacy
+Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. I am making such a request now.
+
+Please confirm receipt of this request and provide written confirmation once my data has been deleted. According to applicable regulations, you must respond to this request within 45 days (CCPA) or 30 days (GDPR).
+
+If you require any additional information to verify my identity or process this request, please contact me at trail7@gmail.com.
+
+Thank you for your prompt attention to this matter.
+
+Sincerely,
+Rakesh Kathuria
+
+This request was sent via GhostMyData on behalf of Rakesh Kathuria.
+For questions about this service, visit https://ghostmydata.com
+
+
+************************************************
+
+Request the deletion of your personal information from Find a Grave systems.
+Inbox
+
+Find a Grave Support <support@findagrave.com>
+Thu, Jan 29, 12:43 PM (5 days ago)
+to me
+
+
+ 
+Hello Rakesh,
+
+Thank you for contacting Find a Grave.
+A search of our system using your email address and full name returned no results.
+
+Should you believe your name or address is included in the memorial or obituary of a loved one, kindly provide us with the individual's name and the memorial ID. Upon receipt, we will proceed with the removal of your name or email address from that member account.
+
+If you need additional assistance, please feel free to reply to this message. 
+
+Sincerely,
+ 
+Tracy
+Sr. Find a Grave Administrator
+findagrave.com 
+
+
+For more information regarding our products, please follow the links listed below.
+Help | Forums
+
+************************************************************
+
+Insufficient information to match Response
+Inbox
+notifications@trustarc.eu
+Thu, Jan 29, 11:59 PM (5 days ago)
+to me
+
+Images in this message are hidden. This message appears suspicious. Don't show the images unless you trust the sender and the message.
+Show imagesReport spam
+External image icon
+Images are not displayed. Display images below - Always display images from notifications@trustarc.eu
+ 
+The Dun and Bradstreet Corporation
+Dear Rakesh
+Thank you for contacting us. We have received your data subject request. However, we were not able to associate the information you provided to a specific, identifiable individual. For example, if you provided us with your name and email and we do not have your email in our records, your name alone may be matched to multiple individuals.  To fulfil your request and avoid causing potential harm to others, including other business owners who may rely on Dun & Bradstreet to help them build business relationships, we need to associate your information with a specific, identifiable individual in our database. 
+
+To see how Dun & Bradstreet processes personal information or to further exercise your rights please refer to our Privacy, Data Transparency, and AI Trust Center.
+ Sincerely,
+Dun & Bradstreet
+Classification: Commercial in Confidence 
+
+**************************************************************************
+
+RE: Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+Inbox
+
+DOZI Privacy <privacy@zoominfo.com>
+12:02 PM (8 hours ago)
+to noreply@send.ghostmydata.com, me
+
+Hello,
+
+Thank you for reaching out. We have added your information to the removal queue which will be completed within 24-72 hours.
+
+Please note that our system automatically sends notice to Google regarding updating their search results to remove any web pages associated with your profile. However, this process can take around a week to complete.
+
+If you would like to expedite Google's removal processes, you can submit a request to remove the cached content once it's first been removed from our site. Their submission form can be found here: https://search.google.com/search-console/remove-outdated-content
+
+Regards,
+Aaron
+ZoomInfo Privacy Team    
+
+
+--------------- Original Message ---------------
+From: GhostMyData [noreply@send.ghostmydata.com]
+Sent: 1/26/2026 12:08 PM
+To: privacy@zoominfo.com
+Subject: Data Deletion Request - CCPA/GDPR - Rakesh Kathuria
+ 
+External Email
+This message came from outside your organization.
+ 
+ 
+********************************************************************
+
+ 
