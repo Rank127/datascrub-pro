@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSubscription } from "@/hooks/useSubscription";
 import {
   Card,
   CardContent,
@@ -98,29 +99,11 @@ export default function SupportPage() {
   const [newComment, setNewComment] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [userPlan, setUserPlan] = useState<string>("FREE");
-  const [userEmail, setUserEmail] = useState<string>("");
+  const { plan: userPlan } = useSubscription();
 
   // Prevent hydration mismatch with date formatting
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  // Fetch user plan for refund eligibility
-  useEffect(() => {
-    const fetchPlan = async () => {
-      try {
-        const response = await fetch("/api/subscription");
-        if (response.ok) {
-          const data = await response.json();
-          setUserPlan(data.plan || "FREE");
-          setUserEmail(data.email || "");
-        }
-      } catch (error) {
-        console.error("Failed to fetch plan:", error);
-      }
-    };
-    fetchPlan();
   }, []);
 
   // New ticket form state
@@ -429,7 +412,7 @@ export default function SupportPage() {
         <p className="text-xs text-slate-500 text-center">
           Need a refund? We offer a 30-day money-back guarantee.{" "}
           <a
-            href={`mailto:support@ghostmydata.com?subject=Refund%20Request%20-%20${userPlan}%20Plan&body=Hi%20GhostMyData%20Support%2C%0A%0AI%20would%20like%20to%20request%20a%20refund%20for%20my%20${userPlan}%20subscription.%0A%0AAccount%20Email%3A%20${encodeURIComponent(userEmail)}%0AReason%20for%20refund%3A%20%0A%0AThank%20you.`}
+            href={`mailto:support@ghostmydata.com?subject=Refund%20Request%20-%20${userPlan}%20Plan&body=Hi%20GhostMyData%20Support%2C%0A%0AI%20would%20like%20to%20request%20a%20refund%20for%20my%20${userPlan}%20subscription.%0A%0AReason%20for%20refund%3A%20%0A%0AThank%20you.`}
             className="text-slate-400 hover:text-slate-300 underline"
           >
             Request a refund

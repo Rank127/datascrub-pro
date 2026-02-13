@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -61,27 +62,11 @@ export default function ScanPage() {
   const [requiresUpgrade, setRequiresUpgrade] = useState(false);
   const [recentScans, setRecentScans] = useState<Scan[]>([]);
   const [loadingScans, setLoadingScans] = useState(true);
-  const [userPlan, setUserPlan] = useState<string>("FREE");
+  const { plan, isFreePlan } = useSubscription();
 
   useEffect(() => {
     fetchRecentScans();
-    fetchSubscription();
   }, []);
-
-  const fetchSubscription = async () => {
-    try {
-      const response = await fetch("/api/subscription");
-      if (response.ok) {
-        const data = await response.json();
-        setUserPlan(data.plan || "FREE");
-      }
-    } catch (err) {
-      console.error("Failed to fetch subscription:", err);
-    }
-  };
-
-  // FREE users can only do FULL scans to see their complete exposure
-  const isFreePlan = userPlan === "FREE";
 
   const fetchRecentScans = async () => {
     try {

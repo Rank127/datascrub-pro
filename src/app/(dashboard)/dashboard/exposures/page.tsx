@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExposureCard } from "@/components/dashboard/exposure-card";
+import { StatCard } from "@/components/dashboard/stat-card";
 import { Input } from "@/components/ui/input";
 import {
   AlertTriangle,
@@ -271,28 +273,10 @@ function ExposuresPageContent() {
     searchParams.get("search") || ""
   );
   const [showHelp, setShowHelp] = useState(false);
-  const [userPlan, setUserPlan] = useState<string>("FREE");
-  const [planSource, setPlanSource] = useState<string>("DEFAULT");
-
-  // Fetch user plan
-  useEffect(() => {
-    const fetchPlan = async () => {
-      try {
-        const response = await fetch("/api/subscription");
-        if (response.ok) {
-          const data = await response.json();
-          setUserPlan(data.plan || "FREE");
-          setPlanSource(data.planSource || "DEFAULT");
-        }
-      } catch (error) {
-        console.error("Failed to fetch plan:", error);
-      }
-    };
-    fetchPlan();
-  }, []);
+  const { isFreePlan } = useSubscription();
 
   // Show upgrade banner only for actual FREE users (not family members with inherited plans)
-  const showUpgradeBanner = userPlan === "FREE" && planSource !== "FAMILY";
+  const showUpgradeBanner = isFreePlan;
 
   // Get only actionable exposures (active, not whitelisted)
   const actionableExposures = exposures.filter(
@@ -554,47 +538,11 @@ function ExposuresPageContent() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-white">{totalExposures}</div>
-            <p className="text-sm text-slate-400">Total Exposures</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-red-400">
-              {stats?.activeBySeverity?.CRITICAL || 0}
-            </div>
-            <p className="text-sm text-slate-400">Critical to Fix</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-orange-400">
-              {stats?.activeBySeverity?.HIGH || 0}
-            </div>
-            <p className="text-sm text-slate-400">High to Fix</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <SendHorizontal className="h-5 w-5 text-purple-400" />
-              <div className="text-2xl font-bold text-purple-400">
-                {stats?.totalRemovalRequests || 0}
-              </div>
-            </div>
-            <p className="text-sm text-slate-400">Submitted</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-emerald-400">
-              {stats?.byStatus?.REMOVED || 0}
-            </div>
-            <p className="text-sm text-slate-400">Removed</p>
-          </CardContent>
-        </Card>
+        <StatCard value={totalExposures} label="Total Exposures" />
+        <StatCard value={stats?.activeBySeverity?.CRITICAL || 0} label="Critical to Fix" color="red" />
+        <StatCard value={stats?.activeBySeverity?.HIGH || 0} label="High to Fix" color="orange" />
+        <StatCard value={stats?.totalRemovalRequests || 0} label="Submitted" icon={SendHorizontal} color="purple" />
+        <StatCard value={stats?.byStatus?.REMOVED || 0} label="Removed" color="emerald" />
       </div>
 
       {/* Filters */}

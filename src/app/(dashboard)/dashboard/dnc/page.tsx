@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSubscription } from "@/hooks/useSubscription";
 import {
   Card,
   CardContent,
@@ -66,7 +67,6 @@ interface DNCData {
 
 export default function DNCPage() {
   const [loading, setLoading] = useState(true);
-  const [plan, setPlan] = useState<string | null>(null);
   const [data, setData] = useState<DNCData | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newPhone, setNewPhone] = useState("");
@@ -75,30 +75,16 @@ export default function DNCPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const isPlanEnterprise = plan === "ENTERPRISE";
+  const { isEnterprise, isLoading: planLoading } = useSubscription();
 
   useEffect(() => {
-    const fetchPlan = async () => {
-      try {
-        const response = await fetch("/api/subscription");
-        if (response.ok) {
-          const data = await response.json();
-          setPlan(data.plan);
-        }
-      } catch (error) {
-        console.error("Failed to fetch subscription:", error);
-      }
-    };
-    fetchPlan();
-  }, []);
-
-  useEffect(() => {
-    if (plan === "ENTERPRISE") {
+    if (planLoading) return;
+    if (isEnterprise) {
       fetchDNCData();
-    } else if (plan !== null) {
+    } else {
       setLoading(false);
     }
-  }, [plan]);
+  }, [isEnterprise, planLoading]);
 
   const fetchDNCData = async () => {
     setError(null);
@@ -225,7 +211,7 @@ export default function DNCPage() {
   };
 
   // Show upgrade prompt for non-Enterprise users
-  if (!isPlanEnterprise) {
+  if (!isEnterprise) {
     return (
       <div className="space-y-6">
         <div>

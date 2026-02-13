@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExposureCard } from "@/components/dashboard/exposure-card";
+import { StatCard } from "@/components/dashboard/stat-card";
 import {
   Bot,
   Scan,
@@ -366,48 +367,11 @@ export default function AIProtectionPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-white">{stats.total}</div>
-            <p className="text-sm text-slate-400">Total Sources Checked</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700 border-blue-500/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-blue-400" />
-              <div className="text-2xl font-bold text-blue-400">{stats.aiTraining}</div>
-            </div>
-            <p className="text-sm text-slate-400">AI Training</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700 border-orange-500/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Scan className="h-5 w-5 text-orange-400" />
-              <div className="text-2xl font-bold text-orange-400">{stats.facialRecognition}</div>
-            </div>
-            <p className="text-sm text-slate-400">Facial Recognition</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700 border-pink-500/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Mic className="h-5 w-5 text-pink-400" />
-              <div className="text-2xl font-bold text-pink-400">{stats.voiceCloning}</div>
-            </div>
-            <p className="text-sm text-slate-400">Voice Cloning</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700 border-emerald-500/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-              <div className="text-2xl font-bold text-emerald-400">{stats.optedOut}</div>
-            </div>
-            <p className="text-sm text-slate-400">Opted Out</p>
-          </CardContent>
-        </Card>
+        <StatCard value={stats.total} label="Total Sources Checked" />
+        <StatCard value={stats.aiTraining} label="AI Training" icon={Bot} color="blue" borderColor />
+        <StatCard value={stats.facialRecognition} label="Facial Recognition" icon={Scan} color="orange" borderColor />
+        <StatCard value={stats.voiceCloning} label="Voice Cloning" icon={Mic} color="pink" borderColor />
+        <StatCard value={stats.optedOut} label="Opted Out" icon={CheckCircle2} color="emerald" borderColor />
       </div>
 
       {/* Progress Bar */}

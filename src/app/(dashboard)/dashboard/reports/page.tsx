@@ -22,6 +22,7 @@ import {
   CheckCircle,
   Loader2,
 } from "lucide-react";
+import { StatCard } from "@/components/dashboard/stat-card";
 import { toast } from "sonner";
 
 interface ReportStats {
@@ -205,54 +206,10 @@ export default function ReportsPage() {
 
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-emerald-500" />
-              <span className="text-2xl font-bold text-white">
-                {summary.totalExposuresRemoved}
-              </span>
-            </div>
-            <p className="text-sm text-slate-400 mt-1">Total Exposures Removed</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              {summary.riskScoreReduction > 0 ? (
-                <TrendingDown className="h-5 w-5 text-emerald-500" />
-              ) : (
-                <TrendingUp className="h-5 w-5 text-slate-500" />
-              )}
-              <span className={`text-2xl font-bold ${summary.riskScoreReduction > 0 ? "text-emerald-400" : "text-slate-400"}`}>
-                {summary.riskScoreReduction > 0 ? `-${summary.riskScoreReduction}%` : "0%"}
-              </span>
-            </div>
-            <p className="text-sm text-slate-400 mt-1">Risk Score Reduction</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-blue-500" />
-              <span className="text-2xl font-bold text-white">
-                {summary.sourcesMonitored}
-              </span>
-            </div>
-            <p className="text-sm text-slate-400 mt-1">Sources Monitored</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-purple-500" />
-              <span className="text-2xl font-bold text-white">
-                {summary.averageRemovalTime}
-              </span>
-            </div>
-            <p className="text-sm text-slate-400 mt-1">Avg. Removal Time</p>
-          </CardContent>
-        </Card>
+        <StatCard value={summary.totalExposuresRemoved} label="Total Exposures Removed" icon={CheckCircle} color="emerald" />
+        <StatCard value={summary.riskScoreReduction > 0 ? `-${summary.riskScoreReduction}%` : "0%"} label="Risk Score Reduction" icon={summary.riskScoreReduction > 0 ? TrendingDown : TrendingUp} color={summary.riskScoreReduction > 0 ? "emerald" : "white"} />
+        <StatCard value={summary.sourcesMonitored} label="Sources Monitored" icon={Shield} color="blue" />
+        <StatCard value={summary.averageRemovalTime} label="Avg. Removal Time" icon={Calendar} color="purple" />
       </div>
 
       {/* Protection Progress */}

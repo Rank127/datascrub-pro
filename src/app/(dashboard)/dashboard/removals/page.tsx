@@ -38,6 +38,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import Link from "next/link";
+import { StatCard } from "@/components/dashboard/stat-card";
 import { DataSourceNames, type DataSource, type Severity } from "@/lib/types";
 
 interface RemovalRequest {
@@ -297,49 +298,11 @@ export default function RemovalsPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-5">
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-white">{totalRemovals}</div>
-            <p className="text-sm text-slate-400">Total Requests</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-emerald-400">
-              {completedCount}
-            </div>
-            <p className="text-sm text-slate-400">Completed</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-blue-400">
-              {(stats.SUBMITTED || 0) + (stats.IN_PROGRESS || 0)}
-            </div>
-            <p className="text-sm text-slate-400">In Progress</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-orange-400">
-              {(stats.FAILED || 0) + (stats.REQUIRES_MANUAL || 0)}
-            </div>
-            <p className="text-sm text-slate-400">Needs Attention</p>
-          </CardContent>
-        </Card>
-        <Link href="/dashboard/exposures?manualAction=pending">
-          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-amber-500/50 transition-all cursor-pointer h-full">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2">
-                <HandHelping className="h-5 w-5 text-amber-400" />
-                <div className="text-2xl font-bold text-amber-400">
-                  {manualAction.done}/{manualAction.total}
-                </div>
-              </div>
-              <p className="text-sm text-slate-400">Manual Actions</p>
-            </CardContent>
-          </Card>
-        </Link>
+        <StatCard value={totalRemovals} label="Total Requests" />
+        <StatCard value={completedCount} label="Completed" color="emerald" />
+        <StatCard value={(stats.SUBMITTED || 0) + (stats.IN_PROGRESS || 0)} label="In Progress" color="blue" />
+        <StatCard value={(stats.FAILED || 0) + (stats.REQUIRES_MANUAL || 0)} label="Needs Attention" color="orange" />
+        <StatCard value={`${manualAction.done}/${manualAction.total}`} label="Manual Actions" icon={HandHelping} color="amber" href="/dashboard/exposures?manualAction=pending" />
       </div>
 
       {/* Overall Progress */}

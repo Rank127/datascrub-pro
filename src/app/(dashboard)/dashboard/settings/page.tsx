@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,12 +38,6 @@ import { ChangePasswordDialog } from "@/components/settings/change-password-dial
 import { TwoFactorSetupDialog } from "@/components/settings/two-factor-setup-dialog";
 import { TwoFactorDisableDialog } from "@/components/settings/two-factor-disable-dialog";
 
-interface SubscriptionData {
-  plan: string;
-  status: string;
-  currentPeriodEnd: string | null;
-}
-
 // Wrapper component to handle Suspense for useSearchParams
 export default function SettingsPage() {
   return (
@@ -58,7 +53,7 @@ function SettingsContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
-  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const { plan: currentPlan, currentPeriodEnd, hasStripeSubscription } = useSubscription();
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Account settings
@@ -291,28 +286,12 @@ function SettingsContent() {
   useEffect(() => {
     if (searchParams.get("success") === "true") {
       setMessage({ type: "success", text: "Your subscription has been activated successfully!" });
-      // Refetch subscription data
-      fetchSubscription();
     } else if (searchParams.get("canceled") === "true") {
       setMessage({ type: "error", text: "Checkout was canceled. No charges were made." });
     }
   }, [searchParams]);
 
-  // Fetch subscription data
-  const fetchSubscription = async () => {
-    try {
-      const response = await fetch("/api/subscription");
-      if (response.ok) {
-        const data = await response.json();
-        setSubscription(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch subscription:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchSubscription();
     fetchNotificationPrefs();
     fetchSmsSettings();
     fetch2FAStatus();
@@ -384,7 +363,6 @@ function SettingsContent() {
     }
   };
 
-  const currentPlan = subscription?.plan || "FREE";
   const plans = [
     {
       name: "FREE",
@@ -755,12 +733,12 @@ function SettingsContent() {
           </div>
         </CardHeader>
         <CardContent>
-          {subscription?.currentPeriodEnd && currentPlan !== "FREE" && (
+          {currentPeriodEnd && currentPlan !== "FREE" && (
             <div className="mb-4 p-3 bg-slate-700/30 rounded-lg">
               <p className="text-sm text-slate-300">
                 Current period ends:{" "}
                 <span className="text-white font-medium">
-                  {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  {new Date(currentPeriodEnd).toLocaleDateString()}
                 </span>
               </p>
             </div>
