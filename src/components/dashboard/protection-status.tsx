@@ -17,6 +17,7 @@ interface ProtectionStatusProps {
   };
   riskScore: number;
   maxExposure?: { found: number; totalKnown: number };
+  userPlan?: string;
   className?: string;
 }
 
@@ -27,6 +28,7 @@ export function ProtectionStatus({
   timeSaved,
   riskScore,
   maxExposure,
+  userPlan,
   className,
 }: ProtectionStatusProps) {
   // Protection score color
@@ -132,6 +134,9 @@ export function ProtectionStatus({
                 />
               ))}
             </div>
+            {userPlan === "FREE" && risk.dots >= 3 && (
+              <div className="text-[10px] text-orange-400 mt-1">Upgrade to auto-fix</div>
+            )}
           </Link>
 
           {/* Exposure Reach */}

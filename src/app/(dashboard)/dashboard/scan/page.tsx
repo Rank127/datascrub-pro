@@ -387,12 +387,36 @@ export default function ScanPage() {
                       <AlertTriangle className="h-5 w-5 text-orange-400" />
                       <span className="font-semibold text-orange-300">Your Data Exposure is Significant</span>
                     </div>
-                    <p className="text-sm text-slate-300 mb-3">
+                    <p className="text-sm text-slate-300 mb-2">
                       We found your data on <strong className="text-white">{scanResult.exposuresFound} sites</strong> out of <strong className="text-white">{TOTAL_KNOWN_BROKERS.toLocaleString()}+</strong> known data broker sites.
                       {isFreePlan
                         ? " Without protection, your data stays exposed and continues to spread."
                         : " We're actively working to remove your data from these sites."}
                     </p>
+                    {isFreePlan && (
+                      <>
+                        <p className="text-xs text-slate-400 mb-1">
+                          Removing your data manually would take ~{Math.round(scanResult.exposuresFound * 0.75)} hours — contacting {scanResult.exposuresFound} sites individually.
+                        </p>
+                        <p className="text-xs text-orange-400/80 mb-2">
+                          Each day your data stays listed, it can be accessed, sold, and re-shared across new databases.
+                        </p>
+                      </>
+                    )}
+                    {(() => {
+                      const lastScan = recentScans.find(s => s.status === "COMPLETED" && s.id !== scanResult.scanId);
+                      if (lastScan) {
+                        const daysSince = Math.floor((Date.now() - new Date(lastScan.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+                        if (daysSince > 7) {
+                          return (
+                            <p className="text-xs text-amber-400 mb-2">
+                              Your last scan was {daysSince} days ago. New exposures may have appeared since then.
+                            </p>
+                          );
+                        }
+                      }
+                      return null;
+                    })()}
                     <div className="w-full bg-slate-700 rounded-full h-2">
                       <div
                         className="bg-orange-500 h-2 rounded-full transition-all"
@@ -439,6 +463,7 @@ export default function ScanPage() {
 
                 return (
                   <UpgradeCta
+                    badge="Introductory pricing — 40% OFF"
                     icon={<Crown className={`h-5 w-5 ${recommendation.plan === "ENTERPRISE" ? "text-purple-400" : "text-emerald-400"}`} />}
                     title={recommendation.title}
                     description={

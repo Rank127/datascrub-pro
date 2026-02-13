@@ -691,6 +691,151 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
     console.error("[Executive Stats] Ticket SLA fetch failed:", err);
   }
 
+  // --- B2: Agent Performance ---
+  let agentPerformance: OperationsMetrics["agentPerformance"];
+  try {
+    const agentHealthRows = await prisma.agentHealth.findMany({
+      orderBy: { updatedAt: "desc" },
+    });
+
+    const agents = agentHealthRows.map((a) => ({
+      agentId: a.agentId,
+      status: a.status,
+      successRate: a.successRate24h ?? 0,
+      avgDuration: a.avgExecutionTime ?? 0,
+      executions: a.executions24h,
+      estimatedCost: a.estimatedCost24h ?? 0,
+      avgConfidence: a.avgConfidence,
+      humanReviewRate: a.humanReviewRate ?? 0,
+    }));
+
+    const healthyAgents = agents.filter(a => a.status === "HEALTHY").length;
+    const degradedAgents = agents.filter(a => a.status === "DEGRADED").length;
+    const failedAgents = agents.filter(a => a.status === "FAILED" || a.status === "OFFLINE").length;
+    const totalCost24h = agents.reduce((sum, a) => sum + a.estimatedCost, 0);
+    const totalExecutions24h = agents.reduce((sum, a) => sum + a.executions, 0);
+
+    agentPerformance = {
+      totalAgents: agents.length,
+      healthyAgents,
+      degradedAgents,
+      failedAgents,
+      totalCost24h,
+      totalExecutions24h,
+      agents,
+    };
+  } catch (err) {
+    console.error("[Executive Stats] Agent performance fetch failed:", err);
+  }
+
+  // --- B2: Broker Intelligence ---
+  let brokerIntelligence: OperationsMetrics["brokerIntelligence"];
+  try {
+    const brokerRows = await prisma.brokerIntelligence.findMany({
+      where: { removalsSent: { gte: 3 } },
+      orderBy: { successRate: "desc" },
+    });
+
+    const topPerformers = brokerRows.slice(0, 5).map(b => ({
+      source: b.source,
+      sourceName: b.sourceName,
+      successRate: b.successRate,
+      removalsCompleted: b.removalsCompleted,
+      removalsSent: b.removalsSent,
+    }));
+
+    const worstPerformers = [...brokerRows]
+      .sort((a, b) => a.successRate - b.successRate)
+      .slice(0, 5)
+      .map(b => ({
+        source: b.source,
+        sourceName: b.sourceName,
+        successRate: b.successRate,
+        falsePositiveRate: b.falsePositiveRate ?? 0,
+        removalsSent: b.removalsSent,
+      }));
+
+    brokerIntelligence = {
+      totalBrokers: brokerRows.length,
+      topPerformers,
+      worstPerformers,
+    };
+  } catch (err) {
+    console.error("[Executive Stats] Broker intelligence fetch failed:", err);
+  }
+
+  // --- B2: Remediation Savings ---
+  let remediationSavings: OperationsMetrics["remediationSavings"];
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [logsToday, logs7d] = await Promise.all([
+      prisma.cronLog.findMany({
+        where: { jobName: "ticketing-agent", createdAt: { gte: twentyFourHoursAgo }, status: { in: ["SUCCESS", "PARTIAL"] } },
+        select: { metadata: true },
+      }),
+      prisma.cronLog.findMany({
+        where: { jobName: "ticketing-agent", createdAt: { gte: sevenDaysAgo }, status: { in: ["SUCCESS", "PARTIAL"] } },
+        select: { metadata: true },
+      }),
+    ]);
+
+    let autoFixedToday = 0, aiCallsAvoidedToday = 0;
+    for (const log of logsToday) {
+      const meta = log.metadata as Record<string, number> | null;
+      if (meta?.autoFixed) autoFixedToday += meta.autoFixed;
+      if (meta?.aiCallsAvoided) aiCallsAvoidedToday += meta.aiCallsAvoided;
+    }
+
+    let autoFixed7d = 0, aiCallsAvoided7d = 0;
+    for (const log of logs7d) {
+      const meta = log.metadata as Record<string, number> | null;
+      if (meta?.autoFixed) autoFixed7d += meta.autoFixed;
+      if (meta?.aiCallsAvoided) aiCallsAvoided7d += meta.aiCallsAvoided;
+    }
+
+    // Estimate cost saved: ~$0.015 per AI call avoided (Haiku pricing)
+    const estimatedCostSaved7d = Math.round(aiCallsAvoided7d * 1.5); // 1.5 cents per call
+
+    remediationSavings = { autoFixedToday, autoFixed7d, aiCallsAvoidedToday, aiCallsAvoided7d, estimatedCostSaved7d };
+  } catch (err) {
+    console.error("[Executive Stats] Remediation savings fetch failed:", err);
+  }
+
+  // --- B2: Queue Velocity ---
+  let queueVelocity: OperationsMetrics["queueVelocity"];
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [completedLast24h, completedLast7d, runsLast24h] = await Promise.all([
+      prisma.removalRequest.count({
+        where: { status: "COMPLETED", completedAt: { gte: twentyFourHoursAgo } },
+      }),
+      prisma.removalRequest.count({
+        where: { status: "COMPLETED", completedAt: { gte: sevenDaysAgo } },
+      }),
+      prisma.cronLog.count({
+        where: {
+          jobName: { in: ["process-removals", "clear-pending-queue"] },
+          createdAt: { gte: twentyFourHoursAgo },
+          status: "SUCCESS",
+        },
+      }),
+    ]);
+
+    queueVelocity = {
+      itemsProcessedLast24h: completedLast24h,
+      itemsProcessedLast7d: completedLast7d,
+      avgItemsPerHour24h: Math.round((completedLast24h / 24) * 10) / 10,
+      avgItemsPerRun: runsLast24h > 0 ? Math.round((completedLast24h / runsLast24h) * 10) / 10 : 0,
+      runsLast24h,
+    };
+  } catch (err) {
+    console.error("[Executive Stats] Queue velocity fetch failed:", err);
+  }
+
   return {
     pendingRemovalRequests,
     inProgressRemovals,
@@ -713,6 +858,10 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
     },
     cronHealth,
     ticketSLA,
+    agentPerformance,
+    brokerIntelligence,
+    remediationSavings,
+    queueVelocity,
   };
 }
 

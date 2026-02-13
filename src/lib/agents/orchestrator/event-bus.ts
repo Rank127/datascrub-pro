@@ -40,6 +40,10 @@ class EventBus {
   private isProcessing = false;
   private eventQueue: AgentEvent[] = [];
 
+  // A3: Event deduplication — suppress duplicate events within 10-minute window
+  private recentEventHashes: Map<string, number> = new Map();
+  private static EVENT_DEDUP_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
   private constructor() {}
 
   /**
@@ -126,6 +130,34 @@ class EventBus {
    * Publish an event
    */
   async publish(event: Omit<AgentEvent, "id" | "timestamp">): Promise<void> {
+    // A3: Event deduplication — hash key metadata and skip if seen recently
+    const now = Date.now();
+
+    // Prune stale dedup entries
+    for (const [hash, ts] of this.recentEventHashes) {
+      if (now - ts > EventBus.EVENT_DEDUP_TTL_MS) {
+        this.recentEventHashes.delete(hash);
+      }
+    }
+
+    // Compute dedup hash from type + source + key payload fields
+    const payload = event.payload as Record<string, unknown> | undefined;
+    const hashParts = [
+      event.type,
+      event.sourceAgentId,
+      payload?.alertType ?? "",
+      payload?.eventName ?? "",
+      payload?.capability ?? "",
+      payload?.cronName ?? "",
+      event.correlationId ?? "",
+    ].join("|");
+
+    if (this.recentEventHashes.has(hashParts)) {
+      // Skip duplicate event
+      return;
+    }
+    this.recentEventHashes.set(hashParts, now);
+
     const fullEvent: AgentEvent = {
       ...event,
       id: nanoid(),

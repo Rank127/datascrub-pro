@@ -228,6 +228,7 @@ function SettingsContent() {
       features: ["10 scans/month", "Basic exposure report", "Manual removal guides"],
       current: currentPlan === "FREE",
       sale: false,
+      valueNote: null,
     },
     {
       name: "PRO",
@@ -242,6 +243,7 @@ function SettingsContent() {
       current: currentPlan === "PRO",
       recommended: currentPlan === "FREE", // Only recommend Pro to Free users
       sale: true,
+      valueNote: "The average identity theft victim spends $1,343+ out of pocket. Protection pays for itself.",
     },
     {
       name: "ENTERPRISE",
@@ -257,6 +259,7 @@ function SettingsContent() {
       current: currentPlan === "ENTERPRISE",
       recommended: currentPlan === "PRO", // Recommend Enterprise to Pro users
       sale: true,
+      valueNote: "Protect your entire family. One compromised member can expose everyone.",
     },
   ];
 
@@ -617,7 +620,7 @@ function SettingsContent() {
                   <h3 className="font-semibold text-white">{plan.name}</h3>
                   {plan.sale && (
                     <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded">
-                      40% OFF
+                      40% OFF — Introductory pricing
                     </span>
                   )}
                 </div>
@@ -632,7 +635,7 @@ function SettingsContent() {
                     </span>
                   </span>
                 </div>
-                <ul className="space-y-2 mb-4">
+                <ul className="space-y-2 mb-3">
                   {plan.features.map((feature) => (
                     <li
                       key={feature}
@@ -643,6 +646,9 @@ function SettingsContent() {
                     </li>
                   ))}
                 </ul>
+                {!plan.current && plan.valueNote && (
+                  <p className="text-xs text-slate-400 italic mb-3 px-1">{plan.valueNote}</p>
+                )}
                 {!plan.current && plan.name !== "FREE" && (
                   // Only show upgrade button if this plan is higher than current plan
                   (currentPlan === "FREE" || (currentPlan === "PRO" && plan.name === "ENTERPRISE"))
@@ -675,6 +681,14 @@ function SettingsContent() {
             ))}
           </div>
 
+          {/* 30-Day Money-Back Guarantee */}
+          <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-3">
+            <Shield className="h-5 w-5 text-emerald-400 shrink-0" />
+            <div>
+              <span className="text-sm font-medium text-emerald-400">30-Day Money-Back Guarantee</span>
+              <p className="text-xs text-slate-400">Try risk-free. If you&apos;re not satisfied, get a full refund within 30 days.</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

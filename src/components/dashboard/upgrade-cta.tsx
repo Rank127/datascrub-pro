@@ -31,6 +31,7 @@ interface UpgradeCtaProps {
   ctaHref: string;
   colorScheme: keyof typeof colorSchemes;
   features?: string[];
+  badge?: string;
   className?: string;
 }
 
@@ -42,6 +43,7 @@ export function UpgradeCta({
   ctaHref,
   colorScheme,
   features,
+  badge,
   className,
 }: UpgradeCtaProps) {
   const scheme = colorSchemes[colorScheme];
@@ -55,6 +57,11 @@ export function UpgradeCta({
           {icon}
         </div>
         <div className="flex-1">
+          {badge && (
+            <span className="inline-block text-xs font-semibold bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2.5 py-0.5 rounded-full mb-2">
+              {badge}
+            </span>
+          )}
           <h3 className="text-lg font-bold text-white">{title}</h3>
           <div className="text-slate-300 mt-1">{description}</div>
           {features && features.length > 0 && (

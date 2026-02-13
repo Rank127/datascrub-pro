@@ -216,6 +216,7 @@ export default function DashboardPage() {
         timeSaved={timeSaved}
         riskScore={stats.riskScore}
         maxExposure={data?.maxExposure}
+        userPlan={stats.userPlan}
       />
 
       {/* 2. Quick Stats - Collapsible inline stats */}

@@ -149,6 +149,43 @@ export async function getCronHealthStatus(): Promise<{
 }
 
 /**
+ * A4: Get retrigger count for a cron job within a time window
+ */
+export async function getRetriggerCount(jobName: string, windowHours: number): Promise<number> {
+  try {
+    const cutoff = new Date(Date.now() - windowHours * 60 * 60 * 1000);
+    return await prisma.cronLog.count({
+      where: {
+        jobName,
+        status: "RETRIGGER" as string,
+        createdAt: { gte: cutoff },
+      },
+    });
+  } catch (error) {
+    console.error("[CronLogger] Failed to get retrigger count:", error);
+    return 0;
+  }
+}
+
+/**
+ * A4: Log a retrigger attempt for a cron job
+ */
+export async function logRetriggerAttempt(jobName: string, success: boolean): Promise<void> {
+  try {
+    await prisma.cronLog.create({
+      data: {
+        jobName,
+        status: "RETRIGGER" as string,
+        message: success ? `Retrigger of ${jobName} succeeded` : `Retrigger of ${jobName} failed`,
+        metadata: JSON.stringify({ success, triggeredAt: new Date().toISOString() }),
+      },
+    });
+  } catch (error) {
+    console.error("[CronLogger] Failed to log retrigger attempt:", error);
+  }
+}
+
+/**
  * Clean up old cron logs (keep last 30 days)
  */
 export async function cleanupOldCronLogs(): Promise<number> {

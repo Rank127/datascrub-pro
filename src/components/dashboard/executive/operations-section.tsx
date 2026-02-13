@@ -395,8 +395,16 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
 
             {/* Pipeline Summary */}
             <div className="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between">
-              <div className="text-sm text-slate-400">
-                Total in pipeline: <span className="text-white font-medium">{data.queueBreakdown.totalPipeline.toLocaleString()}</span>
+              <div className="text-sm text-slate-400 flex items-center gap-4">
+                <span>Total in pipeline: <span className="text-white font-medium">{data.queueBreakdown.totalPipeline.toLocaleString()}</span></span>
+                {data.queueVelocity && (
+                  <>
+                    <span className="text-slate-600">|</span>
+                    <span className="text-emerald-400">{data.queueVelocity.avgItemsPerHour24h} items/hr</span>
+                    <span className="text-slate-600">|</span>
+                    <span>{data.queueVelocity.itemsProcessedLast24h.toLocaleString()} processed (24h)</span>
+                  </>
+                )}
               </div>
               <div className="flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-1">
@@ -641,6 +649,129 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
           </Card>
         )}
       </div>
+
+      {/* Agent Performance */}
+      {data.agentPerformance && (
+        <Card className="bg-slate-900/50 border-slate-800">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-slate-400 flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Agent Performance (24h)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              <div className="text-center">
+                <div className="text-lg font-bold text-white">{data.agentPerformance.totalExecutions24h}</div>
+                <div className="text-xs text-slate-500">Executions</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-blue-400">${(data.agentPerformance.totalCost24h / 100).toFixed(2)}</div>
+                <div className="text-xs text-slate-500">Cost</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-emerald-400">{data.agentPerformance.healthyAgents}/{data.agentPerformance.totalAgents}</div>
+                <div className="text-xs text-slate-500">Active</div>
+              </div>
+            </div>
+            {data.agentPerformance.agents.length > 0 && (
+              <div className="max-h-48 overflow-y-auto space-y-1.5 border-t border-slate-800 pt-2">
+                {data.agentPerformance.agents.map((agent) => (
+                  <div key={agent.agentId} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5">
+                      {agent.status === "HEALTHY" ? (
+                        <CheckCircle className="h-3 w-3 text-emerald-400" />
+                      ) : agent.status === "DEGRADED" ? (
+                        <AlertTriangle className="h-3 w-3 text-amber-400" />
+                      ) : (
+                        <XCircle className="h-3 w-3 text-red-400" />
+                      )}
+                      <span className="text-slate-300">{agent.agentId}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-slate-500">{agent.executions} runs</span>
+                      <span className={agent.successRate >= 90 ? "text-emerald-400" : agent.successRate >= 70 ? "text-amber-400" : "text-red-400"}>
+                        {agent.successRate.toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Broker Intelligence */}
+      {data.brokerIntelligence && (
+        <Card className="bg-slate-900/50 border-slate-800">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-slate-400 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Broker Intelligence
+              <Badge className="bg-blue-500/20 text-blue-400 ml-auto">{data.brokerIntelligence.totalBrokers} tracked</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-emerald-400 font-medium mb-2">Top Brokers</p>
+                <div className="space-y-1.5">
+                  {data.brokerIntelligence.topPerformers.map((b) => (
+                    <div key={b.source} className="flex items-center justify-between text-xs">
+                      <span className="text-slate-300 truncate max-w-[120px]">{b.sourceName || b.source}</span>
+                      <span className="text-emerald-400">{b.removalsCompleted}/{b.removalsSent}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-red-400 font-medium mb-2">Problem Brokers</p>
+                <div className="space-y-1.5">
+                  {data.brokerIntelligence.worstPerformers.map((b) => (
+                    <div key={b.source} className="flex items-center justify-between text-xs">
+                      <span className="text-slate-300 truncate max-w-[120px]">{b.sourceName || b.source}</span>
+                      <span className="text-red-400">{b.successRate.toFixed(0)}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Auto-Remediation Savings */}
+      {data.remediationSavings && (
+        <Card className="bg-slate-900/50 border-teal-500/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-teal-400 flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Auto-Remediation Savings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-4 gap-3">
+              <div className="text-center p-2 bg-teal-500/10 rounded-lg">
+                <div className="text-lg font-bold text-teal-400">{data.remediationSavings.autoFixedToday}</div>
+                <div className="text-xs text-slate-500">Fixed Today</div>
+              </div>
+              <div className="text-center p-2 bg-teal-500/10 rounded-lg">
+                <div className="text-lg font-bold text-teal-400">{data.remediationSavings.autoFixed7d}</div>
+                <div className="text-xs text-slate-500">Fixed 7d</div>
+              </div>
+              <div className="text-center p-2 bg-teal-500/10 rounded-lg">
+                <div className="text-lg font-bold text-teal-400">{data.remediationSavings.aiCallsAvoided7d}</div>
+                <div className="text-xs text-slate-500">AI Calls Saved</div>
+              </div>
+              <div className="text-center p-2 bg-teal-500/10 rounded-lg">
+                <div className="text-lg font-bold text-teal-400">${(data.remediationSavings.estimatedCostSaved7d / 100).toFixed(2)}</div>
+                <div className="text-xs text-slate-500">$ Saved (7d)</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Removal Status Breakdown */}
       <Card className="bg-slate-900/50 border-slate-800">

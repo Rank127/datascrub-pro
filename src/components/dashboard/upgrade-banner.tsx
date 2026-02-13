@@ -9,22 +9,36 @@ export function UpgradeBanner() {
   const [loading, setLoading] = useState(true);
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [exposureData, setExposureData] = useState<{
+    activeExposures: number;
+    maxExposureFound: number;
+  } | null>(null);
 
   useEffect(() => {
-    const fetchPlan = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/subscription");
-        if (response.ok) {
-          const data = await response.json();
+        const [subRes, statsRes] = await Promise.all([
+          fetch("/api/subscription"),
+          fetch("/api/dashboard/stats"),
+        ]);
+        if (subRes.ok) {
+          const data = await subRes.json();
           setPlan(data.plan);
         }
+        if (statsRes.ok) {
+          const stats = await statsRes.json();
+          setExposureData({
+            activeExposures: stats.stats?.activeExposures ?? 0,
+            maxExposureFound: stats.maxExposure?.found ?? 0,
+          });
+        }
       } catch (error) {
-        console.error("Failed to fetch subscription:", error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchPlan();
+    fetchData();
   }, []);
 
   const handleUpgrade = async () => {
@@ -65,9 +79,14 @@ export function UpgradeBanner() {
         <Crown className="h-4 w-4 text-yellow-500" />
         <span className="text-sm font-semibold text-white">Upgrade to PRO</span>
       </div>
-      <p className="text-xs text-slate-300 mb-3">
-        Unlock automated removals & weekly monitoring
+      <p className="text-xs text-slate-300 mb-1">
+        {exposureData && exposureData.activeExposures > 0
+          ? `You have ${exposureData.activeExposures} exposures on ${exposureData.maxExposureFound} sites. Upgrade to auto-remove them.`
+          : "Unlock automated removals & weekly monitoring"}
       </p>
+      {exposureData && exposureData.activeExposures > 0 && (
+        <p className="text-[10px] text-orange-400 mb-2">Your data is being accessed daily</p>
+      )}
       <div className="flex items-baseline gap-1 mb-3">
         <span className="text-xs text-slate-500 line-through">$19.99</span>
         <span className="text-lg font-bold text-white">$11.99</span>

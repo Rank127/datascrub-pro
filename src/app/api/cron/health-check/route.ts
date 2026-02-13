@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { encrypt, decrypt } from "@/lib/encryption/crypto";
 import { Resend } from "resend";
-import { logCronExecution, getCronHealthStatus, cleanupOldCronLogs } from "@/lib/cron-logger";
+import { logCronExecution, getCronHealthStatus, cleanupOldCronLogs, getRetriggerCount, logRetriggerAttempt } from "@/lib/cron-logger";
 import {
   acquireJobLock,
   releaseJobLock,
@@ -122,6 +122,9 @@ export async function GET(request: Request) {
       message: `Could not check orphaned profiles: ${error}`,
     });
   }
+
+  // A6: Cascading fix cooldown — let DB settle after orphan cleanup before next read
+  await new Promise(r => setTimeout(r, 500));
 
   // ========== ENCRYPTION TESTS ==========
 
@@ -350,6 +353,14 @@ export async function GET(request: Request) {
         for (const job of overdueCritical) {
           // Don't re-trigger health-check (that's us!)
           if (job.name === "health-check") continue;
+
+          // A5: Rate-limit retriggers — max 3 per cron per 24h
+          const retriggers = await getRetriggerCount(job.name, 24);
+          if (retriggers >= 3) {
+            retriggerFailed.push(`${job.name}(rate-limited: ${retriggers}/3 in 24h)`);
+            continue;
+          }
+
           try {
             const response = await fetch(`${baseUrl}/api/cron/${job.name}`, {
               method: "GET",
@@ -358,11 +369,14 @@ export async function GET(request: Request) {
             });
             if (response.ok) {
               retriggered.push(job.name);
+              await logRetriggerAttempt(job.name, true);
             } else {
               retriggerFailed.push(`${job.name}(${response.status})`);
+              await logRetriggerAttempt(job.name, false);
             }
           } catch (error) {
             retriggerFailed.push(`${job.name}(${error instanceof Error ? error.message : "timeout"})`);
+            await logRetriggerAttempt(job.name, false);
           }
         }
       }
@@ -529,6 +543,9 @@ export async function GET(request: Request) {
     });
   }
 
+  // A6: Cascading fix cooldown — let DB settle after stuck scan updates
+  await new Promise(r => setTimeout(r, 500));
+
   // Test 10: Stuck Removal Requests (pending for more than 7 days) - AUTO-FIX
   try {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -589,6 +606,9 @@ export async function GET(request: Request) {
       message: `Could not check removals: ${error}`,
     });
   }
+
+  // A6: Cascading fix cooldown — let DB settle after stuck removal processing
+  await new Promise(r => setTimeout(r, 500));
 
   // Test 11: Past Due Subscriptions
   try {

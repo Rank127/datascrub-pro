@@ -498,6 +498,15 @@ class RemediationEngine {
   private maxHistorySize = 500;
   private isInitialized = false;
 
+  // A1: Issue deduplication — skip repeated issues within 30 min window
+  private recentIssues: Map<string, { timestamp: number; count: number }> = new Map();
+  private static DEDUP_WINDOW_MS = 30 * 60 * 1000; // 30 minutes
+
+  // A2: Circuit breaker — stop retrying after repeated failures
+  private circuitBreaker: Map<string, { attempts: number; lastAttempt: number; state: "CLOSED" | "OPEN" }> = new Map();
+  private static CB_MAX_ATTEMPTS = 3;
+  private static CB_RESET_MS = 6 * 60 * 60 * 1000; // 6 hours
+
   private constructor() {}
 
   /**
@@ -711,6 +720,46 @@ class RemediationEngine {
       `[RemediationEngine] Processing issue: ${issue.type} (severity: ${issue.severity})`
     );
 
+    // A1: Issue deduplication — compute fingerprint and skip if seen recently
+    const fingerprint = `${issue.type}:${issue.affectedResource || "global"}`;
+    const now = Date.now();
+
+    // Prune stale dedup entries
+    for (const [key, entry] of this.recentIssues) {
+      if (now - entry.timestamp > RemediationEngine.DEDUP_WINDOW_MS) {
+        this.recentIssues.delete(key);
+      }
+    }
+
+    const existing = this.recentIssues.get(fingerprint);
+    if (existing && now - existing.timestamp < RemediationEngine.DEDUP_WINDOW_MS) {
+      existing.count++;
+      console.log(
+        `[RemediationEngine] DEDUP_SKIP: ${fingerprint} seen ${existing.count} times in last 30min`
+      );
+      return null;
+    }
+    this.recentIssues.set(fingerprint, { timestamp: now, count: 1 });
+
+    // A2: Circuit breaker check — skip if breaker is OPEN for this fingerprint
+    const cb = this.circuitBreaker.get(fingerprint);
+    if (cb) {
+      // Auto-reset after 6 hours of inactivity
+      if (now - cb.lastAttempt > RemediationEngine.CB_RESET_MS) {
+        this.circuitBreaker.delete(fingerprint);
+      } else if (cb.state === "OPEN") {
+        console.log(
+          `[RemediationEngine] CIRCUIT_BREAKER_OPEN: ${fingerprint} — skipping remediation, escalating`
+        );
+        await getEventBus().emitCustom(
+          "remediation-engine",
+          "remediation.circuit_breaker_open",
+          { fingerprint, attempts: cb.attempts, issueType: issue.type }
+        );
+        return null;
+      }
+    }
+
     // Add to history
     this.issueHistory.push(issue);
     if (this.issueHistory.length > this.maxHistorySize) {
@@ -742,6 +791,23 @@ class RemediationEngine {
     // Execute if auto-remediation is enabled
     if (rule.autoRemediate && issue.canAutoRemediate) {
       await this.executePlan(plan);
+
+      // A2: Track circuit breaker state after execution
+      if (plan.status === "failed") {
+        const cbEntry = this.circuitBreaker.get(fingerprint) || { attempts: 0, lastAttempt: now, state: "CLOSED" as const };
+        cbEntry.attempts++;
+        cbEntry.lastAttempt = now;
+        if (cbEntry.attempts >= RemediationEngine.CB_MAX_ATTEMPTS) {
+          cbEntry.state = "OPEN";
+          console.log(
+            `[RemediationEngine] CIRCUIT_BREAKER_TRIPPED: ${fingerprint} after ${cbEntry.attempts} failures`
+          );
+        }
+        this.circuitBreaker.set(fingerprint, cbEntry);
+      } else {
+        // Reset on success
+        this.circuitBreaker.delete(fingerprint);
+      }
     } else {
       // Emit event for manual review
       await getEventBus().emitCustom(

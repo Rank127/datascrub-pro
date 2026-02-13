@@ -24,6 +24,7 @@ import {
 import { registerAgent } from "../registry";
 import { sendManualActionRequiredEmail } from "@/lib/email";
 import { DATA_BROKER_DIRECTORY } from "@/lib/removers/data-broker-directory";
+import { getRetriggerCount, logRetriggerAttempt } from "@/lib/cron-logger";
 
 // ============================================================================
 // CONSTANTS
@@ -612,6 +613,18 @@ class OperationsAgent extends BaseAgent {
 
         if (cronSecret) {
           for (const cronName of deadCrons) {
+            // A5: Rate-limit retriggers — max 3 per cron per 24h
+            const retriggers = await getRetriggerCount(cronName, 24);
+            if (retriggers >= 3) {
+              const matchingAlert = alerts.find(
+                a => a.type === "silent_cron_death" && (a.data as { cronName: string })?.cronName === cronName
+              );
+              if (matchingAlert) {
+                matchingAlert.message += ` [RETRIGGER RATE-LIMITED: ${retriggers}/3 in 24h — escalate manually]`;
+              }
+              continue;
+            }
+
             try {
               const response = await fetch(`${baseUrl}/api/cron/${cronName}`, {
                 method: "GET",
@@ -622,12 +635,19 @@ class OperationsAgent extends BaseAgent {
               const matchingAlert = alerts.find(
                 a => a.type === "silent_cron_death" && (a.data as { cronName: string })?.cronName === cronName
               );
-              if (matchingAlert) {
-                matchingAlert.message += response.ok
-                  ? ` [AUTO-FIX: Re-triggered successfully]`
-                  : ` [AUTO-FIX FAILED: HTTP ${response.status}]`;
+              if (response.ok) {
+                await logRetriggerAttempt(cronName, true);
+                if (matchingAlert) {
+                  matchingAlert.message += ` [AUTO-FIX: Re-triggered successfully]`;
+                }
+              } else {
+                await logRetriggerAttempt(cronName, false);
+                if (matchingAlert) {
+                  matchingAlert.message += ` [AUTO-FIX FAILED: HTTP ${response.status}]`;
+                }
               }
             } catch (error) {
+              await logRetriggerAttempt(cronName, false);
               const matchingAlert = alerts.find(
                 a => a.type === "silent_cron_death" && (a.data as { cronName: string })?.cronName === cronName
               );

@@ -129,6 +129,55 @@ export interface OperationsMetrics {
     resolvedToday: number;
     autoFixedToday: number;
   };
+  agentPerformance?: {
+    totalAgents: number;
+    healthyAgents: number;
+    degradedAgents: number;
+    failedAgents: number;
+    totalCost24h: number;
+    totalExecutions24h: number;
+    agents: Array<{
+      agentId: string;
+      status: string;
+      successRate: number;
+      avgDuration: number;
+      executions: number;
+      estimatedCost: number;
+      avgConfidence: number | null;
+      humanReviewRate: number;
+    }>;
+  };
+  brokerIntelligence?: {
+    totalBrokers: number;
+    topPerformers: Array<{
+      source: string;
+      sourceName: string | null;
+      successRate: number;
+      removalsCompleted: number;
+      removalsSent: number;
+    }>;
+    worstPerformers: Array<{
+      source: string;
+      sourceName: string | null;
+      successRate: number;
+      falsePositiveRate: number;
+      removalsSent: number;
+    }>;
+  };
+  remediationSavings?: {
+    autoFixedToday: number;
+    autoFixed7d: number;
+    aiCallsAvoidedToday: number;
+    aiCallsAvoided7d: number;
+    estimatedCostSaved7d: number; // cents
+  };
+  queueVelocity?: {
+    itemsProcessedLast24h: number;
+    itemsProcessedLast7d: number;
+    avgItemsPerHour24h: number;
+    avgItemsPerRun: number;
+    runsLast24h: number;
+  };
 }
 
 export interface ActivitiesMetrics {

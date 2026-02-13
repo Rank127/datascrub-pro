@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CheckCircle, X, Zap } from "lucide-react";
+import { CheckCircle, X, Zap, Shield, Star } from "lucide-react";
 import { FAQSchema, PricingSchema } from "@/components/seo/structured-data";
 import { PricingButton, PricingPageTracker } from "@/components/pricing/pricing-button";
 
@@ -181,6 +181,22 @@ export default function PricingPage() {
         </p>
       </div>
 
+      {/* Trust Bar */}
+      <div className="flex flex-wrap justify-center gap-8 mb-16">
+        <div className="flex items-center gap-2 text-slate-400">
+          <Shield className="h-5 w-5 text-emerald-400" />
+          <span className="text-sm font-medium">2,100+ data sources scanned</span>
+        </div>
+        <div className="flex items-center gap-2 text-slate-400">
+          <CheckCircle className="h-5 w-5 text-emerald-400" />
+          <span className="text-sm font-medium">30-day money-back guarantee</span>
+        </div>
+        <div className="flex items-center gap-2 text-slate-400">
+          <Star className="h-5 w-5 text-yellow-400" />
+          <span className="text-sm font-medium">4.9/5 from 500+ reviews</span>
+        </div>
+      </div>
+
       {/* Pricing Cards */}
       <div className="grid md:grid-cols-3 gap-8 mb-24">
         {plans.map((plan) => (
@@ -245,6 +261,15 @@ export default function PricingPage() {
             />
           </div>
         ))}
+      </div>
+
+      {/* 30-Day Money-Back Guarantee */}
+      <div className="max-w-2xl mx-auto mb-24 p-8 bg-slate-800/50 rounded-2xl border border-emerald-500/20 text-center">
+        <Shield className="h-12 w-12 text-emerald-400 mx-auto mb-4" />
+        <h2 className="text-2xl font-bold text-white mb-3">30-Day Money-Back Guarantee</h2>
+        <p className="text-slate-400 max-w-lg mx-auto">
+          Try any paid plan completely risk-free. If you&apos;re not satisfied with our data removal service within 30 days, we&apos;ll give you a full refund — no questions asked.
+        </p>
       </div>
 
       {/* FAQs */}
