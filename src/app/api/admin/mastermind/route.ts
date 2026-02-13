@@ -170,7 +170,7 @@ Respond with valid JSON only (no markdown, no code fences):
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(`[Mastermind API] Failed at step "${step}":`, errorMessage, error);
     return NextResponse.json(
-      { error: `Mastermind failed at ${step}: ${errorMessage}` },
+      { error: "Failed to generate mastermind advice. Please try again." },
       { status: 500 }
     );
   }
