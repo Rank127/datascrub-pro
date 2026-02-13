@@ -41,10 +41,10 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
-import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
+import { UpgradeCta } from "@/components/dashboard/upgrade-cta";
 
 interface DNCRegistration {
   id: string;
@@ -222,28 +222,14 @@ export default function DNCPage() {
           description="Register your phone numbers on the National Do Not Call Registry"
         />
 
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="text-center py-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 mb-6">
-                <PhoneOff className="h-8 w-8 text-emerald-500" />
-              </div>
-              <h2 className="text-xl font-semibold text-white mb-2">
-                Enterprise Feature
-              </h2>
-              <p className="text-slate-400 max-w-md mx-auto mb-6">
-                Do Not Call Registry registration is available exclusively for
-                Enterprise plan subscribers. Reduce unwanted telemarketing calls
-                by registering your phone numbers.
-              </p>
-              <Link href="/dashboard/settings?tab=billing">
-                <Button className="bg-emerald-600 hover:bg-emerald-700">
-                  Upgrade to Enterprise
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+        <UpgradeCta
+          icon={<PhoneOff className="h-8 w-8 text-emerald-500" />}
+          title="Enterprise Feature"
+          description="Do Not Call Registry registration is available exclusively for Enterprise plan subscribers. Reduce unwanted telemarketing calls by registering your phone numbers."
+          ctaText="Upgrade to Enterprise"
+          ctaHref="/dashboard/settings?tab=billing"
+          colorScheme="emerald"
+        />
       </div>
     );
   }

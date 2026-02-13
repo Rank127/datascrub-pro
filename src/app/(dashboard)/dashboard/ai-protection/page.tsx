@@ -18,6 +18,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
+import { UpgradeCta } from "@/components/dashboard/upgrade-cta";
 import {
   Bot,
   Scan,
@@ -174,31 +175,14 @@ export default function AIProtectionPage() {
         />
 
         {/* Upgrade CTA */}
-        <Card className="bg-gradient-to-br from-purple-900/50 to-slate-900 border-purple-500/30">
-          <CardContent className="py-8">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="p-4 bg-purple-500/20 rounded-full">
-                <Lock className="h-12 w-12 text-purple-400" />
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                <h2 className="text-xl font-bold text-white mb-2">
-                  Enterprise Feature
-                </h2>
-                <p className="text-slate-300 max-w-xl">
-                  AI Shield scans 50+ sources including AI training datasets,
-                  facial recognition databases, and voice cloning services to protect your
-                  identity from unauthorized AI use.
-                </p>
-              </div>
-              <Link href="/pricing">
-                <Button size="lg" className="bg-purple-600 hover:bg-purple-700">
-                  Upgrade to Enterprise
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+        <UpgradeCta
+          icon={<Lock className="h-8 w-8 text-purple-400" />}
+          title="Enterprise Feature"
+          description="AI Shield scans 50+ sources including AI training datasets, facial recognition databases, and voice cloning services to protect your identity from unauthorized AI use."
+          ctaText={<>Upgrade to Enterprise <ArrowRight className="ml-2 h-4 w-4" /></>}
+          ctaHref="/pricing"
+          colorScheme="purple"
+        />
 
         {/* Feature Preview */}
         <div className="grid gap-6 md:grid-cols-3">

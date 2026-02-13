@@ -28,6 +28,7 @@ import {
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
+import { UpgradeCta } from "@/components/dashboard/upgrade-cta";
 import { getBrokerCount } from "@/lib/removers/data-broker-directory";
 import { trackScanStarted, trackScanCompleted } from "@/components/analytics/google-analytics";
 
@@ -433,55 +434,33 @@ export default function ScanPage() {
               {isFreePlan && scanResult.exposuresFound > 0 && (() => {
                 const recommendation = getRecommendedPlan();
                 if (!recommendation) return null;
+                const showUrgency = scanResult.severityCounts &&
+                  (scanResult.severityCounts.critical > 0 || scanResult.severityCounts.high >= 3);
 
                 return (
-                  <div className={`p-6 rounded-lg border ${
-                    recommendation.plan === "ENTERPRISE"
-                      ? "bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30"
-                      : "bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border-emerald-500/30"
-                  }`}>
-                    {/* Urgency banner for critical/high exposures */}
-                    {scanResult.severityCounts && (scanResult.severityCounts.critical > 0 || scanResult.severityCounts.high >= 3) && (
-                      <div className="flex items-center justify-center gap-2 mb-4 p-2 bg-red-500/20 rounded-lg">
-                        <AlertTriangle className="h-4 w-4 text-red-400" />
-                        <span className="text-sm font-medium text-red-400">{recommendation.urgency}</span>
-                      </div>
-                    )}
-
-                    <div className="flex flex-col md:flex-row md:items-center gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Crown className={`h-5 w-5 ${recommendation.plan === "ENTERPRISE" ? "text-purple-400" : "text-emerald-400"}`} />
-                          <h4 className="text-lg font-semibold text-white">{recommendation.title}</h4>
-                        </div>
-                        <p className="text-slate-300 mb-3">{recommendation.reason}</p>
-                        <ul className="space-y-1 mb-4">
-                          {recommendation.features.map((feature, index) => (
-                            <li key={index} className="flex items-center gap-2 text-sm text-slate-400">
-                              <CheckCircle className="h-3 w-3 text-emerald-500 flex-shrink-0" />
-                              {feature}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="text-center md:text-right">
-                        <div className="mb-2">
+                  <UpgradeCta
+                    icon={<Crown className={`h-5 w-5 ${recommendation.plan === "ENTERPRISE" ? "text-purple-400" : "text-emerald-400"}`} />}
+                    title={recommendation.title}
+                    description={
+                      <>
+                        {showUrgency && (
+                          <div className="flex items-center gap-2 mb-2 p-2 bg-red-500/20 rounded-lg">
+                            <AlertTriangle className="h-4 w-4 text-red-400" />
+                            <span className="text-sm font-medium text-red-400">{recommendation.urgency}</span>
+                          </div>
+                        )}
+                        <p>{recommendation.reason}</p>
+                        <div className="mt-2">
                           <span className="text-2xl font-bold text-white">{recommendation.price}</span>
+                          <p className="text-sm text-emerald-400">{recommendation.savings}</p>
                         </div>
-                        <p className="text-sm text-emerald-400 mb-3">{recommendation.savings}</p>
-                        <Link href="/pricing">
-                          <Button className={`w-full md:w-auto ${
-                            recommendation.plan === "ENTERPRISE"
-                              ? "bg-purple-600 hover:bg-purple-700"
-                              : "bg-emerald-600 hover:bg-emerald-700"
-                          }`}>
-                            <Shield className="mr-2 h-4 w-4" />
-                            {recommendation.cta}
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
+                      </>
+                    }
+                    features={recommendation.features}
+                    ctaText={<><Shield className="mr-2 h-4 w-4" />{recommendation.cta}</>}
+                    ctaHref="/pricing"
+                    colorScheme={recommendation.plan === "ENTERPRISE" ? "purple" : "emerald"}
+                  />
                 );
               })()}
             </div>

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +26,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 import { Pagination } from "@/components/dashboard/pagination";
+import { UpgradeCta } from "@/components/dashboard/upgrade-cta";
 import { Input } from "@/components/ui/input";
 import {
   AlertTriangle,
@@ -40,7 +40,6 @@ import {
   X,
   Search,
   Crown,
-  Zap,
   Shield,
   Globe,
 } from "lucide-react";
@@ -306,42 +305,27 @@ function ExposuresPageContent() {
 
       {/* Free User Upgrade Banner */}
       {showUpgradeBanner && (
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-red-500/20 border border-amber-500/40 p-6">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-amber-500/20 rounded-xl shrink-0">
-                <Shield className="h-8 w-8 text-amber-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-amber-400" />
-                  Your Data is Exposed - Take Action Now
-                </h3>
-                <p className="text-slate-300 mt-1 max-w-xl">
-                  Your data is exposed on <strong className="text-amber-300">{totalExposures}</strong> of <strong className="text-amber-300">{TOTAL_KNOWN_BROKERS.toLocaleString()}+</strong> known broker sites. <strong className="text-amber-300">Upgrade to Pro</strong> to start removing it automatically and protect your privacy.
-                </p>
-                <div className="flex items-center gap-4 mt-3 text-sm">
-                  <span className="flex items-center gap-1 text-emerald-400">
-                    <Zap className="h-4 w-4" /> Automated removals
-                  </span>
-                  <span className="flex items-center gap-1 text-emerald-400">
-                    <Shield className="h-4 w-4" /> 50 sites monitored
-                  </span>
-                  <span className="flex items-center gap-1 text-emerald-400">
-                    <Crown className="h-4 w-4" /> Priority support
-                  </span>
-                </div>
-              </div>
-            </div>
-            <Link href="/dashboard/settings#subscription">
-              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold px-6 py-2 shadow-lg shadow-amber-500/25 shrink-0">
-                <Crown className="h-4 w-4 mr-2" />
-                Upgrade Now - 40% Off
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <UpgradeCta
+          icon={<Shield className="h-8 w-8 text-amber-400" />}
+          title={
+            <span className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-400" />
+              Your Data is Exposed - Take Action Now
+            </span>
+          }
+          description={
+            <p className="max-w-xl">
+              Your data is exposed on <strong className="text-amber-300">{totalExposures}</strong> of{" "}
+              <strong className="text-amber-300">{TOTAL_KNOWN_BROKERS.toLocaleString()}+</strong> known
+              broker sites. <strong className="text-amber-300">Upgrade to Pro</strong> to start removing
+              it automatically and protect your privacy.
+            </p>
+          }
+          features={["Automated removals", "50 sites monitored", "Priority support"]}
+          ctaText={<><Crown className="h-4 w-4 mr-2" />Upgrade Now - 40% Off</>}
+          ctaHref="/dashboard/settings#subscription"
+          colorScheme="amber"
+        />
       )}
 
       {/* Monitoring context for paid users */}
