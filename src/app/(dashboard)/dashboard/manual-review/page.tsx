@@ -20,10 +20,7 @@ import { RemovalProgressTracker } from "@/components/dashboard/removal-progress-
 import { RemovalWizard } from "@/components/dashboard/removal-wizard";
 import {
   MousePointerClick,
-  Loader2,
   Filter,
-  ChevronLeft,
-  ChevronRight,
   CheckCircle2,
   Clock,
   Search,
@@ -34,6 +31,11 @@ import {
   Zap,
   ShieldCheck,
 } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { Pagination } from "@/components/dashboard/pagination";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { trackManualReviewCompleted } from "@/components/analytics/google-analytics";
@@ -376,53 +378,17 @@ export default function ManualReviewPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <MousePointerClick className="h-7 w-7 text-amber-400" />
-            Manual Review
-          </h1>
-          <p className="text-slate-400 mt-1">
-            Sites that require you to manually check and take action
-          </p>
-        </div>
-        <Link href="/dashboard/scan">
-          <Button className="bg-emerald-600 hover:bg-emerald-700">
-            <Search className="mr-2 h-4 w-4" />
-            Run New Scan
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        title={<span className="flex items-center gap-3"><MousePointerClick className="h-7 w-7 text-amber-400" />Manual Review</span>}
+        description="Sites that require you to manually check and take action"
+        actions={<Link href="/dashboard/scan"><Button className="bg-emerald-600 hover:bg-emerald-700"><Search className="mr-2 h-4 w-4" />Run New Scan</Button></Link>}
+      />
 
       {/* Stats Cards - Broker-centric (sites to visit, not individual exposures) */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <MousePointerClick className="h-5 w-5 text-amber-400" />
-              <div className="text-2xl font-bold text-white">{stats.brokers}</div>
-            </div>
-            <p className="text-sm text-slate-400">Total Sites</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700 border-amber-500/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-amber-400" />
-              <div className="text-2xl font-bold text-amber-400">{stats.pending}</div>
-            </div>
-            <p className="text-sm text-slate-400">Sites Pending</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700 border-emerald-500/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-              <div className="text-2xl font-bold text-emerald-400">{stats.done}</div>
-            </div>
-            <p className="text-sm text-slate-400">Sites Reviewed</p>
-          </CardContent>
-        </Card>
+        <StatCard value={stats.brokers} label="Total Sites" icon={MousePointerClick} color="amber" />
+        <StatCard value={stats.pending} label="Sites Pending" icon={Clock} color="amber" borderColor />
+        <StatCard value={stats.done} label="Sites Reviewed" icon={CheckCircle2} color="emerald" borderColor />
       </div>
 
       {/* Info Card */}
@@ -567,31 +533,14 @@ export default function ManualReviewPage() {
 
       {/* Exposures List */}
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-        </div>
+        <LoadingSpinner />
       ) : exposures.length === 0 ? (
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="py-12 text-center">
-            <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white mb-2">
-              {statusFilter === "pending"
-                ? "No Pending Manual Reviews"
-                : "No Manual Review Items"}
-            </h3>
-            <p className="text-slate-400 mb-4">
-              {statusFilter === "pending"
-                ? "Great job! You've reviewed all manual items."
-                : "Run a scan to check for sites requiring manual review."}
-            </p>
-            <Link href="/dashboard/scan">
-              <Button className="bg-emerald-600 hover:bg-emerald-700">
-                <Search className="mr-2 h-4 w-4" />
-                Run Scan
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={<CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto mb-4" />}
+          title={statusFilter === "pending" ? "No Pending Manual Reviews" : "No Manual Review Items"}
+          description={statusFilter === "pending" ? "Great job! You've reviewed all manual items." : "Run a scan to check for sites requiring manual review."}
+          action={<Link href="/dashboard/scan"><Button className="bg-emerald-600 hover:bg-emerald-700"><Search className="mr-2 h-4 w-4" />Run Scan</Button></Link>}
+        />
       ) : (
         <div className="space-y-4">
           {groupedExposures.map((group) => (
@@ -805,29 +754,7 @@ export default function ManualReviewPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="border-slate-600"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm text-slate-400">
-            Page {page} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="border-slate-600"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );

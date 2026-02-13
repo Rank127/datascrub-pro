@@ -28,6 +28,7 @@ import {
   Shield,
 } from "lucide-react";
 import { trackProfileCompleted } from "@/components/analytics/google-analytics";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 interface Address {
   street: string;
@@ -194,12 +195,10 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">My Profile</h1>
-        <p className="text-slate-400">
-          Enter your personal information to search for data exposures
-        </p>
-      </div>
+      <PageHeader
+        title="My Profile"
+        description="Enter your personal information to search for data exposures"
+      />
 
       {success && (
         <Alert className="bg-emerald-500/10 border-emerald-500/20">

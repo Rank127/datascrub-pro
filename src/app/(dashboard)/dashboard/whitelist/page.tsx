@@ -37,6 +37,9 @@ import {
   ListChecks,
   ShieldOff,
 } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
+import { EmptyState } from "@/components/dashboard/empty-state";
 import { DataSourceNames, type DataSource } from "@/lib/types";
 
 interface WhitelistItem {
@@ -137,21 +140,20 @@ export default function WhitelistPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Whitelist</h1>
-          <p className="text-slate-400">
-            Accounts and services you want to keep - excluded from removal
-          </p>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-emerald-600 hover:bg-emerald-700">
-              <Plus className="mr-2 h-4 w-4" />
-              Add to Whitelist
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-slate-800 border-slate-700">
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <PageHeader
+          title="Whitelist"
+          description="Accounts and services you want to keep - excluded from removal"
+          actions={
+            <DialogTrigger asChild>
+              <Button className="bg-emerald-600 hover:bg-emerald-700">
+                <Plus className="mr-2 h-4 w-4" />
+                Add to Whitelist
+              </Button>
+            </DialogTrigger>
+          }
+        />
+        <DialogContent className="bg-slate-800 border-slate-700">
             <DialogHeader>
               <DialogTitle className="text-white">Add to Whitelist</DialogTitle>
               <DialogDescription className="text-slate-400">
@@ -238,8 +240,7 @@ export default function WhitelistPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
-      </div>
+      </Dialog>
 
       {/* Info Card */}
       <Card className="bg-emerald-500/10 border-emerald-500/20">
@@ -272,19 +273,13 @@ export default function WhitelistPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-            </div>
+            <LoadingSpinner />
           ) : whitelist.length === 0 ? (
-            <div className="text-center py-12">
-              <Shield className="mx-auto h-12 w-12 text-slate-600 mb-4" />
-              <h3 className="text-lg font-medium text-slate-300">
-                No whitelisted items
-              </h3>
-              <p className="text-slate-500 mt-1">
-                Add accounts you want to protect from removal
-              </p>
-            </div>
+            <EmptyState
+              icon={<Shield className="mx-auto h-12 w-12 text-slate-600 mb-4" />}
+              title="No whitelisted items"
+              description="Add accounts you want to protect from removal"
+            />
           ) : (
             <div className="space-y-3">
               {whitelist.map((item) => (

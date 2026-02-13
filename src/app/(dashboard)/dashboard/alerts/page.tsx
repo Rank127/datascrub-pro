@@ -20,6 +20,9 @@ import {
   Check,
   RefreshCw,
 } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
+import { EmptyState } from "@/components/dashboard/empty-state";
 
 interface Alert {
   id: string;
@@ -159,43 +162,41 @@ export default function AlertsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Alerts</h1>
-          <p className="text-slate-400">
-            Stay informed about new exposures and removal updates
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="border-slate-600"
-            onClick={() => {
-              setLoading(true);
-              fetchAlerts();
-            }}
-            disabled={loading}
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          </Button>
-          {unreadCount > 0 && (
+      <PageHeader
+        title="Alerts"
+        description="Stay informed about new exposures and removal updates"
+        actions={
+          <div className="flex gap-2">
             <Button
               variant="outline"
+              size="icon"
               className="border-slate-600"
-              onClick={markAllAsRead}
-              disabled={updating}
+              onClick={() => {
+                setLoading(true);
+                fetchAlerts();
+              }}
+              disabled={loading}
             >
-              {updating ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Check className="mr-2 h-4 w-4" />
-              )}
-              Mark all as read
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </Button>
-          )}
-        </div>
-      </div>
+            {unreadCount > 0 && (
+              <Button
+                variant="outline"
+                className="border-slate-600"
+                onClick={markAllAsRead}
+                disabled={updating}
+              >
+                {updating ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="mr-2 h-4 w-4" />
+                )}
+                Mark all as read
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       {/* Summary */}
       <Card className="bg-slate-800/50 border-slate-700">
@@ -246,19 +247,13 @@ export default function AlertsPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-            </div>
+            <LoadingSpinner />
           ) : alerts.length === 0 ? (
-            <div className="text-center py-12">
-              <Bell className="mx-auto h-12 w-12 text-slate-600 mb-4" />
-              <h3 className="text-lg font-medium text-slate-300">
-                No alerts yet
-              </h3>
-              <p className="text-slate-500 mt-1">
-                You&apos;ll be notified when there are updates about your data
-              </p>
-            </div>
+            <EmptyState
+              icon={<Bell className="mx-auto h-12 w-12 text-slate-600 mb-4" />}
+              title="No alerts yet"
+              description="You'll be notified when there are updates about your data"
+            />
           ) : (
             <div className="space-y-3">
               {alerts.map((alert) => {
