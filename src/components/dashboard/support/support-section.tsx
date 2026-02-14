@@ -1,12 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MetricCard } from "../executive/metric-card";
 import { TicketList } from "./ticket-list";
-import { TicketDetailDialog } from "./ticket-detail-dialog";
+
+// Lazy-load ticket detail dialog (400+ lines, only shown when a ticket is selected)
+const TicketDetailDialog = dynamic(
+  () => import("./ticket-detail-dialog").then((m) => ({ default: m.TicketDetailDialog })),
+  { ssr: false }
+);
 import {
   Inbox,
   Clock,

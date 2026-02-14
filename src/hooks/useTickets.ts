@@ -71,7 +71,7 @@ export function useAdminTickets(options?: UseTicketsOptions) {
       return res.json() as Promise<{ tickets: Ticket[]; total: number }>;
     },
     refetchInterval: pollingInterval,
-    refetchIntervalInBackground: true,
+    refetchIntervalInBackground: false,
   });
 
   // Show toast for new tickets
@@ -131,7 +131,7 @@ export function useTicketStats(options?: { pollingInterval?: number }) {
       return res.json() as Promise<TicketStats>;
     },
     refetchInterval: pollingInterval,
-    refetchIntervalInBackground: true,
+    refetchIntervalInBackground: false,
   });
 
   return {
@@ -158,7 +158,7 @@ export function useUserTickets(options?: { pollingInterval?: number; showToast?:
       return res.json() as Promise<{ tickets: Ticket[]; total: number }>;
     },
     refetchInterval: pollingInterval,
-    refetchIntervalInBackground: true,
+    refetchIntervalInBackground: false,
   });
 
   // Show toast for ticket updates

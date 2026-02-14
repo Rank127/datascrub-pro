@@ -33,10 +33,22 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
+import dynamic from "next/dynamic";
 import { FamilySection } from "@/components/dashboard/family";
-import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
-import { TwoFactorSetupDialog } from "@/components/settings/two-factor-setup-dialog";
-import { TwoFactorDisableDialog } from "@/components/settings/two-factor-disable-dialog";
+
+// Lazy-load heavy dialog components (only rendered when user opens them)
+const ChangePasswordDialog = dynamic(
+  () => import("@/components/settings/change-password-dialog").then((m) => ({ default: m.ChangePasswordDialog })),
+  { ssr: false }
+);
+const TwoFactorSetupDialog = dynamic(
+  () => import("@/components/settings/two-factor-setup-dialog").then((m) => ({ default: m.TwoFactorSetupDialog })),
+  { ssr: false }
+);
+const TwoFactorDisableDialog = dynamic(
+  () => import("@/components/settings/two-factor-disable-dialog").then((m) => ({ default: m.TwoFactorDisableDialog })),
+  { ssr: false }
+);
 
 // Wrapper component to handle Suspense for useSearchParams
 export default function SettingsPage() {

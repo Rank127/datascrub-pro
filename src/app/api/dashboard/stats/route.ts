@@ -475,6 +475,10 @@ export async function GET() {
         socialMedia: calculateProgress(socialRemovals),
         aiProtection: calculateProgress(aiProtectionRemovals),
       },
+    }, {
+      headers: {
+        "Cache-Control": "private, s-maxage=30, stale-while-revalidate=60",
+      },
     });
   } catch (error) {
     console.error("Dashboard stats error:", error);

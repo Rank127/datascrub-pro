@@ -1,25 +1,13 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { checkPermission } from "@/lib/admin";
+import { z } from "zod";
 
-// Check if user is an admin
-async function isAdmin(userId: string): Promise<boolean> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { email: true, role: true },
-  });
-
-  if (!user) return false;
-
-  // Check if user has admin role
-  if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
-    return true;
-  }
-
-  // Check ADMIN_EMAILS environment variable
-  const adminEmails = process.env.ADMIN_EMAILS?.split(",").map((e) => e.trim()) || [];
-  return adminEmails.includes(user.email || "");
-}
+const resetExposuresSchema = z.object({
+  targetUserId: z.string().min(1).optional(),
+  confirmDelete: z.boolean().optional().default(false),
+});
 
 // POST /api/admin/reset-exposures - Clear all exposures and related data for current user
 export async function POST(request: Request) {
@@ -30,9 +18,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check admin status
-    const admin = await isAdmin(session.user.id);
-    if (!admin) {
+    // Check admin permission
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { email: true, role: true },
+    });
+
+    if (!checkPermission(currentUser?.email, currentUser?.role, "delete_user_data")) {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 403 }
@@ -40,7 +32,14 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { targetUserId, confirmDelete } = body;
+    const parsed = resetExposuresSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Invalid input" },
+        { status: 400 }
+      );
+    }
+    const { targetUserId, confirmDelete } = parsed.data;
 
     // Use target user ID if provided (for admin to clear another user's data), otherwise current user
     const userIdToReset = targetUserId || session.user.id;

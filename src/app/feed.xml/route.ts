@@ -1,8 +1,9 @@
 import { getAllPosts } from "@/lib/blog/posts";
+import { APP_URL } from "@/lib/constants";
 
 export async function GET() {
   const posts = getAllPosts();
-  const baseUrl = "https://ghostmydata.com";
+  const baseUrl = APP_URL;
   const currentDate = new Date().toISOString();
 
   const rssXml = `<?xml version="1.0" encoding="UTF-8"?>

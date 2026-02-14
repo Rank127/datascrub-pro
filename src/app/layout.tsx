@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://ghostmydata.com";
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com";
 const siteName = "GhostMyData";
 const siteDescription = "Find and remove your personal data from data brokers, breach databases, and the dark web. Automated privacy protection with CCPA/GDPR compliance. Take control of your digital footprint today.";
 

@@ -30,7 +30,7 @@ export function useAlerts(options?: { pollingInterval?: number; showToast?: bool
       return res.json() as Promise<{ alerts: Alert[] }>;
     },
     refetchInterval: pollingInterval,
-    refetchIntervalInBackground: true,
+    refetchIntervalInBackground: false,
   });
 
   // Show toast for new alerts

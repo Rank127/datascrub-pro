@@ -50,6 +50,18 @@ function RegisterForm() {
     e.preventDefault();
     setError("");
 
+    if (!name.trim()) {
+      setError("Please enter your name");
+      return;
+    }
+    if (!email || !email.includes("@")) {
+      setError("Please enter a valid email address");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;

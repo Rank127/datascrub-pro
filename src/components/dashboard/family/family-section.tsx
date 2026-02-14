@@ -1,12 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { Users, UserPlus, Crown, Calendar, Shield, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { InviteDialog } from "./invite-dialog";
+
+// Lazy-load invite dialog (only shown when user clicks "Invite")
+const InviteDialog = dynamic(
+  () => import("./invite-dialog").then((m) => ({ default: m.InviteDialog })),
+  { ssr: false }
+);
 import { MemberCard } from "./member-card";
 import { FamilyGroupInfo, FamilyMembershipInfo, FamilyRole } from "@/lib/family/types";
 import { toast } from "sonner";

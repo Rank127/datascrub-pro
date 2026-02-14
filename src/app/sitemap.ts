@@ -1,8 +1,9 @@
 import { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/blog/posts";
+import { APP_URL } from "@/lib/constants";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://ghostmydata.com";
+  const baseUrl = APP_URL;
   const currentDate = new Date().toISOString();
 
   // Static pages with their priorities and change frequencies
