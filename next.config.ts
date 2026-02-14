@@ -1,3 +1,4 @@
+import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const securityHeaders = [
@@ -67,4 +68,18 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Suppress source map upload warnings when SENTRY_AUTH_TOKEN is not set
+  silent: !process.env.SENTRY_AUTH_TOKEN,
+
+  // Upload source maps for better stack traces
+  widenClientFileUpload: true,
+
+  // Disable Sentry telemetry
+  telemetry: false,
+
+  // Source map configuration
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+});
