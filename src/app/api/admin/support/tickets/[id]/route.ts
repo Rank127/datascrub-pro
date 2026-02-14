@@ -203,7 +203,7 @@ export async function PATCH(
             subject: existingTicket.subject,
             resolution: data.resolution,
           }
-        ).catch(console.error);
+        ).catch((e) => { import("@/lib/error-reporting").then(m => m.captureError("ticket-resolved-email", e instanceof Error ? e : new Error(String(e)))); });
       }
     } else if (data.status && data.status !== existingTicket.status) {
       // Status change (not resolution)
@@ -225,7 +225,7 @@ export async function PATCH(
             status: data.status,
             comment: data.comment,
           }
-        ).catch(console.error);
+        ).catch((e) => { import("@/lib/error-reporting").then(m => m.captureError("ticket-status-email", e instanceof Error ? e : new Error(String(e)))); });
       }
     }
 

@@ -187,9 +187,12 @@ export async function POST(request: Request) {
       `${resultsByConfidence.possible} possible, ${resultsByConfidence.rejected} rejected)`
     );
 
-    // Get existing exposures for this user to avoid duplicates
+    // Get existing exposures for this user to avoid duplicates (only non-removed)
     const existingExposures = await prisma.exposure.findMany({
-      where: { userId: session.user.id },
+      where: {
+        userId: session.user.id,
+        status: { not: "REMOVED" },
+      },
       select: {
         id: true,
         source: true,
@@ -198,6 +201,7 @@ export async function POST(request: Request) {
         dataPreview: true,
         status: true,
       },
+      take: 1000,
     });
 
     // Create a map for quick lookup
@@ -335,7 +339,7 @@ export async function POST(request: Request) {
         session.user.email,
         session.user.name || "",
         { count: exposures.length, critical, high, sources }
-      ).catch(console.error);
+      ).catch((e) => { import("@/lib/error-reporting").then(m => m.captureError("scan-exposure-email", e instanceof Error ? e : new Error(String(e)))); });
 
       // Create an alert record
       await prisma.alert.create({

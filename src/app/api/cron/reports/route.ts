@@ -54,50 +54,58 @@ export async function GET(request: Request) {
     let sentCount = 0;
     let errorCount = 0;
 
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+    const userIds = users.map((u) => u.id);
+
+    // Batch-aggregate all stats in 5 queries instead of 5 * N
+    const [activeExposureCounts, newExposureCounts, completedRemovalCounts, pendingRemovalCounts, prevWeekExposureCounts] = await Promise.all([
+      prisma.exposure.groupBy({
+        by: ["userId"],
+        where: { userId: { in: userIds }, status: "ACTIVE" },
+        _count: true,
+      }),
+      prisma.exposure.groupBy({
+        by: ["userId"],
+        where: { userId: { in: userIds }, firstFoundAt: { gte: oneWeekAgo } },
+        _count: true,
+      }),
+      prisma.removalRequest.groupBy({
+        by: ["userId"],
+        where: { userId: { in: userIds }, status: "COMPLETED", completedAt: { gte: oneWeekAgo } },
+        _count: true,
+      }),
+      prisma.removalRequest.groupBy({
+        by: ["userId"],
+        where: { userId: { in: userIds }, status: { in: ["PENDING", "SUBMITTED", "IN_PROGRESS"] } },
+        _count: true,
+      }),
+      prisma.exposure.groupBy({
+        by: ["userId"],
+        where: { userId: { in: userIds }, firstFoundAt: { lte: oneWeekAgo, gte: twoWeeksAgo } },
+        _count: true,
+      }),
+    ]);
+
+    // Build lookup maps
+    const activeMap = new Map(activeExposureCounts.map((r) => [r.userId, r._count]));
+    const newMap = new Map(newExposureCounts.map((r) => [r.userId, r._count]));
+    const removedMap = new Map(completedRemovalCounts.map((r) => [r.userId, r._count]));
+    const pendingMap = new Map(pendingRemovalCounts.map((r) => [r.userId, r._count]));
+    const prevWeekMap = new Map(prevWeekExposureCounts.map((r) => [r.userId, r._count]));
+
     for (const user of users) {
       try {
-        // Calculate stats for this user
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-        const [totalExposures, newExposures, removedThisWeek, pendingRemovals] = await Promise.all([
-          prisma.exposure.count({
-            where: { userId: user.id, status: "ACTIVE" },
-          }),
-          prisma.exposure.count({
-            where: {
-              userId: user.id,
-              firstFoundAt: { gte: oneWeekAgo },
-            },
-          }),
-          prisma.removalRequest.count({
-            where: {
-              userId: user.id,
-              status: "COMPLETED",
-              completedAt: { gte: oneWeekAgo },
-            },
-          }),
-          prisma.removalRequest.count({
-            where: {
-              userId: user.id,
-              status: { in: ["PENDING", "SUBMITTED", "IN_PROGRESS"] },
-            },
-          }),
-        ]);
+        const totalExposures = activeMap.get(user.id) || 0;
+        const newExposures = newMap.get(user.id) || 0;
+        const removedThisWeek = removedMap.get(user.id) || 0;
+        const pendingRemovals = pendingMap.get(user.id) || 0;
 
         // Calculate risk score (simplified)
         const riskScore = Math.min(100, Math.max(0, totalExposures * 5));
-
-        // Get previous week's total to calculate change
-        const twoWeeksAgo = new Date();
-        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-
-        const previousWeekExposures = await prisma.exposure.count({
-          where: {
-            userId: user.id,
-            firstFoundAt: { lte: oneWeekAgo, gte: twoWeeksAgo },
-          },
-        });
 
         const previousRiskScore = Math.min(100, Math.max(0, (totalExposures + removedThisWeek - newExposures) * 5));
         const riskChange = riskScore - previousRiskScore;

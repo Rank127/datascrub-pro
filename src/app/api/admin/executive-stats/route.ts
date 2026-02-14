@@ -445,47 +445,43 @@ async function getTrends(): Promise<{ users: TrendDataPoint[]; exposures: TrendD
     removalsByMonth[key] = 0;
   }
 
-  // Get actual data
-  const users = await prisma.user.findMany({
-    where: { createdAt: { gte: twelveMonthsAgo } },
-    select: { createdAt: true },
-  });
+  // Aggregate counts by month in SQL instead of fetching all rows
+  const [userCounts, exposureCounts, removalCounts] = await Promise.all([
+    prisma.$queryRaw<{ month: string; count: bigint }[]>`
+      SELECT TO_CHAR("createdAt", 'YYYY-MM') as month, COUNT(*) as count
+      FROM "User"
+      WHERE "createdAt" >= ${twelveMonthsAgo}
+      GROUP BY TO_CHAR("createdAt", 'YYYY-MM')
+    `,
+    prisma.$queryRaw<{ month: string; count: bigint }[]>`
+      SELECT TO_CHAR("firstFoundAt", 'YYYY-MM') as month, COUNT(*) as count
+      FROM "Exposure"
+      WHERE "firstFoundAt" >= ${twelveMonthsAgo}
+      GROUP BY TO_CHAR("firstFoundAt", 'YYYY-MM')
+    `,
+    prisma.$queryRaw<{ month: string; count: bigint }[]>`
+      SELECT TO_CHAR("completedAt", 'YYYY-MM') as month, COUNT(*) as count
+      FROM "RemovalRequest"
+      WHERE "completedAt" >= ${twelveMonthsAgo} AND "status" = 'COMPLETED'
+      GROUP BY TO_CHAR("completedAt", 'YYYY-MM')
+    `,
+  ]);
 
-  users.forEach((u) => {
-    const key = `${u.createdAt.getFullYear()}-${String(u.createdAt.getMonth() + 1).padStart(2, "0")}`;
-    if (usersByMonth[key] !== undefined) {
-      usersByMonth[key]++;
+  for (const row of userCounts) {
+    if (usersByMonth[row.month] !== undefined) {
+      usersByMonth[row.month] = Number(row.count);
     }
-  });
-
-  const exposures = await prisma.exposure.findMany({
-    where: { firstFoundAt: { gte: twelveMonthsAgo } },
-    select: { firstFoundAt: true },
-  });
-
-  exposures.forEach((e) => {
-    const key = `${e.firstFoundAt.getFullYear()}-${String(e.firstFoundAt.getMonth() + 1).padStart(2, "0")}`;
-    if (exposuresByMonth[key] !== undefined) {
-      exposuresByMonth[key]++;
+  }
+  for (const row of exposureCounts) {
+    if (exposuresByMonth[row.month] !== undefined) {
+      exposuresByMonth[row.month] = Number(row.count);
     }
-  });
-
-  const removals = await prisma.removalRequest.findMany({
-    where: {
-      completedAt: { gte: twelveMonthsAgo },
-      status: "COMPLETED",
-    },
-    select: { completedAt: true },
-  });
-
-  removals.forEach((r) => {
-    if (r.completedAt) {
-      const key = `${r.completedAt.getFullYear()}-${String(r.completedAt.getMonth() + 1).padStart(2, "0")}`;
-      if (removalsByMonth[key] !== undefined) {
-        removalsByMonth[key]++;
-      }
+  }
+  for (const row of removalCounts) {
+    if (removalsByMonth[row.month] !== undefined) {
+      removalsByMonth[row.month] = Number(row.count);
     }
-  });
+  }
 
   return {
     users: Object.entries(usersByMonth).map(([date, value]) => ({ date, value })),

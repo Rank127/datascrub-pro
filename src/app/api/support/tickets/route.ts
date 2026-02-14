@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
           subject: ticket.subject,
           type: ticket.type,
         }
-      ).catch(console.error);
+      ).catch((e) => { import("@/lib/error-reporting").then(m => m.captureError("ticket-created-email", e instanceof Error ? e : new Error(String(e)))); });
     }
 
     // Trigger AI ticketing agent to analyze and respond (non-blocking)

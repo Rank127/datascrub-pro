@@ -59,6 +59,7 @@ model User {
   whitelists             Whitelist[]
 
   @@index([createdAt])
+  @@index([emailVerified])
 }
 
 model Account {
@@ -128,6 +129,11 @@ model Scan {
   createdAt      DateTime   @default(now())
   exposures      Exposure[]
   user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([userId, type])
+  @@index([status])
 }
 
 // Exposure status values:
@@ -243,6 +249,8 @@ model Subscription {
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
   user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
 }
 
 model Alert {
@@ -357,6 +365,7 @@ model EmailQueue {
   @@index([processAt])
   @@index([emailType])
   @@index([userId])
+  @@index([createdAt])
 }
 
 model SupportTicket {

@@ -15,7 +15,7 @@ const createRequestSchema = z.object({
   dataType: z.enum(["EMAIL", "PHONE", "NAME", "ADDRESS", "PHOTO", "COMBINED_PROFILE", "OTHER"]),
   dataPreview: z.string().max(500).optional(),
   userNotes: z.string().max(1000).optional(),
-  userScreenshot: z.string().optional(), // Base64 or URL
+  userScreenshot: z.string().max(500000, "Screenshot too large (max ~375KB base64)").optional(),
 });
 
 // GET - List user's custom removal requests

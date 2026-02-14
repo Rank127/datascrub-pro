@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hash } from "bcryptjs";
+import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
 import { z } from "zod";
 
 const resetSchema = z.object({
@@ -8,8 +9,12 @@ const resetSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 3 per hour per IP (reuse forgot-password config)
+    const rl = await rateLimit(getClientIdentifier(request), "auth-forgot-password");
+    if (!rl.success) return rateLimitResponse(rl);
+
     const body = await request.json();
     const result = resetSchema.safeParse(body);
 

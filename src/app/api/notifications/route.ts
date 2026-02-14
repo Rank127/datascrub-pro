@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { z } from "zod";
+
+const notificationSchema = z.object({
+  emailNotifications: z.boolean().optional(),
+  newExposureAlerts: z.boolean().optional(),
+  removalUpdates: z.boolean().optional(),
+  weeklyReports: z.boolean().optional(),
+  marketingEmails: z.boolean().optional(),
+  reportFrequency: z.enum(["daily", "weekly", "monthly"]).optional(),
+}).strict();
 
 // GET /api/notifications - Get notification preferences
 export async function GET() {
@@ -45,6 +55,14 @@ export async function PATCH(request: Request) {
 
   try {
     const body = await request.json();
+    const parsed = notificationSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.issues },
+        { status: 400 }
+      );
+    }
+
     const {
       emailNotifications,
       newExposureAlerts,
@@ -52,16 +70,7 @@ export async function PATCH(request: Request) {
       weeklyReports,
       marketingEmails,
       reportFrequency,
-    } = body;
-
-    // Validate reportFrequency
-    const validFrequencies = ["daily", "weekly", "monthly"];
-    if (reportFrequency && !validFrequencies.includes(reportFrequency)) {
-      return NextResponse.json(
-        { error: "Invalid report frequency" },
-        { status: 400 }
-      );
-    }
+    } = parsed.data;
 
     const user = await prisma.user.update({
       where: { id: session.user.id },

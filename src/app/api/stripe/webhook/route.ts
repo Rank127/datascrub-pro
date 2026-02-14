@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { stripe, getPlanFromPriceId } from "@/lib/stripe";
 import { sendSubscriptionEmail, sendRefundConfirmationEmail } from "@/lib/email";
 import { createPaymentIssueTicket } from "@/lib/support/ticket-service";
+import { captureError } from "@/lib/error-reporting";
 import { logAudit } from "@/lib/rbac/audit-log";
 import Stripe from "stripe";
 
@@ -145,9 +146,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     select: { email: true, name: true },
   });
 
-  // Get current period end from subscription items
-  const currentPeriodEnd = stripeSubscription.items.data[0]?.current_period_end;
+  // Get current period end from subscription items (with null safety)
+  const firstItem = stripeSubscription.items?.data?.[0];
+  const currentPeriodEnd = firstItem?.current_period_end;
   const periodEndDate = currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null;
+  const priceId = firstItem?.price?.id;
 
   await prisma.$transaction([
     // Update subscription record
@@ -155,7 +158,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       where: { userId },
       update: {
         stripeSubscriptionId: subscriptionId,
-        stripePriceId: stripeSubscription.items.data[0]?.price.id,
+        stripePriceId: priceId,
         stripeCurrentPeriodEnd: periodEndDate,
         plan,
         status: "active",
@@ -164,7 +167,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         userId,
         stripeCustomerId: session.customer as string,
         stripeSubscriptionId: subscriptionId,
-        stripePriceId: stripeSubscription.items.data[0]?.price.id,
+        stripePriceId: priceId,
         stripeCurrentPeriodEnd: periodEndDate,
         plan,
         status: "active",
@@ -188,7 +191,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // Send subscription confirmation email (non-blocking)
   if (user?.email) {
-    sendSubscriptionEmail(user.email, user.name || "", plan).catch(console.error);
+    sendSubscriptionEmail(user.email, user.name || "", plan).catch((e) => captureError("stripe-subscription-email", e instanceof Error ? e : new Error(String(e))));
   }
 }
 
@@ -206,8 +209,9 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     return;
   }
 
-  const priceId = subscription.items.data[0]?.price.id;
-  const currentPeriodEnd = subscription.items.data[0]?.current_period_end;
+  const subFirstItem = subscription.items?.data?.[0];
+  const priceId = subFirstItem?.price?.id;
+  const currentPeriodEnd = subFirstItem?.current_period_end;
   const periodEndDate = currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null;
   const newPlan = getPlanFromPriceId(priceId || "");
   const previousPlan = existingSubscription.user.plan;
@@ -356,9 +360,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     subscription.userId,
     subscription.id,
     failureReason
-  ).catch((ticketError) => {
-    console.error("[Stripe Webhook] Failed to create support ticket:", ticketError);
-  });
+  ).catch((e) => captureError("stripe-payment-ticket", e instanceof Error ? e : new Error(String(e))));
 }
 
 async function handleRefund(charge: Stripe.Charge) {
@@ -461,6 +463,6 @@ async function handleRefund(charge: Stripe.Charge) {
       subscription.user.name || "",
       refundAmount,
       isFullRefund
-    ).catch(console.error);
+    ).catch((e) => captureError("stripe-refund-email", e instanceof Error ? e : new Error(String(e))));
   }
 }

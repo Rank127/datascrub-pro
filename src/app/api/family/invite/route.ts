@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send invitation email
+    let emailSent = true;
     try {
       // Get the token for the email
       const invitation = await prisma.familyInvitation.findFirst({
@@ -96,13 +97,15 @@ export async function POST(request: NextRequest) {
         );
       }
     } catch (emailError) {
-      console.error("Failed to send invitation email:", emailError);
-      // Don't fail the request - invitation is still created
+      emailSent = false;
+      const { captureError } = await import("@/lib/error-reporting");
+      captureError("family-invite", emailError instanceof Error ? emailError : new Error(String(emailError)));
     }
 
     return NextResponse.json({
       success: true,
       invitation: result.invitation,
+      ...(emailSent ? {} : { warning: "Invitation created but email delivery failed. The invitee can use the invitation link directly." }),
     });
   } catch (error) {
     console.error("Error creating family invitation:", error);

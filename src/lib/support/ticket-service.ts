@@ -1502,7 +1502,7 @@ export const SEO_METHODOLOGIES: Record<string, (affectedResource?: string) => { 
           title: "Verify current sitemap status",
           description: "Check if sitemap exists and what URLs are missing",
           action: "investigate",
-          commands: ["curl -I https://ghostmydata.com/sitemap.xml"],
+          commands: [`curl -I ${process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com"}/sitemap.xml`],
           expectedOutcome: "Understand current sitemap state",
         },
         {
@@ -1514,7 +1514,7 @@ export const SEO_METHODOLOGIES: Record<string, (affectedResource?: string) => { 
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://ghostmydata.com'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ghostmydata.com'
   return [
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
     { url: \`\${baseUrl}/pricing\`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
@@ -1532,7 +1532,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
             "git add src/app/sitemap.ts",
             "git commit -m 'Add/update sitemap'",
             "git push",
-            "curl https://ghostmydata.com/sitemap.xml | head -50",
+            `curl ${process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com"}/sitemap.xml | head -50`,
           ],
           expectedOutcome: "Sitemap accessible at /sitemap.xml",
         },
@@ -1563,7 +1563,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
           title: "Analyze current robots.txt",
           description: "Review current robots.txt for issues",
           action: "investigate",
-          commands: ["curl https://ghostmydata.com/robots.txt"],
+          commands: [`curl ${process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com"}/robots.txt`],
           expectedOutcome: "Identify what needs to be fixed",
         },
         {
@@ -1581,7 +1581,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/dashboard/', '/admin/'],
     },
-    sitemap: 'https://ghostmydata.com/sitemap.xml',
+    sitemap: '${process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com"}/sitemap.xml',
   }
 }`,
           expectedOutcome: "robots.txt properly configured",
@@ -1591,7 +1591,7 @@ export default function robots(): MetadataRoute.Robots {
           title: "Deploy and test",
           description: "Deploy and verify robots.txt is correct",
           action: "verify",
-          commands: ["curl https://ghostmydata.com/robots.txt"],
+          commands: [`curl ${process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com"}/robots.txt`],
           expectedOutcome: "robots.txt shows correct rules with sitemap reference",
         },
       ],
@@ -1613,7 +1613,7 @@ export default function robots(): MetadataRoute.Robots {
           title: "Run link audit",
           description: `Scan ${url || "the site"} for all broken links`,
           action: "investigate",
-          commands: ["npx broken-link-checker https://ghostmydata.com --recursive"],
+          commands: [`npx broken-link-checker ${process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com"} --recursive`],
           expectedOutcome: "List of all broken links identified",
         },
         {

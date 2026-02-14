@@ -232,7 +232,7 @@ export async function POST(request: NextRequest) {
           subject: ticket.subject,
           type: ticket.type,
         }
-      ).catch(console.error);
+      ).catch((e) => { import("@/lib/error-reporting").then(m => m.captureError("admin-ticket-created-email", e instanceof Error ? e : new Error(String(e)))); });
     }
 
     return NextResponse.json({

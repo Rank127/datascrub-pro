@@ -6,6 +6,7 @@ import { sendWelcomeEmail } from "@/lib/email";
 import { enrollInDripCampaign } from "@/lib/email/drip-campaigns";
 import { trackReferralSignup } from "@/lib/referrals";
 import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
+import { captureError } from "@/lib/error-reporting";
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -71,14 +72,14 @@ export async function POST(request: Request) {
     });
 
     // Send welcome email (non-blocking)
-    sendWelcomeEmail(email, name).catch(console.error);
+    sendWelcomeEmail(email, name).catch((e) => captureError("register-welcome-email", e instanceof Error ? e : new Error(String(e))));
 
     // Enroll in drip campaign for conversion optimization (non-blocking)
-    enrollInDripCampaign(user.id).catch(console.error);
+    enrollInDripCampaign(user.id).catch((e) => captureError("register-drip-campaign", e instanceof Error ? e : new Error(String(e))));
 
     // Track referral if code provided (non-blocking)
     if (referralCode) {
-      trackReferralSignup(referralCode, user.id).catch(console.error);
+      trackReferralSignup(referralCode, user.id).catch((e) => captureError("register-referral-tracking", e instanceof Error ? e : new Error(String(e))));
     }
 
     return NextResponse.json(

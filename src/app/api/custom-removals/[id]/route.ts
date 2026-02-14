@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectivePlan } from "@/lib/family/family-service";
+import { z } from "zod";
+
+const patchSchema = z.object({
+  status: z.enum(["PENDING", "ASSIGNED", "IN_PROGRESS", "COMPLETED", "REJECTED", "CANCELLED"]).optional(),
+  priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional(),
+  assignedToId: z.string().optional(),
+  internalNotes: z.string().max(2000).optional(),
+  resolution: z.string().max(2000).optional(),
+  beforeScreenshot: z.string().max(500000).optional(),
+  afterScreenshot: z.string().max(500000).optional(),
+  userNotes: z.string().max(1000).optional(),
+  userScreenshot: z.string().max(500000).optional(),
+}).strict();
 
 // GET - Get a specific custom removal request
 export async function GET(
@@ -74,6 +87,15 @@ export async function PATCH(
     const userId = session.user.id;
     const body = await request.json();
 
+    const parsed = patchSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.issues },
+        { status: 400 }
+      );
+    }
+    const validatedBody = parsed.data;
+
     // Check user role
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -94,40 +116,40 @@ export async function PATCH(
 
     // Users can only update their own requests and only certain fields
     if (customRequest.userId === userId) {
-      if (body.userNotes !== undefined && customRequest.status === "PENDING") {
-        updateData.userNotes = body.userNotes;
+      if (validatedBody.userNotes !== undefined && customRequest.status === "PENDING") {
+        updateData.userNotes = validatedBody.userNotes;
       }
-      if (body.userScreenshot !== undefined && customRequest.status === "PENDING") {
-        updateData.userScreenshot = body.userScreenshot;
+      if (validatedBody.userScreenshot !== undefined && customRequest.status === "PENDING") {
+        updateData.userScreenshot = validatedBody.userScreenshot;
       }
     }
 
     // Admins can update more fields
     if (isAdmin) {
-      if (body.status !== undefined) {
-        updateData.status = body.status;
-        if (body.status === "COMPLETED") {
+      if (validatedBody.status !== undefined) {
+        updateData.status = validatedBody.status;
+        if (validatedBody.status === "COMPLETED") {
           updateData.completedAt = new Date();
         }
       }
-      if (body.priority !== undefined) {
-        updateData.priority = body.priority;
+      if (validatedBody.priority !== undefined) {
+        updateData.priority = validatedBody.priority;
       }
-      if (body.assignedToId !== undefined) {
-        updateData.assignedToId = body.assignedToId;
+      if (validatedBody.assignedToId !== undefined) {
+        updateData.assignedToId = validatedBody.assignedToId;
         updateData.assignedAt = new Date();
       }
-      if (body.internalNotes !== undefined) {
-        updateData.internalNotes = body.internalNotes;
+      if (validatedBody.internalNotes !== undefined) {
+        updateData.internalNotes = validatedBody.internalNotes;
       }
-      if (body.resolution !== undefined) {
-        updateData.resolution = body.resolution;
+      if (validatedBody.resolution !== undefined) {
+        updateData.resolution = validatedBody.resolution;
       }
-      if (body.beforeScreenshot !== undefined) {
-        updateData.beforeScreenshot = body.beforeScreenshot;
+      if (validatedBody.beforeScreenshot !== undefined) {
+        updateData.beforeScreenshot = validatedBody.beforeScreenshot;
       }
-      if (body.afterScreenshot !== undefined) {
-        updateData.afterScreenshot = body.afterScreenshot;
+      if (validatedBody.afterScreenshot !== undefined) {
+        updateData.afterScreenshot = validatedBody.afterScreenshot;
       }
     }
 

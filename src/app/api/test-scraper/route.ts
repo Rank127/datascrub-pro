@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { scrapeUrl, isScrapingServiceEnabled } from "@/lib/scanners/scraping-service";
 
 // Brokers that need premium proxy (residential IPs) due to strong bot detection
@@ -65,6 +66,20 @@ const brokerUrls: Record<string, (name: string, city: string, state: string) => 
 };
 
 export async function GET(request: Request) {
+  // Auth: admin-only endpoint
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const { prisma } = await import("@/lib/db");
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+  if (!["ADMIN", "SUPER_ADMIN"].includes(user?.role || "")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const { searchParams } = new URL(request.url);
   const broker = searchParams.get("broker") || "spokeo";
   const name = searchParams.get("name") || "John-Smith";

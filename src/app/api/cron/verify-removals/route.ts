@@ -42,7 +42,7 @@ export async function GET(request: Request) {
 
     await logCronExecution({
       jobName: "verify-removals",
-      status: timeBoxed ? ("PARTIAL" as "SUCCESS" | "FAILED") : "SUCCESS",
+      status: timeBoxed ? "PARTIAL" : "SUCCESS",
       duration,
       message: `${timeBoxed ? "PARTIAL: " : ""}Verified ${stats.processed} removals in ${duration}ms`,
       metadata: stats as Record<string, unknown>,

@@ -34,7 +34,8 @@ export async function GET(request: Request) {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    // Get all active users who haven't scanned in the last 30 days
+    // Get active users who haven't scanned in the last 30 days (batched to prevent memory exhaustion)
+    const BATCH_SIZE = 500;
     const usersNeedingScan = await prisma.user.findMany({
       where: {
         emailVerified: { not: null }, // Only verified users
@@ -63,11 +64,13 @@ export async function GET(request: Request) {
           where: { status: "ACTIVE" },
           select: { id: true },
         },
-profiles: {
+        profiles: {
           select: { id: true },
           take: 1,
         },
       },
+      take: BATCH_SIZE,
+      orderBy: { createdAt: "asc" },
     });
 
     console.log(`[Monthly Rescan] Found ${usersNeedingScan.length} users needing scan`);
@@ -132,6 +135,8 @@ profiles: {
           select: { createdAt: true },
         },
       },
+      take: BATCH_SIZE,
+      orderBy: { createdAt: "asc" },
     });
 
     // Queue monitoring scans for users who haven't had one recently
