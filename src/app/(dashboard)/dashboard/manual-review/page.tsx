@@ -265,6 +265,7 @@ export default function ManualReviewPage() {
       }
     } catch (error) {
       console.error("Failed to fetch manual review items:", error);
+      toast.error("Failed to load manual review items");
     } finally {
       setLoading(false);
     }

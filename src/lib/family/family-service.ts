@@ -47,59 +47,46 @@ export async function getOrCreateFamilyGroup(
     },
   });
 
-  // Create if doesn't exist
+  // Create if doesn't exist — use transaction to prevent orphaned groups
   if (!familyGroup) {
-    familyGroup = await prisma.familyGroup.create({
-      data: {
-        ownerId,
-        maxMembers: 5,
-      },
-      include: {
-        owner: {
-          select: { id: true, name: true, email: true, lastScanAt: true },
+    familyGroup = await prisma.$transaction(async (tx) => {
+      const group = await tx.familyGroup.create({
+        data: {
+          ownerId,
+          maxMembers: 5,
         },
-        members: {
-          include: {
-            user: {
-              select: { id: true, name: true, email: true, lastScanAt: true },
+      });
+
+      // Add owner as first member (atomic with group creation)
+      await tx.familyMember.create({
+        data: {
+          familyGroupId: group.id,
+          userId: ownerId,
+          role: FamilyRole.OWNER,
+        },
+      });
+
+      // Return fully populated group
+      return tx.familyGroup.findUnique({
+        where: { id: group.id },
+        include: {
+          owner: {
+            select: { id: true, name: true, email: true, lastScanAt: true },
+          },
+          members: {
+            include: {
+              user: {
+                select: { id: true, name: true, email: true, lastScanAt: true },
+              },
             },
+            orderBy: { joinedAt: "asc" },
+          },
+          invitations: {
+            where: { status: InvitationStatus.PENDING },
+            orderBy: { createdAt: "desc" },
           },
         },
-        invitations: {
-          where: { status: InvitationStatus.PENDING },
-        },
-      },
-    });
-
-    // Add owner as first member
-    await prisma.familyMember.create({
-      data: {
-        familyGroupId: familyGroup.id,
-        userId: ownerId,
-        role: FamilyRole.OWNER,
-      },
-    });
-
-    // Refresh to get updated members
-    familyGroup = await prisma.familyGroup.findUnique({
-      where: { id: familyGroup.id },
-      include: {
-        owner: {
-          select: { id: true, name: true, email: true, lastScanAt: true },
-        },
-        members: {
-          include: {
-            user: {
-              select: { id: true, name: true, email: true, lastScanAt: true },
-            },
-          },
-          orderBy: { joinedAt: "asc" },
-        },
-        invitations: {
-          where: { status: InvitationStatus.PENDING },
-          orderBy: { createdAt: "desc" },
-        },
-      },
+      });
     });
   }
 

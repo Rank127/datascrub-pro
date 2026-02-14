@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -77,6 +78,7 @@ export default function WhitelistPage() {
       }
     } catch (error) {
       console.error("Failed to fetch whitelist:", error);
+      toast.error("Failed to load whitelist");
     } finally {
       setLoading(false);
     }
@@ -105,6 +107,7 @@ export default function WhitelistPage() {
       }
     } catch (error) {
       console.error("Failed to add to whitelist:", error);
+      toast.error("Failed to add to whitelist");
     } finally {
       setIsSubmitting(false);
     }
@@ -123,6 +126,7 @@ export default function WhitelistPage() {
       }
     } catch (error) {
       console.error("Failed to remove from whitelist:", error);
+      toast.error("Failed to remove from whitelist");
     }
   };
 

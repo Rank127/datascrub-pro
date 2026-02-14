@@ -41,9 +41,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/data-removal-texas", priority: 0.85, changeFrequency: "monthly" as const },
     { path: "/data-removal-new-york", priority: 0.85, changeFrequency: "monthly" as const },
     { path: "/data-removal-florida", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/login", priority: 0.4, changeFrequency: "monthly" as const },
-    { path: "/register", priority: 0.8, changeFrequency: "monthly" as const },
-    { path: "/forgot-password", priority: 0.3, changeFrequency: "monthly" as const },
+    // Interactive tools
+    { path: "/privacy-score", priority: 0.7, changeFrequency: "weekly" as const },
+    { path: "/blog/archive", priority: 0.7, changeFrequency: "weekly" as const },
   ];
 
   const staticSitemap = staticPages.map((page) => ({

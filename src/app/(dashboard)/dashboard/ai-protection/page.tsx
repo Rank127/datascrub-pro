@@ -121,6 +121,7 @@ export default function AIProtectionPage() {
       }
     } catch (error) {
       console.error("Failed to fetch AI protection data:", error);
+      toast.error("Failed to load AI protection data");
     } finally {
       setLoading(false);
     }

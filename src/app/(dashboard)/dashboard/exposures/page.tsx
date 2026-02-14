@@ -145,6 +145,7 @@ function ExposuresPageContent() {
       }
     } catch (error) {
       console.error("Failed to fetch exposures:", error);
+      toast.error("Failed to load exposures");
     } finally {
       setLoading(false);
     }
@@ -167,6 +168,7 @@ function ExposuresPageContent() {
       }
     } catch (error) {
       console.error("Failed to whitelist:", error);
+      toast.error("Failed to whitelist exposure");
     }
   };
 
@@ -183,6 +185,7 @@ function ExposuresPageContent() {
       }
     } catch (error) {
       console.error("Failed to unwhitelist:", error);
+      toast.error("Failed to remove from whitelist");
     }
   };
 
@@ -239,6 +242,7 @@ function ExposuresPageContent() {
       fetchExposures();
     } catch (error) {
       console.error("Failed to bulk whitelist:", error);
+      toast.error("Failed to bulk whitelist exposures");
     } finally {
       setBulkLoading(false);
     }

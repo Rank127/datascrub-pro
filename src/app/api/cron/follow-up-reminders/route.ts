@@ -40,6 +40,7 @@ export async function GET(request: Request) {
 
     // Get all users with pending removal requests that need follow-up
     // We look for requests submitted more than 30 days ago that haven't been completed
+    // Limit to 100 users per run to prevent memory exhaustion and cron timeouts
     const usersWithPendingRemovals = await prisma.user.findMany({
       where: {
         removalRequests: {
@@ -71,6 +72,8 @@ export async function GET(request: Request) {
           orderBy: { submittedAt: "asc" },
         },
       },
+      take: 100,
+      orderBy: { createdAt: "asc" },
     });
 
     console.log(`[Follow-up Cron] Found ${usersWithPendingRemovals.length} users with pending removals`);

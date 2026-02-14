@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -279,6 +280,7 @@ export default function RemovalsPage() {
       }
     } catch (error) {
       console.error("Failed to fetch removals:", error);
+      toast.error("Failed to load removal requests");
     } finally {
       setLoading(false);
     }

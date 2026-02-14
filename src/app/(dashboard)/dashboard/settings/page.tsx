@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -100,6 +101,7 @@ function SettingsContent() {
       }
     } catch (error) {
       console.error("Failed to fetch 2FA status:", error);
+      toast.error("Failed to load 2FA status");
     } finally {
       setTwoFactorLoading(false);
     }
@@ -120,6 +122,7 @@ function SettingsContent() {
       }
     } catch (error) {
       console.error("Failed to fetch notification preferences:", error);
+      toast.error("Failed to load notification preferences");
     }
   };
 

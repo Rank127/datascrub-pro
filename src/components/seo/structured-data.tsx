@@ -216,7 +216,7 @@ export function BreadcrumbSchema({ items }: { items: { name: string; url: string
 export function PricingSchema() {
   const schema = {
     "@context": "https://schema.org",
-    "@type": "Product",
+    "@type": "Service",
     name: "GhostMyData Data Removal Service",
     description:
       "Personal data removal service that automatically finds and removes your information from data brokers, breach databases, and the dark web.",

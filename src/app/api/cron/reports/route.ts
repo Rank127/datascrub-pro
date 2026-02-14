@@ -34,6 +34,7 @@ export async function GET(request: Request) {
     }
 
     // Fetch users who want reports and have email notifications enabled
+    // Limit to 200 per run to prevent memory exhaustion and cron timeouts
     const users = await prisma.user.findMany({
       where: {
         emailNotifications: true,
@@ -46,6 +47,8 @@ export async function GET(request: Request) {
         name: true,
         reportFrequency: true,
       },
+      take: 200,
+      orderBy: { createdAt: "asc" },
     });
 
     let sentCount = 0;

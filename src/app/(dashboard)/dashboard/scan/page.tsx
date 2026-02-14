@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,6 +81,7 @@ export default function ScanPage() {
       }
     } catch (err) {
       console.error("Failed to fetch scans:", err);
+      toast.error("Failed to load scan history");
     } finally {
       setLoadingScans(false);
     }
