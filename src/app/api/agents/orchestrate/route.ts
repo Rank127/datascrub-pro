@@ -5,6 +5,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { checkPermission } from "@/lib/admin";
 import {
   getOrchestrator,
   orchestrate,
@@ -39,6 +41,15 @@ import { nanoid } from "nanoid";
  */
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!checkPermission(session.user.email, (session.user as { role?: string }).role, "manage_system_config")) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { action, input, context: contextOverrides, workflow: workflowOptions } = body;
 
@@ -98,6 +109,15 @@ export async function POST(request: NextRequest) {
  */
 export async function GET() {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!checkPermission(session.user.email, (session.user as { role?: string }).role, "manage_system_config")) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    }
+
     const orchestrator = getOrchestrator();
     const workflowEngine = orchestrator.getWorkflowEngine();
     const workflows = workflowEngine.getAllWorkflows();

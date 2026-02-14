@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { z } from "zod";
 import {
   getDNCRegistrations,
   addDNCRegistration,
@@ -7,6 +8,18 @@ import {
   getDNCInfo,
   checkDNCAccess,
 } from "@/lib/dnc";
+
+const dncRegistrationSchema = z.object({
+  phoneNumber: z
+    .string()
+    .min(7, "Phone number too short")
+    .max(20, "Phone number too long")
+    .regex(/^[+\d\s\-().]+$/, "Invalid phone number format"),
+  phoneType: z
+    .enum(["MOBILE", "LANDLINE", "VOIP", "UNKNOWN"])
+    .optional()
+    .default("UNKNOWN"),
+});
 
 // GET /api/dnc - Get all DNC registrations for the current user
 export async function GET() {
@@ -53,18 +66,18 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { phoneNumber, phoneType } = body;
+    const parsed = dncRegistrationSchema.safeParse(body);
 
-    if (!phoneNumber) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Phone number is required" },
+        { error: parsed.error.issues[0]?.message || "Invalid input" },
         { status: 400 }
       );
     }
 
     const result = await addDNCRegistration(session.user.id, {
-      phoneNumber,
-      phoneType,
+      phoneNumber: parsed.data.phoneNumber,
+      phoneType: parsed.data.phoneType,
     });
 
     if (!result.success) {

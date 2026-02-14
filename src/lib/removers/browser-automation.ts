@@ -459,7 +459,7 @@ export default async function ({ page, context }) {
         const input = document.querySelector('input[name="g-recaptcha-response"]');
         if (input) input.value = token;
         if (window.grecaptcha && window.grecaptcha.getResponse) {
-          try { window.___grecaptcha_cfg.clients[0].K.K.callback(token); } catch(e) {}
+          try { window.___grecaptcha_cfg.clients[0].K.K.callback(token); } catch(e) { console.warn('[CAPTCHA] reCAPTCHA callback injection failed:', e); }
         }
       }, captchaToken);
     } else if (captchaType === 'hcaptcha') {

@@ -1,9 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { OperationsMetrics, PlatformMetrics } from "@/lib/executive/types";
 import { MetricCard } from "./metric-card";
-import { TrendChart } from "./trend-chart";
+
+// Lazy-load TrendChart (imports recharts ~50KB gzipped)
+const TrendChart = dynamic(
+  () => import("./trend-chart").then((m) => ({ default: m.TrendChart })),
+  { ssr: false, loading: () => <div className="h-[300px] animate-pulse bg-slate-800/30 rounded-lg" /> }
+);
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -1,17 +1,12 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FinanceSection } from "@/components/dashboard/executive/finance-section";
-import { AnalyticsSection } from "@/components/dashboard/executive/analytics-section";
-import { OperationsSection } from "@/components/dashboard/executive/operations-section";
-import { UserActivitiesSection } from "@/components/dashboard/executive/user-activities-section";
-import { UserManagementSection } from "@/components/dashboard/executive/user-management-section";
-import { SupportSection } from "@/components/dashboard/support/support-section";
 import { ExecutiveStatsResponse } from "@/lib/executive/types";
 import {
   Loader2,
@@ -26,6 +21,37 @@ import {
   Headphones,
 } from "lucide-react";
 import { toast } from "sonner";
+
+// Lazy-load heavy tab sections — only the active tab is loaded
+const TabLoader = () => (
+  <div className="flex items-center justify-center py-20">
+    <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
+  </div>
+);
+const FinanceSection = dynamic(
+  () => import("@/components/dashboard/executive/finance-section").then((m) => ({ default: m.FinanceSection })),
+  { loading: TabLoader }
+);
+const AnalyticsSection = dynamic(
+  () => import("@/components/dashboard/executive/analytics-section").then((m) => ({ default: m.AnalyticsSection })),
+  { loading: TabLoader }
+);
+const OperationsSection = dynamic(
+  () => import("@/components/dashboard/executive/operations-section").then((m) => ({ default: m.OperationsSection })),
+  { loading: TabLoader }
+);
+const UserActivitiesSection = dynamic(
+  () => import("@/components/dashboard/executive/user-activities-section").then((m) => ({ default: m.UserActivitiesSection })),
+  { loading: TabLoader }
+);
+const UserManagementSection = dynamic(
+  () => import("@/components/dashboard/executive/user-management-section").then((m) => ({ default: m.UserManagementSection })),
+  { loading: TabLoader }
+);
+const SupportSection = dynamic(
+  () => import("@/components/dashboard/support/support-section").then((m) => ({ default: m.SupportSection })),
+  { loading: TabLoader }
+);
 
 // Wrapper component to handle Suspense boundary for useSearchParams
 export default function ExecutiveDashboardPage() {
