@@ -53,7 +53,7 @@ export function FAQSection() {
         {faqs.map((faq) => (
           <div
             key={faq.question}
-            className="p-6 bg-slate-800/50 rounded-xl border border-slate-700"
+            className="p-6 bg-slate-800/50 rounded-xl border border-slate-700 card-hover-glow"
           >
             <h3 className="text-lg font-semibold text-white mb-3">
               {faq.question}

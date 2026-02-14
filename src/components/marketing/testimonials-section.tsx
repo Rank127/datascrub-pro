@@ -48,7 +48,7 @@ export function TestimonialsSection() {
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.author}
-              className="p-6 bg-slate-800/50 rounded-xl border border-slate-700"
+              className="p-6 bg-slate-800/50 rounded-xl border border-slate-700 card-hover-glow"
             >
               <div className="flex items-center gap-1 mb-4">
                 {[1, 2, 3, 4, 5].map((star) => (

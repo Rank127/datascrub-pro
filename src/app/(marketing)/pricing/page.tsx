@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CheckCircle, X, Shield } from "lucide-react";
 import { FAQSchema, PricingSchema } from "@/components/seo/structured-data";
 import { PricingButton, PricingPageTracker } from "@/components/pricing/pricing-button";
+import { AnimatedSection, AnimatedCard } from "@/components/marketing/animated-sections";
 
 export const metadata: Metadata = {
   title: "Pricing - Affordable Data Removal Plans",
@@ -155,122 +156,131 @@ export default function PricingPage() {
       <PricingPageTracker />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
       {/* Header */}
-      <div className="text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          Simple, Transparent Pricing
-        </h1>
-        <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-          Choose the plan that fits your needs. Start free and upgrade when you&apos;re
-          ready. All plans include our data removal service to help delete your data from the web.
-        </p>
-        <p className="text-lg text-slate-500 max-w-xl mx-auto mt-4">
-          No hidden fees. No contracts. Cancel any time. We scan 2,100+ data broker sites to find and remove your info.
-          Every plan includes our easy-to-use dashboard where you can track removal progress in real time.
-        </p>
-      </div>
+      <AnimatedSection>
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Simple, Transparent Pricing
+          </h1>
+          <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+            Choose the plan that fits your needs. Start free and upgrade when you&apos;re
+            ready. All plans include our data removal service to help delete your data from the web.
+          </p>
+          <p className="text-lg text-slate-500 max-w-xl mx-auto mt-4">
+            No hidden fees. No contracts. Cancel any time. We scan 2,100+ data broker sites to find and remove your info.
+            Every plan includes our easy-to-use dashboard where you can track removal progress in real time.
+          </p>
+        </div>
+      </AnimatedSection>
 
       {/* Trust Bar */}
-      <div className="flex flex-wrap justify-center gap-8 mb-16">
-        <div className="flex items-center gap-2 text-slate-400">
-          <Shield className="h-5 w-5 text-emerald-400" />
-          <span className="text-sm font-medium">2,100+ data sources scanned</span>
+      <AnimatedSection>
+        <div className="flex flex-wrap justify-center gap-8 mb-16">
+          <div className="flex items-center gap-2 text-slate-400">
+            <Shield className="h-5 w-5 text-emerald-400" />
+            <span className="text-sm font-medium">2,100+ data sources scanned</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-400">
+            <CheckCircle className="h-5 w-5 text-emerald-400" />
+            <span className="text-sm font-medium">30-day money-back guarantee</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-400">
+            <CheckCircle className="h-5 w-5 text-emerald-400" />
+            <span className="text-sm font-medium">Trusted by thousands of users</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-slate-400">
-          <CheckCircle className="h-5 w-5 text-emerald-400" />
-          <span className="text-sm font-medium">30-day money-back guarantee</span>
-        </div>
-        <div className="flex items-center gap-2 text-slate-400">
-          <CheckCircle className="h-5 w-5 text-emerald-400" />
-          <span className="text-sm font-medium">Trusted by thousands of users</span>
-        </div>
-      </div>
+      </AnimatedSection>
 
       {/* Pricing Cards */}
       <div className="grid md:grid-cols-3 gap-8 mb-24">
-        {plans.map((plan) => (
-          <div
-            key={plan.name}
-            className={`relative p-8 rounded-2xl ${
-              plan.popular
-                ? "bg-emerald-500/10 border-2 border-emerald-500"
-                : "bg-slate-800/50 border border-slate-700"
-            }`}
-          >
-            {plan.popular && (
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-emerald-500 rounded-full text-sm font-semibold text-white">
-                Most Popular
-              </div>
-            )}
-
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-              <div className="mb-2">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-white">{plan.price}</span>
-                  <span className="text-slate-400">/month</span>
+        {plans.map((plan, index) => (
+          <AnimatedCard key={plan.name} delay={(index + 1) * 100 as 100 | 200 | 300}>
+            <div
+              className={`relative p-8 rounded-2xl h-full ${
+                plan.popular
+                  ? "bg-emerald-500/10 border-2 border-emerald-500 animate-border-glow glow-emerald scale-105"
+                  : "bg-slate-800/50 border border-slate-700 card-hover-glow"
+              }`}
+            >
+              {plan.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full text-sm font-semibold text-white shadow-lg glow-emerald-sm">
+                  Most Popular
                 </div>
+              )}
+
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                <div className="mb-2">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-white">{plan.price}</span>
+                    <span className="text-slate-400">/month</span>
+                  </div>
+                </div>
+                <p className="text-slate-400">{plan.description}</p>
               </div>
-              <p className="text-slate-400">{plan.description}</p>
+
+              <ul className="space-y-4 mb-8">
+                {plan.features.map((feature) => (
+                  <li key={feature.text} className="flex items-start gap-3">
+                    {feature.included ? (
+                      <CheckCircle className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <X className="h-5 w-5 text-slate-600 flex-shrink-0 mt-0.5" />
+                    )}
+                    <span
+                      className={
+                        feature.included ? "text-slate-300" : "text-slate-500"
+                      }
+                    >
+                      {feature.text}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <PricingButton
+                planName={plan.name}
+                price={parseFloat(plan.price.replace("$", "")) || 0}
+                ctaText={plan.cta}
+                ctaLink={plan.ctaLink}
+                popular={plan.popular}
+              />
             </div>
-
-            <ul className="space-y-4 mb-8">
-              {plan.features.map((feature) => (
-                <li key={feature.text} className="flex items-start gap-3">
-                  {feature.included ? (
-                    <CheckCircle className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                  ) : (
-                    <X className="h-5 w-5 text-slate-600 flex-shrink-0 mt-0.5" />
-                  )}
-                  <span
-                    className={
-                      feature.included ? "text-slate-300" : "text-slate-500"
-                    }
-                  >
-                    {feature.text}
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            <PricingButton
-              planName={plan.name}
-              price={parseFloat(plan.price.replace("$", "")) || 0}
-              ctaText={plan.cta}
-              ctaLink={plan.ctaLink}
-              popular={plan.popular}
-            />
-          </div>
+          </AnimatedCard>
         ))}
       </div>
 
       {/* 30-Day Money-Back Guarantee */}
-      <div className="max-w-2xl mx-auto mb-24 p-8 bg-slate-800/50 rounded-2xl border border-emerald-500/20 text-center">
-        <Shield className="h-12 w-12 text-emerald-400 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-white mb-3">30-Day Money-Back Guarantee</h2>
-        <p className="text-slate-400 max-w-lg mx-auto">
-          Try any paid plan completely risk-free. If you&apos;re not satisfied with our data removal service within 30 days, we&apos;ll give you a full refund — no questions asked.
-        </p>
-      </div>
+      <AnimatedSection>
+        <div className="max-w-2xl mx-auto mb-24 p-8 bg-slate-800/50 rounded-2xl border border-emerald-500/20 text-center card-hover-glow">
+          <Shield className="h-12 w-12 text-emerald-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-3">30-Day Money-Back Guarantee</h2>
+          <p className="text-slate-400 max-w-lg mx-auto">
+            Try any paid plan completely risk-free. If you&apos;re not satisfied with our data removal service within 30 days, we&apos;ll give you a full refund — no questions asked.
+          </p>
+        </div>
+      </AnimatedSection>
 
       {/* FAQs */}
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-bold text-white text-center mb-12">
-          Frequently Asked Questions
-        </h2>
-        <div className="space-y-6">
-          {faqs.map((faq) => (
-            <div
-              key={faq.question}
-              className="p-6 bg-slate-800/50 rounded-xl border border-slate-700"
-            >
-              <h3 className="text-lg font-semibold text-white mb-2">
-                {faq.question}
-              </h3>
-              <p className="text-slate-400">{faq.answer}</p>
-            </div>
-          ))}
+      <AnimatedSection>
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold text-white text-center mb-12">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-6">
+            {faqs.map((faq) => (
+              <div
+                key={faq.question}
+                className="p-6 bg-slate-800/50 rounded-xl border border-slate-700 card-hover-glow"
+              >
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  {faq.question}
+                </h3>
+                <p className="text-slate-400">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </AnimatedSection>
     </div>
     </>
   );
