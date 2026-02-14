@@ -100,76 +100,80 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check monthly limit
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
-    const monthlyCount = await prisma.customRemovalRequest.count({
-      where: {
-        userId,
-        createdAt: { gte: startOfMonth },
-      },
-    });
-
-    if (monthlyCount >= MONTHLY_LIMIT) {
-      return NextResponse.json(
-        {
-          error: `Monthly limit reached. You can submit up to ${MONTHLY_LIMIT} custom removal requests per month.`,
-          usage: {
-            used: monthlyCount,
-            limit: MONTHLY_LIMIT,
-            remaining: 0,
-          },
-        },
-        { status: 429 }
-      );
-    }
-
-    // Parse and validate request body
+    // Parse and validate request body before entering transaction
     const body = await request.json();
     const validatedData = createRequestSchema.parse(body);
 
-    // Check for duplicate pending requests
-    const existingRequest = await prisma.customRemovalRequest.findFirst({
-      where: {
-        userId,
-        targetUrl: validatedData.targetUrl,
-        status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS"] },
-      },
+    // Use transaction to atomically check limit + create request (prevents race condition)
+    const result = await prisma.$transaction(async (tx) => {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const monthlyCount = await tx.customRemovalRequest.count({
+        where: {
+          userId,
+          createdAt: { gte: startOfMonth },
+        },
+      });
+
+      if (monthlyCount >= MONTHLY_LIMIT) {
+        return {
+          error: `Monthly limit reached. You can submit up to ${MONTHLY_LIMIT} custom removal requests per month.`,
+          usage: { used: monthlyCount, limit: MONTHLY_LIMIT, remaining: 0 },
+          status: 429 as const,
+        };
+      }
+
+      // Check for duplicate pending requests
+      const existingRequest = await tx.customRemovalRequest.findFirst({
+        where: {
+          userId,
+          targetUrl: validatedData.targetUrl,
+          status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS"] },
+        },
+      });
+
+      if (existingRequest) {
+        return {
+          error: "You already have a pending request for this URL",
+          status: 409 as const,
+        };
+      }
+
+      const customRequest = await tx.customRemovalRequest.create({
+        data: {
+          userId,
+          targetUrl: validatedData.targetUrl,
+          siteName: validatedData.siteName,
+          dataType: validatedData.dataType,
+          dataPreview: validatedData.dataPreview,
+          userNotes: validatedData.userNotes,
+          userScreenshot: validatedData.userScreenshot,
+          status: "PENDING",
+          priority: "NORMAL",
+        },
+      });
+
+      return {
+        success: true,
+        request: customRequest,
+        usage: {
+          used: monthlyCount + 1,
+          limit: MONTHLY_LIMIT,
+          remaining: Math.max(0, MONTHLY_LIMIT - monthlyCount - 1),
+        },
+      };
     });
 
-    if (existingRequest) {
+    if ("error" in result) {
       return NextResponse.json(
-        { error: "You already have a pending request for this URL" },
-        { status: 409 }
+        { error: result.error, ...(result.usage ? { usage: result.usage } : {}) },
+        { status: result.status }
       );
     }
 
-    // Create the custom removal request
-    const customRequest = await prisma.customRemovalRequest.create({
-      data: {
-        userId,
-        targetUrl: validatedData.targetUrl,
-        siteName: validatedData.siteName,
-        dataType: validatedData.dataType,
-        dataPreview: validatedData.dataPreview,
-        userNotes: validatedData.userNotes,
-        userScreenshot: validatedData.userScreenshot,
-        status: "PENDING",
-        priority: "NORMAL",
-      },
-    });
-
-    return NextResponse.json({
-      success: true,
-      request: customRequest,
-      usage: {
-        used: monthlyCount + 1,
-        limit: MONTHLY_LIMIT,
-        remaining: Math.max(0, MONTHLY_LIMIT - monthlyCount - 1),
-      },
-    });
+    return NextResponse.json(result);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

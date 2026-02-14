@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { encryptArray, encryptObject, hashSSN, encrypt, safeDecrypt, decryptArray, decryptObject } from "@/lib/encryption/crypto";
+import { captureError } from "@/lib/error-reporting";
 import { z } from "zod";
 
 const addressSchema = z.object({
@@ -27,7 +28,6 @@ const profileSchema = z.object({
 export async function GET() {
   try {
     const session = await auth();
-    console.log("[Profile GET] Session:", session?.user?.id ? `User ${session.user.id}` : "No session");
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -36,7 +36,6 @@ export async function GET() {
     const profile = await prisma.personalProfile.findFirst({
       where: { userId: session.user.id },
     });
-    console.log("[Profile GET] Found profile:", profile?.id || "NONE");
 
     if (!profile) {
       return NextResponse.json({ profile: null });
@@ -58,7 +57,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Profile fetch error:", error);
+    captureError("[Profile GET]", error);
     return NextResponse.json(
       { error: "Failed to fetch profile" },
       { status: 500 }
@@ -69,19 +68,15 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    console.log("[Profile POST] Session:", session?.user?.id ? `User ${session.user.id}` : "No session");
 
     if (!session?.user?.id) {
-      console.log("[Profile POST] Unauthorized - no session");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    console.log("[Profile POST] Body received:", JSON.stringify(body).substring(0, 200));
     const result = profileSchema.safeParse(body);
 
     if (!result.success) {
-      console.log("[Profile POST] Validation failed:", result.error.issues[0].message);
       return NextResponse.json(
         { error: result.error.issues[0].message },
         { status: 400 }
@@ -89,14 +84,12 @@ export async function POST(request: Request) {
     }
 
     const data = result.data;
-    console.log("[Profile POST] Validated data - emails:", data.emails?.length, "phones:", data.phones?.length);
 
     // Check if profile exists
     const existingProfile = await prisma.personalProfile.findFirst({
       where: { userId: session.user.id },
       select: { id: true, ssnHash: true },
     });
-    console.log("[Profile POST] Existing profile:", existingProfile?.id || "NONE");
 
     // Encrypt sensitive data
     const encryptedData = {
@@ -114,23 +107,17 @@ export async function POST(request: Request) {
     let profile;
 
     if (existingProfile) {
-      // Update existing profile
-      console.log("[Profile POST] Updating existing profile...");
       profile = await prisma.personalProfile.update({
         where: { id: existingProfile.id },
         data: encryptedData,
       });
-      console.log("[Profile POST] Updated profile:", profile.id);
     } else {
-      // Create new profile
-      console.log("[Profile POST] Creating new profile...");
       profile = await prisma.personalProfile.create({
         data: {
           userId: session.user.id,
           ...encryptedData,
         },
       });
-      console.log("[Profile POST] Created profile:", profile.id);
     }
 
     return NextResponse.json({
@@ -138,7 +125,7 @@ export async function POST(request: Request) {
       profileId: profile.id,
     });
   } catch (error) {
-    console.error("[Profile POST] Error:", error);
+    captureError("[Profile POST]", error);
     return NextResponse.json(
       { error: "Failed to save profile" },
       { status: 500 }

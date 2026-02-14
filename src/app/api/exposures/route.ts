@@ -34,8 +34,8 @@ export async function GET(request: Request) {
     const search = searchParams.get("search"); // Search by company/source name
     const manualAction = searchParams.get("manualAction"); // "required", "pending", "done", "all"
     const excludeManual = searchParams.get("excludeManual") === "true"; // Exclude manual review items
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const page = Math.max(1, Math.min(parseInt(searchParams.get("page") || "1") || 1, 10000));
+    const limit = Math.max(1, Math.min(parseInt(searchParams.get("limit") || "20") || 20, 100));
 
     const where: Record<string, unknown> = {
       userId: session.user.id,

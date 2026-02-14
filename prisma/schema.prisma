@@ -166,7 +166,7 @@ model Exposure {
   markedFalsePositive  Boolean         @default(false) // User or broker marked as false positive
   falsePositiveReason  String?         // Why this was marked false positive
   falsePositiveAt      DateTime?       // When marked false positive
-  scan                 Scan?           @relation(fields: [scanId], references: [id])
+  scan                 Scan?           @relation(fields: [scanId], references: [id], onDelete: SetNull)
   user                 User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   removalRequest       RemovalRequest?
 
@@ -217,7 +217,7 @@ model RemovalRequest {
   formScreenshot     String?
   formScreenshotAt   DateTime?
   isProactive        Boolean   @default(false)
-  exposure           Exposure  @relation(fields: [exposureId], references: [id])
+  exposure           Exposure  @relation(fields: [exposureId], references: [id], onDelete: Cascade)
   user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -380,8 +380,8 @@ model SupportTicket {
   browserInfo      String?
   errorDetails     String?
   pageUrl          String?
-  assignedTo       User?           @relation("AssignedTickets", fields: [assignedToId], references: [id])
-  resolvedBy       User?           @relation("ResolvedTickets", fields: [resolvedById], references: [id])
+  assignedTo       User?           @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
+  resolvedBy       User?           @relation("ResolvedTickets", fields: [resolvedById], references: [id], onDelete: SetNull)
   user             User            @relation("UserTickets", fields: [userId], references: [id], onDelete: Cascade)
   comments         TicketComment[]
 
