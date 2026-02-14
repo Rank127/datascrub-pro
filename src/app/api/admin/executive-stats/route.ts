@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
+import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
 import { logAudit } from "@/lib/rbac/audit-log";
 import { maskEmail } from "@/lib/rbac/pii-masking";
 import { getStripe } from "@/lib/stripe";
@@ -59,6 +60,10 @@ export async function GET(request: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Rate limit admin endpoint
+    const rl = await rateLimit(getClientIdentifier(request, session.user.id), "admin");
+    if (!rl.success) return rateLimitResponse(rl);
 
     const currentUser = await prisma.user.findUnique({
       where: { id: session.user.id },

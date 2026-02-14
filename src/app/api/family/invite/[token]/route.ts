@@ -7,12 +7,18 @@ import { auth } from "@/lib/auth";
 import { getInvitationByToken, acceptInvitation } from "@/lib/family";
 import { prisma } from "@/lib/db";
 import { sendFamilyMemberJoinedEmail } from "@/lib/email";
+import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   try {
+    // Rate limit token lookups to prevent enumeration
+    const identifier = getClientIdentifier(request);
+    const rl = await rateLimit(identifier, "family-invite", { maxRequests: 10, windowMs: 15 * 60 * 1000 });
+    if (!rl.success) return rateLimitResponse(rl);
+
     const { token } = await params;
 
     if (!token) {

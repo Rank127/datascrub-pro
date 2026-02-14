@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectivePlan } from "@/lib/family/family-service";
+import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
 import { z } from "zod";
 
 // Monthly limit for custom removal requests
@@ -82,6 +83,10 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Rate limit custom removal submissions
+    const rl = await rateLimit(getClientIdentifier(request, session.user.id), "api");
+    if (!rl.success) return rateLimitResponse(rl);
 
     const userId = session.user.id;
 

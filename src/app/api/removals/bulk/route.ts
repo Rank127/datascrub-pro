@@ -228,6 +228,14 @@ export async function POST(request: Request) {
     });
     const fullUserName = profile?.fullName || userName;
 
+    // Pre-load all existing removal requests for these exposures (avoid N+1)
+    const allExposureIds = fullExposures.map(e => e.id);
+    const existingRemovalRequests = await prisma.removalRequest.findMany({
+      where: { exposureId: { in: allExposureIds } },
+      select: { exposureId: true },
+    });
+    const existingRemovalSet = new Set(existingRemovalRequests.map(r => r.exposureId));
+
     // Process each broker group with ONE consolidated email
     for (const [privacyEmail, group] of brokerGroups) {
       // Check email quota before sending
@@ -248,34 +256,30 @@ export async function POST(request: Request) {
       }
 
       try {
-        // Create removal requests for all exposures in this group
-        for (const exposure of group.exposures) {
-          const existingRequest = await prisma.removalRequest.findUnique({
-            where: { exposureId: exposure.id },
-          });
-
-          if (!existingRequest) {
-            const method = getRemovalMethod(exposure.source);
-            await prisma.removalRequest.create({
-              data: {
-                userId,
-                exposureId: exposure.id,
-                method,
-                status: "PENDING",
-                notes: `Bulk removal - consolidated with ${group.exposures.length - 1} other exposures to ${group.brokerName}`,
-              },
-            });
-          }
-
-          await prisma.exposure.update({
-            where: { id: exposure.id },
-            data: {
-              status: "REMOVAL_PENDING",
-              manualActionTaken: true,
-              manualActionTakenAt: new Date(),
-            },
+        // Create removal requests for exposures that don't have one yet
+        const newExposures = group.exposures.filter(e => !existingRemovalSet.has(e.id));
+        if (newExposures.length > 0) {
+          await prisma.removalRequest.createMany({
+            data: newExposures.map(exposure => ({
+              userId,
+              exposureId: exposure.id,
+              method: getRemovalMethod(exposure.source),
+              status: "PENDING",
+              notes: `Bulk removal - consolidated with ${group.exposures.length - 1} other exposures to ${group.brokerName}`,
+            })),
+            skipDuplicates: true,
           });
         }
+
+        // Batch update all exposures in this group
+        await prisma.exposure.updateMany({
+          where: { id: { in: group.exposures.map(e => e.id) } },
+          data: {
+            status: "REMOVAL_PENDING",
+            manualActionTaken: true,
+            manualActionTakenAt: new Date(),
+          },
+        });
 
         // Send ONE consolidated CCPA email for all exposures to this broker
         const emailResult = await sendBulkCCPARemovalRequest({
@@ -371,37 +375,41 @@ export async function POST(request: Request) {
       instructions?: string;
     }> = [];
 
-    for (const exposure of manualExposures) {
-      const existingRequest = await prisma.removalRequest.findUnique({
-        where: { exposureId: exposure.id },
-      });
-
-      // Get broker info for opt-out URL and instructions
-      const brokerInfo = getDataBrokerInfo(exposure.source);
-      const instructions = getOptOutInstructions(exposure.source);
-
-      if (!existingRequest) {
-        await prisma.removalRequest.create({
-          data: {
+    // Create removal requests for manual exposures that don't have one yet
+    const newManualExposures = manualExposures.filter(e => !existingRemovalSet.has(e.id));
+    if (newManualExposures.length > 0) {
+      await prisma.removalRequest.createMany({
+        data: newManualExposures.map(exposure => {
+          const instructions = getOptOutInstructions(exposure.source);
+          return {
             userId,
             exposureId: exposure.id,
             method: "MANUAL_GUIDE",
             status: "REQUIRES_MANUAL",
             notes: instructions || "No known privacy email - manual removal required",
-          },
-        });
-      }
+          };
+        }),
+        skipDuplicates: true,
+      });
+    }
 
-      await prisma.exposure.update({
-        where: { id: exposure.id },
+    // Batch update all manual exposures
+    if (manualExposures.length > 0) {
+      await prisma.exposure.updateMany({
+        where: { id: { in: manualExposures.map(e => e.id) } },
         data: {
           status: "REMOVAL_PENDING",
           manualActionTaken: true,
           manualActionTakenAt: new Date(),
         },
       });
+    }
 
-      // Collect manual removal info for the summary email
+    // Collect manual removal info for results and summary email
+    for (const exposure of manualExposures) {
+      const brokerInfo = getDataBrokerInfo(exposure.source);
+      const instructions = getOptOutInstructions(exposure.source);
+
       manualRemovalDetails.push({
         sourceName: exposure.sourceName,
         source: exposure.source,

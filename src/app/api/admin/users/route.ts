@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectiveRole, checkPermission } from "@/lib/admin";
 import { maskUserListItem, logDataAccess } from "@/lib/rbac";
+import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
 import { z } from "zod";
 
 // GET /api/admin/users - List all users (with role-based masking)
@@ -13,6 +14,10 @@ export async function GET(request: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Rate limit admin endpoint
+    const rl = await rateLimit(getClientIdentifier(request, session.user.id), "admin");
+    if (!rl.success) return rateLimitResponse(rl);
 
     // Get user's role
     const currentUser = await prisma.user.findUnique({

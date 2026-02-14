@@ -16,6 +16,8 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       person_profiles: "identified_only",
       capture_pageview: true,
       capture_pageleave: true,
+      ip: false, // Don't send IP addresses (GDPR)
+      property_denylist: ["$ip"], // Strip IP from all events
       loaded: (ph) => {
         if (process.env.NODE_ENV === "development") {
           ph.debug();

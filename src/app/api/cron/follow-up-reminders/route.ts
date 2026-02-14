@@ -137,6 +137,7 @@ export async function GET(request: Request) {
         } else {
           // Send individual reminder emails for requests at threshold
           const toRemind = remindersNeeded.filter(r => r.needsReminder);
+          const sentReminderIds: string[] = [];
 
           for (const reminder of toRemind) {
             await sendFollowUpReminderEmail(user.email, user.name || "", {
@@ -149,17 +150,20 @@ export async function GET(request: Request) {
 
             stats.individualEmailsSent++;
             stats.emailsSent++;
-
-            // Record that we sent a reminder
-            await prisma.removalRequest.update({
-              where: { id: reminder.id },
-              data: {
-                notes: `Follow-up reminder sent on ${now.toISOString()} (${reminder.daysSinceSubmission} days)`,
-              },
-            });
+            sentReminderIds.push(reminder.id);
 
             // Small delay between emails to avoid rate limiting
             await new Promise(resolve => setTimeout(resolve, 200));
+          }
+
+          // Batch update all sent reminders
+          if (sentReminderIds.length > 0) {
+            await prisma.removalRequest.updateMany({
+              where: { id: { in: sentReminderIds } },
+              data: {
+                notes: `Follow-up reminder sent on ${now.toISOString()}`,
+              },
+            });
           }
         }
       } catch (error) {

@@ -175,10 +175,10 @@ export async function GET(request: Request) {
 
     console.log(`[${JOB_NAME}] Found ${removalRequests.length} removal requests to cancel`);
 
-    // Step 3: Cancel removal requests
-    for (const request of removalRequests) {
-      await prisma.removalRequest.update({
-        where: { id: request.id },
+    // Step 3: Cancel removal requests (batch)
+    if (removalRequests.length > 0) {
+      await prisma.removalRequest.updateMany({
+        where: { id: { in: removalRequests.map((r) => r.id) } },
         data: {
           status: "CANCELLED",
           notes:
@@ -186,65 +186,79 @@ export async function GET(request: Request) {
             `Per GDPR Articles 28/29, deletion requests should go to the Data Controller, not the Processor.`,
         },
       });
-      stats.removalRequestsCancelled++;
+      stats.removalRequestsCancelled = removalRequests.length;
     }
 
-    // Step 4: Update exposures to WHITELISTED
-    for (const exposure of exposures) {
-      await prisma.exposure.update({
-        where: { id: exposure.id },
+    // Step 4: Update exposures to WHITELISTED (batch)
+    if (exposures.length > 0) {
+      await prisma.exposure.updateMany({
+        where: { id: { in: exposures.map((e) => e.id) } },
         data: {
           status: "WHITELISTED",
           isWhitelisted: true,
           requiresManualAction: false,
         },
       });
-      stats.exposuresUpdated++;
+      stats.exposuresUpdated = exposures.length;
     }
 
-    // Step 5: Create whitelist entries for future prevention
-    for (const exposure of exposures) {
-      // Check if whitelist entry already exists
-      const existing = await prisma.whitelist.findFirst({
-        where: {
-          userId: exposure.userId,
-          source: exposure.source,
-        },
+    // Step 5: Create whitelist entries for future prevention (batch-check existing)
+    const uniquePairs = [...new Map(
+      exposures.map((e) => [`${e.userId}:${e.source}`, e])
+    ).values()];
+
+    const existingWhitelists = await prisma.whitelist.findMany({
+      where: {
+        OR: uniquePairs.map((e) => ({
+          userId: e.userId,
+          source: e.source,
+        })),
+      },
+      select: { userId: true, source: true },
+    });
+
+    const existingSet = new Set(
+      existingWhitelists.map((w) => `${w.userId}:${w.source}`)
+    );
+
+    const newWhitelists = uniquePairs.filter(
+      (e) => !existingSet.has(`${e.userId}:${e.source}`)
+    );
+
+    if (newWhitelists.length > 0) {
+      await prisma.whitelist.createMany({
+        data: newWhitelists.map((e) => ({
+          userId: e.userId,
+          source: e.source,
+          sourceUrl: e.sourceUrl,
+          sourceName: e.sourceName,
+          reason:
+            "Data Processor (not Data Broker) - Automatically whitelisted. " +
+            "Per GDPR Articles 28/29, deletion requests should go to the Data Controller.",
+        })),
+        skipDuplicates: true,
       });
-
-      if (!existing) {
-        await prisma.whitelist.create({
-          data: {
-            userId: exposure.userId,
-            source: exposure.source,
-            sourceUrl: exposure.sourceUrl,
-            sourceName: exposure.sourceName,
-            reason:
-              "Data Processor (not Data Broker) - Automatically whitelisted. " +
-              "Per GDPR Articles 28/29, deletion requests should go to the Data Controller.",
-          },
-        });
-        stats.whitelistEntriesCreated++;
-      }
+      stats.whitelistEntriesCreated = newWhitelists.length;
     }
 
-    // Step 6: Create alerts for affected users
-    for (const userId of stats.usersAffected) {
+    // Step 6: Create alerts for affected users (batch)
+    const alertData = [...stats.usersAffected].map((userId) => {
       const userExposures = exposures.filter((e) => e.userId === userId);
       const sourceNames = [...new Set(userExposures.map((e) => e.sourceName))];
+      return {
+        userId,
+        type: "EXPOSURE_RECLASSIFIED",
+        title: "Data Source Reclassified",
+        message:
+          `${sourceNames.join(", ")} ${sourceNames.length === 1 ? "has" : "have"} been identified as ` +
+          `Data Processor(s), not Data Broker(s). These have been removed from your dashboard. ` +
+          `Data Processors only handle data on behalf of their clients and cannot process deletion requests directly.`,
+      };
+    });
 
-      await prisma.alert.create({
-        data: {
-          userId,
-          type: "EXPOSURE_RECLASSIFIED",
-          title: "Data Source Reclassified",
-          message:
-            `${sourceNames.join(", ")} ${sourceNames.length === 1 ? "has" : "have"} been identified as ` +
-            `Data Processor(s), not Data Broker(s). These have been removed from your dashboard. ` +
-            `Data Processors only handle data on behalf of their clients and cannot process deletion requests directly.`,
-        },
-      });
-      stats.alertsCreated++;
+    if (alertData.length > 0) {
+      await prisma.alert.createMany({ data: alertData });
+      stats.alertsCreated = alertData.length;
     }
 
     const duration = Date.now() - startTime;

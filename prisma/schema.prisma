@@ -57,6 +57,8 @@ model User {
   tickets                SupportTicket[]    @relation("UserTickets")
   ticketComments         TicketComment[]
   whitelists             Whitelist[]
+
+  @@index([createdAt])
 }
 
 model Account {
@@ -172,6 +174,8 @@ model Exposure {
   @@index([scanId])
   @@index([userId, requiresManualAction])
   @@index([userId, userConfirmed])
+  @@index([userId, status])
+  @@index([userId, isWhitelisted])
   @@index([confidenceScore])
   @@index([markedFalsePositive])
 }
@@ -187,6 +191,7 @@ model Whitelist {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, source])
 }
 
 model RemovalRequest {
@@ -216,6 +221,8 @@ model RemovalRequest {
   user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, status])
+  @@index([status])
   @@index([verifyAfter])
 }
 

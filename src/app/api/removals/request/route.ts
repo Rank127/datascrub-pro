@@ -185,38 +185,47 @@ export async function POST(request: Request) {
       },
     });
 
-    // Handle consolidated subsidiary exposures
+    // Handle consolidated subsidiary exposures (batch)
     const consolidatedRequests: string[] = [];
     if (consolidatedExposures.length > 0) {
-      for (const subExposure of consolidatedExposures) {
-        // Check if removal already exists for this subsidiary
-        const existingSub = await prisma.removalRequest.findUnique({
-          where: { exposureId: subExposure.id },
+      // Batch-check which subsidiaries already have removal requests
+      const existingSubRequests = await prisma.removalRequest.findMany({
+        where: { exposureId: { in: consolidatedExposures.map(e => e.id) } },
+        select: { exposureId: true },
+      });
+      const existingSubSet = new Set(existingSubRequests.map(r => r.exposureId));
+
+      const newSubExposures = consolidatedExposures.filter(e => !existingSubSet.has(e.id));
+
+      if (newSubExposures.length > 0) {
+        // Batch create removal requests for new subsidiaries
+        await prisma.removalRequest.createMany({
+          data: newSubExposures.map(subExposure => ({
+            userId: session.user.id,
+            exposureId: subExposure.id,
+            method: "AUTO_EMAIL" as const,
+            status: "PENDING",
+            notes: `Auto-created via consolidated removal from ${exposure.sourceName}. Will be completed when parent removal is confirmed.`,
+          })),
+          skipDuplicates: true,
         });
 
-        if (!existingSub) {
-          // Create linked removal request for subsidiary
-          const subRequest = await prisma.removalRequest.create({
-            data: {
-              userId: session.user.id,
-              exposureId: subExposure.id,
-              method: "AUTO_EMAIL", // Subsidiaries use parent's opt-out
-              status: "PENDING",
-              notes: `Auto-created via consolidated removal from ${exposure.sourceName}. Will be completed when parent removal is confirmed.`,
-            },
-          });
-          consolidatedRequests.push(subRequest.id);
+        // Batch update subsidiary exposure statuses
+        await prisma.exposure.updateMany({
+          where: { id: { in: newSubExposures.map(e => e.id) } },
+          data: {
+            status: "REMOVAL_PENDING",
+            manualActionTaken: true,
+            manualActionTakenAt: new Date(),
+          },
+        });
 
-          // Update subsidiary exposure status and mark manual action as done
-          await prisma.exposure.update({
-            where: { id: subExposure.id },
-            data: {
-              status: "REMOVAL_PENDING",
-              manualActionTaken: true,
-              manualActionTakenAt: new Date(),
-            },
-          });
-        }
+        // Fetch created request IDs
+        const createdRequests = await prisma.removalRequest.findMany({
+          where: { exposureId: { in: newSubExposures.map(e => e.id) } },
+          select: { id: true },
+        });
+        consolidatedRequests.push(...createdRequests.map(r => r.id));
       }
     }
 
