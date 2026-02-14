@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { MISSION_MAPPINGS, getAllInvocations, getAllPlaybooks } from "@/lib/mastermind";
+import { useState, useEffect } from "react";
 
 interface MastermindResponse {
   advice: string;
@@ -11,6 +10,12 @@ interface MastermindResponse {
   queriesRemaining: number;
 }
 
+interface MastermindData {
+  invocations: Array<{ trigger: string; description: string }>;
+  playbooks: Array<{ id: string; name: string; description: string; scenario: string; mission: string; invocation: string }>;
+  missions: Array<{ domain: string; label: string }>;
+}
+
 export function AdvisorPanel() {
   const [question, setQuestion] = useState("");
   const [selectedMission, setSelectedMission] = useState<string>("");
@@ -18,9 +23,20 @@ export function AdvisorPanel() {
   const [response, setResponse] = useState<MastermindResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<MastermindData | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
 
-  const invocations = getAllInvocations().filter((inv) => inv.mode === "single").slice(0, 8);
-  const playbooks = getAllPlaybooks();
+  useEffect(() => {
+    fetch("/api/admin/mastermind/data")
+      .then((res) => res.json())
+      .then((d) => setData(d))
+      .catch(() => setError("Failed to load advisor data"))
+      .finally(() => setDataLoading(false));
+  }, []);
+
+  const invocations = data?.invocations ?? [];
+  const playbooks = data?.playbooks ?? [];
+  const missions = data?.missions ?? [];
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,12 +58,12 @@ export function AdvisorPanel() {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Request failed");
+        const d = await res.json();
+        throw new Error(d.error || "Request failed");
       }
 
-      const data: MastermindResponse = await res.json();
-      setResponse(data);
+      const d: MastermindResponse = await res.json();
+      setResponse(d);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -62,12 +78,22 @@ export function AdvisorPanel() {
   function handlePlaybook(playbookId: string) {
     const pb = playbooks.find((p) => p.id === playbookId);
     if (pb) {
-      setQuestion(pb.promptOptions.scenario || pb.description);
-      setSelectedMission(pb.promptOptions.mission || "");
-      setSelectedInvocation(
-        pb.promptOptions.invocation || ""
-      );
+      setQuestion(pb.scenario || pb.description);
+      setSelectedMission(pb.mission || "");
+      setSelectedInvocation(pb.invocation || "");
     }
+  }
+
+  if (dataLoading) {
+    return (
+      <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-5 bg-slate-700 rounded w-1/3" />
+          <div className="h-20 bg-slate-700 rounded" />
+          <div className="h-10 bg-slate-700 rounded" />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -145,7 +171,7 @@ export function AdvisorPanel() {
               className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white text-sm focus:border-amber-500 focus:outline-none"
             >
               <option value="">Auto-select</option>
-              {MISSION_MAPPINGS.map((m) => (
+              {missions.map((m) => (
                 <option key={m.domain} value={m.domain}>
                   {m.label}
                 </option>

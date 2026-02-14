@@ -1,13 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { ORG_LAYERS, MISSION_MAPPINGS } from "@/lib/mastermind";
+import { useState, useEffect } from "react";
 
 type TabId = "layers" | "missions" | "principles" | "headcount";
+
+interface OrgLayer {
+  id: string;
+  name: string;
+  subtitle: string;
+  description: string;
+  icon: string;
+  roles: Array<{ title: string; desc: string }>;
+  principles: Array<{ mind: string; insight: string }>;
+  relevantAgents: string[];
+}
+
+interface Mission {
+  domain: string;
+  label: string;
+  description: string;
+  keyAdvisorIds: string[];
+  agentIds: string[];
+}
+
+interface MastermindData {
+  layers: OrgLayer[];
+  missions: Mission[];
+}
 
 export function MastermindOrgChart() {
   const [activeTab, setActiveTab] = useState<TabId>("layers");
   const [expandedLayer, setExpandedLayer] = useState<string | null>("nucleus");
+  const [data, setData] = useState<MastermindData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/mastermind/data")
+      .then((res) => res.json())
+      .then((d) => setData(d))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const layers = data?.layers ?? [];
+  const missions = data?.missions ?? [];
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "layers", label: "The 5 Layers" },
@@ -15,6 +51,17 @@ export function MastermindOrgChart() {
     { id: "principles", label: "Core Principles" },
     { id: "headcount", label: "Headcount Model" },
   ];
+
+  if (loading) {
+    return (
+      <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-10 bg-slate-700 rounded" />
+          <div className="h-40 bg-slate-700 rounded" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
@@ -38,7 +85,7 @@ export function MastermindOrgChart() {
       <div className="p-6">
         {activeTab === "layers" && (
           <div className="space-y-3">
-            {ORG_LAYERS.map((layer) => (
+            {layers.map((layer) => (
               <div
                 key={layer.id}
                 className="border border-slate-700 rounded-lg overflow-hidden"
@@ -136,7 +183,7 @@ export function MastermindOrgChart() {
 
         {activeTab === "missions" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {MISSION_MAPPINGS.map((mission) => (
+            {missions.map((mission) => (
               <div
                 key={mission.domain}
                 className="border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors"

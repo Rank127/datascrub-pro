@@ -41,6 +41,7 @@ export function ReferralWidget() {
       }
     } catch (error) {
       console.error("Failed to fetch referral stats:", error);
+      toast.error("Failed to load referral stats");
     } finally {
       setLoading(false);
     }

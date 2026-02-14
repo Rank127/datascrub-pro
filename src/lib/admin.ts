@@ -71,38 +71,6 @@ export function isStaff(email: string | null | undefined): boolean {
 }
 
 /**
- * Check if user has access to a feature (either by plan or role status)
- */
-export function hasFeatureAccess(
-  email: string | null | undefined,
-  userPlan: string,
-  requiredPlan: "FREE" | "PRO" | "ENTERPRISE"
-): boolean {
-  // Staff roles have full feature access
-  if (isStaff(email)) return true;
-
-  // Plan hierarchy: ENTERPRISE > PRO > FREE
-  const planLevel: Record<string, number> = {
-    FREE: 0,
-    PRO: 1,
-    ENTERPRISE: 2,
-  };
-
-  const userLevel = planLevel[userPlan] ?? 0;
-  const requiredLevel = planLevel[requiredPlan] ?? 0;
-
-  return userLevel >= requiredLevel;
-}
-
-/**
- * Get effective plan for a user (staff get ENTERPRISE features)
- */
-export function getEffectivePlan(email: string | null | undefined, actualPlan: string): string {
-  if (isStaff(email)) return "ENTERPRISE";
-  return actualPlan;
-}
-
-/**
  * Check if user has a specific permission based on their role
  */
 export function checkPermission(

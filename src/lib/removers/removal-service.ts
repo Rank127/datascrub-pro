@@ -391,17 +391,6 @@ export async function executeRemoval(
       `[Removal] Pre-verification check for ${source} (confidence: ${confidenceScore}, user-confirmed)`
     );
 
-    // For now, we'll log this as a verification checkpoint
-    // In a full implementation, this would trigger a re-scan of the broker
-    // to verify the data still exists before sending the removal request.
-    //
-    // Example implementation:
-    // const verificationResult = await verifyDataExists(sourceUrl, userName, userEmail);
-    // if (!verificationResult.exists) {
-    //   await markExposureFalsePositive(removalRequest.exposureId, userId, "VERIFICATION_FAILED");
-    //   return { success: false, message: "Data no longer found on broker site" };
-    // }
-
     // Update the removal request to note verification was considered
     await prisma.removalRequest.update({
       where: { id: removalRequestId },

@@ -3,9 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption/crypto";
 import { sendExposureAlertEmail } from "@/lib/email";
-// SMS notifications temporarily disabled - coming in future release
-// import { sendExposureAlert, sendScanComplete, isSMSConfigured } from "@/lib/sms";
-import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import {
   ScanOrchestrator,
   prepareProfileForScan,

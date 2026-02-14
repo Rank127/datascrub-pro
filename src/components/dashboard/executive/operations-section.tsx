@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { OperationsMetrics, PlatformMetrics } from "@/lib/executive/types";
 import { MetricCard } from "./metric-card";
@@ -216,17 +216,17 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
       default: return "Users";
     }
   };
-  const getHealthBadge = (rate: number) => {
+  const getHealthBadge = useCallback((rate: number) => {
     if (rate >= 95) {
       return <Badge className="bg-emerald-500/20 text-emerald-400">Healthy</Badge>;
     } else if (rate >= 80) {
       return <Badge className="bg-amber-500/20 text-amber-400">Warning</Badge>;
     }
     return <Badge className="bg-red-500/20 text-red-400">Critical</Badge>;
-  };
+  }, []);
 
-  const totalRemovalRequests = Object.values(data.removalsByStatus).reduce((a, b) => a + b, 0);
-  const completedRemovals = data.removalsByStatus["COMPLETED"] || 0;
+  const totalRemovalRequests = useMemo(() => Object.values(data.removalsByStatus).reduce((a, b) => a + b, 0), [data.removalsByStatus]);
+  const completedRemovals = useMemo(() => data.removalsByStatus["COMPLETED"] || 0, [data.removalsByStatus]);
 
   return (
     <div className="space-y-6">

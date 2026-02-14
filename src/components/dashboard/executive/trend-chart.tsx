@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, memo } from "react";
 import {
   LineChart,
   Line,
@@ -27,6 +28,21 @@ interface TrendChartProps {
   height?: number;
 }
 
+const TrendTooltip = memo(({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-lg">
+        <p className="text-slate-400 text-xs">{label}</p>
+        <p className="text-white font-semibold">
+          {new Intl.NumberFormat("en-US").format(payload[0].value)}
+        </p>
+      </div>
+    );
+  }
+  return null;
+});
+TrendTooltip.displayName = "TrendTooltip";
+
 const COLORS = {
   emerald: "#10b981",
   blue: "#3b82f6",
@@ -44,20 +60,6 @@ export function TrendChart({
   height = 200,
 }: TrendChartProps) {
   const chartColor = COLORS[color as keyof typeof COLORS] || COLORS.emerald;
-
-  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-lg">
-          <p className="text-slate-400 text-xs">{label}</p>
-          <p className="text-white font-semibold">
-            {new Intl.NumberFormat("en-US").format(payload[0].value)}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   const renderChart = () => {
     const commonProps = {
@@ -84,7 +86,7 @@ export function TrendChart({
               axisLine={false}
               tickFormatter={(value) => new Intl.NumberFormat("en-US", { notation: "compact" }).format(value)}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<TrendTooltip />} />
             <Line
               type="monotone"
               dataKey="value"
@@ -114,7 +116,7 @@ export function TrendChart({
               axisLine={false}
               tickFormatter={(value) => new Intl.NumberFormat("en-US", { notation: "compact" }).format(value)}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<TrendTooltip />} />
             <Bar dataKey="value" fill={chartColor} radius={[4, 4, 0, 0]} />
           </BarChart>
         );
@@ -143,7 +145,7 @@ export function TrendChart({
               axisLine={false}
               tickFormatter={(value) => new Intl.NumberFormat("en-US", { notation: "compact" }).format(value)}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<TrendTooltip />} />
             <Area
               type="monotone"
               dataKey="value"
