@@ -9,6 +9,7 @@ import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 import { processEmailQueue, getEmailQuotaStatus } from "@/lib/email";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { logCronExecution } from "@/lib/cron-logger";
+import { captureError } from "@/lib/error-reporting";
 
 /**
  * Aggressive Queue Clearer - Ensures pending queue is emptied within 24 hours
@@ -126,7 +127,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("[Cron: Clear Pending Queue] Error:", error);
+    captureError("[Cron: Clear Pending Queue]", error);
     await logCronExecution({
       jobName: "clear-pending-queue",
       status: "FAILED",

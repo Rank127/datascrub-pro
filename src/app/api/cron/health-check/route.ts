@@ -11,6 +11,7 @@ import {
 } from "@/lib/agents/intelligence-coordinator";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { reportIssue } from "@/lib/agents/orchestrator/remediation-engine";
+import { captureError } from "@/lib/error-reporting";
 
 export const maxDuration = 300;
 
@@ -574,7 +575,7 @@ export async function GET(request: Request) {
             successful++;
           }
         } catch (e) {
-          console.error(`[Health Check] Failed to process stuck removal ${removal.id}:`, e);
+          captureError(`[Health Check] Failed to process stuck removal ${removal.id}`, e);
         }
       }
 
@@ -1213,7 +1214,7 @@ export async function GET(request: Request) {
 
       console.log("[Health Check] Email report sent to", ADMIN_EMAIL);
     } catch (emailError) {
-      console.error("[Health Check] Failed to send email:", emailError);
+      captureError("[Health Check] Failed to send email", emailError);
     }
   }
 

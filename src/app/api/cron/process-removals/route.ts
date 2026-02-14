@@ -14,6 +14,7 @@ import {
 import { logCronExecution } from "@/lib/cron-logger";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { getDirective } from "@/lib/mastermind/directives";
+import { captureError } from "@/lib/error-reporting";
 
 // Vercel Pro max timeout: 300 seconds (5 minutes)
 export const maxDuration = 300;
@@ -198,7 +199,7 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     const duration = Date.now() - startTime;
-    console.error(`[Cron: ${JOB_NAME}] Error:`, error);
+    captureError(`[Cron: ${JOB_NAME}]`, error);
 
     await logCronExecution({
       jobName: JOB_NAME,

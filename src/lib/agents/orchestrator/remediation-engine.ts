@@ -23,6 +23,8 @@ import {
   getMethodologyForIssue,
 } from "@/lib/support/ticket-service";
 import { getRedisClient, REDIS_PREFIX } from "@/lib/redis-client";
+import { captureError } from "@/lib/error-reporting";
+import { logger } from "@/lib/logger";
 
 // ============================================================================
 // TYPES
@@ -536,7 +538,7 @@ class RemediationEngine {
       return;
     }
 
-    console.log("[RemediationEngine] Initializing...");
+    logger.debug("[RemediationEngine] Initializing...");
 
     // Load default rules
     for (const rule of DEFAULT_REMEDIATION_RULES) {
@@ -547,7 +549,7 @@ class RemediationEngine {
     this.subscribeToEvents();
 
     this.isInitialized = true;
-    console.log(
+    logger.debug(
       `[RemediationEngine] Initialized with ${this.rules.size} remediation rules`
     );
   }
@@ -582,7 +584,7 @@ class RemediationEngine {
     });
     this.subscriptionIds.push(alertSubId);
 
-    console.log("[RemediationEngine] Subscribed to events");
+    logger.debug("[RemediationEngine] Subscribed to events");
   }
 
   /**
@@ -595,7 +597,7 @@ class RemediationEngine {
     }
     this.subscriptionIds = [];
     this.isInitialized = false;
-    console.log("[RemediationEngine] Shutdown complete");
+    logger.debug("[RemediationEngine] Shutdown complete");
   }
 
   // ============================================================================
@@ -721,7 +723,7 @@ class RemediationEngine {
    * Process a detected issue
    */
   async processIssue(issue: DetectedIssue): Promise<RemediationPlan | null> {
-    console.log(
+    logger.debug(
       `[RemediationEngine] Processing issue: ${issue.type} (severity: ${issue.severity})`
     );
 
@@ -731,7 +733,7 @@ class RemediationEngine {
 
     const isDuplicate = await this.checkAndSetDedup(fingerprint);
     if (isDuplicate) {
-      console.log(
+      logger.debug(
         `[RemediationEngine] DEDUP_SKIP: ${fingerprint} seen recently in last 30min`
       );
       return null;
@@ -740,7 +742,7 @@ class RemediationEngine {
     // A2: Circuit breaker check — skip if breaker is OPEN for this fingerprint
     const cbState = await this.getCircuitBreakerState(fingerprint);
     if (cbState && cbState.state === "OPEN") {
-      console.log(
+      logger.debug(
         `[RemediationEngine] CIRCUIT_BREAKER_OPEN: ${fingerprint} — skipping remediation, escalating`
       );
       await getEventBus().emitCustom(
@@ -760,14 +762,14 @@ class RemediationEngine {
     // Find matching rule
     const rule = this.findMatchingRule(issue);
     if (!rule) {
-      console.log(
+      logger.debug(
         `[RemediationEngine] No remediation rule found for issue type: ${issue.type}`
       );
       return null;
     }
 
     if (!rule.enabled) {
-      console.log(`[RemediationEngine] Rule ${rule.id} is disabled`);
+      logger.debug(`[RemediationEngine] Rule ${rule.id} is disabled`);
       return null;
     }
 
@@ -775,7 +777,7 @@ class RemediationEngine {
     const plan = this.createRemediationPlan(issue, rule);
     this.activePlans.set(plan.id, plan);
 
-    console.log(
+    logger.debug(
       `[RemediationEngine] Created remediation plan ${plan.id} with ${plan.actions.length} actions`
     );
 
@@ -874,7 +876,7 @@ class RemediationEngine {
    * Execute a remediation plan
    */
   async executePlan(plan: RemediationPlan): Promise<void> {
-    console.log(`[RemediationEngine] Executing plan ${plan.id}`);
+    logger.debug(`[RemediationEngine] Executing plan ${plan.id}`);
 
     plan.status = "in_progress";
     plan.startedAt = new Date();
@@ -922,7 +924,7 @@ class RemediationEngine {
 
           if (!result.success) {
             hasFailure = true;
-            console.log(
+            logger.debug(
               `[RemediationEngine] Action ${action.id} failed: ${result.error?.message}`
             );
           }
@@ -964,7 +966,7 @@ class RemediationEngine {
         }
       );
 
-      console.log(
+      logger.debug(
         `[RemediationEngine] Plan ${plan.id} completed with status: ${plan.status}`
       );
     } catch (error) {
@@ -982,10 +984,7 @@ class RemediationEngine {
         }
       );
 
-      console.error(
-        `[RemediationEngine] Plan ${plan.id} failed:`,
-        error
-      );
+      captureError(`[RemediationEngine] Plan ${plan.id} failed`, error);
     }
   }
 
@@ -996,7 +995,7 @@ class RemediationEngine {
     action: RemediationAction,
     plan: RemediationPlan
   ): Promise<AgentResult> {
-    console.log(
+    logger.debug(
       `[RemediationEngine] Executing action ${action.id}: ${action.description}`
     );
 
@@ -1164,7 +1163,7 @@ class RemediationEngine {
         documentation: methodologyData.documentation,
       });
 
-      console.log(
+      logger.debug(
         `[RemediationEngine] Created ticket ${ticket.ticketNumber} for ${input.issueType}`
       );
 
@@ -1198,7 +1197,7 @@ class RemediationEngine {
         },
       };
     } catch (error) {
-      console.error("[RemediationEngine] Failed to create ticket:", error);
+      captureError("[RemediationEngine] Failed to create ticket", error);
 
       return {
         success: false,
@@ -1302,7 +1301,7 @@ class RemediationEngine {
         const attempts = (existing?.attempts || 0) + 1;
         const state = attempts >= RemediationEngine.CB_MAX_ATTEMPTS ? "OPEN" : "CLOSED";
         if (state === "OPEN") {
-          console.log(`[RemediationEngine] CIRCUIT_BREAKER_TRIPPED: ${fingerprint} after ${attempts} failures`);
+          logger.debug(`[RemediationEngine] CIRCUIT_BREAKER_TRIPPED: ${fingerprint} after ${attempts} failures`);
         }
         await redis.set(key, { attempts, state }, { ex: RemediationEngine.CB_RESET_SEC });
         return;
@@ -1318,7 +1317,7 @@ class RemediationEngine {
     cb.lastAttempt = now;
     if (cb.attempts >= RemediationEngine.CB_MAX_ATTEMPTS) {
       cb.state = "OPEN";
-      console.log(`[RemediationEngine] CIRCUIT_BREAKER_TRIPPED: ${fingerprint} after ${cb.attempts} failures`);
+      logger.debug(`[RemediationEngine] CIRCUIT_BREAKER_TRIPPED: ${fingerprint} after ${cb.attempts} failures`);
     }
     this.circuitBreakerLocal.set(fingerprint, cb);
   }
@@ -1387,7 +1386,7 @@ class RemediationEngine {
     this.activePlans.delete(planId);
     this.completedPlans.push(plan);
 
-    console.log(`[RemediationEngine] Plan ${planId} rejected: ${reason}`);
+    logger.debug(`[RemediationEngine] Plan ${planId} rejected: ${reason}`);
   }
 
   // ============================================================================
@@ -1399,7 +1398,7 @@ class RemediationEngine {
    */
   addRule(rule: RemediationRule): void {
     this.rules.set(rule.id, rule);
-    console.log(`[RemediationEngine] Added/updated rule: ${rule.id}`);
+    logger.debug(`[RemediationEngine] Added/updated rule: ${rule.id}`);
   }
 
   /**
@@ -1408,7 +1407,7 @@ class RemediationEngine {
   removeRule(ruleId: string): boolean {
     const result = this.rules.delete(ruleId);
     if (result) {
-      console.log(`[RemediationEngine] Removed rule: ${ruleId}`);
+      logger.debug(`[RemediationEngine] Removed rule: ${ruleId}`);
     }
     return result;
   }
@@ -1420,7 +1419,7 @@ class RemediationEngine {
     const rule = this.rules.get(ruleId);
     if (rule) {
       rule.enabled = enabled;
-      console.log(
+      logger.debug(
         `[RemediationEngine] Rule ${ruleId} ${enabled ? "enabled" : "disabled"}`
       );
     }

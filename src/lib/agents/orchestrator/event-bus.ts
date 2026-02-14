@@ -8,6 +8,8 @@
 import { nanoid } from "nanoid";
 import { AgentEvent, AgentEventHandler, AgentEventType } from "../types";
 import { getRedisClient, REDIS_PREFIX } from "@/lib/redis-client";
+import { captureError } from "@/lib/error-reporting";
+import { logger } from "@/lib/logger";
 
 // ============================================================================
 // TYPES
@@ -81,7 +83,7 @@ class EventBus {
     };
 
     this.subscriptions.set(id, subscription);
-    console.log(
+    logger.debug(
       `[EventBus] Subscribed to '${eventType}' events (subscription: ${id})`
     );
 
@@ -105,7 +107,7 @@ class EventBus {
   unsubscribe(subscriptionId: string): boolean {
     const result = this.subscriptions.delete(subscriptionId);
     if (result) {
-      console.log(`[EventBus] Unsubscribed (subscription: ${subscriptionId})`);
+      logger.debug(`[EventBus] Unsubscribed (subscription: ${subscriptionId})`);
     }
     return result;
   }
@@ -121,7 +123,7 @@ class EventBus {
         count++;
       }
     }
-    console.log(`[EventBus] Unsubscribed ${count} handlers for '${eventType}'`);
+    logger.debug(`[EventBus] Unsubscribed ${count} handlers for '${eventType}'`);
     return count;
   }
 
@@ -239,10 +241,7 @@ class EventBus {
       try {
         await sub.handler(event);
       } catch (error) {
-        console.error(
-          `[EventBus] Error in handler for '${event.type}':`,
-          error
-        );
+        captureError(`[EventBus] Error in handler for '${event.type}'`, error);
       }
 
       // Mark for removal if once
@@ -456,7 +455,7 @@ class EventBus {
   clearHistory(): void {
     this.eventHistory = [];
     this.processingTimes = [];
-    console.log("[EventBus] History cleared");
+    logger.debug("[EventBus] History cleared");
   }
 
   /**
@@ -464,7 +463,7 @@ class EventBus {
    */
   clearSubscriptions(): void {
     this.subscriptions.clear();
-    console.log("[EventBus] All subscriptions cleared");
+    logger.debug("[EventBus] All subscriptions cleared");
   }
 }
 

@@ -17,6 +17,7 @@ import {
   AgentHealthInfo,
   HealthStatuses,
 } from "./types";
+import { logger } from "@/lib/logger";
 
 // ============================================================================
 // REGISTRY TYPES
@@ -106,7 +107,7 @@ class AgentRegistry {
       this.capabilityIndex.set(capabilityKey, [agent.id]); // Full path
     }
 
-    console.log(
+    logger.debug(
       `[Registry] Registered agent '${agent.id}' with ${agent.capabilities.length} capabilities`
     );
   }
@@ -134,7 +135,7 @@ class AgentRegistry {
 
     // Remove agent
     this.agents.delete(agentId);
-    console.log(`[Registry] Unregistered agent '${agentId}'`);
+    logger.debug(`[Registry] Unregistered agent '${agentId}'`);
 
     return true;
   }
@@ -350,11 +351,11 @@ class AgentRegistry {
    */
   async initializeAll(): Promise<void> {
     if (this.isInitialized) {
-      console.log("[Registry] Already initialized");
+      logger.debug("[Registry] Already initialized");
       return;
     }
 
-    console.log(`[Registry] Initializing ${this.agents.size} agents...`);
+    logger.debug(`[Registry] Initializing ${this.agents.size} agents...`);
 
     const results = await Promise.allSettled(
       Array.from(this.agents.values()).map(async ({ agent }) => {
@@ -372,14 +373,14 @@ class AgentRegistry {
     }
 
     this.isInitialized = true;
-    console.log("[Registry] Initialization complete");
+    logger.debug("[Registry] Initialization complete");
   }
 
   /**
    * Shutdown all registered agents
    */
   async shutdownAll(): Promise<void> {
-    console.log(`[Registry] Shutting down ${this.agents.size} agents...`);
+    logger.debug(`[Registry] Shutting down ${this.agents.size} agents...`);
 
     await Promise.allSettled(
       Array.from(this.agents.values()).map(async ({ agent }) => {
@@ -390,7 +391,7 @@ class AgentRegistry {
     );
 
     this.isInitialized = false;
-    console.log("[Registry] Shutdown complete");
+    logger.debug("[Registry] Shutdown complete");
   }
 
   /**
@@ -400,7 +401,7 @@ class AgentRegistry {
     this.agents.clear();
     this.capabilityIndex.clear();
     this.isInitialized = false;
-    console.log("[Registry] Cleared all agents");
+    logger.debug("[Registry] Cleared all agents");
   }
 }
 

@@ -15,16 +15,17 @@ const ADMIN_IP_ALLOWLIST = process.env.ADMIN_IP_ALLOWLIST
 // Content Security Policy - balances security with functionality
 const CSP_DIRECTIVES = [
   "default-src 'self'",
-  // Scripts: self + inline (Next.js hydration) + Stripe
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://checkout.stripe.com",
+  // Scripts: self + inline (Next.js hydration) + Stripe + Google Analytics
+  // unsafe-eval only in development (needed for HMR)
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV !== "production" ? " 'unsafe-eval'" : ""} https://js.stripe.com https://checkout.stripe.com https://www.googletagmanager.com`,
   // Styles: self + inline (CSS-in-JS, Tailwind)
   "style-src 'self' 'unsafe-inline'",
   // Images: self + data URIs + HTTPS sources (for screenshots, avatars)
   "img-src 'self' data: https: blob:",
   // Fonts: self + common font CDNs
   "font-src 'self' https://fonts.gstatic.com",
-  // Connect: API endpoints + Stripe + analytics
-  "connect-src 'self' https://api.stripe.com https://*.supabase.co https://*.upstash.io wss://*.upstash.io https://vitals.vercel-insights.com",
+  // Connect: API endpoints + Stripe + analytics + Sentry + PostHog
+  "connect-src 'self' https://api.stripe.com https://*.supabase.co https://*.upstash.io wss://*.upstash.io https://vitals.vercel-insights.com https://www.google-analytics.com https://*.ingest.sentry.io https://us.i.posthog.com",
   // Frames: Stripe checkout
   "frame-src https://js.stripe.com https://checkout.stripe.com",
   // Object/media restrictions

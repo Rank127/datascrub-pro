@@ -30,6 +30,7 @@ import {
   ManagerReviewItem,
   SuggestedAction,
 } from "./types";
+import { captureError } from "@/lib/error-reporting";
 
 // ============================================================================
 // CONSTANTS
@@ -575,7 +576,7 @@ Please process this request and return a JSON response.
       });
     } catch (error) {
       // Log but don't fail the execution
-      console.warn(`[${this.name}] Failed to log execution start:`, error);
+      captureError(`[${this.name}] Failed to log execution start`, error);
     }
   }
 
@@ -605,7 +606,7 @@ Please process this request and return a JSON response.
         },
       });
     } catch (error) {
-      console.warn(`[${this.name}] Failed to log execution complete:`, error);
+      captureError(`[${this.name}] Failed to log execution complete`, error);
     }
   }
 
@@ -627,7 +628,7 @@ Please process this request and return a JSON response.
         },
       });
     } catch (updateError) {
-      console.warn(`[${this.name}] Failed to log execution failure:`, updateError);
+      captureError(`[${this.name}] Failed to log execution failure`, updateError);
     }
   }
 

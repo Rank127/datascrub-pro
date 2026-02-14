@@ -21,6 +21,7 @@ import { getEventBus } from "./event-bus";
 import { WorkflowEngine } from "./workflows";
 import { getRemediationEngine } from "./remediation-engine";
 import { createAgentContext } from "../base-agent";
+import { logger } from "@/lib/logger";
 
 // ============================================================================
 // TYPES
@@ -99,7 +100,7 @@ class AgentOrchestrator {
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
-    console.log("[Orchestrator] Initializing...");
+    logger.debug("[Orchestrator] Initializing...");
 
     // Initialize all registered agents
     await getRegistry().initializeAll();
@@ -113,7 +114,7 @@ class AgentOrchestrator {
     await getRemediationEngine().initialize();
 
     this.isInitialized = true;
-    console.log("[Orchestrator] Initialization complete");
+    logger.debug("[Orchestrator] Initialization complete");
   }
 
   /**
@@ -138,7 +139,7 @@ class AgentOrchestrator {
 
     // Handle escalation requests
     eventBus.subscribe("escalation.requested", async (event) => {
-      console.log(
+      logger.debug(
         `[Orchestrator] Escalation from ${event.sourceAgentId} to ${event.targetAgentId}`
       );
       // Could trigger escalation workflow here
@@ -235,7 +236,7 @@ class AgentOrchestrator {
 
     // Check circuit breaker
     if (this.config.enableCircuitBreaker && this.isCircuitOpen(agentId!)) {
-      console.log(`[Orchestrator] Circuit open for '${agentId}', using fallback`);
+      logger.debug(`[Orchestrator] Circuit open for '${agentId}', using fallback`);
 
       if (fallbackAgentId) {
         return this.executeAgent<T>(fallbackAgentId, capability!, input, context);
@@ -254,7 +255,7 @@ class AgentOrchestrator {
     const available = await agent.isAvailable();
     if (!available) {
       if (fallbackAgentId) {
-        console.log(
+        logger.debug(
           `[Orchestrator] Agent '${agentId}' unavailable, using fallback '${fallbackAgentId}'`
         );
         return this.executeAgent<T>(fallbackAgentId, capability!, input, context);
@@ -395,7 +396,7 @@ class AgentOrchestrator {
       now - state.openedAt.getTime() > this.config.circuitBreakerTimeout
     ) {
       state.halfOpenAt = new Date();
-      console.log(`[Orchestrator] Circuit half-open for '${agentId}'`);
+      logger.debug(`[Orchestrator] Circuit half-open for '${agentId}'`);
       return false; // Allow one request through
     }
 
@@ -423,7 +424,7 @@ class AgentOrchestrator {
     if (state.failures >= this.config.circuitBreakerThreshold) {
       state.isOpen = true;
       state.openedAt = new Date();
-      console.log(
+      logger.debug(
         `[Orchestrator] Circuit OPEN for '${agentId}' after ${state.failures} failures`
       );
 
@@ -452,7 +453,7 @@ class AgentOrchestrator {
       state.failures = 0;
       state.halfOpenAt = undefined;
       state.openedAt = undefined;
-      console.log(`[Orchestrator] Circuit CLOSED for '${agentId}'`);
+      logger.debug(`[Orchestrator] Circuit CLOSED for '${agentId}'`);
     }
   }
 
@@ -468,7 +469,7 @@ class AgentOrchestrator {
    */
   resetCircuitBreaker(agentId: string): void {
     this.circuitBreakers.delete(agentId);
-    console.log(`[Orchestrator] Circuit breaker reset for '${agentId}'`);
+    logger.debug(`[Orchestrator] Circuit breaker reset for '${agentId}'`);
   }
 
   // ============================================================================
@@ -513,11 +514,11 @@ class AgentOrchestrator {
    * Shutdown the orchestrator
    */
   async shutdown(): Promise<void> {
-    console.log("[Orchestrator] Shutting down...");
+    logger.debug("[Orchestrator] Shutting down...");
     await getRemediationEngine().shutdown();
     await getRegistry().shutdownAll();
     this.isInitialized = false;
-    console.log("[Orchestrator] Shutdown complete");
+    logger.debug("[Orchestrator] Shutdown complete");
   }
 
   /**

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { runVerificationBatch } from "@/lib/removers/verification-service";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { logCronExecution } from "@/lib/cron-logger";
+import { captureError } from "@/lib/error-reporting";
 
 /**
  * Cron endpoint to verify removal requests
@@ -55,7 +56,7 @@ export async function GET(request: Request) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("[Verify Removals] Error:", error);
+    captureError("[Verify Removals]", error);
 
     await logCronExecution({
       jobName: "verify-removals",

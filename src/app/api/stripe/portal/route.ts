@@ -27,7 +27,9 @@ export async function POST() {
     // Using configuration that enables upgrade/downgrade and cancellation at period end
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: subscription.stripeCustomerId,
-      configuration: process.env.STRIPE_PORTAL_CONFIG_ID || "bpc_1SvAfh4ClPmQQvqa715ZeqIN",
+      ...(process.env.STRIPE_PORTAL_CONFIG_ID && {
+        configuration: process.env.STRIPE_PORTAL_CONFIG_ID,
+      }),
       return_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH_URL}/dashboard/settings`,
     });
 

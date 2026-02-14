@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { prisma } from "@/lib/db";
 import { isEmailBlocklisted, getBlocklistEntry } from "@/lib/removers/blocklist";
+import { captureError } from "@/lib/error-reporting";
 
 // Lazy-initialize Resend client to ensure env vars are loaded
 let _resend: Resend | null = null;
@@ -119,7 +120,7 @@ async function queueEmail(
     console.log(`[Email] Queued email to ${to} (ID: ${queued.id}) - will process after quota reset`);
     return { success: true, queued: true, queueId: queued.id };
   } catch (error) {
-    console.error("[Email] Failed to queue email:", error);
+    captureError("[Email] Failed to queue email", error);
     return { success: false, queued: false };
   }
 }
@@ -174,7 +175,7 @@ async function sendEmail(
     });
 
     if (error) {
-      console.error("Failed to send email:", error);
+      captureError("[Email] Failed to send email", error);
       return { success: false, error: error.message };
     }
 
@@ -184,7 +185,7 @@ async function sendEmail(
 
     return { success: true };
   } catch (err) {
-    console.error("Error sending email:", err);
+    captureError("[Email] Error sending email", err);
     return { success: false, error: "Failed to send email" };
   }
 }
@@ -2259,7 +2260,7 @@ export async function processPendingRemovalDigests(): Promise<{
       userUpdates.get(userId)!.queueIds.push(queueItem.id);
       stats.updatesProcessed++;
     } catch (error) {
-      console.error(`[Email Digest] Error parsing queue item ${queueItem.id}:`, error);
+      captureError(`[Email Digest] Error parsing queue item ${queueItem.id}`, error);
       stats.errors++;
     }
   }
@@ -2330,7 +2331,7 @@ export async function processPendingRemovalDigests(): Promise<{
         console.log(`[Email Digest] Sent digest to ${data.email}: ${data.updates.length} updates`);
       } else {
         stats.errors++;
-        console.error(`[Email Digest] Failed to send to ${data.email}:`, result);
+        captureError(`[Email Digest] Failed to send to ${data.email}`, result);
       }
 
       stats.usersProcessed++;
@@ -2338,7 +2339,7 @@ export async function processPendingRemovalDigests(): Promise<{
       // Small delay between sends
       await new Promise(resolve => setTimeout(resolve, 200));
     } catch (error) {
-      console.error(`[Email Digest] Error processing user ${userId}:`, error);
+      captureError(`[Email Digest] Error processing user ${userId}`, error);
       stats.errors++;
     }
   }

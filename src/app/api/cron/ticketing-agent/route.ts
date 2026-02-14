@@ -4,6 +4,7 @@ import { processNewTicket } from "@/lib/agents/ticketing-agent";
 import { tryAutoResolve, getSystemUserId } from "@/lib/support/ticket-service";
 import { logCronExecution } from "@/lib/cron-logger";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { captureError } from "@/lib/error-reporting";
 
 /**
  * Cron job to automatically process open support tickets using AI agent
@@ -116,7 +117,7 @@ export async function POST(request: Request) {
             continue; // Skip AI processing — saved cost + time
           }
         } catch (autoErr) {
-          console.error(`[Cron: Ticketing Agent] tryAutoResolve failed for ${ticket.ticketNumber}:`, autoErr);
+          captureError(`[Cron: Ticketing Agent] tryAutoResolve failed for ${ticket.ticketNumber}`, autoErr);
           // Fall through to AI processing
         }
 
@@ -159,7 +160,7 @@ export async function POST(request: Request) {
           status: "error",
           result: error instanceof Error ? error.message : "Unknown error",
         });
-        console.error(`[Cron: Ticketing Agent] Error processing ${ticket.ticketNumber}:`, error);
+        captureError(`[Cron: Ticketing Agent] Error processing ${ticket.ticketNumber}`, error);
       }
     }
 
@@ -270,7 +271,7 @@ export async function POST(request: Request) {
           console.log(`[Cron: Ticketing Agent] Stale detection: ${staleStats.escalatedOpen} escalated, ${staleStats.reopenedWaiting} reopened`);
         }
       } catch (staleErr) {
-        console.error("[Cron: Ticketing Agent] Stale ticket detection error:", staleErr);
+        captureError("[Cron: Ticketing Agent] Stale ticket detection error", staleErr);
       }
     }
 
@@ -300,7 +301,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("[Cron: Ticketing Agent] Error:", error);
+    captureError("[Cron: Ticketing Agent]", error);
 
     // Log failed execution
     await logCronExecution({
