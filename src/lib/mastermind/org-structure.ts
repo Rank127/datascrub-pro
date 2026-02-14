@@ -1,12 +1,8 @@
 /**
- * Mastermind Advisory System - 5-Layer Organism Model
+ * Mastermind Advisory System - Corporate Org Structure (Feb 2026)
  *
- * The organization is a living organism with 5 layers:
- *   1. Nucleus — 3-5 Architects (Vision)
- *   2. Mission Teams — Domain squads (Execution)
- *   3. AI Agent Layer — Intelligence amplifier
- *   4. Network Layer — Ecosystem
- *   5. Governance Mesh — Integrity
+ * Board of Directors + C-Suite + 14 Divisions
+ * Replaces the 5-Layer Organism Model with a bootstrapped corporate structure.
  */
 
 import type { OrgLayer, MissionDomain } from "./advisors";
@@ -36,103 +32,70 @@ export interface MissionMapping {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 5-LAYER ORG MODEL
+// 3-TIER ORG MODEL: Board + C-Suite + Divisions
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const ORG_LAYERS: OrgLayerDef[] = [
   {
-    id: "nucleus",
-    name: "The Nucleus",
-    subtitle: "3-5 People — The Vision Layer",
+    id: "board",
+    name: "Board of Directors",
+    subtitle: "5 Directors — Strategic Governance",
     description:
-      "The Nucleus is the smallest, most powerful layer. These 3-5 architects set the 10-year vision, allocate capital, design the culture, and hold veto power on safety. They don't manage — they architect.",
-    icon: "🧬",
+      "The Board sets long-term direction, allocates capital, ensures ethical governance, and provides strategic oversight. Includes one historical framework (Marcus Aurelius — Stoic Decision Discipline).",
+    icon: "🏛️",
     roles: [
-      { title: "Vision Architect", desc: "Sets the 10-year direction and infrastructure strategy" },
-      { title: "Systems Architect", desc: "Designs how technology, people, and AI connect" },
-      { title: "Capital Architect", desc: "Allocates resources with discipline and circle of competence" },
-      { title: "Culture Architect", desc: "Growth mindset transformation, the human operating system" },
-      { title: "Safety Architect", desc: "Veto power on safety. 'What could go catastrophically wrong?'" },
+      { title: "Chairman", desc: "Capital allocation, long-term thinking, margin of safety (Buffett)" },
+      { title: "Vice Chairman", desc: "Macro cycles, principles, risk management (Dalio)" },
+      { title: "Director of Behavioral Science", desc: "Influence ethics, persuasion science (Cialdini)" },
+      { title: "Director of Decision Discipline", desc: "Stoic governance — what is within our control? (Marcus Aurelius framework)" },
+      { title: "Director of Sustainable Growth", desc: "Bootstrapped strategy, anti-hustle, zebra not unicorn (Fishkin)" },
     ],
     principles: [
-      { mind: "Jensen Huang", insight: "Build infrastructure, applications will come" },
-      { mind: "Warren Buffett", insight: "Circle of competence, never lose money" },
-      { mind: "Dario Amodei", insight: "Safety is the architecture, not an afterthought" },
-      { mind: "Satya Nadella", insight: "Culture eats strategy. Lead with empathy" },
-      { mind: "Demis Hassabis", insight: "Design how the pieces connect into one system" },
+      { mind: "Warren Buffett", insight: "Circle of competence, never lose money, front-page test" },
+      { mind: "Ray Dalio", insight: "Radical transparency, know where you are in the cycle" },
+      { mind: "Robert Cialdini", insight: "Seven principles of influence as operating system" },
+      { mind: "Marcus Aurelius", insight: "Focus only on what is within your control" },
+      { mind: "Rand Fishkin", insight: "Be a Zebra — sustainable, profitable growth" },
     ],
-    advisorIds: ["jensen-huang", "demis-hassabis", "warren-buffett", "satya-nadella", "dario-amodei"],
+    advisorIds: ["warren-buffett", "ray-dalio", "robert-cialdini", "rand-fishkin", "marcus-aurelius"],
     relevantAgents: [],
   },
   {
-    id: "missions",
-    name: "Mission Teams",
-    subtitle: "10 Domains — The Execution Layer",
+    id: "c-suite",
+    name: "C-Suite",
+    subtitle: "16 Executives — Operational Leadership",
     description:
-      "Cross-functional squads organized by mission domain. Each team has a clear objective, key minds for inspiration, and mapped GhostMyData agents. Teams operate autonomously with Nucleus-level strategic alignment.",
-    icon: "🎯",
+      "The executive team translates board strategy into operational reality. Each role maps to a specific domain of excellence. The C-Suite is designed for a bootstrapped AI, cybersecurity & growth company.",
+    icon: "👔",
     roles: [
-      { title: "Growth & Revenue", desc: "Drive user acquisition, conversion, and revenue" },
-      { title: "Product & Platform", desc: "Build and ship the core platform" },
-      { title: "Commerce & Sales", desc: "Close deals and expand customer relationships" },
-      { title: "Legal & Compliance", desc: "Navigate privacy law and regulatory landscape" },
-      { title: "Customer & Culture", desc: "Build engaged community and customer success" },
-      { title: "Competitive Intel", desc: "Map and outmaneuver the competitive landscape" },
-      { title: "Brand & Media", desc: "Create remarkable content that spreads" },
-      { title: "Science & Research", desc: "Advance core technology and capabilities" },
-      { title: "Global Strategy", desc: "Navigate geopolitical and macro trends" },
-      { title: "Economics", desc: "Analyze market dynamics and structural patterns" },
+      { title: "CEO", desc: "Platform strategy, infrastructure dominance (Jensen Huang)" },
+      { title: "President & COO", desc: "Growth mindset, operational transformation (Nadella)" },
+      { title: "Chief Product Officer", desc: "Frontier tech to accessible products (Altman)" },
+      { title: "CTO", desc: "AI for scientific discovery (Hassabis)" },
+      { title: "Chief Safety Officer", desc: "Responsible AI, constitutional AI (Amodei)" },
+      { title: "COO — Supply Chain", desc: "Greatest operator in history (Cook)" },
+      { title: "Chief Revenue Officer", desc: "Offer design, radical transparency (Hormozi)" },
+      { title: "General Counsel", desc: "International law, moral authority (Clooney)" },
+      { title: "Chief Economist", desc: "Institutions, AI economic impact (Acemoglu)" },
+      { title: "Chief Brand & Media", desc: "Attention, algorithms, scale (MrBeast)" },
+      { title: "CISO", desc: "Global cybersecurity leadership (Hyppönen)" },
+      { title: "Chief Design Officer", desc: "Product aesthetics, materiality (Ive)" },
+      { title: "Chief Organic Growth", desc: "SEO, audience intelligence, bootstrapped marketing (Fishkin)" },
+      { title: "Chief Relevance Engineer", desc: "AI search, technical SEO, passage optimization (King)" },
+      { title: "VP of AI-Security", desc: "AI + cybersecurity convergence (Miessler)" },
+      { title: "Chief Performance Architect", desc: "Infrastructure, DevOps, managed services (Hightower)" },
     ],
     principles: [
+      { mind: "Jensen Huang", insight: "Build infrastructure, applications will come" },
+      { mind: "Dario Amodei", insight: "Safety is the architecture, not an afterthought" },
       { mind: "Alex Hormozi", insight: "Offers so good people feel stupid saying no" },
-      { mind: "Sam Altman", insight: "Ship fast, iterate responsibly" },
-      { mind: "Chris Voss", insight: "Tactical empathy in every interaction" },
-      { mind: "Magnus Carlsen", insight: "Accumulate small advantages that compound" },
-      { mind: "MrBeast", insight: "What's the biggest possible version of this?" },
+      { mind: "Mike King", insight: "Engineer relevance across all search surfaces" },
+      { mind: "Kelsey Hightower", insight: "Don't over-optimize for problems you don't have" },
     ],
     advisorIds: [
-      "alex-hormozi", "russell-brunson", "neil-patel",
-      "sam-altman", "tim-cook", "elon-musk", "mustafa-suleyman",
-      "chris-voss", "andy-elliott", "jeremy-miner", "gary-vaynerchuk", "grant-cardone",
-      "amal-clooney", "neal-katyal", "david-boies", "fiona-scott-morton", "lina-khan",
-      "jordan-peterson", "vanessa-van-edwards", "hikaru-nakamura",
-      "magnus-carlsen", "ding-liren", "fabiano-caruana", "ray-dalio",
-      "mrbeast", "joe-rogan", "lex-fridman", "taylor-swift",
-      "jennifer-doudna", "katalin-kariko", "john-jumper", "feng-zhang",
-      "xi-jinping-ext", "modi-ext", "mbs-ext",
-      "daron-acemoglu", "claudia-goldin", "mohamed-el-erian", "raghuram-rajan", "tyler-cowen",
-    ],
-    relevantAgents: [
-      "growth-agent", "content-agent", "seo-agent",
-      "billing-agent", "removal-agent", "support-agent",
-      "competitive-intel-agent",
-    ],
-  },
-  {
-    id: "ai-agents",
-    name: "The AI Agent Layer",
-    subtitle: "24 Agents — Intelligence Amplifier",
-    description:
-      "AI agents execute at scale what Mission Teams design. Each agent is inspired by specific modern minds. The key principle: efficiency per dollar matters more than raw capability.",
-    icon: "🤖",
-    roles: [
-      { title: "Research Agents", desc: "Gather intelligence, analyze data, surface insights" },
-      { title: "Analysis Agents", desc: "Turn research into production-ready decisions" },
-      { title: "Customer Agents", desc: "Tactical empathy at scale across all touchpoints" },
-      { title: "Content Agents", desc: "Volume + remarkability in content creation" },
-      { title: "Code Agents", desc: "Ship code, not papers — production engineering" },
-      { title: "Finance Agents", desc: "Real-time financial forecasting and optimization" },
-    ],
-    principles: [
-      { mind: "Liang Wenfeng", insight: "Efficiency per dollar > raw capability" },
-      { mind: "Andrej Karpathy", insight: "Research → production is where value lives" },
-      { mind: "Vanessa Van Edwards", insight: "Behavioral science powers customer empathy" },
-      { mind: "MrBeast", insight: "Volume + remarkability = viral content" },
-      { mind: "Ken Griffin", insight: "Speed and precision create competitive edge" },
-    ],
-    advisorIds: [
-      "liang-wenfeng", "andrew-ng", "andrej-karpathy", "yann-lecun",
-      "ken-griffin", "cathie-wood", "masayoshi-son",
+      "jensen-huang", "satya-nadella", "sam-altman", "demis-hassabis", "dario-amodei",
+      "tim-cook", "alex-hormozi", "amal-clooney", "daron-acemoglu", "mrbeast",
+      "mikko-hypponen", "jony-ive", "mike-king", "daniel-miessler", "kelsey-hightower",
     ],
     relevantAgents: [
       "removal-agent", "support-agent", "billing-agent",
@@ -141,129 +104,146 @@ export const ORG_LAYERS: OrgLayerDef[] = [
     ],
   },
   {
-    id: "network",
-    name: "The Network Layer",
-    subtitle: "Ecosystem — Partners & Community",
+    id: "divisions",
+    name: "14 Divisions",
+    subtitle: "160+ Minds — Execution & Expertise",
     description:
-      "The broader ecosystem of experts, creator partners, advisory circles, and community members. These relationships amplify the organization's reach and bring outside perspectives.",
-    icon: "🌐",
+      "Cross-functional divisions organized by domain. Each division has C-Suite heads and domain experts from 19 categories spanning strategy, technology, commerce, security, design, education, and more.",
+    icon: "🎯",
     roles: [
-      { title: "Expert Network", desc: "On-demand domain experts for specialized questions" },
-      { title: "Creator Partners", desc: "Content creators who amplify brand reach" },
-      { title: "Advisory Circles", desc: "Rotating advisors for critique and fresh perspective" },
-      { title: "Community", desc: "Customers and users as co-creators of value" },
+      { title: "AI R&D", desc: "Frontier AI research and efficient innovation" },
+      { title: "Science", desc: "AI-powered scientific discovery" },
+      { title: "Capital & Trading", desc: "Capital allocation, quantitative strategy" },
+      { title: "Product & Design", desc: "Product development, UX, visual design" },
+      { title: "Commerce & Sales", desc: "Revenue, deals, customer relationships" },
+      { title: "SEO & Organic Growth", desc: "Search optimization, content, audience leverage" },
+      { title: "Security & AI Defense", desc: "Cybersecurity, adversarial testing, AI defense" },
+      { title: "Infrastructure & Performance", desc: "DevOps, supply chain, lean operations" },
+      { title: "Academy", desc: "Education, learning design, mastery" },
+      { title: "Behavior Lab", desc: "Psychology, behavioral science, decision-making" },
+      { title: "Legal & Regulatory", desc: "Law, compliance, antitrust, rights" },
+      { title: "Economics & Policy", desc: "Macro analysis, institutional design" },
+      { title: "Brand & Attention", desc: "Media, content, cultural impact" },
+      { title: "Global Strategy", desc: "Geopolitics, competitive positioning" },
     ],
     principles: [
-      { mind: "Robert Cialdini", insight: "Six principles of influence as operating system" },
-      { mind: "Scott Adams", insight: "Talent stacking creates unique value" },
-      { mind: "Emily Weiss", insight: "Every customer should be a brand evangelist" },
+      { mind: "Liang Wenfeng", insight: "Efficiency per dollar > raw capability" },
+      { mind: "Rand Fishkin", insight: "Use other people's audiences to grow your own" },
+      { mind: "Daniel Miessler", insight: "AI gives security professionals 10,000x leverage" },
+      { mind: "Kelsey Hightower", insight: "Use managed services, don't build what you can buy" },
+      { mind: "BJ Fogg", insight: "Behavior = Motivation x Ability x Prompt" },
     ],
-    advisorIds: ["robert-cialdini", "scott-adams", "emily-weiss"],
-    relevantAgents: [],
-  },
-  {
-    id: "governance",
-    name: "The Governance Mesh",
-    subtitle: "Integrity Layer — Ethics & Oversight",
-    description:
-      "The integrity layer ensures the organization operates ethically, manages AI risk, maintains radical transparency, and protects customers. Governance pervades all layers.",
-    icon: "⚖️",
-    roles: [
-      { title: "Ethics Council", desc: "Maximum good test on all major decisions" },
-      { title: "AI Safety Monitor", desc: "Continuous risk monitoring for all AI systems" },
-      { title: "Transparency Engine", desc: "Radical transparency as default operating mode" },
-      { title: "Wisdom Council", desc: "Critique, risk assessment, evidence-based review" },
-      { title: "Customer Ombudsman", desc: "Honest communication, especially during crises" },
+    advisorIds: [], // Too many to list — use MISSION_MAPPINGS for per-division lookup
+    relevantAgents: [
+      "removal-agent", "support-agent", "billing-agent",
+      "growth-agent", "content-agent", "seo-agent",
+      "competitive-intel-agent",
     ],
-    principles: [
-      { mind: "Peter Singer", insight: "Maximum good for maximum number" },
-      { mind: "Geoffrey Hinton", insight: "Continuous AI risk monitoring" },
-      { mind: "Ray Dalio", insight: "Radical transparency by default" },
-      { mind: "Byung-Chul Han", insight: "Question the imperative to optimize everything" },
-      { mind: "Zelenskyy", insight: "Show up, communicate honestly, never hide" },
-    ],
-    advisorIds: [
-      "peter-singer", "yuval-harari", "geoffrey-hinton",
-      "byung-chul-han", "nick-bostrom", "zelenskyy",
-    ],
-    relevantAgents: [],
   },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
-// MISSION-TO-AGENT MAPPINGS
+// 14 DIVISION MAPPINGS
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const MISSION_MAPPINGS: MissionMapping[] = [
   {
-    domain: "growth-revenue",
-    label: "Growth & Revenue",
-    description: "Drive user acquisition, conversion, and revenue growth",
-    keyAdvisorIds: ["alex-hormozi", "russell-brunson", "neil-patel"],
-    agentIds: ["growth-agent", "content-agent"],
+    domain: "ai-rd",
+    label: "AI R&D",
+    description: "Frontier AI research, efficient innovation, and responsible development",
+    keyAdvisorIds: ["demis-hassabis", "sam-altman", "yann-lecun", "liang-wenfeng", "andrew-ng", "andrej-karpathy", "geoffrey-hinton"],
+    agentIds: [],
   },
   {
-    domain: "product-platform",
-    label: "Product & Platform",
-    description: "Build, ship, and iterate the core privacy platform",
-    keyAdvisorIds: ["sam-altman", "tim-cook", "elon-musk", "mustafa-suleyman"],
+    domain: "science-research",
+    label: "Science",
+    description: "AI-powered scientific discovery across biology, chemistry, and materials science",
+    keyAdvisorIds: ["demis-hassabis", "jennifer-doudna", "katalin-kariko", "john-jumper", "feng-zhang"],
+    agentIds: [],
+  },
+  {
+    domain: "capital-trading",
+    label: "Capital & Trading",
+    description: "Capital allocation, quantitative strategy, and financial architecture",
+    keyAdvisorIds: ["warren-buffett", "ken-griffin", "ray-dalio", "cathie-wood", "masayoshi-son", "graham-ben", "jim-simons", "livermore"],
+    agentIds: [],
+  },
+  {
+    domain: "product-design",
+    label: "Product & Design",
+    description: "Product development, UX, industrial design, and user experience architecture",
+    keyAdvisorIds: ["sam-altman", "jony-ive", "tim-cook", "elon-musk", "dieter-rams", "bjarke-ingels", "neri-oxman", "jobs"],
     agentIds: ["seo-agent"],
   },
   {
     domain: "commerce-sales",
     label: "Commerce & Sales",
-    description: "Close deals, expand relationships, maximize customer value",
-    keyAdvisorIds: ["chris-voss", "andy-elliott", "jeremy-miner", "gary-vaynerchuk", "grant-cardone"],
+    description: "Revenue generation, deal-making, funnel optimization, and customer relationships",
+    keyAdvisorIds: ["alex-hormozi", "russell-brunson", "neil-patel", "andy-elliott", "chris-voss", "gary-vaynerchuk", "jeremy-miner"],
     agentIds: ["billing-agent"],
   },
   {
+    domain: "seo-organic-growth",
+    label: "SEO & Organic Growth",
+    description: "Search engine optimization, AI search surfaces, content strategy, and audience leverage",
+    keyAdvisorIds: ["rand-fishkin", "mike-king", "neil-patel", "godin", "ogilvy", "halbert", "hopkins"],
+    agentIds: ["growth-agent", "content-agent", "seo-agent"],
+  },
+  {
+    domain: "security-defense",
+    label: "Security & AI Defense",
+    description: "Cybersecurity, adversarial testing, social engineering defense, and AI security integration",
+    keyAdvisorIds: ["mikko-hypponen", "daniel-miessler", "kevin-mitnick", "bruce-schneier", "katie-moussouris", "parisa-tabriz", "marcus-hutchins"],
+    agentIds: [],
+  },
+  {
+    domain: "infrastructure-performance",
+    label: "Infrastructure & Performance",
+    description: "DevOps, supply chain optimization, lean operations, and managed services strategy",
+    keyAdvisorIds: ["kelsey-hightower", "tim-cook", "taiichi-ohno", "henry-ford", "andy-jassy", "ryan-petersen"],
+    agentIds: [],
+  },
+  {
+    domain: "academy",
+    label: "Academy",
+    description: "Education, learning design, AI tutoring, mastery-based skill development",
+    keyAdvisorIds: ["montessori", "sal-khan", "dewey", "andrew-ng", "barbara-oakley", "bloom"],
+    agentIds: [],
+  },
+  {
+    domain: "behavior-lab",
+    label: "Behavior Lab",
+    description: "Psychology, behavioral science, decision-making, habit formation, and cognitive bias",
+    keyAdvisorIds: ["daniel-kahneman", "carl-jung", "bj-fogg", "angela-duckworth", "dan-ariely", "andrew-huberman"],
+    agentIds: [],
+  },
+  {
     domain: "legal-compliance",
-    label: "Legal & Compliance",
-    description: "Navigate privacy law, CCPA/GDPR, data broker regulations",
-    keyAdvisorIds: ["amal-clooney", "neal-katyal", "david-boies", "fiona-scott-morton", "lina-khan"],
+    label: "Legal & Regulatory",
+    description: "Privacy law, CCPA/GDPR, antitrust, rights advocacy, and regulatory strategy",
+    keyAdvisorIds: ["amal-clooney", "neal-katyal", "david-boies", "fiona-scott-morton", "lina-khan", "marshall"],
     agentIds: ["removal-agent"],
   },
   {
-    domain: "customer-culture",
-    label: "Customer & Culture",
-    description: "Build community, drive engagement, ensure customer success",
-    keyAdvisorIds: ["jordan-peterson", "vanessa-van-edwards", "hikaru-nakamura"],
-    agentIds: ["support-agent"],
-  },
-  {
-    domain: "competitive-intel",
-    label: "Competitive Intelligence",
-    description: "Map competitive landscape and maintain strategic advantage",
-    keyAdvisorIds: ["magnus-carlsen", "ding-liren", "fabiano-caruana", "ray-dalio"],
-    agentIds: ["competitive-intel-agent"],
-  },
-  {
-    domain: "brand-media",
-    label: "Brand & Media",
-    description: "Create remarkable content that builds brand and drives awareness",
-    keyAdvisorIds: ["mrbeast", "joe-rogan", "lex-fridman", "taylor-swift"],
-    agentIds: ["content-agent"],
-  },
-  {
-    domain: "science-research",
-    label: "Science & Research",
-    description: "Advance core technology and scientific capabilities",
-    keyAdvisorIds: ["jennifer-doudna", "katalin-kariko", "john-jumper", "feng-zhang"],
+    domain: "economics-policy",
+    label: "Economics & Policy",
+    description: "Macro analysis, institutional design, labor economics, and AI economic impact",
+    keyAdvisorIds: ["daron-acemoglu", "claudia-goldin", "mohamed-el-erian", "raghuram-rajan", "tyler-cowen", "sowell"],
     agentIds: [],
+  },
+  {
+    domain: "brand-attention",
+    label: "Brand & Attention",
+    description: "Media, content creation, cultural impact, attention arbitrage, and brand building",
+    keyAdvisorIds: ["mrbeast", "joe-rogan", "lex-fridman", "taylor-swift", "gary-vaynerchuk", "oprah"],
+    agentIds: ["content-agent"],
   },
   {
     domain: "global-strategy",
     label: "Global Strategy",
-    description: "Navigate geopolitical trends and international expansion",
-    keyAdvisorIds: ["xi-jinping-ext", "modi-ext", "mbs-ext"],
-    agentIds: [],
-  },
-  {
-    domain: "economics",
-    label: "Economics",
-    description: "Analyze market dynamics, structural patterns, and macro trends",
-    keyAdvisorIds: ["daron-acemoglu", "claudia-goldin", "mohamed-el-erian", "raghuram-rajan", "tyler-cowen"],
-    agentIds: [],
+    description: "Geopolitics, competitive positioning, crisis leadership, and multi-front operations",
+    keyAdvisorIds: ["sun-tzu", "satya-nadella", "jensen-huang", "zelenskyy", "clausewitz", "magnus-carlsen"],
+    agentIds: ["competitive-intel-agent"],
   },
 ];
 

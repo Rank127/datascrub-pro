@@ -198,7 +198,7 @@ class SupportAgent extends BaseAgent {
   ];
 
   protected getSystemPrompt(): string {
-    const mastermind = buildAgentMastermindPrompt("customer-culture", 3);
+    const mastermind = buildAgentMastermindPrompt("behavior-lab", 3);
     return `${SUPPORT_AGENT_SYSTEM_PROMPT}${mastermind}`;
   }
 

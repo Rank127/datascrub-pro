@@ -30,7 +30,7 @@ interface MastermindData {
 
 export function MastermindOrgChart() {
   const [activeTab, setActiveTab] = useState<TabId>("layers");
-  const [expandedLayer, setExpandedLayer] = useState<string | null>("nucleus");
+  const [expandedLayer, setExpandedLayer] = useState<string | null>("board");
   const [data, setData] = useState<MastermindData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -46,10 +46,10 @@ export function MastermindOrgChart() {
   const missions = data?.missions ?? [];
 
   const tabs: { id: TabId; label: string }[] = [
-    { id: "layers", label: "The 5 Layers" },
-    { id: "missions", label: "Mission Teams" },
-    { id: "principles", label: "Core Principles" },
-    { id: "headcount", label: "Headcount Model" },
+    { id: "layers", label: "Organization" },
+    { id: "missions", label: "14 Divisions" },
+    { id: "principles", label: "10 Thinking Layers" },
+    { id: "headcount", label: "Scale Model" },
   ];
 
   if (loading) {
@@ -231,16 +231,22 @@ export function MastermindOrgChart() {
           <div className="space-y-6">
             {[
               {
-                layer: "Technology",
-                question: "How to Build",
-                color: "text-blue-400",
-                minds: "Jensen Huang, Wenfeng, Karpathy, LeCun, Amodei, Altman, Musk",
-              },
-              {
                 layer: "Strategic",
                 question: "How to Position",
                 color: "text-purple-400",
                 minds: "Jensen Huang, Nadella, Carlsen, Dalio, Buffett, Cook, El-Erian",
+              },
+              {
+                layer: "Execution",
+                question: "How to Ship",
+                color: "text-orange-400",
+                minds: "Wenfeng, Cook, Karpathy, Edison, Ohno",
+              },
+              {
+                layer: "Technology",
+                question: "How to Build",
+                color: "text-blue-400",
+                minds: "Jensen Huang, Wenfeng, Karpathy, LeCun, Amodei, Altman, Musk",
               },
               {
                 layer: "Commercial",
@@ -259,6 +265,30 @@ export function MastermindOrgChart() {
                 question: "How to Decide",
                 color: "text-amber-400",
                 minds: "Harari, Han, Bostrom, Singer, Cowen, Acemoglu, Hinton",
+              },
+              {
+                layer: "SEO & Growth",
+                question: "How to Be Found",
+                color: "text-green-400",
+                minds: "Fishkin, King, Patel, Ogilvy, Halbert, Hopkins",
+              },
+              {
+                layer: "Design",
+                question: "How to Feel",
+                color: "text-cyan-400",
+                minds: "Ive, Rams, Jobs, Ingels, Maeda, Oxman",
+              },
+              {
+                layer: "Infrastructure",
+                question: "How to Scale",
+                color: "text-slate-300",
+                minds: "Hightower, Ohno, Cook, Ford, Jassy",
+              },
+              {
+                layer: "Security",
+                question: "How to Defend",
+                color: "text-red-400",
+                minds: "Miessler, Schneier, Mitnick, Hypp\u00f6nen, Tabriz",
               },
             ].map((principle) => (
               <div key={principle.layer} className="flex items-start gap-4">
@@ -279,14 +309,14 @@ export function MastermindOrgChart() {
         {activeTab === "headcount" && (
           <div className="space-y-4">
             <p className="text-slate-300 text-sm">
-              The organism model scales from 1 person to 1,000 without changing structure.
-              Layers expand, not multiply.
+              The corporate model scales from 1 person to 1,000 without changing structure.
+              Board + C-Suite + Divisions expand, not multiply.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { stage: "Solo (1-3)", nucleus: "1 person = all roles", missions: "2-3 priorities", agents: "AI does the rest" },
-                { stage: "Team (4-15)", nucleus: "3-5 architects", missions: "5-7 active missions", agents: "24 AI agents" },
-                { stage: "Scale (15+)", nucleus: "5 architects + board", missions: "All 10 domains staffed", agents: "AI fleet + human oversight" },
+                { stage: "Solo (1-3)", board: "1 person = all roles", divisions: "2-3 priorities", agents: "AI does the rest" },
+                { stage: "Team (4-15)", board: "3-5 directors", divisions: "5-7 active divisions", agents: "24 AI agents" },
+                { stage: "Scale (15+)", board: "5 directors + full C-Suite", divisions: "All 14 divisions staffed", agents: "AI fleet + human oversight" },
               ].map((model) => (
                 <div
                   key={model.stage}
@@ -297,12 +327,12 @@ export function MastermindOrgChart() {
                   </h3>
                   <div className="space-y-2 text-xs">
                     <div>
-                      <span className="text-slate-500">Nucleus:</span>{" "}
-                      <span className="text-slate-300">{model.nucleus}</span>
+                      <span className="text-slate-500">Board:</span>{" "}
+                      <span className="text-slate-300">{model.board}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Missions:</span>{" "}
-                      <span className="text-slate-300">{model.missions}</span>
+                      <span className="text-slate-500">Divisions:</span>{" "}
+                      <span className="text-slate-300">{model.divisions}</span>
                     </div>
                     <div>
                       <span className="text-slate-500">AI Layer:</span>{" "}

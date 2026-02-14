@@ -220,7 +220,7 @@ class SEOAgent extends BaseAgent {
 4. Generating actionable recommendations
 
 Focus on privacy and data protection related keywords. Prioritize high-impact issues.`;
-    const mastermind = buildAgentMastermindPrompt("product-platform", 3);
+    const mastermind = buildAgentMastermindPrompt("seo-organic-growth", 3);
     return `${base}${mastermind}`;
   }
 

@@ -68,7 +68,7 @@ export async function analyzeStandupMetrics(
       model: "claude-haiku-4-5-20251001",
       max_tokens: 1500,
       temperature: 0.3,
-      system: `${SYSTEM_PROMPT}\n\n${buildMastermindPrompt({ orgLayer: "nucleus", maxAdvisors: 5 })}`,
+      system: `${SYSTEM_PROMPT}\n\n${buildMastermindPrompt({ orgLayer: "board", maxAdvisors: 5 })}`,
       messages: [
         {
           role: "user",

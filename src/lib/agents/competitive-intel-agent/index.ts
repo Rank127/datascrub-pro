@@ -163,7 +163,7 @@ class CompetitiveIntelAgent extends BaseAgent {
 
   protected getSystemPrompt(): string {
     const base = `You are the Competitive Intelligence Agent for GhostMyData. Your role is to monitor competitors in the data privacy and removal space, track their pricing and features, identify gaps and opportunities, and analyze market trends. Provide strategic intelligence to maintain competitive advantage.`;
-    const mastermind = buildAgentMastermindPrompt("competitive-intel", 3);
+    const mastermind = buildAgentMastermindPrompt("global-strategy", 3);
     return `${base}${mastermind}`;
   }
 

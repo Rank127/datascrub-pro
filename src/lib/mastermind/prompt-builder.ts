@@ -1,10 +1,11 @@
 /**
- * Mastermind Advisory System - Central Prompt Builder
+ * Mastermind Advisory System - Central Prompt Builder (Feb 2026)
  *
  * Assembles advisor perspectives, protocol steps, and business context
- * into a single prompt section. Token-budgeted (~800 tokens max).
+ * into a single prompt section. Updated for 10 thinking layers, 11-step
+ * protocol, and 8-section response format.
  *
- * Selection priority: Invocation > Mission > Org Layer > Operating Layer > Default (Nucleus)
+ * Selection priority: Invocation > Mission > Org Layer > Operating Layer > Default (Board)
  */
 
 import {
@@ -16,7 +17,7 @@ import {
   getAdvisorsByOrgLayer,
   getAdvisorsByMission,
   getAdvisorsByOperatingLayer,
-  getNucleusAdvisors,
+  getBoardAdvisors,
   MODERN_ADVISORS,
   ALL_ADVISORS,
 } from "./advisors";
@@ -102,10 +103,10 @@ export function buildMastermindPrompt(options: MastermindPromptOptions = {}): st
     sections.push(`Operating Layers: ${layers.join(", ")}`);
   }
 
-  // Default: Nucleus
+  // Default: Board of Directors
   if (selectedAdvisors.length === 0) {
-    selectedAdvisors = getNucleusAdvisors();
-    sections.push("Advisory: Nucleus (5 Architects)");
+    selectedAdvisors = getBoardAdvisors();
+    sections.push("Advisory: Board of Directors");
   }
 
   // --- Filter by era ---
@@ -124,7 +125,7 @@ export function buildMastermindPrompt(options: MastermindPromptOptions = {}): st
   // --- Advisor section ---
   if (selectedAdvisors.length > 0) {
     const advisorLines = selectedAdvisors.map((a) => {
-      const roleLabel = a.nucleusRole || a.missionDomain || a.orgLayer;
+      const roleLabel = a.corpRole || a.missionDomain || a.orgLayer;
       return `- **${a.name}** (${roleLabel}): ${a.promptFragment}`;
     });
     sections.push(`\nConsider these perspectives:\n${advisorLines.join("\n")}`);
@@ -144,6 +145,19 @@ export function buildMastermindPrompt(options: MastermindPromptOptions = {}): st
   if (includeBusinessContext) {
     sections.push(`\n${getBusinessContextPrompt()}`);
   }
+
+  // --- Response format ---
+  sections.push(`\n## Response Format
+Structure your response using these sections:
+
+1. LANDSCAPE (Sun Tzu + Jensen Huang + Nadella) — Competitive terrain + infrastructure view + partnerships
+2. ANALYSIS (Dalio + Acemoglu + Cowen + Einstein) — Cycle position + evidence + first principles
+3. OFFER/SOLUTION (Hormozi + Altman + Brunson + Ive) — Value design + deployment + user experience
+4. SEO & GROWTH (Fishkin + King + Patel) — Organic discovery + AI search + audience leverage
+5. ACTION PLAN — Specific, prioritized next steps with timelines
+6. SECURITY & INFRASTRUCTURE (Miessler + Schneier + Hightower) — AI-security + performance optimization
+7. RISKS & BLIND SPOTS (Munger + Amodei + Feynman + Mitnick) — Inversion + safety + honesty + social engineering
+8. GOVERNANCE CHECK (Buffett + Marcus Aurelius + Socrates + Clooney) — Front-page test + control + assumptions + legal`);
 
   return sections.join("\n");
 }

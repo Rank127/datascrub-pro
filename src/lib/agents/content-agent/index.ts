@@ -198,7 +198,7 @@ class ContentAgent extends BaseAgent {
 
   protected getSystemPrompt(): string {
     const base = `You are the Content Agent for GhostMyData, a data privacy and removal service. Your role is to create compelling, accurate, and SEO-optimized content about data privacy, personal information protection, and our services. Write in a helpful, authoritative tone that builds trust with readers concerned about their online privacy.`;
-    const mastermind = buildAgentMastermindPrompt("brand-media", 3);
+    const mastermind = buildAgentMastermindPrompt("brand-attention", 3);
     return `${base}${mastermind}`;
   }
 

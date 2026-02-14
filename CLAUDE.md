@@ -57,59 +57,82 @@ Invite acceptance can silently fail, leaving invitation PENDING with no FamilyMe
 
 ## Mastermind Advisory System
 
-### 5-Layer Organism Model
-The organization is modeled as a living organism with 5 layers (defined in `src/lib/mastermind/org-structure.ts`):
+### 19 Categories | 240+ Minds | 10 Layers | 11-Step Protocol | 45+ Invocations
 
-| Layer | Name | Description |
-|-------|------|-------------|
-| 1 | **Nucleus** | 5 Architects: Huang (Vision), Hassabis (Systems), Buffett (Capital), Nadella (Culture), Amodei (Safety) |
-| 2 | **Mission Teams** | 10 domain squads: Growth, Product, Commerce, Legal, Customer, Competitive Intel, Brand, Science, Global Strategy, Economics |
-| 3 | **AI Agent Layer** | 24 AI agents mapped to mission domains, inspired by Wenfeng, Karpathy, LeCun, Ng |
-| 4 | **Network Layer** | Expert network, creator partners, advisory circles (Cialdini, Adams, Weiss) |
-| 5 | **Governance Mesh** | Ethics (Singer), AI Safety (Hinton, Amodei), Transparency (Dalio), Wisdom (Han, Bostrom, Cowen), Ombudsman (Zelenskyy) |
+### Corporate Org Structure (Board + C-Suite + 14 Divisions)
+Defined in `src/lib/mastermind/org-structure.ts`:
 
-### 7-Step Decision Protocol
-`MAP → ANALYZE → DESIGN → SAFETY CHECK → BUILD & SHIP → SELL → GOVERN`
+| Tier | Name | Key Roles |
+|------|------|-----------|
+| **Board** | Board of Directors (5) | Buffett (Chairman), Dalio (Vice Chairman), Cialdini (Behavioral Science), Fishkin (Sustainable Growth), Marcus Aurelius (Decision Discipline — framework) |
+| **C-Suite** | Executive Team (16) | Huang (CEO), Nadella (President/COO), Altman (CPO), Hassabis (CTO), Amodei (CSO), Cook (COO), Hormozi (CRO), Clooney (GC), Hypponen (CISO), Ive (CDO), King (Relevance), Miessler (AI-Security), Hightower (Performance) |
+| **Divisions** | 14 Divisions (160+ minds) | AI R&D, Science, Capital & Trading, Product & Design, Commerce & Sales, SEO & Organic Growth, Security & AI Defense, Infrastructure, Academy, Behavior Lab, Legal, Economics, Brand & Attention, Global Strategy |
 
-Each step has assigned modern minds (see `src/lib/mastermind/decision-protocol.ts`).
+### 11-Step Decision Protocol
+`MAP → ANALYZE → DESIGN OFFER → DESIGN EXPERIENCE → SAFETY CHECK → BUILD & SHIP → GROW ORGANICALLY → SELL → OPTIMIZE → PROTECT → GOVERN`
+
+Each step has assigned advisors (see `src/lib/mastermind/decision-protocol.ts`).
+
+### 10 Thinking Layers
+Strategic, Execution, Technology, Commercial, Human, Wisdom, SEO & Growth, Design, Infrastructure, Security (see `src/lib/mastermind/layers.ts`).
 
 ### Agent-to-Mission Mapping
 | Agent | Mission Domain | Key Minds |
 |-------|---------------|-----------|
 | removal-agent | legal-compliance | Clooney, Katyal, Voss |
-| support-agent | customer-culture | Peterson, Van Edwards, Nadella |
-| billing-agent | commerce-sales | Voss, Hormozi, Buffett |
-| competitive-intel-agent | competitive-intel | Carlsen, Caruana, Dalio |
-| growth-agent | growth-revenue | Hormozi, Brunson, Patel |
-| content-agent | brand-media | MrBeast, Gary Vee, Patel |
-| seo-agent | product-platform | Altman, Patel, Brunson |
+| support-agent | behavior-lab | Kahneman, Fogg, Duckworth |
+| billing-agent | commerce-sales | Voss, Hormozi, Brunson |
+| competitive-intel-agent | global-strategy | Carlsen, Sun Tzu, Nadella |
+| growth-agent | commerce-sales | Hormozi, Brunson, Patel |
+| content-agent | brand-attention | MrBeast, Gary Vee, Rogan |
+| seo-agent | seo-organic-growth | Fishkin, King, Patel |
 
-### Invocation Commands
+### 45+ Invocation Commands
 Quick-access commands for specific advisor perspectives:
 - `Jensen lens` — Infrastructure/platform thinking
 - `Hormozi offer` — Irresistible offer design
 - `Voss mode` — Tactical empathy negotiation
-- `Altman deploy` — Ship fast, iterate responsibly
-- `Buffett test` — Circle of competence + front-page test
-- `Carlsen intuition` — Pattern recognition beyond data
-- `MrBeast scale` — Biggest possible version
-- `Amodei safety` — What could go catastrophically wrong?
-- `Board Meeting` — Full Nucleus deliberation (5 architects)
-- `Modern Board Meeting` — Full analysis from 10+ minds
-- See `src/lib/mastermind/invocations.ts` for all ~25 commands
+- `Fishkin growth` — Bootstrapped organic growth
+- `King relevance` — AI search optimization
+- `Miessler augment` — AI-security integration
+- `Hightower simplify` — Infrastructure audit
+- `Board Meeting` — Full Board deliberation (14+ minds)
+- `Modern Board Meeting` — Full analysis from 12+ living minds
+- `Growth War Room` — Revenue + SEO sprint (Hormozi, Fishkin, King, Patel, MrBeast)
+- `Security War Room` — Full security assessment (Hypponen, Miessler, Schneier, Mitnick, Tabriz)
+- `Design Sprint` — Product design review (Ive, Rams, Jobs, Ingels, Maeda)
+- See `src/lib/mastermind/invocations.ts` for all 45+ commands
+
+### 12 Playbooks
+Pre-built scenario combos: pricing_review, content_strategy, seo_growth, legal_response, security_audit, churn_prevention, growth_stalling, competitive_threat, design_sprint, pre_mortem, weekly_strategic, infrastructure_review.
+
+### 6 Decision Frameworks
+Pure computational functions used by agents: `hormoziValueScore`, `carlsenPositionalScore`, `vossEmpathyScore`, `dalioRiskAssessment`, `mrbeastRemarkabilityScore`, `buffettCompetenceCheck` (see `src/lib/mastermind/frameworks.ts`).
+
+### 8-Section Response Format
+1. LANDSCAPE (Sun Tzu + Huang + Nadella)
+2. ANALYSIS (Dalio + Acemoglu + Cowen + Einstein)
+3. OFFER/SOLUTION (Hormozi + Altman + Brunson + Ive)
+4. SEO & GROWTH (Fishkin + King + Patel)
+5. ACTION PLAN
+6. SECURITY & INFRASTRUCTURE (Miessler + Schneier + Hightower)
+7. RISKS & BLIND SPOTS (Munger + Amodei + Feynman + Mitnick)
+8. GOVERNANCE CHECK (Buffett + Marcus Aurelius + Socrates + Clooney)
 
 ### Key Files
 ```
 src/lib/mastermind/
-  advisors.ts        — ~75 modern + ~70 historical advisors
-  org-structure.ts   — 5-layer organism model + mission mappings
-  layers.ts          — 5 operating principle layers
-  decision-protocol.ts — 7-step protocol
-  invocations.ts     — ~25 invocation commands
-  prompt-builder.ts  — Central prompt engine (buildMastermindPrompt)
-  playbooks.ts       — Pre-built scenario combos
-  business-context.ts — Static business data
-  index.ts           — Barrel exports
+  advisors.ts          — ~84 modern + ~82 historical advisors (19 categories)
+  org-structure.ts     — Board + C-Suite + 14 Divisions
+  layers.ts            — 10 thinking layers with frameworks
+  decision-protocol.ts — 11-step protocol
+  invocations.ts       — 45+ invocation commands
+  prompt-builder.ts    — Central prompt engine (buildMastermindPrompt)
+  playbooks.ts         — 12 pre-built scenario combos
+  frameworks.ts        — 6 computational decision frameworks
+  directives.ts        — Strategic directive read/write/cache
+  business-context.ts  — Static business data
+  index.ts             — Barrel exports
 ```
 
 ### Usage Pattern
@@ -118,8 +141,8 @@ import { buildMastermindPrompt, buildAgentMastermindPrompt } from "@/lib/masterm
 
 // Full prompt for strategic queries
 const prompt = buildMastermindPrompt({
-  mission: "growth-revenue",
-  protocol: ["MAP", "DESIGN", "SELL"],
+  mission: "commerce-sales",
+  protocol: ["MAP", "DESIGN_OFFER", "SELL"],
   includeBusinessContext: true,
   scenario: "How to increase free-to-pro conversion?",
 });
@@ -131,7 +154,8 @@ const agentPrompt = buildAgentMastermindPrompt("legal-compliance", 3);
 ### Weekly Cron
 - `mastermind-weekly` runs Mondays 9am ET (`0 14 * * 1` UTC)
 - Sends "Weekly Board Meeting Minutes" email to rocky@ghostmydata.com
-- Uses full 7-step protocol via Claude Haiku
+- Uses full 11-step protocol via Claude Haiku
+- Generates strategic directives that adjust agent thresholds
 
 ### Admin Dashboard
 - `/dashboard/mastermind` — Org chart + interactive advisor panel

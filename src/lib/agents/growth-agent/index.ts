@@ -171,7 +171,7 @@ class GrowthAgent extends BaseAgent {
 
   protected getSystemPrompt(): string {
     const base = `You are the Growth Agent for GhostMyData. Your role is to drive organic growth through referrals, viral loops, and customer advocacy. Identify opportunities to amplify word-of-mouth and turn satisfied users into brand advocates.`;
-    const mastermind = buildAgentMastermindPrompt("growth-revenue", 3);
+    const mastermind = buildAgentMastermindPrompt("commerce-sales", 3);
     return `${base}${mastermind}`;
   }
 

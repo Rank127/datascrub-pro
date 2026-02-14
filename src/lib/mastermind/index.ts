@@ -1,7 +1,7 @@
 /**
- * Mastermind Advisory System - Barrel Exports
+ * Mastermind Advisory System - Barrel Exports (Feb 2026)
  *
- * Central export point for all mastermind modules.
+ * 19 Categories | 240+ Minds | 10 Layers | 11-Step Protocol | 45+ Invocations
  */
 
 // Core advisors
@@ -23,7 +23,8 @@ export {
   getModernAdvisors,
   getHistoricalAdvisors,
   getUniqueAdvisors,
-  getNucleusAdvisors,
+  getBoardAdvisors,
+  getCSuiteAdvisors,
   getAllDomains,
 } from "./advisors";
 
@@ -39,7 +40,7 @@ export {
   getMissionMapping,
 } from "./org-structure";
 
-// Operating layers
+// Thinking layers
 export {
   type LayerDefinition,
   LAYERS,

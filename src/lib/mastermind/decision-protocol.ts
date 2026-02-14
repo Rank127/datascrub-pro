@@ -1,9 +1,8 @@
 /**
- * Mastermind Advisory System - 7-Step Modern Decision Protocol
+ * Mastermind Advisory System - 11-Step Decision Protocol (Feb 2026)
  *
- * MAP → ANALYZE → DESIGN → SAFETY CHECK → BUILD & SHIP → SELL → GOVERN
- *
- * Each step assigns modern living minds and framing questions.
+ * MAP → ANALYZE → DESIGN OFFER → DESIGN EXPERIENCE → SAFETY CHECK →
+ * BUILD & SHIP → GROW ORGANICALLY → SELL → OPTIMIZE → PROTECT → GOVERN
  */
 
 import { getAdvisor, type Advisor } from "./advisors";
@@ -11,10 +10,14 @@ import { getAdvisor, type Advisor } from "./advisors";
 export type ProtocolStep =
   | "MAP"
   | "ANALYZE"
-  | "DESIGN"
+  | "DESIGN_OFFER"
+  | "DESIGN_EXPERIENCE"
   | "SAFETY_CHECK"
   | "BUILD_SHIP"
+  | "GROW_ORGANICALLY"
   | "SELL"
+  | "OPTIMIZE"
+  | "PROTECT"
   | "GOVERN";
 
 interface StepDefinition {
@@ -28,93 +31,134 @@ interface StepDefinition {
 const PROTOCOL_STEPS: StepDefinition[] = [
   {
     id: "MAP",
-    name: "MAP — Map the Terrain",
-    purpose:
-      "Assess the landscape with infrastructure thinking and pattern recognition. What position are we in? What patterns do we see?",
-    advisorIds: ["jensen-huang", "magnus-carlsen"],
+    name: "MAP — Map the Landscape",
+    purpose: "Assess the competitive and technology landscape with infrastructure thinking, partnership strategy, and pattern recognition.",
+    advisorIds: ["sun-tzu", "jensen-huang", "satya-nadella"],
     questions: [
-      "What platform or infrastructure investment makes everything else possible?",
-      "What subtle positional advantage can we accumulate that compounds over time?",
-      "What do we know vs. what are we assuming?",
-      "What patterns from the competitive landscape should inform our strategy?",
+      "What's the full competitive and technology landscape?",
+      "Where is the infrastructure layer we should own?",
+      "What patterns do we intuit that data doesn't yet confirm?",
+      "What partnership opportunities amplify our position?",
     ],
   },
   {
     id: "ANALYZE",
     name: "ANALYZE — Principles & Data Analysis",
-    purpose:
-      "Apply radical transparency, institutional economics, and contrarian thinking. What does the data honestly tell us?",
-    advisorIds: ["ray-dalio", "daron-acemoglu", "tyler-cowen"],
+    purpose: "Apply cycle awareness, institutional thinking, empirical evidence, and first principles to understand the situation deeply.",
+    advisorIds: ["ray-dalio", "daron-acemoglu", "tyler-cowen", "einstein"],
     questions: [
-      "What does the data honestly tell us? Are we being radically transparent?",
-      "Are we building inclusive systems that create value for all stakeholders?",
-      "What does the contrarian view look like, and why might consensus be wrong?",
-      "What structural patterns are we missing?",
+      "Where are we in the economic/technology cycle?",
+      "What institutional dynamics are at play?",
+      "What does the empirical evidence actually say?",
+      "What are we assuming that might be wrong? (First principles)",
     ],
   },
   {
-    id: "DESIGN",
-    name: "DESIGN — Irresistible Solution Design",
-    purpose:
-      "Create offers so good people feel stupid saying no. Ship fast, iterate responsibly. Build the funnel.",
+    id: "DESIGN_OFFER",
+    name: "DESIGN THE OFFER — Irresistible Value",
+    purpose: "Create offers so good people feel stupid saying no. Make frontier technology accessible. Design the conversion architecture.",
     advisorIds: ["alex-hormozi", "sam-altman", "russell-brunson"],
     questions: [
-      "Is our offer so good people feel stupid saying no?",
-      "How do we ship this fast while being responsible?",
-      "What's the value ladder and funnel that moves people from awareness to action?",
-      "What can we remove to make this simpler and better?",
+      "What's the irresistible offer?",
+      "How do we make frontier technology accessible?",
+      "What's the conversion architecture?",
+      "What's the dream outcome / time x effort equation for the customer?",
+    ],
+  },
+  {
+    id: "DESIGN_EXPERIENCE",
+    name: "DESIGN THE EXPERIENCE — Human-Centered Design",
+    purpose: "Design how it feels, how it looks, and what world we're creating for the customer. Simplify relentlessly.",
+    advisorIds: ["jony-ive", "dieter-rams", "jobs"],
+    questions: [
+      "How does it feel? How does it look?",
+      "What world are we creating for the customer?",
+      "What can we remove to make it simpler?",
+      "Is every remaining element essential and beautiful?",
     ],
   },
   {
     id: "SAFETY_CHECK",
     name: "SAFETY CHECK — What Could Go Wrong?",
-    purpose:
-      "Before building, run the safety gauntlet. Constitutional AI check, existential risk scan, and burnout society critique.",
-    advisorIds: ["dario-amodei", "nick-bostrom", "byung-chul-han"],
+    purpose: "Before building, run the safety gauntlet: constitutional AI check, security review, inversion, intellectual honesty.",
+    advisorIds: ["dario-amodei", "bruce-schneier", "munger", "feynman"],
     questions: [
-      "What could go catastrophically wrong with this plan?",
-      "What existential or catastrophic risk have we failed to imagine?",
-      "Are we creating genuine value or just feeding the optimization machine?",
-      "Would we be comfortable if this decision were fully public?",
+      "What could go catastrophically wrong?",
+      "Are we fooling ourselves about any assumption?",
+      "Is our security proportional to our exposure?",
+      "Is our safety infrastructure proportional to our capability?",
     ],
   },
   {
     id: "BUILD_SHIP",
     name: "BUILD & SHIP — Efficient Execution",
-    purpose:
-      "Build with maximum efficiency per dollar. Ship from research to production. Operational excellence.",
-    advisorIds: ["liang-wenfeng", "tim-cook", "andrej-karpathy"],
+    purpose: "Build efficiently — capability per dollar. Ship at scale with flawless execution. Test rapidly. Iterate.",
+    advisorIds: ["liang-wenfeng", "tim-cook", "andrej-karpathy", "edison"],
     questions: [
-      "Are we maximizing output per dollar spent?",
-      "Can we ship this from research to production this week?",
+      "Are we maximizing capability per dollar?",
+      "Can we ship this to production this week?",
       "Is our operations world-class? What's the bottleneck?",
-      "Are we building something that works in the real world, not just in theory?",
+      "Don't let perfect be the enemy of shipped.",
+    ],
+  },
+  {
+    id: "GROW_ORGANICALLY",
+    name: "GROW ORGANICALLY — Sustainable Growth",
+    purpose: "Leverage other people's audiences. Engineer relevance for AI search surfaces. Create content that compounds.",
+    advisorIds: ["rand-fishkin", "mike-king", "neil-patel", "ogilvy"],
+    questions: [
+      "What audiences can we leverage without paid ads?",
+      "Are we engineering relevance for AI search surfaces?",
+      "What content compounds over time?",
+      "Is every piece of content the best version of its concept?",
     ],
   },
   {
     id: "SELL",
     name: "SELL — Empathy-Driven Distribution",
-    purpose:
-      "Use tactical empathy and irresistible offers to connect with customers. Give value before asking.",
-    advisorIds: ["chris-voss", "alex-hormozi", "gary-vaynerchuk"],
+    purpose: "Negotiate with tactical empathy. Make the offer irresistible. Be everywhere attention is underpriced.",
+    advisorIds: ["chris-voss", "alex-hormozi", "gary-vaynerchuk", "ogilvy"],
     questions: [
       "What calibrated question reveals the customer's real constraint?",
-      "Are we giving enough value before we ask for anything?",
-      "Is our messaging native to each platform and audience?",
-      "What's the dream outcome / time × effort equation for the customer?",
+      "Is our offer truly irresistible?",
+      "Are we where attention is underpriced?",
+      "Research what works, then do more of it.",
+    ],
+  },
+  {
+    id: "OPTIMIZE",
+    name: "OPTIMIZE — Performance & Efficiency",
+    purpose: "Ensure tools and scripts perform at peak. Eliminate waste. Decide what to build vs. buy as a managed service.",
+    advisorIds: ["kelsey-hightower", "taiichi-ohno", "tim-cook", "liang-wenfeng"],
+    questions: [
+      "Are our tools and scripts performing at peak efficiency?",
+      "Are we over-engineering anything we should buy as a service?",
+      "Where is waste in our system? Eliminate it.",
+      "Is capability-per-dollar maximized?",
+    ],
+  },
+  {
+    id: "PROTECT",
+    name: "PROTECT — Security & Defense",
+    purpose: "Train the human layer against social engineering. Test adversarially. Embed security in the architecture.",
+    advisorIds: ["kevin-mitnick", "bruce-schneier", "katie-moussouris", "parisa-tabriz"],
+    questions: [
+      "Is our human layer trained against social engineering?",
+      "Have we tested adversarially?",
+      "Is security embedded, not bolted on?",
+      "What single-point-of-failure could take us down?",
     ],
   },
   {
     id: "GOVERN",
     name: "GOVERN — Ethics, Transparency & Legacy",
-    purpose:
-      "Ensure the decision passes the maximum good test, the front-page test, and creates precedent we're proud of.",
-    advisorIds: ["warren-buffett", "peter-singer", "yuval-harari"],
+    purpose: "Ensure decisions pass the front-page test, act with virtue on what we control, question assumptions, and govern proportionally.",
+    advisorIds: ["warren-buffett", "marcus-aurelius", "socrates", "dario-amodei"],
     questions: [
-      "Does this pass the front-page test? Would we be proud if it were public?",
-      "Does this decision maximize overall well-being?",
-      "What story are we telling the world, and is it true?",
-      "What precedent does this set for the future?",
+      "Would we be comfortable with this on the front page?",
+      "What is within our control, and are we acting with virtue?",
+      "What assumptions haven't we questioned?",
+      "Is our governance proportional to our power?",
     ],
   },
 ];
@@ -131,7 +175,7 @@ export function getAllProtocolSteps(): StepDefinition[] {
 
 /**
  * Build a formatted prompt section for selected protocol steps.
- * If no steps are specified, includes all 7.
+ * If no steps are specified, includes all 11.
  */
 export function getDecisionProtocolPrompt(steps?: ProtocolStep[]): string {
   const selectedSteps = steps
@@ -160,8 +204,8 @@ Key Questions:
 ${questionLines}`;
   });
 
-  return `## Modern Mastermind Decision Protocol
-Apply the 7-step framework (MAP → ANALYZE → DESIGN → SAFETY CHECK → BUILD & SHIP → SELL → GOVERN):
+  return `## Mastermind Decision Protocol (11-Step)
+Apply the framework (MAP → ANALYZE → DESIGN OFFER → DESIGN EXPERIENCE → SAFETY CHECK → BUILD & SHIP → GROW ORGANICALLY → SELL → OPTIMIZE → PROTECT → GOVERN):
 
 ${sections.join("\n\n")}`;
 }

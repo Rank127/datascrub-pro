@@ -2,7 +2,7 @@
  * Weekly Mastermind Board Meeting - Cron Job
  *
  * Schedule: Mondays 9am ET (0 14 * * 1 UTC)
- * Runs the full 7-step Modern Mastermind Protocol against live metrics.
+ * Runs the full 11-step Modern Mastermind Protocol against live metrics.
  * Sends "Weekly Board Meeting Minutes" email to rocky@ghostmydata.com.
  */
 
@@ -38,11 +38,11 @@ export async function GET(request: Request) {
     // Collect live metrics
     const metrics = await collectStandupMetrics();
 
-    // Build the full 7-step protocol prompt
+    // Build the full 11-step protocol prompt
     const mastermindPrompt = buildMastermindPrompt({
       invocation: "Board Meeting",
-      protocol: ["MAP", "ANALYZE", "DESIGN", "SAFETY_CHECK", "BUILD_SHIP", "SELL", "GOVERN"],
-      maxAdvisors: 5,
+      protocol: ["MAP", "ANALYZE", "DESIGN_OFFER", "DESIGN_EXPERIENCE", "SAFETY_CHECK", "BUILD_SHIP", "GROW_ORGANICALLY", "SELL", "OPTIMIZE", "PROTECT", "GOVERN"],
+      maxAdvisors: 10,
       includeBusinessContext: true,
       scenario: "Weekly strategic review of GhostMyData operations and performance.",
     });
@@ -65,14 +65,18 @@ Respond with valid JSON:
   "protocolSteps": [
     { "step": "MAP", "observation": "..." },
     { "step": "ANALYZE", "observation": "..." },
-    { "step": "DESIGN", "observation": "..." },
+    { "step": "DESIGN_OFFER", "observation": "..." },
+    { "step": "DESIGN_EXPERIENCE", "observation": "..." },
     { "step": "SAFETY_CHECK", "observation": "..." },
     { "step": "BUILD_SHIP", "observation": "..." },
+    { "step": "GROW_ORGANICALLY", "observation": "..." },
     { "step": "SELL", "observation": "..." },
+    { "step": "OPTIMIZE", "observation": "..." },
+    { "step": "PROTECT", "observation": "..." },
     { "step": "GOVERN", "observation": "..." }
   ],
   "topPriority": "The single most important action for next week",
-  "boardDecision": "2-3 sentence strategic decision from the Nucleus"
+  "boardDecision": "2-3 sentence strategic decision from the Board of Directors"
 }`,
       messages: [
         {
@@ -170,21 +174,29 @@ Only adjust numerical parameters if the data clearly warrants it.`,
     const stepColors: Record<string, string> = {
       MAP: "#3b82f6",
       ANALYZE: "#8b5cf6",
-      DESIGN: "#10b981",
+      DESIGN_OFFER: "#10b981",
+      DESIGN_EXPERIENCE: "#14b8a6",
       SAFETY_CHECK: "#ef4444",
       BUILD_SHIP: "#f59e0b",
+      GROW_ORGANICALLY: "#22c55e",
       SELL: "#ec4899",
+      OPTIMIZE: "#06b6d4",
+      PROTECT: "#f97316",
       GOVERN: "#6366f1",
     };
 
     const stepLabels: Record<string, string> = {
-      MAP: "MAP — Map the Terrain",
-      ANALYZE: "ANALYZE — Principles & Data",
-      DESIGN: "DESIGN — Irresistible Solution",
+      MAP: "MAP — Map the Landscape",
+      ANALYZE: "ANALYZE — Principles & Data Analysis",
+      DESIGN_OFFER: "DESIGN THE OFFER — Irresistible Value",
+      DESIGN_EXPERIENCE: "DESIGN THE EXPERIENCE — Human-Centered Design",
       SAFETY_CHECK: "SAFETY CHECK — What Could Go Wrong?",
       BUILD_SHIP: "BUILD & SHIP — Efficient Execution",
+      GROW_ORGANICALLY: "GROW ORGANICALLY — Sustainable Growth",
       SELL: "SELL — Empathy-Driven Distribution",
-      GOVERN: "GOVERN — Ethics & Legacy",
+      OPTIMIZE: "OPTIMIZE — Performance & Efficiency",
+      PROTECT: "PROTECT — Security & Defense",
+      GOVERN: "GOVERN — Ethics, Transparency & Legacy",
     };
 
     const stepsHtml = (analysis.protocolSteps || [])
@@ -227,7 +239,7 @@ Only adjust numerical parameters if the data clearly warrants it.`,
         </div>
 
         <div style="margin-bottom: 16px;">
-          <h2 style="color: #e2e8f0; font-size: 16px; margin: 0 0 16px 0; padding: 0 0 8px 0; border-bottom: 1px solid #334155;">7-Step Protocol Analysis</h2>
+          <h2 style="color: #e2e8f0; font-size: 16px; margin: 0 0 16px 0; padding: 0 0 8px 0; border-bottom: 1px solid #334155;">11-Step Protocol Analysis</h2>
           ${stepsHtml}
         </div>
 
@@ -237,9 +249,9 @@ Only adjust numerical parameters if the data clearly warrants it.`,
         </div>
 
         <div style="background-color: #1e293b; border-radius: 8px; padding: 24px; margin-bottom: 16px; border-left: 4px solid #f59e0b;">
-          <h2 style="color: #f59e0b; font-size: 16px; margin: 0 0 12px 0;">Nucleus Board Decision</h2>
+          <h2 style="color: #f59e0b; font-size: 16px; margin: 0 0 12px 0;">Board Decision</h2>
           <p style="color: #e2e8f0; font-size: 14px; line-height: 1.6; margin: 0; font-style: italic;">${analysis.boardDecision || "No special decision this week."}</p>
-          <p style="color: #94a3b8; font-size: 11px; margin: 8px 0 0 0;">— Huang, Hassabis, Buffett, Nadella, Amodei</p>
+          <p style="color: #94a3b8; font-size: 11px; margin: 8px 0 0 0;">— Buffett, Dalio, Cialdini, Fishkin, Marcus Aurelius</p>
         </div>
 
         ${directivesApplied > 0 ? `
