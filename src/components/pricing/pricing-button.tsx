@@ -25,9 +25,9 @@ export function PricingButton({ planName, price, ctaText, ctaLink, popular = fal
   return (
     <Link href={ctaLink} onClick={handleClick}>
       <Button
-        className={`w-full ${
+        className={`w-full transition-transform ${
           popular
-            ? "bg-emerald-600 hover:bg-emerald-700"
+            ? "bg-emerald-600 hover:bg-emerald-700 animate-glow-pulse hover:scale-105"
             : "bg-slate-700 hover:bg-slate-600"
         }`}
         size="lg"

@@ -64,7 +64,6 @@ function SettingsContent() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const { plan: currentPlan, currentPeriodEnd, hasStripeSubscription } = useSubscription();
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -187,29 +186,8 @@ function SettingsContent() {
     }
   };
 
-  const handleUpgrade = async (plan: "PRO" | "ENTERPRISE") => {
-    setUpgradeLoading(plan);
-    try {
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.url) {
-          window.location.href = data.url;
-        }
-      } else {
-        const error = await response.json();
-        setMessage({ type: "error", text: error.error || "Failed to start checkout" });
-      }
-    } catch (error) {
-      setMessage({ type: "error", text: "Failed to connect to payment service" });
-    } finally {
-      setUpgradeLoading(null);
-    }
+  const handleUpgrade = (plan: "PRO" | "ENTERPRISE") => {
+    window.location.href = `/dashboard/checkout?plan=${plan}`;
   };
 
   const handleManageBilling = async () => {
@@ -661,13 +639,8 @@ function SettingsContent() {
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
                     size="sm"
                     onClick={() => handleUpgrade(plan.name as "PRO" | "ENTERPRISE")}
-                    disabled={upgradeLoading === plan.name}
                   >
-                    {upgradeLoading === plan.name ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      "Upgrade"
-                    )}
+                    Upgrade
                   </Button>
                 )}
                 {plan.current && plan.name !== "FREE" && (

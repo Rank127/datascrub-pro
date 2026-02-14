@@ -156,6 +156,7 @@ export async function POST(request: Request) {
     }
 
     // Create checkout session for new subscription
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH_URL;
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
@@ -166,8 +167,8 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH_URL}/dashboard/settings?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH_URL}/dashboard/settings?canceled=true`,
+      success_url: `${baseUrl}/dashboard/welcome?plan=${plan}`,
+      cancel_url: `${baseUrl}/pricing?canceled=true`,
       metadata: {
         userId: session.user.id,
         plan,
@@ -179,6 +180,20 @@ export async function POST(request: Request) {
           plan,
         },
       },
+      // Checkout experience enhancements
+      allow_promotion_codes: true,
+      billing_address_collection: "auto",
+      phone_number_collection: { enabled: true },
+      custom_text: {
+        submit: {
+          message: "Your data protection starts immediately. 30-day money-back guarantee.",
+        },
+        after_submit: {
+          message: "Welcome to GhostMyData! Redirecting you to start protecting your data...",
+        },
+      },
+      // Session expires in 30 minutes (urgency)
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     });
 
     return NextResponse.json({ url: checkoutSession.url });

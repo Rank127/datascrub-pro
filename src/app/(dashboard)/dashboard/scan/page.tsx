@@ -432,7 +432,7 @@ export default function ScanPage() {
                       <span>{TOTAL_KNOWN_BROKERS.toLocaleString()}+ known sites</span>
                     </div>
                     {isFreePlan && (
-                      <Link href="/pricing" className="block mt-3">
+                      <Link href="/dashboard/checkout?plan=PRO" className="block mt-3">
                         <Button size="sm" className="w-full bg-orange-600 hover:bg-orange-700">
                           <Shield className="mr-2 h-4 w-4" />
                           Upgrade to remove your data automatically
@@ -490,7 +490,7 @@ export default function ScanPage() {
                     }
                     features={recommendation.features}
                     ctaText={<><Shield className="mr-2 h-4 w-4" />{recommendation.cta}</>}
-                    ctaHref="/pricing"
+                    ctaHref={`/dashboard/checkout?plan=${recommendation.plan}`}
                     colorScheme={recommendation.plan === "ENTERPRISE" ? "purple" : "emerald"}
                   />
                 );
