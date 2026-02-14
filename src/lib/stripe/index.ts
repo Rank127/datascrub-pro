@@ -23,6 +23,7 @@ export const stripe = {
   get checkout() { return getStripe().checkout; },
   get billingPortal() { return getStripe().billingPortal; },
   get webhooks() { return getStripe().webhooks; },
+  get invoices() { return getStripe().invoices; },
 };
 
 // Price IDs - These should be created in your Stripe dashboard

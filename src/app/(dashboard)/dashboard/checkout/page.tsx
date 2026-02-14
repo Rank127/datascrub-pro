@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +14,7 @@ import {
   Users,
   Globe,
   Star,
+  ArrowUpCircle,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 import { trackBeginCheckout } from "@/components/analytics/google-analytics";
@@ -59,6 +60,30 @@ const PLANS = {
   },
 } as const;
 
+interface ProrationPreview {
+  prorationAmount: number;
+  newPlanPrice: number;
+  currency: string;
+  currentPeriodEnd: string | null;
+  previousPlan: string;
+  newPlan: string;
+  lineItems: Array<{
+    description: string;
+    amount: number;
+    period: { start: string; end: string };
+  }>;
+}
+
+function formatCents(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+function daysUntil(isoDate: string): number {
+  const now = new Date();
+  const end = new Date(isoDate);
+  return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+}
+
 export default function CheckoutPage() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
@@ -74,6 +99,59 @@ function CheckoutContent() {
   const plan = PLANS[planKey] || PLANS.PRO;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Upgrade preview state
+  const [checkingSubscription, setCheckingSubscription] = useState(true);
+  const [isUpgrade, setIsUpgrade] = useState(false);
+  const [preview, setPreview] = useState<ProrationPreview | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  // On mount: check if user has an existing subscription
+  useEffect(() => {
+    async function checkForUpgrade() {
+      try {
+        const subRes = await fetch("/api/subscription");
+        if (!subRes.ok) {
+          setCheckingSubscription(false);
+          return;
+        }
+        const subData = await subRes.json();
+
+        // If user has an active Stripe subscription and is upgrading
+        if (subData.hasStripeSubscription && subData.plan) {
+          const hierarchy: Record<string, number> = { FREE: 0, PRO: 1, ENTERPRISE: 2 };
+          const currentRank = hierarchy[subData.plan] ?? 0;
+          const targetRank = hierarchy[planKey] ?? 0;
+
+          if (targetRank > currentRank && currentRank > 0) {
+            // This is an upgrade from a paid plan — fetch proration preview
+            setIsUpgrade(true);
+            try {
+              const previewRes = await fetch("/api/stripe/preview-upgrade", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ plan: planKey }),
+              });
+              const previewData = await previewRes.json();
+              if (previewRes.ok) {
+                setPreview(previewData);
+              } else {
+                setPreviewError(previewData.error || "Unable to preview upgrade cost.");
+              }
+            } catch {
+              setPreviewError("Unable to preview upgrade cost.");
+            }
+          }
+        }
+      } catch {
+        // If subscription check fails, fall through to normal checkout
+      } finally {
+        setCheckingSubscription(false);
+      }
+    }
+
+    checkForUpgrade();
+  }, [planKey]);
 
   const handleCheckout = async () => {
     setLoading(true);
@@ -108,6 +186,187 @@ function CheckoutContent() {
 
   const isPro = planKey === "PRO";
 
+  // Show loading while checking subscription status
+  if (checkingSubscription) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <Loader2 className="h-8 w-8 animate-spin text-slate-400 mx-auto" />
+          <p className="text-slate-400 text-sm">Preparing your checkout...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Upgrade confirmation UI for existing subscribers ──
+  if (isUpgrade && preview) {
+    const remainingDays = preview.currentPeriodEnd
+      ? daysUntil(preview.currentPeriodEnd)
+      : null;
+
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-lg">
+          {/* Header */}
+          <div className="text-center mb-8 animate-fade-in">
+            <div className="inline-flex items-center justify-center p-3 rounded-full bg-purple-500/20 border border-purple-500/30 mb-4">
+              <ArrowUpCircle className="h-8 w-8 text-purple-400" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Confirm Your Upgrade
+            </h1>
+            <p className="text-slate-400">
+              {preview.previousPlan} &rarr; {preview.newPlan}
+            </p>
+          </div>
+
+          {/* Proration Card */}
+          <div className="rounded-xl border border-purple-500/30 bg-gradient-to-br from-purple-900/20 to-slate-900 p-6 mb-6 animate-fade-in-up">
+            {/* Amount due today */}
+            <div className="text-center mb-6">
+              <p className="text-sm text-slate-400 mb-1">Amount due today</p>
+              <p className="text-4xl font-bold text-white">
+                {formatCents(preview.prorationAmount)}
+              </p>
+              {remainingDays !== null && remainingDays > 0 && (
+                <p className="text-sm text-slate-400 mt-1">
+                  Prorated for the remaining {remainingDays} day{remainingDays !== 1 ? "s" : ""} of your billing cycle
+                </p>
+              )}
+            </div>
+
+            {/* Line items breakdown */}
+            {preview.lineItems.length > 0 && (
+              <div className="border-t border-slate-700 pt-4 mb-4 space-y-2">
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Breakdown</p>
+                {preview.lineItems.map((item, i) => (
+                  <div key={i} className="flex items-start justify-between text-sm">
+                    <span className="text-slate-300 flex-1 pr-4">{item.description}</span>
+                    <span className={`font-mono whitespace-nowrap ${item.amount < 0 ? "text-emerald-400" : "text-white"}`}>
+                      {item.amount < 0 ? "−" : ""}{formatCents(Math.abs(item.amount))}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Next charge info */}
+            <div className="border-t border-slate-700 pt-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">Then starting next cycle</span>
+                <span className="text-white font-semibold">
+                  {PLANS[planKey]?.price || formatCents(preview.newPlanPrice)}/mo
+                </span>
+              </div>
+              {preview.currentPeriodEnd && (
+                <p className="text-xs text-slate-500 mt-1">
+                  Next billing date: {new Date(preview.currentPeriodEnd).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Trust signals */}
+          <div className="flex items-center justify-center gap-4 mb-6 text-xs text-slate-500">
+            <div className="flex items-center gap-1">
+              <Lock className="h-3 w-3" />
+              <span>Encrypted</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Shield className="h-3 w-3" />
+              <span>30-day guarantee</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Globe className="h-3 w-3" />
+              <span>Powered by Stripe</span>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="space-y-3">
+            {error && (
+              <p className="text-sm text-red-400 text-center">{error}</p>
+            )}
+            <Button
+              size="lg"
+              className="w-full text-base font-semibold h-12 bg-purple-600 hover:bg-purple-700 transition-transform hover:scale-[1.02]"
+              onClick={handleCheckout}
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  Confirm Upgrade &mdash; {formatCents(preview.prorationAmount)}
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </>
+              )}
+            </Button>
+            <button
+              type="button"
+              className="w-full text-sm text-slate-500 hover:text-slate-300 transition-colors py-2"
+              onClick={() => router.back()}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Upgrade flow but preview failed — show error with fallback ──
+  if (isUpgrade && previewError) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-lg text-center">
+          <div className="inline-flex items-center justify-center p-3 rounded-full bg-orange-500/20 border border-orange-500/30 mb-4">
+            <ArrowUpCircle className="h-8 w-8 text-orange-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">Upgrade to {plan.name}</h1>
+          <p className="text-sm text-orange-400 mb-6">{previewError}</p>
+          <p className="text-slate-400 text-sm mb-6">
+            We couldn&apos;t calculate the exact prorated amount. You can proceed and Stripe will charge the prorated difference to your card on file.
+          </p>
+          <div className="space-y-3">
+            {error && (
+              <p className="text-sm text-red-400">{error}</p>
+            )}
+            <Button
+              size="lg"
+              className="w-full text-base font-semibold h-12 bg-purple-600 hover:bg-purple-700"
+              onClick={handleCheckout}
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  Proceed with Upgrade
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </>
+              )}
+            </Button>
+            <button
+              type="button"
+              className="w-full text-sm text-slate-500 hover:text-slate-300 transition-colors py-2"
+              onClick={() => router.back()}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Normal checkout flow for new subscribers (FREE → paid) ──
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-4xl">
