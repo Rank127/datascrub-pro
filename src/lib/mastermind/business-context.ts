@@ -43,7 +43,7 @@ export const BUSINESS_CONTEXT: BusinessContext = {
     },
     {
       name: "Enterprise",
-      price: "$49.99/mo",
+      price: "$29.99/mo",
       features:
         "Everything in Pro + family plan (up to 5 members), dedicated support, advanced analytics, API access.",
     },

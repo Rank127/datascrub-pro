@@ -7,6 +7,7 @@
 
 import { nanoid } from "nanoid";
 import { AgentEvent, AgentEventHandler, AgentEventType } from "../types";
+import { getRedisClient, REDIS_PREFIX } from "@/lib/redis-client";
 
 // ============================================================================
 // TYPES
@@ -41,8 +42,10 @@ class EventBus {
   private eventQueue: AgentEvent[] = [];
 
   // A3: Event deduplication — suppress duplicate events within 10-minute window
-  private recentEventHashes: Map<string, number> = new Map();
+  // In-memory fallback when Redis is unavailable
+  private recentEventHashesLocal: Map<string, number> = new Map();
   private static EVENT_DEDUP_TTL_MS = 10 * 60 * 1000; // 10 minutes
+  private static EVENT_DEDUP_TTL_SEC = 10 * 60; // 10 minutes in seconds
 
   private constructor() {}
 
@@ -131,16 +134,6 @@ class EventBus {
    */
   async publish(event: Omit<AgentEvent, "id" | "timestamp">): Promise<void> {
     // A3: Event deduplication — hash key metadata and skip if seen recently
-    const now = Date.now();
-
-    // Prune stale dedup entries
-    for (const [hash, ts] of this.recentEventHashes) {
-      if (now - ts > EventBus.EVENT_DEDUP_TTL_MS) {
-        this.recentEventHashes.delete(hash);
-      }
-    }
-
-    // Compute dedup hash from type + source + key payload fields
     const payload = event.payload as Record<string, unknown> | undefined;
     const hashParts = [
       event.type,
@@ -152,11 +145,10 @@ class EventBus {
       event.correlationId ?? "",
     ].join("|");
 
-    if (this.recentEventHashes.has(hashParts)) {
-      // Skip duplicate event
+    const isDuplicate = await this.checkEventDedup(hashParts);
+    if (isDuplicate) {
       return;
     }
-    this.recentEventHashes.set(hashParts, now);
 
     const fullEvent: AgentEvent = {
       ...event,
@@ -171,6 +163,36 @@ class EventBus {
     if (!this.isProcessing) {
       await this.processQueue();
     }
+  }
+
+  /**
+   * Check if an event hash was seen recently. Sets the key if not.
+   * Returns true if duplicate.
+   */
+  private async checkEventDedup(hash: string): Promise<boolean> {
+    const redis = getRedisClient();
+    if (redis) {
+      try {
+        const key = `${REDIS_PREFIX.EVENT_DEDUP}${hash}`;
+        const existing = await redis.get(key);
+        if (existing) return true;
+        await redis.set(key, 1, { ex: EventBus.EVENT_DEDUP_TTL_SEC });
+        return false;
+      } catch (error) {
+        console.warn("[EventBus] Redis dedup failed, using in-memory:", error);
+      }
+    }
+
+    // Fallback: in-memory
+    const now = Date.now();
+    for (const [k, ts] of this.recentEventHashesLocal) {
+      if (now - ts > EventBus.EVENT_DEDUP_TTL_MS) {
+        this.recentEventHashesLocal.delete(k);
+      }
+    }
+    if (this.recentEventHashesLocal.has(hash)) return true;
+    this.recentEventHashesLocal.set(hash, now);
+    return false;
   }
 
   /**

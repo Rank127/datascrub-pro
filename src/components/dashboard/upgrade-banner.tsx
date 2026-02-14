@@ -88,12 +88,8 @@ export function UpgradeBanner() {
         <p className="text-[10px] text-orange-400 mb-2">Your data is being accessed daily</p>
       )}
       <div className="flex items-baseline gap-1 mb-3">
-        <span className="text-xs text-slate-500 line-through">$19.99</span>
         <span className="text-lg font-bold text-white">$11.99</span>
         <span className="text-xs text-slate-400">/mo</span>
-        <span className="ml-1 text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded">
-          40% OFF
-        </span>
       </div>
       {error && (
         <p className="text-xs text-red-400 mb-2">{error}</p>

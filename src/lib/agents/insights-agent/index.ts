@@ -11,7 +11,7 @@
 
 import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
-import { BaseAgent, createAgentContext } from "../base-agent";
+import { BaseAgent, createAgentContext, MODEL_HAIKU } from "../base-agent";
 import {
   AgentCapability,
   AgentContext,
@@ -96,6 +96,10 @@ interface PredictResult {
 // ============================================================================
 
 class InsightsAgent extends BaseAgent {
+  constructor() {
+    super({ model: MODEL_HAIKU }); // Risk scoring is formulaic → Haiku
+  }
+
   readonly id = AGENT_ID;
   readonly name = "Insights Agent";
   readonly domain = AgentDomains.CORE;

@@ -22,6 +22,7 @@ import {
   createAgentTicket,
   getMethodologyForIssue,
 } from "@/lib/support/ticket-service";
+import { getRedisClient, REDIS_PREFIX } from "@/lib/redis-client";
 
 // ============================================================================
 // TYPES
@@ -499,13 +500,17 @@ class RemediationEngine {
   private isInitialized = false;
 
   // A1: Issue deduplication — skip repeated issues within 30 min window
-  private recentIssues: Map<string, { timestamp: number; count: number }> = new Map();
+  // In-memory fallback when Redis is unavailable
+  private recentIssuesLocal: Map<string, { timestamp: number; count: number }> = new Map();
   private static DEDUP_WINDOW_MS = 30 * 60 * 1000; // 30 minutes
+  private static DEDUP_WINDOW_SEC = 30 * 60; // 30 minutes in seconds
 
   // A2: Circuit breaker — stop retrying after repeated failures
-  private circuitBreaker: Map<string, { attempts: number; lastAttempt: number; state: "CLOSED" | "OPEN" }> = new Map();
+  // In-memory fallback when Redis is unavailable
+  private circuitBreakerLocal: Map<string, { attempts: number; lastAttempt: number; state: "CLOSED" | "OPEN" }> = new Map();
   private static CB_MAX_ATTEMPTS = 3;
   private static CB_RESET_MS = 6 * 60 * 60 * 1000; // 6 hours
+  private static CB_RESET_SEC = 6 * 60 * 60; // 6 hours in seconds
 
   private constructor() {}
 
@@ -724,40 +729,26 @@ class RemediationEngine {
     const fingerprint = `${issue.type}:${issue.affectedResource || "global"}`;
     const now = Date.now();
 
-    // Prune stale dedup entries
-    for (const [key, entry] of this.recentIssues) {
-      if (now - entry.timestamp > RemediationEngine.DEDUP_WINDOW_MS) {
-        this.recentIssues.delete(key);
-      }
-    }
-
-    const existing = this.recentIssues.get(fingerprint);
-    if (existing && now - existing.timestamp < RemediationEngine.DEDUP_WINDOW_MS) {
-      existing.count++;
+    const isDuplicate = await this.checkAndSetDedup(fingerprint);
+    if (isDuplicate) {
       console.log(
-        `[RemediationEngine] DEDUP_SKIP: ${fingerprint} seen ${existing.count} times in last 30min`
+        `[RemediationEngine] DEDUP_SKIP: ${fingerprint} seen recently in last 30min`
       );
       return null;
     }
-    this.recentIssues.set(fingerprint, { timestamp: now, count: 1 });
 
     // A2: Circuit breaker check — skip if breaker is OPEN for this fingerprint
-    const cb = this.circuitBreaker.get(fingerprint);
-    if (cb) {
-      // Auto-reset after 6 hours of inactivity
-      if (now - cb.lastAttempt > RemediationEngine.CB_RESET_MS) {
-        this.circuitBreaker.delete(fingerprint);
-      } else if (cb.state === "OPEN") {
-        console.log(
-          `[RemediationEngine] CIRCUIT_BREAKER_OPEN: ${fingerprint} — skipping remediation, escalating`
-        );
-        await getEventBus().emitCustom(
-          "remediation-engine",
-          "remediation.circuit_breaker_open",
-          { fingerprint, attempts: cb.attempts, issueType: issue.type }
-        );
-        return null;
-      }
+    const cbState = await this.getCircuitBreakerState(fingerprint);
+    if (cbState && cbState.state === "OPEN") {
+      console.log(
+        `[RemediationEngine] CIRCUIT_BREAKER_OPEN: ${fingerprint} — skipping remediation, escalating`
+      );
+      await getEventBus().emitCustom(
+        "remediation-engine",
+        "remediation.circuit_breaker_open",
+        { fingerprint, attempts: cbState.attempts, issueType: issue.type }
+      );
+      return null;
     }
 
     // Add to history
@@ -794,19 +785,10 @@ class RemediationEngine {
 
       // A2: Track circuit breaker state after execution
       if (plan.status === "failed") {
-        const cbEntry = this.circuitBreaker.get(fingerprint) || { attempts: 0, lastAttempt: now, state: "CLOSED" as const };
-        cbEntry.attempts++;
-        cbEntry.lastAttempt = now;
-        if (cbEntry.attempts >= RemediationEngine.CB_MAX_ATTEMPTS) {
-          cbEntry.state = "OPEN";
-          console.log(
-            `[RemediationEngine] CIRCUIT_BREAKER_TRIPPED: ${fingerprint} after ${cbEntry.attempts} failures`
-          );
-        }
-        this.circuitBreaker.set(fingerprint, cbEntry);
+        await this.recordCircuitBreakerFailure(fingerprint);
       } else {
         // Reset on success
-        this.circuitBreaker.delete(fingerprint);
+        await this.resetCircuitBreaker(fingerprint);
       }
     } else {
       // Emit event for manual review
@@ -1236,6 +1218,125 @@ class RemediationEngine {
         },
       };
     }
+  }
+
+  // ============================================================================
+  // REDIS-BACKED STATE (with in-memory fallback)
+  // ============================================================================
+
+  /**
+   * Check if an issue fingerprint was seen recently (dedup). Sets the key if not.
+   * Returns true if duplicate (skip), false if new.
+   */
+  private async checkAndSetDedup(fingerprint: string): Promise<boolean> {
+    const redis = getRedisClient();
+    if (redis) {
+      try {
+        const key = `${REDIS_PREFIX.ISSUE_DEDUP}${fingerprint}`;
+        const existing = await redis.get<number>(key);
+        if (existing) {
+          await redis.incr(key);
+          return true;
+        }
+        await redis.set(key, 1, { ex: RemediationEngine.DEDUP_WINDOW_SEC });
+        return false;
+      } catch (error) {
+        console.warn("[RemediationEngine] Redis dedup failed, using in-memory:", error);
+      }
+    }
+
+    // Fallback: in-memory
+    const now = Date.now();
+    for (const [key, entry] of this.recentIssuesLocal) {
+      if (now - entry.timestamp > RemediationEngine.DEDUP_WINDOW_MS) {
+        this.recentIssuesLocal.delete(key);
+      }
+    }
+    const existing = this.recentIssuesLocal.get(fingerprint);
+    if (existing && now - existing.timestamp < RemediationEngine.DEDUP_WINDOW_MS) {
+      existing.count++;
+      return true;
+    }
+    this.recentIssuesLocal.set(fingerprint, { timestamp: now, count: 1 });
+    return false;
+  }
+
+  /**
+   * Get circuit breaker state for a fingerprint.
+   * Returns null if no state or auto-reset has occurred.
+   */
+  private async getCircuitBreakerState(
+    fingerprint: string
+  ): Promise<{ attempts: number; state: "CLOSED" | "OPEN" } | null> {
+    const redis = getRedisClient();
+    if (redis) {
+      try {
+        const key = `${REDIS_PREFIX.CIRCUIT_BREAKER}${fingerprint}`;
+        const data = await redis.get<{ attempts: number; state: "CLOSED" | "OPEN" }>(key);
+        return data ?? null;
+      } catch (error) {
+        console.warn("[RemediationEngine] Redis CB read failed, using in-memory:", error);
+      }
+    }
+
+    // Fallback: in-memory
+    const now = Date.now();
+    const cb = this.circuitBreakerLocal.get(fingerprint);
+    if (!cb) return null;
+    if (now - cb.lastAttempt > RemediationEngine.CB_RESET_MS) {
+      this.circuitBreakerLocal.delete(fingerprint);
+      return null;
+    }
+    return { attempts: cb.attempts, state: cb.state };
+  }
+
+  /**
+   * Record a circuit breaker failure. Trips to OPEN after CB_MAX_ATTEMPTS.
+   */
+  private async recordCircuitBreakerFailure(fingerprint: string): Promise<void> {
+    const redis = getRedisClient();
+    if (redis) {
+      try {
+        const key = `${REDIS_PREFIX.CIRCUIT_BREAKER}${fingerprint}`;
+        const existing = await redis.get<{ attempts: number; state: "CLOSED" | "OPEN" }>(key);
+        const attempts = (existing?.attempts || 0) + 1;
+        const state = attempts >= RemediationEngine.CB_MAX_ATTEMPTS ? "OPEN" : "CLOSED";
+        if (state === "OPEN") {
+          console.log(`[RemediationEngine] CIRCUIT_BREAKER_TRIPPED: ${fingerprint} after ${attempts} failures`);
+        }
+        await redis.set(key, { attempts, state }, { ex: RemediationEngine.CB_RESET_SEC });
+        return;
+      } catch (error) {
+        console.warn("[RemediationEngine] Redis CB write failed, using in-memory:", error);
+      }
+    }
+
+    // Fallback: in-memory
+    const now = Date.now();
+    const cb = this.circuitBreakerLocal.get(fingerprint) || { attempts: 0, lastAttempt: now, state: "CLOSED" as const };
+    cb.attempts++;
+    cb.lastAttempt = now;
+    if (cb.attempts >= RemediationEngine.CB_MAX_ATTEMPTS) {
+      cb.state = "OPEN";
+      console.log(`[RemediationEngine] CIRCUIT_BREAKER_TRIPPED: ${fingerprint} after ${cb.attempts} failures`);
+    }
+    this.circuitBreakerLocal.set(fingerprint, cb);
+  }
+
+  /**
+   * Reset circuit breaker on success.
+   */
+  private async resetCircuitBreaker(fingerprint: string): Promise<void> {
+    const redis = getRedisClient();
+    if (redis) {
+      try {
+        await redis.del(`${REDIS_PREFIX.CIRCUIT_BREAKER}${fingerprint}`);
+        return;
+      } catch (error) {
+        console.warn("[RemediationEngine] Redis CB reset failed:", error);
+      }
+    }
+    this.circuitBreakerLocal.delete(fingerprint);
   }
 
   // ============================================================================

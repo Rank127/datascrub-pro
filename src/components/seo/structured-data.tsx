@@ -78,13 +78,6 @@ export function SoftwareApplicationSchema() {
       priceCurrency: "USD",
       offerCount: "3",
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      ratingCount: "500",
-      bestRating: "5",
-      worstRating: "1",
-    },
     featureList: [
       "Data broker removal",
       "Breach monitoring",
@@ -163,11 +156,11 @@ export function ServiceSchema() {
             name: "Pro Plan",
             description: "Automated removals, weekly monitoring, priority support",
           },
-          price: "9.99",
+          price: "11.99",
           priceCurrency: "USD",
           priceSpecification: {
             "@type": "UnitPriceSpecification",
-            price: "9.99",
+            price: "11.99",
             priceCurrency: "USD",
             billingDuration: "P1M",
           },
@@ -285,43 +278,6 @@ export function PricingSchema() {
           billingDuration: "P1M",
           unitText: "month",
         },
-      },
-    ],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      ratingCount: "500",
-      bestRating: "5",
-      worstRating: "1",
-    },
-    review: [
-      {
-        "@type": "Review",
-        author: {
-          "@type": "Person",
-          name: "John D.",
-        },
-        datePublished: "2025-12-15",
-        reviewRating: {
-          "@type": "Rating",
-          ratingValue: "5",
-          bestRating: "5",
-        },
-        reviewBody: "GhostMyData removed my data from over 100 data brokers. With coverage of 2,100+ sources, they're the most comprehensive service I've found. Highly recommend for anyone concerned about privacy.",
-      },
-      {
-        "@type": "Review",
-        author: {
-          "@type": "Person",
-          name: "Sarah M.",
-        },
-        datePublished: "2025-11-28",
-        reviewRating: {
-          "@type": "Rating",
-          ratingValue: "5",
-          bestRating: "5",
-        },
-        reviewBody: "Easy to use and the dark web monitoring gives me peace of mind. Worth every penny.",
       },
     ],
   };
@@ -444,11 +400,6 @@ export function LocalBusinessSchema() {
       ],
       opens: "00:00",
       closes: "23:59",
-    },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      reviewCount: "500",
     },
   };
 

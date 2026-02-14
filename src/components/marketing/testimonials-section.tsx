@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Star, BadgeCheck } from "lucide-react";
+import { Star, BadgeCheck, Shield } from "lucide-react";
 
 const testimonials = [
   {
@@ -38,11 +38,9 @@ export function TestimonialsSection() {
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
             Real customers who took back control of their privacy
           </p>
-          <div className="flex items-center justify-center gap-1 mt-4">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star key={star} className="h-5 w-5 fill-yellow-500 text-yellow-500" />
-            ))}
-            <span className="ml-2 text-slate-400">4.9/5 from 500+ reviews</span>
+          <div className="flex items-center justify-center gap-2 mt-4">
+            <Shield className="h-5 w-5 text-emerald-400" />
+            <span className="text-slate-400">2,100+ data sources scanned</span>
           </div>
         </div>
 

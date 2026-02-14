@@ -179,7 +179,7 @@ export default function ScanPage() {
           "Dark web monitoring",
         ],
         price: "$29/month",
-        savings: "Save 50% with code EXIT50",
+        savings: "30-day money-back guarantee",
         cta: "Protect My Data Now",
         urgency: critical > 0 ? "URGENT: Your data is at critical risk" : "Your identity is at high risk",
       };
@@ -463,7 +463,7 @@ export default function ScanPage() {
 
                 return (
                   <UpgradeCta
-                    badge="Introductory pricing — 40% OFF"
+                    badge="Recommended for you"
                     icon={<Crown className={`h-5 w-5 ${recommendation.plan === "ENTERPRISE" ? "text-purple-400" : "text-emerald-400"}`} />}
                     title={recommendation.title}
                     description={

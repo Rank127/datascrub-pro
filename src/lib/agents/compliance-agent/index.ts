@@ -1310,7 +1310,7 @@ Respond in JSON format:
 }`;
 
     const response = await this.anthropic.messages.create({
-      model: this.config.model || "claude-sonnet-4-5-20250929",
+      model: this.getModel("simple"), // Classification is a simple task → Haiku
       max_tokens: 500,
       temperature: 0.1,
       messages: [{ role: "user", content: prompt }],

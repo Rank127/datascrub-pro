@@ -89,9 +89,8 @@ export function ExitIntentPopup() {
 
           {/* Subheadline */}
           <p className="text-slate-400 mb-6 max-w-sm mx-auto">
-            Your personal data is being sold right now. Get{" "}
-            <span className="text-emerald-400 font-semibold">50% OFF</span> your
-            first month when you sign up today.
+            Your personal data is being sold right now. See exactly where
+            you&apos;re exposed with a free scan — no credit card required.
           </p>
 
           {/* Offer box */}
@@ -99,10 +98,9 @@ export function ExitIntentPopup() {
             <div className="flex items-center justify-center gap-3">
               <Shield className="h-6 w-6 text-emerald-500" />
               <div className="text-left">
-                <div className="text-white font-semibold">Pro Plan - 50% OFF</div>
+                <div className="text-white font-semibold">Free Privacy Scan</div>
                 <div className="text-sm text-slate-400">
-                  <span className="line-through">$11.99</span>{" "}
-                  <span className="text-emerald-400 font-bold">$5.99/month</span>
+                  Scan <span className="text-emerald-400 font-bold">2,100+ data sources</span> in 60 seconds
                 </div>
               </div>
             </div>
@@ -110,12 +108,12 @@ export function ExitIntentPopup() {
 
           {/* CTA Buttons */}
           <div className="space-y-3">
-            <Link href="/register?discount=EXIT50" className="block">
+            <Link href="/register" className="block">
               <Button
                 size="lg"
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-lg"
               >
-                Claim 50% Off Now
+                Start Free Scan
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -123,7 +121,7 @@ export function ExitIntentPopup() {
               onClick={handleClose}
               className="text-sm text-slate-500 hover:text-slate-400 transition-colors"
             >
-              No thanks, I&apos;ll pay full price later
+              No thanks, I&apos;ll check back later
             </button>
           </div>
 

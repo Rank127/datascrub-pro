@@ -9,7 +9,7 @@
  */
 
 import { nanoid } from "nanoid";
-import { BaseAgent, createAgentContext } from "../base-agent";
+import { BaseAgent, createAgentContext, MODEL_HAIKU } from "../base-agent";
 import {
   AgentCapability,
   AgentContext,
@@ -160,6 +160,10 @@ interface DashboardValidationResult {
 // ============================================================================
 
 class QAAgent extends BaseAgent {
+  constructor() {
+    super({ model: MODEL_HAIKU }); // Validation checks are straightforward → Haiku
+  }
+
   readonly id = AGENT_ID;
   readonly name = "QA Agent";
   readonly domain = AgentDomains.META;

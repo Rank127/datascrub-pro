@@ -9,6 +9,7 @@ import {
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { MicrosoftClarity } from "@/components/analytics/microsoft-clarity";
 import { RetargetingPixels } from "@/components/analytics/retargeting-pixels";
+import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { QueryProvider } from "@/lib/query-provider";
 import { ToasterWrapper } from "@/components/ui/toaster-wrapper";
 import "./globals.css";
@@ -150,9 +151,11 @@ export default function RootLayout({
         <GoogleAnalytics />
         <MicrosoftClarity />
         <RetargetingPixels />
-        <QueryProvider>
-          {children}
-        </QueryProvider>
+        <PostHogProvider>
+          <QueryProvider>
+            {children}
+          </QueryProvider>
+        </PostHogProvider>
         <ToasterWrapper />
       </body>
     </html>

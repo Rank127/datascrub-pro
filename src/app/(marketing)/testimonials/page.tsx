@@ -126,7 +126,7 @@ const reviews = [
 ];
 
 const stats = [
-  { stat: "4.9/5", label: "Average Rating" },
+  { stat: "2,100+", label: "Sources Scanned" },
   { stat: "10,000+", label: "Happy Customers" },
   { stat: "98%", label: "Would Recommend" },
   { stat: "150+", label: "Sites Covered" },

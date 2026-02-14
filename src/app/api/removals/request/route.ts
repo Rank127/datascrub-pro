@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
     // Check removal limits based on plan
     const removalLimits: Record<Plan, number> = {
-      FREE: 1,
+      FREE: 3,
       PRO: -1, // unlimited
       ENTERPRISE: -1, // unlimited
     };
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
       if (removalsThisMonth >= limit) {
         return NextResponse.json(
           {
-            error: `You've reached your monthly removal limit (${limit} removal). Upgrade your plan for unlimited removals.`,
+            error: `You've reached your monthly removal limit (${limit} removals). Upgrade your plan for unlimited removals.`,
             requiresUpgrade: true,
             upgradeUrl: "/pricing",
             currentUsage: removalsThisMonth,

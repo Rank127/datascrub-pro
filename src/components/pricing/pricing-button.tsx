@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { trackViewPricing, trackBeginCheckout } from "@/components/analytics/google-analytics";
+import { trackEvent, PostHogEvents } from "@/components/analytics/posthog-provider";
 import { useEffect } from "react";
 
 interface PricingButtonProps {
@@ -17,6 +18,7 @@ export function PricingButton({ planName, price, ctaText, ctaLink, popular = fal
   const handleClick = () => {
     if (planName !== "Free") {
       trackBeginCheckout(planName, price);
+      trackEvent(PostHogEvents.UPGRADE_CLICKED, { plan: planName, price });
     }
   };
 

@@ -23,7 +23,7 @@ import { trackEvents } from "@/components/analytics/retargeting-pixels";
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const discount = searchParams?.get("discount");
+
   const referralCode = searchParams?.get("ref");
   const callbackUrl = searchParams?.get("callbackUrl");
 
@@ -108,13 +108,6 @@ function RegisterForm() {
         <CardDescription className="text-slate-400">
           Start protecting your personal data today
         </CardDescription>
-        {discount === "EXIT50" && (
-          <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 rounded-full border border-emerald-500/30">
-            <span className="text-sm font-semibold text-emerald-400">
-              50% OFF Applied!
-            </span>
-          </div>
-        )}
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">

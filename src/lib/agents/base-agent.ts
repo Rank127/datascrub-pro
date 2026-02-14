@@ -35,7 +35,14 @@ import {
 // CONSTANTS
 // ============================================================================
 
-const DEFAULT_MODEL = "claude-sonnet-4-5-20250929";
+/** Claude Sonnet — high quality for complex reasoning, customer-facing responses */
+export const MODEL_SONNET = "claude-sonnet-4-5-20250929";
+/** Claude Haiku — fast and cheap for classification, scoring, template selection */
+export const MODEL_HAIKU = "claude-haiku-4-5-20251001";
+
+export type TaskComplexity = "simple" | "complex";
+
+const DEFAULT_MODEL = MODEL_SONNET;
 const DEFAULT_MAX_TOKENS = 4096;
 const DEFAULT_TEMPERATURE = 0.3;
 const MAX_CONSECUTIVE_FAILURES = 5;
@@ -658,6 +665,74 @@ Please process this request and return a JSON response.
         model: metadata.model,
         usedFallback: metadata.usedFallback || false,
         executedAt: metadata.executedAt || new Date(),
+      },
+    };
+  }
+
+  /**
+   * Get the appropriate model for a task complexity level.
+   * 'simple' → Haiku (classification, scoring, template matching)
+   * 'complex' → Sonnet (content generation, customer-facing responses)
+   */
+  protected getModel(complexity: TaskComplexity = "complex"): string {
+    // If agent has a custom model override, use that
+    if (this.config.model && this.config.model !== DEFAULT_MODEL) {
+      return this.config.model;
+    }
+    return complexity === "simple" ? MODEL_HAIKU : MODEL_SONNET;
+  }
+
+  /**
+   * Execute using Claude AI with a specific model
+   */
+  protected async executeWithModel<T>(
+    capability: string,
+    input: unknown,
+    context: AgentContext,
+    model: string
+  ): Promise<AgentResult<T>> {
+    const startTime = Date.now();
+    const requestId = context.requestId || nanoid();
+
+    if (!this.anthropic) {
+      throw new Error("Anthropic client not initialized");
+    }
+
+    const userMessage = this.buildUserMessage(capability, input, context);
+
+    const response = await this.anthropic.messages.create({
+      model,
+      max_tokens: this.config.maxTokens || DEFAULT_MAX_TOKENS,
+      system: this.getSystemPrompt(),
+      messages: [{ role: "user", content: userMessage }],
+    });
+
+    const textContent = response.content.find((c) => c.type === "text");
+    if (!textContent || textContent.type !== "text") {
+      throw new Error("No text response from Claude");
+    }
+
+    const parsed = this.parseAIResponse<T>(textContent.text);
+    const tokensUsed =
+      (response.usage?.input_tokens || 0) +
+      (response.usage?.output_tokens || 0);
+
+    return {
+      success: true,
+      data: parsed.data,
+      confidence: parsed.confidence,
+      needsHumanReview: parsed.needsHumanReview || false,
+      managerReviewItems: parsed.managerReviewItems,
+      suggestedActions: parsed.suggestedActions,
+      metadata: {
+        agentId: this.id,
+        capability,
+        requestId,
+        duration: Date.now() - startTime,
+        tokensUsed,
+        model,
+        usedFallback: false,
+        executedAt: new Date(),
       },
     };
   }
