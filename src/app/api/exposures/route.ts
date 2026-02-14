@@ -334,8 +334,8 @@ export async function PATCH(request: Request) {
     }
 
     if (action === "whitelist") {
-      // Update exposure and create whitelist entry
-      await Promise.all([
+      // Atomically update exposure and create whitelist entry
+      await prisma.$transaction([
         prisma.exposure.update({
           where: { id: exposureId },
           data: {
@@ -353,8 +353,8 @@ export async function PATCH(request: Request) {
         }),
       ]);
     } else if (action === "unwhitelist") {
-      // Remove from whitelist
-      await Promise.all([
+      // Atomically remove from whitelist
+      await prisma.$transaction([
         prisma.exposure.update({
           where: { id: exposureId },
           data: {

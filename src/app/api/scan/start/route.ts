@@ -70,13 +70,6 @@ export async function POST(request: Request) {
     currentMonth.setDate(1);
     currentMonth.setHours(0, 0, 0, 0);
 
-    const scansThisMonth = await prisma.scan.count({
-      where: {
-        userId: session.user.id,
-        createdAt: { gte: currentMonth },
-      },
-    });
-
     const scanLimits: Record<Plan, number> = {
       FREE: 2,
       PRO: 50,
@@ -84,74 +77,92 @@ export async function POST(request: Request) {
     };
 
     const limit = scanLimits[userPlan];
-    if (limit !== -1 && scansThisMonth >= limit) {
-      return NextResponse.json(
-        {
-          error: `You've reached your monthly scan limit (${limit} scans). Upgrade your plan for more scans.`,
-          requiresUpgrade: true,
-          upgradeUrl: "/pricing",
-          currentUsage: scansThisMonth,
-          limit,
-        },
-        { status: 403 }
-      );
-    }
 
-    // Check for existing IN_PROGRESS scan to prevent concurrent scans
-    const existingInProgressScan = await prisma.scan.findFirst({
-      where: {
-        userId: session.user.id,
-        status: "IN_PROGRESS",
-      },
-      orderBy: { createdAt: "desc" },
+    // Atomically check quotas, concurrent scans, profile, and create scan
+    // Prevents double-submission and quota bypass via concurrent requests
+    const txResult = await prisma.$transaction(async (tx) => {
+      const scansThisMonth = await tx.scan.count({
+        where: {
+          userId: session.user.id,
+          createdAt: { gte: currentMonth },
+        },
+      });
+
+      if (limit !== -1 && scansThisMonth >= limit) {
+        return { ok: false as const, code: "QUOTA" as const, scansThisMonth, limit };
+      }
+
+      const existingInProgressScan = await tx.scan.findFirst({
+        where: {
+          userId: session.user.id,
+          status: "IN_PROGRESS",
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      if (existingInProgressScan) {
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        if (existingInProgressScan.createdAt < fiveMinutesAgo) {
+          await tx.scan.update({
+            where: { id: existingInProgressScan.id },
+            data: { status: "FAILED", completedAt: new Date() },
+          });
+          console.log(`[Scan] Marked stuck scan ${existingInProgressScan.id} as FAILED`);
+        } else {
+          return { ok: false as const, code: "IN_PROGRESS" as const, scanId: existingInProgressScan.id };
+        }
+      }
+
+      const foundProfile = await tx.personalProfile.findFirst({
+        where: { userId: session.user.id },
+      });
+
+      if (!foundProfile) {
+        return { ok: false as const, code: "NO_PROFILE" as const };
+      }
+
+      const newScan = await tx.scan.create({
+        data: {
+          userId: session.user.id,
+          type,
+          status: "IN_PROGRESS",
+          startedAt: new Date(),
+        },
+      });
+
+      return { ok: true as const, scan: newScan, profile: foundProfile };
     });
 
-    if (existingInProgressScan) {
-      // Check if it's been running for more than 5 minutes (likely stuck)
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-      if (existingInProgressScan.createdAt < fiveMinutesAgo) {
-        // Mark the stuck scan as FAILED
-        await prisma.scan.update({
-          where: { id: existingInProgressScan.id },
-          data: {
-            status: "FAILED",
-            completedAt: new Date(),
-          },
-        });
-        console.log(`[Scan] Marked stuck scan ${existingInProgressScan.id} as FAILED`);
-      } else {
-        // Recent scan still in progress
-        return NextResponse.json(
-          {
-            error: "A scan is already in progress. Please wait for it to complete.",
-            existingScanId: existingInProgressScan.id,
-          },
-          { status: 409 }
-        );
+    if (!txResult.ok) {
+      switch (txResult.code) {
+        case "QUOTA":
+          return NextResponse.json(
+            {
+              error: `You've reached your monthly scan limit (${txResult.limit} scans). Upgrade your plan for more scans.`,
+              requiresUpgrade: true,
+              upgradeUrl: "/pricing",
+              currentUsage: txResult.scansThisMonth,
+              limit: txResult.limit,
+            },
+            { status: 403 }
+          );
+        case "IN_PROGRESS":
+          return NextResponse.json(
+            {
+              error: "A scan is already in progress. Please wait for it to complete.",
+              existingScanId: txResult.scanId,
+            },
+            { status: 409 }
+          );
+        case "NO_PROFILE":
+          return NextResponse.json(
+            { error: "Please complete your profile before scanning" },
+            { status: 400 }
+          );
       }
     }
 
-    // Get user's profile
-    const profile = await prisma.personalProfile.findFirst({
-      where: { userId: session.user.id },
-    });
-
-    if (!profile) {
-      return NextResponse.json(
-        { error: "Please complete your profile before scanning" },
-        { status: 400 }
-      );
-    }
-
-    // Create scan record
-    const scan = await prisma.scan.create({
-      data: {
-        userId: session.user.id,
-        type,
-        status: "IN_PROGRESS",
-        startedAt: new Date(),
-      },
-    });
+    const { scan, profile } = txResult;
 
     // Prepare profile data for scanning
     const scanInput = await prepareProfileForScan(profile, decrypt);

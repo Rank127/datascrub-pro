@@ -135,10 +135,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  const subscriptionId = session.subscription as string;
+  const subscriptionId = typeof session.subscription === "string"
+    ? session.subscription
+    : session.subscription?.id;
+
+  if (!subscriptionId) {
+    console.error("Missing subscription ID in checkout session");
+    return;
+  }
 
   // Fetch the subscription details
-  const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId) as Stripe.Subscription;
+  const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId);
 
   // Get user details for email
   const user = await prisma.user.findUnique({
@@ -165,7 +172,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       },
       create: {
         userId,
-        stripeCustomerId: session.customer as string,
+        stripeCustomerId: typeof session.customer === "string" ? session.customer : session.customer?.id || "",
         stripeSubscriptionId: subscriptionId,
         stripePriceId: priceId,
         stripeCurrentPeriodEnd: periodEndDate,
@@ -196,7 +203,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  const customerId = subscription.customer as string;
+  const customerId = typeof subscription.customer === "string"
+    ? subscription.customer
+    : subscription.customer?.id;
+  if (!customerId) {
+    console.error("Missing customer ID in subscription update");
+    return;
+  }
 
   // Find user by Stripe customer ID
   const existingSubscription = await prisma.subscription.findFirst({
@@ -248,7 +261,13 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  const customerId = subscription.customer as string;
+  const customerId = typeof subscription.customer === "string"
+    ? subscription.customer
+    : subscription.customer?.id;
+  if (!customerId) {
+    console.error("Missing customer ID in subscription deletion");
+    return;
+  }
 
   const existingSubscription = await prisma.subscription.findFirst({
     where: { stripeCustomerId: customerId },
@@ -307,7 +326,13 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
-  const customerId = invoice.customer as string;
+  const customerId = typeof invoice.customer === "string"
+    ? invoice.customer
+    : invoice.customer?.id;
+  if (!customerId) {
+    console.error("Missing customer ID in payment succeeded");
+    return;
+  }
 
   const subscription = await prisma.subscription.findFirst({
     where: { stripeCustomerId: customerId },
@@ -328,7 +353,13 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  const customerId = invoice.customer as string;
+  const customerId = typeof invoice.customer === "string"
+    ? invoice.customer
+    : invoice.customer?.id;
+  if (!customerId) {
+    console.error("Missing customer ID in payment failed");
+    return;
+  }
 
   const subscription = await prisma.subscription.findFirst({
     where: { stripeCustomerId: customerId },
@@ -364,7 +395,9 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 }
 
 async function handleRefund(charge: Stripe.Charge) {
-  const customerId = charge.customer as string;
+  const customerId = typeof charge.customer === "string"
+    ? charge.customer
+    : charge.customer?.id;
 
   if (!customerId) {
     console.error("No customer ID in refund charge");

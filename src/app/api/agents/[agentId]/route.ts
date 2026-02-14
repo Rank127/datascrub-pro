@@ -8,6 +8,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRegistry, createAgentContext, InvocationTypes } from "@/lib/agents";
 import { nanoid } from "nanoid";
+import { auth } from "@/lib/auth";
+import { isAdmin, getEnvBasedRole } from "@/lib/admin";
 
 interface RouteParams {
   params: Promise<{
@@ -22,6 +24,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { agentId } = await params;
 
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const role = getEnvBasedRole(session.user.email || "");
+    if (!isAdmin(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const registry = getRegistry();
     const agent = registry.getAgent(agentId);
 
@@ -80,6 +91,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const { agentId } = await params;
 
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const role = getEnvBasedRole(session.user.email || "");
+    if (!isAdmin(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { capability, input, context: contextOverrides } = body;
 

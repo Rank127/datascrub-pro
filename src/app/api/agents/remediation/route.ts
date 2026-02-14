@@ -10,7 +10,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
 
 function isAuthorized(request: Request): boolean {
   const authHeader = request.headers.get("authorization");
-  if (!CRON_SECRET) return true; // No secret configured
+  if (!CRON_SECRET) return false; // Deny if secret not configured
   return authHeader === `Bearer ${CRON_SECRET}`;
 }
 

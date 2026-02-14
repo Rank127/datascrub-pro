@@ -341,80 +341,77 @@ export async function acceptInvitation(
   token: string,
   userId: string
 ): Promise<{ success: boolean; error?: string }> {
-  // Get invitation
-  const invitation = await prisma.familyInvitation.findUnique({
-    where: { token },
-    include: {
-      familyGroup: {
-        include: { members: true },
+  // All validation + creation inside a single transaction to prevent race conditions
+  // (e.g., two concurrent acceptances creating duplicate memberships)
+  return await prisma.$transaction(async (tx) => {
+    const invitation = await tx.familyInvitation.findUnique({
+      where: { token },
+      include: {
+        familyGroup: {
+          include: { members: true },
+        },
       },
-    },
-  });
-
-  if (!invitation) {
-    return { success: false, error: "Invitation not found" };
-  }
-
-  if (invitation.status !== InvitationStatus.PENDING) {
-    return { success: false, error: "This invitation is no longer valid" };
-  }
-
-  if (invitation.expiresAt < new Date()) {
-    await prisma.familyInvitation.update({
-      where: { id: invitation.id },
-      data: { status: InvitationStatus.EXPIRED },
     });
-    return { success: false, error: "This invitation has expired" };
-  }
 
-  // Get user
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { email: true },
-  });
+    if (!invitation) {
+      return { success: false, error: "Invitation not found" };
+    }
 
-  if (!user) {
-    return { success: false, error: "User not found" };
-  }
+    if (invitation.status !== InvitationStatus.PENDING) {
+      return { success: false, error: "This invitation is no longer valid" };
+    }
 
-  // Verify email matches
-  if (user.email.toLowerCase() !== invitation.email.toLowerCase()) {
-    return { success: false, error: "This invitation was sent to a different email address" };
-  }
+    if (invitation.expiresAt < new Date()) {
+      await tx.familyInvitation.update({
+        where: { id: invitation.id },
+        data: { status: InvitationStatus.EXPIRED },
+      });
+      return { success: false, error: "This invitation has expired" };
+    }
 
-  // Check if already a member of any family
-  const existingMembership = await prisma.familyMember.findUnique({
-    where: { userId },
-  });
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
 
-  if (existingMembership) {
-    return { success: false, error: "You are already a member of a family group" };
-  }
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
 
-  // Check if family group is full
-  if (invitation.familyGroup.members.length >= invitation.familyGroup.maxMembers) {
-    return { success: false, error: "This family group is full" };
-  }
+    if (user.email.toLowerCase() !== invitation.email.toLowerCase()) {
+      return { success: false, error: "This invitation was sent to a different email address" };
+    }
 
-  // Accept invitation and create membership in a transaction
-  await prisma.$transaction([
-    prisma.familyInvitation.update({
+    const existingMembership = await tx.familyMember.findUnique({
+      where: { userId },
+    });
+
+    if (existingMembership) {
+      return { success: false, error: "You are already a member of a family group" };
+    }
+
+    if (invitation.familyGroup.members.length >= invitation.familyGroup.maxMembers) {
+      return { success: false, error: "This family group is full" };
+    }
+
+    await tx.familyInvitation.update({
       where: { id: invitation.id },
       data: {
         status: InvitationStatus.ACCEPTED,
         acceptedAt: new Date(),
       },
-    }),
-    prisma.familyMember.create({
+    });
+
+    await tx.familyMember.create({
       data: {
         familyGroupId: invitation.familyGroupId,
         userId,
         role: FamilyRole.MEMBER,
       },
-    }),
-  ]);
+    });
 
-  return { success: true };
+    return { success: true };
+  });
 }
 
 /**

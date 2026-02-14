@@ -13,6 +13,8 @@ import {
   getSystemHealth,
 } from "@/lib/agents";
 import { nanoid } from "nanoid";
+import { auth } from "@/lib/auth";
+import { isAdmin, getEnvBasedRole } from "@/lib/admin";
 
 /**
  * POST /api/agents/qa - Trigger QA validation
@@ -25,6 +27,15 @@ import { nanoid } from "nanoid";
  */
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const role = getEnvBasedRole(session.user.email || "");
+    if (!isAdmin(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { type = "validate", agentId } = body;
 
@@ -143,6 +154,15 @@ export async function POST(request: NextRequest) {
  */
 export async function GET() {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const role = getEnvBasedRole(session.user.email || "");
+    if (!isAdmin(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const health = await getSystemHealth();
     const registry = getRegistry();
     const stats = registry.getStats();

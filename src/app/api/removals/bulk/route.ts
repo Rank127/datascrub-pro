@@ -188,14 +188,16 @@ export async function POST(request: Request) {
 
       if (brokerInfo?.privacyEmail) {
         const key = brokerInfo.privacyEmail.toLowerCase();
-        if (!brokerGroups.has(key)) {
-          brokerGroups.set(key, {
+        let group = brokerGroups.get(key);
+        if (!group) {
+          group = {
             brokerName: brokerInfo.name,
             privacyEmail: brokerInfo.privacyEmail,
             exposures: [],
-          });
+          };
+          brokerGroups.set(key, group);
         }
-        brokerGroups.get(key)!.exposures.push(exposure);
+        group.exposures.push(exposure);
       } else {
         // No known privacy email - requires manual removal
         manualExposures.push(exposure);
@@ -256,29 +258,30 @@ export async function POST(request: Request) {
       }
 
       try {
-        // Create removal requests for exposures that don't have one yet
+        // Atomically create removal requests and update exposures
         const newExposures = group.exposures.filter(e => !existingRemovalSet.has(e.id));
-        if (newExposures.length > 0) {
-          await prisma.removalRequest.createMany({
-            data: newExposures.map(exposure => ({
-              userId,
-              exposureId: exposure.id,
-              method: getRemovalMethod(exposure.source),
-              status: "PENDING",
-              notes: `Bulk removal - consolidated with ${group.exposures.length - 1} other exposures to ${group.brokerName}`,
-            })),
-            skipDuplicates: true,
-          });
-        }
+        await prisma.$transaction(async (tx) => {
+          if (newExposures.length > 0) {
+            await tx.removalRequest.createMany({
+              data: newExposures.map(exposure => ({
+                userId,
+                exposureId: exposure.id,
+                method: getRemovalMethod(exposure.source),
+                status: "PENDING",
+                notes: `Bulk removal - consolidated with ${group.exposures.length - 1} other exposures to ${group.brokerName}`,
+              })),
+              skipDuplicates: true,
+            });
+          }
 
-        // Batch update all exposures in this group
-        await prisma.exposure.updateMany({
-          where: { id: { in: group.exposures.map(e => e.id) } },
-          data: {
-            status: "REMOVAL_PENDING",
-            manualActionTaken: true,
-            manualActionTakenAt: new Date(),
-          },
+          await tx.exposure.updateMany({
+            where: { id: { in: group.exposures.map(e => e.id) } },
+            data: {
+              status: "REMOVAL_PENDING",
+              manualActionTaken: true,
+              manualActionTakenAt: new Date(),
+            },
+          });
         });
 
         // Send ONE consolidated CCPA email for all exposures to this broker
@@ -297,25 +300,26 @@ export async function POST(request: Request) {
           // Mark all exposures in this group as submitted
           const verifyAfter = calculateVerifyAfterDate(group.exposures[0].source);
 
-          await prisma.removalRequest.updateMany({
-            where: {
-              exposureId: { in: group.exposures.map(e => e.id) },
-            },
-            data: {
-              status: "SUBMITTED",
-              submittedAt: new Date(),
-              verifyAfter,
-            },
-          });
-
-          await prisma.exposure.updateMany({
-            where: {
-              id: { in: group.exposures.map(e => e.id) },
-            },
-            data: {
-              status: "REMOVAL_IN_PROGRESS",
-            },
-          });
+          await prisma.$transaction([
+            prisma.removalRequest.updateMany({
+              where: {
+                exposureId: { in: group.exposures.map(e => e.id) },
+              },
+              data: {
+                status: "SUBMITTED",
+                submittedAt: new Date(),
+                verifyAfter,
+              },
+            }),
+            prisma.exposure.updateMany({
+              where: {
+                id: { in: group.exposures.map(e => e.id) },
+              },
+              data: {
+                status: "REMOVAL_IN_PROGRESS",
+              },
+            }),
+          ]);
 
           emailsSent++;
           successCount += group.exposures.length;

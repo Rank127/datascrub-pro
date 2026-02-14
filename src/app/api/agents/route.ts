@@ -6,9 +6,20 @@
 
 import { NextResponse } from "next/server";
 import { getRegistry, getSystemStats } from "@/lib/agents";
+import { auth } from "@/lib/auth";
+import { isAdmin, getEnvBasedRole } from "@/lib/admin";
 
 export async function GET() {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const role = getEnvBasedRole(session.user.email || "");
+    if (!isAdmin(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const registry = getRegistry();
     const summaries = registry.getAgentSummaries();
     const stats = getSystemStats();

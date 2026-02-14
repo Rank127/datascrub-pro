@@ -229,22 +229,21 @@ export async function PATCH(
       }
     }
 
-    // Handle priority change
+    // Handle priority and internal notes in a single atomic update
+    const directUpdates: Record<string, unknown> = {};
     if (data.priority && data.priority !== existingTicket.priority) {
-      await prisma.supportTicket.update({
-        where: { id },
-        data: { priority: data.priority },
-      });
+      directUpdates.priority = data.priority;
       changes.push(`priority:${data.priority}`);
     }
-
-    // Handle internal notes
     if (data.internalNotes !== undefined) {
+      directUpdates.internalNotes = data.internalNotes;
+      changes.push("notes");
+    }
+    if (Object.keys(directUpdates).length > 0) {
       await prisma.supportTicket.update({
         where: { id },
-        data: { internalNotes: data.internalNotes },
+        data: directUpdates,
       });
-      changes.push("notes");
     }
 
     // Handle comment

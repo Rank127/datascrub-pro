@@ -559,15 +559,16 @@ export async function runVerificationBatch(deadline?: number): Promise<{
     if (result.updateInfo && (result.status === "COMPLETED" || result.status === "FAILED")) {
       const { userId, userEmail, userName } = result.updateInfo;
       if (userEmail) {
-        if (!userUpdates.has(userId)) {
-          userUpdates.set(userId, {
+        let userUpdate = userUpdates.get(userId);
+        if (!userUpdate) {
+          userUpdate = {
             email: userEmail,
             name: userName,
             completed: [],
             failed: [],
-          });
+          };
+          userUpdates.set(userId, userUpdate);
         }
-        const userUpdate = userUpdates.get(userId)!;
         if (result.status === "COMPLETED") {
           userUpdate.completed.push(result.updateInfo);
         } else {

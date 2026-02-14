@@ -80,110 +80,123 @@ export async function POST(request: Request) {
 
     const limit = removalLimits[userPlan];
 
-    if (limit !== -1) {
-      // Count removal requests this month for FREE users
-      const currentMonth = new Date();
-      currentMonth.setDate(1);
-      currentMonth.setHours(0, 0, 0, 0);
+    // Atomically check quota, validate exposure, check duplicates, and create request
+    // Prevents quota bypass and duplicate removals via concurrent requests
+    const txResult = await prisma.$transaction(async (tx) => {
+      if (limit !== -1) {
+        const currentMonth = new Date();
+        currentMonth.setDate(1);
+        currentMonth.setHours(0, 0, 0, 0);
 
-      const removalsThisMonth = await prisma.removalRequest.count({
+        const removalsThisMonth = await tx.removalRequest.count({
+          where: {
+            userId: session.user.id,
+            createdAt: { gte: currentMonth },
+          },
+        });
+
+        if (removalsThisMonth >= limit) {
+          return { ok: false as const, code: "QUOTA" as const, removalsThisMonth, limit };
+        }
+      }
+
+      const exposure = await tx.exposure.findFirst({
         where: {
+          id: exposureId,
           userId: session.user.id,
-          createdAt: { gte: currentMonth },
         },
       });
 
-      if (removalsThisMonth >= limit) {
-        return NextResponse.json(
-          {
-            error: `You've reached your monthly removal limit (${limit} removals). Upgrade your plan for unlimited removals.`,
-            requiresUpgrade: true,
-            upgradeUrl: "/pricing",
-            currentUsage: removalsThisMonth,
-            limit,
+      if (!exposure) {
+        return { ok: false as const, code: "NOT_FOUND" as const };
+      }
+
+      if (exposure.isWhitelisted) {
+        return { ok: false as const, code: "WHITELISTED" as const };
+      }
+
+      const existingRequest = await tx.removalRequest.findUnique({
+        where: { exposureId },
+      });
+
+      if (existingRequest) {
+        return { ok: false as const, code: "DUPLICATE" as const, existingRequest };
+      }
+
+      const method = getRemovalMethod(exposure.source);
+
+      const subsidiaryKeys = getSubsidiaries(exposure.source);
+      const isParent = subsidiaryKeys.length > 0;
+
+      let consolidatedExposures: { id: string; source: string; sourceName: string }[] = [];
+      if (isParent) {
+        consolidatedExposures = await tx.exposure.findMany({
+          where: {
+            userId: session.user.id,
+            source: { in: subsidiaryKeys },
+            isWhitelisted: false,
+            status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS"] },
           },
-          { status: 403 }
-        );
+          select: { id: true, source: true, sourceName: true },
+        });
+      }
+
+      const removalRequest = await tx.removalRequest.create({
+        data: {
+          userId: session.user.id,
+          exposureId,
+          method,
+          status: "PENDING",
+          notes: consolidatedExposures.length > 0
+            ? `Consolidated removal - covers ${consolidatedExposures.length} subsidiary exposures`
+            : undefined,
+        },
+      });
+
+      await tx.exposure.update({
+        where: { id: exposureId },
+        data: {
+          status: "REMOVAL_PENDING",
+          manualActionTaken: true,
+          manualActionTakenAt: new Date(),
+        },
+      });
+
+      return { ok: true as const, exposure, removalRequest, consolidatedExposures, method };
+    });
+
+    if (!txResult.ok) {
+      switch (txResult.code) {
+        case "QUOTA":
+          return NextResponse.json(
+            {
+              error: `You've reached your monthly removal limit (${txResult.limit} removals). Upgrade your plan for unlimited removals.`,
+              requiresUpgrade: true,
+              upgradeUrl: "/pricing",
+              currentUsage: txResult.removalsThisMonth,
+              limit: txResult.limit,
+            },
+            { status: 403 }
+          );
+        case "NOT_FOUND":
+          return NextResponse.json(
+            { error: "Exposure not found" },
+            { status: 404 }
+          );
+        case "WHITELISTED":
+          return NextResponse.json(
+            { error: "Cannot remove whitelisted items" },
+            { status: 400 }
+          );
+        case "DUPLICATE":
+          return NextResponse.json(
+            { error: "Removal already requested", request: txResult.existingRequest },
+            { status: 400 }
+          );
       }
     }
 
-    // Get the exposure
-    const exposure = await prisma.exposure.findFirst({
-      where: {
-        id: exposureId,
-        userId: session.user.id,
-      },
-    });
-
-    if (!exposure) {
-      return NextResponse.json(
-        { error: "Exposure not found" },
-        { status: 404 }
-      );
-    }
-
-    if (exposure.isWhitelisted) {
-      return NextResponse.json(
-        { error: "Cannot remove whitelisted items" },
-        { status: 400 }
-      );
-    }
-
-    // Check if removal already requested
-    const existingRequest = await prisma.removalRequest.findUnique({
-      where: { exposureId },
-    });
-
-    if (existingRequest) {
-      return NextResponse.json(
-        { error: "Removal already requested", request: existingRequest },
-        { status: 400 }
-      );
-    }
-
-    // Determine removal method
-    const method = getRemovalMethod(exposure.source);
-
-    // Check if this is a parent broker with subsidiaries
-    const subsidiaryKeys = getSubsidiaries(exposure.source);
-    const isParent = subsidiaryKeys.length > 0;
-
-    // Find all subsidiary exposures for this user that can be consolidated
-    let consolidatedExposures: { id: string; source: string; sourceName: string }[] = [];
-    if (isParent) {
-      consolidatedExposures = await prisma.exposure.findMany({
-        where: {
-          userId: session.user.id,
-          source: { in: subsidiaryKeys },
-          isWhitelisted: false,
-          status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS"] },
-        },
-        select: { id: true, source: true, sourceName: true },
-      });
-    }
-
-    // Create removal request for the main exposure
-    const removalRequest = await prisma.removalRequest.create({
-      data: {
-        userId: session.user.id,
-        exposureId,
-        method,
-        status: "PENDING",
-        notes: consolidatedExposures.length > 0
-          ? `Consolidated removal - covers ${consolidatedExposures.length} subsidiary exposures`
-          : undefined,
-      },
-    });
-
-    // Update main exposure status and mark manual action as done
-    await prisma.exposure.update({
-      where: { id: exposureId },
-      data: {
-        status: "REMOVAL_PENDING",
-        manualActionTaken: true,
-        manualActionTakenAt: new Date(),
-      },
-    });
+    const { exposure, removalRequest, consolidatedExposures } = txResult;
 
     // Handle consolidated subsidiary exposures (batch)
     const consolidatedRequests: string[] = [];

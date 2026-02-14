@@ -2247,17 +2247,19 @@ export async function processPendingRemovalDigests(): Promise<{
       const context = JSON.parse(queueItem.context);
       const userId = queueItem.userId;
 
-      if (!userUpdates.has(userId)) {
-        userUpdates.set(userId, {
+      let entry = userUpdates.get(userId);
+      if (!entry) {
+        entry = {
           email: queueItem.toEmail,
           name: context.userName || "",
           updates: [],
           queueIds: [],
-        });
+        };
+        userUpdates.set(userId, entry);
       }
 
-      userUpdates.get(userId)!.updates.push(context.update);
-      userUpdates.get(userId)!.queueIds.push(queueItem.id);
+      entry.updates.push(context.update);
+      entry.queueIds.push(queueItem.id);
       stats.updatesProcessed++;
     } catch (error) {
       captureError(`[Email Digest] Error parsing queue item ${queueItem.id}`, error);

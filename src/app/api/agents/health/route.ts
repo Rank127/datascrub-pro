@@ -6,36 +6,20 @@
 
 import { NextResponse } from "next/server";
 import { getSystemHealth, getOrchestrator } from "@/lib/agents";
+import { auth } from "@/lib/auth";
+import { isAdmin, getEnvBasedRole } from "@/lib/admin";
 
-/**
- * GET /api/agents/health - Get comprehensive health status
- *
- * Response:
- * {
- *   success: boolean;
- *   status: "HEALTHY" | "DEGRADED" | "UNHEALTHY";
- *   agents: {
- *     [agentId]: {
- *       status: string;
- *       lastRun?: Date;
- *       lastSuccess?: Date;
- *       consecutiveFailures: number;
- *       aiAvailable: boolean;
- *       errorMessage?: string;
- *       metrics?: {...}
- *     }
- *   };
- *   summary: {
- *     total: number;
- *     healthy: number;
- *     degraded: number;
- *     unhealthy: number;
- *   };
- *   circuitBreakers: {...};
- * }
- */
 export async function GET() {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const role = getEnvBasedRole(session.user.email || "");
+    if (!isAdmin(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const health = await getSystemHealth();
     const orchestrator = getOrchestrator();
     const circuitBreakers = orchestrator.getCircuitBreakerStatus();

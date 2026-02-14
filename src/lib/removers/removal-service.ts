@@ -1351,10 +1351,12 @@ export async function getPendingRemovalsForAutomation(limit: number = 50): Promi
     }
 
     // Add to broker queue
-    if (!brokerQueues.has(source)) {
-      brokerQueues.set(source, []);
+    let queue = brokerQueues.get(source);
+    if (!queue) {
+      queue = [];
+      brokerQueues.set(source, queue);
     }
-    brokerQueues.get(source)!.push({
+    queue.push({
       id: removal.id,
       severity: removal.exposure.severity,
     });
@@ -1380,7 +1382,8 @@ export async function getPendingRemovalsForAutomation(limit: number = 50): Promi
 
   while (selectedIds.length < limit && emptyRounds < brokerList.length) {
     const source = brokerList[brokerIndex];
-    const queue = brokerQueues.get(source)!;
+    const queue = brokerQueues.get(source);
+    if (!queue) { brokerIndex = (brokerIndex + 1) % brokerList.length; continue; }
 
     // Check if this broker can accept more in this batch
     const batchCount = batchBrokerCounts.get(source) || 0;
@@ -1639,14 +1642,16 @@ export async function processPendingRemovalsBatch(limit: number = 20, deadline?:
 
         // Collect update for digest email
         if (request.user.email) {
-          if (!userUpdates.has(request.userId)) {
-            userUpdates.set(request.userId, {
+          let entry = userUpdates.get(request.userId);
+          if (!entry) {
+            entry = {
               email: request.user.email,
               name: request.user.name || "",
               submitted: [],
-            });
+            };
+            userUpdates.set(request.userId, entry);
           }
-          userUpdates.get(request.userId)!.submitted.push({
+          entry.submitted.push({
             sourceName: request.exposure.sourceName,
             source: request.exposure.source,
             dataType: request.exposure.dataType,
@@ -1782,14 +1787,16 @@ export async function retryFailedRemovalsBatch(limit: number = 20, deadline?: nu
       // Collect update for digest email
       if (result.updateInfo?.userEmail) {
         const { userId, userEmail, userName } = result.updateInfo;
-        if (!userUpdates.has(userId)) {
-          userUpdates.set(userId, {
+        let entry = userUpdates.get(userId);
+        if (!entry) {
+          entry = {
             email: userEmail,
             name: userName,
             submitted: [],
-          });
+          };
+          userUpdates.set(userId, entry);
         }
-        userUpdates.get(userId)!.submitted.push({
+        entry.submitted.push({
           sourceName: result.updateInfo.sourceName,
           source: result.updateInfo.source,
           dataType: result.updateInfo.dataType,

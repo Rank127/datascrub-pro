@@ -651,7 +651,8 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
     const withAssignment = recentResolved.filter(t => t.assignedAt);
     if (withAssignment.length > 0) {
       const totalHrs = withAssignment.reduce((sum, t) => {
-        return sum + (t.assignedAt!.getTime() - t.createdAt.getTime()) / (1000 * 60 * 60);
+        if (!t.assignedAt) return sum;
+        return sum + (t.assignedAt.getTime() - t.createdAt.getTime()) / (1000 * 60 * 60);
       }, 0);
       avgResponseHours = Math.round((totalHrs / withAssignment.length) * 10) / 10;
     }
@@ -660,7 +661,8 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
     const withResolution = recentResolved.filter(t => t.resolvedAt);
     if (withResolution.length > 0) {
       const totalHrs = withResolution.reduce((sum, t) => {
-        return sum + (t.resolvedAt!.getTime() - t.createdAt.getTime()) / (1000 * 60 * 60);
+        if (!t.resolvedAt) return sum;
+        return sum + (t.resolvedAt.getTime() - t.createdAt.getTime()) / (1000 * 60 * 60);
       }, 0);
       avgResolutionHours = Math.round((totalHrs / withResolution.length) * 10) / 10;
     }

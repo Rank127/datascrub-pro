@@ -168,13 +168,13 @@ async function getUserHistory(userId: string): Promise<UserHistory> {
     ]);
 
     const resolvedTickets = tickets.filter((t) => t.status === "RESOLVED" || t.status === "CLOSED");
-    const avgResolutionTime = resolvedTickets.length > 0
-      ? resolvedTickets
-          .filter((t) => t.resolvedAt)
-          .reduce((sum, t) => {
-            const diff = t.resolvedAt!.getTime() - t.createdAt.getTime();
+    const ticketsWithResolution = resolvedTickets.filter((t) => t.resolvedAt);
+    const avgResolutionTime = ticketsWithResolution.length > 0
+      ? ticketsWithResolution.reduce((sum, t) => {
+            if (!t.resolvedAt) return sum;
+            const diff = t.resolvedAt.getTime() - t.createdAt.getTime();
             return sum + diff / (1000 * 60 * 60); // hours
-          }, 0) / resolvedTickets.length
+          }, 0) / ticketsWithResolution.length
       : 0;
 
     const accountAge = user

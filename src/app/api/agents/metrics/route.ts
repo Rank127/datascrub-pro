@@ -7,6 +7,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getRegistry, getEventBus } from "@/lib/agents";
+import { auth } from "@/lib/auth";
+import { isAdmin, getEnvBasedRole } from "@/lib/admin";
 
 interface AgentMetricsSummary {
   agentId: string;
@@ -42,6 +44,15 @@ interface AgentMetricsSummary {
  */
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const role = getEnvBasedRole(session.user.email || "");
+    if (!isAdmin(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const period = searchParams.get("period") || "24h";
     const agentIdFilter = searchParams.get("agentId");
