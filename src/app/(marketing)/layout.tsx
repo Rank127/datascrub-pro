@@ -10,10 +10,17 @@ export default function MarketingLayout({
 }) {
   return (
     <div className="min-h-screen bg-slate-950">
+      {/* Skip to content link for keyboard/screen reader users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-emerald-600 focus:text-white focus:rounded-md"
+      >
+        Skip to main content
+      </a>
       {/* Marketing Widgets */}
       <MarketingWidgets />
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-slate-950/80 backdrop-blur-lg border-b border-slate-800 z-50">
+      <nav aria-label="Main navigation" className="fixed top-0 w-full bg-slate-950/80 backdrop-blur-lg border-b border-slate-800 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2">
@@ -53,10 +60,10 @@ export default function MarketingLayout({
       </nav>
 
       {/* Main content */}
-      <main className="pt-16">{children}</main>
+      <main id="main-content" className="pt-16">{children}</main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-12 mt-24">
+      <footer aria-label="Site footer" className="border-t border-slate-800 py-12 mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 md:grid-cols-4">
             <div>

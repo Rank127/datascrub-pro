@@ -569,6 +569,7 @@ Please process this request and return a JSON response.
           invocationType: context.invocationType,
           status: ExecutionStatuses.RUNNING,
           input: JSON.stringify(input),
+          model: this.config.model || DEFAULT_MODEL,
           startedAt: new Date(),
         },
       });

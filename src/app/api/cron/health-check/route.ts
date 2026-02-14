@@ -14,7 +14,7 @@ import { reportIssue } from "@/lib/agents/orchestrator/remediation-engine";
 
 export const maxDuration = 300;
 
-const ADMIN_EMAIL = "developer@ghostmydata.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "developer@ghostmydata.com";
 const JOB_NAME = "health-check";
 
 // Lazy initialization to avoid build-time errors
