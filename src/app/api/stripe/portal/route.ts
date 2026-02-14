@@ -23,21 +23,45 @@ export async function POST() {
       );
     }
 
-    // Create billing portal session with configured portal
-    // Using configuration that enables upgrade/downgrade and cancellation at period end
-    const portalSession = await stripe.billingPortal.sessions.create({
-      customer: subscription.stripeCustomerId,
-      ...(process.env.STRIPE_PORTAL_CONFIG_ID && {
-        configuration: process.env.STRIPE_PORTAL_CONFIG_ID,
-      }),
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH_URL}/dashboard/settings`,
-    });
+    const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH_URL}/dashboard/settings`;
+    const configId = process.env.STRIPE_PORTAL_CONFIG_ID;
+
+    // Try with custom config first, fall back to default if it fails
+    let portalSession;
+    if (configId) {
+      try {
+        portalSession = await stripe.billingPortal.sessions.create({
+          customer: subscription.stripeCustomerId,
+          configuration: configId,
+          return_url: returnUrl,
+        });
+      } catch (configError) {
+        console.error("Portal config error, falling back to default:", configError);
+        portalSession = await stripe.billingPortal.sessions.create({
+          customer: subscription.stripeCustomerId,
+          return_url: returnUrl,
+        });
+      }
+    } else {
+      portalSession = await stripe.billingPortal.sessions.create({
+        customer: subscription.stripeCustomerId,
+        return_url: returnUrl,
+      });
+    }
+
+    if (!portalSession?.url) {
+      return NextResponse.json(
+        { error: "Stripe returned no portal URL. Please try again." },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({ url: portalSession.url });
   } catch (error) {
     console.error("Portal error:", error);
+    const msg = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to create billing portal session" },
+      { error: `Failed to create billing portal session: ${msg}` },
       { status: 500 }
     );
   }

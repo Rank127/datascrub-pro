@@ -197,14 +197,12 @@ function SettingsContent() {
         method: "POST",
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.url) {
-          window.location.href = data.url;
-        }
+      const data = await response.json();
+
+      if (response.ok && data.url) {
+        window.location.href = data.url;
       } else {
-        const error = await response.json();
-        setMessage({ type: "error", text: error.error || "Failed to open billing portal" });
+        setMessage({ type: "error", text: data.error || "Failed to open billing portal. Please try again." });
       }
     } catch (error) {
       setMessage({ type: "error", text: "Failed to connect to billing portal" });
