@@ -37,13 +37,13 @@ export const BUSINESS_CONTEXT: BusinessContext = {
     },
     {
       name: "Pro",
-      price: "$11.99/mo",
+      price: "$19.99/mo (40% OFF: $11.99/mo)",
       features:
         "Full automated removal, weekly monitoring, CCPA/GDPR requests, priority support, dark web monitoring.",
     },
     {
       name: "Enterprise",
-      price: "$29.99/mo",
+      price: "$49.99/mo (40% OFF: $29.99/mo)",
       features:
         "Everything in Pro + family plan (up to 5 members), dedicated support, advanced analytics, API access.",
     },
@@ -93,7 +93,7 @@ export const BUSINESS_CONTEXT: BusinessContext = {
     "Family plans with shared management dashboard",
     "Real-time exposure monitoring with instant alerts",
     "AI-powered support and ticket routing",
-    "Competitive pricing ($11.99/mo vs $10-25/mo industry average)",
+    "Competitive pricing ($19.99/mo, currently 40% OFF at $11.99/mo vs $10-25/mo industry average)",
   ],
 };
 

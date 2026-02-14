@@ -44,7 +44,7 @@ const faqs = [
   },
   {
     question: "How much does Optery cost?",
-    answer: "Optery starts at $39/year ($3.25/mo). Their top plan is $249/year. GhostMyData has a free tier. Pro costs $11.99/mo with more features.",
+    answer: "Optery starts at $39/year ($3.25/mo). Their top plan is $249/year. GhostMyData has a free tier. Pro costs $19.99/mo (currently 40% OFF at $11.99/mo) with more features.",
   },
   {
     question: "Does Optery have dark web monitoring?",
@@ -63,7 +63,7 @@ const faqs = [
 const comparisonData = [
   {
     feature: "Starting Price",
-    ghostmydata: "Free (paid from $11.99/mo)",
+    ghostmydata: "Free (paid from $19.99/mo, 40% OFF)",
     optery: "$3.25/mo (annual billing)",
     winner: "optery",
   },
@@ -248,11 +248,11 @@ export default function CompareOpteryPage() {
               </div>
               <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
                 <span className="text-slate-300">Pro Plan</span>
-                <span className="text-white font-semibold">$11.99/mo</span>
+                <span><span className="line-through text-slate-500 mr-1">$19.99</span><span className="text-white font-semibold">$11.99/mo</span></span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-300">Enterprise (dark web)</span>
-                <span className="text-white font-semibold">$29.99/mo</span>
+                <span><span className="line-through text-slate-500 mr-1">$49.99</span><span className="text-white font-semibold">$29.99/mo</span></span>
               </div>
             </div>
             <p className="text-emerald-400 text-sm mt-4">

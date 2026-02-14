@@ -248,8 +248,15 @@ export interface TopUser {
 }
 
 // Plan pricing in cents for MRR calculation
+// Sale prices (40% OFF from $19.99 and $49.99)
 export const PLAN_PRICING = {
   FREE: 0,
-  PRO: 1199, // $11.99
-  ENTERPRISE: 2999, // $29.99
+  PRO: 1199, // $11.99 (40% OFF from $19.99)
+  ENTERPRISE: 2999, // $29.99 (40% OFF from $49.99)
+} as const;
+
+export const PLAN_ORIGINAL_PRICING = {
+  FREE: 0,
+  PRO: 1999, // $19.99
+  ENTERPRISE: 4999, // $49.99
 } as const;

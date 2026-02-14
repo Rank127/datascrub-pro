@@ -28,11 +28,11 @@ async function updatePortalConfig() {
   const products = {
     enterprise: {
       product: "prod_TpSBmqgFjoDb1G",
-      prices: ["price_1SrnGs4ClPmQQvqaZqivDhnh"], // $29.99/month
+      prices: ["price_1SrnGs4ClPmQQvqaZqivDhnh"], // $29.99/month (40% OFF from $49.99)
     },
     pro: {
       product: "prod_TpSAXKgvPVwNyI",
-      prices: ["price_1SrnFp4ClPmQQvqaG5iQkSwT"], // $11.99/month
+      prices: ["price_1SrnFp4ClPmQQvqaG5iQkSwT"], // $11.99/month (40% OFF from $19.99)
     },
   };
 

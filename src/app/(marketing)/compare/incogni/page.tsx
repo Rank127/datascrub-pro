@@ -44,7 +44,7 @@ const faqs = [
   },
   {
     question: "How much does Incogni cost?",
-    answer: "Incogni costs $6.49/month yearly or $12.99/month. GhostMyData has a free tier. Paid plans start at $11.99/month with more features.",
+    answer: "Incogni costs $6.49/month yearly or $12.99/month. GhostMyData has a free tier. Paid plans start at $19.99/month (currently 40% OFF at $11.99/month) with more features.",
   },
   {
     question: "Does Incogni have dark web monitoring?",
@@ -63,7 +63,7 @@ const faqs = [
 const comparisonData = [
   {
     feature: "Starting Price",
-    ghostmydata: "Free (paid from $11.99/mo)",
+    ghostmydata: "Free (paid from $19.99/mo, 40% OFF)",
     incogni: "$6.49/mo (annual) or $12.99/mo",
     winner: "ghostmydata",
   },
@@ -255,11 +255,11 @@ export default function CompareIncogniPage() {
               </div>
               <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
                 <span className="text-slate-300">Pro Plan</span>
-                <span className="text-white font-semibold">$11.99/mo</span>
+                <span><span className="line-through text-slate-500 mr-1">$19.99</span><span className="text-white font-semibold">$11.99/mo</span></span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-300">Enterprise (dark web)</span>
-                <span className="text-white font-semibold">$29.99/mo</span>
+                <span><span className="line-through text-slate-500 mr-1">$49.99</span><span className="text-white font-semibold">$29.99/mo</span></span>
               </div>
             </div>
             <p className="text-emerald-400 text-sm mt-4">

@@ -239,8 +239,8 @@ export function trackViewPricing() {
       item_list_name: "Pricing Plans",
       items: [
         { item_id: "free", item_name: "Free Plan", price: 0 },
-        { item_id: "pro", item_name: "Pro Plan", price: 11.99 },
-        { item_id: "enterprise", item_name: "Enterprise Plan", price: 29.99 },
+        { item_id: "pro", item_name: "Pro Plan", price: 19.99, discount: 8.00 },
+        { item_id: "enterprise", item_name: "Enterprise Plan", price: 49.99, discount: 20.00 },
       ],
     });
   }

@@ -180,8 +180,9 @@ export default function ScanPage() {
           "Dedicated support & removal verification",
           "Dark web monitoring",
         ],
-        price: "$29/month",
-        savings: "30-day money-back guarantee",
+        price: "$29.99/month",
+        originalPrice: "$49.99/month",
+        savings: "40% OFF — 30-day money-back guarantee",
         cta: "Protect My Data Now",
         urgency: critical > 0 ? "URGENT: Your data is at critical risk" : "Your identity is at high risk",
       };
@@ -201,7 +202,8 @@ export default function ScanPage() {
         "Removal tracking dashboard",
       ],
       price: "$11.99/month",
-      savings: "Save 50% with code EXIT50",
+      originalPrice: "$19.99/month",
+      savings: "40% OFF — Limited time sale",
       cta: "Start Removing My Data",
       urgency: high > 0 ? "Act now to protect your privacy" : "Take control of your data",
     };
@@ -478,6 +480,9 @@ export default function ScanPage() {
                         )}
                         <p>{recommendation.reason}</p>
                         <div className="mt-2">
+                          {recommendation.originalPrice && (
+                            <span className="text-sm text-slate-500 line-through mr-2">{recommendation.originalPrice}</span>
+                          )}
                           <span className="text-2xl font-bold text-white">{recommendation.price}</span>
                           <p className="text-sm text-emerald-400">{recommendation.savings}</p>
                         </div>

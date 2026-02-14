@@ -407,8 +407,12 @@ export default function HomePage() {
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full text-xs font-semibold text-white shadow-lg glow-emerald-sm">
                   Most Popular
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">Pro</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-xl font-semibold text-white">Pro</h3>
+                  <span className="px-2 py-0.5 bg-red-500/90 text-white text-xs font-bold rounded-full">40% OFF</span>
+                </div>
                 <div className="mb-4">
+                  <div className="text-sm text-slate-500 line-through">$19.99/month</div>
                   <div className="text-3xl font-bold text-white">
                     $11.99<span className="text-sm font-normal text-slate-400">/month</span>
                   </div>
@@ -435,8 +439,12 @@ export default function HomePage() {
 
               {/* Enterprise */}
               <div className="relative p-6 bg-slate-800/50 rounded-xl border border-slate-700 card-hover-glow">
-                <h3 className="text-xl font-semibold text-white mb-2">Enterprise</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-xl font-semibold text-white">Enterprise</h3>
+                  <span className="px-2 py-0.5 bg-red-500/90 text-white text-xs font-bold rounded-full">40% OFF</span>
+                </div>
                 <div className="mb-4">
+                  <div className="text-sm text-slate-500 line-through">$49.99/month</div>
                   <div className="text-3xl font-bold text-white">
                     $29.99<span className="text-sm font-normal text-slate-400">/month</span>
                   </div>

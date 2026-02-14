@@ -178,7 +178,7 @@ export function FinanceSection({ data }: FinanceSectionProps) {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-blue-400">Pro</span>
                 <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                  $11.99/mo
+                  <span className="line-through text-slate-500 mr-1">$19.99</span> $11.99/mo
                 </Badge>
               </div>
               <p className="text-2xl font-bold text-white">
@@ -196,7 +196,7 @@ export function FinanceSection({ data }: FinanceSectionProps) {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-emerald-400">Enterprise</span>
                 <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                  $29.99/mo
+                  <span className="line-through text-slate-500 mr-1">$49.99</span> $29.99/mo
                 </Badge>
               </div>
               <p className="text-2xl font-bold text-white">

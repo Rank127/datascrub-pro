@@ -269,14 +269,14 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <p>Hey ${firstName},</p>
 
-    <p>Here's the math: The average identity theft costs victims $1,300 and 200+ hours to resolve. Our Pro plan costs $5.99/mo with this deal. That's the price of one coffee to protect everything.</p>
+    <p>Here's the math: The average identity theft costs victims $1,300 and 200+ hours to resolve. Our Pro plan costs $11.99/mo with this deal. That's less than one lunch to protect everything.</p>
 
     <p>I noticed you haven't upgraded to Pro yet. So I'm making you an offer that's genuinely hard to say no to...</p>
 
     <div class="offer-box">
-      <div class="offer-title">Exclusive 50% Off</div>
-      <div class="offer-original">$11.99/month</div>
-      <div class="offer-price">$5.99<span style="font-size: 18px; font-weight: normal;">/month</span></div>
+      <div class="offer-title">40% OFF Sale</div>
+      <div class="offer-original">$19.99/month</div>
+      <div class="offer-price">$11.99<span style="font-size: 18px; font-weight: normal;">/month</span></div>
       <div class="offer-period">Billed monthly. Cancel anytime.</div>
     </div>
 

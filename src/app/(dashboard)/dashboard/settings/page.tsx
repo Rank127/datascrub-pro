@@ -246,6 +246,7 @@ function SettingsContent() {
     {
       name: "PRO",
       price: "$11.99",
+      originalPrice: "$19.99",
       features: [
         "50 scans/month",
         "Automated removals",
@@ -259,6 +260,7 @@ function SettingsContent() {
     {
       name: "ENTERPRISE",
       price: "$29.99",
+      originalPrice: "$49.99",
       features: [
         "Unlimited scans",
         "Dark web monitoring",
@@ -624,6 +626,12 @@ function SettingsContent() {
                   <h3 className="font-semibold text-white">{plan.name}</h3>
                 </div>
                 <div className="mb-4">
+                  {plan.originalPrice && (
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs text-slate-500 line-through">{plan.originalPrice}/mo</span>
+                      <span className="px-1.5 py-0.5 bg-red-500/90 text-white text-[10px] font-bold rounded-full">40% OFF</span>
+                    </div>
+                  )}
                   <span className="text-2xl font-bold text-white">
                     {plan.price}
                     <span className="text-sm font-normal text-slate-400">

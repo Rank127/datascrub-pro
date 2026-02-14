@@ -7,7 +7,7 @@ import { AnimatedSection, AnimatedCard } from "@/components/marketing/animated-s
 export const metadata: Metadata = {
   title: "Pricing - Affordable Data Removal Plans",
   description:
-    "Choose free, Pro ($11.99/mo), or Enterprise data removal plans. Automated removal, continuous monitoring, and dark web protection.",
+    "Choose free, Pro ($19.99/mo), or Enterprise data removal plans. 40% OFF sale. Automated removal, continuous monitoring, and dark web protection.",
   keywords: [
     "data removal pricing",
     "privacy protection cost",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Pricing - GhostMyData Data Removal Plans",
     description:
-      "Affordable data removal plans starting free. Pro plan $11.99/mo with automated removal.",
+      "Affordable data removal plans starting free. Pro plan $19.99/mo (40% OFF) with automated removal.",
     url: "https://ghostmydata.com/pricing",
     type: "website",
     images: [
@@ -59,6 +59,7 @@ const plans = [
   {
     name: "Pro",
     price: "$11.99",
+    originalPrice: "$19.99",
     description: "Full protection for individuals",
     features: [
       { text: "Unlimited email scans", included: true },
@@ -77,6 +78,7 @@ const plans = [
   {
     name: "Enterprise",
     price: "$29.99",
+    originalPrice: "$49.99",
     description: "Complete protection for families",
     features: [
       { text: "Everything in Pro", included: true },
@@ -208,8 +210,16 @@ export default function PricingPage() {
               )}
 
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
+                  {plan.originalPrice && (
+                    <span className="px-2 py-0.5 bg-red-500/90 text-white text-xs font-bold rounded-full">40% OFF</span>
+                  )}
+                </div>
                 <div className="mb-2">
+                  {plan.originalPrice && (
+                    <div className="text-sm text-slate-500 line-through">{plan.originalPrice}/month</div>
+                  )}
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-white">{plan.price}</span>
                     <span className="text-slate-400">/month</span>

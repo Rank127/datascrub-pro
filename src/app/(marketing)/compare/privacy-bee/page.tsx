@@ -44,7 +44,7 @@ const faqs = [
   },
   {
     question: "How much does Privacy Bee cost compared to GhostMyData?",
-    answer: "Privacy Bee Essentials costs ~$95/year, Pro is $197/year, and Signature is $799/year. GhostMyData offers a free tier, with Pro at $143.88/year and Enterprise at $359.88/year including more broker coverage.",
+    answer: "Privacy Bee Essentials costs ~$95/year, Pro is $197/year, and Signature is $799/year. GhostMyData offers a free tier, with Pro at $239.88/year (40% OFF: $143.88/year) and Enterprise at $599.88/year (40% OFF: $359.88/year) including more broker coverage.",
   },
   {
     question: "Which service covers more data brokers?",
@@ -52,7 +52,7 @@ const faqs = [
   },
   {
     question: "Does Privacy Bee have dark web monitoring?",
-    answer: "Yes, Privacy Bee includes dark web monitoring starting at their Pro tier ($197/year). GhostMyData includes dark web monitoring in the Enterprise plan ($359.88/year) but offers more broker coverage overall.",
+    answer: "Yes, Privacy Bee includes dark web monitoring starting at their Pro tier ($197/year). GhostMyData includes dark web monitoring in the Enterprise plan ($599.88/year, currently 40% OFF at $359.88/year) but offers more broker coverage overall.",
   },
   {
     question: "Which service offers better value?",
@@ -63,7 +63,7 @@ const faqs = [
 const comparisonData = [
   {
     feature: "Starting Price",
-    ghostmydata: "Free (paid from $11.99/mo)",
+    ghostmydata: "Free (paid from $19.99/mo, 40% OFF)",
     privacybee: "$8/mo (~$95/yr)",
     winner: "ghostmydata",
   },
@@ -251,11 +251,11 @@ export default function ComparePrivacyBeePage() {
               </div>
               <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
                 <span className="text-slate-300">Pro Plan</span>
-                <span className="text-white font-semibold">$11.99/mo ($143.88/yr)</span>
+                <span><span className="line-through text-slate-500 mr-1">$19.99</span><span className="text-white font-semibold">$11.99/mo (40% OFF)</span></span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-300">Enterprise (dark web)</span>
-                <span className="text-white font-semibold">$29.99/mo ($359.88/yr)</span>
+                <span><span className="line-through text-slate-500 mr-1">$49.99</span><span className="text-white font-semibold">$29.99/mo (40% OFF)</span></span>
               </div>
             </div>
             <p className="text-emerald-400 text-sm mt-4">
@@ -301,7 +301,7 @@ export default function ComparePrivacyBeePage() {
             "Nearly 2x data broker coverage (2,100+ vs 1,033)",
             "60 additional AI Shield sources",
             "Free tier with full scan capability",
-            "Lower entry price ($11.99 vs $18 for comparable features)",
+            "Lower sale price ($11.99 vs $18 for comparable features)",
             "Do Not Call Registry integration",
             "Breach monitoring on all plans",
             "Family plan with 5 profiles",

@@ -87,6 +87,10 @@ export function UpgradeBanner() {
       {exposureData && exposureData.activeExposures > 0 && (
         <p className="text-[10px] text-orange-400 mb-2">Your data is being accessed daily</p>
       )}
+      <div className="flex items-baseline gap-1 mb-1">
+        <span className="text-xs text-slate-500 line-through">$19.99/mo</span>
+        <span className="px-1.5 py-0.5 bg-red-500/90 text-white text-[10px] font-bold rounded-full">40% OFF</span>
+      </div>
       <div className="flex items-baseline gap-1 mb-3">
         <span className="text-lg font-bold text-white">$11.99</span>
         <span className="text-xs text-slate-400">/mo</span>
