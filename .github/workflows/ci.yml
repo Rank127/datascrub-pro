@@ -66,22 +66,5 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
-  link-check:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    # Only run on main branch pushes (not PRs) to avoid rate limits
-    if: github.ref == 'refs/heads/main'
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: Check Broker Links
-        run: npm run lint:links
+  # link-check removed from CI — runs daily via /api/cron/link-checker instead
+  # External broker URL checks take 10+ minutes and frequently time out
