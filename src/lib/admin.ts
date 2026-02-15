@@ -78,8 +78,7 @@ export function checkPermission(
   dbRole: string | null | undefined,
   permission: Permission
 ): boolean {
-  // Use database role if available, otherwise fall back to env-based
-  const role = (dbRole as Role) || getEnvBasedRole(email);
+  const role = getEffectiveRole(email, dbRole);
   return hasPermission(role, permission);
 }
 
