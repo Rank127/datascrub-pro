@@ -92,7 +92,9 @@ function ExecutiveDashboardContent() {
       }
       setError(null);
 
-      const response = await fetch("/api/admin/executive-stats");
+      const response = await fetch("/api/admin/executive-stats", {
+        cache: "no-store",
+      });
 
       if (response.status === 403) {
         setError("You don't have permission to access the executive dashboard. This dashboard is restricted to Admin, Legal, and Super Admin roles.");

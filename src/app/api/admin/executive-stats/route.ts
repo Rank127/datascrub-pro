@@ -121,7 +121,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(response, {
       headers: {
-        "Cache-Control": "private, s-maxage=300, stale-while-revalidate=600",
+        "Cache-Control": "private, no-cache, no-store, must-revalidate",
       },
     });
   } catch (error) {
