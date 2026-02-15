@@ -5,6 +5,21 @@
  * Updated periodically as the business evolves.
  */
 
+export interface CompetitorIntel {
+  name: string;
+  pricing: string;
+  approach: string;
+  strengths: string;
+  weaknesses: string;
+}
+
+export interface CompetitiveIntelligence {
+  keyCompetitors: CompetitorIntel[];
+  ourDifferentiators: string[];
+  currentWeaknesses: string[];
+  strategicGuidance: string;
+}
+
 export interface BusinessContext {
   mission: string;
   valuePropositions: string[];
@@ -13,6 +28,7 @@ export interface BusinessContext {
   painPoints: string[];
   uniqueAdvantages: string[];
   currentMetrics?: Record<string, string | number>;
+  competitiveIntelligence: CompetitiveIntelligence;
 }
 
 export const BUSINESS_CONTEXT: BusinessContext = {
@@ -95,6 +111,59 @@ export const BUSINESS_CONTEXT: BusinessContext = {
     "AI-powered support and ticket routing",
     "Competitive pricing ($19.99/mo, currently 40% OFF at $11.99/mo vs $10-25/mo industry average)",
   ],
+
+  competitiveIntelligence: {
+    keyCompetitors: [
+      {
+        name: "Incogni (Surfshark)",
+        pricing: "$7.49/mo (annual) or $14.98/mo",
+        approach:
+          "3 simple statuses (In Progress, Completed, Suppressed). Never requires user action. Shows per-broker average resolution time. Broker compliance ratings.",
+        strengths:
+          "Clean UX, set-and-forget, suppression lists prevent re-collection",
+        weaknesses: "Limited to ~180 brokers, no family plans",
+      },
+      {
+        name: "DeleteMe",
+        pricing: "$10.75/mo (annual)",
+        approach:
+          "White-glove concierge. Quarterly PDF reports. 2 statuses only. Users never see internal complexity.",
+        strengths: "Simplicity, brand trust, human privacy advisors",
+        weaknesses: "Slow (90-day report cycles), limited real-time visibility",
+      },
+      {
+        name: "Optery",
+        pricing: "$9/mo - $25/mo",
+        approach:
+          "4-stage pipeline (Pending > Submitted > Acknowledged > Removed). Screenshots of exposed data. Non-Compliant flag for slow brokers.",
+        strengths: "Most transparent, screenshot proof, free tier",
+        weaknesses: "Two confusing graphs, complex UI",
+      },
+      {
+        name: "Kanary",
+        pricing: "$8/mo (annual)",
+        approach:
+          "5 statuses including Action Required and Blocked. Per-broker ETAs. User involvement via Copilot feature.",
+        strengths:
+          "Most granular transparency, high removal rates for engaged users",
+        weaknesses: "Requires user action, complex for passive users",
+      },
+    ],
+    ourDifferentiators: [
+      "2,100+ brokers (vs 180-500 for competitors)",
+      "Family plan up to 5 profiles",
+      "AI-powered agent system with 24 autonomous agents",
+      "Real-time dashboard (not quarterly reports)",
+    ],
+    currentWeaknesses: [
+      "Dashboard previously showed 8 internal statuses — competitors use 2-3 (now fixed to 3)",
+      "No per-broker ETAs shown — Incogni and Kanary show these (now added)",
+      "Progress bar framing could be more positive",
+      "No broker compliance/non-compliance indicators yet",
+    ],
+    strategicGuidance:
+      "Our UX should match Incogni's simplicity (3 categories, zero user action required) while leveraging our scale advantage (2100+ brokers, family plans). Hide pipeline complexity. Show ETAs. Frame progress positively.",
+  },
 };
 
 /**
@@ -103,6 +172,8 @@ export const BUSINESS_CONTEXT: BusinessContext = {
  */
 export function getBusinessContextPrompt(): string {
   const ctx = BUSINESS_CONTEXT;
+  const ci = ctx.competitiveIntelligence;
+
   return `## Business Context: GhostMyData
 Mission: ${ctx.mission}
 
@@ -110,9 +181,14 @@ Value Props: ${ctx.valuePropositions.join("; ")}
 
 Plans: ${ctx.userSegments.map((s) => `${s.name} (${s.price}): ${s.features}`).join(" | ")}
 
-Competitors: ${ctx.competitors.map((c) => `${c.name} — ${c.positioning}`).join("; ")}
-
 Key Challenges: ${ctx.painPoints.join("; ")}
 
-Our Advantages: ${ctx.uniqueAdvantages.join("; ")}`;
+Our Advantages: ${ctx.uniqueAdvantages.join("; ")}
+
+## Competitive Intelligence
+${ci.keyCompetitors.map((c) => `${c.name} (${c.pricing}): ${c.approach} | Strengths: ${c.strengths} | Weaknesses: ${c.weaknesses}`).join("\n")}
+
+Our Differentiators: ${ci.ourDifferentiators.join("; ")}
+Current Weaknesses: ${ci.currentWeaknesses.join("; ")}
+Strategic Guidance: ${ci.strategicGuidance}`;
 }

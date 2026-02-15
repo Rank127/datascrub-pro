@@ -60,6 +60,15 @@ export interface CronHealthMetrics {
   jobDetails: CronJobDetail[];
 }
 
+export interface RemovalStatusContext {
+  pipelineHealth: "HEALTHY" | "DEGRADED" | "CRITICAL";
+  pendingExplanation: string;
+  submittedExplanation: string;
+  completionRate: number;
+  completedAllTime: number;
+  requiresManualCount: number;
+}
+
 export interface RemovalMetrics {
   pending: number;
   submitted: number;
@@ -68,6 +77,7 @@ export interface RemovalMetrics {
   totalActive: number;
   avgCompletionHours: number | null;
   methodBreakdown: Array<{ method: string; count: number }>;
+  statusContext: RemovalStatusContext;
 }
 
 export interface ScanMetrics {
@@ -298,7 +308,7 @@ async function collectCronHealth(
 async function collectRemovalMetrics(
   since: Date
 ): Promise<RemovalMetrics> {
-  const [pending, submitted, completed24h, failed24h, methodGroups, completedRecords] =
+  const [pending, submitted, completed24h, failed24h, methodGroups, completedRecords, completedAllTime, requiresManualCount, totalAllTime] =
     await Promise.all([
       prisma.removalRequest.count({ where: { status: "PENDING" } }),
       prisma.removalRequest.count({ where: { status: "SUBMITTED" } }),
@@ -317,6 +327,9 @@ async function collectRemovalMetrics(
         where: { status: "COMPLETED", completedAt: { gte: since } },
         select: { createdAt: true, completedAt: true },
       }),
+      prisma.removalRequest.count({ where: { status: "COMPLETED" } }),
+      prisma.removalRequest.count({ where: { status: "REQUIRES_MANUAL" } }),
+      prisma.removalRequest.count(),
     ]);
 
   let avgCompletionHours: number | null = null;
@@ -327,6 +340,26 @@ async function collectRemovalMetrics(
     }, 0);
     avgCompletionHours = Math.round((totalHours / completedRecords.length) * 10) / 10;
   }
+
+  // Determine pipeline health
+  const failureRate24h = (pending + submitted) > 0
+    ? failed24h / (pending + submitted + completed24h + failed24h)
+    : 0;
+  const pipelineHealth: "HEALTHY" | "DEGRADED" | "CRITICAL" =
+    failureRate24h > 0.3 ? "CRITICAL" : failureRate24h > 0.1 ? "DEGRADED" : "HEALTHY";
+
+  const completionRate = totalAllTime > 0
+    ? Math.round((completedAllTime / totalAllTime) * 1000) / 10
+    : 0;
+
+  const statusContext: RemovalStatusContext = {
+    pipelineHealth,
+    pendingExplanation: `${pending} requests queued for processing. These are batched and sent every hour via clear-pending-queue cron (capacity: 3,600/day). This is NORMAL operational state.`,
+    submittedExplanation: `${submitted} emails sent to brokers, awaiting their legal 45-day CCPA/GDPR response window. This is NORMAL — brokers typically respond in 7-45 days.`,
+    completionRate,
+    completedAllTime,
+    requiresManualCount,
+  };
 
   return {
     pending,
@@ -339,6 +372,7 @@ async function collectRemovalMetrics(
       method: g.method,
       count: g._count,
     })),
+    statusContext,
   };
 }
 

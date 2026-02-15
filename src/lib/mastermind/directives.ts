@@ -126,6 +126,37 @@ export async function getDirectivesForDomain(category: string): Promise<Record<s
 }
 
 // ============================================================================
+// DIRECTIVE BOUNDS — Prevent destructive values from board meetings
+// ============================================================================
+
+const DIRECTIVE_BOUNDS: Record<string, { min: number; max: number }> = {
+  removal_rate_per_broker: { min: 5, max: 200 },
+  removal_batch_pending: { min: 50, max: 5000 },
+  removal_batch_retries: { min: 10, max: 1000 },
+  removal_anomaly_multiplier: { min: 0.1, max: 2.0 },
+  content_target_wordcount: { min: 300, max: 5000 },
+  content_target_readability: { min: 30, max: 90 },
+  seo_alert_threshold: { min: 20, max: 95 },
+  seo_keyword_relevance_min: { min: 20, max: 95 },
+  support_batch_size: { min: 5, max: 100 },
+  billing_churn_risk_threshold: { min: 0.1, max: 0.95 },
+  growth_upsell_confidence_min: { min: 0.3, max: 0.95 },
+};
+
+function clampDirectiveValue(key: string, value: unknown): unknown {
+  const bounds = DIRECTIVE_BOUNDS[key];
+  if (!bounds || typeof value !== "number") return value;
+
+  const clamped = Math.max(bounds.min, Math.min(bounds.max, value));
+  if (clamped !== value) {
+    console.warn(
+      `[Directives] CLAMPED "${key}": ${value} → ${clamped} (bounds: ${bounds.min}–${bounds.max})`
+    );
+  }
+  return clamped;
+}
+
+// ============================================================================
 // WRITE FUNCTIONS
 // ============================================================================
 
@@ -176,10 +207,11 @@ export async function applyMastermindDirectives(
 
   for (const d of directives) {
     try {
+      const clampedValue = clampDirectiveValue(d.key, d.value);
       await setDirective({
         category: d.category,
         key: d.key,
-        value: d.value,
+        value: clampedValue,
         rationale: d.rationale,
         advisorSource: d.advisorSource,
         source,

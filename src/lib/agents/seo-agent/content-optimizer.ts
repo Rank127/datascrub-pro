@@ -228,13 +228,15 @@ export async function analyzePageContent(baseUrl: string, path: string): Promise
     }
 
     // Analyze images
-    const imageRegex = /<img[^>]*src=["']([^"']+)["'][^>]*(?:alt=["']([^"']*)["'])?/gi;
+    const imageRegex = /<img\s[^>]{0,500}src=["']([^"']{1,2000})["'][^>]{0,500}/gi;
     const images: ImageAnalysis[] = [];
     let imageMatch;
 
     while ((imageMatch = imageRegex.exec(html)) !== null) {
       const src = imageMatch[1];
-      const altText = imageMatch[2];
+      // Extract alt text from the full match string
+      const altMatch = imageMatch[0].match(/alt=["']([^"']{0,500})["']/i);
+      const altText = altMatch ? altMatch[1] : undefined;
       images.push({
         src,
         hasAlt: !!altText && altText.length > 0,

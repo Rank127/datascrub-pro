@@ -6,9 +6,8 @@ import {
   ChevronDown,
   ChevronUp,
   AlertTriangle,
-  SendHorizontal,
+  Loader2,
   Trash2,
-  HandHelping,
   Shield
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,7 +18,7 @@ interface QuickStatsProps {
   activeExposures: number;
   submittedRemovals: number;
   removedCount: number;
-  manualAction: {
+  manualAction?: {
     done: number;
     total: number;
   };
@@ -63,10 +62,10 @@ export function QuickStats({
       href: "/dashboard/exposures?status=ACTIVE"
     },
     {
-      label: "Submitted",
+      label: "In Progress",
       value: submittedRemovals,
-      icon: SendHorizontal,
-      color: "text-purple-400",
+      icon: Loader2,
+      color: "text-blue-400",
       href: "/dashboard/removals"
     },
     {
@@ -77,17 +76,10 @@ export function QuickStats({
       href: "/dashboard/removals"
     },
     {
-      label: "Manual",
-      value: `${manualAction.done}/${manualAction.total}`,
-      icon: HandHelping,
-      color: "text-amber-400",
-      href: "/dashboard/exposures?manualAction=pending"
-    },
-    {
       label: "Whitelist",
       value: whitelistedCount,
       icon: Shield,
-      color: "text-blue-400",
+      color: "text-purple-400",
       href: "/dashboard/whitelist"
     },
   ];
@@ -148,7 +140,7 @@ export function QuickStats({
 
         {/* Expanded View - Full Grid */}
         {expanded && (
-          <div className="grid grid-cols-5 gap-2 mt-3">
+          <div className="grid grid-cols-4 gap-2 mt-3">
             {stats.map((stat) => (
               <Link
                 key={stat.label}

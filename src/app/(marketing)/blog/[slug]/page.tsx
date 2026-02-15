@@ -95,9 +95,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+/**
+ * Wrap consecutive elements of the same type in a container tag.
+ * E.g., wrap consecutive <li> lines in <ul>, consecutive <tr> lines in <table>.
+ */
+function wrapConsecutiveElements(
+  html: string,
+  tagName: string,
+  wrapperOpen: string,
+  wrapperClose: string
+): string {
+  const lines = html.split("\n");
+  const result: string[] = [];
+  let inGroup = false;
+
+  for (const line of lines) {
+    const isTarget = line.trimStart().startsWith(`<${tagName}`);
+    if (isTarget && !inGroup) {
+      result.push(wrapperOpen);
+      inGroup = true;
+    } else if (!isTarget && inGroup) {
+      result.push(wrapperClose);
+      inGroup = false;
+    }
+    result.push(line);
+  }
+  if (inGroup) result.push(wrapperClose);
+
+  return result.join("\n");
+}
+
 function parseMarkdown(content: string): string {
   // Basic markdown parsing
-  const html = content
+  let html = content
     // Headers
     .replace(/^### (.*$)/gm, '<h3 class="text-xl font-semibold text-white mt-8 mb-4">$1</h3>')
     .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold text-white mt-10 mb-4">$1</h2>')
@@ -120,11 +150,23 @@ function parseMarkdown(content: string): string {
       return `<tr>${cells.map(c => `<${tag} class="${cellClass}">${c.trim()}</${tag}>`).join('')}</tr>`;
     })
     // Paragraphs
-    .replace(/^(?!<[hl]|<li|<tr)(.+)$/gm, '<p class="text-slate-400 mb-4">$1</p>')
-    // Wrap lists
-    .replace(/(<li.*<\/li>\n?)+/g, '<ul class="list-disc list-inside space-y-2 mb-6 text-slate-400">$&</ul>')
-    // Wrap tables
-    .replace(/(<tr.*<\/tr>\n?)+/g, '<table class="w-full mb-6 border-collapse">$&</table>');
+    .replace(/^(?!<[hl]|<li|<tr)(.+)$/gm, '<p class="text-slate-400 mb-4">$1</p>');
+
+  // Wrap consecutive <li> elements in <ul>
+  html = wrapConsecutiveElements(
+    html,
+    "li",
+    '<ul class="list-disc list-inside space-y-2 mb-6 text-slate-400">',
+    "</ul>"
+  );
+
+  // Wrap consecutive <tr> elements in <table>
+  html = wrapConsecutiveElements(
+    html,
+    "tr",
+    '<table class="w-full mb-6 border-collapse">',
+    "</table>"
+  );
 
   return html;
 }

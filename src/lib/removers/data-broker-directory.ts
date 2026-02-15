@@ -29,6 +29,8 @@
  * @see https://sos.vermont.gov/data-brokers/ - Vermont Data Broker Registry
  */
 
+import { getCorrectedUrl } from "@/lib/removals/url-corrections";
+
 export type RemovalMethod = "FORM" | "EMAIL" | "BOTH" | "MONITOR" | "NOT_REMOVABLE";
 export type SourceCategory = "DATA_BROKER" | "BREACH_DATABASE" | "SOCIAL_MEDIA" | "AI_SERVICE" | "DARK_WEB" | "SERVICE_PROVIDER" | "OTHER";
 
@@ -13369,9 +13371,20 @@ export const BROKER_CATEGORIES = {
   ],
 } as const;
 
-// Get data broker info by source
+// Get data broker info by source (applies URL corrections at runtime)
 export function getDataBrokerInfo(source: string): DataBrokerInfo | null {
-  return DATA_BROKER_DIRECTORY[source] || null;
+  const info = DATA_BROKER_DIRECTORY[source];
+  if (!info) return null;
+
+  // Apply URL correction if one exists
+  if (info.optOutUrl) {
+    const corrected = getCorrectedUrl(info.optOutUrl);
+    if (corrected) {
+      return { ...info, optOutUrl: corrected };
+    }
+  }
+
+  return info;
 }
 
 /**

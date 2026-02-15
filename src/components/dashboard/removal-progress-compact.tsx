@@ -137,8 +137,14 @@ export function RemovalProgressCompact({
         {/* Overall progress bar */}
         <div className="mb-3">
           <div className="flex justify-between text-sm mb-1.5">
-            <span className="text-slate-400">Overall Progress</span>
-            <span className="text-white font-medium">{overallPercentage}% complete</span>
+            <span className="text-slate-400">
+              {totalCompleted} of {totalItems} removed
+            </span>
+            <span className="text-white font-medium">
+              {totalItems - totalCompleted > 0
+                ? `${totalItems - totalCompleted} in progress`
+                : "All done!"}
+            </span>
           </div>
           <Progress
             value={overallPercentage}

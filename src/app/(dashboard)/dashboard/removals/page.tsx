@@ -24,20 +24,18 @@ import {
   Trash2,
   CheckCircle,
   Clock,
-  AlertCircle,
-  XCircle,
-  Mail,
-  FileText,
+  Eye,
   ExternalLink,
   RefreshCw,
-  HandHelping,
   Camera,
   Image as ImageIcon,
   HelpCircle,
   ChevronDown,
   ChevronUp,
+  Loader2,
+  FileText,
+  Shield,
 } from "lucide-react";
-import Link from "next/link";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { EmptyState } from "@/components/dashboard/empty-state";
@@ -56,6 +54,12 @@ interface RemovalRequest {
   optOutUrl: string | null;
   optOutEmail: string | null;
   estimatedDays: number | null;
+  // User-facing status fields
+  userStatus: "in_progress" | "completed" | "monitoring";
+  userStatusLabel: string;
+  userStatusColor: string;
+  estimatedCompletionDate: string | null;
+  eta: string | null;
   // Screenshot proof fields
   beforeScreenshot: string | null;
   beforeScreenshotAt: string | null;
@@ -76,66 +80,31 @@ interface RemovalRequest {
   };
 }
 
-const statusConfig: Record<
-  string,
-  { label: string; description: string; color: string; icon: typeof CheckCircle }
-> = {
-  PENDING: {
-    label: "Queued",
-    description: "Request created, opt-out email will be sent soon",
-    color: "bg-slate-500/20 text-slate-400",
-    icon: Clock,
-  },
-  SUBMITTED: {
-    label: "Email Sent",
-    description: "Opt-out request emailed to broker, waiting for response (up to 45 days)",
-    color: "bg-blue-500/20 text-blue-400",
-    icon: Mail,
-  },
-  IN_PROGRESS: {
-    label: "Processing",
-    description: "Broker acknowledged request, removal in progress",
-    color: "bg-yellow-500/20 text-yellow-400",
-    icon: RefreshCw,
-  },
-  COMPLETED: {
-    label: "Removed",
-    description: "Verified: your data has been removed from this broker",
-    color: "bg-emerald-500/20 text-emerald-400",
-    icon: CheckCircle,
-  },
-  FAILED: {
-    label: "Failed",
-    description: "Request failed - will retry automatically",
-    color: "bg-red-500/20 text-red-400",
-    icon: XCircle,
-  },
-  REQUIRES_MANUAL: {
-    label: "Form Required",
-    description: "This broker only accepts opt-out via their website form - click 'Open Opt-Out Form' below",
-    color: "bg-orange-500/20 text-orange-400",
-    icon: AlertCircle,
-  },
-  ACKNOWLEDGED: {
-    label: "Breach Alert",
-    description: "Data breach - cannot be removed, only monitored",
-    color: "bg-purple-500/20 text-purple-400",
-    icon: AlertCircle,
-  },
+interface SimplifiedStats {
+  inProgress: number;
+  completed: number;
+  monitoring: number;
+  total: number;
+}
+
+// Internal status labels for tooltips
+const internalStatusLabels: Record<string, string> = {
+  PENDING: "Queued for processing",
+  SUBMITTED: "Opt-out request sent to broker",
+  IN_PROGRESS: "Broker acknowledged, processing",
+  COMPLETED: "Verified removed",
+  FAILED: "Will retry automatically",
+  REQUIRES_MANUAL: "Being handled by our team",
+  ACKNOWLEDGED: "Breach alert — monitoring",
+  SKIPPED: "Monitoring",
 };
 
 const methodLabels: Record<string, string> = {
-  AUTO_FORM: "Automated Opt-out Form",
-  AUTO_EMAIL: "Automated Email Request",
+  AUTO_FORM: "Automated Opt-out",
+  AUTO_EMAIL: "Automated Email",
   API: "API Integration",
-  MANUAL_GUIDE: "Manual Removal Guide",
+  MANUAL_GUIDE: "Team Assisted",
 };
-
-interface ManualActionStats {
-  total: number;
-  done: number;
-  pending: number;
-}
 
 // Screenshot Proof Dialog Component
 function ScreenshotProofDialog({ removal }: { removal: RemovalRequest }) {
@@ -172,11 +141,11 @@ function ScreenshotProofDialog({ removal }: { removal: RemovalRequest }) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-red-400">Before Removal</h4>
-              {removal.beforeScreenshotAt || removal.exposure.proofScreenshotAt ? (
+              {(removal.beforeScreenshotAt || removal.exposure.proofScreenshotAt) && (
                 <span className="text-xs text-slate-500">
                   {new Date(removal.beforeScreenshotAt || removal.exposure.proofScreenshotAt!).toLocaleDateString()}
                 </span>
-              ) : null}
+              )}
             </div>
             <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
               {beforeScreenshot ? (
@@ -257,10 +226,26 @@ function ScreenshotProofDialog({ removal }: { removal: RemovalRequest }) {
   );
 }
 
+// User-facing status icon
+function StatusIcon({ userStatus }: { userStatus: string }) {
+  switch (userStatus) {
+    case "completed":
+      return <CheckCircle className="h-5 w-5 text-emerald-400" />;
+    case "monitoring":
+      return <Eye className="h-5 w-5 text-purple-400" />;
+    default:
+      return <Loader2 className="h-5 w-5 text-blue-400 animate-spin" />;
+  }
+}
+
 export default function RemovalsPage() {
   const [removals, setRemovals] = useState<RemovalRequest[]>([]);
-  const [stats, setStats] = useState<Record<string, number>>({});
-  const [manualAction, setManualAction] = useState<ManualActionStats>({ total: 0, done: 0, pending: 0 });
+  const [simplifiedStats, setSimplifiedStats] = useState<SimplifiedStats>({
+    inProgress: 0,
+    completed: 0,
+    monitoring: 0,
+    total: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
 
@@ -275,8 +260,14 @@ export default function RemovalsPage() {
       if (response.ok) {
         const data = await response.json();
         setRemovals(data.removals);
-        setStats(data.stats);
-        setManualAction(data.manualAction || { total: 0, done: 0, pending: 0 });
+        setSimplifiedStats(
+          data.simplifiedStats || {
+            inProgress: 0,
+            completed: 0,
+            monitoring: 0,
+            total: 0,
+          }
+        );
       }
     } catch (error) {
       console.error("Failed to fetch removals:", error);
@@ -286,10 +277,13 @@ export default function RemovalsPage() {
     }
   };
 
-  const totalRemovals = Object.values(stats).reduce((a, b) => a + b, 0);
-  const completedCount = stats.COMPLETED || 0;
-  const progressPercent =
-    totalRemovals > 0 ? Math.round((completedCount / totalRemovals) * 100) : 0;
+  const { inProgress, completed, monitoring, total } = simplifiedStats;
+  const activeWorkMessage =
+    inProgress > 0
+      ? `We're actively working on ${inProgress} removal${inProgress !== 1 ? "s" : ""}`
+      : completed > 0
+        ? "All removals completed!"
+        : "No removals in progress";
 
   return (
     <div className="space-y-6">
@@ -298,30 +292,59 @@ export default function RemovalsPage() {
         description="Track the status of your data removal requests"
       />
 
-      {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-5">
-        <StatCard value={totalRemovals} label="Total Requests" />
-        <StatCard value={completedCount} label="Completed" color="emerald" />
-        <StatCard value={(stats.SUBMITTED || 0) + (stats.IN_PROGRESS || 0)} label="In Progress" color="blue" />
-        <StatCard value={(stats.FAILED || 0) + (stats.REQUIRES_MANUAL || 0)} label="Needs Attention" color="orange" />
-        <StatCard value={`${manualAction.done}/${manualAction.total}`} label="Manual Actions" icon={HandHelping} color="amber" href="/dashboard/exposures?manualAction=pending" />
+      {/* Simplified Stats — 3 cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard
+          value={inProgress}
+          label="In Progress"
+          color="blue"
+          icon={Loader2}
+        />
+        <StatCard
+          value={completed}
+          label="Removed"
+          color="emerald"
+          icon={CheckCircle}
+        />
+        <StatCard
+          value={monitoring}
+          label="Monitoring"
+          color="purple"
+          icon={Shield}
+        />
       </div>
 
-      {/* Overall Progress */}
+      {/* Overall Progress — framed positively */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <CardTitle className="text-white">Overall Progress</CardTitle>
+          <CardTitle className="text-white">Removal Progress</CardTitle>
           <CardDescription className="text-slate-400">
-            {completedCount} of {totalRemovals} removals completed
+            {activeWorkMessage}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Progress</span>
-              <span className="text-white">{progressPercent}%</span>
+              <span className="text-slate-400">
+                {completed} of {total} removals completed
+              </span>
+              <span className="text-white">
+                {total > 0
+                  ? Math.round((completed / total) * 100)
+                  : 0}
+                %
+              </span>
             </div>
-            <Progress value={progressPercent} className="h-3 bg-slate-700" />
+            <Progress
+              value={total > 0 ? (completed / total) * 100 : 0}
+              className="h-3 bg-slate-700"
+            />
+            {inProgress > 0 && (
+              <p className="text-xs text-slate-500 mt-1">
+                Most brokers process removal requests within 7-45 days per
+                CCPA/GDPR requirements.
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -346,34 +369,36 @@ export default function RemovalsPage() {
         </CardHeader>
         {showHelp && (
           <CardContent className="pt-0 space-y-4">
-            {/* Status Explanations */}
             <div className="grid gap-3 text-sm">
               <div className="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
-                <Clock className="h-5 w-5 text-slate-400 mt-0.5" />
+                <Loader2 className="h-5 w-5 text-blue-400 mt-0.5" />
                 <div>
-                  <span className="font-medium text-slate-300">Queued</span>
-                  <p className="text-slate-400">Request created. Opt-out email will be sent automatically.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
-                <Mail className="h-5 w-5 text-blue-400 mt-0.5" />
-                <div>
-                  <span className="font-medium text-blue-300">Email Sent</span>
-                  <p className="text-slate-400">CCPA/GDPR opt-out email sent to the data broker. They have 45 days to comply.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-orange-400 mt-0.5" />
-                <div>
-                  <span className="font-medium text-orange-300">Manual Required</span>
-                  <p className="text-slate-400">This broker only accepts removals via their website form. Click &quot;Open Opt-Out Form&quot; to complete the removal yourself.</p>
+                  <span className="font-medium text-blue-300">In Progress</span>
+                  <p className="text-slate-400">
+                    We&apos;ve sent the removal request to the data broker and are actively
+                    following up. This includes queued requests, sent emails, and any
+                    items our team is handling. Most brokers comply within 7-45 days.
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
                 <CheckCircle className="h-5 w-5 text-emerald-400 mt-0.5" />
                 <div>
                   <span className="font-medium text-emerald-300">Removed</span>
-                  <p className="text-slate-400">Verified! Our system re-scanned the broker and confirmed your data is gone.</p>
+                  <p className="text-slate-400">
+                    Verified! We re-scanned the broker and confirmed your data has been
+                    removed. We&apos;ll continue monitoring for any re-collection.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
+                <Eye className="h-5 w-5 text-purple-400 mt-0.5" />
+                <div>
+                  <span className="font-medium text-purple-300">Monitoring</span>
+                  <p className="text-slate-400">
+                    Data from breaches and other non-removable sources. We continuously
+                    monitor these and will alert you to any changes.
+                  </p>
                 </div>
               </div>
             </div>
@@ -382,9 +407,9 @@ export default function RemovalsPage() {
             <div className="p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg">
               <h4 className="font-medium text-blue-300 mb-2">About Proof Screenshots</h4>
               <ul className="text-sm text-slate-400 space-y-1">
-                <li>• <strong>Before:</strong> Screenshot taken when we first found your data</li>
-                <li>• <strong>After:</strong> Screenshot taken when we verify it&apos;s removed (may take days/weeks)</li>
-                <li>• <strong>View Proof:</strong> Only shows if screenshots are available (not all sources support this)</li>
+                <li>&bull; <strong>Before:</strong> Screenshot taken when we first found your data</li>
+                <li>&bull; <strong>After:</strong> Screenshot taken when we verify it&apos;s removed (may take days/weeks)</li>
+                <li>&bull; <strong>View Proof:</strong> Only shows if screenshots are available (not all sources support this)</li>
               </ul>
             </div>
           </CardContent>
@@ -420,17 +445,15 @@ export default function RemovalsPage() {
             <LoadingSpinner />
           ) : removals.length === 0 ? (
             <EmptyState
-              icon={<Trash2 className="mx-auto h-12 w-12 text-slate-600 mb-4" />}
+              icon={
+                <Trash2 className="mx-auto h-12 w-12 text-slate-600 mb-4" />
+              }
               title="No removal requests"
               description="Request removal from the Exposures page"
             />
           ) : (
             <div className="space-y-4">
-              {removals.map((removal) => {
-                const config = statusConfig[removal.status] || statusConfig.PENDING;
-                const StatusIcon = config.icon;
-
-                return (
+                {removals.map((removal) => (
                   <div
                     key={removal.id}
                     className="p-4 bg-slate-700/30 rounded-lg space-y-3"
@@ -438,7 +461,7 @@ export default function RemovalsPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-slate-800 rounded-lg">
-                          <StatusIcon className="h-5 w-5 text-slate-400" />
+                          <StatusIcon userStatus={removal.userStatus} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
@@ -447,10 +470,16 @@ export default function RemovalsPage() {
                             </span>
                             <Badge
                               variant="outline"
-                              className={config.color + " border-0 cursor-help"}
-                              title={config.description}
+                              className={
+                                removal.userStatusColor +
+                                " border-0 cursor-help"
+                              }
+                              title={
+                                internalStatusLabels[removal.status] ||
+                                removal.status
+                              }
                             >
-                              {config.label}
+                              {removal.userStatusLabel}
                             </Badge>
                           </div>
                           <p className="text-sm text-slate-400">
@@ -460,8 +489,10 @@ export default function RemovalsPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {/* View Proof Button - show if screenshots available */}
-                        {(removal.beforeScreenshot || removal.afterScreenshot || removal.exposure.proofScreenshot) && (
+                        {/* View Proof Button */}
+                        {(removal.beforeScreenshot ||
+                          removal.afterScreenshot ||
+                          removal.exposure.proofScreenshot) && (
                           <ScreenshotProofDialog removal={removal} />
                         )}
                         {removal.exposure.sourceUrl && (
@@ -491,74 +522,22 @@ export default function RemovalsPage() {
                       {removal.submittedAt && (
                         <div className="text-slate-500">
                           Submitted:{" "}
-                          {new Date(removal.submittedAt).toLocaleDateString()}
+                          {new Date(
+                            removal.submittedAt
+                          ).toLocaleDateString()}
                         </div>
                       )}
-                      {removal.attempts > 1 && (
-                        <div className="text-slate-500">
-                          Attempts: {removal.attempts}
-                        </div>
-                      )}
-                    </div>
-
-                    {removal.lastError && (
-                      <div className="p-2 bg-red-500/10 rounded text-sm text-red-400">
-                        Error: {removal.lastError}
-                      </div>
-                    )}
-
-                    {removal.status === "REQUIRES_MANUAL" && (
-                      <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-orange-400 mb-1">
-                              Form-Based Removal Required
-                            </p>
-                            <p className="text-xs text-slate-400">
-                              This broker only accepts removals through their website form, not email.
-                            </p>
+                      {removal.eta &&
+                        removal.userStatus === "in_progress" && (
+                          <div className="flex items-center gap-1 text-slate-500">
+                            <Clock className="h-3.5 w-3.5" />
+                            Estimated: {removal.eta}
                           </div>
-                          {removal.optOutUrl && (
-                            <Button
-                              size="sm"
-                              className="bg-orange-600 hover:bg-orange-700 text-white shrink-0"
-                              asChild
-                            >
-                              <a
-                                href={removal.optOutUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <ExternalLink className="mr-2 h-4 w-4" />
-                                Open Opt-Out Form
-                              </a>
-                            </Button>
-                          )}
-                        </div>
-
-                        <div className="mt-3 pt-3 border-t border-orange-500/20">
-                          <p className="text-xs text-slate-400 mb-2">Steps to complete:</p>
-                          <ol className="text-xs text-slate-400 list-decimal list-inside space-y-1">
-                            <li>Click the button above to open the opt-out form</li>
-                            <li>Search for your name/info and locate your record</li>
-                            <li>Submit the removal request</li>
-                            {removal.estimatedDays && (
-                              <li>Wait up to {removal.estimatedDays} days for processing</li>
-                            )}
-                          </ol>
-                        </div>
-
-                        {!removal.optOutUrl && (
-                          <p className="text-xs text-slate-500 mt-2">
-                            Search for &quot;{removal.exposure.sourceName} opt out&quot; to find the removal form.
-                          </p>
                         )}
-                      </div>
-                    )}
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
           )}
         </CardContent>
       </Card>

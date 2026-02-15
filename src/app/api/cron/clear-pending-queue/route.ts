@@ -10,6 +10,7 @@ import { processEmailQueue, getEmailQuotaStatus } from "@/lib/email";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { logCronExecution } from "@/lib/cron-logger";
 import { captureError } from "@/lib/error-reporting";
+import { createRemovalFailedTicket } from "@/lib/support/ticket-service";
 
 /**
  * Aggressive Queue Clearer - Ensures pending queue is emptied within 24 hours
@@ -146,13 +147,15 @@ export async function POST(request: Request) {
 
 /**
  * Mark non-automatable removals as REQUIRES_MANUAL
- * These are brokers without privacy email or opt-out URL
+ * First tries email fallback (many form-only brokers also have privacyEmail).
+ * For truly non-automatable items, creates an internal support ticket
+ * so the team handles it instead of the user.
  */
 async function markNonAutomatableAsManual(): Promise<number> {
   const pendingRemovals = await prisma.removalRequest.findMany({
     where: { status: "PENDING" },
     include: {
-      exposure: { select: { source: true } },
+      exposure: { select: { id: true, source: true, sourceName: true } },
     },
   });
 
@@ -160,16 +163,34 @@ async function markNonAutomatableAsManual(): Promise<number> {
   for (const removal of pendingRemovals) {
     const brokerInfo = getDataBrokerInfo(removal.exposure.source);
 
-    // If no email or opt-out URL, it's not automatable
+    // If broker has a privacy email, it CAN be automated via email — skip
+    if (brokerInfo?.privacyEmail) continue;
+
+    // If broker has an opt-out URL but no email, it still can't be auto-emailed
+    // but we don't want to burden the user — create internal ticket instead
     if (!brokerInfo?.privacyEmail && !brokerInfo?.optOutUrl) {
       await prisma.removalRequest.update({
         where: { id: removal.id },
         data: {
           status: "REQUIRES_MANUAL",
           method: "MANUAL_GUIDE",
-          notes: "Auto-marked: No automated removal method available for this broker",
+          notes: "Auto-marked: No automated removal method available. Internal ticket created for team handling.",
         },
       });
+
+      // Create an internal support ticket so our team handles it
+      try {
+        await createRemovalFailedTicket(
+          removal.userId,
+          removal.id,
+          removal.exposure.id,
+          removal.exposure.sourceName || removal.exposure.source,
+          "No automated removal method available for this broker — requires manual team action"
+        );
+      } catch (ticketError) {
+        console.warn(`[Cron: Clear Pending Queue] Failed to create ticket for ${removal.exposure.source}:`, ticketError);
+      }
+
       marked++;
     }
   }

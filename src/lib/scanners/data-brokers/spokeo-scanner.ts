@@ -139,7 +139,7 @@ export class SpokeoScanner extends BaseBrokerScanner {
         }
       }
       if (!result.location) {
-        const locationMatch = html.match(/(?:Lives in|Located in|Location)[:\s]*([^<,]+(?:,\s*[A-Z]{2})?)/i);
+        const locationMatch = html.match(/(?:Lives in|Located in|Location)[:\s]*([^<,\n]{1,200})/i);
         if (locationMatch) {
           result.location = locationMatch[1].trim();
         }

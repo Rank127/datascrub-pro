@@ -90,7 +90,7 @@ export class WhitePagesScanner extends BaseBrokerScanner {
 
       // Extract location from meta or content
       const locationMatch = html.match(
-        /(?:Lives in|Location|Address)[:\s]*([^<,]+(?:,\s*[A-Z]{2})?)/i
+        /(?:Lives in|Location|Address)[:\s]*([^<,\n]{1,200})/i
       );
       if (locationMatch) {
         result.location = locationMatch[1].trim();

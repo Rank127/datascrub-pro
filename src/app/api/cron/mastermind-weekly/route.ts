@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { logCronExecution } from "@/lib/cron-logger";
-import { collectStandupMetrics } from "@/lib/standup/collect-metrics";
+import { collectStandupMetrics, type StandupMetrics } from "@/lib/standup/collect-metrics";
 import { Resend } from "resend";
 import { buildMastermindPrompt } from "@/lib/mastermind";
 import { applyMastermindDirectives } from "@/lib/mastermind/directives";
@@ -81,7 +81,7 @@ Respond with valid JSON:
       messages: [
         {
           role: "user",
-          content: `Here are this week's GhostMyData metrics:\n\n${JSON.stringify(metrics, null, 2)}`,
+          content: formatMetricsWithContext(metrics),
         },
       ],
     });
@@ -113,23 +113,29 @@ Respond with valid JSON:
         temperature: 0.2,
         system: `You are the Directive Engine for GhostMyData. Based on a weekly Mastermind Board Meeting analysis and live metrics, generate concrete operational directives.
 
-Each directive adjusts a specific parameter that agents and cron jobs use. Only include directives where the analysis suggests a change from defaults.
+Each directive adjusts a specific parameter that agents and cron jobs use. Only include directives where the data CLEARLY warrants a change from defaults. If unsure, do NOT include the directive.
 
-Available directive keys and their defaults:
-- removal_batch_pending (default: 1000) — How many pending removals to process per batch
-- removal_batch_retries (default: 200) — How many retries to process per batch
-- removal_rate_per_broker (default: 25) — Max requests per broker per day
-- removal_anomaly_multiplier (default: 0.5) — Batch size multiplier when anomalies detected
+Available directive keys with defaults and HARD BOUNDS (values will be clamped to these ranges):
+- removal_batch_pending (default: 1000, min: 50, max: 5000) — Pending removals per batch
+- removal_batch_retries (default: 200, min: 10, max: 1000) — Retries per batch
+- removal_rate_per_broker (default: 25, min: 5, max: 200) — Max requests per broker per day. NEVER set below 5 — this would halt removals.
+- removal_anomaly_multiplier (default: 0.5, min: 0.1, max: 2.0) — Batch size multiplier on anomalies
 - content_focus_topics (default: []) — Priority content topics as string array
-- content_target_wordcount (default: 1000) — Target word count for content
-- content_target_readability (default: 65) — Target readability score (Flesch-Kincaid)
-- seo_alert_threshold (default: 70) — SEO score below which to trigger alerts
-- seo_keyword_relevance_min (default: 60) — Minimum keyword relevance percentage
-- support_batch_size (default: 20) — Tickets to process per run
-- billing_churn_risk_threshold (default: 0.6) — Churn risk score trigger
-- growth_upsell_confidence_min (default: 0.7) — Min confidence for upsell suggestions
+- content_target_wordcount (default: 1000, min: 300, max: 5000) — Target word count
+- content_target_readability (default: 65, min: 30, max: 90) — Flesch-Kincaid score
+- seo_alert_threshold (default: 70, min: 20, max: 95) — SEO score alert trigger
+- seo_keyword_relevance_min (default: 60, min: 20, max: 95) — Min keyword relevance %
+- support_batch_size (default: 20, min: 5, max: 100) — Tickets per run
+- billing_churn_risk_threshold (default: 0.6, min: 0.1, max: 0.95) — Churn risk trigger
+- growth_upsell_confidence_min (default: 0.7, min: 0.3, max: 0.95) — Min upsell confidence
 - strategic_priority (default: "") — This week's top strategic priority
 - board_decision (default: "") — Latest board decision text
+
+CRITICAL CONSTRAINTS:
+1. NEVER set removal_rate_per_broker to 0 or below 5 — this halts ALL removals
+2. Large "submitted" counts are NORMAL — brokers have 45-day legal response windows
+3. Large "pending" counts are NORMAL — queue clears at 3,600/day capacity
+4. Only adjust parameters where metrics show a clear, data-driven need for change
 
 Respond with valid JSON only:
 {
@@ -144,8 +150,7 @@ Respond with valid JSON only:
   ]
 }
 
-Always include strategic_priority and board_decision directives.
-Only adjust numerical parameters if the data clearly warrants it.`,
+Always include strategic_priority and board_decision directives.`,
         messages: [
           {
             role: "user",
@@ -324,4 +329,52 @@ Only adjust numerical parameters if the data clearly warrants it.`,
     console.error("[MastermindWeekly] Failed:", message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
+}
+
+/**
+ * Format metrics with human-readable context so the AI doesn't misinterpret
+ * normal operational data as broken.
+ */
+function formatMetricsWithContext(metrics: StandupMetrics): string {
+  const r = metrics.removals;
+  const ctx = r.statusContext;
+
+  return `Here are this week's GhostMyData metrics with context:
+
+## Removal Pipeline — Health: ${ctx.pipelineHealth}
+- Pending: ${r.pending} — ${ctx.pendingExplanation}
+- Submitted: ${r.submitted} — ${ctx.submittedExplanation}
+- Completed (24h): ${r.completed24h}
+- Failed (24h): ${r.failed24h}
+- Completion rate (all-time): ${ctx.completionRate}% (${ctx.completedAllTime} total)
+- Requires manual: ${ctx.requiresManualCount} (handled internally by team, NOT shown to users)
+- Avg completion time: ${r.avgCompletionHours ? `${r.avgCompletionHours}h` : "N/A"}
+
+STATUS DEFINITIONS:
+- PENDING = queued, waiting for next cron batch (capacity: 3,600/day). Normal range: 0-5,000.
+- SUBMITTED = email sent to broker, awaiting legal response. Normal range: 1,000-15,000. Brokers have 45-day legal deadline.
+- COMPLETED = verified removed. This is the end state.
+- REQUIRES_MANUAL = being handled by our internal team (user never sees this status).
+
+IMPORTANT: Large pending/submitted counts are NORMAL and expected. Do NOT interpret them as failures.
+
+## Users
+${JSON.stringify(metrics.users, null, 2)}
+
+## Agents
+Healthy: ${metrics.agents.healthy}/${metrics.agents.total}, Degraded: ${metrics.agents.degraded}, Failed: ${metrics.agents.failed}
+Total cost (24h): $${metrics.agents.totalCost24h.toFixed(4)}
+
+## Crons
+Success: ${metrics.crons.successCount24h}, Failures: ${metrics.crons.failureCount24h}
+Overdue: ${metrics.crons.overdueJobs.length > 0 ? metrics.crons.overdueJobs.join(", ") : "none"}
+
+## Scans
+Completed (24h): ${metrics.scans.completed24h}, Failed: ${metrics.scans.failed24h}, In progress: ${metrics.scans.inProgress}
+
+## Tickets
+Open: ${metrics.tickets.openCount}, Stale: ${metrics.tickets.staleCount}, Auto-fixed (24h): ${metrics.tickets.autoFixedCount24h}
+
+## Security
+Admin actions (24h): ${metrics.security.adminActions24h}, Failed actions: ${metrics.security.failedActions24h}`;
 }

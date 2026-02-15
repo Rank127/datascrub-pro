@@ -1865,11 +1865,11 @@ Respond in JSON format:
     }
 
     // Extract mentioned domains/entities
-    const domainPattern = /(?:https?:\/\/)?(?:www\.)?([a-z0-9-]+(?:\.[a-z]{2,})+)/gi;
+    const domainPattern = /[a-z0-9-]{1,63}\.[a-z]{2,10}/gi;
     const mentionedEntities: string[] = [];
     let match;
     while ((match = domainPattern.exec(content)) !== null) {
-      mentionedEntities.push(match[1]);
+      mentionedEntities.push(match[0]);
     }
 
     // Extract legal references

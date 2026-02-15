@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
+import {
+  getUserStatusCategory,
+  getUserStatusConfig,
+  getEstimatedCompletionDate,
+  getETAString,
+  getSimplifiedStats,
+} from "@/lib/removals/user-status";
 
 // Data Processor sources to exclude from active removal lists
 const DATA_PROCESSOR_SOURCES = [
@@ -69,36 +76,46 @@ export async function GET() {
       },
     });
 
-    // Enrich removals with opt-out URLs from data broker directory
+    // Enrich removals with opt-out URLs, user status, and ETAs
     const enrichedRemovals = removals.map((removal) => {
       const brokerInfo = getDataBrokerInfo(removal.exposure.source);
+      const userStatusCategory = getUserStatusCategory(removal.status);
+      const userStatusConfig = getUserStatusConfig(removal.status);
+      const estimatedDays = brokerInfo?.estimatedDays || null;
+      const estimatedCompletionDate = getEstimatedCompletionDate(
+        removal.submittedAt,
+        estimatedDays
+      );
+      const eta = getETAString(removal.submittedAt, estimatedDays);
+
       return {
         ...removal,
         optOutUrl: brokerInfo?.optOutUrl || removal.exposure.sourceUrl || null,
         optOutEmail: brokerInfo?.privacyEmail || null,
-        estimatedDays: brokerInfo?.estimatedDays || null,
+        estimatedDays,
+        // User-facing status fields
+        userStatus: userStatusCategory,
+        userStatusLabel: userStatusConfig.label,
+        userStatusColor: userStatusConfig.bgColor + " " + userStatusConfig.color,
+        estimatedCompletionDate: estimatedCompletionDate?.toISOString() || null,
+        eta,
       };
     });
 
-    // Sort by priority: items needing attention first, then by date
-    const statusPriority: Record<string, number> = {
-      REQUIRES_MANUAL: 1,  // Needs user to fill form - highest priority
-      FAILED: 2,           // Failed, needs attention
-      PENDING: 3,          // Queued, waiting to be processed
-      IN_PROGRESS: 4,      // Being processed
-      SUBMITTED: 5,        // Email sent, waiting for response
-      ACKNOWLEDGED: 6,     // Breach alert
-      COMPLETED: 7,        // Done - lowest priority
-      CANCELLED: 8,
+    // Sort by user-facing category: in_progress first, then completed, then monitoring
+    const categoryPriority: Record<string, number> = {
+      in_progress: 1,
+      completed: 2,
+      monitoring: 3,
     };
 
     enrichedRemovals.sort((a, b) => {
-      const priorityA = statusPriority[a.status] ?? 99;
-      const priorityB = statusPriority[b.status] ?? 99;
+      const priorityA = categoryPriority[a.userStatus] ?? 99;
+      const priorityB = categoryPriority[b.userStatus] ?? 99;
       if (priorityA !== priorityB) {
         return priorityA - priorityB;
       }
-      // Same priority: sort by date (newest first)
+      // Same category: sort by date (newest first)
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
@@ -134,9 +151,13 @@ export async function GET() {
       }),
     ]);
 
+    const rawStats = Object.fromEntries(stats.map((s) => [s.status, s._count]));
+    const simplifiedStats = getSimplifiedStats(rawStats);
+
     return NextResponse.json({
       removals: enrichedRemovals,
-      stats: Object.fromEntries(stats.map((s) => [s.status, s._count])),
+      stats: rawStats,
+      simplifiedStats,
       manualAction: {
         total: manualActionTotal,
         done: manualActionDone,
