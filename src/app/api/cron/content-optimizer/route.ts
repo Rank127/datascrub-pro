@@ -154,7 +154,7 @@ Consider the support options available. Can you reach someone when needed? Good 
 
 ### How GhostMyData Compares
 
-GhostMyData offers comprehensive privacy protection. We cover 200+ data broker sites. Our automated system works around the clock. We submit removal requests automatically. We verify each removal completes.
+GhostMyData offers comprehensive privacy protection. We cover 200+ data broker sites. We submit removal requests on your behalf and verify each removal completes.
 
 Our continuous monitoring catches new exposures. When your data reappears, we remove it again. This is included in your subscription. No extra charges for re-removal.
 

@@ -91,7 +91,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <a href="${appendUtm(`${APP_URL}/dashboard`, 'welcome')}" class="btn">Run Your First Scan →</a>
 
-    <p>You're getting access to 24 AI agents that work around the clock to find and remove your data. That's the kind of protection that used to require a team of lawyers.</p>
+    <p>Our team handles everything — scanning data brokers, submitting removal requests, and verifying your data is actually deleted. That's the kind of protection that used to require a team of lawyers.</p>
 
     <p>If you have any questions, just reply to this email. We're here to help!</p>
 
@@ -147,7 +147,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <a href="${appendUtm(`${APP_URL}/dashboard`, 'scan_reminder')}" class="btn">See My Exposed Data →</a>
 
-    <p>Once you run your scan, you'll see exactly which sites have your information — and our AI agents can start removing it immediately.</p>
+    <p>Once you run your scan, you'll see exactly which sites have your information — and we can start removing it immediately.</p>
 
     <p>Your privacy matters,<br>The ${APP_NAME} Team</p>
 

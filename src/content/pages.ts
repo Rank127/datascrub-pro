@@ -229,8 +229,8 @@ We keep monitoring for new exposures. Data brokers constantly add new informatio
 **Comprehensive Coverage**
 We cover 200+ data broker sites. This includes all major people-search sites. It includes lesser-known data aggregators too. Complete coverage means complete protection.
 
-**Fully Automated**
-Set it up once and we handle everything. No manual work required from you. Our systems work 24/7 to protect your privacy.
+**Hands-Free**
+Set it up once and we handle everything. No manual work required from you. We continuously monitor and remove your data so you don't have to.
 
 **Proven Results**
 Our removal rate exceeds industry averages. We've helped thousands of people remove their data. Our methods are tested and effective.

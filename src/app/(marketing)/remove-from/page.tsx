@@ -276,7 +276,7 @@ export default function RemoveFromPage() {
           <div className="grid md:grid-cols-2 gap-6">
             {[
               { title: "Wide Coverage", desc: "We cover 200+ data broker sites. We check the big ones and small ones too." },
-              { title: "Fully Automated", desc: "Set it up once. We do the rest 24/7." },
+              { title: "Hands-Free", desc: "Set it up once. We handle the rest so you don't have to." },
               { title: "Proven Results", desc: "We beat industry averages. We've helped thousands." },
               { title: "Clear Reports", desc: "See what we do in your dashboard. Track progress in real-time." },
             ].map(({ title, desc }) => (
