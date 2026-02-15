@@ -7,11 +7,9 @@
 
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { prisma } from "@/lib/db";
 import { logCronExecution } from "@/lib/cron-logger";
 import { runFullSEOReport } from "@/lib/agents/seo-agent";
 import {
-  optimizePage,
   calculateReadability,
   countWords,
   urlToFilePath,
@@ -20,7 +18,6 @@ import {
 import {
   getOptimizationKeywords,
   getKeywordStats,
-  getKeywordGaps,
 } from "@/lib/agents/shared/keyword-intelligence";
 import { getDirective } from "@/lib/mastermind/directives";
 import { verifyCronAuth } from "@/lib/cron-auth";
@@ -54,7 +51,7 @@ async function getTargetConfig(): Promise<OptimizationConfig> {
   try {
     targetKeywords = await getOptimizationKeywords(10);
     console.log(`[Content Optimizer] Using ${targetKeywords.length} keywords from intelligence store`);
-  } catch (err) {
+  } catch {
     console.log("[Content Optimizer] Using default keywords (intelligence store not available)");
   }
 
@@ -127,9 +124,7 @@ async function saveProgress(progress: OptimizationProgress): Promise<void> {
 // ============================================================================
 
 async function generateOptimizedContent(
-  pageType: string,
-  currentWordCount: number,
-  currentReadability: number
+  pageType: string
 ): Promise<string> {
   // Generate content based on page type with SEO best practices
   const contents: Record<string, string> = {
@@ -520,9 +515,7 @@ async function runOptimization(): Promise<{
 
         // Generate optimized content
         const optimizedContent = await generateOptimizedContent(
-          page.pageType,
-          wordCount,
-          readability
+          page.pageType
         );
 
         // Save as draft for review/application
@@ -781,7 +774,6 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { forceOptimize = false } = body;
 
     console.log("[Content Optimizer] Manual run triggered");
 

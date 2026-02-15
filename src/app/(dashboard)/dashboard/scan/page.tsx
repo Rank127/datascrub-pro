@@ -66,7 +66,7 @@ export default function ScanPage() {
   const [requiresUpgrade, setRequiresUpgrade] = useState(false);
   const [recentScans, setRecentScans] = useState<Scan[]>([]);
   const [loadingScans, setLoadingScans] = useState(true);
-  const { plan, isFreePlan } = useSubscription();
+  const { plan: _plan, isFreePlan } = useSubscription();
 
   useEffect(() => {
     fetchRecentScans();
@@ -134,7 +134,7 @@ export default function ScanPage() {
       trackScanCompleted(scanType, data.exposuresFound, data.sourcesChecked);
 
       fetchRecentScans();
-    } catch (err) {
+    } catch (_err) {
       clearInterval(progressInterval);
       setError("An error occurred. Please try again.");
     } finally {

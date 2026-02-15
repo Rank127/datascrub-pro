@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { executeRemoval } from "@/lib/removers/removal-service";
-import { getDataBrokerInfo, getSubsidiaries, getConsolidationParent, isParentBroker } from "@/lib/removers/data-broker-directory";
+import { getDataBrokerInfo, getSubsidiaries } from "@/lib/removers/data-broker-directory";
 import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
-import { isAdmin } from "@/lib/admin";
+import { isAdmin as _isAdmin } from "@/lib/admin";
 import { getEffectivePlan } from "@/lib/family/family-service";
 
 const requestSchema = z.object({

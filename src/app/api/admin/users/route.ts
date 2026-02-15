@@ -227,7 +227,7 @@ export async function GET(request: Request) {
       const userIds = usersWithExposureStats.map(u => u.id);
 
       // Get removal request counts by status for each user (via their exposures)
-      const removalStats = await prisma.removalRequest.groupBy({
+      const _removalStats = await prisma.removalRequest.groupBy({
         by: ["status"],
         where: {
           exposure: {

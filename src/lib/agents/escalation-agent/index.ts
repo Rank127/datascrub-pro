@@ -16,14 +16,14 @@ import { registerAgent } from "../registry";
 const AGENT_ID = "escalation-agent";
 const AGENT_VERSION = "1.0.0";
 
-interface StubbornBrokerInput { brokerId?: string; limit?: number; }
+interface _StubbornBrokerInput { brokerId?: string; limit?: number; }
 interface StubbornBrokerResult {
   analyzed: number;
   stubbornBrokers: Array<{ brokerId: string; name: string; failedAttempts: number; lastAttempt: string; recommendedAction: string; }>;
   escalationQueue: Array<{ brokerId: string; priority: string; action: string; }>;
 }
 
-interface LegalEscalationInput { caseId?: string; }
+interface _LegalEscalationInput { caseId?: string; }
 interface LegalEscalationResult {
   pendingCases: number;
   cases: Array<{ caseId: string; brokerId: string; brokerName: string; status: string; daysOpen: number; legalBasis: string; nextStep: string; }>;

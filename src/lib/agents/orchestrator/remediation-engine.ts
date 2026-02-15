@@ -6,7 +6,7 @@
  */
 
 import { nanoid } from "nanoid";
-import { getEventBus, subscribe } from "./event-bus";
+import { getEventBus } from "./event-bus";
 import { getRegistry } from "../registry";
 import { createAgentContext } from "../base-agent";
 import {
@@ -16,7 +16,6 @@ import {
   InvocationTypes,
   Priority,
   PriorityLevel,
-  SuggestedAction,
 } from "../types";
 import {
   createAgentTicket,
@@ -729,7 +728,7 @@ class RemediationEngine {
 
     // A1: Issue deduplication — compute fingerprint and skip if seen recently
     const fingerprint = `${issue.type}:${issue.affectedResource || "global"}`;
-    const now = Date.now();
+    const _now = Date.now();
 
     const isDuplicate = await this.checkAndSetDedup(fingerprint);
     if (isDuplicate) {

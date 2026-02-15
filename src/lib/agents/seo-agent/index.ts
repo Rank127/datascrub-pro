@@ -24,15 +24,12 @@ import { registerAgent } from "../registry";
 // Import helpers
 import {
   runFullAudit,
-  auditPage,
-  checkSitemap,
   SEOAuditResult,
   SitemapStatus,
   SEOCheck,
 } from "./technical-audit";
 import {
   analyzeAllContent,
-  analyzePageContent,
   ContentAnalysis,
   ContentSuggestion,
 } from "./content-optimizer";
@@ -53,11 +50,9 @@ import {
   runKeywordResearch,
   getKeywordSuggestions,
   KeywordResearchResult,
-  KeywordData,
 } from "./keyword-research";
 import {
   updateFromKeywordResearch,
-  getKeywordStats,
 } from "../shared/keyword-intelligence";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 import { carlsenPositionalScore } from "@/lib/mastermind/frameworks";
@@ -140,7 +135,7 @@ interface FullReportResult {
   stored: boolean;
 }
 
-interface GetReportInput {
+interface _GetReportInput {
   reportId?: string;
 }
 
@@ -242,7 +237,7 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
     context: AgentContext
   ): Promise<AgentResult<TechnicalAuditResult>> {
     const startTime = Date.now();
-    const { baseUrl = this.getBaseUrl(), pages } = input as TechnicalAuditInput;
+    const { baseUrl = this.getBaseUrl(), pages: _pages } = input as TechnicalAuditInput;
 
     try {
       console.log(`[${this.name}] Starting technical audit for ${baseUrl}...`);
@@ -385,7 +380,7 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
       baseUrl = this.getBaseUrl(),
       pages = DEFAULT_PAGES,
       sendEmail = false,
-      emailTo,
+      emailTo: _emailTo,
     } = input as FullReportInput;
 
     try {

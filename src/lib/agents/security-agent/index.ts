@@ -455,7 +455,7 @@ class SecurityAgent extends BaseAgent {
     context: AgentContext
   ): Promise<AgentResult<BreachNotificationResult>> {
     const startTime = Date.now();
-    const { breachId, severity = "HIGH" } = input as BreachNotificationInput;
+    const { breachId: _breachId, severity: _severity = "HIGH" } = input as BreachNotificationInput;
 
     try {
       // In production, would:

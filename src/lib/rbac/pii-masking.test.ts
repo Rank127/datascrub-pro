@@ -3,7 +3,6 @@ import {
   maskEmail,
   maskPhone,
   maskName,
-  maskAddress,
   maskDateOfBirth,
   maskSSN,
   maskUsername,

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getEffectiveRole, checkPermission } from "@/lib/admin";
+import { checkPermission } from "@/lib/admin";
 import { syncUserFromStripe, getCustomerSubscriptions } from "@/lib/stripe/sync";
 import { getPlanFromPriceId } from "@/lib/stripe";
 

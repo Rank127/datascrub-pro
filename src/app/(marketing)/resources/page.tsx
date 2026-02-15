@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbSchema, FAQSchema } from "@/components/seo/structured-data";
-import { Shield, BookOpen, FileText, Video, Download, ExternalLink, AlertTriangle, CheckCircle } from "lucide-react";
+import { Shield, BookOpen, FileText, Video, ExternalLink, AlertTriangle, CheckCircle } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Privacy Resources & Data Removal Guides | GhostMyData",

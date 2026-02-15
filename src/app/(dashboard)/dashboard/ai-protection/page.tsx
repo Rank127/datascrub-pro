@@ -25,7 +25,6 @@ import {
   Mic,
   Shield,
   Lock,
-  ExternalLink,
   AlertTriangle,
   CheckCircle2,
   Search,
@@ -152,7 +151,7 @@ export default function AIProtectionPage() {
         const data = await response.json();
         toast.error(data.error || "Failed to submit opt-out request");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to submit opt-out request");
     }
   };

@@ -37,6 +37,20 @@ const eslintConfig = defineConfig([
       "react-hooks/static-components": "warn",
     },
   },
+  // Allow underscore-prefixed variables to be unused (common convention for
+  // intentionally ignored destructured values, catch params, etc.)
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

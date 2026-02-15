@@ -267,6 +267,7 @@ Keep these codes safe! Each code can only be used once.`;
               {setupData?.qrCode && (
                 <div className="flex justify-center">
                   <div className="bg-white p-3 rounded-lg">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={setupData.qrCode}
                       alt="2FA QR Code"

@@ -13,7 +13,7 @@ try {
       if (key && !process.env[key]) process.env[key] = value;
     }
   });
-} catch (e) {}
+} catch (_e) {}
 
 import Stripe from "stripe";
 
@@ -76,7 +76,7 @@ async function checkPaymentMethods() {
 
     if (cleanupFlag) {
       console.log("=== Cleaning up duplicates ===\n");
-      for (const [key, pms] of duplicates) {
+      for (const [_key, pms] of duplicates) {
         // Keep the newest one, delete the rest
         const sorted = pms.sort((a, b) => b.created - a.created);
         const keep = sorted[0];

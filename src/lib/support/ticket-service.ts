@@ -1364,7 +1364,7 @@ async function sendAgentTicketNotification(
           <p style="color: #10b981; font-weight: bold; margin-top: 0;">${data.methodology.summary}</p>
           <p style="color: #94a3b8; margin-bottom: 16px;">Estimated Effort: ${data.methodology.estimatedEffort.toUpperCase()} | Skills: ${data.methodology.requiredSkills.join(", ")}</p>
 
-          ${data.methodology.steps.map((step, i) => `
+          ${data.methodology.steps.map((step, _i) => `
             <div style="margin-bottom: 16px; padding-left: 16px; border-left: 2px solid #10b981;">
               <p style="color: #e2e8f0; font-weight: bold; margin: 0 0 4px 0;">Step ${step.order}: ${step.title}</p>
               <p style="color: #94a3b8; margin: 0;">${step.description}</p>
@@ -1412,7 +1412,7 @@ async function sendAgentTicketNotification(
  * Map agent issue types to support ticket types
  * Valid types: SCAN_ERROR, REMOVAL_FAILED, PAYMENT_ISSUE, ACCOUNT_ISSUE, FEATURE_REQUEST, OTHER
  */
-function mapIssueTypeToTicketType(issueType: string): string {
+function mapIssueTypeToTicketType(_issueType: string): string {
   // All agent-detected issues map to OTHER since they're technical/system issues
   // The actual issue type is stored in internalNotes for categorization
   return "OTHER";
@@ -1491,7 +1491,7 @@ ${step.description}
 // ============================================
 
 export const SEO_METHODOLOGIES: Record<string, (affectedResource?: string) => { methodology: MethodologyPlan; documentation: DocumentationLink[] }> = {
-  "seo.missing_sitemap": (url) => ({
+  "seo.missing_sitemap": (_url) => ({
     methodology: {
       summary: "Generate and deploy XML sitemap for better search engine indexing",
       estimatedEffort: "low",
@@ -1552,7 +1552,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ],
   }),
 
-  "seo.invalid_robots": (url) => ({
+  "seo.invalid_robots": (_url) => ({
     methodology: {
       summary: "Fix robots.txt to ensure proper search engine crawling",
       estimatedEffort: "low",
@@ -1714,7 +1714,7 @@ export const SECURITY_METHODOLOGIES: Record<string, (affectedResource?: string) 
 // ============================================
 
 export const COMPLIANCE_METHODOLOGIES: Record<string, (affectedResource?: string) => { methodology: MethodologyPlan; documentation: DocumentationLink[] }> = {
-  "compliance.gdpr_violation": (resource) => ({
+  "compliance.gdpr_violation": (_resource) => ({
     methodology: {
       summary: "Address GDPR compliance violation",
       estimatedEffort: "high",
@@ -1764,7 +1764,7 @@ export const COMPLIANCE_METHODOLOGIES: Record<string, (affectedResource?: string
     ],
   }),
 
-  "compliance.ccpa_violation": (resource) => ({
+  "compliance.ccpa_violation": (_resource) => ({
     methodology: {
       summary: "Address CCPA compliance violation",
       estimatedEffort: "high",

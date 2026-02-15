@@ -33,7 +33,7 @@ export default function JoinFamilyPage() {
         }
 
         setInvitation(data.invitation);
-      } catch (err) {
+      } catch (_err) {
         setError("Failed to load invitation");
       } finally {
         setLoading(false);
@@ -66,7 +66,7 @@ export default function JoinFamilyPage() {
       setTimeout(() => {
         router.push("/dashboard/settings");
       }, 2000);
-    } catch (err) {
+    } catch (_err) {
       setError("Failed to accept invitation");
     } finally {
       setAccepting(false);

@@ -24,7 +24,7 @@ import { registerAgent } from "../registry";
 const AGENT_ID = "pricing-agent";
 const AGENT_VERSION = "1.0.0";
 
-interface DiscountOptimizeInput { userId?: string; context?: string; }
+interface _DiscountOptimizeInput { userId?: string; context?: string; }
 interface DiscountOptimizeResult {
   analyzed: number;
   discounts: Array<{ userId: string; email: string; discountPercent: number; reason: string; validUntil: string; }>;
@@ -41,7 +41,7 @@ interface PlanRecommendResult {
   valueProps: string[];
 }
 
-interface ABTestInput { testId?: string; }
+interface _ABTestInput { testId?: string; }
 interface ABTestResult {
   activeTests: Array<{ testId: string; name: string; variants: Array<{ name: string; conversionRate: number; revenue: number; }>; winner?: string; }>;
   recommendations: string[];

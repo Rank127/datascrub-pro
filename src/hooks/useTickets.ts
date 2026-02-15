@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
@@ -55,7 +55,6 @@ export function useAdminTickets(options?: UseTicketsOptions) {
     type,
     priority,
   } = options || {};
-  const queryClient = useQueryClient();
   const previousTickets = useRef<Ticket[]>([]);
 
   const params = new URLSearchParams();
@@ -147,7 +146,6 @@ export function useTicketStats(options?: { pollingInterval?: number }) {
  */
 export function useUserTickets(options?: { pollingInterval?: number; showToast?: boolean }) {
   const { pollingInterval = 30000, showToast = true } = options || {};
-  const queryClient = useQueryClient();
   const previousTickets = useRef<Ticket[]>([]);
 
   const query = useQuery({

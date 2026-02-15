@@ -9,7 +9,7 @@
  */
 
 import { prisma } from "@/lib/db";
-import { createTicket, createAgentTicket } from "@/lib/support/ticket-service";
+import { createTicket } from "@/lib/support/ticket-service";
 import { requestBlocklistAddition } from "@/lib/removers/blocklist";
 import {
   getComplianceAgent,

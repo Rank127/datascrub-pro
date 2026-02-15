@@ -23,6 +23,7 @@ export function ABTest({ experimentId, variants, fallback }: ABTestProps) {
     const existing = localStorage.getItem(storageKey);
 
     if (existing && variants.some(v => v.id === existing)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedVariant(existing);
       return;
     }

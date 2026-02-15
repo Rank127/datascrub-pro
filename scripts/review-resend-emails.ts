@@ -143,13 +143,13 @@ async function reviewEmails() {
       console.log("RECOMMENDATIONS:");
       console.log("-".repeat(70));
 
-      const bouncedDomains = sortedDomains.filter(([_, data]) =>
+      const bouncedDomains = sortedDomains.filter(([, data]) =>
         data.emails.some(e => e.last_event === "bounced")
       );
 
       if (bouncedDomains.length > 0) {
         console.log("1. BOUNCED emails - these addresses are invalid:");
-        for (const [domain, data] of bouncedDomains.slice(0, 5)) {
+        for (const [domain, _data] of bouncedDomains.slice(0, 5)) {
           console.log(`   - ${domain}: Consider removing from broker directory`);
         }
         console.log();

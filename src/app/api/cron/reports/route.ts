@@ -95,7 +95,7 @@ export async function GET(request: Request) {
     const newMap = new Map(newExposureCounts.map((r) => [r.userId, r._count]));
     const removedMap = new Map(completedRemovalCounts.map((r) => [r.userId, r._count]));
     const pendingMap = new Map(pendingRemovalCounts.map((r) => [r.userId, r._count]));
-    const prevWeekMap = new Map(prevWeekExposureCounts.map((r) => [r.userId, r._count]));
+    const _prevWeekMap = new Map(prevWeekExposureCounts.map((r) => [r.userId, r._count]));
 
     for (const user of users) {
       try {

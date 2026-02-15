@@ -36,7 +36,7 @@ export async function GET(
       where: { id: userId },
       select: { role: true },
     });
-    const userPlan = await getEffectivePlan(userId);
+    const _userPlan = await getEffectivePlan(userId);
     const isAdmin = ["ADMIN", "SUPPORT", "SUPER_ADMIN"].includes(user?.role || "");
 
     const customRequest = await prisma.customRemovalRequest.findUnique({

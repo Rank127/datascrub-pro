@@ -151,6 +151,7 @@ function ScreenshotProofDialog({ removal }: { removal: RemovalRequest }) {
             </div>
             <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
               {beforeScreenshot ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={beforeScreenshot}
                   alt="Before removal"
@@ -180,6 +181,7 @@ function ScreenshotProofDialog({ removal }: { removal: RemovalRequest }) {
             </div>
             <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
               {afterScreenshot ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={afterScreenshot}
                   alt="After removal"
@@ -214,6 +216,7 @@ function ScreenshotProofDialog({ removal }: { removal: RemovalRequest }) {
               )}
             </div>
             <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={removal.formScreenshot}
                 alt="Form submission"

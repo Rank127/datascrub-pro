@@ -22,12 +22,10 @@ import {
 import { registerAgent } from "../registry";
 import {
   BLOCKLISTED_COMPANIES,
-  BLOCKLISTED_EMAIL_DOMAINS,
   isDomainBlocklisted,
   getBlocklistEntry,
-  type BlocklistedCompany,
 } from "@/lib/removers/blocklist";
-import { getDataBrokerInfo, type DataBrokerInfo } from "@/lib/removers/data-broker-directory";
+import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 
 // ============================================================================
 // CONSTANTS
@@ -1005,7 +1003,7 @@ ${userName}`,
     const {
       domain,
       companyName,
-      context: inputContext,
+      context: _inputContext,
       skipCache = false,
     } = input as ValidateEntityClassificationInput;
 
@@ -1282,7 +1280,7 @@ ${userName}`,
   private async classifyWithAI(
     domain: string,
     companyName?: string,
-    context?: AgentContext
+    _context?: AgentContext
   ): Promise<ValidateEntityClassificationResult> {
     if (!this.anthropic) {
       throw new Error("AI not available");
@@ -1534,7 +1532,7 @@ Respond in JSON format:
       companyName,
       checkSubsidiaries = true,
       checkParent = true,
-      depth = 2,
+      depth: _depth = 2,
     } = input as DetectProcessorRelationshipsInput;
 
     try {
@@ -1718,7 +1716,7 @@ Respond in JSON format:
       senderEmail,
       senderName,
       subject,
-      receivedAt,
+      receivedAt: _receivedAt,
       inboxType = "COMPLIANCE",
     } = input as ParseComplianceComplaintInput;
 

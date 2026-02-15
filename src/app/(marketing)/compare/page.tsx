@@ -90,7 +90,7 @@ export default function ComparePage() {
   const whyCompareSection = comparePage.sections.find(s => s.id === "why-compare");
   const whatToLookForSection = comparePage.sections.find(s => s.id === "what-to-look-for");
   const advantageSection = comparePage.sections.find(s => s.id === "ghostmydata-advantage");
-  const comparisonFactorsSection = comparePage.sections.find(s => s.id === "comparison-factors");
+  const _comparisonFactorsSection = comparePage.sections.find(s => s.id === "comparison-factors");
   const faqSection = comparePage.sections.find(s => s.id === "faq");
 
   return (

@@ -21,7 +21,7 @@ import {
 } from "../types";
 import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
-import { hormoziValueScore, mrbeastRemarkabilityScore } from "@/lib/mastermind/frameworks";
+import { hormoziValueScore } from "@/lib/mastermind/frameworks";
 
 // ============================================================================
 // CONSTANTS
@@ -522,7 +522,7 @@ class GrowthAgent extends BaseAgent {
     context: AgentContext
   ): Promise<AgentResult<TestimonialResult>> {
     const startTime = Date.now();
-    const { userId, type = "success_story" } = input as TestimonialInput;
+    const { userId, type: _type = "success_story" } = input as TestimonialInput;
 
     try {
       // Find users with good outcomes

@@ -72,12 +72,12 @@ function SettingsContent() {
   }, [router]);
   const [isLoading, setIsLoading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
-  const { plan: currentPlan, currentPeriodEnd, hasStripeSubscription } = useSubscription();
+  const { plan: currentPlan, currentPeriodEnd, hasStripeSubscription: _hasStripeSubscription } = useSubscription();
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Account settings
   const [name, setName] = useState(session?.user?.name || "");
-  const [email, setEmail] = useState(session?.user?.email || "");
+  const [email, _setEmail] = useState(session?.user?.email || "");
 
   // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -153,7 +153,7 @@ function SettingsContent() {
       } else {
         setMessage({ type: "error", text: "Failed to save notification preferences." });
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage({ type: "error", text: "Failed to save notification preferences." });
     } finally {
       setNotificationLoading(false);
@@ -186,7 +186,7 @@ function SettingsContent() {
       if (response.ok) {
         setMessage({ type: "success", text: "Account updated successfully!" });
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage({ type: "error", text: "Failed to update account." });
     } finally {
       setIsLoading(false);
@@ -211,7 +211,7 @@ function SettingsContent() {
       } else {
         setMessage({ type: "error", text: data.error || "Failed to open billing portal. Please try again." });
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage({ type: "error", text: "Failed to connect to billing portal" });
     } finally {
       setPortalLoading(false);

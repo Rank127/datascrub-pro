@@ -50,12 +50,12 @@ const brokerUrls: Record<string, (name: string, city: string, state: string) => 
     const stateAbbr = getStateAbbreviation(state);
     return `https://www.fastpeoplesearch.com/name/${name.toLowerCase()}_${city.toLowerCase()}-${stateAbbr}`;
   },
-  radaris: (name, city, state) => {
+  radaris: (name, _city, _state) => {
     const [first, last] = name.split('-');
     // Radaris only works with /p/First/Last/ format (no city-state)
     return `https://radaris.com/p/${first}/${last}/`;
   },
-  intelius: (name, city, state) => {
+  intelius: (name, _city, _state) => {
     // Intelius only works with /people-search/first-last format (no city-state)
     return `https://www.intelius.com/people-search/${name.toLowerCase()}`;
   },

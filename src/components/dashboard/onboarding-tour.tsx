@@ -43,6 +43,7 @@ export function OnboardingTour({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const completed = localStorage.getItem(ONBOARDING_KEY);
     if (!completed) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRun(true);
     }
   }, []);

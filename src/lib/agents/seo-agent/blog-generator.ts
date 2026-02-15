@@ -1,8 +1,6 @@
 // Blog Post Generator
 // Generates SEO-optimized blog posts on privacy and security topics
 
-import { prisma } from "@/lib/db";
-
 export interface BlogTopic {
   title: string;
   slug: string;
@@ -22,7 +20,7 @@ export interface GeneratedBlogPost {
 }
 
 // Trending topics for data privacy/security niche
-const TOPIC_TEMPLATES: BlogTopic[] = [
+const _TOPIC_TEMPLATES: BlogTopic[] = [
   // Data Broker Removal Guides
   {
     title: "How to Remove Yourself from {broker}",

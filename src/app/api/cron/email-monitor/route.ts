@@ -74,7 +74,7 @@ const RETURN_EMAIL_PATTERNS = {
 /**
  * Categorize a return email based on content patterns
  */
-function categorizeReturnEmail(
+function _categorizeReturnEmail(
   subject: string,
   body: string
 ): "CONFIRMED" | "NO_RECORD" | "REQUIRES_VERIFICATION" | "REQUIRES_MANUAL" | "UNKNOWN" {
@@ -99,7 +99,7 @@ function categorizeReturnEmail(
 /**
  * Identify broker from email sender
  */
-function identifyBrokerFromEmail(fromEmail: string): string | null {
+function _identifyBrokerFromEmail(fromEmail: string): string | null {
   const domain = fromEmail.split("@")[1]?.toLowerCase();
   if (!domain) return null;
 

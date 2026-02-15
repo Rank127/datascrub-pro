@@ -44,7 +44,7 @@ function main() {
   } else {
     for (const key of analysis.emailAutomated.slice(0, 30)) {
       const broker = DATA_BROKER_DIRECTORY[key];
-      const method = getBestAutomationMethod(key);
+      const _method = getBestAutomationMethod(key);
       console.log(`  - ${broker.name.padEnd(30)} ${broker.privacyEmail?.padEnd(35) || 'N/A'}`);
     }
     if (analysis.emailAutomated.length > 30) {

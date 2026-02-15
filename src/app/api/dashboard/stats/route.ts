@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectivePlan } from "@/lib/family/family-service";
 import { DataSourceNames } from "@/lib/types";
-import { getSubsidiaries, getConsolidationParent, isParentBroker, getDataBrokerInfo, getBrokerCount } from "@/lib/removers/data-broker-directory";
+import { getSubsidiaries, getConsolidationParent, getDataBrokerInfo, getBrokerCount } from "@/lib/removers/data-broker-directory";
 import { BLOCKLISTED_COMPANIES } from "@/lib/removers/blocklist";
 
 // Data Processor sources that should be excluded from analytics
@@ -19,7 +19,7 @@ const DATA_PROCESSOR_SOURCES = [
 ];
 
 // Get all blocklisted domains for URL matching
-const BLOCKLISTED_DOMAINS = BLOCKLISTED_COMPANIES.flatMap(c => c.domains);
+const _BLOCKLISTED_DOMAINS = BLOCKLISTED_COMPANIES.flatMap(c => c.domains);
 
 // AI Protection source categories
 const AI_TRAINING_SOURCES = [
@@ -62,7 +62,7 @@ export async function GET() {
       manualActionTotal,
       manualActionDone,
       recentExposures,
-      removalsByCategory,
+      _removalsByCategory,
       aiTrainingExposures,
       facialRecognitionExposures,
       voiceCloningExposures,

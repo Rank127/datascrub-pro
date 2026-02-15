@@ -16,7 +16,6 @@ import { BaseScanner, type ScanInput, type ScanResult } from "../base-scanner";
 import {
   DATA_BROKER_DIRECTORY,
   BROKER_CATEGORIES,
-  type DataBrokerInfo,
 } from "@/lib/removers/data-broker-directory";
 import type { DataSource, Severity } from "@/lib/types";
 
@@ -28,7 +27,7 @@ const SEARCH_URL_PATTERNS: Record<string, (name: string, city?: string, state?: 
     `https://www.whitepages.com/name/${encodeNameForUrl(name)}${state ? `/${state}` : ""}${city ? `/${encodeNameForUrl(city)}` : ""}`,
   BEENVERIFIED: (name) => `https://www.beenverified.com/people/${encodeNameForUrl(name)}/`,
   INTELIUS: (name) => `https://www.intelius.com/people-search/${encodeNameForUrl(name)}/`,
-  TRUEPEOPLESEARCH: (name, city, state) =>
+  TRUEPEOPLESEARCH: (name, city, _state) =>
     `https://www.truepeoplesearch.com/results?name=${encodeURIComponent(name)}${city ? `&citystatezip=${encodeURIComponent(city)}` : ""}`,
   RADARIS: (name) => `https://radaris.com/p/${encodeNameForUrl(name)}/`,
   FASTPEOPLESEARCH: (name, city, state) =>

@@ -4,8 +4,6 @@ import { encrypt, decrypt } from "@/lib/encryption/crypto";
 import { Resend } from "resend";
 import { logCronExecution, getCronHealthStatus, cleanupOldCronLogs, getRetriggerCount, logRetriggerAttempt } from "@/lib/cron-logger";
 import {
-  acquireJobLock,
-  releaseJobLock,
   analyzePatternsAndPredict,
   getCoordinatorStatus,
 } from "@/lib/agents/intelligence-coordinator";
@@ -16,7 +14,7 @@ import { captureError } from "@/lib/error-reporting";
 export const maxDuration = 300;
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "developer@ghostmydata.com";
-const JOB_NAME = "health-check";
+const _JOB_NAME = "health-check";
 
 // Lazy initialization to avoid build-time errors
 function getResend() {

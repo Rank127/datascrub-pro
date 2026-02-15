@@ -55,24 +55,6 @@ const dataTypeLabels: Record<ExposureType, string> = {
   BIOMETRIC: "Biometric Data",
 };
 
-const dataTypeIcons: Record<ExposureType, string> = {
-  EMAIL: "mail",
-  PHONE: "phone",
-  NAME: "user",
-  ADDRESS: "map-pin",
-  DOB: "calendar",
-  SSN: "file-lock",
-  PHOTO: "image",
-  USERNAME: "at-sign",
-  FINANCIAL: "credit-card",
-  COMBINED_PROFILE: "user-circle",
-  // AI-related exposure types
-  FACE_DATA: "scan",
-  VOICE_DATA: "mic",
-  AI_TRAINING_DATA: "bot",
-  BIOMETRIC: "fingerprint",
-};
-
 // Status display names (what users see)
 const statusDisplayNames: Record<string, string> = {
   ACTIVE: "ACTIVE",

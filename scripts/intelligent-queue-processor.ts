@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 // Aggressive but safe limits for queue clearing
 const AGGRESSIVE_BATCH_SIZE = 150; // Up from 100
 const RETRY_BATCH_SIZE = 50; // Up from 25
-const TARGET_CLEARANCE_HOURS = 24;
+const _TARGET_CLEARANCE_HOURS = 24;
 const BATCHES_PER_HOUR = 2; // Run every 30 minutes instead of every 4 hours
 
 interface QueueAnalysis {
@@ -29,7 +29,7 @@ interface QueueAnalysis {
 }
 
 async function analyzeQueue(): Promise<QueueAnalysis> {
-  const now = new Date();
+  const _now = new Date();
 
   // Get all pending removals with details
   const pendingRemovals = await prisma.removalRequest.findMany({

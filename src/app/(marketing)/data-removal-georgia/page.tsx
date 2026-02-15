@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbSchema, FAQSchema } from "@/components/seo/structured-data";
-import { Shield, Scale, Clock, CheckCircle, AlertTriangle, FileText, Users, Building, Lock } from "lucide-react";
+import { Shield, Scale, Clock, AlertTriangle, FileText, Lock } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Georgia Data Removal Services | Personal Identity Protection | GhostMyData",

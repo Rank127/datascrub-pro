@@ -37,7 +37,6 @@ import {
   RefreshCw,
   Clock,
   CheckCircle,
-  AlertCircle,
   Send,
   MessageSquare,
 } from "lucide-react";
@@ -196,7 +195,7 @@ export default function SupportPage() {
         const data = await response.json();
         toast.error(data.error || "Failed to create ticket");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to create ticket");
     } finally {
       setSubmittingTicket(false);
@@ -221,7 +220,7 @@ export default function SupportPage() {
       } else {
         toast.error("Failed to send reply");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to send reply");
     } finally {
       setSubmittingComment(false);

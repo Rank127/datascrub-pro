@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { logAudit } from "@/lib/rbac/audit-log";
 import { getEmailQuotaStatus, getEmailQueueStatus, sendServiceAlertEmail } from "@/lib/email";
-import { getServiceStatus, shouldUseFreeAlternative, getHIBPRateLimitStatus, getScrapingBeeStatus, updateScrapingBeeApiCredits, getLeakCheckStatus, updateLeakCheckApiCredits } from "@/lib/services/rate-limiter";
+import { shouldUseFreeAlternative, getHIBPRateLimitStatus, getScrapingBeeStatus, updateScrapingBeeApiCredits, getLeakCheckStatus, updateLeakCheckApiCredits } from "@/lib/services/rate-limiter";
 import {
   ServicesIntegrationResponse,
   ResendServiceStatus,
@@ -165,7 +165,7 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
         queue: queueInfo,
       };
     }
-  } catch (error) {
+  } catch (_error) {
     // Even if Resend API check fails, show our internal quota
     return {
       status: "connected",
@@ -351,7 +351,7 @@ async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
         },
       };
     }
-  } catch (error) {
+  } catch (_error) {
     return {
       status: "connected",
       message: `~${internalStatus.queriesRemaining} queries left (API error)`,
@@ -461,7 +461,7 @@ async function checkScrapingBeeStatus(): Promise<ScrapingBeeServiceStatus> {
         },
       };
     }
-  } catch (error) {
+  } catch (_error) {
     // Use internal tracking on error
     return {
       status: "connected",
@@ -519,7 +519,7 @@ async function checkRedisStatus(): Promise<RedisServiceStatus> {
 
         // Upstash free tier: 10K commands/day, 256MB storage
         const maxKeys = 10000; // Estimate based on typical usage
-        const dailyCommandLimit = 10000;
+        const _dailyCommandLimit = 10000;
 
         return {
           status: "connected",

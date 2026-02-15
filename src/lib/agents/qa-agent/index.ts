@@ -368,7 +368,7 @@ class QAAgent extends BaseAgent {
     context: AgentContext
   ): Promise<AgentResult<AnomalyDetectionResult>> {
     const startTime = Date.now();
-    const { timeframe = "day" } = input as AnomalyDetectionInput;
+    const { timeframe: _timeframe = "day" } = input as AnomalyDetectionInput;
 
     try {
       const registry = getRegistry();

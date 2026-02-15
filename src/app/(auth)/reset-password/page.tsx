@@ -32,6 +32,7 @@ function ResetPasswordForm() {
     e.preventDefault();
     setError("");
 
+    // eslint-disable-next-line security/detect-possible-timing-attacks
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;

@@ -207,7 +207,7 @@ class RemovalAgent extends BaseAgent {
     context: AgentContext
   ): Promise<AgentResult<StrategyResult>> {
     const startTime = Date.now();
-    const { exposureId, source, sourceUrl, dataType } = input as StrategyInput;
+    const { exposureId: _exposureId, source, sourceUrl: _sourceUrl, dataType: _dataType } = input as StrategyInput;
 
     try {
       // Get broker info
@@ -349,7 +349,7 @@ class RemovalAgent extends BaseAgent {
 
       // Get pending removal requests
       const now = new Date();
-      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const _oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
       // Build query with rate limiting logic
       const pendingRemovals = await prisma.removalRequest.findMany({

@@ -17,7 +17,6 @@ import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import {
   detectThreats,
   preventFraud,
-  getSecurityAgent,
 } from "@/lib/agents/security-agent";
 import { prisma } from "@/lib/db";
 

@@ -22,7 +22,7 @@ interface LawTrackingResult {
   upcoming: Array<{ jurisdiction: string; law: string; expectedDate: string; preparation: string; }>;
 }
 
-interface JurisdictionInput { userId?: string; }
+interface _JurisdictionInput { userId?: string; }
 interface JurisdictionResult {
   supported: string[];
   userJurisdiction: string;

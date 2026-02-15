@@ -14,7 +14,7 @@
  * - Image CAPTCHAs
  */
 
-import { DATA_BROKER_DIRECTORY, type DataBrokerInfo } from "./data-broker-directory";
+import { DATA_BROKER_DIRECTORY } from "./data-broker-directory";
 import { solveCaptcha, isCaptchaSolverEnabled, type CaptchaType } from "./captcha-solver";
 
 // Browser automation result

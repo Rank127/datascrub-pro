@@ -453,6 +453,7 @@ export async function getKeywordStats(): Promise<{
 // EXPORTS
 // ============================================================================
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   loadKeywordIntelligence,
   updateFromKeywordResearch,

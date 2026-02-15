@@ -16,7 +16,6 @@ import {
   Share2,
   Bot,
 } from "lucide-react";
-import Link from "next/link";
 
 interface RemovalProgress {
   completed: number;
@@ -50,6 +49,7 @@ export function RemovalProgressCompact({
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved !== null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpanded(saved === "true");
     }
   }, []);

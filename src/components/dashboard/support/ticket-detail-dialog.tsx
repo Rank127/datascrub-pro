@@ -25,7 +25,6 @@ import {
   Send,
   User,
   Clock,
-  AlertCircle,
   CheckCircle,
   ExternalLink,
   Lock,
@@ -368,6 +367,7 @@ export function TicketDetailDialog({
       setResolution(ticket.resolution || "");
       setIsEditingDraft(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, ticket]);
 
   const fetchComments = async () => {
@@ -404,7 +404,7 @@ export function TicketDetailDialog({
       } else {
         toast.error("Failed to add comment");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to add comment");
     } finally {
       setSubmitting(false);
@@ -437,7 +437,7 @@ export function TicketDetailDialog({
       } else {
         toast.error("Failed to update ticket");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to update ticket");
     } finally {
       setUpdating(false);
@@ -459,7 +459,7 @@ export function TicketDetailDialog({
       } else {
         toast.error("Failed to assign ticket");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to assign ticket");
     } finally {
       setUpdating(false);
@@ -486,7 +486,7 @@ export function TicketDetailDialog({
       } else {
         toast.error("Failed to resolve ticket");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to resolve ticket");
     } finally {
       setUpdating(false);

@@ -320,7 +320,7 @@ export async function cancelSubscription(
     };
   } else {
     // Cancel at period end
-    const updated = await stripe.subscriptions.update(subscriptionId, {
+    const _updated = await stripe.subscriptions.update(subscriptionId, {
       cancel_at_period_end: true,
     });
     return {

@@ -11,7 +11,7 @@ import {
 import { CONFIDENCE_THRESHOLDS } from "@/lib/scanners/base-scanner";
 import type { Plan, ScanType } from "@/lib/types";
 import { z } from "zod";
-import { isAdmin } from "@/lib/admin";
+import { isAdmin as _isAdmin } from "@/lib/admin";
 import { getEffectivePlan } from "@/lib/family/family-service";
 import { generateScreenshotUrl } from "@/lib/screenshots/screenshot-service";
 import { createScanErrorTicket } from "@/lib/support/ticket-service";

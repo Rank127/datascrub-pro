@@ -27,6 +27,7 @@ export function Header({ onMenuClick }: HeaderProps) {
 
   // Prevent hydration mismatch with Radix UI dropdown IDs
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

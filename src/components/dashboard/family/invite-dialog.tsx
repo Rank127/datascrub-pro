@@ -253,7 +253,8 @@ export function InviteDialog({ open, onOpenChange, onSuccess }: InviteDialogProp
                   {/* QR Code Display */}
                   <div className="flex justify-center">
                     <div className="bg-white p-4 rounded-lg">
-                      <img
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
                         src={qrCode}
                         alt="Family Invite QR Code"
                         className="w-64 h-64"

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, X, ArrowRight, Shield, DollarSign, Clock, Zap } from "lucide-react";
+import { CheckCircle, ArrowRight, Shield, DollarSign, Clock, Zap } from "lucide-react";
 import { FAQSchema, BreadcrumbSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {

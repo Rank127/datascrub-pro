@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Shield, X } from "lucide-react";
 
 // Realistic-looking names and locations

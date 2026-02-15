@@ -1,6 +1,6 @@
 import { BaseScanner, type ScanInput, type ScanResult } from "../base-scanner";
 import type { DataSource, ExposureType } from "@/lib/types";
-import { DATA_BROKER_DIRECTORY } from "@/lib/removers/data-broker-directory";
+// DATA_BROKER_DIRECTORY is imported for potential future use with AI source scanning
 
 type AICategory = "AI_TRAINING" | "FACIAL_RECOGNITION" | "VOICE_CLONING" | "DEEPFAKE_VIDEO" | "AI_AVATAR";
 
@@ -617,7 +617,7 @@ export class AIProtectionScanner extends BaseScanner {
     return true; // Always available - provides manual check links
   }
 
-  async scan(input: ScanInput): Promise<ScanResult[]> {
+  async scan(_input: ScanInput): Promise<ScanResult[]> {
     // AI sources are informational-only - they don't have actual evidence of user data
     // Opt-out resources are still available at /dashboard/ai-protection
     console.log("[AIShieldScanner] AI sources are informational-only - no exposures created");

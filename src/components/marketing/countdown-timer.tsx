@@ -15,6 +15,19 @@ function getDefaultEndDate(): Date {
   return new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 }
 
+function TimeBlock({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="flex flex-col items-center">
+      <div className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 min-w-[3.5rem]">
+        <span className="text-2xl font-bold text-white tabular-nums">
+          {String(value).padStart(2, "0")}
+        </span>
+      </div>
+      <span className="text-xs text-slate-500 mt-1 uppercase tracking-wider">{label}</span>
+    </div>
+  );
+}
+
 export function CountdownTimer({ endDate, className = "" }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -46,6 +59,7 @@ export function CountdownTimer({ endDate, className = "" }: CountdownTimerProps)
     };
 
     // Initial calculation
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTimeLeft(calculateTimeLeft());
 
     // Update every second
@@ -59,17 +73,6 @@ export function CountdownTimer({ endDate, className = "" }: CountdownTimerProps)
   if (isExpired) {
     return null;
   }
-
-  const TimeBlock = ({ value, label }: { value: number; label: string }) => (
-    <div className="flex flex-col items-center">
-      <div className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 min-w-[3.5rem]">
-        <span className="text-2xl font-bold text-white tabular-nums">
-          {String(value).padStart(2, "0")}
-        </span>
-      </div>
-      <span className="text-xs text-slate-500 mt-1 uppercase tracking-wider">{label}</span>
-    </div>
-  );
 
   return (
     <div className={`inline-flex items-center gap-4 ${className}`}>
@@ -119,6 +122,7 @@ export function CountdownTimerCompact({ endDate, className = "" }: CountdownTime
       return `${hours}h ${minutes}m ${seconds}s`;
     };
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTimeLeft(calculateTimeLeft());
 
     const timer = setInterval(() => {

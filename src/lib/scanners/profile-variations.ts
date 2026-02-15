@@ -435,6 +435,7 @@ function normalizeStreet(street: string): string {
   let normalized = street;
   for (const [full, abbrev] of Object.entries(abbreviations)) {
     // Match whole words only
+    // eslint-disable-next-line security/detect-non-literal-regexp
     const regex = new RegExp(`\\b${full}\\b`, "gi");
     normalized = normalized.replace(regex, abbrev);
   }

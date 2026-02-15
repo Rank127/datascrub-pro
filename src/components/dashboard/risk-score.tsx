@@ -22,13 +22,6 @@ export function RiskScore({ score, size = "md" }: RiskScoreProps) {
     return "Critical Risk";
   };
 
-  const getGradient = () => {
-    if (score <= 25) return "from-emerald-500 to-emerald-600";
-    if (score <= 50) return "from-yellow-500 to-yellow-600";
-    if (score <= 75) return "from-orange-500 to-orange-600";
-    return "from-red-500 to-red-600";
-  };
-
   const sizes = {
     sm: { ring: "w-24 h-24", text: "text-2xl", label: "text-xs" },
     md: { ring: "w-36 h-36", text: "text-4xl", label: "text-sm" },

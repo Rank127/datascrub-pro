@@ -29,55 +29,55 @@ interface AnalyticsSectionProps {
   data: WebAnalyticsMetrics;
 }
 
-export function AnalyticsSection({ data }: AnalyticsSectionProps) {
-  const MetricCard = ({
-    title,
-    value,
-    subtitle,
-    icon: Icon,
-    variant = "default",
-  }: {
-    title: string;
-    value: number | string;
-    subtitle?: string;
-    icon: React.ElementType;
-    variant?: "default" | "success" | "warning" | "info";
-  }) => {
-    const variantStyles = {
-      default: "from-slate-500/10 to-slate-500/5 border-slate-500/20",
-      success: "from-emerald-500/10 to-emerald-500/5 border-emerald-500/20",
-      warning: "from-amber-500/10 to-amber-500/5 border-amber-500/20",
-      info: "from-blue-500/10 to-blue-500/5 border-blue-500/20",
-    };
+const variantStyles = {
+  default: "from-slate-500/10 to-slate-500/5 border-slate-500/20",
+  success: "from-emerald-500/10 to-emerald-500/5 border-emerald-500/20",
+  warning: "from-amber-500/10 to-amber-500/5 border-amber-500/20",
+  info: "from-blue-500/10 to-blue-500/5 border-blue-500/20",
+};
 
-    const iconStyles = {
-      default: "bg-slate-500/20 text-slate-400",
-      success: "bg-emerald-500/20 text-emerald-400",
-      warning: "bg-amber-500/20 text-amber-400",
-      info: "bg-blue-500/20 text-blue-400",
-    };
+const iconStyles = {
+  default: "bg-slate-500/20 text-slate-400",
+  success: "bg-emerald-500/20 text-emerald-400",
+  warning: "bg-amber-500/20 text-amber-400",
+  info: "bg-blue-500/20 text-blue-400",
+};
 
-    const displayValue = typeof value === "number" ? value.toLocaleString() : value;
+function MetricCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  variant = "default",
+}: {
+  title: string;
+  value: number | string;
+  subtitle?: string;
+  icon: React.ElementType;
+  variant?: "default" | "success" | "warning" | "info";
+}) {
+  const displayValue = typeof value === "number" ? value.toLocaleString() : value;
 
-    return (
-      <Card className={`bg-gradient-to-br ${variantStyles[variant]}`}>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${iconStyles[variant]}`}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-slate-400 truncate">{title}</p>
-              <p className="text-xl font-bold text-white">{displayValue}</p>
-              {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
-            </div>
+  return (
+    <Card className={`bg-gradient-to-br ${variantStyles[variant]}`}>
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${iconStyles[variant]}`}>
+            <Icon className="h-5 w-5" />
           </div>
-        </CardContent>
-      </Card>
-    );
-  };
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-slate-400 truncate">{title}</p>
+            <p className="text-xl font-bold text-white">{displayValue}</p>
+            {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-  const NotConfigured = ({ service }: { service: string }) => (
+function NotConfigured({ service }: { service: string }) {
+  return (
     <Card className="bg-slate-900/50 border-slate-800">
       <CardContent className="p-8 text-center">
         <AlertCircle className="h-12 w-12 text-slate-500 mx-auto mb-4" />
@@ -88,7 +88,9 @@ export function AnalyticsSection({ data }: AnalyticsSectionProps) {
       </CardContent>
     </Card>
   );
+}
 
+export function AnalyticsSection({ data }: AnalyticsSectionProps) {
   return (
     <div className="space-y-8">
       {/* Google Analytics Section */}

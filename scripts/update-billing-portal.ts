@@ -13,7 +13,7 @@ try {
       if (key && !process.env[key]) process.env[key] = value;
     }
   });
-} catch (e) {}
+} catch (_e) {}
 
 import Stripe from "stripe";
 
@@ -39,7 +39,7 @@ async function updatePortalConfig() {
   console.log("=== Updating Billing Portal Configuration ===\n");
   console.log("Config ID:", configId);
 
-  const updatedConfig = await stripe.billingPortal.configurations.update(configId, {
+  const _updatedConfig = await stripe.billingPortal.configurations.update(configId, {
     business_profile: {
       headline: "Manage your GhostMyData subscription",
       privacy_policy_url: "https://ghostmydata.com/privacy",

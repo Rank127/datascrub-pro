@@ -24,7 +24,7 @@ import { registerAgent } from "../registry";
 const AGENT_ID = "partner-agent";
 const AGENT_VERSION = "1.0.0";
 
-interface AffiliateManageInput { affiliateId?: string; }
+interface _AffiliateManageInput { affiliateId?: string; }
 interface AffiliateManageResult {
   totalAffiliates: number;
   activeAffiliates: number;
@@ -38,7 +38,7 @@ interface B2BOutreachResult {
   pipelineValue: number;
 }
 
-interface EnterpriseInput { accountId?: string; }
+interface _EnterpriseInput { accountId?: string; }
 interface EnterpriseResult {
   accounts: Array<{ id: string; company: string; status: string; seats: number; annualValue: number; healthScore: number; }>;
   atRisk: number;

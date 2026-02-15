@@ -53,7 +53,7 @@ export async function GET(
     }
 
     // Remove user relation from response (we already verified ownership)
-    const { user: _, ...ticketData } = ticket;
+    const { user: _user, ...ticketData } = ticket;
 
     return NextResponse.json({ ticket: ticketData });
   } catch (error) {

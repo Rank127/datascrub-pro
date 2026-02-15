@@ -293,7 +293,7 @@ class BrokerIntelAgent extends BaseAgent {
     context: AgentContext
   ): Promise<AgentResult<NewBrokerResult>> {
     const startTime = Date.now();
-    const { sources = ["research", "user_reports", "industry_news"] } = input as NewBrokerInput;
+    const { sources: _sources = ["research", "user_reports", "industry_news"] } = input as NewBrokerInput;
 
     try {
       // Get existing broker domains to avoid duplicates

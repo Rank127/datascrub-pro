@@ -509,7 +509,7 @@ class ThreatIntelAgent extends BaseAgent {
         if (userExp.length >= 3) {
           // Look for patterns
           const sources = [...new Set(userExp.map((e) => e.source))];
-          const dataTypes = [...new Set(userExp.map((e) => e.dataType))];
+          const _dataTypes = [...new Set(userExp.map((e) => e.dataType))];
 
           // Check for cascade pattern (one breach leading to others)
           const timeSpread =

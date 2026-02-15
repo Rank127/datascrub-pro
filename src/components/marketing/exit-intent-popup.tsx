@@ -34,6 +34,7 @@ export function ExitIntentPopup() {
     // Check if already shown
     const shown = sessionStorage.getItem("exitPopupShown");
     if (shown) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasShown(true);
       return;
     }

@@ -15,8 +15,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ExposureCard } from "@/components/dashboard/exposure-card";
-import { RemovalProgressTracker } from "@/components/dashboard/removal-progress-tracker";
 import { RemovalWizard } from "@/components/dashboard/removal-wizard";
 import {
   MousePointerClick,
@@ -27,7 +25,6 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
-  AlertTriangle,
   Zap,
   ShieldCheck,
 } from "lucide-react";
@@ -182,7 +179,7 @@ export default function ManualReviewPage() {
       toast.success(`Whitelisted ${selectedBrokers.size} site(s)`);
       setSelectedBrokers(new Set());
       fetchManualExposures();
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to whitelist sites");
     } finally {
       setBulkLoading(false);
@@ -212,7 +209,7 @@ export default function ManualReviewPage() {
       toast.success(`Marked ${selectedBrokers.size} site(s) as reviewed`);
       setSelectedBrokers(new Set());
       fetchManualExposures();
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to mark sites as reviewed");
     } finally {
       setBulkLoading(false);
@@ -294,7 +291,7 @@ export default function ManualReviewPage() {
       } else {
         toast.error("Failed to mark as reviewed");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to mark as reviewed");
     }
   };
@@ -313,7 +310,7 @@ export default function ManualReviewPage() {
       } else {
         toast.error("Failed to update");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to update");
     }
   };
@@ -332,12 +329,12 @@ export default function ManualReviewPage() {
       } else {
         toast.error("Failed to whitelist");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to whitelist");
     }
   };
 
-  const handleUnwhitelist = async (exposureId: string) => {
+  const _handleUnwhitelist = async (exposureId: string) => {
     try {
       const response = await fetch("/api/exposures", {
         method: "PATCH",
@@ -351,12 +348,12 @@ export default function ManualReviewPage() {
       } else {
         toast.error("Failed to remove from whitelist");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to remove from whitelist");
     }
   };
 
-  const handleRemove = async (exposureId: string) => {
+  const _handleRemove = async (exposureId: string) => {
     try {
       const response = await fetch("/api/removals/request", {
         method: "POST",
@@ -371,7 +368,7 @@ export default function ManualReviewPage() {
         const data = await response.json();
         toast.error(data.error || "Failed to request removal");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to request removal");
     }
   };

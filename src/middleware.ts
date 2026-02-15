@@ -176,7 +176,7 @@ export default auth((req) => {
   const isAdminLoginPage = nextUrl.pathname === "/admin/login";
   const isAdminApiRoute = nextUrl.pathname.startsWith("/api/admin");
   const isApiAuthPage = nextUrl.pathname.startsWith("/api/auth");
-  const isPublicApiPage = nextUrl.pathname.startsWith("/api/auth/register");
+  const _isPublicApiPage = nextUrl.pathname.startsWith("/api/auth/register");
   const isBingVerify = nextUrl.pathname === "/api/bing-verify";
   const isCronRoute = nextUrl.pathname.startsWith("/api/cron");
 

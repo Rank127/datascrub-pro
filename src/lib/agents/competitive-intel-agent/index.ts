@@ -8,7 +8,6 @@
  * - Market trend analysis
  */
 
-import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
 import { BaseAgent, createAgentContext } from "../base-agent";
 import {

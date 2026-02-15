@@ -618,7 +618,7 @@ function formatBlocklistTicketDescription(request: BlocklistAdditionRequest): st
  * Currently returns false - all additions require manual review
  * Future: Could auto-approve high-confidence classifications from trusted sources
  */
-export function shouldAutoApproveBlocklistAddition(request: BlocklistAdditionRequest): boolean {
+export function shouldAutoApproveBlocklistAddition(_request: BlocklistAdditionRequest): boolean {
   // Currently all additions require manual review for compliance safety
   // Future enhancement: Could auto-approve if:
   // - confidence >= 0.95 AND

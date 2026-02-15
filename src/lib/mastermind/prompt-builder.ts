@@ -18,8 +18,6 @@ import {
   getAdvisorsByMission,
   getAdvisorsByOperatingLayer,
   getBoardAdvisors,
-  MODERN_ADVISORS,
-  ALL_ADVISORS,
 } from "./advisors";
 import { getDecisionProtocolPrompt, type ProtocolStep } from "./decision-protocol";
 import { getBusinessContextPrompt } from "./business-context";

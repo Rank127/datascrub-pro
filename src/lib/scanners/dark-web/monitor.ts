@@ -36,7 +36,7 @@ export class DarkWebScanner extends BaseScanner {
     return false;
   }
 
-  async scan(input: ScanInput): Promise<ScanResult[]> {
+  async scan(_input: ScanInput): Promise<ScanResult[]> {
     // Return empty results - no mock data
     // Real dark web monitoring requires integration with specialized services
     console.log("[DarkWebScanner] Dark web monitoring not yet implemented - requires API integration");

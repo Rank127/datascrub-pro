@@ -35,6 +35,7 @@ export function BrokerStatusCompact({
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved !== null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpanded(saved === "true");
     }
   }, []);

@@ -213,7 +213,7 @@ async function getUserHistory(userId: string): Promise<UserHistory> {
 /**
  * Find similar resolved tickets for context
  */
-async function findSimilarTickets(type: string, subject: string): Promise<SimilarTicket[]> {
+async function findSimilarTickets(type: string, _subject: string): Promise<SimilarTicket[]> {
   try {
     // Find resolved tickets of same type
     const tickets = await prisma.supportTicket.findMany({

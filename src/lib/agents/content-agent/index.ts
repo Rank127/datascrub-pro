@@ -306,7 +306,7 @@ class ContentAgent extends BaseAgent {
     }
   }
 
-  private generateBlogTemplate(topic: string, keywords: string[], tone: string): string {
+  private generateBlogTemplate(topic: string, keywords: string[], _tone: string): string {
     return `
 # ${topic}: A Complete Guide to Protecting Your Privacy
 
@@ -601,7 +601,7 @@ GhostMyData finds where your data appears and automatically requests removal. We
     context: AgentContext
   ): Promise<AgentResult<SEOOptimizeResult>> {
     const startTime = Date.now();
-    const { content, targetKeywords, contentType = "blog" } = input as SEOOptimizeInput;
+    const { content, targetKeywords, contentType: _contentType = "blog" } = input as SEOOptimizeInput;
 
     try {
       const analysis = this.analyzeSEO(content, targetKeywords);
@@ -661,6 +661,7 @@ GhostMyData finds where your data appears and automatically requests removal. We
     // Calculate keyword density
     const keywordDensity: Record<string, number> = {};
     for (const keyword of keywords) {
+      // eslint-disable-next-line security/detect-non-literal-regexp
       const regex = new RegExp(keyword.toLowerCase(), "gi");
       const matches = contentLower.match(regex);
       const count = matches ? matches.length : 0;
@@ -740,7 +741,7 @@ GhostMyData finds where your data appears and automatically requests removal. We
 
   private applySEOImprovements(
     content: string,
-    improvements: SEOOptimizeResult["improvements"]
+    _improvements: SEOOptimizeResult["improvements"]
   ): string {
     // Return original content - actual optimization would be done by AI in production
     return content;
@@ -751,7 +752,7 @@ GhostMyData finds where your data appears and automatically requests removal. We
     context: AgentContext
   ): Promise<AgentResult<GenerateMetaResult>> {
     const startTime = Date.now();
-    const { url, issueType, currentContent = {} } = input as GenerateMetaInput;
+    const { url, issueType: _issueType, currentContent = {} } = input as GenerateMetaInput;
 
     try {
       // Extract page name from URL for generating content
@@ -897,7 +898,7 @@ export const metadata: Metadata = {
     context: AgentContext
   ): Promise<AgentResult<SEOOptimizeResult>> {
     const startTime = Date.now();
-    const { url, issueType, currentContent, targetKeywords = [] } = input as {
+    const { url: _url, issueType, currentContent, targetKeywords = [] } = input as {
       url?: string;
       issueType?: string;
       currentContent?: string;

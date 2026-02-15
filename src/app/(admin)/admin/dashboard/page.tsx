@@ -64,6 +64,7 @@ export default function AdminDashboardPage() {
       fetchExecutiveStats();
       fetchVercelStatus();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router]);
 
   const fetchVercelStatus = async () => {

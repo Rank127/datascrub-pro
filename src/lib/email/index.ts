@@ -12,9 +12,6 @@ function getResendClient(): Resend | null {
   return _resend;
 }
 
-// For backwards compatibility
-const resend = null as Resend | null; // Will use getResendClient() instead
-
 const APP_NAME = (process.env.NEXT_PUBLIC_APP_NAME || "GhostMyData").replace(/[\r\n]/g, "").trim();
 
 // Daily email quota tracking (resets at midnight UTC)
@@ -1964,7 +1961,7 @@ export async function sendFamilyInvitationEmail(
   familyName: string | null
 ) {
   const inviteUrl = `${APP_URL}/family/join/${token}`;
-  const familyDisplayName = familyName || `${ownerName}'s family`;
+  const _familyDisplayName = familyName || `${ownerName}'s family`;
 
   const html = baseTemplate(`
     <div style="text-align: center; margin-bottom: 24px;">

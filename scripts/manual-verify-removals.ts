@@ -171,7 +171,7 @@ async function manualVerifyRemovals() {
   // Show per-user summary
   if (userUpdates.size > 0) {
     console.log(`\n📧 USER NOTIFICATION SUMMARY:`);
-    for (const [userId, data] of userUpdates) {
+    for (const [_userId, data] of userUpdates) {
       console.log(`   ${data.email}: ${data.completed.length} removals completed`);
       for (const item of data.completed) {
         console.log(`     - ${item.sourceName}`);

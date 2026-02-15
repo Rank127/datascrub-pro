@@ -6,8 +6,8 @@
  */
 
 import { prisma } from "@/lib/db";
-import { getRegistry, getAgent } from "../registry";
-import { getEventBus, subscribe } from "../orchestrator/event-bus";
+import { getAgent } from "../registry";
+import { subscribe } from "../orchestrator/event-bus";
 import type { AgentEvent } from "../types";
 
 // ============================================================================

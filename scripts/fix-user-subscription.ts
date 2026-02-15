@@ -15,7 +15,7 @@ try {
       }
     }
   });
-} catch (e) {
+} catch (_e) {
   // .env.local might not exist
 }
 

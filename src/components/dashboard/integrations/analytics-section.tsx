@@ -6,8 +6,6 @@ import { IntegrationCard, MetricDisplay } from "./integration-card";
 import { AnalyticsIntegrationResponse } from "@/lib/integrations/types";
 import {
   BarChart3,
-  Users,
-  TrendingUp,
   Globe,
   ExternalLink,
   RefreshCw,

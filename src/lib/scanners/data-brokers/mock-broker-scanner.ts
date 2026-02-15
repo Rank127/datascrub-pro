@@ -1,5 +1,5 @@
 import { BaseScanner, type ScanInput, type ScanResult } from "../base-scanner";
-import { DataSource, DataSourceNames, type ExposureType } from "@/lib/types";
+import { DataSource, DataSourceNames } from "@/lib/types";
 
 const DATA_BROKERS: DataSource[] = [
   "SPOKEO",

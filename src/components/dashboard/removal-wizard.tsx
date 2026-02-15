@@ -8,8 +8,6 @@ import { Progress } from "@/components/ui/progress";
 import {
   CheckCircle,
   Circle,
-  ExternalLink,
-  Copy,
   Loader2,
   ChevronRight,
   ChevronLeft,
@@ -17,7 +15,6 @@ import {
   Layers,
   ArrowRight,
   Check,
-  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -136,7 +133,7 @@ export function RemovalWizard({ onComplete, onClose }: RemovalWizardProps) {
           toast.error(data.error || "Failed to process bulk removal");
         }
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to submit bulk removal");
     } finally {
       setSubmitting(false);
@@ -184,7 +181,7 @@ export function RemovalWizard({ onComplete, onClose }: RemovalWizardProps) {
       } else {
         toast.error(data.error || "Failed to submit removal");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to process removal");
     } finally {
       setSubmitting(false);

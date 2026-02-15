@@ -11,7 +11,7 @@ config({ path: ".env.local" });
 
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const _resend = new Resend(process.env.RESEND_API_KEY);
 
 // Suppressed emails from the email monitor
 const SUPPRESSED_EMAILS = [

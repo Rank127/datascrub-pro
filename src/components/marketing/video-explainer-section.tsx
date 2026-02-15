@@ -99,7 +99,7 @@ export function VideoExplainerSection() {
               title: "Ongoing Protection",
               description: "See how continuous monitoring catches new exposures before they become problems",
             },
-          ].map((feature, index) => (
+          ].map((feature) => (
             <div key={feature.title} className="flex items-start gap-4">
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
                 <CheckCircle className="h-5 w-5 text-emerald-500" />

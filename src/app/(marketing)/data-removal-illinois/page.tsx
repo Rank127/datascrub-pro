@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbSchema, FAQSchema } from "@/components/seo/structured-data";
-import { Shield, Scale, Clock, CheckCircle, AlertTriangle, FileText, Users, Building, Fingerprint } from "lucide-react";
+import { Shield, Scale, Clock, FileText, Fingerprint } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Illinois Data Removal Services | BIPA Compliance | GhostMyData",

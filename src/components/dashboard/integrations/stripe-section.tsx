@@ -1,13 +1,11 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { IntegrationCard, MetricDisplay } from "./integration-card";
 import { StripeIntegrationResponse } from "@/lib/integrations/types";
 import {
   CreditCard,
-  DollarSign,
   Users,
   TrendingUp,
   ExternalLink,

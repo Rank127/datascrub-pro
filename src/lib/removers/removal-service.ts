@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/db";
 import { sendCCPARemovalRequest, sendRemovalStatusDigestEmail, queueRemovalStatusUpdate } from "@/lib/email";
-import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, getConsolidationParent, isKnownDataBroker, getNotBrokerReason, type DataBrokerInfo } from "./data-broker-directory";
+import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, isKnownDataBroker, getNotBrokerReason, type DataBrokerInfo } from "./data-broker-directory";
 import { calculateVerifyAfterDate } from "./verification-service";
 import { attemptAutomatedOptOut, isAutomationEnabled, getBestAutomationMethod, canAutomateBroker } from "./browser-automation";
 import type { RemovalMethod } from "@/lib/types";
 import { createRemovalFailedTicket } from "@/lib/support/ticket-service";
-import { isDomainBlocklisted, getBlocklistEntry } from "./blocklist";
+import { getBlocklistEntry } from "./blocklist";
 import { CONFIDENCE_THRESHOLDS } from "@/lib/scanners/base-scanner";
 
 const MAX_REMOVAL_ATTEMPTS = 5;
@@ -47,13 +47,13 @@ function extractPrivacyEmailsFromDomain(sourceUrl?: string | null): string[] {
 }
 
 // Get primary privacy email (backward compatible)
-function extractPrivacyEmailFromDomain(sourceUrl?: string | null): string | null {
+function _extractPrivacyEmailFromDomain(sourceUrl?: string | null): string | null {
   const emails = extractPrivacyEmailsFromDomain(sourceUrl);
   return emails.length > 0 ? emails[0] : null;
 }
 
 // Extract domain name from source for display
-function extractDomainFromSource(source: string, sourceUrl?: string | null): string {
+function _extractDomainFromSource(source: string, sourceUrl?: string | null): string {
   // First try to get from URL
   if (sourceUrl) {
     try {
@@ -1363,7 +1363,7 @@ export async function getPendingRemovalsForAutomation(limit: number = 50): Promi
   }
 
   // Sort each broker queue by severity (CRITICAL first)
-  for (const [source, queue] of brokerQueues) {
+  for (const [_source, queue] of brokerQueues) {
     queue.sort((a, b) => {
       const priorityA = SEVERITY_PRIORITY[a.severity] ?? 4;
       const priorityB = SEVERITY_PRIORITY[b.severity] ?? 4;
@@ -1673,7 +1673,7 @@ export async function processPendingRemovalsBatch(limit: number = 20, deadline?:
 
   // Send ONE digest email per user with all their submitted removals
   console.log(`[Batch Removal] Sending digest emails to ${userUpdates.size} users`);
-  for (const [userId, userData] of userUpdates) {
+  for (const [_userId, userData] of userUpdates) {
     if (userData.submitted.length > 0) {
       try {
         await sendRemovalStatusDigestEmail(userData.email, userData.name, {
@@ -1812,7 +1812,7 @@ export async function retryFailedRemovalsBatch(limit: number = 20, deadline?: nu
 
   // Send ONE digest email per user with all their retried removals
   console.log(`[Retry Batch] Sending digest emails to ${userUpdates.size} users`);
-  for (const [userId, userData] of userUpdates) {
+  for (const [_userId, userData] of userUpdates) {
     if (userData.submitted.length > 0) {
       try {
         await sendRemovalStatusDigestEmail(userData.email, userData.name, {
@@ -1848,7 +1848,7 @@ export async function getAutomationStats(): Promise<{
   byStatus: Record<string, number>;
   bySource: Array<{ source: string; count: number; automated: number }>;
 }> {
-  const [totalCount, byStatus, topSources] = await Promise.all([
+  const [totalCount, byStatus, _topSources] = await Promise.all([
     prisma.removalRequest.count(),
     prisma.removalRequest.groupBy({
       by: ["status"],

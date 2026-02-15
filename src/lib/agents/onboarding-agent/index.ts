@@ -365,7 +365,7 @@ class OnboardingAgent extends BaseAgent {
     const { userId } = input as FirstScanGuideInput;
 
     try {
-      const user = await prisma.user.findUnique({
+      const _user = await prisma.user.findUnique({
         where: { id: userId },
         select: { name: true },
       });

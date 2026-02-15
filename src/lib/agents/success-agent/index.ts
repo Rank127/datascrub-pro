@@ -667,7 +667,7 @@ class SuccessAgent extends BaseAgent {
 
   private generateInterventionSuggestion(
     factors: HealthScoreResult["scores"][0]["factors"],
-    riskFactors: string[]
+    _riskFactors: string[]
   ): string {
     // Find the lowest scoring factor
     const lowestFactor = factors.reduce((lowest, current) =>

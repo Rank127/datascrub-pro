@@ -13,7 +13,6 @@
 
 import {
   canUseScrapingBee,
-  calculateScrapingBeeCost,
   recordScrapingBeeUsage,
   shouldUseScrapingBeeFallback,
   getScrapingBeeStatus,

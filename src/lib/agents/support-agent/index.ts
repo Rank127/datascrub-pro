@@ -12,7 +12,6 @@
 
 import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
-import Anthropic from "@anthropic-ai/sdk";
 import { BaseAgent, createAgentContext } from "../base-agent";
 import {
   AgentCapability,
@@ -21,11 +20,9 @@ import {
   AgentModes,
   AgentResult,
   InvocationTypes,
-  ManagerReviewItem,
 } from "../types";
 import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
-import { vossEmpathyScore } from "@/lib/mastermind/frameworks";
 
 // ============================================================================
 // CONSTANTS

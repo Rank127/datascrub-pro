@@ -45,7 +45,7 @@ const PAGES_TO_AUDIT = [
 ];
 
 // Required meta tags
-const REQUIRED_META_TAGS = [
+const _REQUIRED_META_TAGS = [
   "title",
   "description",
   "og:title",

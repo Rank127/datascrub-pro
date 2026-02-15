@@ -10,7 +10,7 @@ import { CompactExposures } from "@/components/dashboard/compact-exposures";
 import { RemovalProgressCompact } from "@/components/dashboard/removal-progress-compact";
 import { BrokerStatusCompact } from "@/components/dashboard/broker-status-compact";
 import { RemovalWizard } from "@/components/dashboard/removal-wizard";
-import { Search, Loader2, Bot, ArrowRight, Lock } from "lucide-react";
+import { Search, Loader2, Bot, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import type { DataSource, ExposureType, Severity } from "@/lib/types";

@@ -165,7 +165,7 @@ export async function GET(request: Request) {
             });
             stats.scansQueued++;
           }
-        } catch (error) {
+        } catch (_error) {
           stats.errors++;
         }
       }

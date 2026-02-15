@@ -105,7 +105,7 @@ function WelcomeContent() {
 
         {/* Get Started Cards */}
         <div className="mt-10 space-y-4 animate-fade-in-up animation-delay-400">
-          {steps.map((step, index) => (
+          {steps.map((step, _index) => (
             <Link key={step.title} href={step.href} className="block group">
               <div className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 ${
                 step.primary

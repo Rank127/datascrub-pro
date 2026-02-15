@@ -239,7 +239,7 @@ export async function POST(request: Request) {
     const existingRemovalSet = new Set(existingRemovalRequests.map(r => r.exposureId));
 
     // Process each broker group with ONE consolidated email
-    for (const [privacyEmail, group] of brokerGroups) {
+    for (const [_privacyEmail, group] of brokerGroups) {
       // Check email quota before sending
       if (!canSendEmail()) {
         console.log("[Bulk Removal] Email quota exhausted, stopping");
@@ -479,7 +479,7 @@ export async function POST(request: Request) {
 }
 
 // GET endpoint to get bulk removal stats/preview
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     const session = await auth();
 

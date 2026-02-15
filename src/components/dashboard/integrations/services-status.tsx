@@ -17,9 +17,7 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Loader2,
   LucideIcon,
-  TrendingUp,
   AlertTriangle,
   Bot,
   MessageSquare,
@@ -214,7 +212,7 @@ export function ServicesStatus({
   loading,
   onRefresh,
 }: ServicesStatusProps) {
-  const [processingQueue, setProcessingQueue] = useState(false);
+  const [, setProcessingQueue] = useState(false);
 
   const handleProcessQueue = async () => {
     setProcessingQueue(true);
@@ -230,10 +228,10 @@ export function ServicesStatus({
         toast.success(`Processed ${result.sent} emails (${result.remaining} remaining)`);
         onRefresh(); // Refresh to update stats
       } else {
-        const error = await response.json();
-        toast.error(error.error || "Failed to process queue");
+        const errorData = await response.json();
+        toast.error(errorData.error || "Failed to process queue");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to process email queue");
     } finally {
       setProcessingQueue(false);
@@ -273,7 +271,6 @@ export function ServicesStatus({
   ];
   const connectedCount = services.filter((s) => s?.status === "connected").length;
   const errorCount = services.filter((s) => s?.status === "error").length;
-  const warningCount = services.filter((s) => s?.rateLimit?.status === "warning" || s?.rateLimit?.status === "critical").length;
 
   return (
     <div className="space-y-4">

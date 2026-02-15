@@ -51,6 +51,7 @@ function RegisterForm() {
       setError("Password must be at least 8 characters");
       return;
     }
+    // eslint-disable-next-line security/detect-possible-timing-attacks
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;

@@ -2,7 +2,7 @@ import { config } from "dotenv";
 config({ path: ".env.local" });
 
 import { PrismaClient } from "@prisma/client";
-import { getDataBrokerInfo, DATA_BROKER_DIRECTORY } from "../src/lib/removers/data-broker-directory";
+import { getDataBrokerInfo } from "../src/lib/removers/data-broker-directory";
 
 const prisma = new PrismaClient();
 

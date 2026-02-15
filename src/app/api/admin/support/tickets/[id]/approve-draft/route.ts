@@ -102,7 +102,7 @@ export async function POST(
     }
 
     // Use transaction to update draft and create public response
-    const [updatedDraft, publicComment, updatedTicket] = await prisma.$transaction([
+    const [_updatedDraft, publicComment, updatedTicket] = await prisma.$transaction([
       // Mark the draft as approved
       prisma.ticketComment.update({
         where: { id: draftCommentId },

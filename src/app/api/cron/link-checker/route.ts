@@ -3,7 +3,6 @@ import { DATA_BROKER_DIRECTORY } from "@/lib/removers/data-broker-directory";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { logCronExecution } from "@/lib/cron-logger";
 import {
-  URL_CORRECTIONS,
   URL_PATTERN_VARIATIONS,
   getCorrectedUrl,
 } from "@/lib/removals/url-corrections";

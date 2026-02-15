@@ -584,7 +584,7 @@ export async function runVerificationBatch(deadline?: number): Promise<{
 
   // Send ONE digest email per user with all their updates
   console.log(`[Verification] Sending digest emails to ${userUpdates.size} users`);
-  for (const [userId, userData] of userUpdates) {
+  for (const [_userId, userData] of userUpdates) {
     try {
       await sendRemovalStatusDigestEmail(userData.email, userData.name, {
         completed: userData.completed.map(u => ({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, memo } from "react";
+import { memo } from "react";
 import {
   LineChart,
   Line,

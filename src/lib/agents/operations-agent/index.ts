@@ -764,7 +764,7 @@ class OperationsAgent extends BaseAgent {
 
       // Analyze email statuses
       const deliveredStatuses = ["delivered", "sent", "opened", "clicked"];
-      const problemStatuses = ["bounced", "failed", "rejected", "suppressed"];
+      const _problemStatuses = ["bounced", "failed", "rejected", "suppressed"];
 
       let delivered = 0;
       let bounced = 0;

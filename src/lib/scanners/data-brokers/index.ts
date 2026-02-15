@@ -37,7 +37,7 @@ import {
   createFastPeopleSearchManualScanner,
   createPeopleFinderManualScanner,
 } from "./manual-check-scanner";
-import { createAllBrokersScanner } from "./all-brokers-scanner";
+// createAllBrokersScanner is available for comprehensive scanning
 import type { Scanner } from "../base-scanner";
 
 /**
