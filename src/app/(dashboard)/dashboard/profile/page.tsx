@@ -48,7 +48,6 @@ interface CompletionStatus {
   contact: boolean;
   addresses: boolean;
   sensitive: boolean;
-  usernames: boolean;
   count: number;
   percentage: number;
 }
@@ -57,8 +56,8 @@ function getProgressColor(count: number): {
   bar: string;
   text: string;
 } {
-  if (count >= 5) return { bar: "bg-emerald-500", text: "text-emerald-400" };
-  if (count >= 3) return { bar: "bg-blue-500", text: "text-blue-400" };
+  if (count >= 4) return { bar: "bg-emerald-500", text: "text-emerald-400" };
+  if (count >= 2) return { bar: "bg-blue-500", text: "text-blue-400" };
   return { bar: "bg-amber-500", text: "text-amber-400" };
 }
 
@@ -104,18 +103,16 @@ export default function ProfilePage() {
     const contact = emails.length > 0 || phones.length > 0;
     const addr = addresses.length > 0;
     const sensitive = dateOfBirth.trim().length > 0;
-    const unames = usernames.length > 0;
-    const count = [basic, contact, addr, sensitive, unames].filter(Boolean).length;
+    const count = [basic, contact, addr, sensitive].filter(Boolean).length;
     return {
       basic,
       contact,
       addresses: addr,
       sensitive,
-      usernames: unames,
       count,
-      percentage: Math.round((count / 5) * 100),
+      percentage: Math.round((count / 4) * 100),
     };
-  }, [fullName, emails, phones, addresses, dateOfBirth, usernames]);
+  }, [fullName, emails, phones, addresses, dateOfBirth]);
 
   // Load existing profile data on mount
   useEffect(() => {
@@ -257,7 +254,7 @@ export default function ProfilePage() {
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-slate-300">
-              Profile Completion: <span className={progressColor.text}>{completion.count} of 5</span> sections complete
+              Profile Completion: <span className={progressColor.text}>{completion.count} of 4</span> sections complete
             </span>
             <span className={progressColor.text}>{completion.percentage}%</span>
           </div>
@@ -355,11 +352,7 @@ export default function ProfilePage() {
             Sensitive
           </TabsTrigger>
           <TabsTrigger value="usernames" className="data-[state=active]:bg-cyan-500/30 data-[state=active]:text-cyan-300 gap-1.5">
-            {completion.usernames ? (
-              <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-            ) : (
-              <Circle className="h-3 w-3 text-slate-500" />
-            )}
+            <AtSign className="h-3 w-3" />
             Usernames
           </TabsTrigger>
         </TabsList>
@@ -792,7 +785,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <CardDescription className="text-slate-400">
-                Online handles appear in data breaches and people-search sites. Adding them expands our scan coverage.
+                Optional. If you use the same handle across sites, adding it can help us catch extra matches in breach databases. Skip this if you&apos;re not sure.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
