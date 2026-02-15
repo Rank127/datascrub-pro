@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 import {
   User,
   Mail,
@@ -26,6 +27,9 @@ import {
   Loader2,
   Save,
   Shield,
+  CheckCircle2,
+  Circle,
+  Sparkles,
 } from "lucide-react";
 import { trackProfileCompleted } from "@/components/analytics/google-analytics";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -37,6 +41,25 @@ interface Address {
   zipCode: string;
   country: string;
   isCurrent: boolean;
+}
+
+interface CompletionStatus {
+  basic: boolean;
+  contact: boolean;
+  addresses: boolean;
+  sensitive: boolean;
+  usernames: boolean;
+  count: number;
+  percentage: number;
+}
+
+function getProgressColor(count: number): {
+  bar: string;
+  text: string;
+} {
+  if (count >= 5) return { bar: "bg-emerald-500", text: "text-emerald-400" };
+  if (count >= 3) return { bar: "bg-blue-500", text: "text-blue-400" };
+  return { bar: "bg-amber-500", text: "text-amber-400" };
 }
 
 export default function ProfilePage() {
@@ -74,6 +97,25 @@ export default function ProfilePage() {
   // Usernames
   const [usernames, setUsernames] = useState<string[]>([]);
   const [newUsername, setNewUsername] = useState("");
+
+  // Compute completion status
+  const completion = useMemo<CompletionStatus>(() => {
+    const basic = fullName.trim().length > 0;
+    const contact = emails.length > 0 || phones.length > 0;
+    const addr = addresses.length > 0;
+    const sensitive = dateOfBirth.trim().length > 0;
+    const unames = usernames.length > 0;
+    const count = [basic, contact, addr, sensitive, unames].filter(Boolean).length;
+    return {
+      basic,
+      contact,
+      addresses: addr,
+      sensitive,
+      usernames: unames,
+      count,
+      percentage: Math.round((count / 5) * 100),
+    };
+  }, [fullName, emails, phones, addresses, dateOfBirth, usernames]);
 
   // Load existing profile data on mount
   useEffect(() => {
@@ -193,12 +235,65 @@ export default function ProfilePage() {
     }
   };
 
+  const progressColor = getProgressColor(completion.count);
+
+  // Badge helpers
+  const contactBadgeText = (() => {
+    const parts: string[] = [];
+    if (emails.length > 0) parts.push(`${emails.length} email${emails.length > 1 ? "s" : ""}`);
+    if (phones.length > 0) parts.push(`${phones.length} phone${phones.length > 1 ? "s" : ""}`);
+    return parts.length > 0 ? parts.join(", ") : "No info added";
+  })();
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="My Profile"
         description="Enter your personal information to search for data exposures"
       />
+
+      {/* Profile Completion Progress */}
+      {!isLoadingProfile && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-300">
+              Profile Completion: <span className={progressColor.text}>{completion.count} of 5</span> sections complete
+            </span>
+            <span className={progressColor.text}>{completion.percentage}%</span>
+          </div>
+          <Progress
+            value={completion.percentage}
+            className="h-2 bg-slate-700"
+            indicatorClassName={`${progressColor.bar} transition-all duration-500`}
+          />
+        </div>
+      )}
+
+      {/* Motivational Banner */}
+      {!isLoadingProfile && completion.percentage < 100 && (
+        <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-6">
+          <div className="flex gap-3">
+            <Sparkles className="h-5 w-5 text-emerald-400 mt-0.5 shrink-0" />
+            <div className="space-y-3">
+              <h3 className="text-white font-medium">Complete your profile for the best scan results</h3>
+              <ul className="space-y-2 text-sm text-slate-300">
+                <li className="flex gap-2">
+                  <span className="text-emerald-400 shrink-0">&#x2022;</span>
+                  Data brokers list you under different names, emails, and addresses &mdash; the more we know, the more we find and remove.
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-emerald-400 shrink-0">&#x2022;</span>
+                  A complete profile means one thorough scan catches everything. No need to scan multiple times.
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-emerald-400 shrink-0">&#x2022;</span>
+                  All your data is encrypted with AES-256. We never share your information.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       {success && (
         <Alert className="bg-emerald-500/10 border-emerald-500/20">
@@ -227,19 +322,44 @@ export default function ProfilePage() {
       <>
       <Tabs defaultValue="basic" className="space-y-6">
         <TabsList className="bg-slate-800 border-slate-700">
-          <TabsTrigger value="basic" className="data-[state=active]:bg-slate-700">
+          <TabsTrigger value="basic" className="data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-300 gap-1.5">
+            {completion.basic ? (
+              <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+            ) : (
+              <Circle className="h-3 w-3 text-slate-500" />
+            )}
             Basic Info
           </TabsTrigger>
-          <TabsTrigger value="contact" className="data-[state=active]:bg-slate-700">
+          <TabsTrigger value="contact" className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 gap-1.5">
+            {completion.contact ? (
+              <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+            ) : (
+              <Circle className="h-3 w-3 text-slate-500" />
+            )}
             Contact
           </TabsTrigger>
-          <TabsTrigger value="addresses" className="data-[state=active]:bg-slate-700">
+          <TabsTrigger value="addresses" className="data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-300 gap-1.5">
+            {completion.addresses ? (
+              <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+            ) : (
+              <Circle className="h-3 w-3 text-slate-500" />
+            )}
             Addresses
           </TabsTrigger>
-          <TabsTrigger value="sensitive" className="data-[state=active]:bg-slate-700">
+          <TabsTrigger value="sensitive" className="data-[state=active]:bg-amber-500/30 data-[state=active]:text-amber-300 gap-1.5">
+            {completion.sensitive ? (
+              <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+            ) : (
+              <Circle className="h-3 w-3 text-slate-500" />
+            )}
             Sensitive
           </TabsTrigger>
-          <TabsTrigger value="usernames" className="data-[state=active]:bg-slate-700">
+          <TabsTrigger value="usernames" className="data-[state=active]:bg-cyan-500/30 data-[state=active]:text-cyan-300 gap-1.5">
+            {completion.usernames ? (
+              <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+            ) : (
+              <Circle className="h-3 w-3 text-slate-500" />
+            )}
             Usernames
           </TabsTrigger>
         </TabsList>
@@ -248,12 +368,23 @@ export default function ProfilePage() {
         <TabsContent value="basic">
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <User className="h-5 w-5 text-emerald-500" />
-                Basic Information
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <User className="h-5 w-5 text-emerald-500" />
+                  Basic Information
+                </CardTitle>
+                {fullName.trim() ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    Name set
+                  </span>
+                ) : (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-400">
+                    Not set
+                  </span>
+                )}
+              </div>
               <CardDescription className="text-slate-400">
-                Your name and any aliases or previous names
+                Data brokers list you under different name variations. Adding aliases helps us find and remove more records.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -325,12 +456,23 @@ export default function ProfilePage() {
         <TabsContent value="contact">
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <Mail className="h-5 w-5 text-emerald-500" />
-                Contact Information
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Mail className="h-5 w-5 text-blue-500" />
+                  Contact Information
+                </CardTitle>
+                {completion.contact ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                    {contactBadgeText}
+                  </span>
+                ) : (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-400">
+                    No info added
+                  </span>
+                )}
+              </div>
               <CardDescription className="text-slate-400">
-                Add all email addresses and phone numbers associated with you
+                Brokers link profiles by email and phone. Adding all of yours helps us match and remove every listing.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -435,12 +577,23 @@ export default function ProfilePage() {
         <TabsContent value="addresses">
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <MapPin className="h-5 w-5 text-emerald-500" />
-                Physical Addresses
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <MapPin className="h-5 w-5 text-purple-500" />
+                  Physical Addresses
+                </CardTitle>
+                {addresses.length > 0 ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                    {addresses.length} address{addresses.length > 1 ? "es" : ""}
+                  </span>
+                ) : (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-400">
+                    No addresses
+                  </span>
+                )}
+              </div>
               <CardDescription className="text-slate-400">
-                Add current and previous addresses where you&apos;ve lived
+                People-search sites index your address history. Including past addresses helps us catch older records.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -540,12 +693,30 @@ export default function ProfilePage() {
         <TabsContent value="sensitive">
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <Lock className="h-5 w-5 text-emerald-500" />
-                Sensitive Information
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Lock className="h-5 w-5 text-amber-500" />
+                  Sensitive Information
+                </CardTitle>
+                <div className="flex gap-1.5">
+                  {dateOfBirth.trim() ? (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                      DOB set
+                    </span>
+                  ) : (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-400">
+                      DOB not set
+                    </span>
+                  )}
+                  {hasExistingSSN && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                      SSN on file
+                    </span>
+                  )}
+                </div>
+              </div>
               <CardDescription className="text-slate-400">
-                Optional sensitive data for more thorough scanning. All data is encrypted.
+                Date of birth helps us accurately match your records and avoid false positives. SSN is checked for dark web exposure only. All data is AES-256 encrypted.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -605,12 +776,23 @@ export default function ProfilePage() {
         <TabsContent value="usernames">
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <AtSign className="h-5 w-5 text-emerald-500" />
-                Usernames & Handles
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <AtSign className="h-5 w-5 text-cyan-500" />
+                  Usernames & Handles
+                </CardTitle>
+                {usernames.length > 0 ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                    {usernames.length} username{usernames.length > 1 ? "s" : ""}
+                  </span>
+                ) : (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-400">
+                    None added
+                  </span>
+                )}
+              </div>
               <CardDescription className="text-slate-400">
-                Add usernames you use across different platforms. Click + or press Enter to add.
+                Online handles appear in data breaches and people-search sites. Adding them expands our scan coverage.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
