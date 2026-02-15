@@ -317,7 +317,7 @@ export function getKeywordSuggestions(topic: string): string[] {
   suggestions.push(`${baseTopic} tutorial`);
   suggestions.push(`best ${baseTopic}`);
   suggestions.push(`${baseTopic} tips`);
-  suggestions.push(`${baseTopic} 2024`);
+  suggestions.push(`${baseTopic} ${new Date().getFullYear()}`);
 
   // Add related terms if topic matches our niche
   if (baseTopic.includes("remove") || baseTopic.includes("delete") || baseTopic.includes("opt out")) {

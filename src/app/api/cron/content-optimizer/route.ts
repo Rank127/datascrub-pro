@@ -23,6 +23,7 @@ import {
   getKeywordGaps,
 } from "@/lib/agents/shared/keyword-intelligence";
 import { getDirective } from "@/lib/mastermind/directives";
+import { verifyCronAuth } from "@/lib/cron-auth";
 import * as fs from "fs/promises";
 import * as path from "path";
 
@@ -32,7 +33,6 @@ export const maxDuration = 300;
 // CONFIGURATION
 // ============================================================================
 
-const CRON_SECRET = process.env.CRON_SECRET;
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@ghostmydata.com";
 
@@ -725,9 +725,8 @@ async function sendOptimizationReport(result: {
 export async function GET(request: Request) {
   const startTime = Date.now();
   try {
-    // Verify authorization
-    const authHeader = request.headers.get("authorization");
-    if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+    const authResult = verifyCronAuth(request);
+    if (!authResult.authorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -776,8 +775,8 @@ export async function GET(request: Request) {
 // Manual trigger with options
 export async function POST(request: Request) {
   try {
-    const authHeader = request.headers.get("authorization");
-    if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+    const authResult = verifyCronAuth(request);
+    if (!authResult.authorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

@@ -16,6 +16,24 @@
 - **Event Deduplication**: Event bus deduplicates publish calls via hash-based fingerprinting (10-minute TTL)
 - **Retrigger Rate Limiting**: Max 3 auto-retriggers per cron per 24 hours. Tracked via CronLog `status='RETRIGGER'`. Applied in both health-check and operations-agent `detect-anomalies`.
 - **Cascading Fix Cooldown**: 500ms delay after database-modifying health check tests (3, 9, 10) to prevent read-after-write races
+- **Directive Bounds**: `DIRECTIVE_BOUNDS` map in `directives.ts` clamps all numeric directives to safe ranges before DB write. `removal_rate_per_broker` min=5 (NEVER zero). Logged as warnings when clamped.
+
+## Removal Pipeline UX (Feb 2026)
+- **3-Category Status Mapping**: 8 internal statuses mapped to 3 user-facing categories via `src/lib/removals/user-status.ts`:
+  - `in_progress` = PENDING, SUBMITTED, IN_PROGRESS, REQUIRES_MANUAL, FAILED
+  - `completed` = COMPLETED
+  - `monitoring` = ACKNOWLEDGED, SKIPPED
+- **ETA Display**: Calculated from `submittedAt` + broker's `estimatedDays`, shown on in-progress items
+- **URL Corrections**: Shared registry at `src/lib/removals/url-corrections.ts`, applied at runtime in `getDataBrokerInfo()`
+- **REQUIRES_MANUAL Handling**: `clear-pending-queue` creates internal support tickets via `createRemovalFailedTicket()` — users never see this status
+- **Admin URL Corrections**: `POST /api/admin/url-corrections` validates new URLs and generates code snippets
+- **Link Checker Enhanced**: Auto-applies corrections, tries pattern variations for unknown broken links, includes suggestions in reports
+
+## Mastermind Pipeline Context (Feb 2026)
+- **Formatted Metrics**: `formatMetricsWithContext()` replaces raw `JSON.stringify()` — includes status definitions, expected ranges, pipeline health
+- **Directive Constraints**: System prompt includes hard bounds and "NEVER set removal_rate_per_broker below 5"
+- **Competitive Intelligence**: `business-context.ts` includes detailed competitor analysis (Incogni, DeleteMe, Optery, Kanary)
+- **`statusContext` in metrics**: `pipelineHealth`, `pendingExplanation`, `submittedExplanation`, `completionRate`
 
 ## Ops Visibility (Admin Dashboard)
 The Operations tab (`/dashboard/executive?tab=operations`) includes:

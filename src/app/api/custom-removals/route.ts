@@ -10,7 +10,24 @@ const MONTHLY_LIMIT = 10;
 
 // Validation schema
 const createRequestSchema = z.object({
-  targetUrl: z.string().url("Please enter a valid URL"),
+  targetUrl: z.string().url("Please enter a valid URL").refine((url) => {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "https:") return false;
+      const hostname = parsed.hostname.toLowerCase();
+      if (["localhost", "127.0.0.1", "0.0.0.0", "::1", "[::1]"].includes(hostname)) return false;
+      const parts = hostname.split(".");
+      if (parts.length === 4 && parts.every(p => /^\d+$/.test(p))) {
+        const [a, b] = parts.map(Number);
+        if (a === 10) return false;
+        if (a === 172 && b >= 16 && b <= 31) return false;
+        if (a === 192 && b === 168) return false;
+        if (a === 169 && b === 254) return false;
+        if (a === 0) return false;
+      }
+      return true;
+    } catch { return false; }
+  }, { message: "URL must be a public HTTPS address" }),
   siteName: z.string().optional(),
   dataType: z.enum(["EMAIL", "PHONE", "NAME", "ADDRESS", "PHOTO", "COMBINED_PROFILE", "OTHER"]),
   dataPreview: z.string().max(500).optional(),

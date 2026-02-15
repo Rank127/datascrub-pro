@@ -29,16 +29,16 @@ import { UpgradeBanner } from "@/components/dashboard/upgrade-banner";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "My Profile", href: "/dashboard/profile", icon: User },
-  { name: "Scan", href: "/dashboard/scan", icon: Search },
-  { name: "Exposures", href: "/dashboard/exposures", icon: AlertTriangle },
+  { name: "Scan", href: "/dashboard/scan", icon: Search, tourId: "scan-nav" },
+  { name: "Exposures", href: "/dashboard/exposures", icon: AlertTriangle, tourId: "exposures-nav" },
   { name: "Whitelist", href: "/dashboard/whitelist", icon: ListChecks },
-  { name: "Removals", href: "/dashboard/removals", icon: Trash2 },
+  { name: "Removals", href: "/dashboard/removals", icon: Trash2, tourId: "removals-nav" },
   { name: "AI Shield", href: "/dashboard/ai-protection", icon: Bot },
   { name: "Alerts", href: "/dashboard/alerts", icon: Bell },
   { name: "Support", href: "/dashboard/support", icon: Headphones },
   { name: "Reports", href: "/dashboard/reports", icon: FileText },
   { name: "Do Not Call", href: "/dashboard/dnc", icon: PhoneOff },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings, tourId: "settings-nav" },
 ];
 
 const adminNavigation = [
@@ -73,6 +73,7 @@ export function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
+              data-tour={item.tourId}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive

@@ -140,7 +140,7 @@ export function QuickStats({
 
         {/* Expanded View - Full Grid */}
         {expanded && (
-          <div className="grid grid-cols-4 gap-2 mt-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-3">
             {stats.map((stat) => (
               <Link
                 key={stat.label}

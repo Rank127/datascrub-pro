@@ -379,6 +379,39 @@ export function ReviewSchema({ reviews }: { reviews: Review[] }) {
   );
 }
 
+export function BlogPostingSchema({ post }: { post: { title: string; description: string; slug: string; publishedAt: string; updatedAt?: string; author: string; tags: string[]; content: string; } }) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    author: {
+      "@type": "Person",
+      name: post.author,
+    },
+    datePublished: post.publishedAt,
+    dateModified: post.updatedAt || post.publishedAt,
+    publisher: {
+      "@type": "Organization",
+      name: "GhostMyData",
+      url: "https://ghostmydata.com",
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://ghostmydata.com/blog/${post.slug}`,
+    },
+    keywords: post.tags.join(", "),
+    wordCount: post.content.split(/\s+/).length,
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
 export function LocalBusinessSchema() {
   const schema = {
     "@context": "https://schema.org",

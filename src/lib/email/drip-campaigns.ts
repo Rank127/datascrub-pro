@@ -21,6 +21,11 @@ const APP_NAME = "GhostMyData";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com";
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || `${APP_NAME} <onboarding@resend.dev>`;
 
+function appendUtm(url: string, campaign: string): string {
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}utm_source=drip&utm_medium=email&utm_campaign=${campaign}`;
+}
+
 // Drip campaign schedule (days after signup)
 export const DRIP_SCHEDULE = [
   { day: 0, templateId: "welcome" },
@@ -84,7 +89,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <p><span class="highlight">Your next step:</span> Run your first scan to see exactly where your personal information is exposed. It takes 60 seconds and the results will surprise you.</p>
 
-    <a href="${APP_URL}/dashboard" class="btn">Run Your First Scan →</a>
+    <a href="${appendUtm(`${APP_URL}/dashboard`, 'welcome')}" class="btn">Run Your First Scan →</a>
 
     <p>You're getting access to 24 AI agents that work around the clock to find and remove your data. That's the kind of protection that used to require a team of lawyers.</p>
 
@@ -94,7 +99,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <div class="footer">
       <p>© ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
-      <p><a href="${APP_URL}/unsubscribe" style="color: #64748b;">Unsubscribe</a></p>
+      <p><a href="${appendUtm(`${APP_URL}/unsubscribe`, 'welcome')}" style="color: #64748b;">Unsubscribe</a></p>
     </div>
   </div>
 </body>
@@ -140,7 +145,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <p>The good news? Finding out exactly what's exposed takes less than 60 seconds.</p>
 
-    <a href="${APP_URL}/dashboard" class="btn">See My Exposed Data →</a>
+    <a href="${appendUtm(`${APP_URL}/dashboard`, 'scan_reminder')}" class="btn">See My Exposed Data →</a>
 
     <p>Once you run your scan, you'll see exactly which sites have your information — and our AI agents can start removing it immediately.</p>
 
@@ -148,7 +153,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <div class="footer">
       <p>© ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
-      <p><a href="${APP_URL}/unsubscribe" style="color: #64748b;">Unsubscribe</a></p>
+      <p><a href="${appendUtm(`${APP_URL}/unsubscribe`, 'scan_reminder')}" style="color: #64748b;">Unsubscribe</a></p>
     </div>
   </div>
 </body>
@@ -218,13 +223,13 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <p><span class="highlight">Your results could be similar.</span> Run your scan to see how exposed you are.</p>
 
-    <a href="${APP_URL}/dashboard" class="btn">See My Exposure Score →</a>
+    <a href="${appendUtm(`${APP_URL}/dashboard`, 'case_study')}" class="btn">See My Exposure Score →</a>
 
     <p>To your privacy,<br>The ${APP_NAME} Team</p>
 
     <div class="footer">
       <p>© ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
-      <p><a href="${APP_URL}/unsubscribe" style="color: #64748b;">Unsubscribe</a></p>
+      <p><a href="${appendUtm(`${APP_URL}/unsubscribe`, 'case_study')}" style="color: #64748b;">Unsubscribe</a></p>
     </div>
   </div>
 </body>
@@ -234,8 +239,8 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     case "discount_offer":
       return {
-        subject: `${firstName}, here's 50% off Pro - just for you`,
-        previewText: "Limited time offer - expires in 48 hours",
+        subject: `${firstName}, 50% off your first month of Pro`,
+        previewText: "Use code DRIP50 for 50% off your first month",
         html: `
 <!DOCTYPE html>
 <html>
@@ -252,7 +257,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
     .btn { display: inline-block; background: #f97316; color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 700; font-size: 18px; margin: 16px 0; }
     .offer-box { background: linear-gradient(135deg, #065f46 0%, #064e3b 100%); border: 2px solid #10b981; border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center; }
     .offer-title { color: #10b981; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
-    .offer-price { color: #ffffff; font-size: 48px; font-weight: bold; }
+    .offer-price { color: #ffffff; font-size: 36px; font-weight: bold; }
     .offer-original { color: #94a3b8; text-decoration: line-through; font-size: 18px; }
     .offer-period { color: #94a3b8; font-size: 14px; }
     .urgency { background: #7c2d12; border: 1px solid #ea580c; border-radius: 8px; padding: 12px; margin: 24px 0; text-align: center; }
@@ -265,19 +270,19 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 </head>
 <body>
   <div class="container">
-    <h1>🎁 Special Offer Just For You</h1>
+    <h1>50% Off Your First Month of Pro</h1>
 
     <p>Hey ${firstName},</p>
 
-    <p>Here's the math: The average identity theft costs victims $1,300 and 200+ hours to resolve. Our Pro plan costs $11.99/mo with this deal. That's less than one lunch to protect everything.</p>
+    <p>Here's the math: The average identity theft costs victims $1,300 and 200+ hours to resolve. Pro protection costs a fraction of that. That's less than one lunch to protect everything.</p>
 
     <p>I noticed you haven't upgraded to Pro yet. So I'm making you an offer that's genuinely hard to say no to...</p>
 
     <div class="offer-box">
-      <div class="offer-title">40% OFF Sale</div>
+      <div class="offer-title">Exclusive Drip Offer</div>
       <div class="offer-original">$19.99/month</div>
-      <div class="offer-price">$11.99<span style="font-size: 18px; font-weight: normal;">/month</span></div>
-      <div class="offer-period">Billed monthly. Cancel anytime.</div>
+      <div class="offer-price">Use code DRIP50 for 50% off your first month</div>
+      <div class="offer-period">Stacks on top of any active sale. Cancel anytime.</div>
     </div>
 
     <div class="urgency">
@@ -293,7 +298,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
       <div class="feature"><span class="feature-icon">✓</span> Priority support</div>
     </div>
 
-    <a href="${APP_URL}/pricing?code=DRIP50" class="btn">Claim 50% Off Now →</a>
+    <a href="${appendUtm(`${APP_URL}/pricing?code=DRIP50`, 'discount_offer')}" class="btn">Claim 50% Off Now →</a>
 
     <p>Use code <span class="highlight">DRIP50</span> at checkout if it's not automatically applied.</p>
 
@@ -301,7 +306,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <div class="footer">
       <p>© ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
-      <p><a href="${APP_URL}/unsubscribe" style="color: #64748b;">Unsubscribe</a></p>
+      <p><a href="${appendUtm(`${APP_URL}/unsubscribe`, 'discount_offer')}" style="color: #64748b;">Unsubscribe</a></p>
     </div>
   </div>
 </body>
@@ -311,8 +316,8 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     case "final_push":
       return {
-        subject: `Last chance: Your data is still exposed, ${firstName}`,
-        previewText: "Final reminder + special offer",
+        subject: `Last chance: 50% off your first month, ${firstName}`,
+        previewText: "Final reminder - use code DRIP50 for 50% off your first month",
         html: `
 <!DOCTYPE html>
 <html>
@@ -338,7 +343,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 </head>
 <body>
   <div class="container">
-    <h1>⚠️ This Is My Final Reminder</h1>
+    <h1>This Is My Final Reminder</h1>
 
     <p>Hey ${firstName},</p>
 
@@ -362,8 +367,8 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
     <p>The longer your data stays out there, the more it gets copied and spread across new sites.</p>
 
     <div class="cta-box">
-      <p><span class="green">I'm extending your 50% discount one more time.</span><br>Code: DRIP50</p>
-      <a href="${APP_URL}/pricing?code=DRIP50" class="btn">Start Protecting My Data →</a>
+      <p><span class="green">I'm extending your 50% off first month one more time.</span><br><s>$19.99</s> → Use code DRIP50 for 50% off your first month</p>
+      <a href="${appendUtm(`${APP_URL}/pricing?code=DRIP50`, 'final_push')}" class="btn">Start Protecting My Data →</a>
     </div>
 
     <p>This is the last email I'll send about this. The choice is yours.</p>
@@ -374,7 +379,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
 
     <div class="footer">
       <p>© ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
-      <p><a href="${APP_URL}/unsubscribe" style="color: #64748b;">Unsubscribe</a></p>
+      <p><a href="${appendUtm(`${APP_URL}/unsubscribe`, 'final_push')}" style="color: #64748b;">Unsubscribe</a></p>
     </div>
   </div>
 </body>

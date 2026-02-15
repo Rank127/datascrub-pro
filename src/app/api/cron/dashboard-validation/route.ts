@@ -8,22 +8,16 @@
 import { NextResponse } from "next/server";
 import { validateDashboardData } from "@/lib/agents/qa-agent";
 import { logCronExecution } from "@/lib/cron-logger";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 export const maxDuration = 120;
 export const dynamic = "force-dynamic";
 
-function verifyCronSecret(request: Request): boolean {
-  const authHeader = request.headers.get("authorization");
-  const expectedToken = process.env.CRON_SECRET;
-  if (!expectedToken) return true;
-  return authHeader === `Bearer ${expectedToken}`;
-}
-
 export async function GET(request: Request) {
   const startTime = Date.now();
 
-  // Verify cron secret
-  if (!verifyCronSecret(request)) {
+  const auth = verifyCronAuth(request);
+  if (!auth.authorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllPosts, getFeaturedPosts, getAllCategories } from "@/lib/blog/posts";
 import { Calendar, Clock, ArrowRight, Tag } from "lucide-react";
+import { NewsletterCapture } from "@/components/blog/newsletter-capture";
 
 export const metadata: Metadata = {
   title: "Privacy Blog | Data Removal Tips | GhostMyData",
@@ -178,6 +179,11 @@ export default function BlogPage() {
           <ArrowRight className="h-4 w-4" />
         </Link>
       </section>
+
+      {/* Newsletter */}
+      <div className="mt-12">
+        <NewsletterCapture source="blog" />
+      </div>
     </div>
   );
 }

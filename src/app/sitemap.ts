@@ -41,6 +41,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/data-removal-texas", priority: 0.85, changeFrequency: "monthly" as const },
     { path: "/data-removal-new-york", priority: 0.85, changeFrequency: "monthly" as const },
     { path: "/data-removal-florida", priority: 0.85, changeFrequency: "monthly" as const },
+    { path: "/data-removal-illinois", priority: 0.85, changeFrequency: "monthly" as const },
+    { path: "/data-removal-pennsylvania", priority: 0.85, changeFrequency: "monthly" as const },
+    { path: "/data-removal-ohio", priority: 0.85, changeFrequency: "monthly" as const },
+    { path: "/data-removal-georgia", priority: 0.85, changeFrequency: "monthly" as const },
+    { path: "/data-removal-north-carolina", priority: 0.85, changeFrequency: "monthly" as const },
+    { path: "/data-removal-michigan", priority: 0.85, changeFrequency: "monthly" as const },
     // Interactive tools
     { path: "/privacy-score", priority: 0.7, changeFrequency: "weekly" as const },
     { path: "/blog/archive", priority: 0.7, changeFrequency: "weekly" as const },

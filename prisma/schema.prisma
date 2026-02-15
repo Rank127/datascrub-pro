@@ -818,3 +818,11 @@ model StrategicDirective {
   @@index([category, isActive])
   @@index([isActive])
 }
+
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+  source       String   @default("blog")
+  status       String   @default("active")
+}

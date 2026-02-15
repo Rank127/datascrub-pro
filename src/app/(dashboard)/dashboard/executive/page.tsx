@@ -200,42 +200,42 @@ function ExecutiveDashboardContent() {
             className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-300 data-[state=active]:border-emerald-500/50 data-[state=active]:border hover:bg-emerald-500/10 hover:text-emerald-400 transition-all"
           >
             <DollarSign className="h-5 w-5" />
-            <span>Finance</span>
+            <span className="hidden sm:inline">Finance</span>
           </TabsTrigger>
           <TabsTrigger
             value="analytics"
             className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 data-[state=active]:border-blue-500/50 data-[state=active]:border hover:bg-blue-500/10 hover:text-blue-400 transition-all"
           >
             <BarChart3 className="h-5 w-5" />
-            <span>Analytics</span>
+            <span className="hidden sm:inline">Analytics</span>
           </TabsTrigger>
           <TabsTrigger
             value="operations"
             className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-amber-500/30 data-[state=active]:text-amber-300 data-[state=active]:border-amber-500/50 data-[state=active]:border hover:bg-amber-500/10 hover:text-amber-400 transition-all"
           >
             <Settings className="h-5 w-5" />
-            <span>Operations</span>
+            <span className="hidden sm:inline">Operations</span>
           </TabsTrigger>
           <TabsTrigger
             value="activities"
             className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-300 data-[state=active]:border-purple-500/50 data-[state=active]:border hover:bg-purple-500/10 hover:text-purple-400 transition-all"
           >
             <Users className="h-5 w-5" />
-            <span>Activities</span>
+            <span className="hidden sm:inline">Activities</span>
           </TabsTrigger>
           <TabsTrigger
             value="users"
             className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-pink-500/30 data-[state=active]:text-pink-300 data-[state=active]:border-pink-500/50 data-[state=active]:border hover:bg-pink-500/10 hover:text-pink-400 transition-all"
           >
             <UserCog className="h-5 w-5" />
-            <span>Users</span>
+            <span className="hidden sm:inline">Users</span>
           </TabsTrigger>
           <TabsTrigger
             value="support"
             className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-cyan-500/30 data-[state=active]:text-cyan-300 data-[state=active]:border-cyan-500/50 data-[state=active]:border hover:bg-cyan-500/10 hover:text-cyan-400 transition-all"
           >
             <Headphones className="h-5 w-5" />
-            <span>Support</span>
+            <span className="hidden sm:inline">Support</span>
           </TabsTrigger>
         </TabsList>
 

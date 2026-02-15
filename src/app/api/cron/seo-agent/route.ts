@@ -6,6 +6,7 @@ import { createAgentContext } from "@/lib/agents/base-agent";
 import { InvocationTypes } from "@/lib/agents/types";
 import { getRemediationEngine } from "@/lib/agents";
 import { logCronExecution } from "@/lib/cron-logger";
+import { verifyCronAuth } from "@/lib/cron-auth";
 import { nanoid } from "nanoid";
 
 // Initialize Resend for email notifications
@@ -228,14 +229,10 @@ async function waitForRemediationComplete(
   console.log("[SEO Agent Cron] Remediation wait timeout reached, continuing...");
 }
 
-// Verify cron secret to prevent unauthorized access
-const CRON_SECRET = process.env.CRON_SECRET;
-
 export async function GET(request: Request) {
   try {
-    // Verify authorization
-    const authHeader = request.headers.get("authorization");
-    if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+    const authResult = verifyCronAuth(request);
+    if (!authResult.authorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -354,9 +351,8 @@ export async function GET(request: Request) {
 // POST endpoint for manual trigger with options
 export async function POST(request: Request) {
   try {
-    // Verify authorization
-    const authHeader = request.headers.get("authorization");
-    if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+    const authResult = verifyCronAuth(request);
+    if (!authResult.authorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

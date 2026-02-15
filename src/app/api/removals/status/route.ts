@@ -154,10 +154,40 @@ export async function GET() {
     const rawStats = Object.fromEntries(stats.map((s) => [s.status, s._count]));
     const simplifiedStats = getSimplifiedStats(rawStats);
 
+    // Compute per-broker compliance metrics from completed removals
+    const brokerMetrics: Record<string, {
+      totalCompleted: number;
+      avgDays: number;
+      estimatedDays: number;
+      complianceStatus: "fast" | "on-time" | "slow" | "non-compliant";
+    }> = {};
+
+    for (const removal of enrichedRemovals) {
+      if (removal.status !== "COMPLETED" || !removal.submittedAt || !removal.completedAt) continue;
+      const brokerName = removal.exposure.sourceName || removal.exposure.source;
+      const actualMs = new Date(removal.completedAt).getTime() - new Date(removal.submittedAt).getTime();
+      const actualDays = Math.max(1, Math.round(actualMs / (1000 * 60 * 60 * 24)));
+      const estDays = removal.estimatedDays || 14;
+
+      if (!brokerMetrics[brokerName]) {
+        brokerMetrics[brokerName] = { totalCompleted: 0, avgDays: 0, estimatedDays: estDays, complianceStatus: "on-time" };
+      }
+      const m = brokerMetrics[brokerName];
+      m.avgDays = (m.avgDays * m.totalCompleted + actualDays) / (m.totalCompleted + 1);
+      m.totalCompleted++;
+
+      const ratio = m.avgDays / m.estimatedDays;
+      if (ratio < 0.75) m.complianceStatus = "fast";
+      else if (ratio <= 1.5) m.complianceStatus = "on-time";
+      else if (ratio <= 3) m.complianceStatus = "slow";
+      else m.complianceStatus = "non-compliant";
+    }
+
     return NextResponse.json({
       removals: enrichedRemovals,
       stats: rawStats,
       simplifiedStats,
+      brokerMetrics,
       manualAction: {
         total: manualActionTotal,
         done: manualActionDone,

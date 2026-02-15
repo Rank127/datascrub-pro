@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllPosts, getPostBySlug } from "@/lib/blog/posts";
-import { BreadcrumbSchema, HowToSchema, type HowToStep } from "@/components/seo/structured-data";
+import { BreadcrumbSchema, BlogPostingSchema, HowToSchema, type HowToStep } from "@/components/seo/structured-data";
 import { Calendar, Clock, ArrowLeft, ArrowRight, User, Tag } from "lucide-react";
+import { NewsletterCapture } from "@/components/blog/newsletter-capture";
 
 // Extract steps from markdown content for HowTo schema
 function extractHowToSteps(content: string): HowToStep[] {
@@ -203,52 +204,6 @@ export default async function BlogPostPage({ params }: Props) {
     ? `PT${Math.max(5, Math.min(30, howToSteps.length * 3))}M`
     : undefined;
 
-  const blogPostSchema = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.description,
-    image: "https://ghostmydata.com/og-image.png",
-    author: {
-      "@type": "Organization",
-      name: post.author,
-      url: "https://ghostmydata.com",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://ghostmydata.com/logo.png",
-      },
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "GhostMyData",
-      url: "https://ghostmydata.com",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://ghostmydata.com/logo.png",
-        width: 512,
-        height: 512,
-      },
-    },
-    datePublished: post.publishedAt,
-    dateModified: post.updatedAt || post.publishedAt,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `https://ghostmydata.com/blog/${post.slug}`,
-    },
-    url: `https://ghostmydata.com/blog/${post.slug}`,
-    articleSection: post.category,
-    keywords: post.tags.join(", "),
-    wordCount: post.content.split(/\s+/).length,
-    timeRequired: post.readTime.replace(" read", ""),
-    inLanguage: "en-US",
-    isAccessibleForFree: true,
-    copyrightHolder: {
-      "@type": "Organization",
-      name: "GhostMyData",
-    },
-    copyrightYear: new Date(post.publishedAt).getFullYear(),
-  };
-
   return (
     <>
       <BreadcrumbSchema items={breadcrumbs} />
@@ -260,10 +215,7 @@ export default async function BlogPostPage({ params }: Props) {
           steps={howToSteps}
         />
       )}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostSchema) }}
-      />
+      <BlogPostingSchema post={post} />
 
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         {/* Breadcrumb */}
@@ -353,6 +305,11 @@ export default async function BlogPostPage({ params }: Props) {
             Start Your Free Scan
             <ArrowRight className="h-4 w-4" />
           </Link>
+        </div>
+
+        {/* Newsletter Capture */}
+        <div className="mt-12">
+          <NewsletterCapture source="blog" />
         </div>
 
         {/* Navigation */}

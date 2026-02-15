@@ -35,7 +35,9 @@ import {
   Loader2,
   FileText,
   Shield,
+  BarChart3,
 } from "lucide-react";
+import { RemovalPipeline } from "@/components/dashboard/removal-pipeline";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { EmptyState } from "@/components/dashboard/empty-state";
@@ -246,6 +248,14 @@ export default function RemovalsPage() {
     monitoring: 0,
     total: 0,
   });
+  const [rawStats, setRawStats] = useState<Record<string, number>>({});
+  const [brokerMetrics, setBrokerMetrics] = useState<Record<string, {
+    totalCompleted: number;
+    avgDays: number;
+    estimatedDays: number;
+    complianceStatus: "fast" | "on-time" | "slow" | "non-compliant";
+  }>>({});
+  const [showBrokerRatings, setShowBrokerRatings] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
 
@@ -260,6 +270,8 @@ export default function RemovalsPage() {
       if (response.ok) {
         const data = await response.json();
         setRemovals(data.removals);
+        setRawStats(data.stats || {});
+        setBrokerMetrics(data.brokerMetrics || {});
         setSimplifiedStats(
           data.simplifiedStats || {
             inProgress: 0,
@@ -348,6 +360,71 @@ export default function RemovalsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Pipeline Visualization */}
+      <RemovalPipeline stats={rawStats} />
+
+      {/* Broker Compliance Ratings */}
+      {Object.keys(brokerMetrics).length > 0 && (
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader className="pb-3">
+            <button
+              onClick={() => setShowBrokerRatings(!showBrokerRatings)}
+              className="flex items-center justify-between w-full text-left"
+            >
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-emerald-400" />
+                <CardTitle className="text-white">Broker Compliance Ratings</CardTitle>
+              </div>
+              {showBrokerRatings ? (
+                <ChevronUp className="h-5 w-5 text-slate-400" />
+              ) : (
+                <ChevronDown className="h-5 w-5 text-slate-400" />
+              )}
+            </button>
+            <CardDescription className="text-slate-400">
+              How quickly brokers process removal requests
+            </CardDescription>
+          </CardHeader>
+          {showBrokerRatings && (
+            <CardContent className="space-y-4">
+              <div className="grid gap-3">
+                {Object.entries(brokerMetrics)
+                  .sort((a, b) => a[1].avgDays - b[1].avgDays)
+                  .map(([broker, metrics]) => {
+                    const statusColors: Record<string, string> = {
+                      fast: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+                      "on-time": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+                      slow: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+                      "non-compliant": "bg-red-500/20 text-red-400 border-red-500/30",
+                    };
+                    const statusLabels: Record<string, string> = {
+                      fast: "Fast",
+                      "on-time": "On Time",
+                      slow: "Slow",
+                      "non-compliant": "Non-Compliant",
+                    };
+                    return (
+                      <div key={broker} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium text-white">{broker}</span>
+                          <Badge variant="outline" className={statusColors[metrics.complianceStatus]}>
+                            {statusLabels[metrics.complianceStatus]}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-slate-400">
+                          <span>{Math.round(metrics.avgDays)}d avg</span>
+                          <span className="text-slate-600">|</span>
+                          <span>{metrics.totalCompleted} removed</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      )}
 
       {/* Help Section */}
       <Card className="bg-slate-800/50 border-slate-700">

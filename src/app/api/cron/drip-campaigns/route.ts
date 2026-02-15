@@ -1,18 +1,15 @@
 import { NextResponse } from "next/server";
 import { processDripCampaigns } from "@/lib/email/drip-campaigns";
 import { logCronExecution } from "@/lib/cron-logger";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 export const maxDuration = 120;
-
-// Verify cron secret to prevent unauthorized access
-const CRON_SECRET = process.env.CRON_SECRET;
 
 export async function GET(request: Request) {
   const startTime = Date.now();
   try {
-    // Verify authorization
-    const authHeader = request.headers.get("authorization");
-    if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+    const authResult = verifyCronAuth(request);
+    if (!authResult.authorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

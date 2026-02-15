@@ -22,6 +22,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { logCronExecution } from "@/lib/cron-logger";
 import { acquireJobLock, releaseJobLock } from "@/lib/agents/intelligence-coordinator";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 export const maxDuration = 120;
 export const dynamic = "force-dynamic";
@@ -49,13 +50,6 @@ const DATA_PROCESSOR_PATTERNS = {
     "yotpo.com",
   ],
 };
-
-function verifyCronSecret(request: Request): boolean {
-  const authHeader = request.headers.get("authorization");
-  const expectedToken = process.env.CRON_SECRET;
-  if (!expectedToken) return true;
-  return authHeader === `Bearer ${expectedToken}`;
-}
 
 async function findDataProcessorExposures() {
   // Build OR conditions for source names
@@ -113,7 +107,8 @@ async function findPendingRemovalRequests(exposureIds: string[]) {
 export async function GET(request: Request) {
   const startTime = Date.now();
 
-  if (!verifyCronSecret(request)) {
+  const auth = verifyCronAuth(request);
+  if (!auth.authorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
