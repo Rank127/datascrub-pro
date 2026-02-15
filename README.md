@@ -68,7 +68,7 @@ Personal data removal service that helps users find and remove their personal in
 |------|-------|----------|
 | Free | $0 | 1 scan/month, manual removal guides |
 | Pro | $11.99/mo | 10 scans/month, automated removals, weekly monitoring |
-| Enterprise | $29.00/mo | Unlimited scans, dark web monitoring, family plan (5 profiles) |
+| Enterprise | $29.99/mo | Unlimited scans, dark web monitoring, family plan (5 profiles) |
 
 ## Project Structure
 
