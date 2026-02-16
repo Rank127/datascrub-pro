@@ -16,7 +16,9 @@ import {
   ActivitiesMetrics,
   CompetitiveIntelMetrics,
   GrowthMetrics,
+  CorporateMetrics,
   TrendDataPoint,
+  CORPORATE_PLAN_PRICING,
 } from "@/lib/executive/types";
 import { getEmailQueueStatus, getEmailQuotaStatus } from "@/lib/email";
 import {
@@ -107,6 +109,7 @@ export async function GET(request: Request) {
       platform,
       competitive,
       growth,
+      corporate,
     ] = await Promise.all([
       getFinanceMetrics(),
       getWebAnalyticsMetrics(),
@@ -115,6 +118,7 @@ export async function GET(request: Request) {
       getPlatformMetrics(),
       getCompetitiveIntelMetrics(),
       getGrowthMetrics(),
+      getCorporateMetrics(),
     ]);
 
     const response: ExecutiveStatsResponse = {
@@ -125,6 +129,7 @@ export async function GET(request: Request) {
       platform,
       competitive,
       growth,
+      corporate,
       generatedAt: new Date().toISOString(),
     };
 
@@ -1049,6 +1054,76 @@ async function getGrowthMetrics(): Promise<GrowthMetrics | undefined> {
     };
   } catch (err) {
     console.error("[Executive Stats] Growth metrics fetch failed:", err);
+    return undefined;
+  }
+}
+
+async function getCorporateMetrics(): Promise<CorporateMetrics | undefined> {
+  try {
+    const [accounts, seatCounts] = await Promise.all([
+      prisma.corporateAccount.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        select: {
+          id: true,
+          name: true,
+          tier: true,
+          maxSeats: true,
+          status: true,
+          createdAt: true,
+          _count: { select: { seats: { where: { status: "ACTIVE" } } } },
+        },
+      }),
+      prisma.corporateSeat.groupBy({
+        by: ["status"],
+        _count: true,
+      }),
+    ]);
+
+    const totalAccounts = await prisma.corporateAccount.count();
+    const totalSeats = await prisma.corporateSeat.count();
+    const activeSeats = seatCounts.find(s => s.status === "ACTIVE")?._count ?? 0;
+
+    // Count accounts by tier
+    const tierCounts = await prisma.corporateAccount.groupBy({
+      by: ["tier"],
+      _count: true,
+    });
+    const accountsByTier: Record<string, number> = {};
+    for (const row of tierCounts) {
+      accountsByTier[row.tier] = row._count;
+    }
+
+    // Calculate ARR from active accounts
+    const activeAccounts = await prisma.corporateAccount.findMany({
+      where: { status: "ACTIVE" },
+      select: { tier: true },
+    });
+
+    let totalCorporateARR = 0;
+    for (const acct of activeAccounts) {
+      const pricing = CORPORATE_PLAN_PRICING[acct.tier as keyof typeof CORPORATE_PLAN_PRICING];
+      if (pricing) totalCorporateARR += pricing;
+    }
+
+    return {
+      totalAccounts,
+      totalSeats,
+      activeSeats,
+      accountsByTier,
+      totalCorporateARR,
+      recentAccounts: accounts.map(a => ({
+        id: a.id,
+        name: a.name,
+        tier: a.tier,
+        maxSeats: a.maxSeats,
+        activeSeats: a._count.seats,
+        status: a.status,
+        createdAt: a.createdAt.toISOString(),
+      })),
+    };
+  } catch (err) {
+    console.error("[Executive Stats] Corporate metrics fetch failed:", err);
     return undefined;
   }
 }

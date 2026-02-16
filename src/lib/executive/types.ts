@@ -8,7 +8,25 @@ export interface ExecutiveStatsResponse {
   platform: PlatformMetrics; // User/exposure/removal trends
   competitive?: CompetitiveIntelMetrics;
   growth?: GrowthMetrics;
+  corporate?: CorporateMetrics;
   generatedAt: string;
+}
+
+export interface CorporateMetrics {
+  totalAccounts: number;
+  totalSeats: number;
+  activeSeats: number;
+  accountsByTier: Record<string, number>;
+  totalCorporateARR: number; // cents
+  recentAccounts: Array<{
+    id: string;
+    name: string;
+    tier: string;
+    maxSeats: number;
+    activeSeats: number;
+    status: string;
+    createdAt: string;
+  }>;
 }
 
 export interface CompetitiveIntelMetrics {
@@ -333,4 +351,13 @@ export const PLAN_ORIGINAL_PRICING = {
   FREE: 0,
   PRO: 23988, // $239.88/year ($19.99/mo × 12)
   ENTERPRISE: 59988, // $599.88/year ($49.99/mo × 12)
+} as const;
+
+// Corporate plan pricing in cents (annual)
+export const CORPORATE_PLAN_PRICING = {
+  CORP_10: 199900, // $1,999/year (10 seats)
+  CORP_25: 399900, // $3,999/year (25 seats)
+  CORP_50: 699900, // $6,999/year (50 seats)
+  CORP_100: 1199900, // $11,999/year (100 seats)
+  FAMILY_ADDON: 12000, // $120/year per family add-on
 } as const;

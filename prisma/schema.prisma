@@ -57,6 +57,8 @@ model User {
   tickets                SupportTicket[]    @relation("UserTickets")
   ticketComments         TicketComment[]
   whitelists             Whitelist[]
+  corporateAdmin         CorporateAccount?  @relation("CorporateAdmin")
+  corporateSeat          CorporateSeat?
 
   @@index([createdAt])
   @@index([emailVerified])
@@ -864,4 +866,60 @@ model CompetitorChange {
   @@index([competitor])
   @@index([impact])
   @@index([detectedAt])
+}
+
+// Corporate plan accounts
+model CorporateAccount {
+  id                   String            @id @default(cuid())
+  name                 String            // Company name
+  tier                 String            // CORP_10, CORP_25, CORP_50, CORP_100
+  maxSeats             Int
+  adminUserId          String            @unique
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  status               String            @default("ACTIVE") // ACTIVE, SUSPENDED, CANCELLED
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  adminUser            User              @relation("CorporateAdmin", fields: [adminUserId], references: [id], onDelete: Cascade)
+  seats                CorporateSeat[]
+  invitations          CorporateInvite[]
+
+  @@index([tier])
+  @@index([status])
+}
+
+// Individual seats within a corporate account
+model CorporateSeat {
+  id                 String            @id @default(cuid())
+  corporateAccountId String
+  userId             String?           @unique // null = unassigned seat
+  status             String            @default("INVITED") // INVITED, ACTIVE, DEACTIVATED
+  qrCode             String            @unique @default(cuid())
+  onboardedAt        DateTime?
+  lastScanAt         DateTime?
+  removalCount       Int               @default(0)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  corporateAccount   CorporateAccount  @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  user               User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([corporateAccountId])
+  @@index([status])
+}
+
+// Invitations to join a corporate account
+model CorporateInvite {
+  id                 String            @id @default(cuid())
+  corporateAccountId String
+  email              String
+  token              String            @unique @default(cuid())
+  status             String            @default("PENDING") // PENDING, ACCEPTED, EXPIRED
+  expiresAt          DateTime
+  createdAt          DateTime          @default(now())
+  corporateAccount   CorporateAccount  @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+
+  @@index([corporateAccountId])
+  @@index([email])
+  @@index([token])
+  @@index([status])
 }

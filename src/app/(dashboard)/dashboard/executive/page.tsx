@@ -22,6 +22,7 @@ import {
   Crosshair,
   Sprout,
   Plug,
+  Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,6 +68,10 @@ const IntegrationsSection = dynamic(
   () => import("@/components/dashboard/integrations/integrations-section").then((m) => ({ default: m.IntegrationsSection })),
   { loading: TabLoader }
 );
+const CorporateSection = dynamic(
+  () => import("@/components/dashboard/executive/corporate-section").then((m) => ({ default: m.CorporateSection })),
+  { loading: TabLoader }
+);
 
 // Wrapper component to handle Suspense boundary for useSearchParams
 export default function ExecutiveDashboardPage() {
@@ -85,7 +90,7 @@ function ExecutiveDashboardContent() {
   useSession(); // Ensure user is authenticated
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const defaultTab = ["finance", "analytics", "operations", "activities", "users", "support", "integrations", "competitive", "growth"].includes(tabParam || "")
+  const defaultTab = ["finance", "analytics", "operations", "activities", "users", "support", "integrations", "competitive", "growth", "corporate"].includes(tabParam || "")
     ? tabParam!
     : "finance";
 
@@ -275,6 +280,13 @@ function ExecutiveDashboardContent() {
             <Sprout className="h-5 w-5" />
             <span className="hidden sm:inline">Growth</span>
           </TabsTrigger>
+          <TabsTrigger
+            value="corporate"
+            className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-violet-500/30 data-[state=active]:text-violet-300 data-[state=active]:border-violet-500/50 data-[state=active]:border hover:bg-violet-500/10 hover:text-violet-400 transition-all"
+          >
+            <Briefcase className="h-5 w-5" />
+            <span className="hidden sm:inline">Corporate</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="finance" className="mt-6 p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
@@ -311,6 +323,10 @@ function ExecutiveDashboardContent() {
 
         <TabsContent value="growth" className="mt-6 p-4 rounded-lg border border-green-500/20 bg-green-500/5">
           <GrowthSection data={data.growth} />
+        </TabsContent>
+
+        <TabsContent value="corporate" className="mt-6 p-4 rounded-lg border border-violet-500/20 bg-violet-500/5">
+          <CorporateSection data={data.corporate} />
         </TabsContent>
       </Tabs>
     </div>
