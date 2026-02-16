@@ -130,6 +130,10 @@ const config: Config = {
           "0%, 100%": { borderColor: "rgba(16, 185, 129, 0.5)" },
           "50%": { borderColor: "rgba(16, 185, 129, 1)" },
         },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(100%)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -147,6 +151,7 @@ const config: Config = {
         float: "float 3s ease-in-out infinite",
         shimmer: "shimmer 3s ease-in-out infinite",
         "border-glow": "border-glow 2s ease-in-out infinite",
+        "slide-up": "slide-up 0.4s ease-out forwards",
       },
     },
   },

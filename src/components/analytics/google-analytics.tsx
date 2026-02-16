@@ -3,6 +3,8 @@
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
+import { useConsent } from "@/lib/consent/consent-context";
+import { isAnalyticsConsented } from "@/lib/consent/consent-utils";
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
@@ -33,7 +35,9 @@ function RouteChangeTracker() {
 }
 
 export function GoogleAnalytics() {
-  if (!GA_MEASUREMENT_ID) {
+  const { effectiveConsent } = useConsent();
+
+  if (!GA_MEASUREMENT_ID || !effectiveConsent.analytics) {
     return null;
   }
 
@@ -53,7 +57,7 @@ export function GoogleAnalytics() {
             anonymize_ip: true,
             cookie_flags: 'SameSite=None;Secure',
             send_page_view: true,
-            allow_google_signals: true,
+            allow_google_signals: false,
             allow_ad_personalization_signals: false
           });
 
@@ -79,6 +83,7 @@ export function GoogleAnalytics() {
 
 // Track page views (for client-side navigation)
 export function trackPageView(url: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag && GA_MEASUREMENT_ID) {
     gtag("config", GA_MEASUREMENT_ID, {
@@ -89,6 +94,7 @@ export function trackPageView(url: string) {
 
 // Generic event tracking
 export function trackEvent(action: string, category: string, label?: string, value?: number) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", action, {
@@ -105,6 +111,7 @@ export function trackEvent(action: string, category: string, label?: string, val
 
 // Set user ID for cross-device tracking (call after login)
 export function setUserId(userId: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag && GA_MEASUREMENT_ID) {
     gtag("config", GA_MEASUREMENT_ID, {
@@ -122,6 +129,7 @@ export function setUserProperties(properties: {
   has_completed_scan?: boolean;
   signup_source?: string;
 }) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("set", "user_properties", properties);
@@ -130,6 +138,7 @@ export function setUserProperties(properties: {
 
 // Clear user ID on logout
 export function clearUserId() {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag && GA_MEASUREMENT_ID) {
     gtag("config", GA_MEASUREMENT_ID, {
@@ -144,6 +153,7 @@ export function clearUserId() {
 
 // User signs up
 export function trackSignUp(method: string = "email") {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "sign_up", {
@@ -154,6 +164,7 @@ export function trackSignUp(method: string = "email") {
 
 // User logs in
 export function trackLogin(method: string = "email") {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "login", {
@@ -164,6 +175,7 @@ export function trackLogin(method: string = "email") {
 
 // User starts a scan
 export function trackScanStarted(scanType: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "scan_started", {
@@ -174,6 +186,7 @@ export function trackScanStarted(scanType: string) {
 
 // Scan completes
 export function trackScanCompleted(scanType: string, exposuresFound: number, sourcesChecked: number) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "scan_completed", {
@@ -186,6 +199,7 @@ export function trackScanCompleted(scanType: string, exposuresFound: number, sou
 
 // User requests data removal
 export function trackRemovalRequested(source: string, dataType: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "removal_requested", {
@@ -197,6 +211,7 @@ export function trackRemovalRequested(source: string, dataType: string) {
 
 // Removal completed successfully
 export function trackRemovalCompleted(source: string, daysToComplete: number) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "removal_completed", {
@@ -208,6 +223,7 @@ export function trackRemovalCompleted(source: string, daysToComplete: number) {
 
 // User completes profile
 export function trackProfileCompleted() {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "profile_completed", {
@@ -218,6 +234,7 @@ export function trackProfileCompleted() {
 
 // User marks manual review as done
 export function trackManualReviewCompleted(source: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "manual_review_completed", {
@@ -232,6 +249,7 @@ export function trackManualReviewCompleted(source: string) {
 
 // User views pricing page
 export function trackViewPricing() {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "view_item_list", {
@@ -248,6 +266,7 @@ export function trackViewPricing() {
 
 // User selects a plan
 export function trackSelectPlan(plan: string, price: number) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "select_item", {
@@ -260,6 +279,7 @@ export function trackSelectPlan(plan: string, price: number) {
 
 // User clicks checkout button
 export function trackBeginCheckout(plan: string, value: number) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "begin_checkout", {
@@ -277,6 +297,7 @@ export function trackBeginCheckout(plan: string, value: number) {
 
 // User adds payment info
 export function trackAddPaymentInfo(plan: string, value: number) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "add_payment_info", {
@@ -295,6 +316,7 @@ export function trackAddPaymentInfo(plan: string, value: number) {
 
 // Purchase completed (call from Stripe webhook or success page)
 export function trackPurchase(transactionId: string, plan: string, value: number) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "purchase", {
@@ -313,6 +335,7 @@ export function trackPurchase(transactionId: string, plan: string, value: number
 
 // User upgrades plan
 export function trackPlanUpgrade(fromPlan: string, toPlan: string, value: number) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "plan_upgrade", {
@@ -326,6 +349,7 @@ export function trackPlanUpgrade(fromPlan: string, toPlan: string, value: number
 
 // User cancels subscription
 export function trackSubscriptionCanceled(plan: string, reason?: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "subscription_canceled", {
@@ -341,6 +365,7 @@ export function trackSubscriptionCanceled(plan: string, reason?: string) {
 
 // Track feature usage
 export function trackFeatureUsed(featureName: string, details?: Record<string, unknown>) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "feature_used", {
@@ -352,6 +377,7 @@ export function trackFeatureUsed(featureName: string, details?: Record<string, u
 
 // Track scroll depth (call at 25%, 50%, 75%, 100%)
 export function trackScrollDepth(percentage: number, pagePath: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "scroll", {
@@ -363,6 +389,7 @@ export function trackScrollDepth(percentage: number, pagePath: string) {
 
 // Track time on page
 export function trackTimeOnPage(seconds: number, pagePath: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "timing_complete", {
@@ -375,6 +402,7 @@ export function trackTimeOnPage(seconds: number, pagePath: string) {
 
 // Track outbound link clicks
 export function trackOutboundLink(url: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "click", {
@@ -387,6 +415,7 @@ export function trackOutboundLink(url: string) {
 
 // Track file downloads
 export function trackDownload(fileName: string, fileType: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "file_download", {
@@ -398,6 +427,7 @@ export function trackDownload(fileName: string, fileType: string) {
 
 // Track search queries
 export function trackSearch(searchTerm: string, resultsCount?: number) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "search", {
@@ -409,6 +439,7 @@ export function trackSearch(searchTerm: string, resultsCount?: number) {
 
 // Track CTA clicks
 export function trackCTAClick(ctaName: string, ctaLocation: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "cta_click", {
@@ -420,6 +451,7 @@ export function trackCTAClick(ctaName: string, ctaLocation: string) {
 
 // Track video engagement
 export function trackVideoEngagement(action: "play" | "pause" | "complete", videoTitle: string, percentWatched?: number) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", `video_${action}`, {
@@ -435,6 +467,7 @@ export function trackVideoEngagement(action: "play" | "pause" | "complete", vide
 
 // Track application errors
 export function trackError(errorMessage: string, errorSource: string, fatal: boolean = false) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "exception", {
@@ -446,6 +479,7 @@ export function trackError(errorMessage: string, errorSource: string, fatal: boo
 
 // Track API errors
 export function trackAPIError(endpoint: string, statusCode: number, errorMessage?: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "api_error", {
@@ -462,6 +496,7 @@ export function trackAPIError(endpoint: string, statusCode: number, errorMessage
 
 // Track experiment exposure
 export function trackExperiment(experimentId: string, variantId: string) {
+  if (!isAnalyticsConsented()) return;
   const gtag = getGtag();
   if (gtag) {
     gtag("event", "experiment_impression", {

@@ -60,7 +60,7 @@ const cookieCategories = [
     category: "Analytics",
     description:
       "These cookies help us understand how visitors use our site so we can improve the experience. They collect anonymous usage data.",
-    legalBasis: "Consent (GDPR Art. 6(1)(a)) — for EU/EEA visitors, these cookies are only set after you provide consent via our cookie banner. Non-EU visitors may opt out via browser settings or DNT/GPC signals.",
+    legalBasis: "Consent (GDPR Art. 6(1)(a)) — these cookies are only set after you provide consent via our cookie consent banner. You can change your preferences at any time.",
     cookies: [
       {
         name: "_ga",
@@ -86,7 +86,7 @@ const cookieCategories = [
     category: "Marketing",
     description:
       "These cookies help us measure the effectiveness of our advertising and understand how visitors arrive at our site.",
-    legalBasis: "Consent (GDPR Art. 6(1)(a)) — for EU/EEA visitors, these cookies are only set after you provide consent via our cookie banner.",
+    legalBasis: "Consent (GDPR Art. 6(1)(a)) — these cookies are only set after you provide consent via our cookie consent banner. You can change your preferences at any time.",
     cookies: [
       {
         name: "_clck, _clsk",
@@ -98,6 +98,12 @@ const cookieCategories = [
         name: "_fbp",
         provider: "Meta (Facebook)",
         purpose: "Conversion tracking for ad campaigns. Note: Meta acts as a joint controller for data collected via this pixel. Meta's data processing is governed by Meta's own privacy policy.",
+        duration: "90 days",
+      },
+      {
+        name: "_gcl_au",
+        provider: "Google Ads",
+        purpose: "Stores conversion data for Google Ads campaigns. Used to attribute ad clicks to conversions on our site.",
         duration: "90 days",
       },
     ],
@@ -213,9 +219,9 @@ export default function CookiePolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">Cookie Consent for EU/EEA Visitors</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">Cookie Consent</h2>
             <p className="text-slate-400 mb-4">
-              In compliance with the EU ePrivacy Directive and GDPR, we display a cookie consent banner to visitors from the EU/EEA. Non-essential cookies (Analytics and Marketing categories) are not set until you provide explicit opt-in consent. You can change your cookie preferences at any time by clicking the &quot;Cookie Settings&quot; link in our website footer.
+              We display a cookie consent banner to all visitors. Non-essential cookies (Analytics and Marketing categories) are not set until you provide explicit opt-in consent. You can change your cookie preferences at any time by clicking the &quot;Cookie Settings&quot; link in our website footer.
             </p>
             <p className="text-slate-400">
               Strictly Necessary cookies do not require consent as they are essential for the website to function. These cookies are always active.

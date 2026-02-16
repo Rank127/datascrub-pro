@@ -3,11 +3,16 @@
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
 import { useEffect } from "react";
+import { useConsent } from "@/lib/consent/consent-context";
+import { isAnalyticsConsented } from "@/lib/consent/consent-utils";
 
 const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
+  const { effectiveConsent } = useConsent();
+
+  // Initialize PostHog once (with opt-out by default)
   useEffect(() => {
     if (!POSTHOG_KEY) return;
 
@@ -16,8 +21,9 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       person_profiles: "identified_only",
       capture_pageview: true,
       capture_pageleave: true,
-      ip: false, // Don't send IP addresses (GDPR)
-      property_denylist: ["$ip"], // Strip IP from all events
+      opt_out_capturing_by_default: true,
+      ip: false,
+      property_denylist: ["$ip"],
       loaded: (ph) => {
         if (process.env.NODE_ENV === "development") {
           ph.debug();
@@ -25,6 +31,17 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       },
     });
   }, []);
+
+  // React to consent changes
+  useEffect(() => {
+    if (!POSTHOG_KEY) return;
+
+    if (effectiveConsent.analytics) {
+      posthog.opt_in_capturing();
+    } else {
+      posthog.opt_out_capturing();
+    }
+  }, [effectiveConsent.analytics]);
 
   if (!POSTHOG_KEY) {
     return <>{children}</>;
@@ -35,12 +52,12 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
 // Track key conversion events
 export function trackEvent(event: string, properties?: Record<string, unknown>) {
-  if (!POSTHOG_KEY) return;
+  if (!POSTHOG_KEY || !isAnalyticsConsented()) return;
   posthog.capture(event, properties);
 }
 
 export function identifyUser(userId: string, properties?: Record<string, unknown>) {
-  if (!POSTHOG_KEY) return;
+  if (!POSTHOG_KEY || !isAnalyticsConsented()) return;
   posthog.identify(userId, properties);
 }
 

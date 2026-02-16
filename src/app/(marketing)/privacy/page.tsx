@@ -156,7 +156,7 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
               <li><strong className="text-slate-300">Contract Performance (Art. 6(1)(b)):</strong> Processing needed to provide our data removal service to you</li>
-              <li><strong className="text-slate-300">Consent (Art. 6(1)(a)):</strong> For optional features like marketing emails and analytics cookies. We obtain consent through clear opt-in mechanisms (e.g., checkbox on registration, cookie consent banner for EU visitors).</li>
+              <li><strong className="text-slate-300">Consent (Art. 6(1)(a)):</strong> For optional features like marketing emails and analytics cookies. We obtain consent through clear opt-in mechanisms (e.g., checkbox on registration, cookie consent banner shown to all visitors).</li>
               <li><strong className="text-slate-300">Legitimate Interest (Art. 6(1)(f)):</strong> For security monitoring, fraud prevention, and service improvement</li>
               <li><strong className="text-slate-300">Legal Obligation (Art. 6(1)(c)):</strong> For tax records, legal requests, and regulatory compliance</li>
             </ul>
@@ -289,11 +289,23 @@ export default function PrivacyPage() {
                     <td className="py-3 px-4">Anonymized usage data (IP anonymization enabled)</td>
                     <td className="py-3 px-4">US</td>
                   </tr>
-                  <tr>
+                  <tr className="border-b border-slate-800">
                     <td className="py-3 px-4 font-medium text-slate-300">Microsoft Clarity</td>
                     <td className="py-3 px-4">UX analytics (session recording, heatmaps)</td>
                     <td className="py-3 px-4">Anonymized interaction data</td>
                     <td className="py-3 px-4">US</td>
+                  </tr>
+                  <tr className="border-b border-slate-800">
+                    <td className="py-3 px-4 font-medium text-slate-300">Google Ads</td>
+                    <td className="py-3 px-4">Conversion tracking &amp; remarketing</td>
+                    <td className="py-3 px-4">Anonymized conversion events</td>
+                    <td className="py-3 px-4">US</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 font-medium text-slate-300">Meta (Facebook)</td>
+                    <td className="py-3 px-4">Conversion tracking (Meta Pixel)</td>
+                    <td className="py-3 px-4">Anonymized conversion events. Meta acts as joint controller for pixel data.</td>
+                    <td className="py-3 px-4">US/EU</td>
                   </tr>
                 </tbody>
               </table>
@@ -434,9 +446,9 @@ export default function PrivacyPage() {
             <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700 mb-6">
               <p className="text-slate-300 text-sm mb-2"><strong>EU Representative (GDPR Art. 27):</strong></p>
               <p className="text-slate-400 text-sm">
-                As we are established outside the EU/EEA, our EU Data Protection Representative can be contacted at{" "}
-                <a href="mailto:eu-representative@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">eu-representative@ghostmydata.com</a>.
-                EU/EEA residents may contact our representative for any matters relating to the processing of their personal data.
+                As we are established outside the EU/EEA, we are in the process of appointing an EU Data Protection Representative pursuant to GDPR Article 27. Once appointed, their contact details will be published here. In the meantime, EU/EEA residents may contact our Data Protection Officer at{" "}
+                <a href="mailto:dpo@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">dpo@ghostmydata.com</a>{" "}
+                for any matters relating to the processing of their personal data.
               </p>
             </div>
 

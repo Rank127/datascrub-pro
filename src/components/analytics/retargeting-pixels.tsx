@@ -2,6 +2,8 @@
 
 import { useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useConsent } from "@/lib/consent/consent-context";
+import { isMarketingConsented } from "@/lib/consent/consent-utils";
 
 // Environment variables for pixel IDs
 const FB_PIXEL_ID = process.env.NEXT_PUBLIC_FB_PIXEL_ID;
@@ -21,9 +23,12 @@ declare global {
 function RouteChangeTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { effectiveConsent } = useConsent();
 
   // Track page views on route change
   useEffect(() => {
+    if (!effectiveConsent.marketing) return;
+
     const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
 
     // Facebook page view
@@ -35,18 +40,17 @@ function RouteChangeTracker() {
     if (GOOGLE_ADS_ID && window.gtag) {
       window.gtag("config", GOOGLE_ADS_ID, { page_path: url });
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, effectiveConsent.marketing]);
 
   return null;
 }
 
 export function RetargetingPixels() {
+  const { effectiveConsent } = useConsent();
+
   // Initialize Facebook Pixel
   useEffect(() => {
-    if (!FB_PIXEL_ID) {
-      console.log("[Retargeting] Facebook Pixel not configured. Set NEXT_PUBLIC_FB_PIXEL_ID to enable.");
-      return;
-    }
+    if (!FB_PIXEL_ID || !effectiveConsent.marketing) return;
 
     // Initialize fbq
     const initFbq = () => {
@@ -80,14 +84,11 @@ export function RetargetingPixels() {
       const existingScript = document.querySelector('script[src*="fbevents.js"]');
       if (existingScript) existingScript.remove();
     };
-  }, []);
+  }, [effectiveConsent.marketing]);
 
   // Initialize Google Ads
   useEffect(() => {
-    if (!GOOGLE_ADS_ID) {
-      console.log("[Retargeting] Google Ads not configured. Set NEXT_PUBLIC_GOOGLE_ADS_ID to enable.");
-      return;
-    }
+    if (!GOOGLE_ADS_ID || !effectiveConsent.marketing) return;
 
     // Initialize dataLayer and gtag
     window.dataLayer = window.dataLayer || [];
@@ -107,7 +108,7 @@ export function RetargetingPixels() {
       const existingScript = document.querySelector(`script[src*="${GOOGLE_ADS_ID}"]`);
       if (existingScript) existingScript.remove();
     };
-  }, []);
+  }, [effectiveConsent.marketing]);
 
   return (
     <Suspense fallback={null}>
@@ -118,12 +119,14 @@ export function RetargetingPixels() {
 
 // Conversion tracking functions
 export function trackFacebookEvent(event: string, params?: Record<string, unknown>) {
+  if (!isMarketingConsented()) return;
   if (FB_PIXEL_ID && typeof window !== "undefined" && window.fbq) {
     window.fbq("track", event, params);
   }
 }
 
 export function trackGoogleConversion(conversionLabel?: string) {
+  if (!isMarketingConsented()) return;
   if (GOOGLE_ADS_ID && typeof window !== "undefined" && window.gtag) {
     const conversionId = conversionLabel || GOOGLE_ADS_CONVERSION_ID;
     if (conversionId) {

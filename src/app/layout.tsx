@@ -10,6 +10,8 @@ import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { MicrosoftClarity } from "@/components/analytics/microsoft-clarity";
 import { RetargetingPixels } from "@/components/analytics/retargeting-pixels";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
+import { ConsentProvider } from "@/lib/consent/consent-context";
+import { CookieConsentBanner } from "@/components/consent/cookie-consent-banner";
 import { QueryProvider } from "@/lib/query-provider";
 import { ToasterWrapper } from "@/components/ui/toaster-wrapper";
 import "./globals.css";
@@ -148,14 +150,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-white`}
       >
-        <GoogleAnalytics />
-        <MicrosoftClarity />
-        <RetargetingPixels />
-        <PostHogProvider>
-          <QueryProvider>
-            {children}
-          </QueryProvider>
-        </PostHogProvider>
+        <ConsentProvider>
+          <GoogleAnalytics />
+          <MicrosoftClarity />
+          <RetargetingPixels />
+          <PostHogProvider>
+            <QueryProvider>
+              {children}
+            </QueryProvider>
+          </PostHogProvider>
+          <CookieConsentBanner />
+        </ConsentProvider>
         <ToasterWrapper />
       </body>
     </html>

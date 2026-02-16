@@ -1,11 +1,14 @@
 "use client";
 
 import Script from "next/script";
+import { useConsent } from "@/lib/consent/consent-context";
 
 const CLARITY_PROJECT_ID = "v82teg4yu8";
 
 export function MicrosoftClarity() {
-  if (!CLARITY_PROJECT_ID) {
+  const { effectiveConsent } = useConsent();
+
+  if (!CLARITY_PROJECT_ID || !effectiveConsent.marketing) {
     return null;
   }
 

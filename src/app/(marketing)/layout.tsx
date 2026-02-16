@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MarketingWidgets } from "@/components/marketing/marketing-widgets";
+import { CookieSettingsButton } from "@/components/consent/cookie-settings-button";
 
 export default function MarketingLayout({
   children,
@@ -189,6 +190,9 @@ export default function MarketingLayout({
                   <Link href="/vulnerability-disclosure" className="hover:text-white">
                     Vulnerability Disclosure
                   </Link>
+                </li>
+                <li>
+                  <CookieSettingsButton />
                 </li>
               </ul>
             </div>
