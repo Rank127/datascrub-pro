@@ -322,15 +322,15 @@ export interface GrowthMetrics {
 }
 
 // Plan pricing in cents for MRR calculation
-// Sale prices (40% OFF from $19.99 and $49.99)
+// Annual pricing, effective Feb 2026 (50%/55% OFF annual plans)
 export const PLAN_PRICING = {
   FREE: 0,
-  PRO: 1199, // $11.99 (40% OFF from $19.99)
-  ENTERPRISE: 2999, // $29.99 (40% OFF from $49.99)
+  PRO: 11988, // $119.88/year ($9.99/mo effective, 50% OFF)
+  ENTERPRISE: 26995, // $269.95/year ($22.50/mo effective, 55% OFF)
 } as const;
 
 export const PLAN_ORIGINAL_PRICING = {
   FREE: 0,
-  PRO: 1999, // $19.99
-  ENTERPRISE: 4999, // $49.99
+  PRO: 23988, // $239.88/year ($19.99/mo × 12)
+  ENTERPRISE: 59988, // $599.88/year ($49.99/mo × 12)
 } as const;

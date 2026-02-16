@@ -53,15 +53,15 @@ export const BUSINESS_CONTEXT: BusinessContext = {
     },
     {
       name: "Pro",
-      price: "$19.99/mo (40% OFF: $11.99/mo)",
+      price: "$119.88/year ($9.99/mo effective, 50% OFF from $19.99/mo)",
       features:
-        "Full automated removal, weekly monitoring, CCPA/GDPR requests, priority support, dark web monitoring.",
+        "Full automated removal, weekly monitoring, CCPA/GDPR requests, priority support, dark web monitoring. Annual billing only.",
     },
     {
       name: "Enterprise",
-      price: "$49.99/mo (40% OFF: $29.99/mo)",
+      price: "$269.95/year ($22.50/mo effective, 55% OFF from $49.99/mo)",
       features:
-        "Everything in Pro + family plan (up to 5 members), dedicated support, advanced analytics, API access.",
+        "Everything in Pro + family plan (up to 5 members), dedicated support, advanced analytics, API access. Annual billing only.",
     },
   ],
 
@@ -109,7 +109,7 @@ export const BUSINESS_CONTEXT: BusinessContext = {
     "Family plans with shared management dashboard",
     "Real-time exposure monitoring with instant alerts",
     "AI-powered support and ticket routing",
-    "Competitive pricing ($19.99/mo, currently 40% OFF at $11.99/mo vs $10-25/mo industry average)",
+    "Competitive annual pricing ($119.88/year, $9.99/mo effective — 50% OFF vs $10-25/mo industry average)",
   ],
 
   competitiveIntelligence: {

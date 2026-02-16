@@ -44,7 +44,7 @@ const faqs = [
   },
   {
     question: "How much does Optery cost?",
-    answer: "Optery has 6 pricing tiers: Core $3.99/mo, Extended $14.99/mo, and Ultimate $24.99/mo (annual billing). GhostMyData has a free tier with Pro at $11.99/mo (40% OFF) with more features included.",
+    answer: "Optery has 6 pricing tiers: Core $3.99/mo, Extended $14.99/mo, and Ultimate $24.99/mo (annual billing). GhostMyData has a free tier with Pro at $9.99/mo (billed annually at $119.88/year, 50% OFF) with more features included.",
   },
   {
     question: "Does Optery have dark web monitoring?",
@@ -67,7 +67,7 @@ const faqs = [
 const comparisonData = [
   {
     feature: "Starting Price",
-    ghostmydata: "Free (paid from $19.99/mo, 40% OFF)",
+    ghostmydata: "Free (paid from $9.99/mo billed annually, 50% OFF)",
     optery: "$3.25/mo (annual billing)",
     winner: "optery",
   },
@@ -277,11 +277,11 @@ export default function CompareOpteryPage() {
               </div>
               <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
                 <span className="text-slate-300">Pro Plan</span>
-                <span><span className="line-through text-slate-500 mr-1">$19.99</span><span className="text-white font-semibold">$11.99/mo</span></span>
+                <span><span className="line-through text-slate-500 mr-1">$19.99</span><span className="text-white font-semibold">$9.99/mo</span></span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-300">Enterprise (dark web)</span>
-                <span><span className="line-through text-slate-500 mr-1">$49.99</span><span className="text-white font-semibold">$29.99/mo</span></span>
+                <span><span className="line-through text-slate-500 mr-1">$49.99</span><span className="text-white font-semibold">$22.50/mo</span></span>
               </div>
             </div>
             <p className="text-emerald-400 text-sm mt-4">

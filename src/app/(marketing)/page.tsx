@@ -409,13 +409,14 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-xl font-semibold text-white">Pro</h3>
-                  <span className="px-2 py-0.5 bg-red-500/90 text-white text-xs font-bold rounded-full">40% OFF</span>
+                  <span className="px-2 py-0.5 bg-red-500/90 text-white text-xs font-bold rounded-full">50% OFF</span>
                 </div>
                 <div className="mb-4">
                   <div className="text-sm text-slate-500 line-through">$19.99/month</div>
                   <div className="text-3xl font-bold text-white">
-                    $11.99<span className="text-sm font-normal text-slate-400">/month</span>
+                    $9.99<span className="text-sm font-normal text-slate-400">/mo</span>
                   </div>
+                  <div className="text-xs text-slate-500 mt-1">Billed annually at $119.88</div>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {[
@@ -441,13 +442,14 @@ export default function HomePage() {
               <div className="relative p-6 bg-slate-800/50 rounded-xl border border-slate-700 card-hover-glow">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-xl font-semibold text-white">Enterprise</h3>
-                  <span className="px-2 py-0.5 bg-red-500/90 text-white text-xs font-bold rounded-full">40% OFF</span>
+                  <span className="px-2 py-0.5 bg-red-500/90 text-white text-xs font-bold rounded-full">55% OFF</span>
                 </div>
                 <div className="mb-4">
                   <div className="text-sm text-slate-500 line-through">$49.99/month</div>
                   <div className="text-3xl font-bold text-white">
-                    $29.99<span className="text-sm font-normal text-slate-400">/month</span>
+                    $22.50<span className="text-sm font-normal text-slate-400">/mo</span>
                   </div>
+                  <div className="text-xs text-slate-500 mt-1">Billed annually at $269.95</div>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {[

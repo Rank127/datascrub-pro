@@ -119,7 +119,7 @@ export function FinanceSection({ data }: FinanceSectionProps) {
           value={data.subscriptionsByPlan.PRO}
           icon={Users}
           variant="info"
-          subtitle={`$${((data.subscriptionsByPlan.PRO * 1199) / 100).toLocaleString()}/mo`}
+          subtitle={`$${((data.subscriptionsByPlan.PRO * 999) / 100).toLocaleString()}/mo`}
           onClick={() => setDialogType("pro")}
         />
         <MetricCard
@@ -127,7 +127,7 @@ export function FinanceSection({ data }: FinanceSectionProps) {
           value={data.subscriptionsByPlan.ENTERPRISE}
           icon={Users}
           variant="success"
-          subtitle={`$${((data.subscriptionsByPlan.ENTERPRISE * 2999) / 100).toLocaleString()}/mo`}
+          subtitle={`$${((data.subscriptionsByPlan.ENTERPRISE * 2250) / 100).toLocaleString()}/mo`}
           onClick={() => setDialogType("enterprise")}
         />
         <MetricCard
@@ -178,14 +178,14 @@ export function FinanceSection({ data }: FinanceSectionProps) {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-blue-400">Pro</span>
                 <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                  <span className="line-through text-slate-500 mr-1">$19.99</span> $11.99/mo
+                  <span className="line-through text-slate-500 mr-1">$19.99</span> $9.99/mo
                 </Badge>
               </div>
               <p className="text-2xl font-bold text-white">
                 {data.subscriptionsByPlan.PRO.toLocaleString()}
               </p>
               <p className="text-xs text-slate-500 mt-1">
-                ${((data.subscriptionsByPlan.PRO * 1199) / 100).toLocaleString()}/mo revenue
+                ${((data.subscriptionsByPlan.PRO * 999) / 100).toLocaleString()}/mo revenue
               </p>
             </div>
 
@@ -196,14 +196,14 @@ export function FinanceSection({ data }: FinanceSectionProps) {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-emerald-400">Enterprise</span>
                 <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                  <span className="line-through text-slate-500 mr-1">$49.99</span> $29.99/mo
+                  <span className="line-through text-slate-500 mr-1">$49.99</span> $22.50/mo
                 </Badge>
               </div>
               <p className="text-2xl font-bold text-white">
                 {data.subscriptionsByPlan.ENTERPRISE.toLocaleString()}
               </p>
               <p className="text-xs text-slate-500 mt-1">
-                ${((data.subscriptionsByPlan.ENTERPRISE * 2999) / 100).toLocaleString()}/mo revenue
+                ${((data.subscriptionsByPlan.ENTERPRISE * 2250) / 100).toLocaleString()}/mo revenue
               </p>
             </div>
           </div>

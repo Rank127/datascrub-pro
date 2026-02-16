@@ -180,9 +180,9 @@ export default function ScanPage() {
           "Dedicated support & removal verification",
           "Dark web monitoring",
         ],
-        price: "$29.99/month",
+        price: "$22.50/mo",
         originalPrice: "$49.99/month",
-        savings: "40% OFF — 30-day money-back guarantee",
+        savings: "55% OFF — Billed annually at $269.95. 30-day money-back guarantee",
         cta: "Protect My Data Now",
         urgency: critical > 0 ? "URGENT: Your data is at critical risk" : "Your identity is at high risk",
       };
@@ -201,9 +201,9 @@ export default function ScanPage() {
         "Email & form opt-out automation",
         "Removal tracking dashboard",
       ],
-      price: "$11.99/month",
+      price: "$9.99/mo",
       originalPrice: "$19.99/month",
-      savings: "40% OFF — Limited time sale",
+      savings: "50% OFF — Billed annually at $119.88. 30-day money-back guarantee",
       cta: "Start Removing My Data",
       urgency: high > 0 ? "Act now to protect your privacy" : "Take control of your data",
     };

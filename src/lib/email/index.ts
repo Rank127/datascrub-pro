@@ -1655,7 +1655,7 @@ export async function sendFreeUserExposureDigest(
         Let us handle it for you.
       </p>
       <a href="${APP_URL}/pricing" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 16px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
-        Upgrade to PRO - $19.99 $11.99/mo (40% OFF)
+        Upgrade to PRO - $19.99 $9.99/mo (50% OFF, billed annually)
       </a>
       <p style="margin-top: 12px; color: #64748b; font-size: 12px;">
         Automated removals • Weekly monitoring • Priority support

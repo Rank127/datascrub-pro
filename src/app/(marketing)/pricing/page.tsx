@@ -7,7 +7,7 @@ import { AnimatedSection, AnimatedCard } from "@/components/marketing/animated-s
 export const metadata: Metadata = {
   title: "Pricing - Affordable Data Removal Plans",
   description:
-    "Choose free, Pro ($19.99/mo), or Enterprise data removal plans. 40% OFF sale. Automated removal, continuous monitoring, and dark web protection.",
+    "Choose free, Pro ($9.99/mo billed annually), or Enterprise data removal plans. Up to 55% OFF. Automated removal, continuous monitoring, and dark web protection.",
   keywords: [
     "data removal pricing",
     "privacy protection cost",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Pricing - GhostMyData Data Removal Plans",
     description:
-      "Affordable data removal plans starting free. Pro plan $19.99/mo (40% OFF) with automated removal.",
+      "Affordable data removal plans starting free. Pro plan $9.99/mo billed annually (50% OFF) with automated removal.",
     url: "https://ghostmydata.com/pricing",
     type: "website",
     images: [
@@ -58,8 +58,9 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$11.99",
+    price: "$9.99",
     originalPrice: "$19.99",
+    annualPrice: "$119.88/year",
     description: "Full protection for individuals",
     features: [
       { text: "Unlimited email scans", included: true },
@@ -77,8 +78,9 @@ const plans = [
   },
   {
     name: "Enterprise",
-    price: "$29.99",
+    price: "$22.50",
     originalPrice: "$49.99",
+    annualPrice: "$269.95/year",
     description: "Complete protection for families",
     features: [
       { text: "Everything in Pro", included: true },
@@ -106,7 +108,7 @@ const faqs = [
   {
     question: "Can I cancel anytime?",
     answer:
-      "Yes. Cancel any time you want. You keep access until your paid period ends. No fees to cancel.",
+      "Yes. All paid plans are billed annually. Cancel any time you want. Within 30 days of purchase, you get a full refund. After 30 days, you keep access until your annual period ends. No fees to cancel.",
   },
   {
     question: "What payment methods do you accept?",
@@ -116,7 +118,7 @@ const faqs = [
   {
     question: "Do you offer refunds?",
     answer:
-      "Yes. We have a 30-day money-back promise. If you're not happy, we refund you. Just ask support.",
+      "Yes. Full refund within 30 days of purchase, no questions asked. After 30 days, you keep full access until your annual billing period ends — no partial refunds.",
   },
   {
     question: "What's in the family plan?",
@@ -212,8 +214,11 @@ export default function PricingPage() {
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
-                  {plan.originalPrice && (
-                    <span className="px-2 py-0.5 bg-red-500/90 text-white text-xs font-bold rounded-full">40% OFF</span>
+                  {plan.originalPrice && plan.name === "Pro" && (
+                    <span className="px-2 py-0.5 bg-red-500/90 text-white text-xs font-bold rounded-full">50% OFF</span>
+                  )}
+                  {plan.originalPrice && plan.name === "Enterprise" && (
+                    <span className="px-2 py-0.5 bg-red-500/90 text-white text-xs font-bold rounded-full">55% OFF</span>
                   )}
                 </div>
                 <div className="mb-2">
@@ -222,8 +227,11 @@ export default function PricingPage() {
                   )}
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-white">{plan.price}</span>
-                    <span className="text-slate-400">/month</span>
+                    <span className="text-slate-400">/mo</span>
                   </div>
+                  {(plan as typeof plans[number] & { annualPrice?: string }).annualPrice && (
+                    <div className="text-xs text-slate-500 mt-1">Billed annually at {(plan as typeof plans[number] & { annualPrice?: string }).annualPrice}</div>
+                  )}
                 </div>
                 <p className="text-slate-400">{plan.description}</p>
               </div>

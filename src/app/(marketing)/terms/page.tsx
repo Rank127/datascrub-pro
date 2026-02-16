@@ -270,7 +270,7 @@ export default function TermsPage() {
 
             <h3 className="text-xl font-medium text-white mb-3">10.2 How Billing Works</h3>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
-              <li>Paid plans bill monthly or yearly in advance</li>
+              <li>All paid plans are billed annually in advance</li>
               <li>We use Stripe for secure payments (PCI-DSS Level 1 compliant)</li>
               <li>Prices are in US dollars</li>
               <li>You let us charge your card for your plan</li>
@@ -280,9 +280,9 @@ export default function TermsPage() {
             <h3 className="text-xl font-medium text-white mb-3">10.3 Canceling and Refunds</h3>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
               <li>Cancel any time in settings or by email</li>
-              <li>You keep access until your paid period ends</li>
-              <li><strong className="text-emerald-400">30-Day Money Back Guarantee:</strong> Request a full refund within 30 days of your first payment. No questions asked.</li>
-              <li>After 30 days, we don&apos;t give refunds for the current period</li>
+              <li><strong className="text-emerald-400">30-Day Money Back Guarantee:</strong> Full refund within 30 days of purchase. No questions asked.</li>
+              <li>After 30 days, no refund for the current annual period</li>
+              <li>On cancellation, you retain full access until your annual billing period ends</li>
               <li>No partial refunds after the 30-day window</li>
               <li>Refunds take 5-10 business days to process</li>
               <li>Think we charged you wrong? Tell us within 30 days</li>

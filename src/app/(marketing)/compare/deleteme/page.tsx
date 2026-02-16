@@ -44,7 +44,7 @@ const faqs = [
   },
   {
     question: "How much does DeleteMe cost?",
-    answer: "DeleteMe uses a credit-based pricing model starting at $129/year with no monthly option. They also charge a $55 chargeback processing fee. GhostMyData has a free tier and paid plans from $19.99/month (currently 40% OFF at $11.99/month) with no hidden fees.",
+    answer: "DeleteMe uses a credit-based pricing model starting at $129/year with no monthly option. They also charge a $55 chargeback processing fee. GhostMyData has a free tier and paid plans from $9.99/mo (billed annually at $119.88/year, 50% OFF) with no hidden fees.",
   },
   {
     question: "Which service covers more data brokers?",
@@ -67,7 +67,7 @@ const faqs = [
 const comparisonData = [
   {
     feature: "Starting Price",
-    ghostmydata: "Free (paid from $19.99/mo, 40% OFF)",
+    ghostmydata: "Free (paid from $9.99/mo billed annually, 50% OFF)",
     deleteme: "$10.75/mo (billed annually, credit-based)",
     winner: "ghostmydata",
   },
@@ -211,7 +211,7 @@ export default function CompareDeleteMePage() {
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">Better Pricing</h3>
           <p className="text-slate-400">
-            GhostMyData has a free tier. Paid plans start at $19.99/mo (40% OFF: $11.99/mo).
+            GhostMyData has a free tier. Paid plans start at $9.99/mo (billed annually at $119.88/year, 50% OFF).
             DeleteMe costs $129/year with no monthly option.
           </p>
         </div>
@@ -289,16 +289,16 @@ export default function CompareDeleteMePage() {
                 <span className="text-white font-semibold">$0</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
-                <span className="text-slate-300">Pro Plan (monthly)</span>
-                <span><span className="line-through text-slate-500 mr-1">$19.99</span><span className="text-white font-semibold">$11.99/mo</span></span>
+                <span className="text-slate-300">Pro Plan (annual)</span>
+                <span><span className="line-through text-slate-500 mr-1">$19.99</span><span className="text-white font-semibold">$9.99/mo</span></span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
                 <span className="text-slate-300">Pro Plan (annual)</span>
-                <span><span className="line-through text-slate-500 mr-1">$159.88</span><span className="text-white font-semibold">$95.88/yr</span></span>
+                <span><span className="line-through text-slate-500 mr-1">$239.88</span><span className="text-white font-semibold">$119.88/yr</span></span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-300">Enterprise (with dark web)</span>
-                <span><span className="line-through text-slate-500 mr-1">$49.99</span><span className="text-white font-semibold">$29.99/mo</span></span>
+                <span><span className="line-through text-slate-500 mr-1">$49.99</span><span className="text-white font-semibold">$22.50/mo</span></span>
               </div>
             </div>
           </div>

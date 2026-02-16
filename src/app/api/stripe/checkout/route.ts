@@ -14,7 +14,7 @@ const PLAN_HIERARCHY: Record<string, number> = {
 
 const checkoutSchema = z.object({
   plan: z.enum(["PRO", "ENTERPRISE"]),
-  billingPeriod: z.enum(["monthly", "yearly"]).optional().default("monthly"),
+  billingPeriod: z.enum(["monthly", "yearly"]).optional().default("yearly"),
 });
 
 export async function POST(request: Request) {

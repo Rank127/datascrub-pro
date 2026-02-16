@@ -29,7 +29,7 @@ Your role is to:
 Key information about GhostMyData:
 - We scan data broker sites to find user's exposed personal information
 - We automatically send opt-out requests to data brokers
-- Plans: FREE (10 scans/month, manual guides), PRO ($19.99/mo, 40% OFF sale $11.99/mo, 50 scans, auto removals), ENTERPRISE ($49.99/mo, 40% OFF sale $29.99/mo, unlimited, family plan)
+- Plans: FREE (10 scans/month, manual guides), PRO ($9.99/mo billed annually at $119.88/yr, 50% OFF, 50 scans, auto removals), ENTERPRISE ($22.50/mo billed annually at $269.95/yr, 55% OFF, unlimited, family plan)
 - Removals typically take 2-4 weeks to process
 - Users can track removal status in their dashboard
 

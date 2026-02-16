@@ -228,8 +228,9 @@ function SettingsContent() {
     },
     {
       name: "PRO",
-      price: "$11.99",
+      price: "$9.99",
       originalPrice: "$19.99",
+      annualPrice: "$119.88/year",
       features: [
         "50 scans/month",
         "Automated removals",
@@ -242,8 +243,9 @@ function SettingsContent() {
     },
     {
       name: "ENTERPRISE",
-      price: "$29.99",
+      price: "$22.50",
       originalPrice: "$49.99",
+      annualPrice: "$269.95/year",
       features: [
         "Unlimited scans",
         "Dark web monitoring",
@@ -640,15 +642,18 @@ function SettingsContent() {
                       {plan.originalPrice && (
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs text-slate-500 line-through">{plan.originalPrice}/mo</span>
-                          <span className="px-1.5 py-0.5 bg-red-500/90 text-white text-[10px] font-bold rounded-full">40% OFF</span>
+                          <span className="px-1.5 py-0.5 bg-red-500/90 text-white text-[10px] font-bold rounded-full">{plan.name === "PRO" ? "50% OFF" : "55% OFF"}</span>
                         </div>
                       )}
                       <span className="text-2xl font-bold text-white">
                         {plan.price}
                         <span className="text-sm font-normal text-slate-400">
-                          /month
+                          /mo
                         </span>
                       </span>
+                      {(plan as typeof plans[number] & { annualPrice?: string }).annualPrice && (
+                        <div className="text-[10px] text-slate-500 mt-0.5">Billed annually at {(plan as typeof plans[number] & { annualPrice?: string }).annualPrice}</div>
+                      )}
                     </div>
                     <ul className="space-y-2 mb-3">
                       {plan.features.map((feature) => (

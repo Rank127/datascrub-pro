@@ -25,9 +25,11 @@ const PLANS = {
     name: "Pro",
     badge: "Most Popular",
     badgeColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    price: "$11.99",
+    price: "$9.99",
     originalPrice: "$19.99",
-    period: "/month",
+    period: "/mo",
+    annualPrice: "$119.88/year",
+    discount: "50% OFF",
     icon: <Zap className="h-6 w-6 text-emerald-400" />,
     features: [
       "50 scans per month",
@@ -43,9 +45,11 @@ const PLANS = {
     name: "Enterprise",
     badge: "Maximum Protection",
     badgeColor: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    price: "$29.99",
+    price: "$22.50",
     originalPrice: "$49.99",
-    period: "/month",
+    period: "/mo",
+    annualPrice: "$269.95/year",
+    discount: "55% OFF",
     icon: <Crown className="h-6 w-6 text-purple-400" />,
     features: [
       "Unlimited scans",
@@ -164,7 +168,7 @@ function CheckoutContent() {
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planKey }),
+        body: JSON.stringify({ plan: planKey, billingPeriod: "yearly" }),
       });
 
       const data = await response.json();
@@ -404,7 +408,7 @@ function CheckoutContent() {
                   </div>
                 </div>
                 <span className="px-2 py-1 bg-red-500/90 text-white text-xs font-bold rounded-full">
-                  40% OFF
+                  {plan.discount}
                 </span>
               </div>
 
@@ -417,6 +421,7 @@ function CheckoutContent() {
                   <span className="text-4xl font-bold text-white">{plan.price}</span>
                   <span className="text-slate-400">{plan.period}</span>
                 </div>
+                <div className="text-xs text-slate-500 mt-1">Billed annually at {plan.annualPrice}</div>
               </div>
 
               {/* Features */}
@@ -490,7 +495,7 @@ function CheckoutContent() {
                 The average identity theft victim spends <span className="text-white font-semibold">$1,343</span> out of pocket and <span className="text-white font-semibold">200+ hours</span> resolving it.
               </p>
               <p className="text-xs text-slate-400">
-                Your protection costs just {plan.price}/mo — less than a coffee a week.
+                Your protection costs just {plan.price}/mo (billed annually) — less than a coffee a week.
               </p>
             </div>
 
@@ -535,7 +540,7 @@ function CheckoutContent() {
                 )}
               </Button>
               <p className="text-xs text-slate-500 text-center">
-                Cancel anytime. No hidden fees.
+                30-day money-back guarantee. Cancel anytime.
               </p>
             </div>
           </div>

@@ -44,11 +44,11 @@ const faqs = [
   },
   {
     question: "How much does Incogni cost?",
-    answer: "Incogni costs $6.49/month yearly or $12.99/month. Their new Protect tier with NordProtect bundle costs $41.48/month and includes $1M identity theft insurance. GhostMyData has a free tier and paid plans from $11.99/month (40% OFF) with more features.",
+    answer: "Incogni costs $6.49/month yearly or $12.99/month. Their new Protect tier with NordProtect bundle costs $41.48/month and includes $1M identity theft insurance. GhostMyData has a free tier and paid plans from $9.99/mo (billed annually at $119.88/year, 50% OFF) with more features.",
   },
   {
     question: "Does Incogni have dark web monitoring?",
-    answer: "No, not in the standard plan. Incogni only does data broker removal unless you buy the NordProtect Protect tier at $41.48/month. GhostMyData includes dark web alerts in Enterprise for $29.99/month.",
+    answer: "No, not in the standard plan. Incogni only does data broker removal unless you buy the NordProtect Protect tier at $41.48/month. GhostMyData includes dark web alerts in Enterprise for $22.50/mo (billed annually).",
   },
   {
     question: "Can I try these for free?",
@@ -67,7 +67,7 @@ const faqs = [
 const comparisonData = [
   {
     feature: "Starting Price",
-    ghostmydata: "Free (paid from $19.99/mo, 40% OFF)",
+    ghostmydata: "Free (paid from $9.99/mo billed annually, 50% OFF)",
     incogni: "$6.49/mo (annual) or $12.99/mo",
     winner: "ghostmydata",
   },
@@ -272,11 +272,11 @@ export default function CompareIncogniPage() {
               </div>
               <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
                 <span className="text-slate-300">Pro Plan</span>
-                <span><span className="line-through text-slate-500 mr-1">$19.99</span><span className="text-white font-semibold">$11.99/mo</span></span>
+                <span><span className="line-through text-slate-500 mr-1">$19.99</span><span className="text-white font-semibold">$9.99/mo</span></span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-300">Enterprise (dark web)</span>
-                <span><span className="line-through text-slate-500 mr-1">$49.99</span><span className="text-white font-semibold">$29.99/mo</span></span>
+                <span><span className="line-through text-slate-500 mr-1">$49.99</span><span className="text-white font-semibold">$22.50/mo</span></span>
               </div>
             </div>
             <p className="text-emerald-400 text-sm mt-4">

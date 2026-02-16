@@ -63,12 +63,13 @@ export function UpgradeBanner() {
       )}
       <div className="flex items-baseline gap-1 mb-1">
         <span className="text-xs text-slate-500 line-through">$19.99/mo</span>
-        <span className="px-1.5 py-0.5 bg-red-500/90 text-white text-[10px] font-bold rounded-full">40% OFF</span>
+        <span className="px-1.5 py-0.5 bg-red-500/90 text-white text-[10px] font-bold rounded-full">50% OFF</span>
       </div>
-      <div className="flex items-baseline gap-1 mb-3">
-        <span className="text-lg font-bold text-white">$11.99</span>
+      <div className="flex items-baseline gap-1 mb-1">
+        <span className="text-lg font-bold text-white">$9.99</span>
         <span className="text-xs text-slate-400">/mo</span>
       </div>
+      <p className="text-[10px] text-slate-500 mb-3">Billed annually at $119.88</p>
       <Button
         size="sm"
         className="w-full bg-emerald-600 hover:bg-emerald-700 text-sm"

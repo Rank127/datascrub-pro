@@ -34,10 +34,10 @@ export const PRICE_IDS = {
   ENTERPRISE_YEARLY: process.env.STRIPE_ENTERPRISE_YEARLY_PRICE_ID || "price_enterprise_yearly",
 } as const;
 
-// Plan to Price mapping
+// Plan to Price mapping (annual-only billing)
 export const PLAN_TO_PRICE = {
-  PRO: PRICE_IDS.PRO_MONTHLY,
-  ENTERPRISE: PRICE_IDS.ENTERPRISE_MONTHLY,
+  PRO: PRICE_IDS.PRO_YEARLY,
+  ENTERPRISE: PRICE_IDS.ENTERPRISE_YEARLY,
 } as const;
 
 // Price to Plan mapping

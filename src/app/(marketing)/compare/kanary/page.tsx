@@ -45,7 +45,7 @@ const faqs = [
   },
   {
     question: "How much does Kanary cost compared to GhostMyData?",
-    answer: "Kanary has a free Community tier, Professional at $9.99/month, and a 50% family member discount. GhostMyData offers a free tier and paid plans starting at $11.99/month (40% OFF) with more features included.",
+    answer: "Kanary has a free Community tier, Professional at $9.99/month, and a 50% family member discount. GhostMyData offers a free tier and paid plans starting at $9.99/mo (billed annually at $119.88/year, 50% OFF) with more features included.",
   },
   {
     question: "Does Kanary have a mobile app?",
@@ -64,7 +64,7 @@ const faqs = [
 const comparisonData = [
   {
     feature: "Starting Price",
-    ghostmydata: "Free (paid from $19.99/mo, 40% OFF)",
+    ghostmydata: "Free (paid from $9.99/mo billed annually, 50% OFF)",
     kanary: "Free (Professional $9.99/mo)",
     winner: "ghostmydata",
   },
@@ -283,11 +283,11 @@ export default function CompareKanaryPage() {
               </div>
               <div className="flex justify-between items-center py-2 border-b border-emerald-500/20">
                 <span className="text-slate-300">Pro Plan</span>
-                <span><span className="line-through text-slate-500 mr-1">$19.99</span><span className="text-white font-semibold">$11.99/mo</span></span>
+                <span><span className="line-through text-slate-500 mr-1">$19.99</span><span className="text-white font-semibold">$9.99/mo</span></span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-300">Enterprise (dark web)</span>
-                <span><span className="line-through text-slate-500 mr-1">$49.99</span><span className="text-white font-semibold">$29.99/mo</span></span>
+                <span><span className="line-through text-slate-500 mr-1">$49.99</span><span className="text-white font-semibold">$22.50/mo</span></span>
               </div>
             </div>
             <p className="text-emerald-400 text-sm mt-4">
@@ -332,7 +332,7 @@ export default function CompareKanaryPage() {
             "AI Shield with 60 additional sources",
             "Free tier with full scan capability",
             "Do Not Call Registry integration",
-            "Lower sale price ($11.99 vs $14.99)",
+            "Lower sale price ($9.99 vs $14.99)",
             "Custom removal requests (Enterprise)",
           ].map((benefit) => (
             <div key={benefit} className="flex items-center gap-3 p-4 bg-slate-800/50 rounded-lg">
