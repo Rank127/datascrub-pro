@@ -1,8 +1,15 @@
 export const CONSENT_COOKIE_NAME = "cookie-consent";
 
+/** Bump this when the cookie/privacy policy changes to re-prompt users */
+export const CONSENT_VERSION = 1;
+
 export interface ConsentPreferences {
   analytics: boolean;
   marketing: boolean;
+}
+
+interface StoredConsent extends ConsentPreferences {
+  v: number;
 }
 
 export function readConsentCookie(): ConsentPreferences | null {
@@ -22,7 +29,11 @@ export function readConsentCookie(): ConsentPreferences | null {
       typeof parsed.analytics === "boolean" &&
       typeof parsed.marketing === "boolean"
     ) {
-      return parsed as ConsentPreferences;
+      // Treat outdated consent versions as no consent (re-prompt)
+      if (typeof parsed.v === "number" && parsed.v < CONSENT_VERSION) {
+        return null;
+      }
+      return { analytics: parsed.analytics, marketing: parsed.marketing };
     }
     return null;
   } catch {
@@ -33,9 +44,11 @@ export function readConsentCookie(): ConsentPreferences | null {
 export function writeConsentCookie(prefs: ConsentPreferences): void {
   if (typeof document === "undefined") return;
 
-  const value = encodeURIComponent(JSON.stringify(prefs));
+  const stored: StoredConsent = { ...prefs, v: CONSENT_VERSION };
+  const value = encodeURIComponent(JSON.stringify(stored));
   const maxAge = 365 * 24 * 60 * 60; // 1 year
-  document.cookie = `${CONSENT_COOKIE_NAME}=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${CONSENT_COOKIE_NAME}=${value}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
 }
 
 export function hasPrivacySignal(): boolean {
