@@ -581,7 +581,7 @@ function CheckoutContent() {
             {/* Testimonial */}
             <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-5">
               <p className="text-sm text-slate-300 italic mb-3">
-                &quot;Within a week of upgrading, GhostMyData had already removed my data from 15 broker sites. Worth every penny.&quot;
+                &quot;In my first month, GhostMyData removed my data from 15 broker sites. Worth every penny.&quot;
               </p>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
