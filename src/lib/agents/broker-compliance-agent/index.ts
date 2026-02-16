@@ -113,10 +113,15 @@ export async function validateOptOutUrls(
       // Consume body to avoid memory leaks on open connections
       await response.text().catch(() => {});
       httpStatus = response.status;
-      isHealthy = httpStatus >= 200 && httpStatus < 400;
+      // 2xx-3xx = healthy, 403 = bot protection (indeterminate, not broken),
+      // 404/410/5xx = genuinely broken
+      isHealthy = httpStatus >= 200 && httpStatus < 400 || httpStatus === 403;
     } catch (err) {
       error = err instanceof Error ? err.message : String(err);
-      isHealthy = false;
+      // Network failures (fetch failed, aborted) from serverless are often
+      // geo-blocks or DNS issues for international sites — treat as indeterminate
+      const isNetworkError = error.includes("fetch failed") || error.includes("aborted");
+      isHealthy = isNetworkError; // Don't flag network errors as broken
     }
 
     const responseTimeMs = Date.now() - startMs;
