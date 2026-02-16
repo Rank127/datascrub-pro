@@ -33,33 +33,41 @@ export async function GET(request: Request) {
       analyzeFeatureGaps(),
     ]);
 
+    // Defensive: ensure arrays exist even if agent returns partial data
+    const changes = monitorResult.changes || [];
+    const gaps = gapResult.gaps || [];
+    const advantages = gapResult.advantages || [];
+    const recommendations = gapResult.recommendations || [];
+
     // Store snapshot in DB
     const snapshot = await prisma.competitorSnapshot.create({
       data: {
-        competitorsMonitored: monitorResult.monitored,
-        changesDetected: monitorResult.changes.length,
-        gapsAnalyzed: gapResult.analyzed,
-        advantagesFound: gapResult.advantages.length,
-        highImpactAlerts: monitorResult.changes.filter((c) => c.impact === "HIGH").length,
-        gapAnalysis: JSON.stringify(gapResult.gaps),
-        recommendations: JSON.stringify(gapResult.recommendations),
-        advantages: JSON.stringify(gapResult.advantages),
+        competitorsMonitored: monitorResult.monitored || 0,
+        changesDetected: changes.length,
+        gapsAnalyzed: gapResult.analyzed || 0,
+        advantagesFound: advantages.length,
+        highImpactAlerts: changes.filter((c) => c.impact === "HIGH").length,
+        gapAnalysis: JSON.stringify(gaps),
+        recommendations: JSON.stringify(recommendations),
+        advantages: JSON.stringify(advantages),
         duration: Date.now() - startTime,
         status: "SUCCESS",
-        changes: {
-          create: monitorResult.changes.map((change) => ({
-            competitor: change.competitor,
-            changeType: change.changeType,
-            description: change.description,
-            impact: change.impact,
-            detectedAt: new Date(change.detectedAt),
-          })),
-        },
+        changes: changes.length > 0
+          ? {
+              create: changes.map((change) => ({
+                competitor: change.competitor,
+                changeType: change.changeType,
+                description: change.description,
+                impact: change.impact,
+                detectedAt: new Date(change.detectedAt),
+              })),
+            }
+          : undefined,
       },
     });
 
     // Send alert email for HIGH impact changes
-    const highImpactChanges = monitorResult.changes.filter((c) => c.impact === "HIGH");
+    const highImpactChanges = changes.filter((c) => c.impact === "HIGH");
     if (highImpactChanges.length > 0) {
       await sendAlertEmail(highImpactChanges);
     }
@@ -70,25 +78,25 @@ export async function GET(request: Request) {
       jobName: JOB_NAME,
       status: "SUCCESS",
       duration,
-      message: `Monitored ${monitorResult.monitored} competitors. ${monitorResult.changes.length} changes detected (${highImpactChanges.length} high impact). ${gapResult.gaps.length} gaps, ${gapResult.advantages.length} advantages.`,
+      message: `Monitored ${monitorResult.monitored || 0} competitors. ${changes.length} changes detected (${highImpactChanges.length} high impact). ${gaps.length} gaps, ${advantages.length} advantages.`,
       metadata: {
         snapshotId: snapshot.id,
-        changesDetected: monitorResult.changes.length,
+        changesDetected: changes.length,
         highImpactAlerts: highImpactChanges.length,
-        gapsFound: gapResult.gaps.length,
-        advantagesFound: gapResult.advantages.length,
-        recommendationsCount: gapResult.recommendations.length,
+        gapsFound: gaps.length,
+        advantagesFound: advantages.length,
+        recommendationsCount: recommendations.length,
       },
     });
 
     return NextResponse.json({
       success: true,
       snapshotId: snapshot.id,
-      monitored: monitorResult.monitored,
-      changesDetected: monitorResult.changes.length,
+      monitored: monitorResult.monitored || 0,
+      changesDetected: changes.length,
       highImpactAlerts: highImpactChanges.length,
-      gaps: gapResult.gaps.length,
-      advantages: gapResult.advantages.length,
+      gaps: gaps.length,
+      advantages: advantages.length,
       duration,
     });
   } catch (error) {
