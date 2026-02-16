@@ -22,6 +22,10 @@ import {
   UserPlus,
   BarChart3,
   FileText,
+  Receipt,
+  CalendarClock,
+  Mail,
+  AlertCircle,
 } from "lucide-react";
 import { CorporateMetrics } from "@/lib/executive/types";
 import {
@@ -295,7 +299,89 @@ function QuarterlyReports() {
   );
 }
 
-// --- F) Competitive Positioning ---
+// --- F) Net 30 Invoice Billing ---
+function Net30Billing() {
+  const timeline = [
+    {
+      icon: Receipt,
+      day: "Day 0",
+      title: "Invoice Created & Sent",
+      description: "Stripe invoice generated with Net 30 terms. Sent automatically to company admin email.",
+    },
+    {
+      icon: CalendarClock,
+      day: "Day 1-29",
+      title: "Payment Window",
+      description: "Customer can pay via hosted invoice link (card, ACH, wire). Stripe tracks status automatically.",
+    },
+    {
+      icon: Mail,
+      day: "Day 25",
+      title: "Reminder Sent",
+      description: "Stripe auto-sends payment reminder 5 days before due date.",
+    },
+    {
+      icon: AlertCircle,
+      day: "Day 30+",
+      title: "Overdue Handling",
+      description: "If unpaid, account suspended. Stripe marks invoice overdue and sends final notice.",
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Receipt className="h-5 w-5 text-violet-400" />
+        <h3 className="text-lg font-semibold text-white">Net 30 Invoice Billing</h3>
+        <Badge className="bg-emerald-500/20 text-emerald-300 text-xs">Stripe Invoicing</Badge>
+      </div>
+      <p className="text-sm text-slate-400">
+        Corporate accounts at 50+ seats use Net 30 invoice billing via Stripe. Invoices are created, sent, and tracked automatically.
+        Smaller tiers pay upfront via standard checkout.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {timeline.map((step) => (
+          <Card key={step.day} className="bg-slate-800/60 border-slate-700">
+            <CardContent className="pt-6 space-y-3">
+              <div className="flex items-center gap-3">
+                <step.icon className="h-5 w-5 text-violet-400" />
+                <Badge variant="outline" className="border-violet-500/50 text-violet-300 text-xs">
+                  {step.day}
+                </Badge>
+              </div>
+              <h4 className="font-medium text-white">{step.title}</h4>
+              <p className="text-sm text-slate-400">{step.description}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Card className="bg-slate-800/60 border-slate-700">
+        <CardContent className="pt-6">
+          <h4 className="font-medium text-white mb-3">Billing Service Capabilities</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {[
+              "Create Stripe customer per corporate account",
+              "Generate Net 30 invoices with line items",
+              "Automatic invoice finalization and sending",
+              "Family add-on seats as separate line items",
+              "Hosted payment page (card, ACH, wire)",
+              "Auto-activate account on payment",
+              "Auto-suspend on overdue (30+ days)",
+              "Invoice history and PDF downloads",
+            ].map((cap) => (
+              <div key={cap} className="flex items-start gap-2 text-sm text-slate-300">
+                <Check className="h-4 w-4 text-emerald-400 mt-0.5 shrink-0" />
+                <span>{cap}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// --- G) Competitive Positioning ---
 function CompetitivePositioning() {
   const competitors = [
     {
@@ -437,7 +523,8 @@ function LaunchStatus({ data }: { data?: CorporateMetrics }) {
   const checklist = [
     { label: "Database models created", done: true },
     { label: "Pricing structure finalized", done: true },
-    { label: "Admin review dashboard (this tab)", done: true },
+    { label: "Admin review dashboard", done: true },
+    { label: "Net 30 invoice billing service", done: true },
     { label: "Create Stripe products & prices", done: false },
     { label: "Build public corporate landing page", done: false },
     { label: "Build corporate checkout flow", done: false },
@@ -522,6 +609,7 @@ export function CorporateSection({ data }: { data?: CorporateMetrics }) {
       <FamilyAddon />
       <QrOnboarding />
       <QuarterlyReports />
+      <Net30Billing />
       <CompetitivePositioning />
       <RevenueProjections />
       <LaunchStatus data={data} />
