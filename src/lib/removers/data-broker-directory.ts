@@ -11288,8 +11288,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   SULEKHA_IN_EXT: {
     name: "Sulekha India Extended",
-    optOutUrl: "https://www.sulekha.com/privacy",
-    privacyEmail: "privacy@sulekha.com",
+    optOutUrl: "https://www.sulekha.com/collateral/privacy",
+    privacyEmail: "care@sulekha.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
   },
@@ -11302,7 +11302,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   TRADEINDIA: {
     name: "TradeIndia",
-    optOutUrl: "https://www.tradeindia.com/privacy",
+    optOutUrl: "https://www.tradeindia.com/privacy_policy.html",
     privacyEmail: "privacy@tradeindia.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
@@ -11330,8 +11330,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   YELLOWPAGES_TH_V2: {
     name: "Yellow Pages Thailand",
-    optOutUrl: "https://www.yellowpages.co.th/privacy",
-    privacyEmail: "privacy@yellowpages.co.th",
+    optOutUrl: "https://www.yellowpages.co.th/en/privacy-policy",
+    privacyEmail: "DPOOFFICE@ais.co.th",
     removalMethod: "EMAIL",
     estimatedDays: 30,
   },

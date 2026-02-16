@@ -114,8 +114,9 @@ export async function validateOptOutUrls(
       await response.text().catch(() => {});
       httpStatus = response.status;
       // 2xx-3xx = healthy, 403 = bot protection (indeterminate, not broken),
-      // 405 = method not allowed (page exists), 404/410/5xx = genuinely broken
-      isHealthy = (httpStatus >= 200 && httpStatus < 400) || httpStatus === 403 || httpStatus === 405;
+      // 405 = method not allowed (page exists), 429 = rate limited (page exists),
+      // 404/410/5xx = genuinely broken
+      isHealthy = (httpStatus >= 200 && httpStatus < 400) || httpStatus === 403 || httpStatus === 405 || httpStatus === 429;
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);
       const errName = err instanceof Error ? err.name : "";
