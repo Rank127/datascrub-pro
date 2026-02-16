@@ -3148,51 +3148,10 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
 
   // ==========================================
-  // EMAIL VERIFICATION SERVICES
+  // EMAIL VERIFICATION SERVICES — ENTIRE CATEGORY REMOVED
+  // These are SaaS tools, NOT data brokers. Removed Feb 16 2026 (GDPR DSR compliance).
+  // Removed: ZEROBOUNCE, NEVERBOUNCE, KICKBOX, DEBOUNCE, EMAILLISTVERIFY, CLEAROUT
   // ==========================================
-  ZEROBOUNCE: {
-    name: "ZeroBounce",
-    optOutUrl: "https://www.zerobounce.net/privacy-policy/",
-    privacyEmail: "privacy@zerobounce.net",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-    notes: "IMPORTANT: Requires identity verification. If user is a customer, they must confirm last payment date. For non-customers, standard email removal may work.",
-  },
-  NEVERBOUNCE: {
-    name: "NeverBounce",
-    optOutUrl: "https://neverbounce.com/privacy-policy",
-    privacyEmail: "privacy@neverbounce.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  KICKBOX: {
-    name: "Kickbox",
-    optOutUrl: "https://kickbox.com/privacy",
-    privacyEmail: "privacy@kickbox.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  DEBOUNCE: {
-    name: "DeBounce",
-    optOutUrl: "https://debounce.io/privacy-policy/",
-    privacyEmail: "privacy@debounce.io",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  EMAILLISTVERIFY: {
-    name: "EmailListVerify",
-    optOutUrl: "https://emaillistverify.com/privacy-policy",
-    privacyEmail: "privacy@emaillistverify.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  CLEAROUT: {
-    name: "Clearout",
-    optOutUrl: "https://clearout.io/privacy-policy",
-    privacyEmail: "privacy@clearout.io",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
 
   // ==========================================
   // DEVICE & IDENTITY GRAPHS
@@ -4813,20 +4772,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "EMAIL",
     estimatedDays: 14,
   },
-  ZEROBOUNCE_DATA: {
-    name: "ZeroBounce",
-    optOutUrl: "https://www.zerobounce.net/privacy",
-    privacyEmail: "privacy@zerobounce.net",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
-  KICKBOX_DATA: {
-    name: "Kickbox",
-    optOutUrl: "https://kickbox.com/privacy/",
-    privacyEmail: "privacy@kickbox.com",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
+  // REMOVED: ZEROBOUNCE_DATA, KICKBOX_DATA — not data brokers (Feb 16 2026, GDPR DSR compliance)
   EMAILAGE: {
     name: "Emailage (LexisNexis)",
     optOutUrl: "https://www.lexisnexis.com/en-us/privacy/privacy-policy.page",
@@ -12804,9 +12750,7 @@ export const BROKER_CATEGORIES = {
   INSURANCE_RISK: [
     "LN_RISK_SOLUTIONS", "VERISK", "CLUE_REPORT", "ISO_CLAIMS"
   ],
-  EMAIL_VERIFICATION: [
-    "ZEROBOUNCE", "NEVERBOUNCE", "KICKBOX", "DEBOUNCE", "EMAILLISTVERIFY", "CLEAROUT"
-  ],
+  // EMAIL_VERIFICATION: [] — ENTIRE CATEGORY REMOVED (not data brokers, Feb 16 2026)
   IDENTITY_GRAPHS: [
     "DRAWBRIDGE", "CROSSWISE", "IQVIA", "ID5", "SHAREDID"
   ],
@@ -13121,8 +13065,7 @@ export const BROKER_CATEGORIES = {
   ],
   IDENTITY_RESOLUTION: [
     "FULLCONTACT", "PIPL_ENTERPRISE", "PEOPLEDATALABS", "VERSIUM_DATA",
-    "TOWERDATA", "BIGDBM", "ZEROBOUNCE_DATA", "NEVERBOUNCE_DATA",
-    "KICKBOX_DATA", "EMAILAGE"
+    "TOWERDATA", "BIGDBM", "EMAILAGE"
   ],
   ALTERNATIVE_CREDIT: [
     "CHEXSYSTEMS_CREDIT", "CERTEGY_CHECK", "TELECHECK", "NCTUE_UTILITY",

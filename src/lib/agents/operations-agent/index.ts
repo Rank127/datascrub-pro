@@ -1060,12 +1060,7 @@ class OperationsAgent extends BaseAgent {
       },
 
       // Requires Manual Action
-      {
-        broker: "ZEROBOUNCE",
-        patterns: [/zerobounce/i, /verify your identity/i],
-        category: "REQUIRES_MANUAL",
-        instructions: "Verify identity: Confirm last payment date to ZeroBounce",
-      },
+      // REMOVED: ZEROBOUNCE — not a data broker (Feb 16 2026, GDPR DSR compliance)
       {
         broker: "STABILITY_AI",
         patterns: [/stability\.ai|stability ai/i, /delete account.*button|fill out this form/i],
