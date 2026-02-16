@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { CheckCircle, X, Shield } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle, X, Shield, ArrowRight, Building2 } from "lucide-react";
 import { FAQSchema, PricingSchema } from "@/components/seo/structured-data";
 import { PricingButton, PricingPageTracker } from "@/components/pricing/pricing-button";
 import { AnimatedSection, AnimatedCard } from "@/components/marketing/animated-sections";
@@ -266,6 +267,26 @@ export default function PricingPage() {
           </AnimatedCard>
         ))}
       </div>
+
+      {/* Corporate Cross-Sell Banner */}
+      <AnimatedSection>
+        <div className="max-w-2xl mx-auto mb-16 p-6 bg-violet-500/10 rounded-xl border border-violet-500/20 text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Building2 className="h-5 w-5 text-violet-400" />
+            <span className="text-sm font-semibold text-violet-300">Corporate Plans</span>
+          </div>
+          <p className="text-slate-400 mb-3">
+            Looking for team plans? Protect your entire workforce with volume discounts up to 56% off.
+          </p>
+          <Link
+            href="/corporate"
+            className="inline-flex items-center gap-1 text-violet-400 hover:text-violet-300 font-medium text-sm"
+          >
+            See Corporate pricing
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </AnimatedSection>
 
       {/* 30-Day Money-Back Guarantee */}
       <AnimatedSection>

@@ -43,6 +43,12 @@ export default function MarketingLayout({
                 Pricing
               </Link>
               <Link
+                href="/corporate"
+                className="text-slate-300 hover:text-white transition-colors"
+              >
+                Corporate
+              </Link>
+              <Link
                 href="/remove-from"
                 className="text-slate-300 hover:text-white transition-colors"
               >
@@ -94,6 +100,11 @@ export default function MarketingLayout({
                 <li>
                   <Link href="/pricing" className="hover:text-white">
                     Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/corporate" className="hover:text-white">
+                    Corporate
                   </Link>
                 </li>
                 <li>
