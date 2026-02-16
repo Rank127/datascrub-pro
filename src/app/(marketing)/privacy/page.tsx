@@ -154,12 +154,31 @@ export default function PrivacyPage() {
             <p className="text-slate-400 mb-4">
               We process your data under these legal bases, as defined in GDPR Article 6:
             </p>
-            <ul className="list-disc list-inside text-slate-400 space-y-2">
+            <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
               <li><strong className="text-slate-300">Contract Performance (Art. 6(1)(b)):</strong> Processing needed to provide our data removal service to you</li>
-              <li><strong className="text-slate-300">Consent (Art. 6(1)(a)):</strong> For optional features like marketing emails and analytics cookies</li>
+              <li><strong className="text-slate-300">Consent (Art. 6(1)(a)):</strong> For optional features like marketing emails and analytics cookies. We obtain consent through clear opt-in mechanisms (e.g., checkbox on registration, cookie consent banner for EU visitors).</li>
               <li><strong className="text-slate-300">Legitimate Interest (Art. 6(1)(f)):</strong> For security monitoring, fraud prevention, and service improvement</li>
               <li><strong className="text-slate-300">Legal Obligation (Art. 6(1)(c)):</strong> For tax records, legal requests, and regulatory compliance</li>
             </ul>
+
+            <h3 className="text-xl font-medium text-white mb-3">3.1 Sensitive Data (GDPR Art. 9)</h3>
+            <p className="text-slate-400 mb-4">
+              When you optionally provide sensitive data such as Social Security Numbers for dark web monitoring, we process this under:
+            </p>
+            <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
+              <li><strong className="text-slate-300">Explicit Consent (Art. 9(2)(a)):</strong> You explicitly opt in before providing sensitive information. SSNs are immediately hashed (SHA-256 with unique salt) and the plaintext is never stored.</li>
+              <li><strong className="text-slate-300">Substantial Public Interest (Art. 9(2)(g)):</strong> Processing necessary for identity theft prevention and protection of individuals against data broker exploitation</li>
+            </ul>
+
+            <h3 className="text-xl font-medium text-white mb-3">3.2 Automated Decision-Making (GDPR Art. 22)</h3>
+            <p className="text-slate-400 mb-4">
+              Our service uses AI-assisted automation for scan processing, ticket routing, and removal request optimization. These automated processes assist our service delivery but do not produce legal or similarly significant effects on users. No decisions about your account status, plan features, or data access are made solely by automated means without human oversight. You may contact us at any time to request human review of any automated decision.
+            </p>
+
+            <h3 className="text-xl font-medium text-white mb-3">3.3 Data Protection Impact Assessment</h3>
+            <p className="text-slate-400">
+              We conduct Data Protection Impact Assessments (DPIAs) as required by GDPR Article 35 for processing activities that are likely to result in a high risk to individuals, including our data scanning and removal operations involving sensitive personal data.
+            </p>
           </section>
 
           <section>
@@ -258,10 +277,22 @@ export default function PrivacyPage() {
                     <td className="py-3 px-4">Anonymous usage events</td>
                     <td className="py-3 px-4">US/EU</td>
                   </tr>
-                  <tr>
+                  <tr className="border-b border-slate-800">
                     <td className="py-3 px-4 font-medium text-slate-300">Sentry</td>
                     <td className="py-3 px-4">Error monitoring</td>
                     <td className="py-3 px-4">Error logs (no PII)</td>
+                    <td className="py-3 px-4">US</td>
+                  </tr>
+                  <tr className="border-b border-slate-800">
+                    <td className="py-3 px-4 font-medium text-slate-300">Google Analytics</td>
+                    <td className="py-3 px-4">Web analytics</td>
+                    <td className="py-3 px-4">Anonymized usage data (IP anonymization enabled)</td>
+                    <td className="py-3 px-4">US</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 font-medium text-slate-300">Microsoft Clarity</td>
+                    <td className="py-3 px-4">UX analytics (session recording, heatmaps)</td>
+                    <td className="py-3 px-4">Anonymized interaction data</td>
                     <td className="py-3 px-4">US</td>
                   </tr>
                 </tbody>
@@ -280,16 +311,21 @@ export default function PrivacyPage() {
             <p className="text-slate-400 mb-4">
               We use strong security to protect your data:
             </p>
-            <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li><strong className="text-slate-300">Storage:</strong> AES-256 encryption with AWS KMS key management</li>
+            <ul className="list-disc list-inside text-slate-400 space-y-2 mb-6">
+              <li><strong className="text-slate-300">Storage:</strong> AES-256-GCM authenticated encryption with unique initialization vectors per operation</li>
               <li><strong className="text-slate-300">Transfer:</strong> TLS 1.3 encrypted connections (HSTS enforced)</li>
-              <li><strong className="text-slate-300">Passwords:</strong> Hashed with bcrypt (cost factor 12)</li>
+              <li><strong className="text-slate-300">Passwords:</strong> Hashed with bcrypt (cost factor 12). Never stored in plain text.</li>
               <li><strong className="text-slate-300">SSNs:</strong> SHA-256 hashed with unique salt. Never stored in plain text.</li>
-              <li><strong className="text-slate-300">Access:</strong> Staff only see what they need (least privilege)</li>
-              <li><strong className="text-slate-300">Hosting:</strong> SOC 2 Type II compliant infrastructure</li>
-              <li><strong className="text-slate-300">Testing:</strong> Regular third-party penetration testing</li>
+              <li><strong className="text-slate-300">Access:</strong> Staff only see what they need (least privilege). Role-based access control with full audit logging.</li>
+              <li><strong className="text-slate-300">Hosting:</strong> SOC 2 Type II compliant infrastructure (Vercel/AWS)</li>
+              <li><strong className="text-slate-300">Testing:</strong> Automated vulnerability scanning and code review on every deployment. See our <Link href="/vulnerability-disclosure" className="text-emerald-400 hover:text-emerald-300 underline">Vulnerability Disclosure Policy</Link>.</li>
               <li><strong className="text-slate-300">Monitoring:</strong> 24/7 security monitoring with Sentry (PII excluded)</li>
             </ul>
+
+            <h3 className="text-xl font-medium text-white mb-3">6.1 Breach Notification</h3>
+            <p className="text-slate-400">
+              In the event of a personal data breach that poses a risk to your rights and freedoms, we will notify the relevant supervisory authority within 72 hours per GDPR Article 33. Where the breach is likely to result in a high risk to you, we will also notify affected users without undue delay per GDPR Article 34. For California residents, we will provide notification as required by Cal. Civ. Code &sect; 1798.82.
+            </p>
           </section>
 
           <section>
@@ -369,8 +405,11 @@ export default function PrivacyPage() {
               <li><strong className="text-slate-300">Right to Correct (&sect; 1798.106):</strong> Fix inaccurate personal information</li>
               <li><strong className="text-slate-300">Right to Limit (&sect; 1798.121):</strong> Limit use of sensitive personal information</li>
             </ul>
-            <p className="text-slate-400 mb-6">
+            <p className="text-slate-400 mb-4">
               To exercise your CCPA rights, email <a href="mailto:privacy@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">privacy@ghostmydata.com</a>. We respond within 45 days.
+            </p>
+            <p className="text-slate-400 mb-6">
+              <strong className="text-slate-300">Authorized Agents:</strong> You may designate an authorized agent to exercise your CCPA rights on your behalf. To do so, the agent must provide a signed, written authorization from you, and we may require you to verify your identity directly with us before processing the request.
             </p>
 
             <h3 className="text-xl font-medium text-white mb-3">8.3 Europe (GDPR)</h3>
@@ -384,13 +423,22 @@ export default function PrivacyPage() {
               <li><strong className="text-slate-300">Right to Restrict Processing (Art. 18):</strong> Limit how we use your data</li>
               <li><strong className="text-slate-300">Right to Data Portability (Art. 20):</strong> Receive your data in a portable format</li>
               <li><strong className="text-slate-300">Right to Object (Art. 21):</strong> Object to processing based on legitimate interest</li>
+              <li><strong className="text-slate-300">Right Not to Be Subject to Automated Decisions (Art. 22):</strong> Object to decisions based solely on automated processing that significantly affect you</li>
               <li><strong className="text-slate-300">Right to Withdraw Consent (Art. 7(3)):</strong> Withdraw consent at any time</li>
               <li><strong className="text-slate-300">Right to Lodge a Complaint (Art. 77):</strong> File a complaint with your supervisory authority</li>
             </ul>
-            <p className="text-slate-400 mb-6">
+            <p className="text-slate-400 mb-4">
               We process your data to run our service, with your consent, and to keep things safe.
               Our Data Protection Officer can be reached at <a href="mailto:dpo@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">dpo@ghostmydata.com</a>. We respond within 30 days per GDPR Article 12.
             </p>
+            <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700 mb-6">
+              <p className="text-slate-300 text-sm mb-2"><strong>EU Representative (GDPR Art. 27):</strong></p>
+              <p className="text-slate-400 text-sm">
+                As we are established outside the EU/EEA, our EU Data Protection Representative can be contacted at{" "}
+                <a href="mailto:eu-representative@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">eu-representative@ghostmydata.com</a>.
+                EU/EEA residents may contact our representative for any matters relating to the processing of their personal data.
+              </p>
+            </div>
 
             <h3 className="text-xl font-medium text-white mb-3">8.4 Canada (PIPEDA)</h3>
             <p className="text-slate-400 mb-4">
@@ -443,7 +491,7 @@ export default function PrivacyPage() {
               <li><strong className="text-slate-300">Marketing:</strong> Microsoft Clarity, conversion tracking pixels</li>
             </ul>
             <p className="text-slate-400">
-              We honor Do Not Track signals. For full details on each cookie, how to manage them, and your choices, see our <Link href="/cookies" className="text-emerald-400 hover:text-emerald-300 underline">Cookie Policy</Link>.
+              We honor Do Not Track (DNT) and Global Privacy Control (GPC) signals from your browser. When we detect either signal, we disable non-essential analytics and marketing cookies for your session. For full details on each cookie, how to manage them, and your choices, see our <Link href="/cookies" className="text-emerald-400 hover:text-emerald-300 underline">Cookie Policy</Link>.
             </p>
           </section>
 
@@ -460,20 +508,25 @@ export default function PrivacyPage() {
             <p className="text-slate-400 mb-4">
               Questions? Want to use your rights? Reach out:
             </p>
-            <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+            <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 space-y-3">
+              <div>
+                <p className="text-slate-300 font-medium">GhostMyData (operated by Rank127 LLC)</p>
+                <p className="text-slate-400 text-sm">A Delaware limited liability company</p>
+                <p className="text-slate-400 text-sm">8 The Green, Suite A, Dover, DE 19901, United States</p>
+              </div>
               <p className="text-slate-300">
                 <strong>Privacy:</strong>{" "}
                 <a href="mailto:privacy@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                   privacy@ghostmydata.com
                 </a>
               </p>
-              <p className="text-slate-300 mt-2">
+              <p className="text-slate-300">
                 <strong>DPO:</strong>{" "}
                 <a href="mailto:dpo@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                   dpo@ghostmydata.com
                 </a>
               </p>
-              <p className="text-slate-300 mt-2">
+              <p className="text-slate-300">
                 <strong>Support:</strong>{" "}
                 <a href="mailto:support@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                   support@ghostmydata.com

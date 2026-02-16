@@ -74,7 +74,7 @@ export default function TermsPage() {
             <ul className="list-disc list-inside text-slate-400 space-y-2">
               <li><strong className="text-slate-300">&quot;Service&quot;</strong> means the GhostMyData website, applications, and all related tools and features</li>
               <li><strong className="text-slate-300">&quot;User,&quot; &quot;You,&quot; &quot;Your&quot;</strong> means anyone who uses our Service</li>
-              <li><strong className="text-slate-300">&quot;We,&quot; &quot;Us,&quot; &quot;Our&quot;</strong> means GhostMyData</li>
+              <li><strong className="text-slate-300">&quot;We,&quot; &quot;Us,&quot; &quot;Our&quot;</strong> means GhostMyData, a service operated by Rank127 LLC, a Delaware limited liability company with its principal address at 8 The Green, Suite A, Dover, DE 19901, United States</li>
               <li><strong className="text-slate-300">&quot;Personal Data&quot;</strong> means info that can identify you</li>
               <li><strong className="text-slate-300">&quot;Subscription&quot;</strong> means a paid plan</li>
               <li><strong className="text-slate-300">&quot;Data Broker&quot;</strong> means any company, website, or service that collects, aggregates, and sells or licenses personal information about consumers, including people-search sites, background check services, and data aggregators</li>
@@ -165,7 +165,12 @@ export default function TermsPage() {
               Keep your info up to date.
             </p>
 
-            <h3 className="text-xl font-medium text-white mb-3">5.2 Keeping It Safe</h3>
+            <h3 className="text-xl font-medium text-white mb-3">5.2 Electronic Signatures (E-SIGN Act)</h3>
+            <p className="text-slate-400 mb-4">
+              By creating an account, you consent to transact with us electronically pursuant to the Electronic Signatures in Global and National Commerce Act (E-SIGN Act, 15 U.S.C. &sect; 7001 et seq.). You agree that your electronic acceptance of these Terms constitutes a valid, binding agreement equivalent to a handwritten signature. You may withdraw this consent by deleting your account.
+            </p>
+
+            <h3 className="text-xl font-medium text-white mb-3">5.3 Keeping It Safe</h3>
             <p className="text-slate-400 mb-4">You must:</p>
             <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
               <li>Keep your password secret</li>
@@ -208,6 +213,9 @@ export default function TermsPage() {
             <p className="text-slate-400 mb-4">
               This authorization lasts while your account is active. Delete your account to revoke it.
             </p>
+            <p className="text-slate-400 mb-4">
+              <strong className="text-slate-300">CCPA Authorized Agent:</strong> By creating an account and initiating removal requests, you designate GhostMyData as your authorized agent under CCPA &sect; 1798.185(a)(7) to submit data deletion requests to data brokers on your behalf. This authorization constitutes your signed, written permission as defined by the California Attorney General&apos;s regulations.
+            </p>
 
             <h3 className="text-xl font-medium text-white mb-3">7.1 What We Don&apos;t Do</h3>
             <p className="text-slate-400 mb-4">Our authorization scope does not include:</p>
@@ -247,7 +255,7 @@ export default function TermsPage() {
               <li><strong className="text-slate-300">Scope:</strong> Data broker sites, people-search engines, and background check services</li>
               <li><strong className="text-slate-300">Exclusions:</strong> Social media profiles, government databases, court records, news articles, and content you posted yourself</li>
               <li><strong className="text-slate-300">Processing:</strong> Custom requests are reviewed and processed within 5 business days</li>
-              <li><strong className="text-slate-300">Limits:</strong> Subject to fair use. Excessive requests may be rate-limited.</li>
+              <li><strong className="text-slate-300">Limits:</strong> Up to 100 custom requests per month for Pro users, 250 for Enterprise. Requests exceeding these thresholds may be queued for the next billing period.</li>
             </ul>
           </section>
 
@@ -280,7 +288,18 @@ export default function TermsPage() {
               <li>Think we charged you wrong? Tell us within 30 days</li>
             </ul>
 
-            <h3 className="text-xl font-medium text-white mb-3">10.4 Free Trials</h3>
+            <h3 className="text-xl font-medium text-white mb-3">10.4 Auto-Renewal Disclosure (FTC Negative Option Rule)</h3>
+            <p className="text-slate-400 mb-4">
+              In compliance with the FTC&apos;s Negative Option Rule (16 CFR Part 425):
+            </p>
+            <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
+              <li>All paid subscriptions automatically renew at the end of each billing period at the then-current price</li>
+              <li>You will receive an email reminder at least 7 days before each renewal</li>
+              <li>You can cancel at any time through your account settings or by emailing support — cancellation takes effect at the end of the current billing period</li>
+              <li>We provide a simple, accessible cancellation mechanism at the same level of ease as sign-up</li>
+            </ul>
+
+            <h3 className="text-xl font-medium text-white mb-3">10.5 Free Trials</h3>
             <p className="text-slate-400">
               We may offer free trials. Your paid plan starts when the trial ends. Cancel before then to avoid charges.
               We&apos;ll let you know before we charge you.
@@ -369,6 +388,9 @@ export default function TermsPage() {
               <li>OUR TOTAL LIABILITY IS LIMITED TO THE GREATER OF (A) $100 OR (B) THE TOTAL FEES PAID BY YOU IN THE 12 MONTHS PRECEDING THE CLAIM</li>
               <li>WE ARE NOT LIABLE FOR THIRD-PARTY ACTIONS INCLUDING DATA BROKER NON-COMPLIANCE OR DATA BREACHES AT THIRD-PARTY SERVICES</li>
             </ul>
+            <p className="text-slate-400 mb-4">
+              <strong className="text-slate-300">Exception:</strong> These limitations do not apply to liability arising from our gross negligence, willful misconduct, or fraud.
+            </p>
             <p className="text-slate-400">
               Some jurisdictions don&apos;t allow these limitations. If that applies to you, our liability is limited to the maximum extent permitted by your local law.
             </p>
@@ -398,13 +420,13 @@ export default function TermsPage() {
               <li>Do something illegal or abusive</li>
               <li>Don&apos;t pay</li>
               <li>Get flagged by law enforcement</li>
-              <li>Don&apos;t use your account for a long time</li>
+              <li>Have an inactive account for 12 or more consecutive months (we will email you 30 days before terminating an inactive account)</li>
             </ul>
 
             <h3 className="text-xl font-medium text-white mb-3">16.3 What Happens After</h3>
             <p className="text-slate-400">
               When your account ends, you lose access. We may keep some data as the law requires.
-              Some parts of these Terms still apply after you leave (Sections 14, 15, 17, and 18).
+              Some parts of these Terms still apply after you leave (Sections 12, 14, 15, 17, and 18).
             </p>
           </section>
 
@@ -494,14 +516,18 @@ export default function TermsPage() {
             <p className="text-slate-400 mb-4">
               Questions? Reach out:
             </p>
-            <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+            <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 space-y-3">
+              <div>
+                <p className="text-slate-300 font-medium">GhostMyData (operated by Rank127 LLC)</p>
+                <p className="text-slate-400 text-sm">8 The Green, Suite A, Dover, DE 19901, United States</p>
+              </div>
               <p className="text-slate-300">
                 <strong>Legal:</strong>{" "}
                 <a href="mailto:legal@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                   legal@ghostmydata.com
                 </a>
               </p>
-              <p className="text-slate-300 mt-2">
+              <p className="text-slate-300">
                 <strong>Support:</strong>{" "}
                 <a href="mailto:support@ghostmydata.com" className="text-emerald-400 hover:text-emerald-300">
                   support@ghostmydata.com

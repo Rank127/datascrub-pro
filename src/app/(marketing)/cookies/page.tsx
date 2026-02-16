@@ -34,6 +34,7 @@ const cookieCategories = [
     category: "Strictly Necessary",
     description:
       "These cookies are required for our site to work. They handle login sessions, security tokens, and CSRF protection. You cannot disable them.",
+    legalBasis: "Legitimate Interest (GDPR Art. 6(1)(f)) — these cookies are essential for the service to function and do not require consent.",
     cookies: [
       {
         name: "next-auth.session-token",
@@ -59,12 +60,19 @@ const cookieCategories = [
     category: "Analytics",
     description:
       "These cookies help us understand how visitors use our site so we can improve the experience. They collect anonymous usage data.",
+    legalBasis: "Consent (GDPR Art. 6(1)(a)) — for EU/EEA visitors, these cookies are only set after you provide consent via our cookie banner. Non-EU visitors may opt out via browser settings or DNT/GPC signals.",
     cookies: [
       {
-        name: "_ga, _ga_*",
+        name: "_ga",
         provider: "Google Analytics",
-        purpose: "Tracks anonymous page views and user journeys",
+        purpose: "Distinguishes unique users for anonymous page view tracking. IP anonymization is enabled (anonymizeIp).",
         duration: "2 years",
+      },
+      {
+        name: "_gid",
+        provider: "Google Analytics",
+        purpose: "Distinguishes users for session-level analytics",
+        duration: "24 hours",
       },
       {
         name: "ph_*",
@@ -78,17 +86,18 @@ const cookieCategories = [
     category: "Marketing",
     description:
       "These cookies help us measure the effectiveness of our advertising and understand how visitors arrive at our site.",
+    legalBasis: "Consent (GDPR Art. 6(1)(a)) — for EU/EEA visitors, these cookies are only set after you provide consent via our cookie banner.",
     cookies: [
       {
         name: "_clck, _clsk",
         provider: "Microsoft Clarity",
-        purpose: "Session recording and heatmaps for UX improvement",
+        purpose: "Session recording (mouse movements, clicks, scroll depth) and heatmaps for UX improvement. Clarity may record anonymized user interactions including page navigation and form engagement patterns. No keystrokes or personal data are captured.",
         duration: "1 year",
       },
       {
         name: "_fbp",
         provider: "Meta (Facebook)",
-        purpose: "Conversion tracking for ad campaigns",
+        purpose: "Conversion tracking for ad campaigns. Note: Meta acts as a joint controller for data collected via this pixel. Meta's data processing is governed by Meta's own privacy policy.",
         duration: "90 days",
       },
     ],
@@ -143,7 +152,10 @@ export default function CookiePolicyPage() {
             {cookieCategories.map((cat) => (
               <div key={cat.category} className="mb-8">
                 <h3 className="text-xl font-medium text-white mb-3">{cat.category}</h3>
-                <p className="text-slate-400 mb-4">{cat.description}</p>
+                <p className="text-slate-400 mb-3">{cat.description}</p>
+                <p className="text-slate-500 text-sm mb-4 italic">
+                  <strong>Legal Basis:</strong> {cat.legalBasis}
+                </p>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-sm">
                     <thead>
@@ -201,10 +213,19 @@ export default function CookiePolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">Do Not Track</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">Cookie Consent for EU/EEA Visitors</h2>
+            <p className="text-slate-400 mb-4">
+              In compliance with the EU ePrivacy Directive and GDPR, we display a cookie consent banner to visitors from the EU/EEA. Non-essential cookies (Analytics and Marketing categories) are not set until you provide explicit opt-in consent. You can change your cookie preferences at any time by clicking the &quot;Cookie Settings&quot; link in our website footer.
+            </p>
             <p className="text-slate-400">
-              We honor Do Not Track (DNT) signals from your browser. When we detect a DNT
-              signal, we disable analytics and marketing cookies for your session.
+              Strictly Necessary cookies do not require consent as they are essential for the website to function. These cookies are always active.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">Do Not Track / Global Privacy Control</h2>
+            <p className="text-slate-400">
+              We honor both Do Not Track (DNT) and Global Privacy Control (GPC) signals from your browser. When we detect either signal, we disable analytics and marketing cookies for your session. The California Attorney General recognizes GPC as a valid opt-out mechanism under the CCPA.
             </p>
           </section>
 
