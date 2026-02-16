@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
 import { stripe, getPlanFromPriceId } from "@/lib/stripe";
-import { sendSubscriptionEmail, sendRefundConfirmationEmail } from "@/lib/email";
+import { sendSubscriptionEmail, sendRefundConfirmationEmail, sendCorporateWelcomeEmail } from "@/lib/email";
 import { createPaymentIssueTicket } from "@/lib/support/ticket-service";
+import { activateCorporateAccount, handleOverdueInvoice } from "@/lib/corporate/billing";
 import { captureError } from "@/lib/error-reporting";
 import { logAudit } from "@/lib/rbac/audit-log";
+import { CORPORATE_TIERS } from "@/lib/corporate/types";
 import Stripe from "stripe";
 
 // Helper to log plan changes for admin dashboard tracking
@@ -77,7 +79,11 @@ export async function POST(request: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutCompleted(session);
+        if (session.metadata?.type === "corporate") {
+          await handleCorporateCheckoutCompleted(session);
+        } else {
+          await handleCheckoutCompleted(session);
+        }
         break;
       }
 
@@ -90,18 +96,31 @@ export async function POST(request: Request) {
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(subscription);
+        // Check if this is a corporate subscription
+        if (subscription.metadata?.type === "corporate") {
+          await handleCorporateSubscriptionDeleted(subscription);
+        } else {
+          await handleSubscriptionDeleted(subscription);
+        }
         break;
       }
 
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as Stripe.Invoice;
+        // Handle corporate invoice payments
+        if (invoice.metadata?.type === "corporate_annual") {
+          await activateCorporateAccount(invoice.id);
+        }
         await handlePaymentSucceeded(invoice);
         break;
       }
 
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
+        // Handle corporate invoice failures
+        if (invoice.metadata?.type === "corporate_annual") {
+          await handleOverdueInvoice(invoice.id);
+        }
         await handlePaymentFailed(invoice);
         break;
       }
@@ -498,4 +517,166 @@ async function handleRefund(charge: Stripe.Charge) {
       isFullRefund
     ).catch((e) => captureError("stripe-refund-email", e instanceof Error ? e : new Error(String(e))));
   }
+}
+
+// ==========================================
+// CORPORATE WEBHOOK HANDLERS
+// ==========================================
+
+async function handleCorporateCheckoutCompleted(session: Stripe.Checkout.Session) {
+  const userId = session.metadata?.userId;
+  const tier = session.metadata?.tier;
+  const companyName = session.metadata?.companyName;
+
+  if (!userId || !tier || !companyName) {
+    console.error("[Corporate Webhook] Missing metadata in checkout session");
+    return;
+  }
+
+  const tierData = CORPORATE_TIERS.find((t) => t.id === tier);
+  if (!tierData) {
+    console.error("[Corporate Webhook] Unknown tier:", tier);
+    return;
+  }
+
+  const subscriptionId = typeof session.subscription === "string"
+    ? session.subscription
+    : session.subscription?.id;
+
+  const customerId = typeof session.customer === "string"
+    ? session.customer
+    : session.customer?.id;
+
+  // Check for existing account (idempotency)
+  const existing = await prisma.corporateAccount.findUnique({
+    where: { adminUserId: userId },
+  });
+  if (existing) {
+    console.log("[Corporate Webhook] Account already exists for user:", userId);
+    return;
+  }
+
+  // Create corporate account + empty seats in a transaction
+  await prisma.$transaction(async (tx) => {
+    const account = await tx.corporateAccount.create({
+      data: {
+        name: companyName,
+        tier,
+        maxSeats: tierData.maxSeats,
+        adminUserId: userId,
+        stripeCustomerId: customerId || null,
+        stripeSubscriptionId: subscriptionId || null,
+        status: "ACTIVE",
+      },
+    });
+
+    // Create empty seats
+    const seatData = Array.from({ length: tierData.maxSeats }, () => ({
+      corporateAccountId: account.id,
+      status: "INVITED" as const,
+    }));
+
+    await tx.corporateSeat.createMany({ data: seatData });
+
+    // Update user plan
+    await tx.user.update({
+      where: { id: userId },
+      data: { plan: "ENTERPRISE" },
+    });
+
+    // Create welcome alert
+    await tx.alert.create({
+      data: {
+        userId,
+        type: "SUBSCRIPTION_UPDATED",
+        title: "Corporate Plan Activated",
+        message: `Your ${tierData.name} Corporate Plan with ${tierData.maxSeats} seats is now active!`,
+      },
+    });
+  });
+
+  // Send welcome email (non-blocking)
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, name: true },
+  });
+
+  if (user?.email) {
+    sendCorporateWelcomeEmail(
+      user.email,
+      companyName,
+      tier,
+      tierData.maxSeats
+    ).catch((e) => captureError("corporate-welcome-email", e instanceof Error ? e : new Error(String(e))));
+  }
+
+  // Log audit
+  await logAudit({
+    actorId: "STRIPE_WEBHOOK",
+    actorEmail: "stripe@system",
+    actorRole: "SYSTEM",
+    action: "PLAN_UPGRADE",
+    resource: "corporate_account",
+    resourceId: userId,
+    targetUserId: userId,
+    targetEmail: user?.email || "",
+    details: {
+      tier,
+      companyName,
+      maxSeats: tierData.maxSeats,
+      source: "stripe_corporate_checkout",
+    },
+  });
+}
+
+async function handleCorporateSubscriptionDeleted(subscription: Stripe.Subscription) {
+  const subscriptionId = subscription.id;
+
+  const account = await prisma.corporateAccount.findFirst({
+    where: { stripeSubscriptionId: subscriptionId },
+    include: { seats: { where: { status: "ACTIVE" } } },
+  });
+
+  if (!account) {
+    console.log("[Corporate Webhook] No account found for subscription:", subscriptionId);
+    return;
+  }
+
+  // Suspend account and deactivate all seats
+  await prisma.$transaction(async (tx) => {
+    await tx.corporateAccount.update({
+      where: { id: account.id },
+      data: { status: "SUSPENDED" },
+    });
+
+    // Deactivate all active seats
+    await tx.corporateSeat.updateMany({
+      where: { corporateAccountId: account.id, status: "ACTIVE" },
+      data: { status: "DEACTIVATED" },
+    });
+
+    // Downgrade all seat-holder users to FREE
+    const userIds = account.seats.map((s) => s.userId).filter(Boolean) as string[];
+    if (userIds.length > 0) {
+      await tx.user.updateMany({
+        where: { id: { in: userIds } },
+        data: { plan: "FREE" },
+      });
+    }
+
+    // Downgrade admin user
+    await tx.user.update({
+      where: { id: account.adminUserId },
+      data: { plan: "FREE" },
+    });
+
+    await tx.alert.create({
+      data: {
+        userId: account.adminUserId,
+        type: "SUBSCRIPTION_CANCELED",
+        title: "Corporate Plan Canceled",
+        message: "Your corporate subscription has been canceled. All seats have been deactivated.",
+      },
+    });
+  });
 }

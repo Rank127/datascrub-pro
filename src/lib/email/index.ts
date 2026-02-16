@@ -2124,6 +2124,172 @@ export async function sendFamilyMemberRemovedEmail(
 }
 
 // ==========================================
+// Corporate Plan Emails
+// ==========================================
+
+/**
+ * Send corporate team invitation email
+ */
+export async function sendCorporateInviteEmail(
+  email: string,
+  companyName: string,
+  adminName: string,
+  inviteUrl: string
+) {
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 48px;">🏢</span>
+    </div>
+    <h1 style="color: #8b5cf6; margin-top: 0; text-align: center;">
+      You're Invited to Join ${companyName}
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi there,
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      <strong>${adminName}</strong> has invited you to join <strong>${companyName}</strong>'s ${APP_NAME} Corporate Plan.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #8b5cf6;">
+      <p style="margin: 0 0 16px 0; color: #8b5cf6; font-weight: 600; font-size: 18px;">
+        What you'll get:
+      </p>
+      <ul style="margin: 0; padding-left: 20px; color: #e2e8f0; line-height: 1.8;">
+        <li>Unlimited privacy scans</li>
+        <li>Automatic data removal from 400+ sites</li>
+        <li>Dark web monitoring</li>
+        <li>Daily monitoring for new exposures</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6;">
+      Click the button below to accept the invitation and activate your seat.
+    </p>
+
+    ${buttonHtml("Accept Invitation", inviteUrl)}
+
+    <div style="background-color: #1e293b; border-radius: 8px; padding: 16px; margin: 24px 0; border-left: 4px solid #f59e0b;">
+      <p style="margin: 0; font-size: 14px; color: #fbbf24;">
+        This invitation expires in 14 days.
+      </p>
+    </div>
+
+    <p style="font-size: 14px; color: #94a3b8; text-align: center;">
+      If you weren't expecting this invitation, you can safely ignore this email.
+    </p>
+  `);
+
+  return sendEmail(
+    email,
+    `🏢 ${adminName} invited you to ${companyName}'s ${APP_NAME} Corporate Plan`,
+    html,
+    {
+      emailType: "CORPORATE_INVITATION",
+      queueIfExceeded: true,
+      priority: 2,
+    }
+  );
+}
+
+/**
+ * Send corporate welcome email to admin after purchase
+ */
+export async function sendCorporateWelcomeEmail(
+  email: string,
+  companyName: string,
+  tier: string,
+  seatCount: number
+) {
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 48px;">🎉</span>
+    </div>
+    <h1 style="color: #8b5cf6; margin-top: 0; text-align: center;">
+      Welcome to ${APP_NAME} Corporate!
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Your corporate account for <strong>${companyName}</strong> is now active.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #8b5cf6;">
+      <p style="margin: 0 0 8px 0; color: #94a3b8; font-size: 14px;">Your Plan</p>
+      <p style="margin: 0 0 16px 0; color: #8b5cf6; font-size: 24px; font-weight: 600;">Corporate ${tier.replace("CORP_", "")} Seats</p>
+      <p style="margin: 0; color: #e2e8f0; font-size: 16px;">${seatCount} employee seats ready to activate</p>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6;">
+      <strong>Next steps:</strong>
+    </p>
+    <ol style="color: #e2e8f0; line-height: 2; padding-left: 20px;">
+      <li>Visit your Corporate Admin Portal</li>
+      <li>Invite team members via email or QR code</li>
+      <li>Track your team's privacy protection progress</li>
+    </ol>
+
+    ${buttonHtml("Open Admin Portal", `${APP_URL}/dashboard/corporate-admin`)}
+
+    <p style="font-size: 14px; color: #94a3b8; text-align: center;">
+      Need help? Contact us at support@ghostmydata.com
+    </p>
+  `);
+
+  return sendEmail(
+    email,
+    `🎉 Your ${APP_NAME} Corporate Plan is Active — ${seatCount} Seats Ready`,
+    html,
+    {
+      emailType: "CORPORATE_WELCOME",
+      skipQuotaCheck: true,
+      priority: 1,
+    }
+  );
+}
+
+/**
+ * Send notification to admin when an employee activates their seat
+ */
+export async function sendCorporateSeatActivatedEmail(
+  adminEmail: string,
+  employeeName: string,
+  companyName: string
+) {
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 48px;">✅</span>
+    </div>
+    <h1 style="color: #8b5cf6; margin-top: 0; text-align: center;">
+      New Team Member Activated
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      <strong>${employeeName}</strong> has activated their seat on <strong>${companyName}</strong>'s ${APP_NAME} Corporate Plan.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #10b981; text-align: center;">
+      <p style="margin: 0 0 8px 0; color: #94a3b8; font-size: 14px;">Activated:</p>
+      <p style="margin: 0; color: #10b981; font-size: 24px; font-weight: 600;">${employeeName}</p>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6;">
+      They now have full access to all Enterprise features and can start scanning for data exposures immediately.
+    </p>
+
+    ${buttonHtml("View Team", `${APP_URL}/dashboard/corporate-admin`)}
+  `);
+
+  return sendEmail(
+    adminEmail,
+    `✅ ${employeeName} activated their ${APP_NAME} seat`,
+    html,
+    {
+      emailType: "CORPORATE_SEAT_ACTIVATED",
+      queueIfExceeded: true,
+      priority: 3,
+    }
+  );
+}
+
+// ==========================================
 // Batched Removal Status Updates (Preference-Aware)
 // ==========================================
 

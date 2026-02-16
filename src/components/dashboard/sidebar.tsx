@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -22,6 +23,7 @@ import {
   Headphones,
   Brain,
   Briefcase,
+  Building2,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -42,6 +44,13 @@ const navigation = [
   { name: "Settings", href: "/dashboard/settings", icon: Settings, tourId: "settings-nav" },
 ];
 
+// Corporate admin link — shown for users who manage a corporate account (customers, not GhostMyData staff)
+const corporateAdminLink = {
+  name: "My Corporate Plan",
+  href: "/dashboard/corporate-admin",
+  icon: Building2,
+};
+
 const adminNavigation = [
   { name: "Admin Dashboard", href: "/dashboard/executive", icon: TrendingUp },
   { name: "Mastermind", href: "/dashboard/mastermind", icon: Brain },
@@ -54,10 +63,20 @@ const ADMIN_ROLES = ["ADMIN", "LEGAL", "SUPER_ADMIN"];
 export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [isCorporateAdmin, setIsCorporateAdmin] = useState(false);
 
   // Check if user has admin role
   const userRole = (session?.user as { role?: string })?.role || "USER";
   const isAdmin = ADMIN_ROLES.includes(userRole);
+
+  // Check if user is a corporate account admin
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch("/api/corporate/admin")
+        .then((res) => res.ok ? setIsCorporateAdmin(true) : setIsCorporateAdmin(false))
+        .catch(() => setIsCorporateAdmin(false));
+    }
+  }, [session?.user?.id]);
 
   return (
     <div className="flex h-full flex-col bg-slate-900 border-r border-slate-800">
@@ -88,6 +107,25 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {/* Corporate Admin Link — for corporate customers, not GhostMyData staff */}
+        {isCorporateAdmin && (() => {
+          const isActive = pathname === corporateAdminLink.href || pathname.startsWith(corporateAdminLink.href + "/");
+          return (
+            <Link
+              href={corporateAdminLink.href}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-violet-500/10 text-violet-400"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+              )}
+            >
+              <corporateAdminLink.icon className="h-5 w-5" />
+              {corporateAdminLink.name}
+            </Link>
+          );
+        })()}
 
         {/* Admin Section */}
         {isAdmin && (

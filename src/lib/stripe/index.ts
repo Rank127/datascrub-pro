@@ -46,6 +46,23 @@ export const PLAN_TO_PRICE = {
   ENTERPRISE: PRICE_IDS.ENTERPRISE_YEARLY,
 } as const;
 
+// Corporate Plan to Price mapping
+export const CORPORATE_PLAN_TO_PRICE: Record<string, string> = {
+  CORP_10: PRICE_IDS.CORPORATE_10_YEARLY,
+  CORP_25: PRICE_IDS.CORPORATE_25_YEARLY,
+  CORP_50: PRICE_IDS.CORPORATE_50_YEARLY,
+  CORP_100: PRICE_IDS.CORPORATE_100_YEARLY,
+} as const;
+
+/** Get Stripe price ID for a corporate tier. Throws if tier is unknown. */
+export function getCorporatePriceId(tier: string): string {
+  const priceId = CORPORATE_PLAN_TO_PRICE[tier];
+  if (!priceId) {
+    throw new Error(`Unknown corporate tier: ${tier}`);
+  }
+  return priceId;
+}
+
 // Price to Plan mapping
 export function getPlanFromPriceId(priceId: string): "PRO" | "ENTERPRISE" | "FREE" {
   if (priceId === PRICE_IDS.PRO_MONTHLY || priceId === PRICE_IDS.PRO_YEARLY) {
