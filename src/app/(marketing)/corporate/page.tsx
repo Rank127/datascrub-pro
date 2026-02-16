@@ -370,7 +370,7 @@ export default function CorporatePage() {
 
         {/* ── C) How It Works ── */}
         <AnimatedSection>
-          <div className="text-center mb-12">
+          <div id="how-it-works" className="text-center mb-12 scroll-mt-24">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               How It Works
             </h2>
@@ -506,7 +506,7 @@ export default function CorporatePage() {
 
         {/* ── E) Feature Matrix ── */}
         <AnimatedSection>
-          <div className="text-center mb-12">
+          <div id="features" className="text-center mb-12 scroll-mt-24">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Feature Comparison
             </h2>
@@ -674,7 +674,7 @@ export default function CorporatePage() {
 
         {/* ── I) FAQ ── */}
         <AnimatedSection>
-          <div className="max-w-3xl mx-auto mb-24">
+          <div id="faq" className="max-w-3xl mx-auto mb-24 scroll-mt-24">
             <h2 className="text-3xl font-bold text-white text-center mb-12">
               Frequently Asked Questions
             </h2>
