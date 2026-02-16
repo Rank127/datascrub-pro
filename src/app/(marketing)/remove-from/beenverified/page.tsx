@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     "beenverified removal",
     "delete beenverified listing",
     "beenverified background check removal",
+    "beenverified privacy",
+    "how to remove yourself from beenverified",
+    "beenverified opt-out guide",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/beenverified",
@@ -100,6 +103,12 @@ const beenverifiedInfo: BrokerInfo = {
       question: "Can GhostMyData help?",
       answer: "Yes. We remove you from BeenVerified and 2,100+ other sites. We watch for new data too.",
     },
+  ],
+  relatedBrokers: [
+    { name: "Intelius", slug: "intelius" },
+    { name: "TruthFinder", slug: "truthfinder" },
+    { name: "Instant Checkmate", slug: "instant-checkmate" },
+    { name: "Spokeo", slug: "spokeo" },
   ],
   lastUpdated: "January 24, 2026",
 };

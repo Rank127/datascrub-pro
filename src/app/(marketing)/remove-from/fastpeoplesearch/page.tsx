@@ -10,6 +10,10 @@ export const metadata: Metadata = {
     "fastpeoplesearch opt out",
     "fastpeoplesearch removal",
     "delete fastpeoplesearch listing",
+    "fastpeoplesearch privacy",
+    "how to remove yourself from fastpeoplesearch",
+    "fastpeoplesearch opt-out guide",
+    "fastpeoplesearch data removal",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/fastpeoplesearch",
@@ -81,6 +85,13 @@ const fastpeoplesearchInfo: BrokerInfo = {
       question: "How is FastPeopleSearch different from TruePeopleSearch?",
       answer: "They are separate companies with different databases. You need to remove from both separately.",
     },
+  ],
+  relatedBrokers: [
+    { name: "TruePeopleSearch", slug: "truepeoplesearch" },
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "SearchPeopleFree", slug: "searchpeoplefree" },
+    { name: "PeopleFinder", slug: "peoplefinder" },
+    { name: "WhitePages", slug: "whitepages" },
   ],
   lastUpdated: "January 24, 2026",
 };

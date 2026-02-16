@@ -114,6 +114,12 @@ const whitepagesInfo: BrokerInfo = {
       answer: "Yes. We handle WhitePages removal plus 2,100+ other sites. We also watch for new listings.",
     },
   ],
+  relatedBrokers: [
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "TruePeopleSearch", slug: "truepeoplesearch" },
+    { name: "PeopleFinder", slug: "peoplefinder" },
+    { name: "BeenVerified", slug: "beenverified" },
+  ],
   lastUpdated: "January 24, 2026",
 };
 

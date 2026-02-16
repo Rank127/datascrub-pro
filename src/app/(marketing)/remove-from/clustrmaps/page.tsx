@@ -99,6 +99,13 @@ const clustrMapsInfo: BrokerInfo = {
       answer: "Yes. The opt-out process on ClustrMaps is free. You should never have to pay to remove your own personal information from a data broker.",
     },
   ],
+  relatedBrokers: [
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "TruePeopleSearch", slug: "truepeoplesearch" },
+    { name: "FamilyTreeNow", slug: "familytreenow" },
+    { name: "WhitePages", slug: "whitepages" },
+    { name: "Nuwber", slug: "nuwber" },
+  ],
   lastUpdated: "February 15, 2026",
 };
 

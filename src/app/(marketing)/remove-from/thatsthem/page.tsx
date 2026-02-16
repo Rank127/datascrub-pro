@@ -95,6 +95,13 @@ const thatSThemInfo: BrokerInfo = {
       answer: "Yes. The opt-out process on That\u0027s Them is completely free. Beware of third-party sites that charge fees for the same service.",
     },
   ],
+  relatedBrokers: [
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "TruePeopleSearch", slug: "truepeoplesearch" },
+    { name: "PeekYou", slug: "peekyou" },
+    { name: "USPhonebook", slug: "usphonebook" },
+    { name: "FastPeopleSearch", slug: "fastpeoplesearch" },
+  ],
   lastUpdated: "February 15, 2026",
 };
 

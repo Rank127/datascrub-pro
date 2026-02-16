@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     "intelius removal",
     "delete intelius record",
     "intelius background check removal",
+    "intelius privacy",
+    "how to remove yourself from intelius",
+    "intelius opt-out guide",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/intelius",
@@ -88,6 +91,13 @@ const inteliusInfo: BrokerInfo = {
       question: "Will my Intelius information reappear?",
       answer: "Possibly. Intelius updates from public records regularly. Continuous monitoring is recommended.",
     },
+  ],
+  relatedBrokers: [
+    { name: "BeenVerified", slug: "beenverified" },
+    { name: "TruthFinder", slug: "truthfinder" },
+    { name: "USSearch", slug: "ussearch" },
+    { name: "Instant Checkmate", slug: "instant-checkmate" },
+    { name: "Spokeo", slug: "spokeo" },
   ],
   lastUpdated: "January 24, 2026",
 };

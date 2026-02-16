@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     "mylife removal",
     "delete mylife profile",
     "mylife reputation score removal",
+    "mylife privacy",
+    "how to remove yourself from mylife",
+    "mylife opt-out guide",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/mylife",
@@ -90,6 +93,12 @@ const mylifeInfo: BrokerInfo = {
       question: "Will MyLife try to upsell me during removal?",
       answer: "Possibly. MyLife may offer paid services during the removal process. You don't need to pay to remove your data.",
     },
+  ],
+  relatedBrokers: [
+    { name: "Radaris", slug: "radaris" },
+    { name: "Arrests.org", slug: "arrests-org" },
+    { name: "USSearch", slug: "ussearch" },
+    { name: "Spokeo", slug: "spokeo" },
   ],
   lastUpdated: "January 24, 2026",
 };

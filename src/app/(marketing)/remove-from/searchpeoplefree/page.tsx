@@ -95,6 +95,13 @@ const searchPeopleFreeInfo: BrokerInfo = {
       answer: "Yes. We remove you from SearchPeopleFree and 2,100+ other data broker sites. We also monitor for new listings and remove them automatically.",
     },
   ],
+  relatedBrokers: [
+    { name: "TruePeopleSearch", slug: "truepeoplesearch" },
+    { name: "FastPeopleSearch", slug: "fastpeoplesearch" },
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "PeopleFinder", slug: "peoplefinder" },
+    { name: "Cocofinder", slug: "cocofinder" },
+  ],
   lastUpdated: "February 15, 2026",
 };
 

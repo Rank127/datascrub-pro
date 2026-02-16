@@ -103,6 +103,12 @@ const piplInfo: BrokerInfo = {
       answer: "Yes. We handle Pipl removal and 2,100+ other data broker sites. We also monitor for re-listings and remove them automatically.",
     },
   ],
+  relatedBrokers: [
+    { name: "ZoomInfo", slug: "zoominfo" },
+    { name: "PeekYou", slug: "peekyou" },
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "Radaris", slug: "radaris" },
+  ],
   lastUpdated: "February 15, 2026",
 };
 

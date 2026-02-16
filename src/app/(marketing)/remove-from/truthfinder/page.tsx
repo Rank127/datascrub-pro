@@ -10,6 +10,10 @@ export const metadata: Metadata = {
     "truthfinder opt out",
     "truthfinder removal",
     "delete truthfinder listing",
+    "truthfinder privacy",
+    "how to remove yourself from truthfinder",
+    "truthfinder opt-out guide",
+    "truthfinder data removal",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/truthfinder",
@@ -106,6 +110,13 @@ const truthfinderInfo: BrokerInfo = {
       question: "Why does TruthFinder have my data?",
       answer: "TruthFinder aggregates data from public records, court filings, social media, and other publicly available sources to build people-search profiles.",
     },
+  ],
+  relatedBrokers: [
+    { name: "BeenVerified", slug: "beenverified" },
+    { name: "Intelius", slug: "intelius" },
+    { name: "Instant Checkmate", slug: "instant-checkmate" },
+    { name: "Smart Background Checks", slug: "smartbackgroundchecks" },
+    { name: "Spokeo", slug: "spokeo" },
   ],
   lastUpdated: "February 15, 2026",
 };

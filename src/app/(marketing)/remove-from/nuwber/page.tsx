@@ -100,6 +100,13 @@ const nuwberInfo: BrokerInfo = {
       answer: "Yes. We remove you from Nuwber and 2,100+ other data broker sites. We also monitor for new listings and remove them automatically.",
     },
   ],
+  relatedBrokers: [
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "WhitePages", slug: "whitepages" },
+    { name: "PeopleFinder", slug: "peoplefinder" },
+    { name: "Cocofinder", slug: "cocofinder" },
+    { name: "BeenVerified", slug: "beenverified" },
+  ],
   lastUpdated: "February 15, 2026",
 };
 

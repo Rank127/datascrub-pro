@@ -144,6 +144,7 @@ export default function ComparePrivacyBeePage() {
           Compare two comprehensive data removal services to find the best protection
           for your personal information.
         </p>
+        <p className="text-sm text-slate-500 mb-8">Last updated: February 15, 2026</p>
       </div>
 
       {/* Quick Verdict */}
@@ -358,6 +359,43 @@ export default function ComparePrivacyBeePage() {
               <p className="text-slate-400">{faq.answer}</p>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Cross-links to broker removal guides */}
+      <div className="mb-16">
+        <h2 className="text-2xl font-bold text-white mb-4">Start Removing Your Data Now</h2>
+        <p className="text-slate-400 mb-6">
+          While you decide on an automated service, start protecting your privacy today with our free step-by-step removal guides.
+        </p>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            { name: "Spokeo", slug: "spokeo" },
+            { name: "Whitepages", slug: "whitepages" },
+            { name: "BeenVerified", slug: "beenverified" },
+            { name: "TruthFinder", slug: "truthfinder" },
+            { name: "FastPeopleSearch", slug: "fastpeoplesearch" },
+          ].map((broker) => (
+            <Link
+              key={broker.slug}
+              href={`/remove-from/${broker.slug}`}
+              className="group flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700 hover:border-emerald-500/50 transition-colors"
+            >
+              <span className="text-slate-300 group-hover:text-emerald-400 transition-colors">
+                Remove from {broker.name}
+              </span>
+              <ArrowRight className="h-4 w-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          ))}
+          <Link
+            href="/remove-from"
+            className="group flex items-center justify-between p-4 bg-emerald-500/10 rounded-lg border border-emerald-500/20 hover:border-emerald-500/50 transition-colors"
+          >
+            <span className="text-emerald-400 group-hover:text-emerald-300 transition-colors">
+              View All 25 Guides
+            </span>
+            <ArrowRight className="h-4 w-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </div>
 

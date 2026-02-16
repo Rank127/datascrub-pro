@@ -95,6 +95,12 @@ const peekYouInfo: BrokerInfo = {
       answer: "Yes. We remove you from PeekYou and 2,100+ other data broker sites. We also monitor for new listings and remove them automatically.",
     },
   ],
+  relatedBrokers: [
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "Pipl", slug: "pipl" },
+    { name: "TruePeopleSearch", slug: "truepeoplesearch" },
+    { name: "That's Them", slug: "thatsthem" },
+  ],
   lastUpdated: "February 15, 2026",
 };
 

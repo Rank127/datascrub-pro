@@ -104,6 +104,12 @@ const zoomInfoInfo: BrokerInfo = {
       answer: "If you don\u0027t hear back within 14 days, send a follow-up email to privacy@zoominfo.com referencing your original request. You may also file a complaint under CCPA or GDPR depending on your location.",
     },
   ],
+  relatedBrokers: [
+    { name: "Pipl", slug: "pipl" },
+    { name: "Intelius", slug: "intelius" },
+    { name: "Radaris", slug: "radaris" },
+    { name: "USSearch", slug: "ussearch" },
+  ],
   lastUpdated: "February 15, 2026",
 };
 

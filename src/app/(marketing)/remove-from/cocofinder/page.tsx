@@ -95,6 +95,13 @@ const cocofinderInfo: BrokerInfo = {
       answer: "Yes. The Cocofinder removal process is completely free. You should never have to pay to remove your personal information from a data broker site.",
     },
   ],
+  relatedBrokers: [
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "TruePeopleSearch", slug: "truepeoplesearch" },
+    { name: "SearchPeopleFree", slug: "searchpeoplefree" },
+    { name: "Nuwber", slug: "nuwber" },
+    { name: "PeopleFinder", slug: "peoplefinder" },
+  ],
   lastUpdated: "February 15, 2026",
 };
 

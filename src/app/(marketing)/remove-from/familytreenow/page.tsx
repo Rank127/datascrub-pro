@@ -98,6 +98,13 @@ const familyTreeNowInfo: BrokerInfo = {
       answer: "FamilyTreeNow aggregates publicly available records including property records, census data, and other government databases to build genealogy profiles.",
     },
   ],
+  relatedBrokers: [
+    { name: "TruePeopleSearch", slug: "truepeoplesearch" },
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "WhitePages", slug: "whitepages" },
+    { name: "PeopleFinder", slug: "peoplefinder" },
+    { name: "Nuwber", slug: "nuwber" },
+  ],
   lastUpdated: "February 15, 2026",
 };
 

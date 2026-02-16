@@ -10,6 +10,10 @@ export const metadata: Metadata = {
     "ussearch opt out",
     "ussearch removal",
     "delete ussearch record",
+    "ussearch privacy",
+    "how to remove yourself from ussearch",
+    "ussearch opt-out guide",
+    "ussearch data removal",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/ussearch",
@@ -87,6 +91,12 @@ const ussearchInfo: BrokerInfo = {
       question: "Is USSearch opt-out permanent?",
       answer: "The opt-out is permanent for that record, but new records may appear from updated data sources.",
     },
+  ],
+  relatedBrokers: [
+    { name: "Intelius", slug: "intelius" },
+    { name: "Radaris", slug: "radaris" },
+    { name: "MyLife", slug: "mylife" },
+    { name: "BeenVerified", slug: "beenverified" },
   ],
   lastUpdated: "January 24, 2026",
 };

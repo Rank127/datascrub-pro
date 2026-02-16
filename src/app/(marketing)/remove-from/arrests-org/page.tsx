@@ -101,6 +101,12 @@ const arrestsOrgInfo: BrokerInfo = {
       answer: "Arrests.org processes removals manually and may have a large backlog. The verification step also adds time. Most removals complete within 30 days.",
     },
   ],
+  relatedBrokers: [
+    { name: "MyLife", slug: "mylife" },
+    { name: "Radaris", slug: "radaris" },
+    { name: "USSearch", slug: "ussearch" },
+    { name: "BeenVerified", slug: "beenverified" },
+  ],
   lastUpdated: "February 15, 2026",
 };
 

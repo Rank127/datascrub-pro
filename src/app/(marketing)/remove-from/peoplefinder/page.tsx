@@ -10,6 +10,10 @@ export const metadata: Metadata = {
     "peoplefinder opt out",
     "peoplefinder removal",
     "delete peoplefinder listing",
+    "peoplefinder privacy",
+    "how to remove yourself from peoplefinder",
+    "peoplefinder opt-out guide",
+    "peoplefinder data removal",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/peoplefinder",
@@ -86,6 +90,13 @@ const peoplefinderInfo: BrokerInfo = {
       question: "Can I remove family members from PeopleFinder?",
       answer: "Each person needs to submit their own opt-out request with their own email verification.",
     },
+  ],
+  relatedBrokers: [
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "WhitePages", slug: "whitepages" },
+    { name: "TruePeopleSearch", slug: "truepeoplesearch" },
+    { name: "FastPeopleSearch", slug: "fastpeoplesearch" },
+    { name: "Nuwber", slug: "nuwber" },
   ],
   lastUpdated: "January 24, 2026",
 };

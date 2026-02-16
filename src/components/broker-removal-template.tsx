@@ -3,6 +3,11 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, ArrowRight, Clock, Shield, AlertTriangle } from "lucide-react";
 import { HowToSchema, FAQSchema, BreadcrumbSchema, HowToStep } from "@/components/seo/structured-data";
 
+export interface RelatedBroker {
+  name: string;
+  slug: string;
+}
+
 export interface BrokerInfo {
   name: string;
   slug: string;
@@ -15,6 +20,26 @@ export interface BrokerInfo {
   steps: HowToStep[];
   faqs: { question: string; answer: string }[];
   lastUpdated: string;
+  relatedBrokers?: RelatedBroker[];
+}
+
+/**
+ * Parse ISO 8601 duration (e.g. PT336H, PT48H, PT72H) to human-readable text.
+ */
+function formatOptOutTime(iso: string): string {
+  const match = iso.match(/^PT(\d+)H$/);
+  if (!match) return iso;
+  const hours = parseInt(match[1], 10);
+  if (hours < 24) return `${hours} hours`;
+  if (hours === 24) return "24 hours";
+  const days = Math.round(hours / 24);
+  if (days <= 2) return "1-2 days";
+  if (days <= 3) return "2-3 days";
+  if (days <= 5) return "3-5 days";
+  if (days <= 7) return "3-7 days";
+  if (days <= 14) return "7-14 days";
+  if (days <= 30) return "7-30 days";
+  return `${days} days`;
 }
 
 export function BrokerRemovalTemplate({ broker }: { broker: BrokerInfo }) {
@@ -23,6 +48,11 @@ export function BrokerRemovalTemplate({ broker }: { broker: BrokerInfo }) {
     { name: "Remove From", url: "https://ghostmydata.com/remove-from" },
     { name: `Remove from ${broker.name}`, url: `https://ghostmydata.com/remove-from/${broker.slug}` },
   ];
+
+  const readableTime = formatOptOutTime(broker.optOutTime);
+  const firstStepSummary = broker.steps.length > 0
+    ? broker.steps[0].text.split(".")[0]
+    : "visit their opt-out page";
 
   return (
     <>
@@ -46,7 +76,7 @@ export function BrokerRemovalTemplate({ broker }: { broker: BrokerInfo }) {
         </nav>
 
         {/* Header */}
-        <header className="mb-12">
+        <header className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-sm border border-emerald-500/20">
               Data Broker Removal
@@ -71,7 +101,7 @@ export function BrokerRemovalTemplate({ broker }: { broker: BrokerInfo }) {
           <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500">
             <span className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              Processing time: {broker.optOutTime}
+              Processing time: {readableTime}
             </span>
             <span className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
@@ -79,6 +109,16 @@ export function BrokerRemovalTemplate({ broker }: { broker: BrokerInfo }) {
             </span>
           </div>
         </header>
+
+        {/* Quick Answer / TL;DR for AI search extraction */}
+        <div className="mb-12 p-5 bg-slate-800/50 border border-slate-700 rounded-xl">
+          <p className="text-sm font-semibold text-emerald-400 mb-2">Quick Answer</p>
+          <p className="text-slate-300">
+            To remove yourself from {broker.name}, {firstStepSummary.toLowerCase()}, then follow their opt-out process to submit your removal request.
+            The process is rated <strong className="text-white">{broker.difficulty.toLowerCase()}</strong> difficulty and typically takes <strong className="text-white">{readableTime}</strong> to complete.
+            {broker.name} is one of 4,000+ data brokers that may have your information — use <Link href="/register" className="text-emerald-400 hover:text-emerald-300 underline">GhostMyData</Link> to remove your data from all of them automatically.
+          </p>
+        </div>
 
         {/* Quick Action Box */}
         <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6 mb-12">
@@ -189,6 +229,37 @@ export function BrokerRemovalTemplate({ broker }: { broker: BrokerInfo }) {
           </div>
         </section>
 
+        {/* Related Guides */}
+        {broker.relatedBrokers && broker.relatedBrokers.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Also Remove Yourself From
+            </h2>
+            <p className="text-slate-400 mb-6">
+              Your data is likely on these similar sites too. Remove yourself from all of them to fully protect your privacy.
+            </p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {broker.relatedBrokers.map((related) => (
+                <Link
+                  key={related.slug}
+                  href={`/remove-from/${related.slug}`}
+                  className="group flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700 hover:border-emerald-500/50 transition-colors"
+                >
+                  <span className="text-slate-300 group-hover:text-emerald-400 transition-colors font-medium">
+                    Remove from {related.name}
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              ))}
+            </div>
+            <p className="text-sm text-slate-500 mt-4">
+              <Link href="/remove-from" className="text-emerald-400 hover:text-emerald-300 underline">
+                View all 25 broker removal guides
+              </Link>
+            </p>
+          </section>
+        )}
+
         {/* CTA */}
         <div className="text-center p-8 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20">
           <h2 className="text-2xl font-bold text-white mb-4">
@@ -198,12 +269,17 @@ export function BrokerRemovalTemplate({ broker }: { broker: BrokerInfo }) {
             Manual removal is time-consuming and requires constant vigilance.
             GhostMyData automates the entire process with continuous monitoring.
           </p>
-          <Link href="/register">
-            <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-lg px-8">
-              Start Your Free Scan
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/register">
+              <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-lg px-8">
+                Start Your Free Scan
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="/compare" className="text-slate-400 hover:text-emerald-400 text-sm underline">
+              Compare automated removal services
+            </Link>
+          </div>
         </div>
       </div>
     </>

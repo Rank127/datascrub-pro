@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     "radaris removal",
     "delete radaris profile",
     "radaris privacy",
+    "how to remove yourself from radaris",
+    "radaris data removal",
+    "radaris opt-out guide",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/radaris",
@@ -89,6 +92,12 @@ const radarisInfo: BrokerInfo = {
       question: "Can GhostMyData help with Radaris removal?",
       answer: "Yes, GhostMyData automates Radaris removal and handles the account creation and verification process for you.",
     },
+  ],
+  relatedBrokers: [
+    { name: "MyLife", slug: "mylife" },
+    { name: "Arrests.org", slug: "arrests-org" },
+    { name: "USSearch", slug: "ussearch" },
+    { name: "BeenVerified", slug: "beenverified" },
   ],
   lastUpdated: "January 24, 2026",
 };

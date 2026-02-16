@@ -41,6 +41,12 @@ export default function MarketingLayout({
               >
                 Pricing
               </Link>
+              <Link
+                href="/remove-from"
+                className="text-slate-300 hover:text-white transition-colors"
+              >
+                Removal Guides
+              </Link>
             </div>
 
             <div className="flex items-center gap-4">

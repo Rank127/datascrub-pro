@@ -10,6 +10,10 @@ export const metadata: Metadata = {
     "checkpeople opt out",
     "checkpeople removal",
     "delete checkpeople listing",
+    "checkpeople privacy",
+    "how to remove yourself from checkpeople",
+    "checkpeople opt-out guide",
+    "checkpeople data removal",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/checkpeople",
@@ -91,6 +95,13 @@ const checkpeopleInfo: BrokerInfo = {
       question: "Why does Checkpeople have my information?",
       answer: "Checkpeople collects data from public records, government databases, and other publicly available sources to build their people search profiles.",
     },
+  ],
+  relatedBrokers: [
+    { name: "Smart Background Checks", slug: "smartbackgroundchecks" },
+    { name: "BeenVerified", slug: "beenverified" },
+    { name: "Instant Checkmate", slug: "instant-checkmate" },
+    { name: "TruthFinder", slug: "truthfinder" },
+    { name: "Spokeo", slug: "spokeo" },
   ],
   lastUpdated: "February 15, 2026",
 };

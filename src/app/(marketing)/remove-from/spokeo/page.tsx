@@ -114,6 +114,12 @@ const spokeoInfo: BrokerInfo = {
       answer: "Yes. We remove you from Spokeo and 2,100+ other sites. We also monitor for new data and remove it again.",
     },
   ],
+  relatedBrokers: [
+    { name: "WhitePages", slug: "whitepages" },
+    { name: "TruePeopleSearch", slug: "truepeoplesearch" },
+    { name: "FastPeopleSearch", slug: "fastpeoplesearch" },
+    { name: "BeenVerified", slug: "beenverified" },
+  ],
   lastUpdated: "January 24, 2026",
 };
 

@@ -10,6 +10,10 @@ export const metadata: Metadata = {
     "truepeoplesearch opt out",
     "truepeoplesearch removal",
     "delete truepeoplesearch listing",
+    "truepeoplesearch privacy",
+    "how to remove yourself from truepeoplesearch",
+    "truepeoplesearch opt-out guide",
+    "truepeoplesearch data removal",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/truepeoplesearch",
@@ -81,6 +85,13 @@ const truepeoplesearchInfo: BrokerInfo = {
       question: "Do I need to provide my email for TruePeopleSearch removal?",
       answer: "No, TruePeopleSearch is one of the few sites that doesn't require email verification for opt-out.",
     },
+  ],
+  relatedBrokers: [
+    { name: "FastPeopleSearch", slug: "fastpeoplesearch" },
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "SearchPeopleFree", slug: "searchpeoplefree" },
+    { name: "WhitePages", slug: "whitepages" },
+    { name: "PeopleFinder", slug: "peoplefinder" },
   ],
   lastUpdated: "January 24, 2026",
 };

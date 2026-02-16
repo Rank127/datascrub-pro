@@ -10,6 +10,10 @@ export const metadata: Metadata = {
     "instant checkmate opt out",
     "instant checkmate removal",
     "delete instant checkmate listing",
+    "instant checkmate privacy",
+    "how to remove yourself from instant checkmate",
+    "instant checkmate opt-out guide",
+    "instant checkmate data removal",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/instant-checkmate",
@@ -102,6 +106,13 @@ const instantCheckmateInfo: BrokerInfo = {
       question: "Why does Instant Checkmate have my information?",
       answer: "Instant Checkmate compiles data from public records, court filings, government databases, and other publicly available sources.",
     },
+  ],
+  relatedBrokers: [
+    { name: "TruthFinder", slug: "truthfinder" },
+    { name: "BeenVerified", slug: "beenverified" },
+    { name: "Intelius", slug: "intelius" },
+    { name: "Smart Background Checks", slug: "smartbackgroundchecks" },
+    { name: "Checkpeople", slug: "checkpeople" },
   ],
   lastUpdated: "February 15, 2026",
 };

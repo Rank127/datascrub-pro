@@ -10,6 +10,10 @@ export const metadata: Metadata = {
     "smart background checks opt out",
     "smart background checks removal",
     "delete smart background checks listing",
+    "smart background checks privacy",
+    "how to remove yourself from smart background checks",
+    "smart background checks opt-out guide",
+    "smart background checks data removal",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/smartbackgroundchecks",
@@ -96,6 +100,13 @@ const smartBackgroundChecksInfo: BrokerInfo = {
       question: "Why does Smart Background Checks have my data?",
       answer: "Smart Background Checks compiles data from public records, court filings, government databases, and other publicly available sources.",
     },
+  ],
+  relatedBrokers: [
+    { name: "BeenVerified", slug: "beenverified" },
+    { name: "TruthFinder", slug: "truthfinder" },
+    { name: "Instant Checkmate", slug: "instant-checkmate" },
+    { name: "Checkpeople", slug: "checkpeople" },
+    { name: "Intelius", slug: "intelius" },
   ],
   lastUpdated: "February 15, 2026",
 };

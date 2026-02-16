@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Shield, Search, AlertTriangle, FileText, Eye, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Shield, Search, AlertTriangle, FileText, Eye, CheckCircle2, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { removeFromPage } from "@/content/pages";
+import { BreadcrumbSchema, FAQSchema } from "@/components/seo/structured-data";
 
 export const metadata: Metadata = {
   title: removeFromPage.meta.title,
@@ -205,6 +206,39 @@ const brokers = [
   },
 ];
 
+const faqs = [
+  {
+    question: "What is a data broker?",
+    answer:
+      "Data brokers are companies that collect, aggregate, and sell personal information from public records, online activity, purchase history, and other sources. They compile detailed profiles including your name, address, phone number, email, relatives, and more. The data broker industry generates over $200 billion annually by selling this information to marketers, employers, landlords, and anyone willing to pay.",
+  },
+  {
+    question: "How many data brokers have my information?",
+    answer:
+      "The average person appears on 50+ data broker sites. Your information spreads through data broker networks as they buy and sell data from each other, creating a web of exposure that grows over time. Even if you remove yourself from one site, your data often reappears because brokers continuously re-acquire information from public records and other sources.",
+  },
+  {
+    question: "Is it legal for data brokers to sell my data?",
+    answer:
+      "In most US states, yes. Data brokers operate in a largely unregulated space. However, laws like CCPA (California), VCDPA (Virginia), and CPA (Colorado) give residents the right to opt out of data sales. The EU's GDPR provides stronger protections for European residents. Federal regulation in the US remains limited, which is why proactive removal is so important.",
+  },
+  {
+    question: "How long does data broker removal take?",
+    answer:
+      "It varies by broker. Easy removals (like USPhonebook) take 24-48 hours. Medium-difficulty brokers (like WhitePages or Intelius) take 3-14 days. Hard removals (like Arrests.org or Radaris) can take 7-30 days. Manual removal from all brokers would take 100+ hours of your time. GhostMyData automates this process so you don't have to spend that time.",
+  },
+  {
+    question: "Will my data reappear after removal?",
+    answer:
+      "Yes, data brokers continuously collect new data from public records, online activity, and other brokers. Your information can reappear within weeks or months after removal. That's why ongoing monitoring is essential. GhostMyData provides continuous monitoring to catch and remove reappearing listings automatically.",
+  },
+  {
+    question: "Can I remove my data from all brokers at once?",
+    answer:
+      "Manual removal requires visiting each broker individually, navigating different opt-out processes, and waiting for each request to be processed. There is no single opt-out form that covers all brokers. GhostMyData automates this process, submitting removal requests to 2,100+ data brokers simultaneously and monitoring for reappearances.",
+  },
+];
+
 export default function RemoveFromPage() {
   // Get content sections
   const heroSection = removeFromPage.sections.find(s => s.id === "hero");
@@ -215,6 +249,29 @@ export default function RemoveFromPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", url: "https://ghostmydata.com" },
+          { name: "Data Broker Removal Guides", url: "https://ghostmydata.com/remove-from" },
+        ]}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Data Broker Removal Guides",
+          description: "Step-by-step guides to remove your personal information from data brokers",
+          numberOfItems: brokers.length,
+          itemListElement: brokers.map((broker, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: `Remove from ${broker.name}`,
+            url: `https://ghostmydata.com/remove-from/${broker.slug}`,
+          })),
+        }) }}
+      />
+      <FAQSchema faqs={faqs} />
       {/* Header */}
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -400,6 +457,36 @@ export default function RemoveFromPage() {
           </div>
         </div>
       )}
+
+      {/* FAQ Section */}
+      <div className="mb-16">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Frequently Asked Questions About Data Brokers
+          </h2>
+          <p className="text-slate-400 max-w-2xl mx-auto">
+            Understanding how data brokers work is the first step to protecting your privacy.
+            Here are answers to the most common questions about data broker removal.
+          </p>
+        </div>
+        <div className="space-y-4 max-w-3xl mx-auto">
+          {faqs.map((faq) => (
+            <details
+              key={faq.question}
+              className="group bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden"
+            >
+              <summary className="flex items-center gap-3 p-6 cursor-pointer list-none hover:bg-slate-800/80 transition-colors">
+                <HelpCircle className="h-5 w-5 text-emerald-400 flex-shrink-0" />
+                <span className="text-lg font-semibold text-white flex-1">{faq.question}</span>
+                <ArrowRight className="h-4 w-4 text-slate-400 transition-transform group-open:rotate-90" />
+              </summary>
+              <div className="px-6 pb-6 pt-0 ml-8">
+                <p className="text-slate-400 leading-relaxed">{faq.answer}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
 
       {/* CTA */}
       <div className="text-center p-8 bg-slate-800/30 rounded-2xl">

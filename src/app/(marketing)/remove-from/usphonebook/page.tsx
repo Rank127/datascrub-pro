@@ -10,6 +10,10 @@ export const metadata: Metadata = {
     "usphonebook opt out",
     "usphonebook removal",
     "delete usphonebook listing",
+    "usphonebook privacy",
+    "how to remove yourself from usphonebook",
+    "usphonebook opt-out guide",
+    "usphonebook data removal",
   ],
   alternates: {
     canonical: "https://ghostmydata.com/remove-from/usphonebook",
@@ -89,6 +93,13 @@ const usphonebookInfo: BrokerInfo = {
       question: "Why does USPhonebook have my phone number?",
       answer: "USPhonebook collects data from public records, phone directories, and other publicly available sources to build their database.",
     },
+  ],
+  relatedBrokers: [
+    { name: "Spokeo", slug: "spokeo" },
+    { name: "WhitePages", slug: "whitepages" },
+    { name: "TruePeopleSearch", slug: "truepeoplesearch" },
+    { name: "That's Them", slug: "thatsthem" },
+    { name: "Cocofinder", slug: "cocofinder" },
   ],
   lastUpdated: "February 15, 2026",
 };
