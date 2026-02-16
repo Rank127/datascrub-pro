@@ -97,16 +97,21 @@ export async function validateOptOutUrls(
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
+      // Use GET with redirect follow — many broker sites block HEAD requests
+      // or return 405/403. Follow redirects since opt-out pages often redirect.
       const response = await fetch(info.optOutUrl, {
-        method: "HEAD",
-        redirect: "manual", // Don't follow redirects, just track them
+        method: "GET",
+        redirect: "follow",
         signal: controller.signal,
         headers: {
-          "User-Agent": "GhostMyData-ComplianceMonitor/1.0",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         },
       });
 
       clearTimeout(timeout);
+      // Consume body to avoid memory leaks on open connections
+      await response.text().catch(() => {});
       httpStatus = response.status;
       isHealthy = httpStatus >= 200 && httpStatus < 400;
     } catch (err) {
