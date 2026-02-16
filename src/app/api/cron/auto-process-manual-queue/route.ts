@@ -19,6 +19,8 @@ import { PrismaClient } from "@prisma/client";
 import { acquireJobLock, releaseJobLock, getBrokerIntelligence } from "@/lib/agents/intelligence-coordinator/index";
 import { getBestAutomationMethod } from "@/lib/removers/browser-automation";
 import { logCronExecution } from "@/lib/cron-logger";
+import { getEffectivePlan } from "@/lib/family/family-service";
+import type { Plan } from "@/lib/types";
 
 export const maxDuration = 300;
 
@@ -56,11 +58,19 @@ const AUTO_PROCESS_MIN_CONFIDENCE = 30;
 // Maximum exposures to process per run (increased since we're processing more)
 const BATCH_SIZE = 200;
 
+// Plan-based removal limits (matches removals/request/route.ts)
+const REMOVAL_LIMITS: Record<Plan, number> = {
+  FREE: 3,
+  PRO: -1, // unlimited
+  ENTERPRISE: -1, // unlimited
+};
+
 interface ProcessResult {
   processed: number;
   removalRequestsCreated: number;
   skippedLowConfidence: number;
   skippedExcludedSource: number;
+  skippedPlanLimit: number;
   errors: number;
 }
 
@@ -70,6 +80,7 @@ async function processManualQueue(): Promise<ProcessResult> {
     removalRequestsCreated: 0,
     skippedLowConfidence: 0,
     skippedExcludedSource: 0,
+    skippedPlanLimit: 0,
     errors: 0,
   };
 
@@ -104,8 +115,59 @@ async function processManualQueue(): Promise<ProcessResult> {
 
   console.log(`[AutoManualQueue] Found ${exposures.length} exposures to auto-process`);
 
+  // Pre-load plan info and monthly quotas for all unique users in this batch
+  const uniqueUserIds = [...new Set(exposures.map(e => e.userId))];
+
+  const userPlanMap = new Map<string, Plan>();
+  for (const userId of uniqueUserIds) {
+    const plan = await getEffectivePlan(userId) as Plan;
+    userPlanMap.set(userId, plan);
+  }
+
+  // For FREE users, pre-load their current month's removal count
+  const currentMonth = new Date();
+  currentMonth.setDate(1);
+  currentMonth.setHours(0, 0, 0, 0);
+
+  const freeUserIds = uniqueUserIds.filter(id => userPlanMap.get(id) === "FREE");
+  const userQuotaUsed = new Map<string, number>();
+
+  if (freeUserIds.length > 0) {
+    // Batch query: count removals this month for all FREE users
+    const quotaCounts = await prisma.removalRequest.groupBy({
+      by: ["userId"],
+      where: {
+        userId: { in: freeUserIds },
+        createdAt: { gte: currentMonth },
+      },
+      _count: true,
+    });
+
+    for (const userId of freeUserIds) {
+      const found = quotaCounts.find(q => q.userId === userId);
+      userQuotaUsed.set(userId, found?._count ?? 0);
+    }
+  }
+
+  console.log(`[AutoManualQueue] Users in batch: ${uniqueUserIds.length} (${freeUserIds.length} FREE)`);
+
   for (const exposure of exposures) {
     try {
+      // Enforce plan-based removal limits
+      const userPlan = userPlanMap.get(exposure.userId) ?? "FREE";
+      const limit = REMOVAL_LIMITS[userPlan];
+
+      if (limit !== -1) {
+        const used = userQuotaUsed.get(exposure.userId) ?? 0;
+        if (used >= limit) {
+          result.skippedPlanLimit++;
+          console.log(`[AutoManualQueue] Skipped ${exposure.source} for user ${exposure.userId.substring(0, 8)}... (${userPlan} plan, ${used}/${limit} quota used)`);
+          continue;
+        }
+        // Increment the tracked quota so subsequent exposures for same user are also limited
+        userQuotaUsed.set(exposure.userId, used + 1);
+      }
+
       // Get broker intelligence to inform method selection
       const intel = await getBrokerIntelligence(exposure.source);
 
@@ -225,7 +287,7 @@ export async function GET() {
       duration: `${duration}ms`,
       result,
       remainingManualQueue,
-      message: `Auto-processed ${result.processed} exposures. Created ${result.removalRequestsCreated} removal requests. ${result.skippedLowConfidence} skipped (low confidence), ${result.skippedExcludedSource} skipped (excluded/data processors). ${result.errors} errors.`,
+      message: `Auto-processed ${result.processed} exposures. Created ${result.removalRequestsCreated} removal requests. ${result.skippedPlanLimit} skipped (plan limit), ${result.skippedLowConfidence} skipped (low confidence), ${result.skippedExcludedSource} skipped (excluded/data processors). ${result.errors} errors.`,
     });
   } catch (error) {
     await releaseJobLock(JOB_NAME);
