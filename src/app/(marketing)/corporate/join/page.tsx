@@ -43,7 +43,7 @@ function CorporateJoinContent() {
   // Fetch invite details
   useEffect(() => {
     if (!token) {
-      setError("No invitation token provided");
+      setError("missing_token");
       setLoading(false);
       return;
     }
@@ -58,15 +58,15 @@ function CorporateJoinContent() {
           if (data.status !== "PENDING" || data.isExpired) {
             setError(
               data.isExpired
-                ? "This invitation has expired."
-                : "This invitation is no longer valid."
+                ? "This invitation has expired. Please ask your company admin to resend the invite."
+                : "This invitation has already been used or is no longer valid."
             );
           }
         }
         setLoading(false);
       })
       .catch(() => {
-        setError("Failed to load invitation");
+        setError("We couldn't load this invitation. Please check your link and try again.");
         setLoading(false);
       });
   }, [token]);
@@ -137,10 +137,43 @@ function CorporateJoinContent() {
         </div>
 
         {error && !invite ? (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
-            <XCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-            <p className="text-red-400">{error}</p>
-          </div>
+          error === "missing_token" ? (
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center">
+              <Building2 className="w-12 h-12 text-violet-400 mx-auto mb-4" />
+              <h2 className="text-lg font-semibold text-white mb-2">
+                No Invitation Link Detected
+              </h2>
+              <p className="text-slate-400 mb-6 leading-relaxed">
+                To join a corporate plan, you need an invitation link from your company admin.
+                Check your email for an invite from GhostMyData, or ask your admin to send one.
+              </p>
+              <div className="flex flex-col gap-3">
+                <a
+                  href="/login"
+                  className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
+                >
+                  Already have an account? Sign in
+                </a>
+                <a
+                  href="/corporate"
+                  className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
+                  Learn about Corporate Plans
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
+              <XCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+              <p className="text-red-400 mb-4">{error}</p>
+              <a
+                href="/corporate"
+                className="text-sm text-slate-400 hover:text-white transition-colors"
+              >
+                Learn about Corporate Plans
+              </a>
+            </div>
+          )
         ) : invite ? (
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-6">
