@@ -40,11 +40,11 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "Is GhostMyData better than DeleteMe?",
-    answer: "GhostMyData has more features for a similar price. It offers dark web monitoring, a free tier, and monthly billing. DeleteMe has been around since 2011 but lacks dark web alerts.",
+    answer: "GhostMyData has more features for a similar price. It offers dark web monitoring, a free tier, and monthly billing. DeleteMe has been around since 2011 but lacks dark web alerts and requires a government ID and proof of address to sign up.",
   },
   {
     question: "How much does DeleteMe cost?",
-    answer: "DeleteMe costs $129/year with no monthly option. GhostMyData has a free tier and paid plans from $19.99/month (currently 40% OFF at $11.99/month).",
+    answer: "DeleteMe uses a credit-based pricing model starting at $129/year with no monthly option. They also charge a $55 chargeback processing fee. GhostMyData has a free tier and paid plans from $19.99/month (currently 40% OFF at $11.99/month) with no hidden fees.",
   },
   {
     question: "Which service covers more data brokers?",
@@ -56,7 +56,11 @@ const faqs = [
   },
   {
     question: "Can I try these for free?",
-    answer: "GhostMyData has a free tier with a full scan and guides. DeleteMe has no free tier but offers a 30-day refund.",
+    answer: "GhostMyData has a free tier with a full scan and guides. DeleteMe has no free tier and requires government ID and proof of address just to create an account.",
+  },
+  {
+    question: "Is DeleteMe a US company?",
+    answer: "DeleteMe is operated by Abine/DeleteMe, which is registered as a Cyprus entity. GhostMyData is US-based. DeleteMe also retains your data for up to 3 years and staff can access stored passwords.",
   },
 ];
 
@@ -64,7 +68,7 @@ const comparisonData = [
   {
     feature: "Starting Price",
     ghostmydata: "Free (paid from $19.99/mo, 40% OFF)",
-    deleteme: "$10.75/mo (billed annually)",
+    deleteme: "$10.75/mo (billed annually, credit-based)",
     winner: "ghostmydata",
   },
   {
@@ -104,9 +108,27 @@ const comparisonData = [
     winner: "ghostmydata",
   },
   {
-    feature: "Do Not Call Registration",
-    ghostmydata: "Yes (Enterprise)",
-    deleteme: "No",
+    feature: "Signup Requirements",
+    ghostmydata: "Email only",
+    deleteme: "Government ID + proof of address",
+    winner: "ghostmydata",
+  },
+  {
+    feature: "Data Retention",
+    ghostmydata: "30 days after cancellation",
+    deleteme: "Up to 3 years",
+    winner: "ghostmydata",
+  },
+  {
+    feature: "Hidden Fees",
+    ghostmydata: "None",
+    deleteme: "$55 chargeback fee",
+    winner: "ghostmydata",
+  },
+  {
+    feature: "Company Location",
+    ghostmydata: "US-based",
+    deleteme: "Cyprus entity",
     winner: "ghostmydata",
   },
   {
@@ -122,6 +144,12 @@ const comparisonData = [
     winner: "ghostmydata",
   },
   {
+    feature: "API / White-Label",
+    ghostmydata: "No",
+    deleteme: "Yes (business tier)",
+    winner: "deleteme",
+  },
+  {
     feature: "Company Founded",
     ghostmydata: "2024",
     deleteme: "2011",
@@ -129,9 +157,9 @@ const comparisonData = [
   },
   {
     feature: "Money-Back Guarantee",
-    ghostmydata: "30 days",
+    ghostmydata: "30 days, no questions asked",
     deleteme: "30 days",
-    winner: "tie",
+    winner: "ghostmydata",
   },
 ];
 
@@ -310,10 +338,12 @@ export default function CompareDeleteMePage() {
             "Dark web monitoring included",
             "Monthly billing option available",
             "More data brokers covered (2,100+)",
+            "No government ID required to sign up",
+            "No hidden fees (no $55 chargeback fee)",
+            "US-based company (not Cyprus entity)",
+            "30-day data deletion (not 3-year retention)",
             "Faster removal processing",
             "Real-time dashboard vs quarterly reports",
-            "Larger family plans (5 profiles)",
-            "Breach monitoring on all plans",
           ].map((benefit) => (
             <div key={benefit} className="flex items-center gap-3 p-4 bg-slate-800/50 rounded-lg">
               <CheckCircle className="h-5 w-5 text-emerald-500 flex-shrink-0" />
@@ -336,13 +366,16 @@ export default function CompareDeleteMePage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">•</span>
-            You&apos;re okay paying yearly
+            You need API access or white-label solutions for business use
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">•</span>
-            You don&apos;t need dark web alerts
+            You&apos;re comfortable with credit-based pricing and annual billing
           </li>
         </ul>
+        <p className="text-slate-500 text-sm mt-4">
+          Note: DeleteMe requires government ID and proof of address to create an account, is registered as a Cyprus entity, retains data for up to 3 years, and charges a $55 chargeback processing fee.
+        </p>
       </div>
 
       {/* FAQ Section */}

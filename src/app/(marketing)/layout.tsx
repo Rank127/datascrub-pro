@@ -65,7 +65,7 @@ export default function MarketingLayout({
       {/* Footer */}
       <footer aria-label="Site footer" className="border-t border-slate-800 py-12 mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8 md:grid-cols-4">
+          <div className="grid gap-8 md:grid-cols-5">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Shield className="h-6 w-6 text-emerald-500" />
@@ -92,6 +92,46 @@ export default function MarketingLayout({
                 <li>
                   <Link href="/security" className="hover:text-white">
                     Security
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/compare" className="hover:text-white">
+                    Compare
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-white mb-4">Removal Guides</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li>
+                  <Link href="/remove-from/spokeo" className="hover:text-white">
+                    Remove from Spokeo
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/remove-from/whitepages" className="hover:text-white">
+                    Remove from Whitepages
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/remove-from/beenverified" className="hover:text-white">
+                    Remove from BeenVerified
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/remove-from/truthfinder" className="hover:text-white">
+                    Remove from TruthFinder
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/remove-from/fastpeoplesearch" className="hover:text-white">
+                    Remove from FastPeopleSearch
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/remove-from" className="hover:text-white text-emerald-400">
+                    View All Guides
                   </Link>
                 </li>
               </ul>
@@ -130,9 +170,19 @@ export default function MarketingLayout({
                   </Link>
                 </li>
                 <li>
-                  <a href="mailto:legal@ghostmydata.com" className="hover:text-white">
-                    Legal Inquiries
-                  </a>
+                  <Link href="/cookies" className="hover:text-white">
+                    Cookie Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/security" className="hover:text-white">
+                    Security
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/vulnerability-disclosure" className="hover:text-white">
+                    Vulnerability Disclosure
+                  </Link>
                 </li>
               </ul>
             </div>

@@ -328,11 +328,15 @@ export default function ComparePrivacyBeePage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">-</span>
-            You need white-glove service with dedicated US-based analysts (Signature tier)
+            You need white-glove service with dedicated US-based analysts (Signature tier at $799/year)
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">-</span>
             You prefer their 181,000+ custom site database for niche removals
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-slate-500">-</span>
+            You want dark web monitoring at a lower tier (Pro at $197/year)
           </li>
         </ul>
       </div>

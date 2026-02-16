@@ -40,23 +40,27 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "Is GhostMyData better than Incogni?",
-    answer: "GhostMyData has more features. It has dark web alerts, breach alerts, and covers 2,100+ sites vs 35+ for Incogni. Incogni is cheaper but has fewer features.",
+    answer: "GhostMyData has more features. It has dark web alerts, breach alerts, and covers 2,100+ sites vs 35+ for Incogni. Incogni is cheaper but limits accounts to 3 data points and only allows one refund per lifetime.",
   },
   {
     question: "How much does Incogni cost?",
-    answer: "Incogni costs $6.49/month yearly or $12.99/month. GhostMyData has a free tier. Paid plans start at $19.99/month (currently 40% OFF at $11.99/month) with more features.",
+    answer: "Incogni costs $6.49/month yearly or $12.99/month. Their new Protect tier with NordProtect bundle costs $41.48/month and includes $1M identity theft insurance. GhostMyData has a free tier and paid plans from $11.99/month (40% OFF) with more features.",
   },
   {
     question: "Does Incogni have dark web monitoring?",
-    answer: "No. Incogni only does data broker removal. GhostMyData has dark web alerts in its Enterprise plan.",
+    answer: "No, not in the standard plan. Incogni only does data broker removal unless you buy the NordProtect Protect tier at $41.48/month. GhostMyData includes dark web alerts in Enterprise for $29.99/month.",
   },
   {
     question: "Can I try these for free?",
-    answer: "GhostMyData has a free tier with a full scan. Incogni has no free tier but offers a 30-day refund.",
+    answer: "GhostMyData has a free tier with a full scan. Incogni has no free tier and only allows one refund per lifetime, so choose carefully.",
   },
   {
     question: "Which covers more data brokers?",
     answer: "GhostMyData covers 2,100+ sites plus 60 AI Shield sources. Incogni covers about 35+ sites.",
+  },
+  {
+    question: "Who owns Incogni?",
+    answer: "Incogni is owned by Surfshark, which is part of Nord Security (NordVPN). GhostMyData is an independent company focused solely on data privacy and removal.",
   },
 ];
 
@@ -104,9 +108,21 @@ const comparisonData = [
     winner: "ghostmydata",
   },
   {
+    feature: "Account Data Limit",
+    ghostmydata: "Unlimited data points",
+    incogni: "Max 3 data points per account",
+    winner: "ghostmydata",
+  },
+  {
     feature: "VPN Bundle",
     ghostmydata: "No",
-    incogni: "Yes (Surfshark)",
+    incogni: "Yes (Surfshark/NordProtect)",
+    winner: "incogni",
+  },
+  {
+    feature: "Identity Theft Insurance",
+    ghostmydata: "No",
+    incogni: "$1M (Protect tier, $41.48/mo)",
     winner: "incogni",
   },
   {
@@ -119,13 +135,13 @@ const comparisonData = [
     feature: "Parent Company",
     ghostmydata: "Independent",
     incogni: "Surfshark (Nord Security)",
-    winner: "tie",
+    winner: "ghostmydata",
   },
   {
-    feature: "Money-Back Guarantee",
-    ghostmydata: "30 days",
-    incogni: "30 days",
-    winner: "tie",
+    feature: "Refund Policy",
+    ghostmydata: "30 days, no questions asked",
+    incogni: "One refund per lifetime",
+    winner: "ghostmydata",
   },
 ];
 
@@ -324,7 +340,7 @@ export default function CompareIncogniPage() {
         <ul className="space-y-2 text-slate-400">
           <li className="flex items-start gap-2">
             <span className="text-slate-500">•</span>
-            You use Surfshark VPN and want a bundle
+            You use Surfshark VPN or NordVPN and want a bundle
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">•</span>
@@ -332,9 +348,12 @@ export default function CompareIncogniPage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">•</span>
-            You only need basic broker removal
+            You want $1M identity theft insurance (Protect tier at $41.48/mo)
           </li>
         </ul>
+        <p className="text-slate-500 text-sm mt-4">
+          Note: Incogni limits accounts to 3 data points, only allows one refund per lifetime, and is owned by Surfshark (Nord Security), not an independent privacy company.
+        </p>
       </div>
 
       {/* FAQ Section */}

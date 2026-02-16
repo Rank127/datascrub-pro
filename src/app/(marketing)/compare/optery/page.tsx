@@ -40,11 +40,11 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "Is GhostMyData better than Optery?",
-    answer: "GhostMyData covers 2,100+ sites vs 370-635 for Optery. It also has dark web and breach alerts. Optery is cheaper but has fewer features.",
+    answer: "GhostMyData covers 2,100+ sites vs 370-635 for Optery. It also has dark web and breach alerts. Optery has SOC 2 Type II certification and 6 pricing tiers but charges more for comparable features.",
   },
   {
     question: "How much does Optery cost?",
-    answer: "Optery starts at $39/year ($3.25/mo). Their top plan is $249/year. GhostMyData has a free tier. Pro costs $19.99/mo (currently 40% OFF at $11.99/mo) with more features.",
+    answer: "Optery has 6 pricing tiers: Core $3.99/mo, Extended $14.99/mo, and Ultimate $24.99/mo (annual billing). GhostMyData has a free tier with Pro at $11.99/mo (40% OFF) with more features included.",
   },
   {
     question: "Does Optery have dark web monitoring?",
@@ -57,6 +57,10 @@ const faqs = [
   {
     question: "Does Optery have a free tier?",
     answer: "Optery has a limited free tier with self-service guides. GhostMyData's free tier has a full scan of 2,100+ sites.",
+  },
+  {
+    question: "Does Optery use AI?",
+    answer: "Optery uses OpenAI with an opt-in consent model for data processing. They also offer a GPC browser extension and file FTC complaints on your behalf. GhostMyData uses AI internally with ephemeral sessions and never shares your data with AI training.",
   },
 ];
 
@@ -108,6 +112,30 @@ const comparisonData = [
     ghostmydata: "Yes (Enterprise)",
     optery: "Yes (Ultimate tier)",
     winner: "tie",
+  },
+  {
+    feature: "SOC 2 Type II",
+    ghostmydata: "Compliant infrastructure",
+    optery: "Certified",
+    winner: "optery",
+  },
+  {
+    feature: "FTC Complaint Filing",
+    ghostmydata: "No",
+    optery: "Yes (on your behalf)",
+    winner: "optery",
+  },
+  {
+    feature: "Browser Extension",
+    ghostmydata: "No",
+    optery: "GPC extension",
+    winner: "optery",
+  },
+  {
+    feature: "AI Data Usage",
+    ghostmydata: "Never shared with AI training",
+    optery: "OpenAI opt-in consent",
+    winner: "ghostmydata",
   },
   {
     feature: "Dashboard Quality",
@@ -270,15 +298,15 @@ export default function CompareOpteryPage() {
               </div>
               <div className="flex justify-between items-center py-2 border-b border-slate-700">
                 <span className="text-slate-300">Core (370 sites)</span>
-                <span className="text-white font-semibold">$3.25/mo (annual)</span>
+                <span className="text-white font-semibold">$3.99/mo (annual)</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-slate-700">
                 <span className="text-slate-300">Extended (540 sites)</span>
-                <span className="text-white font-semibold">$12.42/mo (annual)</span>
+                <span className="text-white font-semibold">$14.99/mo (annual)</span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-300">Ultimate (635 sites)</span>
-                <span className="text-white font-semibold">$20.75/mo (annual)</span>
+                <span className="text-white font-semibold">$24.99/mo (annual)</span>
               </div>
             </div>
             <p className="text-slate-500 text-sm mt-4">
@@ -321,15 +349,19 @@ export default function CompareOpteryPage() {
         <ul className="space-y-2 text-slate-400">
           <li className="flex items-start gap-2">
             <span className="text-slate-500">-</span>
-            Budget is key and $39/year is your limit
+            You need SOC 2 Type II certified service for compliance
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">-</span>
-            You only need basic broker removal
+            You want FTC complaints filed on your behalf
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">-</span>
-            You like their screenshot proof system
+            You want a GPC browser extension for automatic opt-outs
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-slate-500">-</span>
+            You like their before/after screenshot proof system
           </li>
         </ul>
       </div>

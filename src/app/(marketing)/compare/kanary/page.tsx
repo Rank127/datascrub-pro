@@ -41,19 +41,19 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "Is GhostMyData better than Kanary?",
-    answer: "GhostMyData offers more comprehensive protection with 2,100+ data brokers (plus 60 AI Shield sources), dark web monitoring, and breach alerts. Kanary covers only 310 brokers but has a mobile app. For overall protection, GhostMyData is the better choice.",
+    answer: "GhostMyData offers more comprehensive protection with 2,100+ data brokers (plus 60 AI Shield sources), dark web monitoring, and breach alerts. Kanary uses a threat-model approach and covers 12,887 unique sites but has a different focus. For overall data broker removal, GhostMyData is the better choice.",
   },
   {
     question: "How much does Kanary cost compared to GhostMyData?",
-    answer: "Kanary costs $14.99/month or $179.88/year for individuals. GhostMyData offers a free tier and paid plans starting at $19.99/month (currently 40% OFF at $11.99/month) with more features included.",
+    answer: "Kanary has a free Community tier, Professional at $9.99/month, and a 50% family member discount. GhostMyData offers a free tier and paid plans starting at $11.99/month (40% OFF) with more features included.",
   },
   {
     question: "Does Kanary have a mobile app?",
     answer: "Yes, Kanary is one of the few data removal services with iOS and Android apps. GhostMyData currently offers a responsive web app with mobile app planned for future release.",
   },
   {
-    question: "Which service covers more data brokers?",
-    answer: "GhostMyData covers 2,100+ data brokers plus 60 AI Shield sources, while Kanary covers 310 brokers (209 automated, 101 with guides). GhostMyData offers significantly more coverage.",
+    question: "What makes Kanary different?",
+    answer: "Kanary is Y Combinator-backed, uses a threat-model approach, covers Google search results and social media, claims 12,887 unique sites, pledges no AI/LLM data sharing, retains logs for only 1 week, and has an active Discord/Reddit community.",
   },
   {
     question: "Does Kanary have dark web monitoring?",
@@ -65,20 +65,20 @@ const comparisonData = [
   {
     feature: "Starting Price",
     ghostmydata: "Free (paid from $19.99/mo, 40% OFF)",
-    kanary: "$14.99/mo",
+    kanary: "Free (Professional $9.99/mo)",
     winner: "ghostmydata",
   },
   {
     feature: "Free Tier",
     ghostmydata: "Yes - full scan",
-    kanary: "14-day trial (3 removals)",
+    kanary: "Community tier (limited)",
     winner: "ghostmydata",
   },
   {
-    feature: "Data Brokers Covered",
+    feature: "Sites Covered",
     ghostmydata: "2,100+ (plus 60 AI Shield sources)",
-    kanary: "310 (209 automated)",
-    winner: "ghostmydata",
+    kanary: "12,887 unique sites (threat-model)",
+    winner: "kanary",
   },
   {
     feature: "Dark Web Monitoring",
@@ -111,16 +111,46 @@ const comparisonData = [
     winner: "ghostmydata",
   },
   {
-    feature: "Security Certifications",
-    ghostmydata: "AES-256, SOC 2 compliant",
-    kanary: "ISO 27001, SOC 1/2",
+    feature: "Google & Social Media",
+    ghostmydata: "No",
+    kanary: "Yes (Google results + social)",
+    winner: "kanary",
+  },
+  {
+    feature: "AI/LLM Data Sharing",
+    ghostmydata: "Never shared with training",
+    kanary: "No AI/LLM sharing pledge",
     winner: "tie",
+  },
+  {
+    feature: "Log Retention",
+    ghostmydata: "90 days",
+    kanary: "1 week",
+    winner: "kanary",
+  },
+  {
+    feature: "Community",
+    ghostmydata: "Email support",
+    kanary: "Discord + Reddit community",
+    winner: "kanary",
+  },
+  {
+    feature: "Backed By",
+    ghostmydata: "Independent",
+    kanary: "Y Combinator",
+    winner: "kanary",
+  },
+  {
+    feature: "Family Discount",
+    ghostmydata: "Enterprise plan (5 profiles)",
+    kanary: "50% off per family member",
+    winner: "kanary",
   },
   {
     feature: "Money-Back Guarantee",
     ghostmydata: "30 days",
-    kanary: "14-day free trial",
-    winner: "ghostmydata",
+    kanary: "Free Community tier",
+    winner: "tie",
   },
 ];
 
@@ -269,24 +299,20 @@ export default function CompareKanaryPage() {
             <h3 className="text-2xl font-bold text-white mb-4">Kanary</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b border-slate-700">
-                <span className="text-slate-300">Free Trial</span>
-                <span className="text-white font-semibold">14 days (3 removals)</span>
+                <span className="text-slate-300">Community (free)</span>
+                <span className="text-white font-semibold">$0</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-slate-700">
-                <span className="text-slate-300">Individual (monthly)</span>
-                <span className="text-white font-semibold">$16.99/mo</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-slate-700">
-                <span className="text-slate-300">Individual (annual)</span>
-                <span className="text-white font-semibold">$14.99/mo</span>
+                <span className="text-slate-300">Professional</span>
+                <span className="text-white font-semibold">$9.99/mo</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-slate-300">Family Add-on</span>
-                <span className="text-white font-semibold">$7.49/mo each</span>
+                <span className="text-slate-300">Family Members</span>
+                <span className="text-white font-semibold">50% off each</span>
               </div>
             </div>
             <p className="text-slate-500 text-sm mt-4">
-              310 data brokers only - no dark web or breach monitoring
+              Threat-model approach, Google + social media coverage, Y Combinator backed
             </p>
           </div>
         </div>
@@ -329,11 +355,15 @@ export default function CompareKanaryPage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">-</span>
-            You have a large family (10+ members to protect)
+            You want Google search result and social media removal
           </li>
           <li className="flex items-start gap-2">
             <span className="text-slate-500">-</span>
-            You prefer ISO 27001 certified security compliance
+            You prefer minimal log retention (1-week policy)
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-slate-500">-</span>
+            You want a community (Discord/Reddit) and a 50% family discount
           </li>
         </ul>
       </div>

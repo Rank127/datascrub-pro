@@ -618,6 +618,52 @@ We're committed to helping you understand these terms. Don't hesitate to reach o
 };
 
 // ============================================================================
+// COOKIE POLICY PAGE
+// ============================================================================
+
+export const cookiePolicyPage: PageContent = {
+  meta: {
+    title: "Cookie Policy | GhostMyData",
+    description: "Learn about the cookies GhostMyData uses, why we use them, and how to manage your cookie preferences. We respect your privacy.",
+    keywords: ["cookie policy", "cookies", "privacy", "tracking", "analytics cookies"],
+  },
+  sections: [
+    {
+      id: "intro",
+      type: "hero",
+      title: "Cookie Policy",
+      content: `This Cookie Policy explains what cookies are, how GhostMyData uses them, and how you can control them. We keep things simple and transparent.
+
+Cookies are small text files stored on your device when you visit a website. They help sites work properly and let us improve your experience.`
+    },
+  ],
+  lastUpdated: "2026-02-15",
+};
+
+// ============================================================================
+// VULNERABILITY DISCLOSURE PAGE
+// ============================================================================
+
+export const vulnerabilityDisclosurePage: PageContent = {
+  meta: {
+    title: "Vulnerability Disclosure Policy | GhostMyData",
+    description: "GhostMyData's vulnerability disclosure policy for security researchers. Learn how to report security issues responsibly.",
+    keywords: ["vulnerability disclosure", "security policy", "bug reporting", "responsible disclosure"],
+  },
+  sections: [
+    {
+      id: "intro",
+      type: "hero",
+      title: "Vulnerability Disclosure Policy",
+      content: `At GhostMyData, security is core to our mission. We welcome reports from security researchers who find vulnerabilities in our systems.
+
+This policy describes how to report issues and what you can expect from us. We do not take legal action against researchers acting in good faith.`
+    },
+  ],
+  lastUpdated: "2026-02-15",
+};
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -627,6 +673,8 @@ export const allPages = {
   security: securityPage,
   privacy: privacyPage,
   terms: termsPage,
+  cookies: cookiePolicyPage,
+  "vulnerability-disclosure": vulnerabilityDisclosurePage,
 };
 
 export default allPages;

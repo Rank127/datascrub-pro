@@ -98,6 +98,111 @@ const brokers = [
     difficulty: "Medium",
     time: "5-7 days",
   },
+  {
+    name: "TruthFinder",
+    slug: "truthfinder",
+    description: "People search and background check site with public records",
+    difficulty: "Medium",
+    time: "7-14 days",
+  },
+  {
+    name: "Instant Checkmate",
+    slug: "instant-checkmate",
+    description: "Background check service with criminal and contact data",
+    difficulty: "Medium",
+    time: "7-14 days",
+  },
+  {
+    name: "USPhonebook",
+    slug: "usphonebook",
+    description: "Free phone number lookup and people search service",
+    difficulty: "Easy",
+    time: "24-48 hours",
+  },
+  {
+    name: "Smart Background Checks",
+    slug: "smartbackgroundchecks",
+    description: "Public records and background check aggregator",
+    difficulty: "Medium",
+    time: "3-7 days",
+  },
+  {
+    name: "Checkpeople",
+    slug: "checkpeople",
+    description: "Free people search engine with public records access",
+    difficulty: "Easy",
+    time: "24-48 hours",
+  },
+  {
+    name: "Arrests.org",
+    slug: "arrests-org",
+    description: "Mugshot and arrest record publishing site",
+    difficulty: "Hard",
+    time: "7-30 days",
+  },
+  {
+    name: "Nuwber",
+    slug: "nuwber",
+    description: "People search with detailed contact and address profiles",
+    difficulty: "Medium",
+    time: "3-7 days",
+  },
+  {
+    name: "PeekYou",
+    slug: "peekyou",
+    description: "People search engine indexing social media and web profiles",
+    difficulty: "Easy",
+    time: "24-48 hours",
+  },
+  {
+    name: "Pipl",
+    slug: "pipl",
+    description: "Large people search engine used by businesses and investigators",
+    difficulty: "Hard",
+    time: "7-14 days",
+  },
+  {
+    name: "SearchPeopleFree",
+    slug: "searchpeoplefree",
+    description: "Free people search with phone numbers and addresses",
+    difficulty: "Easy",
+    time: "24-48 hours",
+  },
+  {
+    name: "FamilyTreeNow",
+    slug: "familytreenow",
+    description: "Genealogy site exposing addresses, phones, and relatives",
+    difficulty: "Easy",
+    time: "24 hours",
+  },
+  {
+    name: "That's Them",
+    slug: "thatsthem",
+    description: "Free people search with addresses, phones, emails, and IPs",
+    difficulty: "Easy",
+    time: "24-72 hours",
+  },
+  {
+    name: "ClustrMaps",
+    slug: "clustrmaps",
+    description: "People search mapping personal info to geographic locations",
+    difficulty: "Medium",
+    time: "3-7 days",
+  },
+  {
+    name: "Cocofinder",
+    slug: "cocofinder",
+    description: "People search engine with phone lookup and address data",
+    difficulty: "Easy",
+    time: "24-48 hours",
+  },
+  {
+    name: "ZoomInfo",
+    slug: "zoominfo",
+    description: "B2B data platform with professional contact information",
+    difficulty: "Hard",
+    time: "7-14 days",
+  },
 ];
 
 export default function RemoveFromPage() {
@@ -230,7 +335,11 @@ export default function RemoveFromPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid md:grid-cols-3 gap-8 mb-16">
+      <div className="grid md:grid-cols-4 gap-8 mb-16">
+        <div className="text-center p-6 bg-slate-800/30 rounded-xl">
+          <div className="text-4xl font-bold text-emerald-400 mb-2">25</div>
+          <div className="text-slate-400">Step-by-Step Guides</div>
+        </div>
         <div className="text-center p-6 bg-slate-800/30 rounded-xl">
           <div className="text-4xl font-bold text-emerald-400 mb-2">4,000+</div>
           <div className="text-slate-400">Data Brokers Exist</div>
