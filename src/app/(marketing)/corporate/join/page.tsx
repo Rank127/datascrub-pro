@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { SessionProvider, useSession } from "next-auth/react";
 import { Shield, Building2, CheckCircle, XCircle, Loader2 } from "lucide-react";
 
 interface InviteInfo {
@@ -16,13 +16,15 @@ interface InviteInfo {
 
 export default function CorporateJoinPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <Loader2 className="w-8 h-8 text-violet-500 animate-spin" />
-      </div>
-    }>
-      <CorporateJoinContent />
-    </Suspense>
+    <SessionProvider>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-950">
+          <Loader2 className="w-8 h-8 text-violet-500 animate-spin" />
+        </div>
+      }>
+        <CorporateJoinContent />
+      </Suspense>
+    </SessionProvider>
   );
 }
 
