@@ -12783,6 +12783,22 @@ export const BROKER_CATEGORIES = {
     // Review platforms — user-generated content but also aggregate business data
     "YELP_DATA", "TRIPADVISOR_DATA",
   ],
+  // Direct Relationship Platforms — NOT data brokers per CA Civil Code § 1798.99.80(d)
+  // These platforms have direct user relationships: users create accounts,
+  // voluntarily provide data, or consent to background checks.
+  // Distinct from SERVICE_PROVIDER_SOURCES (which covers real estate brokerages, etc.)
+  DIRECT_RELATIONSHIP_PLATFORMS: [
+    // Dating platforms — users create accounts and provide their own data
+    "MATCHDOTCOM_LOOKUP", "BUMBLE_LOOKUP", "HINGE_LOOKUP",
+    "OKCUPID_LOOKUP", "PLENTYOFFISH", "TINDER_LOOKUP",
+    // Consent-based background check firms — employers/consumers pay for checks,
+    // subjects consent per FCRA § 604. NOT data brokers.
+    // (THEWORKNUMBER stays — Equifax subsidiary on CA registry, collects from employers without employee consent)
+    "HIRERIGHT", "STERLING", "CHECKR", "GOODHIRE", "ACCURATE_BG",
+    // User-generated content review platforms — users voluntarily post reviews
+    "TRUSTPILOT_DATA", "CONSUMERAFFAIRS", "SITEJABBER",
+    "PISSEDCONSUMER", "COMPLAINTSBOARD",
+  ],
   AI_TRAINING: [
     "LAION_AI", "STABILITY_AI", "OPENAI", "MIDJOURNEY", "META_AI",
     "GOOGLE_AI", "LINKEDIN_AI", "ADOBE_AI", "AMAZON_AI", "ANTHROPIC",
@@ -13405,6 +13421,17 @@ export function isKnownDataBroker(source: string): boolean {
     return false;
   }
 
+  // Gray area sources — mixed user/aggregated data, exclude from removals pending classification
+  if ((BROKER_CATEGORIES.GRAY_AREA_SOURCES as readonly string[]).includes(source)) {
+    return false;
+  }
+
+  // Direct relationship platforms — users create accounts, consent to checks, or post reviews
+  // NOT data brokers per CA Civil Code § 1798.99.80(d)
+  if ((BROKER_CATEGORIES.DIRECT_RELATIONSHIP_PLATFORMS as readonly string[]).includes(source)) {
+    return false;
+  }
+
   // Has a valid opt-out method = is a data broker we can send removals to
   return true;
 }
@@ -13464,6 +13491,14 @@ export function getNotBrokerReason(source: string): string | null {
     return `${brokerInfo.name} is a service provider with direct user relationships, not a statutory data broker per CA Civil Code § 1798.99.80(d)`;
   }
 
+  if ((BROKER_CATEGORIES.GRAY_AREA_SOURCES as readonly string[]).includes(source)) {
+    return `${brokerInfo.name} has mixed user/aggregated data — excluded from removals pending legal classification review`;
+  }
+
+  if ((BROKER_CATEGORIES.DIRECT_RELATIONSHIP_PLATFORMS as readonly string[]).includes(source)) {
+    return `${brokerInfo.name} has direct user relationships (users create accounts, consent to checks, or post reviews) — not a statutory data broker per CA Civil Code § 1798.99.80(d)`;
+  }
+
   // It is a known broker
   return null;
 }
@@ -13476,6 +13511,7 @@ export function getNotBrokerReason(source: string): string | null {
 export type LegalClassification =
   | "STATUTORY_DATA_BROKER"
   | "SERVICE_PROVIDER"
+  | "DIRECT_RELATIONSHIP"
   | "SOCIAL_PLATFORM"
   | "MONITORING_ONLY"
   | "GRAY_AREA"
@@ -13489,6 +13525,7 @@ export function getLegalClassification(source: string): LegalClassification {
   // Check explicit category arrays first
   if ((BROKER_CATEGORIES.SOCIAL_MEDIA as readonly string[]).includes(source)) return "SOCIAL_PLATFORM";
   if ((BROKER_CATEGORIES.SERVICE_PROVIDER_SOURCES as readonly string[]).includes(source)) return "SERVICE_PROVIDER";
+  if ((BROKER_CATEGORIES.DIRECT_RELATIONSHIP_PLATFORMS as readonly string[]).includes(source)) return "DIRECT_RELATIONSHIP";
   if ((BROKER_CATEGORIES.GRAY_AREA_SOURCES as readonly string[]).includes(source)) return "GRAY_AREA";
   // Breach/dark web/AI = monitoring only
   if ((BROKER_CATEGORIES.BREACH_DATABASE as readonly string[]).includes(source)) return "MONITORING_ONLY";

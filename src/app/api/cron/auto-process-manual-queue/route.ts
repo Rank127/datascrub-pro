@@ -20,6 +20,7 @@ import { acquireJobLock, releaseJobLock, getBrokerIntelligence } from "@/lib/age
 import { getBestAutomationMethod } from "@/lib/removers/browser-automation";
 import { logCronExecution } from "@/lib/cron-logger";
 import { getEffectivePlan } from "@/lib/family/family-service";
+import { getDirective } from "@/lib/mastermind/directives";
 import type { Plan } from "@/lib/types";
 
 export const maxDuration = 300;
@@ -27,8 +28,8 @@ export const maxDuration = 300;
 const prisma = new PrismaClient();
 const JOB_NAME = "auto-process-manual-queue";
 
-// Sources to EXCLUDE from auto-processing (data processors, not data brokers)
-// These are handled by cleanup-data-processors cron instead
+// Sources to EXCLUDE from auto-processing
+// Includes data processors, gray area sources, and direct relationship platforms
 const EXCLUDED_SOURCES = [
   // Data Processors (GDPR-exempt - they process data on behalf of others)
   "SYNDIGO",
@@ -49,6 +50,20 @@ const EXCLUDED_SOURCES = [
   "EGGHEADS",
   "PROFISEE",
   "SEMARCHY",
+  // Gray area sources — mixed user/aggregated data, excluded pending classification
+  "ZILLOW", "REDFIN", "REALTOR_COM", "TRULIA",
+  "HOMES_COM", "HOMESNAP", "MOVOTO",
+  "HEALTHGRADES", "VITALS",
+  "YELP_DATA", "TRIPADVISOR_DATA",
+  // Direct relationship platforms — NOT data brokers per CA Civil Code § 1798.99.80(d)
+  // Dating platforms
+  "MATCHDOTCOM_LOOKUP", "BUMBLE_LOOKUP", "HINGE_LOOKUP",
+  "OKCUPID_LOOKUP", "PLENTYOFFISH", "TINDER_LOOKUP",
+  // Consent-based background check firms (FCRA § 604)
+  "HIRERIGHT", "STERLING", "CHECKR", "GOODHIRE", "ACCURATE_BG",
+  // User-generated content review platforms
+  "TRUSTPILOT_DATA", "CONSUMERAFFAIRS", "SITEJABBER",
+  "PISSEDCONSUMER", "COMPLAINTSBOARD",
 ];
 
 // Auto-process any exposure with confidence >= this threshold (or no confidence data)
@@ -75,6 +90,13 @@ interface ProcessResult {
 }
 
 async function processManualQueue(): Promise<ProcessResult> {
+  // Compliance freeze — halt all outbound removals until audit is complete
+  const isFrozen = await getDirective<boolean>("compliance_freeze", false);
+  if (isFrozen) {
+    console.log("[processManualQueue] COMPLIANCE FREEZE active — skipping all processing");
+    return { processed: 0, removalRequestsCreated: 0, skippedLowConfidence: 0, skippedExcludedSource: 0, skippedPlanLimit: 0, errors: 0 };
+  }
+
   const result: ProcessResult = {
     processed: 0,
     removalRequestsCreated: 0,

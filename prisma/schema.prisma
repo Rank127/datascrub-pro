@@ -923,3 +923,46 @@ model CorporateInvite {
   @@index([token])
   @@index([status])
 }
+
+// Broker opt-out URL health tracking — monitored by broker-compliance cron
+model BrokerOptOutHealth {
+  id                  String    @id @default(cuid())
+  brokerKey           String    @unique // e.g., "SPOKEO", "WHITEPAGES"
+  brokerName          String
+  optOutUrl           String?
+  privacyEmail        String?
+  lastCheckAt         DateTime?
+  lastHttpStatus      Int?      // 200, 301, 404, 500, etc.
+  lastResponseTimeMs  Int?
+  consecutiveFailures Int       @default(0)
+  isHealthy           Boolean   @default(true)
+  lastError           String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([isHealthy])
+  @@index([lastCheckAt])
+  @@index([consecutiveFailures])
+}
+
+// Compliance audit run results — one record per daily/weekly audit
+model ComplianceAuditRun {
+  id                    String   @id @default(cuid())
+  runType               String   // "daily_url_check", "weekly_full_audit"
+  brokersChecked        Int
+  urlsHealthy           Int      @default(0)
+  urlsBroken            Int      @default(0)
+  urlsRedirected        Int      @default(0)
+  classificationsValid  Int      @default(0)
+  classificationsChanged Int     @default(0)
+  highBounceEmails      Int      @default(0)
+  alertsSent            Int      @default(0)
+  issues                String?  // JSON array of issues found
+  duration              Int?     // Execution time in ms
+  status                String   // SUCCESS, PARTIAL, FAILED
+  createdAt             DateTime @default(now())
+
+  @@index([runType])
+  @@index([createdAt])
+  @@index([status])
+}

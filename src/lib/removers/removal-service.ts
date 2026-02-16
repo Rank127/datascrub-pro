@@ -7,6 +7,7 @@ import type { RemovalMethod } from "@/lib/types";
 import { createRemovalFailedTicket } from "@/lib/support/ticket-service";
 import { getBlocklistEntry } from "./blocklist";
 import { CONFIDENCE_THRESHOLDS } from "@/lib/scanners/base-scanner";
+import { getDirective } from "@/lib/mastermind/directives";
 
 const MAX_REMOVAL_ATTEMPTS = 5;
 const MAX_REQUESTS_PER_BROKER_PER_DAY = 100; // Increased from 25 - clearing backlog with handful of users
@@ -1572,6 +1573,13 @@ export async function processPendingRemovalsBatch(limit: number = 20, deadline?:
   brokerDistribution: Record<string, number>;
   timeBoxed: boolean;
 }> {
+  // Compliance freeze — halt all outbound removals until audit is complete
+  const isFrozen = await getDirective<boolean>("compliance_freeze", false);
+  if (isFrozen) {
+    console.log("[processPendingRemovalsBatch] COMPLIANCE FREEZE active — skipping all processing");
+    return { processed: 0, successful: 0, failed: 0, skipped: 0, emailsSent: 0, brokerDistribution: {}, timeBoxed: false };
+  }
+
   const stats = {
     processed: 0,
     successful: 0,
@@ -1713,6 +1721,13 @@ export async function retryFailedRemovalsBatch(limit: number = 20, deadline?: nu
   skippedDueToLimit: number;
   timeBoxed: boolean;
 }> {
+  // Compliance freeze — halt all outbound removals until audit is complete
+  const isFrozen = await getDirective<boolean>("compliance_freeze", false);
+  if (isFrozen) {
+    console.log("[retryFailedRemovalsBatch] COMPLIANCE FREEZE active — skipping all processing");
+    return { processed: 0, retried: 0, stillFailed: 0, emailsSent: 0, skippedDueToLimit: 0, timeBoxed: false };
+  }
+
   const stats = { processed: 0, retried: 0, stillFailed: 0, emailsSent: 0, skippedDueToLimit: 0, timeBoxed: false };
 
   // Collect updates per user for batched digest emails

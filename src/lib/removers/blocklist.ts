@@ -315,6 +315,130 @@ export const BLOCKLISTED_COMPANIES: BlocklistedCompany[] = [
     dateAdded: "2026-02-03",
     notes: "E-commerce marketing platform including reviews. Retailers are the Data Controllers - Yotpo only processes data on their behalf.",
   },
+  // ============================================================================
+  // DATING PLATFORMS (DIRECT RELATIONSHIP — NOT DATA BROKERS)
+  // Users create accounts and voluntarily provide their own data.
+  // ============================================================================
+  {
+    name: "Match.com",
+    domains: ["match.com"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts and voluntarily provide personal data. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "Dating platform. Users delete accounts directly via settings.",
+  },
+  {
+    name: "Bumble",
+    domains: ["bumble.com"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts and voluntarily provide personal data. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "Dating platform. Users delete accounts directly via settings.",
+  },
+  {
+    name: "Hinge",
+    domains: ["hinge.co"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts and voluntarily provide personal data. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "Dating platform (owned by Match Group). Users delete accounts directly via settings.",
+  },
+  {
+    name: "OkCupid",
+    domains: ["okcupid.com"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts and voluntarily provide personal data. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "Dating platform (owned by Match Group). Users delete accounts directly via settings.",
+  },
+  {
+    name: "Plenty of Fish",
+    domains: ["pof.com"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts and voluntarily provide personal data. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "Dating platform (owned by Match Group). Users delete accounts directly via settings.",
+  },
+  {
+    name: "Tinder",
+    domains: ["tinder.com"],
+    reason: "NOT a data broker - direct user relationship. Users create accounts and voluntarily provide personal data. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "Dating platform (owned by Match Group). Users delete accounts directly via settings.",
+  },
+  // ============================================================================
+  // CONSENT-BASED BACKGROUND CHECK FIRMS (DIRECT RELATIONSHIP — NOT DATA BROKERS)
+  // Employers/consumers pay for checks, subjects consent per FCRA § 604.
+  // ============================================================================
+  {
+    name: "HireRight",
+    domains: ["hireright.com"],
+    reason: "NOT a data broker - consent-based background check firm. Subjects consent per FCRA § 604. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "Employment background check company. Operates under FCRA consent requirements.",
+  },
+  {
+    name: "Sterling",
+    domains: ["sterlingcheck.com", "sterlingbackcheck.com"],
+    reason: "NOT a data broker - consent-based background check firm. Subjects consent per FCRA § 604. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "Employment background check company. Operates under FCRA consent requirements.",
+  },
+  {
+    name: "Checkr",
+    domains: ["checkr.com"],
+    reason: "NOT a data broker - consent-based background check firm. Subjects consent per FCRA § 604. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "Employment background check company. Operates under FCRA consent requirements.",
+  },
+  {
+    name: "GoodHire",
+    domains: ["goodhire.com"],
+    reason: "NOT a data broker - consent-based background check firm. Subjects consent per FCRA § 604. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "Employment background check company (Checkr subsidiary). Operates under FCRA consent requirements.",
+  },
+  {
+    name: "Accurate Background",
+    domains: ["accuratebackground.com"],
+    reason: "NOT a data broker - consent-based background check firm. Subjects consent per FCRA § 604. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "Employment background check company. Operates under FCRA consent requirements.",
+  },
+  // ============================================================================
+  // USER-GENERATED CONTENT REVIEW PLATFORMS (DIRECT RELATIONSHIP — NOT DATA BROKERS)
+  // Users voluntarily create accounts and post their own reviews.
+  // ============================================================================
+  {
+    name: "Trustpilot",
+    domains: ["trustpilot.com"],
+    reason: "NOT a data broker - direct user relationship. Users voluntarily create accounts and post reviews. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "User-generated review platform. Users manage their own reviews and accounts.",
+  },
+  {
+    name: "ConsumerAffairs",
+    domains: ["consumeraffairs.com"],
+    reason: "NOT a data broker - direct user relationship. Users voluntarily create accounts and post reviews. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "User-generated review platform. Users manage their own reviews and accounts.",
+  },
+  {
+    name: "Sitejabber",
+    domains: ["sitejabber.com"],
+    reason: "NOT a data broker - direct user relationship. Users voluntarily create accounts and post reviews. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "User-generated review platform. Users manage their own reviews and accounts.",
+  },
+  {
+    name: "PissedConsumer",
+    domains: ["pissedconsumer.com"],
+    reason: "NOT a data broker - direct user relationship. Users voluntarily create accounts and post reviews. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "User-generated review platform. Users manage their own reviews and accounts.",
+  },
+  {
+    name: "ComplaintsBoard",
+    domains: ["complaintsboard.com"],
+    reason: "NOT a data broker - direct user relationship. Users voluntarily create accounts and post reviews. Per Cal. Civ. Code § 1798.99.80(d).",
+    dateAdded: "2026-02-16",
+    notes: "User-generated review platform. Users manage their own reviews and accounts.",
+  },
 ];
 
 /**
@@ -364,6 +488,26 @@ export const BLOCKLISTED_EMAIL_DOMAINS: string[] = [
   "1worldsync.com",
   "bazaarvoice.com",
   "yotpo.com",
+  // Dating platforms (direct relationship)
+  "match.com",
+  "bumble.com",
+  "hinge.co",
+  "okcupid.com",
+  "pof.com",
+  "tinder.com",
+  // Background check firms (consent-based, not data brokers)
+  "hireright.com",
+  "sterlingcheck.com",
+  "sterlingbackcheck.com",
+  "checkr.com",
+  "goodhire.com",
+  "accuratebackground.com",
+  // Review platforms (direct relationship)
+  "trustpilot.com",
+  "consumeraffairs.com",
+  "sitejabber.com",
+  "pissedconsumer.com",
+  "complaintsboard.com",
 ];
 
 /**
