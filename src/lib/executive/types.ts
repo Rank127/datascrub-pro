@@ -7,6 +7,7 @@ export interface ExecutiveStatsResponse {
   activities: ActivitiesMetrics;
   platform: PlatformMetrics; // User/exposure/removal trends
   competitive?: CompetitiveIntelMetrics;
+  growth?: GrowthMetrics;
   generatedAt: string;
 }
 
@@ -206,6 +207,26 @@ export interface OperationsMetrics {
     avgItemsPerRun: number;
     runsLast24h: number;
   };
+  emailQueue?: {
+    queued: number;
+    processing: number;
+    sent: number;
+    failed: number;
+    quotaUsed: number;
+    quotaLimit: number;
+    quotaPercentUsed: number;
+  };
+  linkHealth?: {
+    lastRun: string | null;
+    checked: number;
+    working: number;
+    broken: number;
+    errors: number;
+    corrected: number;
+    suggested: number;
+    healthPercent: number;
+    brokenLinks: Array<{ broker: string; url: string; status: number | string }>;
+  };
 }
 
 export interface ActivitiesMetrics {
@@ -273,6 +294,31 @@ export interface TopUser {
   scansCount: number;
   exposuresCount: number;
   lastActive: string;
+}
+
+export interface GrowthMetrics {
+  lastRun: string | null;
+  powerUsers: {
+    identified: number;
+    advocateCandidates: number;
+    upsellCandidates: number;
+    topUsers: Array<{
+      email: string;
+      score: number;
+      segments: string[];
+      scans: number;
+      removals: number;
+      tenure: number;
+    }>;
+    insights: string[];
+  };
+  referrals: {
+    analyzed: number;
+    totalReferrers: number;
+    conversionRate: number;
+    recommendations: string[];
+  };
+  viralCoefficient: number;
 }
 
 // Plan pricing in cents for MRR calculation

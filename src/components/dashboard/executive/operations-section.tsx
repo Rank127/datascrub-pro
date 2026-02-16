@@ -48,6 +48,8 @@ import {
   Play,
   Headphones,
   Radio,
+  Mail,
+  Link2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PlanBadge } from "../plan-badge";
@@ -778,6 +780,124 @@ export function OperationsSection({ data, platform }: OperationsSectionProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Email Queue + Link Health */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Email Queue */}
+        {data.emailQueue && (
+          <Card className="bg-slate-900/50 border-amber-500/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-amber-400 flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email Queue
+                {data.emailQueue.failed > 0 ? (
+                  <Badge className="bg-red-500/20 text-red-400 ml-auto">{data.emailQueue.failed} Failed</Badge>
+                ) : data.emailQueue.queued > 0 ? (
+                  <Badge className="bg-amber-500/20 text-amber-400 ml-auto">{data.emailQueue.queued} Queued</Badge>
+                ) : (
+                  <Badge className="bg-emerald-500/20 text-emerald-400 ml-auto">Clear</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-4 gap-2 mb-3">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-amber-400">{data.emailQueue.queued}</div>
+                  <div className="text-xs text-slate-500">Queued</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-blue-400">{data.emailQueue.processing}</div>
+                  <div className="text-xs text-slate-500">Sending</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-emerald-400">{data.emailQueue.sent}</div>
+                  <div className="text-xs text-slate-500">Sent</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-red-400">{data.emailQueue.failed}</div>
+                  <div className="text-xs text-slate-500">Failed</div>
+                </div>
+              </div>
+              <div className="border-t border-slate-800 pt-2">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-slate-400">Daily Quota</span>
+                  <span className="text-white font-medium">{data.emailQueue.quotaUsed} / {data.emailQueue.quotaLimit}</span>
+                </div>
+                <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      data.emailQueue.quotaPercentUsed >= 90 ? "bg-red-500" :
+                      data.emailQueue.quotaPercentUsed >= 70 ? "bg-amber-500" : "bg-emerald-500"
+                    }`}
+                    style={{ width: `${Math.min(data.emailQueue.quotaPercentUsed, 100)}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1 text-right">{data.emailQueue.quotaPercentUsed}% used</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Broker Link Health */}
+        {data.linkHealth && (
+          <Card className="bg-slate-900/50 border-slate-800">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-slate-400 flex items-center gap-2">
+                <Link2 className="h-4 w-4" />
+                Broker Link Health
+                {data.linkHealth.broken > 0 ? (
+                  <Badge className="bg-red-500/20 text-red-400 ml-auto">{data.linkHealth.broken} Broken</Badge>
+                ) : (
+                  <Badge className="bg-emerald-500/20 text-emerald-400 ml-auto">All Healthy</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-3 mb-3">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-emerald-400">{data.linkHealth.healthPercent}%</div>
+                  <div className="text-xs text-slate-500">Healthy</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-red-400">{data.linkHealth.broken}</div>
+                  <div className="text-xs text-slate-500">Broken</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-amber-400">{data.linkHealth.corrected}</div>
+                  <div className="text-xs text-slate-500">Corrections</div>
+                </div>
+              </div>
+              <div className="h-2 bg-slate-800 rounded-full overflow-hidden mb-2">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    data.linkHealth.healthPercent >= 90 ? "bg-emerald-500" :
+                    data.linkHealth.healthPercent >= 70 ? "bg-amber-500" : "bg-red-500"
+                  }`}
+                  style={{ width: `${data.linkHealth.healthPercent}%` }}
+                />
+              </div>
+              {data.linkHealth.brokenLinks.length > 0 && (
+                <div className="space-y-1 border-t border-slate-800 pt-2 max-h-32 overflow-y-auto">
+                  {data.linkHealth.brokenLinks.slice(0, 5).map((link, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <span className="text-slate-300 truncate max-w-[180px]">{link.broker}</span>
+                      <Badge className="bg-red-500/20 text-red-400 text-[10px]">{link.status}</Badge>
+                    </div>
+                  ))}
+                  {data.linkHealth.brokenLinks.length > 5 && (
+                    <p className="text-[10px] text-slate-500 text-center">+{data.linkHealth.brokenLinks.length - 5} more</p>
+                  )}
+                </div>
+              )}
+              {data.linkHealth.lastRun && (
+                <p className="text-[10px] text-slate-500 mt-2">
+                  Last checked: {new Date(data.linkHealth.lastRun).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* Removal Status Breakdown */}
       <Card className="bg-slate-900/50 border-slate-800">

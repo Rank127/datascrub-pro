@@ -678,6 +678,7 @@ export function getGrowthAgent(): GrowthAgent {
 
 export async function optimizeReferrals(): Promise<ReferralOptimizeResult> {
   const agent = getGrowthAgent();
+  await agent.initialize(); // CRITICAL: must initialize before execute
   const context = createAgentContext({
     requestId: nanoid(),
     invocationType: InvocationTypes.CRON,
@@ -698,6 +699,7 @@ export async function optimizeReferrals(): Promise<ReferralOptimizeResult> {
 
 export async function identifyPowerUsers(limit = 50): Promise<PowerUserResult> {
   const agent = getGrowthAgent();
+  await agent.initialize(); // CRITICAL: must initialize before execute
   const context = createAgentContext({
     requestId: nanoid(),
     invocationType: InvocationTypes.CRON,

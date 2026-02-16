@@ -15,8 +15,10 @@ import {
   OperationsMetrics,
   ActivitiesMetrics,
   CompetitiveIntelMetrics,
+  GrowthMetrics,
   TrendDataPoint,
 } from "@/lib/executive/types";
+import { getEmailQueueStatus, getEmailQuotaStatus } from "@/lib/email";
 import {
   isGAConfigured,
   getPageViews,
@@ -104,6 +106,7 @@ export async function GET(request: Request) {
       activities,
       platform,
       competitive,
+      growth,
     ] = await Promise.all([
       getFinanceMetrics(),
       getWebAnalyticsMetrics(),
@@ -111,6 +114,7 @@ export async function GET(request: Request) {
       getActivitiesMetrics(isSuperAdmin),
       getPlatformMetrics(),
       getCompetitiveIntelMetrics(),
+      getGrowthMetrics(),
     ]);
 
     const response: ExecutiveStatsResponse = {
@@ -120,6 +124,7 @@ export async function GET(request: Request) {
       activities,
       platform,
       competitive,
+      growth,
       generatedAt: new Date().toISOString(),
     };
 
@@ -847,6 +852,56 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
     console.error("[Executive Stats] Queue velocity fetch failed:", err);
   }
 
+  // --- Email Queue ---
+  let emailQueue: OperationsMetrics["emailQueue"];
+  try {
+    const [queueStatus, quotaStatus] = await Promise.all([
+      getEmailQueueStatus(),
+      Promise.resolve(getEmailQuotaStatus()),
+    ]);
+    emailQueue = {
+      queued: queueStatus.queued,
+      processing: queueStatus.processing,
+      sent: queueStatus.sent,
+      failed: queueStatus.failed,
+      quotaUsed: quotaStatus.sent,
+      quotaLimit: quotaStatus.limit,
+      quotaPercentUsed: quotaStatus.percentUsed,
+    };
+  } catch (err) {
+    console.error("[Executive Stats] Email queue fetch failed:", err);
+  }
+
+  // --- Link Health ---
+  let linkHealth: OperationsMetrics["linkHealth"];
+  try {
+    const lastLinkCheck = await prisma.cronLog.findFirst({
+      where: { jobName: "link-checker", status: "SUCCESS" },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (lastLinkCheck?.metadata) {
+      const meta = typeof lastLinkCheck.metadata === "string"
+        ? JSON.parse(lastLinkCheck.metadata)
+        : lastLinkCheck.metadata;
+      const checked = meta.checked || 0;
+      const working = meta.working || 0;
+      linkHealth = {
+        lastRun: lastLinkCheck.createdAt.toISOString(),
+        checked,
+        working,
+        broken: meta.broken || 0,
+        errors: meta.errors || 0,
+        corrected: meta.corrected || 0,
+        suggested: meta.suggested || 0,
+        healthPercent: checked > 0 ? Math.round((working / checked) * 100) : 100,
+        brokenLinks: Array.isArray(meta.brokenLinks) ? meta.brokenLinks : [],
+      };
+    }
+  } catch (err) {
+    console.error("[Executive Stats] Link health fetch failed:", err);
+  }
+
   return {
     pendingRemovalRequests,
     inProgressRemovals,
@@ -873,6 +928,8 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
     brokerIntelligence,
     remediationSavings,
     queueVelocity,
+    emailQueue,
+    linkHealth,
   };
 }
 
@@ -951,6 +1008,47 @@ async function getCompetitiveIntelMetrics(): Promise<CompetitiveIntelMetrics | u
     };
   } catch (err) {
     console.error("[Executive Stats] Competitive intel fetch failed:", err);
+    return undefined;
+  }
+}
+
+async function getGrowthMetrics(): Promise<GrowthMetrics | undefined> {
+  try {
+    const lastGrowthRun = await prisma.cronLog.findFirst({
+      where: { jobName: "growth-analysis", status: "SUCCESS" },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!lastGrowthRun?.metadata) return undefined;
+
+    const meta = typeof lastGrowthRun.metadata === "string"
+      ? JSON.parse(lastGrowthRun.metadata)
+      : lastGrowthRun.metadata;
+
+    const powerUsers = meta.powerUsers || {};
+    const referrals = meta.referrals || {};
+
+    return {
+      lastRun: lastGrowthRun.createdAt.toISOString(),
+      powerUsers: {
+        identified: powerUsers.identified || 0,
+        advocateCandidates: powerUsers.advocateCandidates || 0,
+        upsellCandidates: (powerUsers.topUsers || []).filter(
+          (u: { segments?: string[] }) => u.segments?.includes("upsell_candidate")
+        ).length,
+        topUsers: (powerUsers.topUsers || []).slice(0, 10),
+        insights: powerUsers.insights || [],
+      },
+      referrals: {
+        analyzed: referrals.analyzed || 0,
+        totalReferrers: referrals.totalReferrers || 0,
+        conversionRate: referrals.conversionRate || 0,
+        recommendations: referrals.recommendations || [],
+      },
+      viralCoefficient: meta.viralCoefficient || 0,
+    };
+  } catch (err) {
+    console.error("[Executive Stats] Growth metrics fetch failed:", err);
     return undefined;
   }
 }

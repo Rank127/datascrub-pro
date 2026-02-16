@@ -91,6 +91,7 @@ export async function getCronHealthStatus(): Promise<{
     "security-scan": { interval: 25, label: "Daily" },
     "mastermind-weekly": { interval: 170, label: "Weekly" },
     "competitive-monitor": { interval: 170, label: "Weekly" },
+    "growth-analysis": { interval: 170, label: "Weekly" },
   };
 
   const jobs: Array<{

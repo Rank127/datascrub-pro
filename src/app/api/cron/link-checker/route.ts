@@ -244,6 +244,19 @@ export async function GET(request: Request) {
     status: "SUCCESS",
     duration,
     message: `${report.checked} checked, ${report.working} working, ${report.broken} broken, ${report.corrected} corrections, ${report.suggested} suggestions`,
+    metadata: {
+      checked: report.checked,
+      working: report.working,
+      broken: report.broken,
+      errors: report.errors,
+      corrected: report.corrected,
+      suggested: report.suggested,
+      brokenLinks: report.brokenLinks.map((l: { broker: string; url: string; status: number | string }) => ({
+        broker: l.broker,
+        url: l.url,
+        status: l.status,
+      })),
+    },
   });
 
   return NextResponse.json({

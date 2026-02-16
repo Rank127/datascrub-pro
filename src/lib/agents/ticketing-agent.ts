@@ -1045,10 +1045,39 @@ export async function getAgentStats(): Promise<{
     },
   });
 
+  // Calculate average response time from first non-internal comment
+  let averageResponseTime = 0;
+  try {
+    const ticketsWithFirstResponse = await prisma.supportTicket.findMany({
+      where: { comments: { some: { isInternal: false } } },
+      select: {
+        createdAt: true,
+        comments: {
+          where: { isInternal: false },
+          orderBy: { createdAt: "asc" },
+          take: 1,
+          select: { createdAt: true },
+        },
+      },
+      take: 100,
+      orderBy: { createdAt: "desc" },
+    });
+
+    const withResponse = ticketsWithFirstResponse.filter(t => t.comments.length > 0);
+    if (withResponse.length > 0) {
+      const totalHrs = withResponse.reduce((sum, t) => {
+        return sum + (t.comments[0].createdAt.getTime() - t.createdAt.getTime()) / (1000 * 60 * 60);
+      }, 0);
+      averageResponseTime = Math.round((totalHrs / withResponse.length) * 10) / 10;
+    }
+  } catch (err) {
+    console.error("[TicketingAgent] Failed to calculate avg response time:", err);
+  }
+
   return {
     totalProcessed: aiComments,
     autoResolved,
     pendingReview,
-    averageResponseTime: 0, // TODO: Calculate from timestamps
+    averageResponseTime,
   };
 }

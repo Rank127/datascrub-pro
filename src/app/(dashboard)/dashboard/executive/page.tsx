@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   Headphones,
   Crosshair,
+  Sprout,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -57,6 +58,10 @@ const CompetitiveSection = dynamic(
   () => import("@/components/dashboard/executive/competitive-section").then((m) => ({ default: m.CompetitiveSection })),
   { loading: TabLoader }
 );
+const GrowthSection = dynamic(
+  () => import("@/components/dashboard/executive/growth-section").then((m) => ({ default: m.GrowthSection })),
+  { loading: TabLoader }
+);
 
 // Wrapper component to handle Suspense boundary for useSearchParams
 export default function ExecutiveDashboardPage() {
@@ -75,7 +80,7 @@ function ExecutiveDashboardContent() {
   useSession(); // Ensure user is authenticated
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const defaultTab = ["finance", "analytics", "operations", "activities", "users", "support", "competitive"].includes(tabParam || "")
+  const defaultTab = ["finance", "analytics", "operations", "activities", "users", "support", "competitive", "growth"].includes(tabParam || "")
     ? tabParam!
     : "finance";
 
@@ -251,6 +256,13 @@ function ExecutiveDashboardContent() {
             <Crosshair className="h-5 w-5" />
             <span className="hidden sm:inline">Competitive</span>
           </TabsTrigger>
+          <TabsTrigger
+            value="growth"
+            className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-green-500/30 data-[state=active]:text-green-300 data-[state=active]:border-green-500/50 data-[state=active]:border hover:bg-green-500/10 hover:text-green-400 transition-all"
+          >
+            <Sprout className="h-5 w-5" />
+            <span className="hidden sm:inline">Growth</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="finance" className="mt-6 p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
@@ -279,6 +291,10 @@ function ExecutiveDashboardContent() {
 
         <TabsContent value="competitive" className="mt-6 p-4 rounded-lg border border-indigo-500/20 bg-indigo-500/5">
           <CompetitiveSection data={data.competitive} />
+        </TabsContent>
+
+        <TabsContent value="growth" className="mt-6 p-4 rounded-lg border border-green-500/20 bg-green-500/5">
+          <GrowthSection data={data.growth} />
         </TabsContent>
       </Tabs>
     </div>
