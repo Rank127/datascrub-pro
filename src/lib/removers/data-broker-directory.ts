@@ -10645,9 +10645,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   // BACKGROUND CHECK EXPANSION (40 brokers)
   BACKGROUNDCHECKPRO: {
     name: "BackgroundCheckPro",
-    optOutUrl: "https://www.backgroundcheckpro.com/optout",
-    privacyEmail: "privacy@backgroundcheckpro.com",
-    removalMethod: "BOTH",
+    optOutUrl: "https://www.backgroundcheckpro.com/privacy/",
+    privacyEmail: "mail@bcpro.net",
+    removalMethod: "EMAIL",
     estimatedDays: 14,
   },
   CRIMINALRECORDSNOW: {
@@ -10666,9 +10666,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   BACKGROUNDSEARCHNOW: {
     name: "BackgroundSearchNow",
-    optOutUrl: "https://www.backgroundsearchnow.com/removal",
+    // Site live but all privacy/opt-out links broken or non-functional (checked Feb 2026)
     privacyEmail: "optout@backgroundsearchnow.com",
-    removalMethod: "BOTH",
+    removalMethod: "EMAIL",
     estimatedDays: 14,
   },
   CRIMINALCHECKPRO: {
@@ -10687,10 +10687,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   VERIFYCHECKPRO: {
     name: "VerifyCheckPro",
-    optOutUrl: "https://www.verifycheckpro.com/optout",
+    // DEFUNCT: Site shows bare LiteSpeed directory listing, no content (checked Feb 2026)
     privacyEmail: "privacy@verifycheckpro.com",
-    removalMethod: "BOTH",
-    estimatedDays: 21,
+    removalMethod: "NOT_REMOVABLE",
+    isRemovable: false,
+    estimatedDays: -1,
   },
   BACKGROUNDINFOPRO: {
     name: "BackgroundInfoPro",
@@ -10962,8 +10963,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   CANADA411_EXTENDED: {
     name: "Canada411 Extended",
-    optOutUrl: "https://www.canada411.ca/privacy",
-    privacyEmail: "privacy@canada411.ca",
+    optOutUrl: "https://corporate.yp.ca/en/legal-notice/privacy-statement/",
+    privacyEmail: "privacy@yp.ca",
     removalMethod: "EMAIL",
     estimatedDays: 14,
   
@@ -10992,8 +10993,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   YELLOWPAGES_CA_EXT: {
     name: "YellowPages Canada Extended",
-    optOutUrl: "https://www.yellowpages.ca/privacy",
-    privacyEmail: "optout@yellowpages.ca",
+    optOutUrl: "https://corporate.yp.ca/en/legal-notice/privacy-statement/",
+    privacyEmail: "privacy@yp.ca",
     removalMethod: "EMAIL",
     estimatedDays: 14,
   },
@@ -11031,9 +11032,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   ADDRESSFINDER_AU: {
     name: "AddressFinder Australia",
-    optOutUrl: "https://www.addressfinder.com.au/removal",
-    privacyEmail: "optout@addressfinder.com.au",
-    removalMethod: "BOTH",
+    optOutUrl: "https://addressfinder.com/au/privacy",
+    privacyEmail: "support@addressfinder.com",
+    removalMethod: "EMAIL",
     estimatedDays: 21,
   },
   PAGESJAUNES_FR_V2: {
@@ -11056,10 +11057,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   ANNUAIRE_FR: {
     name: "Annuaire France",
-    optOutUrl: "https://www.annuaire.com/vie-privee",
-    privacyEmail: "optout@annuaire.com",
+    optOutUrl: "https://annuaire.petitesaffiches.fr/politique-de-protection-des-donnees/",
+    privacyEmail: "dpo@societe.com",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+    notes: "Rebranded: annuaire.com redirects to annuaire.petitesaffiches.fr",
   },
   DASTELEFONBUCH_DE_V2: {
     name: "Das Telefonbuch Germany",
@@ -11079,9 +11081,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   PERSONENSUCHE_DE: {
     name: "Personensuche Germany",
-    optOutUrl: "https://www.personensuche.de/optout",
-    privacyEmail: "optout@personensuche.de",
-    removalMethod: "BOTH",
+    optOutUrl: "https://www.personensuche.de/datenschutzerklaerung",
+    privacyEmail: "support@personensuche.de",
+    removalMethod: "EMAIL",
     estimatedDays: 30,
   },
   PAGINEBIANCHE_IT_V2: {
@@ -11095,14 +11097,14 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   PAGINEGIALLE_IT_V2: {
     name: "Pagine Gialle Italy",
-    optOutUrl: "https://www.paginegialle.it/privacy",
-    privacyEmail: "privacy@paginegialle.it",
+    optOutUrl: "https://www.paginegialle.it/termini-condizioni/dati_personali",
+    privacyEmail: "info@italiaonline.it",
     removalMethod: "EMAIL",
     estimatedDays: 30,
   },
   PAGINASAMARILLAS_ES_V2: {
     name: "Paginas Amarillas Spain",
-    optOutUrl: "https://www.paginasamarillas.es/privacidad",
+    optOutUrl: "https://www.paginasamarillas.es/proteccion-datos",
     privacyEmail: "privacy@paginasamarillas.es",
     removalMethod: "EMAIL",
     estimatedDays: 30,
@@ -11116,7 +11118,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   HITTA_SE_EXT: {
     name: "Hitta Sweden Extended",
-    optOutUrl: "https://www.hitta.se/integritet",
+    optOutUrl: "https://www.hitta.se/din-integritet",
     privacyEmail: "privacy@hitta.se",
     removalMethod: "BOTH",
     estimatedDays: 14,
@@ -11158,9 +11160,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   FONECTA_FI_V2: {
     name: "Fonecta Finland",
-    optOutUrl: "https://www.fonecta.fi/tietosuoja",
-    privacyEmail: "privacy@fonecta.fi",
-    removalMethod: "BOTH",
+    optOutUrl: "https://www.fonecta.fi/ehdot-ja-tietosuoja/",
+    privacyEmail: "tietosuoja@fonecta.com",
+    removalMethod: "EMAIL",
     estimatedDays: 14,
   },
   NUMEROPALVELU_FI: {
@@ -11186,38 +11188,40 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   HEROLD_AT_EXT: {
     name: "Herold Austria Extended",
-    optOutUrl: "https://www.herold.at/datenschutz",
-    privacyEmail: "privacy@herold.at",
+    optOutUrl: "https://www.herold.at/datenschutzerklaerung/",
+    privacyEmail: "datenschutz@herold.at",
     removalMethod: "EMAIL",
     estimatedDays: 30,
   },
   LOCAL_CH_EXT: {
     name: "Local Switzerland Extended",
-    optOutUrl: "https://www.local.ch/datenschutz",
-    privacyEmail: "privacy@local.ch",
+    optOutUrl: "https://localsearch.ch/de/datenschutz/",
+    privacyEmail: "dataprivacy@localsearch.ch",
     removalMethod: "EMAIL",
     estimatedDays: 30,
   },
   SEARCH_CH_V2: {
     name: "Search Switzerland",
-    optOutUrl: "https://www.search.ch/datenschutz",
-    privacyEmail: "privacy@search.ch",
+    optOutUrl: "https://search.ch/privacy",
+    privacyEmail: "dataprivacy@localsearch.ch",
     removalMethod: "EMAIL",
     estimatedDays: 30,
   },
   ZLATESTRANKY_CZ_V2: {
     name: "Zlate Stranky Czech",
-    optOutUrl: "https://www.zlatestranky.cz/ochrana-udaju",
-    privacyEmail: "privacy@zlatestranky.cz",
+    optOutUrl: "https://cmp.mediatel.cz/Widget/Article?slug=contentstore-terms-conditions",
+    privacyEmail: "oou@mediatel.cz",
     removalMethod: "EMAIL",
     estimatedDays: 30,
+    notes: "Operated by MEDIATEL CZ, s.r.o. Privacy page on parent domain.",
   },
   ZLATESTRANY_SK: {
     name: "Zlate Strany Slovakia",
-    optOutUrl: "https://www.zlatestrany.sk/ochrana-udajov",
+    // DEFUNCT: Domain shows hosting placeholder page, no content (checked Feb 2026)
     privacyEmail: "privacy@zlatestrany.sk",
-    removalMethod: "EMAIL",
-    estimatedDays: 30,
+    removalMethod: "NOT_REMOVABLE",
+    isRemovable: false,
+    estimatedDays: -1,
   },
   PANORAMAFIRM_PL_V2: {
     name: "Panorama Firm Poland",
@@ -11235,8 +11239,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   YELLOWPAGES_JP: {
     name: "Yellow Pages Japan",
-    optOutUrl: "https://www.yellowpages.jp/privacy",
-    privacyEmail: "privacy@yellowpages.jp",
+    optOutUrl: "https://www.yellowpages.jp/pages/Privacy-Policy/",
+    privacyEmail: "info@yellowpages.net",
     removalMethod: "EMAIL",
     estimatedDays: 45,
   },
