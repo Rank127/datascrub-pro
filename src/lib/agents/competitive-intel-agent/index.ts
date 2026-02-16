@@ -672,6 +672,7 @@ export function getCompetitiveIntelAgent(): CompetitiveIntelAgent {
 
 export async function monitorCompetitors(): Promise<CompetitorMonitorResult> {
   const agent = getCompetitiveIntelAgent();
+  await agent.initialize();
   const context = createAgentContext({
     requestId: nanoid(),
     invocationType: InvocationTypes.CRON,
@@ -692,6 +693,7 @@ export async function monitorCompetitors(): Promise<CompetitorMonitorResult> {
 
 export async function analyzeFeatureGaps(): Promise<FeatureGapResult> {
   const agent = getCompetitiveIntelAgent();
+  await agent.initialize();
   const context = createAgentContext({
     requestId: nanoid(),
     invocationType: InvocationTypes.ON_DEMAND,
