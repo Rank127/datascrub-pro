@@ -30,12 +30,12 @@ const securityFeatures = [
   {
     icon: Lock,
     title: "AES-256 Encryption",
-    description: "All data encrypted at rest with AES-256 and AWS KMS key management. Each user gets their own encryption key.",
+    description: "All data encrypted at rest using AES-256-GCM authenticated encryption with unique initialization vectors per operation.",
   },
   {
     icon: Server,
     title: "SOC 2 Infrastructure",
-    description: "Our servers meet SOC 2 Type II standards. DDoS protection, multi-region redundancy, and automated backups.",
+    description: "Hosted on SOC 2 Type II certified infrastructure (Vercel/AWS). DDoS protection, multi-region redundancy, and automated backups.",
   },
   {
     icon: Key,
@@ -50,8 +50,8 @@ const securityFeatures = [
 ];
 
 const complianceBadges = [
-  { name: "SOC 2 Type II", description: "Compliant hosting infrastructure" },
-  { name: "PCI-DSS", description: "Level 1 payment processing via Stripe" },
+  { name: "SOC 2 Type II", description: "Hosted on SOC 2 Type II certified infrastructure (Vercel/AWS)" },
+  { name: "PCI-DSS", description: "Payment processing via Stripe (PCI-DSS Level 1 certified)" },
   { name: "GDPR", description: "Full compliance for EU/EEA users" },
   { name: "CCPA/CPRA", description: "California privacy law compliance" },
   { name: "TLS 1.3", description: "Latest transport layer encryption" },
@@ -126,7 +126,7 @@ export default function SecurityPage() {
                 <ul className="space-y-3 text-slate-400">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">At Rest:</strong> AES-256 encryption with AWS KMS key management. Each user gets their own encryption key, rotated regularly.</span>
+                    <span><strong className="text-slate-300">At Rest:</strong> AES-256-GCM authenticated encryption with unique initialization vectors per operation. Encryption keys stored as environment secrets, isolated from application data.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -134,7 +134,7 @@ export default function SecurityPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Key Safety:</strong> Encryption keys stored separately from data via AWS KMS. Keys rotated automatically.</span>
+                    <span><strong className="text-slate-300">Key Safety:</strong> Encryption keys stored as environment secrets, separate from application data and database. Access restricted to the production runtime environment.</span>
                   </li>
                 </ul>
               </div>
@@ -151,11 +151,15 @@ export default function SecurityPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Password Requirements:</strong> Minimum 8 characters. We check against known breached password databases.</span>
+                    <span><strong className="text-slate-300">Password Requirements:</strong> Minimum 8 characters required. Passwords hashed immediately and never stored in plain text.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                     <span><strong className="text-slate-300">Sessions:</strong> Secure, HttpOnly cookies with short expiration. Sessions invalidated on suspicious activity.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                    <span><strong className="text-slate-300">Two-Factor Authentication:</strong> Optional TOTP-based 2FA with 10 backup codes. Compatible with Google Authenticator, Authy, and other authenticator apps.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -202,7 +206,7 @@ export default function SecurityPage() {
                 <ul className="space-y-3 text-slate-400">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Cloud Servers:</strong> SOC 2 Type II compliant infrastructure with strict physical and logical access controls.</span>
+                    <span><strong className="text-slate-300">Cloud Servers:</strong> Hosted on Vercel (SOC 2 Type II certified) with strict physical and logical access controls provided by the infrastructure layer.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -231,7 +235,7 @@ export default function SecurityPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Immutable Logs:</strong> All security events logged in append-only audit trails.</span>
+                    <span><strong className="text-slate-300">Comprehensive Audit Logs:</strong> All security events logged with 30+ action types. Logs retained for 365 days.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -239,7 +243,7 @@ export default function SecurityPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span><strong className="text-slate-300">Penetration Testing:</strong> Regular third-party penetration testing to identify and remediate vulnerabilities.</span>
+                    <span><strong className="text-slate-300">Security Testing:</strong> Automated vulnerability scanning and code review on every deployment. We welcome responsible security research via our <Link href="/vulnerability-disclosure" className="text-emerald-400 hover:text-emerald-300 underline">Vulnerability Disclosure Policy</Link>.</span>
                   </li>
                 </ul>
               </div>
