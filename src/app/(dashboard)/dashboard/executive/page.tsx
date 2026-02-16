@@ -21,6 +21,7 @@ import {
   Headphones,
   Crosshair,
   Sprout,
+  Plug,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -62,6 +63,10 @@ const GrowthSection = dynamic(
   () => import("@/components/dashboard/executive/growth-section").then((m) => ({ default: m.GrowthSection })),
   { loading: TabLoader }
 );
+const IntegrationsSection = dynamic(
+  () => import("@/components/dashboard/integrations/integrations-section").then((m) => ({ default: m.IntegrationsSection })),
+  { loading: TabLoader }
+);
 
 // Wrapper component to handle Suspense boundary for useSearchParams
 export default function ExecutiveDashboardPage() {
@@ -80,7 +85,7 @@ function ExecutiveDashboardContent() {
   useSession(); // Ensure user is authenticated
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const defaultTab = ["finance", "analytics", "operations", "activities", "users", "support", "competitive", "growth"].includes(tabParam || "")
+  const defaultTab = ["finance", "analytics", "operations", "activities", "users", "support", "integrations", "competitive", "growth"].includes(tabParam || "")
     ? tabParam!
     : "finance";
 
@@ -250,6 +255,13 @@ function ExecutiveDashboardContent() {
             <span className="hidden sm:inline">Support</span>
           </TabsTrigger>
           <TabsTrigger
+            value="integrations"
+            className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-teal-500/30 data-[state=active]:text-teal-300 data-[state=active]:border-teal-500/50 data-[state=active]:border hover:bg-teal-500/10 hover:text-teal-400 transition-all"
+          >
+            <Plug className="h-5 w-5" />
+            <span className="hidden sm:inline">Integrations</span>
+          </TabsTrigger>
+          <TabsTrigger
             value="competitive"
             className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-indigo-500/30 data-[state=active]:text-indigo-300 data-[state=active]:border-indigo-500/50 data-[state=active]:border hover:bg-indigo-500/10 hover:text-indigo-400 transition-all"
           >
@@ -287,6 +299,10 @@ function ExecutiveDashboardContent() {
 
         <TabsContent value="support" className="mt-6 p-4 rounded-lg border border-cyan-500/20 bg-cyan-500/5">
           <SupportSection />
+        </TabsContent>
+
+        <TabsContent value="integrations" className="mt-6 p-4 rounded-lg border border-teal-500/20 bg-teal-500/5">
+          <IntegrationsSection />
         </TabsContent>
 
         <TabsContent value="competitive" className="mt-6 p-4 rounded-lg border border-indigo-500/20 bg-indigo-500/5">

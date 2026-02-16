@@ -743,7 +743,7 @@ export async function executeAutoFix(
       return {
         success: true,
         message: "Rate limits reviewed",
-        data: { dashboardUrl: "/admin/dashboard?tab=api-usage" }
+        data: { dashboardUrl: "/dashboard/executive?tab=integrations" }
       };
     }
 

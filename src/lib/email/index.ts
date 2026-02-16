@@ -1358,7 +1358,7 @@ export async function sendServiceAlertEmail(
     <p style="font-size: 14px; color: #64748b; margin-top: 24px;">
       These services are approaching their limits. Consider upgrading to avoid service interruptions.
     </p>
-    ${buttonHtml("View Integrations Dashboard", `${APP_URL}/admin/dashboard/integrations`)}
+    ${buttonHtml("View Integrations Dashboard", `${APP_URL}/dashboard/executive?tab=integrations`)}
   `);
 
   return sendEmail(

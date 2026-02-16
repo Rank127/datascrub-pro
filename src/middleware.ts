@@ -214,7 +214,7 @@ export default auth((req) => {
 
   // Redirect logged-in admin users away from admin login
   if (isAdminLoginPage && isLoggedIn) {
-    const response = NextResponse.redirect(new URL("/admin/dashboard", nextUrl));
+    const response = NextResponse.redirect(new URL("/dashboard/executive", nextUrl));
     return addSecurityHeaders(response);
   }
 

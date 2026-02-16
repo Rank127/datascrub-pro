@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      router.push("/admin/dashboard");
+      router.push("/dashboard/executive");
     } catch {
       setError("An error occurred. Please try again.");
       setLoading(false);
