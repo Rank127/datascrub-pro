@@ -432,7 +432,7 @@ export default function ScanPage() {
                       <span>{TOTAL_KNOWN_BROKERS.toLocaleString()}+ known sites</span>
                     </div>
                     {isFreePlan && (
-                      <Link href="/dashboard/checkout?plan=PRO" className="block mt-3">
+                      <Link href="/dashboard/checkout" className="block mt-3">
                         <Button size="sm" className="w-full bg-orange-600 hover:bg-orange-700">
                           <Shield className="mr-2 h-4 w-4" />
                           Upgrade to remove your data automatically
@@ -486,6 +486,21 @@ export default function ScanPage() {
                           <span className="text-2xl font-bold text-white">{recommendation.price}</span>
                           <p className="text-sm text-emerald-400">{recommendation.savings}</p>
                         </div>
+                        {recommendation.plan === "PRO" ? (
+                          <p className="text-sm text-slate-400 mt-3">
+                            Or get maximum protection with{" "}
+                            <Link href="/dashboard/checkout?plan=ENTERPRISE" className="text-purple-400 hover:text-purple-300 underline">
+                              Enterprise — dark web monitoring, family plan &amp; more
+                            </Link>
+                          </p>
+                        ) : (
+                          <p className="text-sm text-slate-400 mt-3">
+                            Or{" "}
+                            <Link href="/dashboard/checkout?plan=PRO" className="text-emerald-400 hover:text-emerald-300 underline">
+                              start with Pro at $9.99/mo
+                            </Link>
+                          </p>
+                        )}
                       </>
                     }
                     features={recommendation.features}

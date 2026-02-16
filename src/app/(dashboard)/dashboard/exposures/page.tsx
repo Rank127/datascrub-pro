@@ -308,27 +308,35 @@ function ExposuresPageContent() {
 
       {/* Free User Upgrade Banner */}
       {showUpgradeBanner && (
-        <UpgradeCta
-          icon={<Shield className="h-8 w-8 text-amber-400" />}
-          title={
-            <span className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-400" />
-              Your Data is Exposed - Take Action Now
-            </span>
-          }
-          description={
-            <p className="max-w-xl">
-              Your data is exposed on <strong className="text-amber-300">{totalExposures}</strong> of{" "}
-              <strong className="text-amber-300">{TOTAL_KNOWN_BROKERS.toLocaleString()}+</strong> known
-              broker sites. <strong className="text-amber-300">Upgrade to Pro</strong> to start removing
-              it automatically and protect your privacy.
-            </p>
-          }
-          features={["Automated removals", "50 sites monitored", "Priority support"]}
-          ctaText={<><Crown className="h-4 w-4 mr-2" />Upgrade Now - 40% Off</>}
-          ctaHref="/dashboard/settings#subscription"
-          colorScheme="amber"
-        />
+        <div className="space-y-2">
+          <UpgradeCta
+            icon={<Shield className="h-8 w-8 text-amber-400" />}
+            title={
+              <span className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-amber-400" />
+                Your Data is Exposed - Take Action Now
+              </span>
+            }
+            description={
+              <p className="max-w-xl">
+                Your data is exposed on <strong className="text-amber-300">{totalExposures}</strong> of{" "}
+                <strong className="text-amber-300">{TOTAL_KNOWN_BROKERS.toLocaleString()}+</strong> known
+                broker sites. <strong className="text-amber-300">Upgrade to Enterprise</strong> for maximum
+                protection — dark web monitoring, family plan, AI Shield &amp; more.
+              </p>
+            }
+            features={["Automated removals from 2,000+ brokers", "Dark web monitoring", "Family plan (5 profiles)", "AI Shield protection"]}
+            ctaText={<><Crown className="h-4 w-4 mr-2" />Get Maximum Protection - 55% OFF</>}
+            ctaHref="/dashboard/checkout"
+            colorScheme="amber"
+          />
+          <p className="text-sm text-slate-400 text-center">
+            Or{" "}
+            <a href="/dashboard/checkout?plan=PRO" className="text-emerald-400 hover:text-emerald-300 underline">
+              start with Pro at $9.99/mo
+            </a>
+          </p>
+        </div>
       )}
 
       {/* Monitoring context for paid users */}

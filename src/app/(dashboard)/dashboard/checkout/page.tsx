@@ -99,8 +99,12 @@ export default function CheckoutPage() {
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const planKey = (searchParams.get("plan") || "PRO").toUpperCase() as keyof typeof PLANS;
-  const plan = PLANS[planKey] || PLANS.PRO;
+  const initialPlan = (searchParams.get("plan") || "ENTERPRISE").toUpperCase() as keyof typeof PLANS;
+  const [selectedPlan, setSelectedPlan] = useState<keyof typeof PLANS>(
+    initialPlan in PLANS ? initialPlan : "ENTERPRISE"
+  );
+  const plan = PLANS[selectedPlan];
+  const planKey = selectedPlan;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -155,7 +159,7 @@ function CheckoutContent() {
     }
 
     checkForUpgrade();
-  }, [planKey]);
+  }, [selectedPlan]);
 
   const handleCheckout = async () => {
     setLoading(true);
@@ -188,7 +192,7 @@ function CheckoutContent() {
     }
   };
 
-  const isPro = planKey === "PRO";
+  const isPro = selectedPlan === "PRO";
 
   // Show loading while checking subscription status
   if (checkingSubscription) {
@@ -371,74 +375,149 @@ function CheckoutContent() {
   }
 
   // ── Normal checkout flow for new subscribers (FREE → paid) ──
+  const ENTERPRISE_EXTRAS = [
+    "Dark web monitoring",
+    "Family plan — up to 5 profiles",
+    "AI Shield protection",
+    "Daily monitoring",
+    "API access",
+    "Do Not Call registry",
+  ];
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-4xl">
+      <div className="w-full max-w-5xl">
         {/* Header */}
         <div className="text-center mb-8 animate-fade-in">
           <h1 className="text-3xl font-bold text-white mb-2">
-            Complete Your Order
+            Choose Your Protection
           </h1>
           <p className="text-slate-400">
-            You&apos;re one step away from protecting your personal data
+            Select a plan and take control of your personal data
           </p>
         </div>
 
-        <div className="grid md:grid-cols-5 gap-6">
-          {/* Left Column — Order Summary (3/5) */}
-          <div className="md:col-span-3 space-y-6 animate-fade-in-up">
-            {/* Plan Card */}
-            <div className={`rounded-xl border p-6 ${
-              isPro
-                ? "bg-gradient-to-br from-emerald-900/30 to-slate-900 border-emerald-500/30"
-                : "bg-gradient-to-br from-purple-900/30 to-slate-900 border-purple-500/30"
-            }`}>
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-lg ${isPro ? "bg-emerald-500/20" : "bg-purple-500/20"}`}>
-                    {plan.icon}
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-white">
-                      {plan.name} Plan
-                    </h2>
-                    <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border mt-1 ${plan.badgeColor}`}>
-                      {plan.badge}
-                    </span>
-                  </div>
+        {/* Plan Picker — Two Columns */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8 animate-fade-in-up">
+          {/* Pro Card */}
+          <button
+            type="button"
+            className={`text-left rounded-xl border-2 p-6 transition-all ${
+              selectedPlan === "PRO"
+                ? "border-emerald-500 bg-gradient-to-br from-emerald-900/30 to-slate-900 shadow-lg shadow-emerald-500/10"
+                : "border-slate-700 bg-slate-800/50 hover:border-slate-500"
+            }`}
+            onClick={() => setSelectedPlan("PRO")}
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-emerald-500/20">
+                  <Zap className="h-6 w-6 text-emerald-400" />
                 </div>
-                <span className="px-2 py-1 bg-red-500/90 text-white text-xs font-bold rounded-full">
-                  {plan.discount}
-                </span>
-              </div>
-
-              {/* Pricing */}
-              <div className="mb-5">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-sm text-slate-500 line-through">{plan.originalPrice}/mo</span>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Pro</h2>
+                  <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full border mt-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                    Most Popular
+                  </span>
                 </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-white">{plan.price}</span>
-                  <span className="text-slate-400">{plan.period}</span>
-                </div>
-                <div className="text-xs text-slate-500 mt-1">Billed annually at {plan.annualPrice}</div>
               </div>
-
-              {/* Features */}
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-slate-300">Everything included:</p>
-                <ul className="space-y-2.5">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2.5 text-sm text-slate-300">
-                      <CheckCircle className={`h-4 w-4 shrink-0 ${isPro ? "text-emerald-400" : "text-purple-400"}`} />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <span className="px-2 py-1 bg-red-500/90 text-white text-xs font-bold rounded-full">
+                50% OFF
+              </span>
             </div>
+            <div className="mb-5">
+              <span className="text-sm text-slate-500 line-through">$19.99/mo</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-3xl font-bold text-white">$9.99</span>
+                <span className="text-slate-400">/mo</span>
+              </div>
+              <div className="text-xs text-slate-500 mt-1">Billed annually at $119.88/year</div>
+            </div>
+            <ul className="space-y-2">
+              {PLANS.PRO.features.map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-slate-300">
+                  <CheckCircle className="h-4 w-4 shrink-0 text-emerald-400" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </button>
 
-            {/* What Happens Next */}
+          {/* Enterprise Card — Recommended */}
+          <button
+            type="button"
+            className={`relative text-left rounded-xl border-2 p-6 transition-all ${
+              selectedPlan === "ENTERPRISE"
+                ? "border-purple-500 bg-gradient-to-br from-purple-900/30 to-slate-900 shadow-lg shadow-purple-500/20 ring-1 ring-purple-500/30"
+                : "border-slate-700 bg-slate-800/50 hover:border-slate-500"
+            }`}
+            onClick={() => setSelectedPlan("ENTERPRISE")}
+          >
+            {/* Recommended Badge */}
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span className="px-3 py-1 bg-purple-600 text-white text-xs font-bold rounded-full shadow-lg shadow-purple-500/30">
+                Recommended
+              </span>
+            </div>
+            <div className="flex items-start justify-between mb-4 mt-1">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-purple-500/20">
+                  <Crown className="h-6 w-6 text-purple-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Enterprise</h2>
+                  <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full border mt-1 bg-purple-500/20 text-purple-400 border-purple-500/30">
+                    Maximum Protection
+                  </span>
+                </div>
+              </div>
+              <span className="px-2 py-1 bg-red-500/90 text-white text-xs font-bold rounded-full">
+                55% OFF
+              </span>
+            </div>
+            <div className="mb-5">
+              <span className="text-sm text-slate-500 line-through">$49.99/mo</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-3xl font-bold text-white">$22.50</span>
+                <span className="text-slate-400">/mo</span>
+              </div>
+              <div className="text-xs text-slate-500 mt-1">Billed annually at $269.95/year</div>
+            </div>
+            <ul className="space-y-2">
+              {PLANS.ENTERPRISE.features.map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-slate-300">
+                  <CheckCircle className="h-4 w-4 shrink-0 text-purple-400" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </button>
+        </div>
+
+        {/* Why Enterprise? — only show when Enterprise is selected */}
+        {selectedPlan === "ENTERPRISE" && (
+          <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-5 mb-8 animate-fade-in">
+            <div className="flex items-center gap-2 mb-3">
+              <Crown className="h-4 w-4 text-purple-400" />
+              <h3 className="text-sm font-semibold text-purple-300">Why Enterprise?</h3>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {ENTERPRISE_EXTRAS.map((extra) => (
+                <div key={extra} className="flex items-center gap-2 text-sm text-slate-300">
+                  <CheckCircle className="h-3.5 w-3.5 shrink-0 text-purple-400" />
+                  {extra}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-slate-500 mt-3">
+              Everything in Pro plus comprehensive protection for you and your entire family.
+            </p>
+          </div>
+        )}
+
+        <div className="grid md:grid-cols-5 gap-6">
+          {/* Left Column — What Happens Next (3/5) */}
+          <div className="md:col-span-3 space-y-6 animate-fade-in-up">
             <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
               <h3 className="text-sm font-semibold text-white mb-4">What happens next</h3>
               <div className="space-y-4">
@@ -465,7 +544,7 @@ function CheckoutContent() {
             </div>
           </div>
 
-          {/* Right Column — Trust Signals (2/5) */}
+          {/* Right Column — Trust Signals + CTA (2/5) */}
           <div className="md:col-span-2 space-y-5 animate-fade-in-up animation-delay-200">
             {/* Trust Badges */}
             <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-5 space-y-4">
@@ -524,8 +603,8 @@ function CheckoutContent() {
                 size="lg"
                 className={`w-full text-base font-semibold h-12 transition-transform hover:scale-[1.02] ${
                   isPro
-                    ? "bg-emerald-600 hover:bg-emerald-700 animate-glow-pulse"
-                    : "bg-purple-600 hover:bg-purple-700"
+                    ? "bg-emerald-600 hover:bg-emerald-700"
+                    : "bg-purple-600 hover:bg-purple-700 animate-glow-pulse"
                 }`}
                 onClick={handleCheckout}
                 disabled={loading}
@@ -534,7 +613,7 @@ function CheckoutContent() {
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   <>
-                    Proceed to Secure Checkout
+                    Get {plan.name} — {plan.price}/mo
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </>
                 )}
