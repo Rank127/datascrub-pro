@@ -118,13 +118,13 @@ async function complianceHalt() {
       status: "SUCCESS",
       duration,
       message: `Compliance halt executed: ${cancelledRemovals.count} removals cancelled, ${cancelledEmails.count} emails cancelled, freeze directive set`,
-      metadata: {
+      metadata: JSON.stringify({
         removalsCount: cancelledRemovals.count,
         emailsCount: cancelledEmails.count,
         removalsByStatus: removalsByStatus.map(g => ({ status: g.status, count: g._count })),
         freezeDirectiveSet: true,
         executedAt: new Date().toISOString(),
-      },
+      }),
     },
   });
   console.log("Logged to CronLog");
