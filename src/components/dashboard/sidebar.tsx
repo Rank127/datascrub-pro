@@ -21,6 +21,7 @@ import {
   TrendingUp,
   Headphones,
   Brain,
+  Briefcase,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ const navigation = [
 const adminNavigation = [
   { name: "Admin Dashboard", href: "/dashboard/executive", icon: TrendingUp },
   { name: "Mastermind", href: "/dashboard/mastermind", icon: Brain },
+  { name: "Corporate", href: "/dashboard/corporate", icon: Briefcase },
 ];
 
 // Roles that can see admin navigation
