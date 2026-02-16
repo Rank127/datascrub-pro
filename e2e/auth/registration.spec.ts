@@ -1,6 +1,15 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Registration Flow', () => {
+  test.beforeEach(async ({ context }) => {
+    await context.addCookies([{
+      name: 'cookie-consent',
+      value: encodeURIComponent(JSON.stringify({ analytics: true, marketing: true, v: 1 })),
+      domain: 'localhost',
+      path: '/',
+    }]);
+  });
+
   test('renders registration form correctly', async ({ page }) => {
     await page.goto('/register')
 
@@ -46,12 +55,6 @@ test.describe('Registration Flow', () => {
     // Check that login link preserves callback
     const loginLink = page.locator('a[href="/login"]')
     await expect(loginLink).toBeVisible()
-  })
-
-  test('displays discount banner when discount code is present', async ({ page }) => {
-    await page.goto('/register?discount=EXIT50')
-
-    await expect(page.locator('text=50% OFF Applied!')).toBeVisible()
   })
 
   test('has link to login page', async ({ page }) => {

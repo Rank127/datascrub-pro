@@ -1,6 +1,15 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Login Flow', () => {
+  test.beforeEach(async ({ context }) => {
+    await context.addCookies([{
+      name: 'cookie-consent',
+      value: encodeURIComponent(JSON.stringify({ analytics: true, marketing: true, v: 1 })),
+      domain: 'localhost',
+      path: '/',
+    }]);
+  });
+
   test('renders login form correctly', async ({ page }) => {
     await page.goto('/login')
 

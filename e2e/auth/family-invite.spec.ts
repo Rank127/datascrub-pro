@@ -1,6 +1,15 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Family Invitation Flow', () => {
+  test.beforeEach(async ({ context }) => {
+    await context.addCookies([{
+      name: 'cookie-consent',
+      value: encodeURIComponent(JSON.stringify({ analytics: true, marketing: true, v: 1 })),
+      domain: 'localhost',
+      path: '/',
+    }]);
+  });
+
   test('unauthenticated user sees login/register options', async ({ page }) => {
     // Use a test token - the page will show login options for unauthenticated users
     await page.goto('/family/join/test-token')
