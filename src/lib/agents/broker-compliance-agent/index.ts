@@ -114,14 +114,24 @@ export async function validateOptOutUrls(
       await response.text().catch(() => {});
       httpStatus = response.status;
       // 2xx-3xx = healthy, 403 = bot protection (indeterminate, not broken),
-      // 404/410/5xx = genuinely broken
-      isHealthy = httpStatus >= 200 && httpStatus < 400 || httpStatus === 403;
+      // 405 = method not allowed (page exists), 404/410/5xx = genuinely broken
+      isHealthy = (httpStatus >= 200 && httpStatus < 400) || httpStatus === 403 || httpStatus === 405;
     } catch (err) {
-      error = err instanceof Error ? err.message : String(err);
-      // Network failures (fetch failed, aborted) from serverless are often
-      // geo-blocks or DNS issues for international sites — treat as indeterminate
-      const isNetworkError = error.includes("fetch failed") || error.includes("aborted");
-      isHealthy = isNetworkError; // Don't flag network errors as broken
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const errName = err instanceof Error ? err.name : "";
+      error = errMsg;
+      // Network failures from Vercel serverless: fetch failed, aborted, ENOTFOUND,
+      // ECONNREFUSED, ETIMEDOUT — mostly international sites unreachable from US-East.
+      // Treat as indeterminate (healthy) rather than flagging as broken opt-out URLs.
+      const isNetworkError =
+        errMsg.includes("fetch failed") ||
+        errMsg.includes("aborted") ||
+        errMsg.includes("ENOTFOUND") ||
+        errMsg.includes("ECONNREFUSED") ||
+        errMsg.includes("ETIMEDOUT") ||
+        errName === "AbortError" ||
+        errName === "TypeError";
+      isHealthy = isNetworkError;
     }
 
     const responseTimeMs = Date.now() - startMs;
