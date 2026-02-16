@@ -826,3 +826,42 @@ model NewsletterSubscriber {
   source       String   @default("blog")
   status       String   @default("active")
 }
+
+// Weekly competitive intelligence snapshots
+model CompetitorSnapshot {
+  id                   String             @id @default(cuid())
+  competitorsMonitored Int
+  changesDetected      Int
+  gapsAnalyzed         Int
+  advantagesFound      Int
+  highImpactAlerts     Int
+  gapAnalysis          String?            // JSON array of gaps
+  recommendations      String?            // JSON array of recommendations
+  advantages           String?            // JSON array of advantages
+  duration             Int?               // Execution time in ms
+  status               String             // SUCCESS, FAILED, PARTIAL
+  runDate              DateTime           @default(now())
+  createdAt            DateTime           @default(now())
+  changes              CompetitorChange[]
+
+  @@index([runDate])
+  @@index([status])
+}
+
+// Individual competitor changes detected per snapshot
+model CompetitorChange {
+  id           String             @id @default(cuid())
+  snapshotId   String
+  competitor   String
+  changeType   String             // PRICING, FEATURE, MARKETING, BROKER_COUNT
+  description  String
+  impact       String             // LOW, MEDIUM, HIGH
+  detectedAt   DateTime           @default(now())
+  acknowledged Boolean            @default(false)
+  snapshot     CompetitorSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@index([snapshotId])
+  @@index([competitor])
+  @@index([impact])
+  @@index([detectedAt])
+}

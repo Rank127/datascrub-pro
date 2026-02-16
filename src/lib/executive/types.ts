@@ -6,7 +6,35 @@ export interface ExecutiveStatsResponse {
   operations: OperationsMetrics;
   activities: ActivitiesMetrics;
   platform: PlatformMetrics; // User/exposure/removal trends
+  competitive?: CompetitiveIntelMetrics;
   generatedAt: string;
+}
+
+export interface CompetitiveIntelMetrics {
+  lastRun: string | null;
+  totalSnapshots: number;
+  recentChanges: Array<{
+    id: string;
+    competitor: string;
+    changeType: string;
+    description: string;
+    impact: string;
+    detectedAt: string;
+    acknowledged: boolean;
+  }>;
+  gapAnalysis: Array<{
+    feature: string;
+    competitors: string[];
+    priority: string;
+    estimatedImpact: string;
+  }>;
+  advantages: Array<{
+    feature: string;
+    description: string;
+  }>;
+  recommendations: string[];
+  changesByCompetitor: Record<string, number>;
+  changesByType: Record<string, number>;
 }
 
 export interface FinanceMetrics {

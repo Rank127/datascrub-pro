@@ -14,6 +14,7 @@ import {
   PlatformMetrics,
   OperationsMetrics,
   ActivitiesMetrics,
+  CompetitiveIntelMetrics,
   TrendDataPoint,
 } from "@/lib/executive/types";
 import {
@@ -102,12 +103,14 @@ export async function GET(request: Request) {
       operations,
       activities,
       platform,
+      competitive,
     ] = await Promise.all([
       getFinanceMetrics(),
       getWebAnalyticsMetrics(),
       getOperationsMetrics(),
       getActivitiesMetrics(isSuperAdmin),
       getPlatformMetrics(),
+      getCompetitiveIntelMetrics(),
     ]);
 
     const response: ExecutiveStatsResponse = {
@@ -116,6 +119,7 @@ export async function GET(request: Request) {
       operations,
       activities,
       platform,
+      competitive,
       generatedAt: new Date().toISOString(),
     };
 
@@ -870,6 +874,85 @@ async function getOperationsMetrics(): Promise<OperationsMetrics> {
     remediationSavings,
     queueVelocity,
   };
+}
+
+async function getCompetitiveIntelMetrics(): Promise<CompetitiveIntelMetrics | undefined> {
+  try {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    // Get latest snapshot and recent changes in parallel
+    const [latestSnapshot, recentChanges, totalSnapshots, changesByCompetitorRaw, changesByTypeRaw] = await Promise.all([
+      prisma.competitorSnapshot.findFirst({
+        orderBy: { runDate: "desc" },
+        select: { runDate: true, gapAnalysis: true, advantages: true, recommendations: true },
+      }),
+      prisma.competitorChange.findMany({
+        where: { detectedAt: { gte: thirtyDaysAgo } },
+        orderBy: { detectedAt: "desc" },
+        take: 20,
+        select: {
+          id: true,
+          competitor: true,
+          changeType: true,
+          description: true,
+          impact: true,
+          detectedAt: true,
+          acknowledged: true,
+        },
+      }),
+      prisma.competitorSnapshot.count(),
+      prisma.competitorChange.groupBy({
+        by: ["competitor"],
+        where: { detectedAt: { gte: thirtyDaysAgo } },
+        _count: true,
+      }),
+      prisma.competitorChange.groupBy({
+        by: ["changeType"],
+        where: { detectedAt: { gte: thirtyDaysAgo } },
+        _count: true,
+      }),
+    ]);
+
+    // Parse JSON fields from latest snapshot
+    let gapAnalysis: CompetitiveIntelMetrics["gapAnalysis"] = [];
+    let advantages: CompetitiveIntelMetrics["advantages"] = [];
+    let recommendations: string[] = [];
+
+    if (latestSnapshot) {
+      try {
+        if (latestSnapshot.gapAnalysis) gapAnalysis = JSON.parse(latestSnapshot.gapAnalysis);
+        if (latestSnapshot.advantages) advantages = JSON.parse(latestSnapshot.advantages);
+        if (latestSnapshot.recommendations) recommendations = JSON.parse(latestSnapshot.recommendations);
+      } catch { /* JSON parse failure is non-critical */ }
+    }
+
+    const changesByCompetitor: Record<string, number> = {};
+    for (const row of changesByCompetitorRaw) {
+      changesByCompetitor[row.competitor] = row._count;
+    }
+
+    const changesByType: Record<string, number> = {};
+    for (const row of changesByTypeRaw) {
+      changesByType[row.changeType] = row._count;
+    }
+
+    return {
+      lastRun: latestSnapshot?.runDate?.toISOString() || null,
+      totalSnapshots,
+      recentChanges: recentChanges.map((c) => ({
+        ...c,
+        detectedAt: c.detectedAt.toISOString(),
+      })),
+      gapAnalysis,
+      advantages,
+      recommendations,
+      changesByCompetitor,
+      changesByType,
+    };
+  } catch (err) {
+    console.error("[Executive Stats] Competitive intel fetch failed:", err);
+    return undefined;
+  }
 }
 
 // Helper to calculate effective plan considering family membership
