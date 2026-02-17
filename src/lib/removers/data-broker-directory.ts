@@ -13436,6 +13436,11 @@ export function isKnownDataBroker(source: string): boolean {
     return false;
   }
 
+  // Must have at least one removal path (URL or email)
+  if (!brokerInfo.optOutUrl && !brokerInfo.privacyEmail && !brokerInfo.optOutEmail) {
+    return false;
+  }
+
   // Has a valid opt-out method = is a data broker we can send removals to
   return true;
 }
@@ -13501,6 +13506,10 @@ export function getNotBrokerReason(source: string): string | null {
 
   if ((BROKER_CATEGORIES.DIRECT_RELATIONSHIP_PLATFORMS as readonly string[]).includes(source)) {
     return `${brokerInfo.name} has direct user relationships (users create accounts, consent to checks, or post reviews) — not a statutory data broker per CA Civil Code § 1798.99.80(d)`;
+  }
+
+  if (!brokerInfo.optOutUrl && !brokerInfo.privacyEmail && !brokerInfo.optOutEmail) {
+    return `${brokerInfo.name} has no opt-out URL or privacy email — no removal path available`;
   }
 
   // It is a known broker

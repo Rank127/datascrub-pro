@@ -279,19 +279,19 @@ export async function auditClassifications(): Promise<ClassificationAuditResult[
     const removable = isKnownDataBroker(key);
     const issues: string[] = [];
 
-    // Flag brokers marked removable but without opt-out URL
-    if (removable && !info.optOutUrl) {
-      issues.push("Marked as removable but missing opt-out URL");
+    // Check 1: Removable but no removal path at all (safety net — should be rare after isKnownDataBroker fix)
+    if (removable && !info.optOutUrl && !info.privacyEmail && !info.optOutEmail) {
+      issues.push("Marked as removable but no opt-out URL or email — no removal path");
     }
 
-    // Flag brokers with opt-out URL but classified as non-broker
+    // Check 2: Has URL but not classified as removable
     if (!removable && info.optOutUrl && classification === "STATUTORY_DATA_BROKER") {
       issues.push("Has opt-out URL but not classified as removable — classification mismatch");
     }
 
-    // Flag entries with no removal method at all
-    if (removable && !info.optOutUrl && !info.privacyEmail && info.removalMethod === "MONITOR") {
-      issues.push("No opt-out URL, no privacy email, and method is MONITOR — how do we remove?");
+    // Check 3: Method mismatch — FORM method needs a URL
+    if (removable && info.removalMethod === "FORM" && !info.optOutUrl) {
+      issues.push("Removal method is FORM but no opt-out URL defined");
     }
 
     if (issues.length > 0) {
@@ -331,6 +331,16 @@ export async function generateComplianceReport(
     (r) => r.httpStatus && r.httpStatus >= 300 && r.httpStatus < 400
   );
 
+  // Batch-load health records for all broken URLs to avoid N+1 queries
+  const brokenKeys = brokenUrls.map((b) => b.brokerKey);
+  const healthRecords = brokenKeys.length > 0
+    ? await prisma.brokerOptOutHealth.findMany({
+        where: { brokerKey: { in: brokenKeys } },
+        select: { brokerKey: true, consecutiveFailures: true },
+      })
+    : [];
+  const healthMap = new Map(healthRecords.map((h) => [h.brokerKey, h.consecutiveFailures]));
+
   for (const broken of brokenUrls) {
     // Check if this is a top broker (high removal volume)
     const removalCount = await prisma.removalRequest.count({
@@ -340,9 +350,12 @@ export async function generateComplianceReport(
       },
     });
 
+    // Only HIGH if broken for 2+ consecutive checks AND has active removals
+    const isRepeatFailure = (healthMap.get(broken.brokerKey) ?? 0) >= 2;
+
     issues.push({
       type: "BROKEN_URL",
-      severity: removalCount > 10 ? "HIGH" : removalCount > 0 ? "MEDIUM" : "LOW",
+      severity: (removalCount > 10 && isRepeatFailure) ? "HIGH" : removalCount > 0 ? "MEDIUM" : "LOW",
       brokerKey: broken.brokerKey,
       description: `Opt-out URL returned ${broken.httpStatus || "timeout"}: ${broken.url}${broken.error ? ` (${broken.error})` : ""}`,
     });
