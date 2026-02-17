@@ -16,6 +16,7 @@ import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { buildMastermindPrompt } from "@/lib/mastermind";
 import { resolveInvocation } from "@/lib/mastermind/invocations";
+import { getSystemUserId } from "@/lib/support/ticket-service";
 import type { MissionDomain } from "@/lib/mastermind";
 
 const DAILY_LIMIT = 10;
@@ -37,6 +38,8 @@ export async function POST(request: Request) {
 
     if (isCronAuth) {
       // CLI access via CRON_SECRET — skip session auth and rate limiting
+      const systemId = await getSystemUserId();
+      if (systemId) actorId = systemId;
     } else {
       const session = await auth();
       if (!session?.user?.id) {
@@ -199,7 +202,7 @@ Respond with valid JSON only (no markdown, no code fences):
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(`[Mastermind API] Failed at step "${step}":`, errorMessage, error);
     return NextResponse.json(
-      { error: `Failed at step "${step}": ${errorMessage}` },
+      { error: "Failed to generate mastermind advice. Please try again.", step },
       { status: 500 }
     );
   }
