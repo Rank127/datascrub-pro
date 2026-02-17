@@ -171,7 +171,19 @@ Respond with valid JSON only (no markdown, no code fences):
       jsonText = jsonText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     }
 
-    const result = JSON.parse(jsonText);
+    // Try to parse JSON; fall back to raw text if it fails (truncated responses, etc.)
+    let result: { advice?: string; advisors?: string[]; protocol?: string[]; keyInsight?: string };
+    try {
+      result = JSON.parse(jsonText);
+    } catch {
+      // Response wasn't valid JSON — return raw text as advice
+      result = {
+        advice: textBlock.text,
+        advisors: resolved?.advisorIds || [],
+        protocol: [],
+        keyInsight: "Response returned as raw text (JSON parse failed)",
+      };
+    }
 
     // Log the query
     step = "audit-log";
@@ -193,10 +205,10 @@ Respond with valid JSON only (no markdown, no code fences):
     });
 
     return NextResponse.json({
-      advice: result.advice,
+      advice: result.advice || "",
       advisors: result.advisors || [],
       protocol: result.protocol || [],
-      keyInsight: result.keyInsight,
+      keyInsight: result.keyInsight || "",
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
