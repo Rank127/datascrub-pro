@@ -20,6 +20,7 @@ import {
   generateComplianceReport,
 } from "@/lib/agents/broker-compliance-agent";
 import { Resend } from "resend";
+import { getAdminFromEmail } from "@/lib/email";
 
 export const maxDuration = 300;
 
@@ -162,7 +163,7 @@ async function sendAlertEmail(
       .join("");
 
     await resend.emails.send({
-      from: "GhostMyData Compliance <alerts@ghostmydata.com>",
+      from: getAdminFromEmail(),
       to: ALERT_RECIPIENT,
       subject: `[Compliance Alert] ${issues.length} HIGH severity issue${issues.length > 1 ? "s" : ""} detected (${runType})`,
       html: `

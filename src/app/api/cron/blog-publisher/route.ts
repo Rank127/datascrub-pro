@@ -15,6 +15,7 @@ import { logCronExecution } from "@/lib/cron-logger";
 import { getTopBlogIdeas } from "@/lib/agents/seo-agent/blog-generator";
 import { writeAndPublishPost } from "@/lib/agents/seo-agent/blog-writer";
 import { Resend } from "resend";
+import { getAdminFromEmail } from "@/lib/email";
 
 export const maxDuration = 300;
 
@@ -93,7 +94,7 @@ export async function GET(request: Request) {
           .join("\n");
 
         await resend.emails.send({
-          from: "GhostMyData <notifications@ghostmydata.com>",
+          from: getAdminFromEmail(),
           to: "rocky@ghostmydata.com",
           subject: `${published.length} New Blog Post${published.length > 1 ? "s" : ""} Published`,
           html: `

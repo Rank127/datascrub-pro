@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { logCronExecution } from "@/lib/cron-logger";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
+import { getAdminFromEmail } from "@/lib/email";
 import {
   collectStandupMetrics,
   analyzeStandupMetrics,
@@ -60,9 +61,7 @@ export async function GET(request: Request) {
     const subject = `${emoji} Daily Cabinet Meeting: ${analysis.overallHealth.replace("_", " ")} - ${dateStr}`;
 
     await getResend().emails.send({
-      from:
-        process.env.RESEND_FROM_EMAIL ||
-        "GhostMyData <noreply@send.ghostmydata.com>",
+      from: getAdminFromEmail(),
       to: [ADMIN_EMAIL],
       subject,
       html: emailHtml,

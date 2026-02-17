@@ -990,3 +990,25 @@ model AutoBlogPost {
   @@index([status])
   @@index([publishedAt])
 }
+
+// Email bounce/suppression tracking — prevents re-sending to known-bad addresses
+model EmailSuppression {
+  id             String    @id @default(cuid())
+  email          String    @unique // recipient email address
+  reason         String    // hard_bounce, soft_bounce_repeated, complaint, manual
+  bounceCount    Int       @default(0)
+  lastBounceType String?   // transient, permanent, undetermined
+  category       String?   // ccpa_broker, platform, drip, admin
+  brokerKey      String?   // data broker key if CCPA removal email
+  suppressed     Boolean   @default(false)
+  suppressedAt   DateTime?
+  firstBouncedAt DateTime?
+  lastBouncedAt  DateTime?
+  lastResendId   String?   // most recent Resend email ID that bounced
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([suppressed])
+  @@index([brokerKey])
+  @@index([category])
+}

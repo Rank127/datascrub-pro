@@ -8,6 +8,7 @@
 import { PrismaClient } from "@prisma/client";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSystemUserId } from "@/lib/support/ticket-service";
+import { getAdminFromEmail } from "@/lib/email";
 
 const prisma = new PrismaClient();
 
@@ -930,7 +931,7 @@ Please review and take appropriate action.`;
       const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
       if (adminEmails.length > 0) {
         await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || "noreply@ghostmydata.com",
+          from: getAdminFromEmail(),
           to: adminEmails,
           subject: `[Manager Review] Ticket ${ticketNumber} - Action Required`,
           html: `

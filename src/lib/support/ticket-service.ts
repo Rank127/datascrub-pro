@@ -3,6 +3,7 @@
 
 import { prisma } from "@/lib/db";
 import { Resend } from "resend";
+import { getFromEmail } from "@/lib/email";
 import type { TicketType, TicketPriority, TicketSource } from "@/lib/types";
 
 // Email client for agent ticket notifications
@@ -1392,7 +1393,7 @@ async function sendAgentTicketNotification(
 
   try {
     const { error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || `${APP_NAME} <onboarding@resend.dev>`,
+      from: getFromEmail(),
       to: SUPPORT_EMAIL,
       subject: `${severityEmoji[data.severity] || "📋"} [${ticket.ticketNumber}] ${categoryPrefix} Issue: ${data.title}`,
       html,

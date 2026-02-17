@@ -7,6 +7,7 @@ import { InvocationTypes } from "@/lib/agents/types";
 import { getRemediationEngine } from "@/lib/agents";
 import { logCronExecution } from "@/lib/cron-logger";
 import { verifyCronAuth } from "@/lib/cron-auth";
+import { getAdminFromEmail } from "@/lib/email";
 import { nanoid } from "nanoid";
 
 // Initialize Resend for email notifications
@@ -24,7 +25,7 @@ async function sendSEOAlertEmail(to: string, subject: string, content: string): 
 
   try {
     const { error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "GhostMyData <onboarding@resend.dev>",
+      from: getAdminFromEmail(),
       to,
       subject,
       html: `<pre style="font-family: monospace; white-space: pre-wrap; background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: 8px;">${content}</pre>`,
@@ -189,7 +190,7 @@ async function sendRemediationSummaryEmail(summary: RemediationSummary, seoScore
 
   try {
     const { error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "GhostMyData <onboarding@resend.dev>",
+      from: getAdminFromEmail(),
       to: SUPPORT_EMAIL,
       subject: `SEO Auto-Remediation: ${summary.totalAutoRemediated} issues fixed, Score: ${seoScore}/100`,
       html,

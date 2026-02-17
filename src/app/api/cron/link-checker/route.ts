@@ -6,6 +6,7 @@ import {
   URL_PATTERN_VARIATIONS,
   getCorrectedUrl,
 } from "@/lib/removals/url-corrections";
+import { getAdminFromEmail } from "@/lib/email";
 
 export const maxDuration = 300;
 
@@ -223,8 +224,7 @@ export async function GET(request: Request) {
           .join("\n");
 
         await resend.emails.send({
-          from:
-            process.env.RESEND_FROM_EMAIL || "noreply@ghostmydata.com",
+          from: getAdminFromEmail(),
           to: adminEmails,
           subject: `[GhostMyData] ${report.brokenLinks.length} Broken Opt-Out Links (${report.corrected} corrections, ${report.suggested} suggestions)`,
           text: `Daily Link Check Report\n\nChecked: ${report.checked}\nWorking: ${report.working}\nBroken: ${report.broken}\nErrors: ${report.errors}\nCorrections Available: ${report.corrected}\nSuggestions Found: ${report.suggested}\n\nBroken Links:\n${brokenList}\n\nCorrections are applied at runtime via url-corrections.ts.\nSuggestions should be verified manually before adding to the registry.`,

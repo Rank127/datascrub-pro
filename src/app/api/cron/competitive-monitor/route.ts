@@ -12,6 +12,7 @@ import { logCronExecution } from "@/lib/cron-logger";
 import { prisma } from "@/lib/db";
 import { monitorCompetitors, analyzeFeatureGaps } from "@/lib/agents/competitive-intel-agent";
 import { Resend } from "resend";
+import { getAdminFromEmail } from "@/lib/email";
 
 export const maxDuration = 120;
 
@@ -149,7 +150,7 @@ async function sendAlertEmail(
     });
 
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "GhostMyData <noreply@send.ghostmydata.com>",
+      from: getAdminFromEmail(),
       to: ALERT_RECIPIENT,
       subject: `Competitive Alert: ${changes.length} High Impact Change${changes.length > 1 ? "s" : ""} Detected`,
       html: `

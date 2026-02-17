@@ -7,8 +7,10 @@
 
 import { Resend } from "resend";
 import { prisma } from "@/lib/db";
+import { getFromEmail, canSendEmail } from "@/lib/email";
+import { isEmailSuppressed } from "@/lib/email/suppression";
 
-// Lazy-initialize Resend client
+// Lazy-initialize Resend client (used for drip sends with custom headers)
 let _resend: Resend | null = null;
 function getResendClient(): Resend | null {
   if (_resend === null && process.env.RESEND_API_KEY) {
@@ -19,7 +21,6 @@ function getResendClient(): Resend | null {
 
 const APP_NAME = "GhostMyData";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com";
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || `${APP_NAME} <onboarding@resend.dev>`;
 
 function appendUtm(url: string, campaign: string): string {
   const separator = url.includes("?") ? "&" : "?";
@@ -528,8 +529,21 @@ export async function sendDripEmail(userId: string, templateId: DripTemplateId):
 
     const template = getDripEmailTemplate(templateId, user.name || "there", templateData);
 
+    // Check suppression — don't drip to bounced addresses
+    const suppressed = await isEmailSuppressed(user.email);
+    if (suppressed) {
+      console.log(`[Drip] Skipped ${templateId} to ${user.email} — address suppressed`);
+      return false;
+    }
+
+    // Check quota — drip emails should respect the shared limit
+    if (!canSendEmail()) {
+      console.warn(`[Drip] Skipped ${templateId} to ${user.email} — daily quota exceeded`);
+      return false;
+    }
+
     const { error } = await client.emails.send({
-      from: FROM_EMAIL,
+      from: getFromEmail(),
       to: user.email,
       subject: template.subject,
       html: template.html,

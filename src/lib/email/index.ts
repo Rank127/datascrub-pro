@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { prisma } from "@/lib/db";
 import { isEmailBlocklisted, getBlocklistEntry } from "@/lib/removers/blocklist";
 import { captureError } from "@/lib/error-reporting";
+import { isEmailSuppressed, recordBounce, categorizeEmail, lookupBrokerByEmail } from "@/lib/email/suppression";
 
 // Lazy-initialize Resend client to ensure env vars are loaded
 let _resend: Resend | null = null;
@@ -15,7 +16,7 @@ function getResendClient(): Resend | null {
 const APP_NAME = (process.env.NEXT_PUBLIC_APP_NAME || "GhostMyData").replace(/[\r\n]/g, "").trim();
 
 // Daily email quota tracking (resets at midnight UTC)
-const DAILY_EMAIL_LIMIT = parseInt(process.env.DAILY_EMAIL_LIMIT || "90"); // Leave buffer below Resend's 100
+const DAILY_EMAIL_LIMIT = parseInt(process.env.DAILY_EMAIL_LIMIT || "1500"); // Pro plan: 50k/month ≈ 1,666/day
 let emailsSentToday = 0;
 let lastResetDate = new Date().toDateString();
 
@@ -43,9 +44,17 @@ export function canSendEmail(): boolean {
 }
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH_URL || "https://ghostmydata.com";
 
-// Use getter to ensure env var is read at runtime (after dotenv loads in scripts)
-function getFromEmail(): string {
-  return process.env.RESEND_FROM_EMAIL || `${APP_NAME} <onboarding@resend.dev>`;
+// Centralized FROM address getters — all email senders should use these
+export function getFromEmail(): string {
+  return process.env.RESEND_FROM_EMAIL || `${APP_NAME} <noreply@send.ghostmydata.com>`;
+}
+
+export function getCcpaFromEmail(): string {
+  return process.env.RESEND_CCPA_FROM_EMAIL || getFromEmail();
+}
+
+export function getAdminFromEmail(): string {
+  return process.env.RESEND_ADMIN_FROM_EMAIL || getFromEmail();
 }
 
 // Base email template
@@ -151,6 +160,13 @@ async function sendEmail(
     return { success: false, error: "Email service not configured" };
   }
 
+  // Check suppression list — don't send to known-bad addresses
+  const suppressed = await isEmailSuppressed(to);
+  if (suppressed) {
+    console.log(`[Email] Skipped send to ${to} — address is suppressed`);
+    return { success: false, error: "Email address is suppressed", suppressed: true };
+  }
+
   // Check quota (unless explicitly skipped for critical emails)
   if (!skipQuotaCheck && !canSendEmail()) {
     console.warn(`[Email] Daily quota exceeded (${emailsSentToday}/${DAILY_EMAIL_LIMIT}).`);
@@ -184,6 +200,63 @@ async function sendEmail(
   } catch (err) {
     captureError("[Email] Error sending email", err);
     return { success: false, error: "Failed to send email" };
+  }
+}
+
+/**
+ * Send a CCPA/GDPR removal email to a broker.
+ * Uses separate FROM address (if configured) to protect platform domain reputation.
+ * Tracks category for bounce analysis.
+ */
+async function sendCcpaEmail(
+  to: string,
+  subject: string,
+  html: string
+) {
+  const client = getResendClient();
+  if (!client) {
+    return { success: false, error: "Email service not configured" };
+  }
+
+  // Check suppression
+  const suppressed = await isEmailSuppressed(to);
+  if (suppressed) {
+    console.log(`[Email] CCPA skipped — ${to} is suppressed`);
+    return { success: false, error: "Broker email is suppressed", suppressed: true };
+  }
+
+  // Check quota
+  if (!canSendEmail()) {
+    return queueEmail(to, subject, html, { emailType: "CCPA_REMOVAL", priority: 3 });
+  }
+
+  try {
+    const { data, error } = await client.emails.send({
+      from: getCcpaFromEmail(),
+      to,
+      subject,
+      html,
+    });
+
+    if (error) {
+      // Record bounce for tracking
+      const brokerKey = lookupBrokerByEmail(to);
+      await recordBounce({
+        email: to,
+        bounceType: "transient",
+        category: "ccpa_broker",
+        brokerKey: brokerKey || undefined,
+      });
+      captureError("[Email] CCPA send failed", error);
+      return { success: false, error: error.message };
+    }
+
+    emailsSentToday++;
+    console.log(`[Email] CCPA sent to ${to} (${emailsSentToday}/${DAILY_EMAIL_LIMIT} today)`);
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    captureError("[Email] CCPA error", err);
+    return { success: false, error: "Failed to send CCPA email" };
   }
 }
 
@@ -992,7 +1065,7 @@ export async function sendCCPARemovalRequest(data: RemovalRequestEmail) {
     </html>
   `;
 
-  return sendEmail(
+  return sendCcpaEmail(
     data.toEmail,
     `Data Deletion Request - CCPA/GDPR - ${data.fromName}`,
     html
@@ -1082,7 +1155,7 @@ export async function sendBulkCCPARemovalRequest(data: BulkRemovalRequestEmail) 
     </html>
   `;
 
-  return sendEmail(
+  return sendCcpaEmail(
     data.toEmail,
     `Data Deletion Request - CCPA/GDPR - ${data.fromName} (${data.exposures.length} records)`,
     html

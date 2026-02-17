@@ -10,6 +10,7 @@ import {
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { reportIssue } from "@/lib/agents/orchestrator/remediation-engine";
 import { captureError } from "@/lib/error-reporting";
+import { getAdminFromEmail } from "@/lib/email";
 
 export const maxDuration = 300;
 
@@ -1204,7 +1205,7 @@ export async function GET(request: Request) {
       `;
 
       await getResend().emails.send({
-        from: process.env.RESEND_FROM_EMAIL || "GhostMyData <noreply@send.ghostmydata.com>",
+        from: getAdminFromEmail(),
         to: [ADMIN_EMAIL],
         subject: `${statusEmoji} GhostMyData Health: ${overall} - ${summary.failed} failed, ${summary.warnings} warnings`,
         html: emailHtml,

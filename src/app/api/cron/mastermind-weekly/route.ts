@@ -14,6 +14,7 @@ import { collectStandupMetrics, type StandupMetrics } from "@/lib/standup/collec
 import { Resend } from "resend";
 import { buildMastermindPrompt } from "@/lib/mastermind";
 import { applyMastermindDirectives } from "@/lib/mastermind/directives";
+import { getAdminFromEmail } from "@/lib/email";
 import type { MastermindDirectiveOutput } from "@/lib/mastermind/directives";
 
 function getResend() {
@@ -286,9 +287,7 @@ Always include strategic_priority and board_decision directives.`,
 
     // Send email
     await getResend().emails.send({
-      from:
-        process.env.RESEND_FROM_EMAIL ||
-        "GhostMyData <noreply@send.ghostmydata.com>",
+      from: getAdminFromEmail(),
       to: RECIPIENT,
       subject: `Weekly Board Meeting — ${dateStr}`,
       html: emailHtml,

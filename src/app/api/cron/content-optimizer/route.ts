@@ -8,6 +8,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { logCronExecution } from "@/lib/cron-logger";
+import { getAdminFromEmail } from "@/lib/email";
 import { runFullSEOReport } from "@/lib/agents/seo-agent";
 import {
   calculateReadability,
@@ -700,7 +701,7 @@ async function sendOptimizationReport(result: {
 
   try {
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "GhostMyData <onboarding@resend.dev>",
+      from: getAdminFromEmail(),
       to: SUPPORT_EMAIL,
       subject: `SEO Progress: ${result.seoScore}/100 (${scoreChange >= 0 ? '+' : ''}${scoreChange}) - ${result.pagesOptimized} pages optimized`,
       html,
