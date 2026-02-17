@@ -31,7 +31,7 @@ export const DRIP_SCHEDULE = [
   { day: 0, templateId: "welcome" },
   { day: 1, templateId: "scan_reminder" },
   { day: 3, templateId: "case_study" },
-  { day: 7, templateId: "discount_offer" },
+  { day: 7, templateId: "first_removal_coming" },
   { day: 14, templateId: "final_push" },
 ] as const;
 
@@ -43,8 +43,15 @@ interface DripEmail {
   html: string;
 }
 
+interface DripTemplateData {
+  submittedCount: number;
+  completedCount: number;
+  exposureCount: number;
+  topBrokers: string[];
+}
+
 // Email templates
-function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEmail {
+function getDripEmailTemplate(templateId: DripTemplateId, name: string, data?: DripTemplateData): DripEmail {
   const firstName = name.split(" ")[0] || "there";
 
   switch (templateId) {
@@ -237,10 +244,48 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
         `,
       };
 
-    case "discount_offer":
+    case "first_removal_coming": {
+      const submitted = data?.submittedCount ?? 0;
+      const completed = data?.completedCount ?? 0;
+      const exposures = data?.exposureCount ?? 0;
+      const brokers = data?.topBrokers ?? [];
+      const hasRemovals = submitted > 0 || completed > 0;
+
+      const brokerListHtml = brokers.length > 0
+        ? `<div class="broker-list">
+            <p style="color: #e2e8f0; font-weight: 600; margin-bottom: 8px;">Brokers we're working on:</p>
+            ${brokers.map(b => `<div class="broker-item"><span class="broker-icon">&#8227;</span> ${b}</div>`).join("")}
+          </div>`
+        : "";
+
+      const statsHtml = hasRemovals
+        ? `<div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-value">${submitted + completed}</div>
+              <div class="stat-label">Removal Requests Submitted</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${completed}</div>
+              <div class="stat-label">Already Completed</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${exposures}</div>
+              <div class="stat-label">Exposures Found</div>
+            </div>
+          </div>`
+        : "";
+
+      const progressMessage = completed > 0
+        ? `<p>Great news — <span class="highlight">${completed} removal${completed === 1 ? " has" : "s have"} already been completed!</span> The rest are being processed by data brokers right now.</p>`
+        : hasRemovals
+          ? `<p>We've submitted <span class="highlight">${submitted + completed} removal request${submitted + completed === 1 ? "" : "s"}</span> to data brokers on your behalf. Most brokers take 7-14 days to process removals — <span class="highlight">your first completions are expected soon.</span></p>`
+          : `<p>You signed up a week ago but haven't run your first scan yet. It takes 60 seconds and we'll immediately start removing your data from every broker that has it.</p>`;
+
       return {
-        subject: `${firstName}, 50% off your first month of Pro`,
-        previewText: "Use code DRIP50 for 50% off your first month",
+        subject: `${firstName}, your data removals are in progress`,
+        previewText: hasRemovals
+          ? `${submitted + completed} removal requests submitted — completions coming soon`
+          : "Run your first scan to start removing your data",
         html: `
 <!DOCTYPE html>
 <html>
@@ -252,67 +297,64 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string): DripEma
     .container { max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; padding: 32px; }
     h1 { color: #ffffff; font-size: 24px; margin-bottom: 16px; }
     p { color: #94a3b8; line-height: 1.6; margin-bottom: 16px; }
-    .highlight { color: #f97316; font-weight: bold; }
-    .green { color: #10b981; }
-    .btn { display: inline-block; background: #f97316; color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 700; font-size: 18px; margin: 16px 0; }
-    .offer-box { background: linear-gradient(135deg, #065f46 0%, #064e3b 100%); border: 2px solid #10b981; border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center; }
-    .offer-title { color: #10b981; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
-    .offer-price { color: #ffffff; font-size: 36px; font-weight: bold; }
-    .offer-original { color: #94a3b8; text-decoration: line-through; font-size: 18px; }
-    .offer-period { color: #94a3b8; font-size: 14px; }
-    .urgency { background: #7c2d12; border: 1px solid #ea580c; border-radius: 8px; padding: 12px; margin: 24px 0; text-align: center; }
-    .urgency p { color: #fed7aa; margin: 0; font-weight: 600; }
-    .features { margin: 24px 0; }
-    .feature { display: flex; align-items: center; gap: 12px; color: #e2e8f0; margin-bottom: 12px; }
-    .feature-icon { color: #10b981; }
+    .highlight { color: #10b981; font-weight: bold; }
+    .btn { display: inline-block; background: #10b981; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; margin: 16px 0; }
+    .btn:hover { background: #059669; }
+    .btn-secondary { display: inline-block; background: transparent; color: #10b981; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; margin: 8px 0; border: 1px solid #10b981; }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0; }
+    .stat-card { background: #334155; border-radius: 8px; padding: 16px; text-align: center; }
+    .stat-value { color: #10b981; font-size: 28px; font-weight: bold; }
+    .stat-label { color: #94a3b8; font-size: 12px; margin-top: 4px; }
+    .progress-box { background: linear-gradient(135deg, #065f46 0%, #064e3b 100%); border: 1px solid #10b981; border-radius: 12px; padding: 20px; margin: 24px 0; }
+    .progress-box p { color: #a7f3d0; margin: 0 0 8px 0; }
+    .broker-list { margin: 16px 0; }
+    .broker-item { color: #e2e8f0; padding: 6px 0; display: flex; align-items: center; gap: 8px; }
+    .broker-icon { color: #10b981; font-weight: bold; }
+    .upgrade-box { background: #334155; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center; }
+    .upgrade-box p { color: #94a3b8; margin: 0 0 12px 0; }
     .footer { text-align: center; color: #64748b; font-size: 12px; margin-top: 32px; padding-top: 16px; border-top: 1px solid #334155; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>50% Off Your First Month of Pro</h1>
+    <h1>${hasRemovals ? "Your Removals Are In Progress" : "Your Privacy Scan Is Waiting"}</h1>
 
     <p>Hey ${firstName},</p>
 
-    <p>Here's the math: The average identity theft costs victims $1,300 and 200+ hours to resolve. Pro protection costs a fraction of that. That's less than one lunch to protect everything.</p>
+    ${progressMessage}
 
-    <p>I noticed you haven't upgraded to Pro yet. So I'm making you an offer that's genuinely hard to say no to...</p>
+    ${statsHtml}
 
-    <div class="offer-box">
-      <div class="offer-title">Exclusive Drip Offer</div>
-      <div class="offer-original">$19.99/month</div>
-      <div class="offer-price">Use code DRIP50 for 50% off your first month</div>
-      <div class="offer-period">Stacks on top of any active sale. Cancel anytime.</div>
+    ${hasRemovals ? `
+    <div class="progress-box">
+      <p><strong>What happens next?</strong></p>
+      <p>Data brokers are legally required to process opt-out requests, but each one has its own timeline. Most respond within 7-14 days. We'll keep monitoring and re-submit if any broker drags their feet.</p>
     </div>
+    ` : ""}
 
-    <div class="urgency">
-      <p>⏰ This offer expires in 48 hours</p>
+    ${brokerListHtml}
+
+    <a href="${appendUtm(`${APP_URL}/dashboard`, 'first_removal_coming')}" class="btn">${hasRemovals ? "View Your Dashboard" : "Run Your First Scan"} &rarr;</a>
+
+    ${hasRemovals ? `
+    <div class="upgrade-box">
+      <p>Free plan includes 3 removals per month. <strong style="color: #e2e8f0;">Unlock unlimited removals</strong> and continuous monitoring with Pro.</p>
+      <a href="${appendUtm(`${APP_URL}/dashboard/billing`, 'first_removal_coming')}" class="btn-secondary">See Upgrade Options &rarr;</a>
     </div>
+    ` : ""}
 
-    <p><span class="green">With Pro, you get:</span></p>
-
-    <div class="features">
-      <div class="feature"><span class="feature-icon">✓</span> Automated removal from 2,100+ sites</div>
-      <div class="feature"><span class="feature-icon">✓</span> Weekly monitoring for new exposures</div>
-      <div class="feature"><span class="feature-icon">✓</span> CCPA/GDPR removal requests</div>
-      <div class="feature"><span class="feature-icon">✓</span> Priority support</div>
-    </div>
-
-    <a href="${appendUtm(`${APP_URL}/pricing?code=DRIP50`, 'discount_offer')}" class="btn">Claim 50% Off Now →</a>
-
-    <p>Use code <span class="highlight">DRIP50</span> at checkout if it's not automatically applied.</p>
-
-    <p>To your privacy,<br>The ${APP_NAME} Team</p>
+    <p>Your privacy is our priority,<br>The ${APP_NAME} Team</p>
 
     <div class="footer">
-      <p>© ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
-      <p><a href="${appendUtm(`${APP_URL}/unsubscribe`, 'discount_offer')}" style="color: #64748b;">Unsubscribe</a></p>
+      <p>&copy; ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
+      <p><a href="${appendUtm(`${APP_URL}/unsubscribe`, 'first_removal_coming')}" style="color: #64748b;">Unsubscribe</a></p>
     </div>
   </div>
 </body>
 </html>
         `,
       };
+    }
 
     case "final_push":
       return {
@@ -460,7 +502,26 @@ export async function sendDripEmail(userId: string, templateId: DripTemplateId):
       return false;
     }
 
-    const template = getDripEmailTemplate(templateId, user.name || "there");
+    // Fetch per-user removal stats for the first_removal_coming template
+    let templateData: DripTemplateData | undefined;
+    if (templateId === "first_removal_coming") {
+      const [removalRequests, exposureCount] = await Promise.all([
+        prisma.removalRequest.findMany({
+          where: { userId, status: { in: ["SUBMITTED", "IN_PROGRESS", "PENDING", "COMPLETED"] } },
+          select: { status: true, exposure: { select: { sourceName: true } } },
+          take: 50,
+        }),
+        prisma.exposure.count({ where: { userId } }),
+      ]);
+      templateData = {
+        submittedCount: removalRequests.filter(r => r.status === "SUBMITTED" || r.status === "IN_PROGRESS").length,
+        completedCount: removalRequests.filter(r => r.status === "COMPLETED").length,
+        exposureCount,
+        topBrokers: [...new Set(removalRequests.slice(0, 5).map(r => r.exposure.sourceName))],
+      };
+    }
+
+    const template = getDripEmailTemplate(templateId, user.name || "there", templateData);
 
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
