@@ -13541,6 +13541,8 @@ export function getLegalClassification(source: string): LegalClassification {
   if ((BROKER_CATEGORIES.DIRECT_RELATIONSHIP_PLATFORMS as readonly string[]).includes(source)) return "DIRECT_RELATIONSHIP";
   if ((BROKER_CATEGORIES.GRAY_AREA_SOURCES as readonly string[]).includes(source)) return "GRAY_AREA";
   // Breach/dark web/AI = monitoring only
+  if ((BROKER_CATEGORIES.AI_TRAINING as readonly string[]).includes(source)) return "MONITORING_ONLY";
+  if ((BROKER_CATEGORIES.AI_IMAGE_VIDEO as readonly string[]).includes(source)) return "MONITORING_ONLY";
   if ((BROKER_CATEGORIES.BREACH_DATABASE as readonly string[]).includes(source)) return "MONITORING_ONLY";
   if ((BROKER_CATEGORIES.NON_REMOVABLE as readonly string[]).includes(source)) return "MONITORING_ONLY";
   // Check category field on the entry
