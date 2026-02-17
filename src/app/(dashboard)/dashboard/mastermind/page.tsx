@@ -21,7 +21,7 @@ export default function MastermindPage() {
       <div>
         <h1 className="text-2xl font-bold text-white">Mastermind Advisory Council</h1>
         <p className="text-slate-400 mt-1">
-          5-Layer Organism Model — 75 modern minds powering every decision
+          Board + C-Suite + 14 Divisions — 240+ minds powering every decision
         </p>
       </div>
 

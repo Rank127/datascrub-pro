@@ -198,9 +198,11 @@ export function AdvisorPanel() {
                   {inv.trigger} — {inv.description.substring(0, 50)}
                 </option>
               ))}
-              <option value="Board Meeting">Board Meeting — Full Nucleus</option>
+              <option value="Board Meeting">Board Meeting — Full Board + C-Suite (14+ minds)</option>
               <option value="Safety Council">Safety Council — Risk Review</option>
               <option value="Growth War Room">Growth War Room — Revenue Sprint</option>
+              <option value="Security War Room">Security War Room — Full Security Assessment</option>
+              <option value="Design Sprint">Design Sprint — Product Design Review</option>
             </select>
           </div>
         </div>

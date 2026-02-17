@@ -13,6 +13,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
 import { buildMastermindPrompt } from "@/lib/mastermind";
+import { resolveInvocation } from "@/lib/mastermind/invocations";
 import type { MissionDomain } from "@/lib/mastermind";
 
 const DAILY_LIMIT = 10;
@@ -75,12 +76,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // Build mastermind prompt
+    // Build mastermind prompt — scale advisors and model based on invocation
     step = "build-prompt";
+    const resolved = invocation ? resolveInvocation(invocation) : null;
+    const isGroupMode = resolved?.mode === "group";
+    const advisorCount = isGroupMode ? Math.max(14, resolved.advisorIds.length) : 5;
+
     const promptOptions: Parameters<typeof buildMastermindPrompt>[0] = {
-      maxAdvisors: 5,
+      maxAdvisors: advisorCount,
       includeBusinessContext: true,
       scenario: question.trim(),
+      era: isGroupMode ? "both" : "modern",
     };
 
     if (invocation) {
@@ -97,16 +103,20 @@ export async function POST(request: Request) {
 
     const liveContext = `Live metrics: ${userCount} total users.`;
 
+    // Scale model and tokens for group invocations (Board Meeting, War Rooms, etc.)
+    const model = isGroupMode ? "claude-sonnet-4-5-20250929" : "claude-haiku-4-5-20251001";
+    const maxTokens = isGroupMode ? 8000 : 1500;
+
     // Call Claude
     step = "anthropic-init";
     const anthropic = new Anthropic();
 
     step = "anthropic-call";
     const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1500,
+      model,
+      max_tokens: maxTokens,
       temperature: 0.4,
-      system: `You are the Mastermind Advisory Council for GhostMyData. Channel the assigned advisors' thinking styles to provide strategic advice.
+      system: `You are the Mastermind Advisory Council for GhostMyData, a data privacy platform. Channel the assigned advisors' thinking styles to provide strategic advice.
 
 ${mastermindPrompt}
 
@@ -114,7 +124,7 @@ ${liveContext}
 
 Respond with valid JSON only (no markdown, no code fences):
 {
-  "advice": "3-5 paragraph strategic advice channeling the advisors' perspectives",
+  "advice": "${isGroupMode ? "Comprehensive multi-section strategic analysis using the 8-section format (LANDSCAPE, ANALYSIS, OFFER/SOLUTION, SEO & GROWTH, ACTION PLAN, SECURITY & INFRASTRUCTURE, RISKS & BLIND SPOTS, GOVERNANCE CHECK)" : "3-5 paragraph strategic advice channeling the advisors' perspectives"}",
   "advisors": ["List of advisor names whose perspectives you channeled"],
   "protocol": ["List of protocol steps you applied, if any"],
   "keyInsight": "One-sentence key takeaway"
