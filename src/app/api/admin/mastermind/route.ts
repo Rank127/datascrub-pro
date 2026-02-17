@@ -20,7 +20,7 @@ import type { MissionDomain } from "@/lib/mastermind";
 
 const DAILY_LIMIT = 10;
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   let step = "init";
