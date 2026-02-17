@@ -154,6 +154,36 @@ export async function GET() {
     const rawStats = Object.fromEntries(stats.map((s) => [s.status, s._count]));
     const simplifiedStats = getSimplifiedStats(rawStats);
 
+    // Query platform-wide broker intelligence for user's brokers
+    const allSourceKeys = [...new Set(enrichedRemovals.map(r => r.exposure.source))];
+
+    const [platformIntelRows, platformHealthRows] = await Promise.all([
+      prisma.brokerIntelligence.findMany({
+        where: { source: { in: allSourceKeys }, removalsSent: { gte: 3 } },
+        select: { source: true, sourceName: true, successRate: true, removalsCompleted: true, removalsSent: true },
+      }),
+      prisma.brokerOptOutHealth.findMany({
+        where: { brokerKey: { in: allSourceKeys } },
+        select: { brokerKey: true, isHealthy: true },
+      }),
+    ]);
+
+    const platformBrokerData: Record<string, {
+      successRate: number;
+      completionsTotal: number;
+      isHealthy?: boolean;
+    }> = {};
+
+    const healthLookup = new Map(platformHealthRows.map(r => [r.brokerKey, r.isHealthy]));
+
+    for (const row of platformIntelRows) {
+      platformBrokerData[row.source] = {
+        successRate: row.successRate,
+        completionsTotal: row.removalsCompleted,
+        isHealthy: healthLookup.get(row.source),
+      };
+    }
+
     // Compute per-broker compliance metrics from completed removals
     const brokerMetrics: Record<string, {
       totalCompleted: number;
@@ -188,6 +218,7 @@ export async function GET() {
       stats: rawStats,
       simplifiedStats,
       brokerMetrics,
+      platformBrokerData,
       manualAction: {
         total: manualActionTotal,
         done: manualActionDone,

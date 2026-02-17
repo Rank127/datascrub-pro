@@ -43,6 +43,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 import { DataSourceNames, type DataSource, type Severity } from "@/lib/types";
+import { getBrokerComplianceTier } from "@/lib/removals/user-status";
 
 interface RemovalRequest {
   id: string;
@@ -258,6 +259,11 @@ export default function RemovalsPage() {
     estimatedDays: number;
     complianceStatus: "fast" | "on-time" | "slow" | "non-compliant";
   }>>({});
+  const [platformBrokerData, setPlatformBrokerData] = useState<Record<string, {
+    successRate: number;
+    completionsTotal: number;
+    isHealthy?: boolean;
+  }>>({});
   const [showBrokerRatings, setShowBrokerRatings] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
@@ -275,6 +281,7 @@ export default function RemovalsPage() {
         setRemovals(data.removals);
         setRawStats(data.stats || {});
         setBrokerMetrics(data.brokerMetrics || {});
+        setPlatformBrokerData(data.platformBrokerData || {});
         setSimplifiedStats(
           data.simplifiedStats || {
             inProgress: 0,
@@ -368,7 +375,7 @@ export default function RemovalsPage() {
       <RemovalPipeline stats={rawStats} />
 
       {/* Broker Compliance Ratings */}
-      {Object.keys(brokerMetrics).length > 0 && (
+      {(Object.keys(brokerMetrics).length > 0 || Object.keys(platformBrokerData).length > 0) && (
         <Card className="bg-slate-800/50 border-slate-700">
           <CardHeader className="pb-3">
             <button
@@ -391,39 +398,85 @@ export default function RemovalsPage() {
           </CardHeader>
           {showBrokerRatings && (
             <CardContent className="space-y-4">
-              <div className="grid gap-3">
-                {Object.entries(brokerMetrics)
-                  .sort((a, b) => a[1].avgDays - b[1].avgDays)
-                  .map(([broker, metrics]) => {
-                    const statusColors: Record<string, string> = {
-                      fast: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-                      "on-time": "bg-blue-500/20 text-blue-400 border-blue-500/30",
-                      slow: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-                      "non-compliant": "bg-red-500/20 text-red-400 border-red-500/30",
-                    };
-                    const statusLabels: Record<string, string> = {
-                      fast: "Fast",
-                      "on-time": "On Time",
-                      slow: "Slow",
-                      "non-compliant": "Non-Compliant",
-                    };
-                    return (
-                      <div key={broker} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium text-white">{broker}</span>
-                          <Badge variant="outline" className={statusColors[metrics.complianceStatus]}>
-                            {statusLabels[metrics.complianceStatus]}
-                          </Badge>
+              {/* Personal broker metrics (from user's completed removals) */}
+              {Object.keys(brokerMetrics).length > 0 && (
+                <div className="grid gap-3">
+                  {Object.entries(brokerMetrics)
+                    .sort((a, b) => a[1].avgDays - b[1].avgDays)
+                    .map(([broker, metrics]) => {
+                      const statusColors: Record<string, string> = {
+                        fast: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+                        "on-time": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+                        slow: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+                        "non-compliant": "bg-red-500/20 text-red-400 border-red-500/30",
+                      };
+                      const statusLabels: Record<string, string> = {
+                        fast: "Fast",
+                        "on-time": "On Time",
+                        slow: "Slow",
+                        "non-compliant": "Non-Compliant",
+                      };
+                      return (
+                        <div key={broker} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <span className="font-medium text-white">{broker}</span>
+                            <Badge variant="outline" className={statusColors[metrics.complianceStatus]}>
+                              {statusLabels[metrics.complianceStatus]}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-slate-400">
+                            <span>{Math.round(metrics.avgDays)}d avg</span>
+                            <span className="text-slate-600">|</span>
+                            <span>{metrics.totalCompleted} removed</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-slate-400">
-                          <span>{Math.round(metrics.avgDays)}d avg</span>
-                          <span className="text-slate-600">|</span>
-                          <span>{metrics.totalCompleted} removed</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
+                      );
+                    })}
+                </div>
+              )}
+
+              {/* Platform-wide broker ratings (shown when user has no personal completions or as supplement) */}
+              {Object.keys(platformBrokerData).length > 0 && (
+                <div className="space-y-3">
+                  {Object.keys(brokerMetrics).length > 0 && (
+                    <div className="border-t border-slate-600 pt-3" />
+                  )}
+                  <p className="text-xs text-slate-500">
+                    Based on platform-wide data across all users
+                  </p>
+                  <div className="grid gap-2">
+                    {Object.entries(platformBrokerData)
+                      .sort((a, b) => b[1].successRate - a[1].successRate)
+                      .map(([source, data]) => {
+                        const indicator = getBrokerComplianceTier(data.successRate);
+                        return (
+                          <div key={source} className="flex items-center justify-between p-2.5 bg-slate-700/20 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-white">
+                                {DataSourceNames[source as keyof typeof DataSourceNames] || source}
+                              </span>
+                              <Badge
+                                variant="outline"
+                                className={`text-xs border-0 ${indicator.bgColor} ${indicator.color}`}
+                                title={indicator.description}
+                              >
+                                {indicator.label}
+                              </Badge>
+                              {data.isHealthy === false && (
+                                <span className="text-xs text-amber-400" title="Opt-out form temporarily unavailable — using alternative methods">
+                                  ⚠
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              {data.completionsTotal} removals completed
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
             </CardContent>
           )}
         </Card>
@@ -548,6 +601,14 @@ export default function RemovalsPage() {
                             <span className="font-medium text-white">
                               {removal.exposure.sourceName}
                             </span>
+                            {platformBrokerData[removal.exposure.source] && (() => {
+                              const tier = getBrokerComplianceTier(platformBrokerData[removal.exposure.source].successRate);
+                              return (
+                                <span className={`text-xs font-medium ${tier.color}`} title={tier.description}>
+                                  {tier.label}
+                                </span>
+                              );
+                            })()}
                             <Badge
                               variant="outline"
                               className={

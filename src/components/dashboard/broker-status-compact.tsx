@@ -16,6 +16,9 @@ interface BrokerStat {
   pendingCount: number;
   status: string;
   lastCompletedAt?: string;
+  // Platform compliance data
+  platformSuccessRate?: number;
+  optOutUrlHealthy?: boolean;
 }
 
 interface BrokerStatusCompactProps {

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { getBrokerComplianceTier } from "@/lib/removals/user-status";
 
 interface BrokerStat {
   source: string;
@@ -30,6 +31,9 @@ interface BrokerStat {
   subsidiaries?: string[];
   consolidatesTo?: string;
   parentName?: string;
+  // Platform compliance data
+  platformSuccessRate?: number;
+  optOutUrlHealthy?: boolean;
 }
 
 interface BrokerProgressProps {
@@ -105,6 +109,9 @@ export function BrokerProgress({ brokers, className, showConsolidated = true }: 
           const config = statusConfig[broker.status] || statusConfig.PENDING;
           const StatusIcon = config.icon;
           const isConsolidatedParent = broker.isParent && (broker.subsidiaryCount || 0) > 0;
+          const complianceIndicator = broker.platformSuccessRate !== undefined
+            ? getBrokerComplianceTier(broker.platformSuccessRate)
+            : null;
 
           return (
             <Link
@@ -141,6 +148,20 @@ export function BrokerProgress({ brokers, className, showConsolidated = true }: 
                   {broker.status === "PENDING" && broker.exposureCount > 1 && (
                     <span className="text-xs text-slate-400">
                       {broker.exposureCount} exposures
+                    </span>
+                  )}
+                  {complianceIndicator && (
+                    <Badge
+                      variant="outline"
+                      className={cn("text-xs border-0", complianceIndicator.bgColor, complianceIndicator.color)}
+                      title={complianceIndicator.description}
+                    >
+                      {complianceIndicator.label}
+                    </Badge>
+                  )}
+                  {broker.optOutUrlHealthy === false && (
+                    <span className="text-xs text-amber-400" title="Opt-out form temporarily unavailable — using alternative methods">
+                      ⚠
                     </span>
                   )}
                   {isConsolidatedParent && broker.status === "PENDING" && (

@@ -150,3 +150,58 @@ export function getSimplifiedStats(stats: Record<string, number>): {
     total: inProgress + completed + monitoring,
   };
 }
+
+// --- Broker Compliance Indicators (user-facing) ---
+
+export type BrokerComplianceTier = "excellent" | "good" | "slow" | "poor";
+
+export interface BrokerComplianceIndicator {
+  tier: BrokerComplianceTier;
+  label: string;
+  color: string; // Tailwind text color
+  bgColor: string; // Tailwind bg color
+  description: string;
+}
+
+/**
+ * Get user-facing compliance tier from platform-wide success rate.
+ * Thresholds match existing compliance color scheme.
+ */
+export function getBrokerComplianceTier(
+  successRate: number
+): BrokerComplianceIndicator {
+  if (successRate >= 80) {
+    return {
+      tier: "excellent",
+      label: "Excellent",
+      color: "text-emerald-400",
+      bgColor: "bg-emerald-500/20",
+      description: `${Math.round(successRate)}% platform success rate — this broker responds quickly and reliably`,
+    };
+  }
+  if (successRate >= 55) {
+    return {
+      tier: "good",
+      label: "Good",
+      color: "text-blue-400",
+      bgColor: "bg-blue-500/20",
+      description: `${Math.round(successRate)}% platform success rate — this broker typically complies with removal requests`,
+    };
+  }
+  if (successRate >= 30) {
+    return {
+      tier: "slow",
+      label: "Slow",
+      color: "text-amber-400",
+      bgColor: "bg-amber-500/20",
+      description: `${Math.round(successRate)}% platform success rate — this broker is slower to respond but we follow up persistently`,
+    };
+  }
+  return {
+    tier: "poor",
+    label: "Poor",
+    color: "text-red-400",
+    bgColor: "bg-red-500/20",
+    description: `${Math.round(successRate)}% platform success rate — this broker is difficult but we escalate aggressively`,
+  };
+}

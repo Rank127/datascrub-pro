@@ -365,9 +365,31 @@ export async function GET() {
     }
 
     // Convert to array and sort by exposure count
-    const brokerStats = Array.from(brokerStatsMap.values())
+    const brokerStatsArray = Array.from(brokerStatsMap.values())
       .sort((a, b) => b.exposureCount - a.exposureCount)
       .slice(0, 10); // Top 10 brokers
+
+    // Enrich with platform-wide compliance data
+    const userSourceKeys = brokerStatsArray.map(b => b.source);
+    const [brokerIntelRows, brokerHealthRows] = await Promise.all([
+      prisma.brokerIntelligence.findMany({
+        where: { source: { in: userSourceKeys }, removalsSent: { gte: 3 } },
+        select: { source: true, successRate: true },
+      }),
+      prisma.brokerOptOutHealth.findMany({
+        where: { brokerKey: { in: userSourceKeys } },
+        select: { brokerKey: true, isHealthy: true },
+      }),
+    ]);
+
+    const intelMap = new Map(brokerIntelRows.map(r => [r.source, r.successRate]));
+    const healthMap = new Map(brokerHealthRows.map(r => [r.brokerKey, r.isHealthy]));
+
+    const brokerStats = brokerStatsArray.map(b => ({
+      ...b,
+      platformSuccessRate: intelMap.get(b.source) as number | undefined,
+      optOutUrlHealthy: healthMap.get(b.source) as boolean | undefined,
+    }));
 
     // Calculate risk score based on exposures
     // Higher score = higher risk (more active exposures)
