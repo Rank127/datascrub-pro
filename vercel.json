@@ -173,7 +173,7 @@
     },
     {
       "path": "/api/cron/blog-publisher",
-      "schedule": "0 4 * * 3,6"
+      "schedule": "0 4 * * *"
     }
   ]
 }

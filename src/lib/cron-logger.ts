@@ -93,7 +93,7 @@ export async function getCronHealthStatus(): Promise<{
     "competitive-monitor": { interval: 170, label: "Weekly" },
     "growth-analysis": { interval: 170, label: "Weekly" },
     "broker-compliance": { interval: 25, label: "Daily" },
-    "blog-publisher": { interval: 90, label: "Twice weekly" },
+    "blog-publisher": { interval: 25, label: "Daily" },
   };
 
   const jobs: Array<{

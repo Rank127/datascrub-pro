@@ -1,12 +1,12 @@
 /**
  * Blog Publisher Cron
  *
- * Runs twice per week (Wednesday + Saturday at 4 AM UTC).
- * Picks the top-priority blog topic not yet covered, generates a full post
- * via Claude Haiku, saves it to the AutoBlogPost table, and sends a
- * notification email.
+ * Runs DAILY at 4 AM UTC. Publishes up to 3 blog posts per run.
+ * Picks top-priority topics not yet covered, generates full posts
+ * via Claude Haiku, saves to AutoBlogPost table.
  *
- * Schedule: 0 4 * * 3,6  (Wed + Sat at 4 AM UTC)
+ * Schedule: 0 4 * * *  (daily at 4 AM UTC)
+ * Target: 21 posts/week, 90+ posts/month
  */
 
 import { NextResponse } from "next/server";
@@ -16,9 +16,11 @@ import { getTopBlogIdeas } from "@/lib/agents/seo-agent/blog-generator";
 import { writeAndPublishPost } from "@/lib/agents/seo-agent/blog-writer";
 import { Resend } from "resend";
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 const JOB_NAME = "blog-publisher";
+const POSTS_PER_RUN = 3;
+const DEADLINE_MS = 270_000; // 270s safety margin (maxDuration=300)
 
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
@@ -33,10 +35,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log(`[${JOB_NAME}] Starting blog publisher...`);
+    console.log(`[${JOB_NAME}] Starting blog publisher (target: ${POSTS_PER_RUN} posts)...`);
 
-    // Get top topic ideas that haven't been written yet
-    const ideas = await getTopBlogIdeas(5);
+    // Get more ideas than we need, so we can skip collisions
+    const ideas = await getTopBlogIdeas(POSTS_PER_RUN * 3);
 
     if (ideas.length === 0) {
       console.log(`[${JOB_NAME}] No new topics to write about`);
@@ -50,49 +52,60 @@ export async function GET(request: Request) {
       return NextResponse.json({ status: "no_new_topics" });
     }
 
-    // Try the top topic first, fall back to next if slug collision
-    let publishedSlug: string | null = null;
-    let topicUsed = ideas[0];
+    // Publish up to POSTS_PER_RUN posts, with time-boxing
+    const published: { slug: string; title: string; category: string }[] = [];
+    let attempted = 0;
 
     for (const idea of ideas) {
-      publishedSlug = await writeAndPublishPost(idea);
-      if (publishedSlug) {
-        topicUsed = idea;
+      if (published.length >= POSTS_PER_RUN) break;
+      if (Date.now() - startTime >= DEADLINE_MS) {
+        console.log(`[${JOB_NAME}] Time limit approaching, stopping at ${published.length} posts`);
         break;
+      }
+
+      attempted++;
+      console.log(`[${JOB_NAME}] Generating post ${published.length + 1}/${POSTS_PER_RUN}: ${idea.title}`);
+
+      const slug = await writeAndPublishPost(idea);
+      if (slug) {
+        published.push({ slug, title: idea.title, category: idea.category });
+        console.log(`[${JOB_NAME}] Published: /blog/${slug}`);
       }
     }
 
-    if (!publishedSlug) {
-      console.log(`[${JOB_NAME}] Failed to publish any post`);
+    if (published.length === 0) {
+      console.log(`[${JOB_NAME}] Failed to publish any posts after ${attempted} attempts`);
       await logCronExecution({
         jobName: JOB_NAME,
         status: "FAILED",
         duration: Date.now() - startTime,
-        message: `Generation failed after trying ${ideas.length} topics`,
-        metadata: { postsPublished: 0, reason: "generation_failed", topicsAttempted: ideas.length },
+        message: `Generation failed after trying ${attempted} topics`,
+        metadata: { postsPublished: 0, reason: "generation_failed", topicsAttempted: attempted },
       });
       return NextResponse.json({ status: "generation_failed" });
     }
 
-    const postUrl = `https://ghostmydata.com/blog/${publishedSlug}`;
-    console.log(`[${JOB_NAME}] Published: ${postUrl}`);
-
-    // Send notification email
+    // Send single summary notification email
     if (resend) {
       try {
+        const postList = published
+          .map((p) => `<li><a href="https://ghostmydata.com/blog/${p.slug}">${p.title}</a> (${p.category})</li>`)
+          .join("\n");
+
         await resend.emails.send({
           from: "GhostMyData <notifications@ghostmydata.com>",
           to: "rocky@ghostmydata.com",
-          subject: `New Blog Post Published: ${topicUsed.title}`,
+          subject: `${published.length} New Blog Post${published.length > 1 ? "s" : ""} Published`,
           html: `
             <div style="font-family: sans-serif; max-width: 600px;">
-              <h2>New Blog Post Auto-Published</h2>
-              <p><strong>Title:</strong> ${topicUsed.title}</p>
-              <p><strong>Category:</strong> ${topicUsed.category}</p>
-              <p><strong>Keywords:</strong> ${topicUsed.keywords.join(", ")}</p>
-              <p><strong>URL:</strong> <a href="${postUrl}">${postUrl}</a></p>
+              <h2>${published.length} Blog Post${published.length > 1 ? "s" : ""} Auto-Published</h2>
+              <ul>${postList}</ul>
               <p style="color: #666; font-size: 14px;">
-                Generated by the blog-publisher cron. Review the post and make any edits via the database.
+                Generated by the blog-publisher cron (${Math.round((Date.now() - startTime) / 1000)}s).
+                Review posts and make any edits via the database.
+              </p>
+              <p style="color: #666; font-size: 14px;">
+                Topics remaining in queue: ${ideas.length - published.length}
               </p>
             </div>
           `,
@@ -103,25 +116,26 @@ export async function GET(request: Request) {
     }
 
     const duration = Date.now() - startTime;
+    const isPartial = published.length < POSTS_PER_RUN && ideas.length >= POSTS_PER_RUN;
+
     await logCronExecution({
       jobName: JOB_NAME,
-      status: "SUCCESS",
+      status: isPartial ? "PARTIAL" : "SUCCESS",
       duration,
-      message: `Published: ${topicUsed.title}`,
+      message: `Published ${published.length}/${POSTS_PER_RUN} posts`,
       metadata: {
-        postsPublished: 1,
-        slug: publishedSlug,
-        title: topicUsed.title,
-        category: topicUsed.category,
-        keywords: topicUsed.keywords,
+        postsPublished: published.length,
+        posts: published,
+        topicsAttempted: attempted,
+        topicsRemaining: ideas.length - published.length,
       },
     });
 
     return NextResponse.json({
       status: "published",
-      slug: publishedSlug,
-      title: topicUsed.title,
-      url: postUrl,
+      postsPublished: published.length,
+      posts: published,
+      topicsRemaining: ideas.length - published.length,
       duration,
     });
   } catch (error) {

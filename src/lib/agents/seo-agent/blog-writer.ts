@@ -42,6 +42,9 @@ function categoryDisplayName(category: string): string {
     security: "Security",
     "dark-web": "Dark Web Protection",
     guide: "Guide",
+    comparison: "Service Comparison",
+    "state-privacy": "State Privacy Rights",
+    legal: "Legal & Rights",
   };
   return map[category] || "Privacy";
 }
