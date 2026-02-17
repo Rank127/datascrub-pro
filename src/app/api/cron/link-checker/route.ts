@@ -9,6 +9,7 @@ import {
 import { getAdminFromEmail } from "@/lib/email";
 
 export const maxDuration = 300;
+const PROCESSING_DEADLINE_MS = 240_000; // 4 min deadline, 60s buffer for email + logging
 
 interface LinkCheckResult {
   broker: string;
@@ -37,13 +38,15 @@ const CONCURRENCY = 20;
 async function checkUrlBatch<T>(
   items: T[],
   fn: (item: T) => Promise<void>,
-  concurrency: number
+  concurrency: number,
+  deadline?: number
 ): Promise<void> {
   let i = 0;
   const workers = Array.from(
     { length: Math.min(concurrency, items.length) },
     async () => {
       while (i < items.length) {
+        if (deadline && Date.now() >= deadline) break;
         const idx = i++;
         await fn(items[idx]);
       }
@@ -97,13 +100,15 @@ function isUrlWorking(status: number | "error"): boolean {
  * Returns the first working URL found, or null.
  */
 async function trySuggestUrl(
-  brokerUrl: string
+  brokerUrl: string,
+  deadline?: number
 ): Promise<string | null> {
   try {
     const urlObj = new URL(brokerUrl);
     const baseUrl = `${urlObj.protocol}//${urlObj.hostname}`;
 
     for (const variation of URL_PATTERN_VARIATIONS) {
+      if (deadline && Date.now() >= deadline) break;
       const candidateUrl = baseUrl + variation;
       if (candidateUrl === brokerUrl) continue;
 
@@ -127,6 +132,7 @@ export async function GET(request: Request) {
   }
 
   console.log("[LinkChecker] Starting daily link check...");
+  const deadline = startTime + PROCESSING_DEADLINE_MS;
 
   const results: LinkCheckResult[] = [];
   const brokers = Object.entries(DATA_BROKER_DIRECTORY);
@@ -165,7 +171,7 @@ export async function GET(request: Request) {
 
         // If no known correction, try common pattern variations
         if (!result.correctedUrl) {
-          const suggestion = await trySuggestUrl(broker.optOutUrl!);
+          const suggestion = await trySuggestUrl(broker.optOutUrl!, deadline);
           if (suggestion) {
             result.suggestedUrl = suggestion;
             console.log(
@@ -181,7 +187,8 @@ export async function GET(request: Request) {
 
       results.push(result);
     },
-    CONCURRENCY
+    CONCURRENCY,
+    deadline
   );
 
   const corrections = results.filter((r) => r.correctedUrl);
@@ -202,9 +209,16 @@ export async function GET(request: Request) {
   };
 
   const duration = Date.now() - startTime;
+  const timeBoxed = Date.now() >= deadline;
+  const statusLabel = timeBoxed ? "PARTIAL" : "Complete";
   console.log(
-    `[LinkChecker] Complete: ${report.checked} checked, ${report.working} working, ${report.broken} broken, ${report.errors} errors, ${report.corrected} corrections available, ${report.suggested} suggestions`
+    `[LinkChecker] ${statusLabel}: ${report.checked}/${checkable.length} checked, ${report.working} working, ${report.broken} broken, ${report.errors} errors, ${report.corrected} corrections available, ${report.suggested} suggestions`
   );
+  if (timeBoxed) {
+    console.log(
+      `[LinkChecker] Time-boxed at ${Math.round(duration / 1000)}s — ${checkable.length - report.checked} URLs skipped`
+    );
+  }
 
   // Send alert email if there are broken links
   if (report.brokenLinks.length > 0) {
@@ -241,16 +255,18 @@ export async function GET(request: Request) {
 
   await logCronExecution({
     jobName: "link-checker",
-    status: "SUCCESS",
+    status: timeBoxed ? "PARTIAL" : "SUCCESS",
     duration,
-    message: `${report.checked} checked, ${report.working} working, ${report.broken} broken, ${report.corrected} corrections, ${report.suggested} suggestions`,
+    message: `${report.checked}/${checkable.length} checked, ${report.working} working, ${report.broken} broken, ${report.corrected} corrections, ${report.suggested} suggestions${timeBoxed ? ` (time-boxed, ${checkable.length - report.checked} skipped)` : ""}`,
     metadata: {
       checked: report.checked,
+      total: checkable.length,
       working: report.working,
       broken: report.broken,
       errors: report.errors,
       corrected: report.corrected,
       suggested: report.suggested,
+      timeBoxed,
       brokenLinks: report.brokenLinks.map((l: { broker: string; url: string; status: number | string }) => ({
         broker: l.broker,
         url: l.url,

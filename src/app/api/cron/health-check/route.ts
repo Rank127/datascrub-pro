@@ -698,10 +698,14 @@ export async function GET(request: Request) {
   // Test 14: Expired Subscriptions Still Active
   try {
     const now = new Date();
+    const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").filter(Boolean);
     const expiredButActive = await prisma.subscription.count({
       where: {
         status: "active",
         stripeCurrentPeriodEnd: { lt: now },
+        ...(adminEmails.length > 0
+          ? { user: { email: { notIn: adminEmails } } }
+          : {}),
       },
     });
 
