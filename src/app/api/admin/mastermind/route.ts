@@ -5,6 +5,8 @@
  * Accepts a question with optional mission domain or invocation command.
  * Returns AI-generated strategic advice channeling mastermind advisors.
  * Rate limited to 10 requests per day per admin.
+ *
+ * Auth: Browser session (NextAuth) OR CRON_SECRET Bearer token for CLI access.
  */
 
 import { NextResponse } from "next/server";
@@ -18,26 +20,63 @@ import type { MissionDomain } from "@/lib/mastermind";
 
 const DAILY_LIMIT = 10;
 
+export const maxDuration = 120;
+
 export async function POST(request: Request) {
   let step = "init";
   try {
-    // Auth
+    // Auth — session or CRON_SECRET
     step = "auth";
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    let actorId = "system-cli";
+    let actorEmail = "cli@ghostmydata.com";
+    let role = "ADMIN";
 
-    step = "fetch-user";
-    const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { email: true, role: true },
-    });
+    const authHeader = request.headers.get("authorization");
+    const isCronAuth =
+      authHeader === `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET;
 
-    step = "check-role";
-    const role = getEffectiveRole(currentUser?.email, currentUser?.role);
-    if (!["ADMIN", "LEGAL", "SUPER_ADMIN"].includes(role)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (isCronAuth) {
+      // CLI access via CRON_SECRET — skip session auth and rate limiting
+    } else {
+      const session = await auth();
+      if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      step = "fetch-user";
+      const currentUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { email: true, role: true },
+      });
+
+      step = "check-role";
+      role = getEffectiveRole(currentUser?.email, currentUser?.role);
+      if (!["ADMIN", "LEGAL", "SUPER_ADMIN"].includes(role)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+
+      actorId = session.user.id;
+      actorEmail = currentUser?.email || "unknown";
+
+      // Rate limiting (session users only)
+      step = "rate-limit";
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      const todayCount = await prisma.auditLog.count({
+        where: {
+          actorId: session.user.id,
+          action: "MASTERMIND_QUERY",
+          createdAt: { gte: todayStart },
+        },
+      });
+
+      if (todayCount >= DAILY_LIMIT) {
+        return NextResponse.json(
+          { error: `Daily limit of ${DAILY_LIMIT} mastermind queries reached. Try again tomorrow.` },
+          { status: 429 }
+        );
+      }
     }
 
     // Parse body
@@ -53,26 +92,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Question must be at least 5 characters" },
         { status: 400 }
-      );
-    }
-
-    // Rate limiting
-    step = "rate-limit";
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
-    const todayCount = await prisma.auditLog.count({
-      where: {
-        actorId: session.user.id,
-        action: "MASTERMIND_QUERY",
-        createdAt: { gte: todayStart },
-      },
-    });
-
-    if (todayCount >= DAILY_LIMIT) {
-      return NextResponse.json(
-        { error: `Daily limit of ${DAILY_LIMIT} mastermind queries reached. Try again tomorrow.` },
-        { status: 429 }
       );
     }
 
@@ -155,8 +174,8 @@ Respond with valid JSON only (no markdown, no code fences):
     step = "audit-log";
     await prisma.auditLog.create({
       data: {
-        actorId: session.user.id,
-        actorEmail: currentUser?.email || "unknown",
+        actorId,
+        actorEmail,
         actorRole: role,
         action: "MASTERMIND_QUERY",
         resource: "mastermind",
@@ -165,6 +184,7 @@ Respond with valid JSON only (no markdown, no code fences):
           mission,
           invocation,
           advisors: result.advisors,
+          source: isCronAuth ? "cli" : "dashboard",
         }),
       },
     });
@@ -174,7 +194,6 @@ Respond with valid JSON only (no markdown, no code fences):
       advisors: result.advisors || [],
       protocol: result.protocol || [],
       keyInsight: result.keyInsight,
-      queriesRemaining: DAILY_LIMIT - todayCount - 1,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
