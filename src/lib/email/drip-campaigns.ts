@@ -358,8 +358,8 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string, data?: D
 
     case "final_push":
       return {
-        subject: `Last chance: 50% off your first month, ${firstName}`,
-        previewText: "Final reminder - use code DRIP50 for 50% off your first month",
+        subject: `${firstName}, this is my last reminder about your exposed data`,
+        previewText: "Your personal info is still out there — here's what's at stake",
         html: `
 <!DOCTYPE html>
 <html>
@@ -380,6 +380,9 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string, data?: D
     .warning-box li { margin-bottom: 8px; }
     .cta-box { background: #065f46; border: 2px solid #10b981; border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center; }
     .cta-box p { color: #a7f3d0; margin: 0 0 16px 0; }
+    .price { color: #ffffff; font-size: 28px; font-weight: bold; }
+    .price-detail { color: #94a3b8; font-size: 14px; }
+    .price-original { color: #94a3b8; text-decoration: line-through; }
     .footer { text-align: center; color: #64748b; font-size: 12px; margin-top: 32px; padding-top: 16px; border-top: 1px solid #334155; }
   </style>
 </head>
@@ -409,8 +412,10 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string, data?: D
     <p>The longer your data stays out there, the more it gets copied and spread across new sites.</p>
 
     <div class="cta-box">
-      <p><span class="green">I'm extending your 50% off first month one more time.</span><br><s>$19.99</s> → Use code DRIP50 for 50% off your first month</p>
-      <a href="${appendUtm(`${APP_URL}/pricing?code=DRIP50`, 'final_push')}" class="btn">Start Protecting My Data →</a>
+      <p><span class="green">Pro gives you unlimited removals across 2,100+ data brokers.</span></p>
+      <div class="price"><span class="price-original">$19.99/mo</span> &rarr; $9.99/mo</div>
+      <p class="price-detail">$119.88/year — 50% off list price. 30-day money-back guarantee.</p>
+      <a href="${appendUtm(`${APP_URL}/dashboard/billing`, 'final_push')}" class="btn">Upgrade to Pro &rarr;</a>
     </div>
 
     <p>This is the last email I'll send about this. The choice is yours.</p>
@@ -420,7 +425,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string, data?: D
     <p style="font-size: 12px; color: #64748b;">P.S. If you've already taken care of your privacy elsewhere, that's great! Just reply and let me know, and I'll stop these reminders.</p>
 
     <div class="footer">
-      <p>© ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
+      <p>&copy; ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
       <p><a href="${appendUtm(`${APP_URL}/unsubscribe`, 'final_push')}" style="color: #64748b;">Unsubscribe</a></p>
     </div>
   </div>
