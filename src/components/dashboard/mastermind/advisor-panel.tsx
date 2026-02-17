@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 
 interface MastermindResponse {
-  advice: string;
+  prompt: string;
   advisors: string[];
-  protocol: string[];
-  keyInsight: string;
-  queriesRemaining: number;
+  invocation: string | null;
+  mode: string;
+  isGroupMode: boolean;
+  liveContext: { userCount: number };
+  question: string;
 }
 
 interface MastermindData {
@@ -212,7 +214,7 @@ export function AdvisorPanel() {
           disabled={loading || !question.trim()}
           className="w-full py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-700 disabled:text-slate-500 text-black font-semibold rounded-lg text-sm transition-colors"
         >
-          {loading ? "Consulting the Council..." : "Ask the Mastermind Council"}
+          {loading ? "Building Advisory Prompt..." : "Build Mastermind Prompt"}
         </button>
       </form>
 
@@ -226,32 +228,30 @@ export function AdvisorPanel() {
       {/* Response */}
       {response && (
         <div className="mt-6 space-y-4">
-          {/* Key Insight */}
-          {response.keyInsight && (
-            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-              <div className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-1">
-                Key Insight
-              </div>
-              <p className="text-white text-sm font-medium">
-                {response.keyInsight}
-              </p>
+          {/* Mode & Context */}
+          <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+            <div className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-1">
+              {response.isGroupMode ? "Group Deliberation" : "Advisory Query"} — {response.liveContext.userCount} users
             </div>
-          )}
+            <p className="text-white text-sm font-medium">
+              {response.invocation || "General Query"}{response.isGroupMode ? ` (${response.advisors.length} advisors)` : ""}
+            </p>
+          </div>
 
-          {/* Advice */}
+          {/* Prompt */}
           <div className="p-4 bg-slate-800 rounded-lg">
             <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-              Advisory Response
+              Built Mastermind Prompt
             </div>
-            <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
-              {response.advice}
+            <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto">
+              {response.prompt}
             </div>
           </div>
 
           {/* Advisors */}
           {response.advisors.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-slate-500">Advisors consulted:</span>
+              <span className="text-xs text-slate-500">Advisors assigned:</span>
               {response.advisors.map((name) => (
                 <span
                   key={name}
@@ -262,26 +262,6 @@ export function AdvisorPanel() {
               ))}
             </div>
           )}
-
-          {/* Protocol */}
-          {response.protocol.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-slate-500">Protocol steps:</span>
-              {response.protocol.map((step) => (
-                <span
-                  key={step}
-                  className="px-2 py-0.5 bg-purple-500/10 text-purple-400 rounded text-xs"
-                >
-                  {step}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Remaining queries */}
-          <p className="text-xs text-slate-600">
-            {response.queriesRemaining} queries remaining today
-          </p>
         </div>
       )}
     </div>

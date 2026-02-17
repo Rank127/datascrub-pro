@@ -3,14 +3,13 @@
  *
  * POST /api/admin/mastermind
  * Accepts a question with optional mission domain or invocation command.
- * Returns AI-generated strategic advice channeling mastermind advisors.
+ * Returns the built mastermind prompt, advisors, and business context.
  * Rate limited to 10 requests per day per admin.
  *
  * Auth: Browser session (NextAuth) OR CRON_SECRET Bearer token for CLI access.
  */
 
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectiveRole } from "@/lib/admin";
@@ -20,8 +19,6 @@ import { getSystemUserId } from "@/lib/support/ticket-service";
 import type { MissionDomain } from "@/lib/mastermind";
 
 const DAILY_LIMIT = 10;
-
-export const maxDuration = 300;
 
 export async function POST(request: Request) {
   let step = "init";
@@ -98,7 +95,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Build mastermind prompt — scale advisors and model based on invocation
+    // Build mastermind prompt — scale advisors based on invocation
     step = "build-prompt";
     const resolved = invocation ? resolveInvocation(invocation) : null;
     const isGroupMode = resolved?.mode === "group";
@@ -119,71 +116,9 @@ export async function POST(request: Request) {
 
     const mastermindPrompt = buildMastermindPrompt(promptOptions);
 
-    // Fetch some live context
+    // Fetch live context
     step = "fetch-metrics";
     const userCount = await prisma.user.count();
-
-    const liveContext = `Live metrics: ${userCount} total users.`;
-
-    // Scale model and tokens for group invocations (Board Meeting, War Rooms, etc.)
-    const model = isGroupMode ? "claude-sonnet-4-5-20250929" : "claude-haiku-4-5-20251001";
-    const maxTokens = isGroupMode ? 8000 : 1500;
-
-    // Call Claude
-    step = "anthropic-init";
-    const anthropic = new Anthropic();
-
-    step = "anthropic-call";
-    const message = await anthropic.messages.create({
-      model,
-      max_tokens: maxTokens,
-      temperature: 0.4,
-      system: `You are the Mastermind Advisory Council for GhostMyData, a data privacy platform. Channel the assigned advisors' thinking styles to provide strategic advice.
-
-${mastermindPrompt}
-
-${liveContext}
-
-Respond with valid JSON only (no markdown, no code fences):
-{
-  "advice": "${isGroupMode ? "Comprehensive multi-section strategic analysis using the 8-section format (LANDSCAPE, ANALYSIS, OFFER/SOLUTION, SEO & GROWTH, ACTION PLAN, SECURITY & INFRASTRUCTURE, RISKS & BLIND SPOTS, GOVERNANCE CHECK)" : "3-5 paragraph strategic advice channeling the advisors' perspectives"}",
-  "advisors": ["List of advisor names whose perspectives you channeled"],
-  "protocol": ["List of protocol steps you applied, if any"],
-  "keyInsight": "One-sentence key takeaway"
-}`,
-      messages: [
-        {
-          role: "user",
-          content: question.trim(),
-        },
-      ],
-    });
-
-    step = "parse-response";
-    const textBlock = message.content.find((b) => b.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
-      throw new Error("No text response from Claude");
-    }
-
-    // Strip markdown code fences if present
-    let jsonText = textBlock.text.trim();
-    if (jsonText.startsWith("```")) {
-      jsonText = jsonText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-    }
-
-    // Try to parse JSON; fall back to raw text if it fails (truncated responses, etc.)
-    let result: { advice?: string; advisors?: string[]; protocol?: string[]; keyInsight?: string };
-    try {
-      result = JSON.parse(jsonText);
-    } catch {
-      // Response wasn't valid JSON — return raw text as advice
-      result = {
-        advice: textBlock.text,
-        advisors: resolved?.advisorIds || [],
-        protocol: [],
-        keyInsight: "Response returned as raw text (JSON parse failed)",
-      };
-    }
 
     // Log the query
     step = "audit-log";
@@ -198,23 +133,26 @@ Respond with valid JSON only (no markdown, no code fences):
           question: question.trim().substring(0, 200),
           mission,
           invocation,
-          advisors: result.advisors,
+          advisors: resolved?.advisorIds || [],
           source: isCronAuth ? "cli" : "dashboard",
         }),
       },
     });
 
     return NextResponse.json({
-      advice: result.advice || "",
-      advisors: result.advisors || [],
-      protocol: result.protocol || [],
-      keyInsight: result.keyInsight || "",
+      prompt: mastermindPrompt,
+      advisors: resolved?.advisorIds || [],
+      invocation: invocation || null,
+      mode: resolved?.mode || "single",
+      isGroupMode,
+      liveContext: { userCount },
+      question: question.trim(),
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(`[Mastermind API] Failed at step "${step}":`, errorMessage, error);
     return NextResponse.json(
-      { error: "Failed to generate mastermind advice. Please try again.", step },
+      { error: "Failed to build mastermind prompt. Please try again.", step },
       { status: 500 }
     );
   }
