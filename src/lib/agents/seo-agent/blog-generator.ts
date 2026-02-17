@@ -367,6 +367,40 @@ const HOW_TO_GUIDES: BlogTopic[] = [
 ];
 
 // ============================================================================
+// DATA REMOVAL TIMELINE ARTICLES — Board Meeting Priority 4 (priority 11)
+// ============================================================================
+const DATA_REMOVAL_TIMELINE_TOPICS: BlogTopic[] = [
+  {
+    title: "How Long Does Data Removal Actually Take? A Complete Timeline",
+    slug: "how-long-data-removal-takes-complete-timeline",
+    keywords: ["how long data removal takes", "data removal timeline", "data broker removal time", "opt out how long", "CCPA removal timeline"],
+    category: "guide",
+    priority: 11,
+  },
+  {
+    title: "Data Broker Response Times: What to Expect After Requesting Removal",
+    slug: "data-broker-response-times-what-to-expect",
+    keywords: ["data broker response time", "removal request response", "opt out waiting time", "when will my data be removed", "data removal waiting period"],
+    category: "guide",
+    priority: 11,
+  },
+  {
+    title: "CCPA vs GDPR Removal Timelines: How Fast Must Companies Delete Your Data?",
+    slug: "ccpa-vs-gdpr-removal-timelines-comparison",
+    keywords: ["CCPA removal timeline", "GDPR deletion timeline", "data deletion deadline", "how fast CCPA removal", "GDPR 30 day rule"],
+    category: "legal",
+    priority: 11,
+  },
+  {
+    title: "Why Your Data Removal Is Taking So Long (And What We Do About It)",
+    slug: "why-data-removal-takes-so-long-what-we-do",
+    keywords: ["data removal slow", "why removal takes long", "data broker stalling", "speed up data removal", "removal not working"],
+    category: "guide",
+    priority: 11,
+  },
+];
+
+// ============================================================================
 // TOPIC GENERATION
 // ============================================================================
 
@@ -479,6 +513,11 @@ export async function generateTopicIdeas(): Promise<BlogTopic[]> {
 
   // --- Legal guides (10 topics, priority 7-9) ---
   for (const topic of LEGAL_TOPICS) {
+    addIfNew(topic);
+  }
+
+  // --- Data removal timeline articles (4 topics, priority 11) ---
+  for (const topic of DATA_REMOVAL_TIMELINE_TOPICS) {
     addIfNew(topic);
   }
 
