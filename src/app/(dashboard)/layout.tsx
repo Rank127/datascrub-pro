@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { OnboardingTour } from "@/components/dashboard/onboarding-tour";
+import { FirstRemovalCelebration } from "@/components/dashboard/first-removal-celebration";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 export default function DashboardLayout({
@@ -50,6 +51,7 @@ export default function DashboardLayout({
           <Header onMenuClick={() => setSidebarOpen(true)} />
           <main className="flex-1 overflow-y-auto p-4 lg:p-6">
             <OnboardingTour>{children}</OnboardingTour>
+            <FirstRemovalCelebration />
           </main>
         </div>
       </div>

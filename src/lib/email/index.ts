@@ -2290,6 +2290,52 @@ export async function sendCorporateSeatActivatedEmail(
 }
 
 // ==========================================
+// First Removal Milestone Email
+// ==========================================
+
+export async function sendFirstRemovalMilestoneEmail(
+  email: string,
+  name: string,
+  brokerName: string
+) {
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div style="font-size: 48px; line-height: 1;">&#127881;</div>
+    </div>
+    <h1 style="color: #10b981; margin-top: 0; text-align: center;">Your First Data Removal is Complete!</h1>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${name || "there"},
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Great news — your personal data has been <strong style="color: #10b981;">successfully removed</strong> from <strong>${brokerName}</strong>. This is a major milestone in protecting your digital privacy.
+    </p>
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <p style="margin: 0 0 12px 0; font-weight: 600; color: #10b981;">What this means:</p>
+      <ul style="margin: 0; padding-left: 20px; color: #e2e8f0; line-height: 1.8;">
+        <li>${brokerName} can no longer sell or share your personal information</li>
+        <li>Your data is being actively removed from other brokers too</li>
+        <li>We'll continue monitoring to make sure it stays removed</li>
+      </ul>
+    </div>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Most data brokers process removal requests within 7-14 days. More completions are on the way!
+    </p>
+    <div style="background: linear-gradient(135deg, #065f46, #0f766e); border-radius: 8px; padding: 24px; margin: 24px 0; text-align: center;">
+      <p style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: white;">Want to remove your data from every broker?</p>
+      <p style="margin: 0 0 16px 0; font-size: 14px; color: #a7f3d0;">Upgrade to unlock unlimited automated removals and continuous monitoring.</p>
+      <a href="${APP_URL}/dashboard/billing" style="display: inline-block; background-color: white; color: #065f46; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+        View Plans
+      </a>
+    </div>
+    ${buttonHtml("View Your Dashboard", `${APP_URL}/dashboard`)}
+  `);
+
+  return sendEmail(email, `Your First Data Removal is Complete!`, html, {
+    emailType: "FIRST_REMOVAL_MILESTONE",
+  });
+}
+
+// ==========================================
 // Batched Removal Status Updates (Preference-Aware)
 // ==========================================
 

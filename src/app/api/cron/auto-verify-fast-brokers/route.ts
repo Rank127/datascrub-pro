@@ -16,6 +16,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
+import { checkAndFireFirstRemovalMilestone } from "@/lib/removals/milestone-service";
 import {
   acquireJobLock,
   releaseJobLock,
@@ -147,6 +148,13 @@ export async function GET(request: Request) {
               },
             }),
           ]);
+
+          // Check for first removal milestone (idempotent)
+          checkAndFireFirstRemovalMilestone(
+            removal.userId,
+            removal.exposure.sourceName || broker,
+            removal.id
+          ).catch(console.error);
 
           totalVerified++;
           brokerResults[broker].verified++;

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption/crypto";
 import { sendRemovalStatusDigestEmail } from "@/lib/email";
+import { checkAndFireFirstRemovalMilestone } from "@/lib/removals/milestone-service";
 // SMS for removal updates disabled - only exposure and breach alerts
 import { LeakCheckScanner } from "@/lib/scanners/breaches/leakcheck";
 import { HaveIBeenPwnedScanner } from "@/lib/scanners/breaches/haveibeenpwned";
@@ -257,6 +258,13 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
         }),
       ]);
 
+      // Check for first removal milestone (idempotent)
+      checkAndFireFirstRemovalMilestone(
+        removalRequest.user.id,
+        removalRequest.exposure.sourceName,
+        removalRequestId
+      ).catch(console.error);
+
       return {
         success: true,
         status: "COMPLETED",
@@ -385,6 +393,13 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
           },
         }),
       ]);
+
+      // Check for first removal milestone (idempotent)
+      checkAndFireFirstRemovalMilestone(
+        removalRequest.user.id,
+        removalRequest.exposure.sourceName,
+        removalRequestId
+      ).catch(console.error);
 
       // Return update info for batched email (sent by runVerificationBatch)
       return {

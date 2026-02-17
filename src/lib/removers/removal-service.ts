@@ -5,6 +5,7 @@ import { calculateVerifyAfterDate } from "./verification-service";
 import { attemptAutomatedOptOut, isAutomationEnabled, getBestAutomationMethod, canAutomateBroker } from "./browser-automation";
 import type { RemovalMethod } from "@/lib/types";
 import { createRemovalFailedTicket } from "@/lib/support/ticket-service";
+import { checkAndFireFirstRemovalMilestone } from "@/lib/removals/milestone-service";
 import { getBlocklistEntry } from "./blocklist";
 import { CONFIDENCE_THRESHOLDS } from "@/lib/scanners/base-scanner";
 import { getDirective } from "@/lib/mastermind/directives";
@@ -950,6 +951,9 @@ export async function markRemovalCompleted(
       },
     });
   });
+
+  // Check for first removal milestone (idempotent)
+  checkAndFireFirstRemovalMilestone(userId, request.exposure.sourceName, removalRequestId).catch(console.error);
 
   // Queue completion notification for daily digest
   const emailMessage = subsidiaries.length > 0

@@ -28,6 +28,7 @@ model User {
   role                   String             @default("USER")
   lastExposureDigestSent DateTime?
   lastScanAt             DateTime?
+  firstRemovalCompletedAt DateTime?
   smsBreachAlerts        Boolean            @default(true)
   smsExposureAlerts      Boolean            @default(true)
   smsNotifications       Boolean            @default(false)

@@ -19,6 +19,7 @@ import {
   Trash2,
   Check,
   RefreshCw,
+  PartyPopper,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -58,6 +59,11 @@ const alertTypeConfig: Record<
     icon: Trash2,
     color: "text-red-400",
     bgColor: "bg-red-500/10",
+  },
+  FIRST_REMOVAL_MILESTONE: {
+    icon: PartyPopper,
+    color: "text-amber-400",
+    bgColor: "bg-amber-500/10",
   },
 };
 
