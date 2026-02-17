@@ -12762,11 +12762,7 @@ export const BROKER_CATEGORIES = {
     "HAVEIBEENPWNED", "DEHASHED", "LEAKCHECK", "SNUSBASE", "BREACH_DB"
   ],
   NON_REMOVABLE: [
-    "BREACH_DB", "DARK_WEB_FORUM", "PASTE_SITE", "ROOP",
-    // Bogus directory entries — domains are parked, unrelated businesses, or service providers
-    "PROPERTYDATAHUB", "PROPERTYSEARCHPRO", "HOMEVALUEPRO", "PROPERTYOWNERPRO",
-    "EMAILLISTHUB", "SOCIALDATAPRO", "SOCIALMEDIAPRO", "SOCIALPROFILEFINDER",
-    "IDVERIFICATIONHUB", "IDCHECKPRO", "IDVERIFICATIONPRO",
+    "BREACH_DB", "DARK_WEB_FORUM", "PASTE_SITE", "ROOP"
   ],
   SOCIAL_MEDIA: [
     "LINKEDIN", "FACEBOOK", "TWITTER", "INSTAGRAM", "TIKTOK", "REDDIT",
@@ -13338,6 +13334,25 @@ export const BROKER_CATEGORIES = {
   ],
 } as const;
 
+/**
+ * Precomputed set of all auto-generated expansion entries.
+ * These are fabricated directory entries with non-existent domains —
+ * 99.6% of URLs don't resolve. Excluded from removals entirely.
+ */
+const EXPANSION_EXCLUSION_SET: ReadonlySet<string> = new Set([
+  ...BROKER_CATEGORIES.PEOPLE_SEARCH_EXPANSION,
+  ...BROKER_CATEGORIES.PHONE_LOOKUP_EXPANSION,
+  ...BROKER_CATEGORIES.ADDRESS_LOOKUP_EXPANSION,
+  ...BROKER_CATEGORIES.B2B_DATA_EXPANSION,
+  ...BROKER_CATEGORIES.MARKETING_DATA_EXPANSION,
+  ...BROKER_CATEGORIES.BACKGROUND_CHECK_EXPANSION,
+  ...BROKER_CATEGORIES.INTERNATIONAL_EXPANSION,
+  ...BROKER_CATEGORIES.PROPERTY_DATA_EXPANSION,
+  ...BROKER_CATEGORIES.EMAIL_MARKETING_EXPANSION,
+  ...BROKER_CATEGORIES.SOCIAL_MEDIA_AGGREGATORS,
+  ...BROKER_CATEGORIES.IDENTITY_VERIFICATION_EXPANSION,
+]);
+
 // Get data broker info by source (applies URL corrections at runtime)
 export function getDataBrokerInfo(source: string): DataBrokerInfo | null {
   const info = DATA_BROKER_DIRECTORY[source];
@@ -13440,6 +13455,11 @@ export function isKnownDataBroker(source: string): boolean {
     return false;
   }
 
+  // Auto-generated expansion entries — fabricated domains, not real data brokers
+  if (EXPANSION_EXCLUSION_SET.has(source)) {
+    return false;
+  }
+
   // Must have at least one removal path (URL or email)
   if (!brokerInfo.optOutUrl && !brokerInfo.privacyEmail && !brokerInfo.optOutEmail) {
     return false;
@@ -13512,6 +13532,10 @@ export function getNotBrokerReason(source: string): string | null {
     return `${brokerInfo.name} has direct user relationships (users create accounts, consent to checks, or post reviews) — not a statutory data broker per CA Civil Code § 1798.99.80(d)`;
   }
 
+  if (EXPANSION_EXCLUSION_SET.has(source)) {
+    return `${brokerInfo.name} is an auto-generated expansion entry with a fabricated domain — not a real data broker`;
+  }
+
   if (!brokerInfo.optOutUrl && !brokerInfo.privacyEmail && !brokerInfo.optOutEmail) {
     return `${brokerInfo.name} has no opt-out URL or privacy email — no removal path available`;
   }
@@ -13549,6 +13573,7 @@ export function getLegalClassification(source: string): LegalClassification {
   if ((BROKER_CATEGORIES.AI_IMAGE_VIDEO as readonly string[]).includes(source)) return "MONITORING_ONLY";
   if ((BROKER_CATEGORIES.BREACH_DATABASE as readonly string[]).includes(source)) return "MONITORING_ONLY";
   if ((BROKER_CATEGORIES.NON_REMOVABLE as readonly string[]).includes(source)) return "MONITORING_ONLY";
+  if (EXPANSION_EXCLUSION_SET.has(source)) return "MONITORING_ONLY";
   // Check category field on the entry
   const info = DATA_BROKER_DIRECTORY[source];
   if (!info) return "UNKNOWN";
