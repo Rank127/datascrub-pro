@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAllPosts, getFeaturedPosts, getAllCategories } from "@/lib/blog/posts";
+import { getAllPostsCombined, getFeaturedPostsCombined, getAllCategoriesCombined } from "@/lib/blog/blog-service";
 import { Calendar, Clock, ArrowRight, Tag } from "lucide-react";
 import { NewsletterCapture } from "@/components/blog/newsletter-capture";
 
@@ -38,10 +38,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BlogPage() {
-  const posts = getAllPosts();
-  const featuredPosts = getFeaturedPosts();
-  const categories = getAllCategories();
+export default async function BlogPage() {
+  const posts = await getAllPostsCombined();
+  const featuredPosts = await getFeaturedPostsCombined();
+  const categories = await getAllCategoriesCombined();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">

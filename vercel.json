@@ -170,6 +170,10 @@
     {
       "path": "/api/cron/broker-compliance",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/blog-publisher",
+      "schedule": "0 4 * * 3,6"
     }
   ]
 }

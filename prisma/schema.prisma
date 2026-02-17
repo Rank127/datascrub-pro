@@ -967,3 +967,26 @@ model ComplianceAuditRun {
   @@index([createdAt])
   @@index([status])
 }
+
+// Auto-generated blog posts — created by blog-publisher cron via AI
+model AutoBlogPost {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  description    String
+  content        String   @db.Text
+  publishedAt    DateTime
+  author         String   @default("GhostMyData Team")
+  category       String
+  tags           String[]
+  readTime       String
+  featured       Boolean  @default(false)
+  status         String   @default("PUBLISHED") // DRAFT, PUBLISHED, ARCHIVED
+  targetKeywords String[]
+  generatedBy    String   @default("seo-agent")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([status])
+  @@index([publishedAt])
+}

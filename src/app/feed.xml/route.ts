@@ -1,8 +1,8 @@
-import { getAllPosts } from "@/lib/blog/posts";
+import { getAllPostsCombined } from "@/lib/blog/blog-service";
 import { APP_URL } from "@/lib/constants";
 
 export async function GET() {
-  const posts = getAllPosts();
+  const posts = await getAllPostsCombined();
   const baseUrl = APP_URL;
   const currentDate = new Date().toISOString();
 

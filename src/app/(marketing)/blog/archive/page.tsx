@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAllPosts, getAllCategories } from "@/lib/blog/posts";
+import { getAllPostsCombined, getAllCategoriesCombined } from "@/lib/blog/blog-service";
 import { Calendar, Clock, ArrowRight, ArrowLeft, Tag } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BlogArchivePage() {
-  const posts = getAllPosts();
-  const categories = getAllCategories();
+export default async function BlogArchivePage() {
+  const posts = await getAllPostsCombined();
+  const categories = await getAllCategoriesCombined();
 
   // Group posts by category
   const postsByCategory = categories.reduce((acc, category) => {

@@ -1,8 +1,8 @@
 import { MetadataRoute } from "next";
-import { getAllPosts } from "@/lib/blog/posts";
+import { getAllPostsCombined } from "@/lib/blog/blog-service";
 import { APP_URL } from "@/lib/constants";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_URL;
   const currentDate = new Date().toISOString();
 
@@ -78,8 +78,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: page.priority,
   }));
 
-  // Blog posts
-  const posts = getAllPosts();
+  // Blog posts (static + auto-generated from DB)
+  const posts = await getAllPostsCombined();
   const blogSitemap = posts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
     lastModified: post.updatedAt || post.publishedAt,

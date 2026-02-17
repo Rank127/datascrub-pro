@@ -113,10 +113,8 @@ const DATA_TYPES = [
  */
 export async function getExistingBlogSlugs(): Promise<string[]> {
   try {
-    // Import the blog posts from the posts.ts file
-    const { getAllPosts } = await import("@/lib/blog/posts");
-    const posts = getAllPosts();
-    return posts.map(post => post.slug);
+    const { getAllSlugs } = await import("@/lib/blog/blog-service");
+    return await getAllSlugs();
   } catch (error) {
     console.error("[SEO Agent] Failed to get existing blog slugs:", error);
     return [];

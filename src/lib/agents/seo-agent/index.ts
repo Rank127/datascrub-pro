@@ -38,6 +38,7 @@ import {
   generateTopicIdeas,
   BlogTopic,
 } from "./blog-generator";
+import { getAllPostsCombined } from "@/lib/blog/blog-service";
 import {
   generateSEOReport,
   storeReport,
@@ -64,8 +65,8 @@ import { carlsenPositionalScore } from "@/lib/mastermind/frameworks";
 const AGENT_ID = "seo-agent";
 const AGENT_VERSION = "1.0.0";
 
-// Default pages to audit
-const DEFAULT_PAGES = [
+// Static marketing pages to audit
+const STATIC_PAGES = [
   "/",
   "/pricing",
   "/how-it-works",
@@ -82,6 +83,13 @@ const DEFAULT_PAGES = [
   "/terms",
   "/security",
 ];
+
+// All pages to audit — static pages + all blog posts (static + auto-generated)
+async function getDefaultPages(): Promise<string[]> {
+  const posts = await getAllPostsCombined();
+  const blogSlugs = posts.map(post => `/blog/${post.slug}`);
+  return [...STATIC_PAGES, ...blogSlugs];
+}
 
 // ============================================================================
 // TYPES
@@ -280,7 +288,8 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
     context: AgentContext
   ): Promise<AgentResult<ContentAnalysisResult>> {
     const startTime = Date.now();
-    const { baseUrl = this.getBaseUrl(), pages = DEFAULT_PAGES } = input as ContentAnalysisInput;
+    const { baseUrl = this.getBaseUrl(), pages: inputPages } = input as ContentAnalysisInput;
+    const pages = inputPages ?? await getDefaultPages();
 
     try {
       console.log(`[${this.name}] Starting content analysis for ${pages.length} pages...`);
@@ -378,10 +387,11 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
     const startTime = Date.now();
     const {
       baseUrl = this.getBaseUrl(),
-      pages = DEFAULT_PAGES,
+      pages: inputPages,
       sendEmail = false,
       emailTo: _emailTo,
     } = input as FullReportInput;
+    const pages = inputPages ?? await getDefaultPages();
 
     try {
       console.log(`[${this.name}] Running full SEO audit and report generation...`);

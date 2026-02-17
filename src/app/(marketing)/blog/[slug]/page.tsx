@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAllPosts, getPostBySlug } from "@/lib/blog/posts";
+import { getAllPostsCombined, getPostBySlugCombined } from "@/lib/blog/blog-service";
 import { BreadcrumbSchema, BlogPostingSchema, HowToSchema, type HowToStep } from "@/components/seo/structured-data";
 import { Calendar, Clock, ArrowLeft, ArrowRight, User, Tag } from "lucide-react";
 import { NewsletterCapture } from "@/components/blog/newsletter-capture";
@@ -45,7 +45,7 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const posts = getAllPosts();
+  const posts = await getAllPostsCombined();
   return posts.map((post) => ({
     slug: post.slug,
   }));
@@ -53,7 +53,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlugCombined(slug);
 
   if (!post) {
     return {
@@ -174,13 +174,13 @@ function parseMarkdown(content: string): string {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlugCombined(slug);
 
   if (!post) {
     notFound();
   }
 
-  const allPosts = getAllPosts();
+  const allPosts = await getAllPostsCombined();
   const currentIndex = allPosts.findIndex((p) => p.slug === slug);
   const prevPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
   const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
