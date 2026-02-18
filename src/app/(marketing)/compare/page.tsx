@@ -148,6 +148,116 @@ export default function ComparePage() {
         </div>
       )}
 
+      {/* Master Comparison Table */}
+      <div className="mb-16 overflow-x-auto">
+        <h2 className="text-2xl font-bold text-white mb-8 text-center">Data Removal Service Comparison 2026</h2>
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-slate-700">
+              <th className="px-4 py-3 text-left text-slate-300 font-semibold">Feature</th>
+              <th className="px-4 py-3 text-left text-emerald-400 font-semibold">GhostMyData</th>
+              <th className="px-4 py-3 text-left text-slate-300 font-semibold">DeleteMe</th>
+              <th className="px-4 py-3 text-left text-slate-300 font-semibold">Incogni</th>
+              <th className="px-4 py-3 text-left text-slate-300 font-semibold">Optery</th>
+              <th className="px-4 py-3 text-left text-slate-300 font-semibold">Kanary</th>
+              <th className="px-4 py-3 text-left text-slate-300 font-semibold">Privacy Bee</th>
+            </tr>
+          </thead>
+          <tbody className="text-slate-400">
+            <tr className="border-b border-slate-800">
+              <td className="px-4 py-3 font-medium text-slate-300">Broker Coverage</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">2,100+</td>
+              <td className="px-4 py-3">750+</td>
+              <td className="px-4 py-3">180+</td>
+              <td className="px-4 py-3">600+</td>
+              <td className="px-4 py-3">350+</td>
+              <td className="px-4 py-3">1,100+</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="px-4 py-3 font-medium text-slate-300">Monthly Price</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">$9.99/mo</td>
+              <td className="px-4 py-3">$10.75/mo</td>
+              <td className="px-4 py-3">$7.49/mo</td>
+              <td className="px-4 py-3">$9.99/mo</td>
+              <td className="px-4 py-3">$8.00/mo</td>
+              <td className="px-4 py-3">$15.00/mo</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="px-4 py-3 font-medium text-slate-300">Annual Price</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">$119.88/yr</td>
+              <td className="px-4 py-3">$129.00/yr</td>
+              <td className="px-4 py-3">$89.88/yr</td>
+              <td className="px-4 py-3">$119.88/yr</td>
+              <td className="px-4 py-3">$96.00/yr</td>
+              <td className="px-4 py-3">$180.00/yr</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="px-4 py-3 font-medium text-slate-300">Free Tier</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">Yes (3 removals/mo)</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">Scan only</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">No</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="px-4 py-3 font-medium text-slate-300">Dark Web Monitoring</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">Yes</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">No</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="px-4 py-3 font-medium text-slate-300">Family Plan</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">Up to 5 profiles</td>
+              <td className="px-4 py-3">2 profiles</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">4 profiles</td>
+              <td className="px-4 py-3">5 profiles</td>
+              <td className="px-4 py-3">No</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="px-4 py-3 font-medium text-slate-300">AI Shield</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">60+ sources</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">No</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="px-4 py-3 font-medium text-slate-300">Automated Removal</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">24 AI agents</td>
+              <td className="px-4 py-3">Manual team</td>
+              <td className="px-4 py-3">Automated</td>
+              <td className="px-4 py-3">Automated</td>
+              <td className="px-4 py-3">Automated</td>
+              <td className="px-4 py-3">Automated</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="px-4 py-3 font-medium text-slate-300">Monitoring Frequency</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">Daily</td>
+              <td className="px-4 py-3">Quarterly</td>
+              <td className="px-4 py-3">Weekly</td>
+              <td className="px-4 py-3">Monthly</td>
+              <td className="px-4 py-3">Weekly</td>
+              <td className="px-4 py-3">Monthly</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="px-4 py-3 font-medium text-slate-300">Custom Requests</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">Yes</td>
+              <td className="px-4 py-3">Limited</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">Yes (paid)</td>
+              <td className="px-4 py-3">No</td>
+              <td className="px-4 py-3">Yes</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       {/* Competitor Comparisons Grid */}
       <div className="mb-16">
         <h2 className="text-2xl font-bold text-white mb-8 text-center">Compare GhostMyData with Top Services</h2>

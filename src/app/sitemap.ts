@@ -2,6 +2,7 @@ import { MetadataRoute } from "next";
 import { getAllPostsCombined } from "@/lib/blog/blog-service";
 import { APP_URL } from "@/lib/constants";
 import { getRemovableBrokerSlugs, EXISTING_MANUAL_PAGES } from "@/lib/broker-pages/broker-page-data";
+import { getAllStateSlugs } from "@/lib/state-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_URL;
@@ -39,17 +40,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Resource and info pages
     { path: "/resources", priority: 0.8, changeFrequency: "weekly" as const },
     { path: "/testimonials", priority: 0.7, changeFrequency: "weekly" as const },
-    // Location-based pages (CCPA, state-specific)
-    { path: "/data-removal-california", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/data-removal-texas", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/data-removal-new-york", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/data-removal-florida", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/data-removal-illinois", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/data-removal-pennsylvania", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/data-removal-ohio", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/data-removal-georgia", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/data-removal-north-carolina", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/data-removal-michigan", priority: 0.85, changeFrequency: "monthly" as const },
+    // New pages
+    { path: "/data-removal-statistics", priority: 0.85, changeFrequency: "monthly" as const },
+    { path: "/about", priority: 0.7, changeFrequency: "monthly" as const },
+    { path: "/press", priority: 0.6, changeFrequency: "monthly" as const },
     // Interactive tools
     { path: "/privacy-score", priority: 0.7, changeFrequency: "weekly" as const },
     { path: "/blog/archive", priority: 0.7, changeFrequency: "weekly" as const },
@@ -62,6 +56,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: page.priority,
   }));
 
+  // State data removal pages (all 50 states)
+  const stateSlugs = getAllStateSlugs();
+  const stateSitemap = stateSlugs.map((slug) => ({
+    url: `${baseUrl}/data-removal/${slug}`,
+    lastModified: currentDate,
+    changeFrequency: "monthly" as const,
+    priority: 0.85,
+  }));
+
   // Blog posts (static + auto-generated from DB)
   const posts = await getAllPostsCombined();
   const blogSitemap = posts.map((post) => ({
@@ -71,5 +74,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: post.featured ? 0.8 : 0.7,
   }));
 
-  return [...staticSitemap, ...brokerSitemap, ...blogSitemap];
+  return [...staticSitemap, ...brokerSitemap, ...stateSitemap, ...blogSitemap];
 }

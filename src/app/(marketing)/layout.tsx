@@ -152,6 +152,16 @@ export default function MarketingLayout({
                   </a>
                 </li>
                 <li>
+                  <Link href="/about" className="hover:text-white">
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/press" className="hover:text-white">
+                    Press
+                  </Link>
+                </li>
+                <li>
                   <Link href="/login" className="hover:text-white">
                     Sign In
                   </Link>

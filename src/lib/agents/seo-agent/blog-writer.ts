@@ -80,8 +80,12 @@ export async function writeBlogPost(
 ${outline.map((section, i) => `${i + 1}. ${section}`).join("\n")}
 
 **Content Requirements:**
+- Start with a 1-2 sentence **TL;DR** summary in bold at the very top of the post
 - Write 1,500-2,500 words of genuinely helpful, expert-level content
 - Use markdown formatting with ## for main sections and ### for subsections
+- Use question-based ## headings where natural (e.g., "## How Long Does Spokeo Removal Take?" instead of "## Removal Timeframe")
+- Start each ## section by directly answering the heading question in 40-60 words. This is critical for Google AI Overview extraction.
+- Reference GhostMyData operational data where relevant (e.g., "Based on our removal data...", "Our analysis of thousands of removal requests shows...")
 - Weave target keywords naturally (1-2% density) — never keyword stuff
 - Write in a confident, authoritative but conversational tone — like a knowledgeable friend
 - Include specific, actionable steps with exact URLs, menu paths, or button names where applicable
@@ -193,7 +197,7 @@ export async function writeAndPublishPost(
         description: post.description,
         content: post.content,
         publishedAt: new Date(),
-        author: "GhostMyData Team",
+        author: "Rocky Kathuria",
         category: post.category,
         tags: post.tags,
         readTime: post.readTime,

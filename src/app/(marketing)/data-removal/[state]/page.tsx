@@ -1,134 +1,107 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { BreadcrumbSchema, FAQSchema } from "@/components/seo/structured-data";
-import { Shield, Scale, Clock, CheckCircle, AlertTriangle, FileText } from "lucide-react";
+import { Shield, Clock, FileText, Scale } from "lucide-react";
+import { STATE_DATA, getAllStateSlugs } from "@/lib/state-data";
 
-export const metadata: Metadata = {
-  title: "Ohio Data Removal Services | Ohio Data Protection Act | GhostMyData",
-  description:
-    "Protect your privacy as an Ohio resident. GhostMyData helps you remove personal information from data brokers and understand your rights under the Ohio Data Protection Act.",
-  keywords: [
-    "ohio data removal",
-    "ohio data protection act",
-    "ohio privacy rights",
-    "ohio data broker removal",
-    "ohio privacy compliance",
-    "ohio data protection",
-    "delete my data ohio",
-    "ohio consumer privacy",
-  ],
-  alternates: {
-    canonical: "https://ghostmydata.com/data-removal-ohio",
-  },
-  openGraph: {
-    title: "Ohio Data Removal Services | Ohio Data Protection Act | GhostMyData",
-    description:
-      "Protect your privacy in Ohio. Remove your personal information from data brokers with GhostMyData.",
-    url: "https://ghostmydata.com/data-removal-ohio",
-    type: "website",
-  },
-};
+interface Props {
+  params: Promise<{ state: string }>;
+}
 
-const ohioRights = [
-  {
-    title: "Data Protection Incentive",
-    description: "Ohio rewards businesses that implement strong data protection programs with an affirmative legal defense against breach claims",
-    icon: Shield,
-  },
-  {
-    title: "Breach Notification",
-    description: "Ohio requires businesses to notify residents promptly when their personal information is compromised in a data breach",
-    icon: AlertTriangle,
-  },
-  {
-    title: "Security Standards",
-    description: "The Ohio Data Protection Act encourages businesses to adopt recognized cybersecurity frameworks like NIST and ISO 27001",
-    icon: CheckCircle,
-  },
-  {
-    title: "Consumer Protection",
-    description: "Ohio's Consumer Sales Practices Act provides additional protections against deceptive data collection and use",
-    icon: Scale,
-  },
-];
+export async function generateStaticParams() {
+  return getAllStateSlugs().map((state) => ({ state }));
+}
 
-const ohioStats = [
-  { stat: "11.8M+", label: "Ohio Residents" },
-  { stat: "500+", label: "Data Brokers Operating in OH" },
-  { stat: "2024", label: "Data Protection Act Enacted" },
-  { stat: "Prompt", label: "Breach Notification Required" },
-];
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { state: slug } = await params;
+  const stateInfo = STATE_DATA[slug];
 
-const faqs = [
-  {
-    question: "What is the Ohio Data Protection Act?",
-    answer:
-      "The Ohio Data Protection Act (SB 220, enacted 2024) is a state law that provides businesses with an affirmative defense against data breach lawsuits if they implement and maintain a cybersecurity program that conforms to recognized industry frameworks such as NIST, ISO 27001, or HIPAA.",
-  },
-  {
-    question: "Does Ohio have a comprehensive consumer privacy law?",
-    answer:
-      "Ohio is actively developing consumer privacy legislation. While the Data Protection Act focuses on business cybersecurity incentives, Ohio residents can still exercise data removal rights through services like GhostMyData that submit removal requests to data brokers on your behalf.",
-  },
-  {
-    question: "What are Ohio's breach notification requirements?",
-    answer:
-      "Ohio law requires businesses to notify affected residents in a reasonable timeframe after discovering a data breach involving personal information such as Social Security numbers, driver's license numbers, or financial account information.",
-  },
-  {
-    question: "Can Ohio residents request data deletion from data brokers?",
-    answer:
-      "Yes. While Ohio does not yet mandate deletion rights like California's CCPA, most data brokers honor removal requests. GhostMyData automates the process of finding and requesting removal of your data from hundreds of brokers.",
-  },
-  {
-    question: "What personal information does Ohio law protect?",
-    answer:
-      "Ohio protects personal information including Social Security numbers, driver's license or state ID numbers, account numbers with access codes, and other identifying information when combined with a person's name.",
-  },
-  {
-    question: "How does GhostMyData help Ohio residents?",
-    answer:
-      "GhostMyData scans hundreds of data brokers for your personal information, automates removal requests, tracks responses, follows up on delayed removals, and provides documentation of your data removal efforts for Ohio residents.",
-  },
-];
+  if (!stateInfo) {
+    return { title: "State Not Found" };
+  }
 
-const topBrokers = [
-  { name: "Spokeo", difficulty: "Easy", time: "24-72 hours" },
-  { name: "WhitePages", difficulty: "Medium", time: "48-72 hours" },
-  { name: "BeenVerified", difficulty: "Easy", time: "24-48 hours" },
-  { name: "Intelius", difficulty: "Medium", time: "72 hours" },
-  { name: "Radaris", difficulty: "Hard", time: "7-30 days" },
-  { name: "MyLife", difficulty: "Hard", time: "7-14 days" },
-];
+  const title = `${stateInfo.name} Data Removal Services | ${stateInfo.lawAcronym} | GhostMyData`;
+  const description = `Exercise your ${stateInfo.lawAcronym} rights with GhostMyData. ${stateInfo.name} residents can request deletion of personal information from data brokers.`;
 
-export default function OhioDataRemovalPage() {
+  return {
+    title,
+    description,
+    keywords: [
+      `${stateInfo.name.toLowerCase()} data removal`,
+      `${stateInfo.lawAcronym.toLowerCase()} data removal`,
+      `${stateInfo.name.toLowerCase()} privacy rights`,
+      `${stateInfo.lawAcronym.toLowerCase()} opt out`,
+      `${stateInfo.name.toLowerCase()} data broker removal`,
+      `delete my data ${stateInfo.name.toLowerCase()}`,
+    ],
+    alternates: {
+      canonical: `https://ghostmydata.com/data-removal/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://ghostmydata.com/data-removal/${slug}`,
+      type: "website",
+      images: [
+        {
+          url: "https://ghostmydata.com/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: `${stateInfo.name} Data Removal Services`,
+        },
+      ],
+    },
+  };
+}
+
+const icons = [FileText, Shield, Scale, Clock];
+
+export default async function StateDataRemovalPage({ params }: Props) {
+  const { state: slug } = await params;
+  const stateInfo = STATE_DATA[slug];
+
+  if (!stateInfo) {
+    notFound();
+  }
+
+  // Get a few neighboring state slugs for cross-linking
+  const allSlugs = getAllStateSlugs();
+  const currentIndex = allSlugs.indexOf(slug);
+  const nearbyStates = allSlugs
+    .filter((_, i) => i !== currentIndex)
+    .slice(0, 5)
+    .map((s) => STATE_DATA[s])
+    .filter(Boolean);
+
   return (
     <>
       <BreadcrumbSchema
         items={[
           { name: "Home", url: "https://ghostmydata.com" },
-          { name: "Ohio Data Removal", url: "https://ghostmydata.com/data-removal-ohio" },
+          {
+            name: `${stateInfo.name} Data Removal`,
+            url: `https://ghostmydata.com/data-removal/${slug}`,
+          },
         ]}
       />
-      <FAQSchema faqs={faqs} />
+      <FAQSchema faqs={stateInfo.faqs} />
 
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
         {/* Hero Section */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="flex items-center justify-center gap-2 mb-6">
-              <span className="text-4xl">🦌</span>
-              <span className="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm font-medium">
-                Data Protection Act
+              <span className="text-4xl">{stateInfo.emoji}</span>
+              <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-sm font-medium">
+                {stateInfo.badgeText}
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-white text-center mb-6">
-              Ohio Data Removal Services
+              {stateInfo.name} Data Removal Services
             </h1>
             <p className="text-xl text-gray-300 text-center max-w-3xl mx-auto mb-8">
-              Protect your privacy under Ohio&apos;s Data Protection Act.
-              GhostMyData helps Ohio residents remove their personal
-              information from data brokers.
+              {stateInfo.heroDescription}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -141,7 +114,7 @@ export default function OhioDataRemovalPage() {
                 href="/pricing"
                 className="px-8 py-3 bg-gray-700 text-white rounded-lg font-semibold hover:bg-gray-600 transition-colors text-center"
               >
-                View Ohio Plans
+                View Plans
               </Link>
             </div>
           </div>
@@ -151,7 +124,7 @@ export default function OhioDataRemovalPage() {
         <section className="py-12 bg-gray-800/50">
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {ohioStats.map((item) => (
+              {stateInfo.stats.map((item) => (
                 <div key={item.label} className="text-center">
                   <div className="text-3xl md:text-4xl font-bold text-cyan-400 mb-2">
                     {item.stat}
@@ -167,26 +140,29 @@ export default function OhioDataRemovalPage() {
         <section className="py-16">
           <div className="container mx-auto px-4 max-w-6xl">
             <h2 className="text-3xl font-bold text-white text-center mb-4">
-              Ohio Data Protection Rights
+              Your {stateInfo.lawAcronym} Rights
             </h2>
             <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-              The Ohio Data Protection Act incentivizes businesses to protect your personal data through strong cybersecurity programs
+              {stateInfo.lawName} ({stateInfo.lawYear}) gives you important rights over your personal data
             </p>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {ohioRights.map((right) => (
-                <div
-                  key={right.title}
-                  className="bg-gray-900/50 border border-gray-700 rounded-xl p-6"
-                >
-                  <div className="p-3 bg-cyan-500/10 rounded-lg w-fit mb-4">
-                    <right.icon className="h-6 w-6 text-cyan-400" />
+              {stateInfo.rights.map((right, i) => {
+                const Icon = icons[i % icons.length];
+                return (
+                  <div
+                    key={right.title}
+                    className="bg-gray-900/50 border border-gray-700 rounded-xl p-6"
+                  >
+                    <div className="p-3 bg-cyan-500/10 rounded-lg w-fit mb-4">
+                      <Icon className="h-6 w-6 text-cyan-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-2">
+                      {right.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm">{right.description}</p>
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {right.title}
-                  </h3>
-                  <p className="text-gray-400 text-sm">{right.description}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -195,13 +171,13 @@ export default function OhioDataRemovalPage() {
         <section className="py-16 bg-gray-800/50">
           <div className="container mx-auto px-4 max-w-6xl">
             <h2 className="text-3xl font-bold text-white text-center mb-4">
-              Top Data Brokers Targeting Ohio Residents
+              Top Data Brokers Targeting {stateInfo.name} Residents
             </h2>
             <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-              These data brokers collect and sell information about Ohio residents
+              These data brokers collect and sell information about {stateInfo.name} residents
             </p>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {topBrokers.map((broker) => (
+              {stateInfo.topBrokers.map((broker) => (
                 <div
                   key={broker.name}
                   className="bg-gray-900/50 border border-gray-700 rounded-xl p-6 flex items-center justify-between"
@@ -243,7 +219,7 @@ export default function OhioDataRemovalPage() {
         <section className="py-16">
           <div className="container mx-auto px-4 max-w-6xl">
             <h2 className="text-3xl font-bold text-white text-center mb-12">
-              How GhostMyData Helps Ohio Residents
+              How GhostMyData Helps {stateInfo.name} Residents
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
@@ -251,11 +227,11 @@ export default function OhioDataRemovalPage() {
                   <Shield className="h-8 w-8 text-cyan-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  Automated Removal Requests
+                  Automated {stateInfo.lawAcronym} Requests
                 </h3>
                 <p className="text-gray-400">
-                  We submit data deletion requests to data
-                  brokers on your behalf to protect your Ohio privacy rights.
+                  We submit legally compliant {stateInfo.lawAcronym} deletion requests to data
+                  brokers on your behalf.
                 </p>
               </div>
               <div className="text-center">
@@ -263,11 +239,11 @@ export default function OhioDataRemovalPage() {
                   <Clock className="h-8 w-8 text-cyan-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  Response Tracking
+                  {stateInfo.responseTimeDays}-Day Compliance Tracking
                 </h3>
                 <p className="text-gray-400">
-                  We track data broker response times and follow up on
-                  non-compliant brokers to ensure your data is removed.
+                  We track the {stateInfo.responseTimeDays}-day response deadline and follow up on
+                  non-compliant brokers.
                 </p>
               </div>
               <div className="text-center">
@@ -290,10 +266,10 @@ export default function OhioDataRemovalPage() {
         <section className="py-16 bg-gray-800/50">
           <div className="container mx-auto px-4 max-w-4xl">
             <h2 className="text-3xl font-bold text-white text-center mb-12">
-              Ohio Privacy Frequently Asked Questions
+              {stateInfo.name} Privacy FAQ
             </h2>
             <div className="space-y-4">
-              {faqs.map((faq, index) => (
+              {stateInfo.faqs.map((faq, index) => (
                 <div
                   key={index}
                   className="bg-gray-900/50 border border-gray-700 rounded-xl p-6"
@@ -308,15 +284,35 @@ export default function OhioDataRemovalPage() {
           </div>
         </section>
 
+        {/* Cross-links to other states */}
+        <section className="py-16">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <h2 className="text-2xl font-bold text-white text-center mb-8">
+              Data Removal in Other States
+            </h2>
+            <div className="flex flex-wrap justify-center gap-3">
+              {nearbyStates.map((s) => (
+                <Link
+                  key={s.slug}
+                  href={`/data-removal/${s.slug}`}
+                  className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition-colors text-sm"
+                >
+                  {s.emoji} {s.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section className="py-16">
           <div className="container mx-auto px-4 max-w-4xl text-center">
             <h2 className="text-3xl font-bold text-white mb-4">
-              Protect Your Ohio Privacy Rights
+              {stateInfo.ctaText}
             </h2>
             <p className="text-gray-300 mb-8">
               Don&apos;t let data brokers profit from your personal information.
-              Take control of your data with GhostMyData.
+              Exercise your {stateInfo.lawAcronym} rights with GhostMyData.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

@@ -251,10 +251,13 @@ export default async function BlogPostPage({ params }: Props) {
           <p className="text-xl text-slate-400 mb-6">{post.description}</p>
 
           <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500">
-            <span className="flex items-center gap-2">
+            <Link
+              href="/about"
+              className="flex items-center gap-2 hover:text-emerald-400 transition-colors"
+            >
               <User className="h-4 w-4" />
-              {post.author}
-            </span>
+              Written by {post.author}{post.author === "Rocky Kathuria" ? ", Founder & CEO" : ""}
+            </Link>
             <span className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               {new Date(post.publishedAt).toLocaleDateString("en-US", {

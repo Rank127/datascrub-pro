@@ -47,6 +47,20 @@ const nextConfig: NextConfig = {
       // CORS is handled by middleware for dynamic origin support with credentials
     ];
   },
+  async redirects() {
+    return [
+      { source: "/data-removal-california", destination: "/data-removal/california", permanent: true },
+      { source: "/data-removal-texas", destination: "/data-removal/texas", permanent: true },
+      { source: "/data-removal-new-york", destination: "/data-removal/new-york", permanent: true },
+      { source: "/data-removal-florida", destination: "/data-removal/florida", permanent: true },
+      { source: "/data-removal-illinois", destination: "/data-removal/illinois", permanent: true },
+      { source: "/data-removal-pennsylvania", destination: "/data-removal/pennsylvania", permanent: true },
+      { source: "/data-removal-ohio", destination: "/data-removal/ohio", permanent: true },
+      { source: "/data-removal-georgia", destination: "/data-removal/georgia", permanent: true },
+      { source: "/data-removal-north-carolina", destination: "/data-removal/north-carolina", permanent: true },
+      { source: "/data-removal-michigan", destination: "/data-removal/michigan", permanent: true },
+    ];
+  },
   async rewrites() {
     return [
       {
