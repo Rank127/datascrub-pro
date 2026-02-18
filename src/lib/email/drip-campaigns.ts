@@ -500,11 +500,21 @@ export async function sendDripEmail(userId: string, templateId: DripTemplateId):
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { email: true, name: true },
+      select: { email: true, name: true, emailNotifications: true, marketingEmails: true },
     });
 
     if (!user) {
       console.error("[Drip] User not found:", userId);
+      return false;
+    }
+
+    // Respect user email preferences
+    if (!user.emailNotifications) {
+      console.log(`[Drip] Skipped ${templateId} to ${user.email} — emailNotifications disabled`);
+      return false;
+    }
+    if (!user.marketingEmails) {
+      console.log(`[Drip] Skipped ${templateId} to ${user.email} — marketingEmails disabled`);
       return false;
     }
 
@@ -590,7 +600,7 @@ export async function processDripCampaigns(): Promise<{
       where: { status: "active" },
       include: {
         user: {
-          select: { email: true, name: true, plan: true },
+          select: { email: true, name: true, plan: true, emailNotifications: true, marketingEmails: true },
         },
       },
     });
@@ -604,6 +614,11 @@ export async function processDripCampaigns(): Promise<{
           where: { id: campaign.id },
           data: { status: "completed" },
         });
+        continue;
+      }
+
+      // Skip if user disabled email notifications or marketing emails
+      if (!campaign.user.emailNotifications || !campaign.user.marketingEmails) {
         continue;
       }
 

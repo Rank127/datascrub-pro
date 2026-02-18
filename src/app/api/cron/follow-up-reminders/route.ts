@@ -43,6 +43,7 @@ export async function GET(request: Request) {
     // Limit to 100 users per run to prevent memory exhaustion and cron timeouts
     const usersWithPendingRemovals = await prisma.user.findMany({
       where: {
+        emailNotifications: true, // Respect user preference
         removalRequests: {
           some: {
             status: { in: ["SUBMITTED", "IN_PROGRESS"] },

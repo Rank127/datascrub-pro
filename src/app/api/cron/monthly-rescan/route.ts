@@ -39,6 +39,7 @@ export async function GET(request: Request) {
     const usersNeedingScan = await prisma.user.findMany({
       where: {
         emailVerified: { not: null }, // Only verified users
+        emailNotifications: true, // Respect user preference
         OR: [
           { scans: { none: {} } }, // Never scanned
           {

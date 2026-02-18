@@ -22,6 +22,8 @@ export async function checkAndFireFirstRemovalMilestone(
         email: true,
         name: true,
         plan: true,
+        emailNotifications: true,
+        removalUpdates: true,
       },
     });
 
@@ -50,12 +52,14 @@ export async function checkAndFireFirstRemovalMilestone(
       },
     });
 
-    // Send celebration email
-    await sendFirstRemovalMilestoneEmail(
-      user.email,
-      user.name || "there",
-      brokerName
-    );
+    // Send celebration email (respect user preferences)
+    if (user.emailNotifications && user.removalUpdates) {
+      await sendFirstRemovalMilestoneEmail(
+        user.email,
+        user.name || "there",
+        brokerName
+      );
+    }
 
     console.log(
       `[Milestone] First removal celebrated for user ${userId} (broker: ${brokerName})`
