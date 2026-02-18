@@ -30,6 +30,19 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Feature freeze: pause blog publishing via env var (re-enable by removing or setting to "false")
+    if (process.env.BLOG_PUBLISHER_PAUSED === "true") {
+      console.log(`[${JOB_NAME}] Blog publisher is paused (BLOG_PUBLISHER_PAUSED=true)`);
+      await logCronExecution({
+        jobName: JOB_NAME,
+        status: "SKIPPED",
+        duration: Date.now() - startTime,
+        message: "Blog publisher paused via BLOG_PUBLISHER_PAUSED env var",
+        metadata: { reason: "paused" },
+      });
+      return NextResponse.json({ status: "paused" });
+    }
+
     console.log(`[${JOB_NAME}] Starting blog publisher (target: ${POSTS_PER_RUN} posts)...`);
 
     // Get more ideas than we need, so we can skip collisions

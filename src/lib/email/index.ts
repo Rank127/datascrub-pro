@@ -58,6 +58,10 @@ export function getAdminFromEmail(): string {
   return process.env.RESEND_ADMIN_FROM_EMAIL || getFromEmail();
 }
 
+export function getFounderFromEmail(): string {
+  return process.env.RESEND_FOUNDER_FROM_EMAIL || "Rocky at GhostMyData <noreply@send.ghostmydata.com>";
+}
+
 // Base email template
 function baseTemplate(content: string): string {
   return `

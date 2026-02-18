@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CheckCircle, X, Shield } from "lucide-react";
+import { CheckCircle, X, Shield, TrendingUp } from "lucide-react";
 import { FAQSchema, PricingSchema } from "@/components/seo/structured-data";
 import { PricingButton, PricingPageTracker } from "@/components/pricing/pricing-button";
 import { AnimatedSection, AnimatedCard } from "@/components/marketing/animated-sections";
+import { getPublicStats } from "@/lib/stats";
 
 export const metadata: Metadata = {
   title: "Pricing - Affordable Data Removal Plans",
@@ -153,7 +154,22 @@ const faqs = [
   },
 ];
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  let totalRemovals = 0;
+  let successRate = 0;
+  let brokersMonitored = 0;
+
+  try {
+    const stats = await getPublicStats();
+    totalRemovals = stats.overview.totalRemovals;
+    successRate = stats.overview.successRate;
+    brokersMonitored = stats.overview.totalBrokersTracked;
+  } catch {
+    // Stats are non-critical — page renders fine without them
+  }
+
+  const roundedRemovals = Math.floor(totalRemovals / 100) * 100;
+
   return (
     <>
       <FAQSchema faqs={faqs} />
@@ -186,11 +202,11 @@ export default function PricingPage() {
           </div>
           <div className="flex items-center gap-2 text-slate-400">
             <CheckCircle className="h-5 w-5 text-emerald-400" />
-            <span className="text-sm font-medium">30-day money-back guarantee</span>
+            <span className="text-sm font-medium">{roundedRemovals > 0 ? `${roundedRemovals.toLocaleString()}+ removals processed` : "30-day money-back guarantee"}</span>
           </div>
           <div className="flex items-center gap-2 text-slate-400">
             <CheckCircle className="h-5 w-5 text-emerald-400" />
-            <span className="text-sm font-medium">Trusted by thousands of users</span>
+            <span className="text-sm font-medium">{successRate > 0 ? `${successRate}% removal success rate` : "Trusted by thousands of users"}</span>
           </div>
         </div>
       </AnimatedSection>
@@ -267,6 +283,26 @@ export default function PricingPage() {
           </AnimatedCard>
         ))}
       </div>
+
+      {/* Social Proof Stats Banner */}
+      {totalRemovals > 50 && (
+        <AnimatedSection>
+          <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto mb-16 text-center">
+            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <div className="text-3xl font-bold text-emerald-400 mb-1">{totalRemovals.toLocaleString()}</div>
+              <div className="text-sm text-slate-400">Removals Processed</div>
+            </div>
+            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <div className="text-3xl font-bold text-emerald-400 mb-1">{successRate}%</div>
+              <div className="text-sm text-slate-400">Success Rate</div>
+            </div>
+            <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              <div className="text-3xl font-bold text-emerald-400 mb-1">{brokersMonitored.toLocaleString()}</div>
+              <div className="text-sm text-slate-400">Brokers Monitored</div>
+            </div>
+          </div>
+        </AnimatedSection>
+      )}
 
       {/* 30-Day Money-Back Guarantee */}
       <AnimatedSection>

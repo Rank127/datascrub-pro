@@ -52,6 +52,10 @@ const TwoFactorDisableDialog = dynamic(
   () => import("@/components/settings/two-factor-disable-dialog").then((m) => ({ default: m.TwoFactorDisableDialog })),
   { ssr: false }
 );
+const CancelSubscriptionDialog = dynamic(
+  () => import("@/components/settings/cancel-subscription-dialog").then((m) => ({ default: m.CancelSubscriptionDialog })),
+  { ssr: false }
+);
 
 // Wrapper component to handle Suspense for useSearchParams
 export default function SettingsPage() {
@@ -88,6 +92,9 @@ function SettingsContent() {
   const [reportFrequency, setReportFrequency] = useState("weekly");
   const [notificationLoading, setNotificationLoading] = useState(false);
 
+
+  // Cancel subscription
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   // Security section
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -216,6 +223,11 @@ function SettingsContent() {
     } finally {
       setPortalLoading(false);
     }
+  };
+
+  const handleCanceled = () => {
+    toast.success("Subscription cancellation scheduled. You'll keep access until the end of your billing period.");
+    handleManageBilling();
   };
 
   const plans = [
@@ -682,15 +694,24 @@ function SettingsContent() {
                       </Button>
                     )}
                     {plan.current && plan.name !== "FREE" && (
-                      <Button
-                        variant="outline"
-                        className="w-full border-slate-600"
-                        size="sm"
-                        onClick={handleManageBilling}
-                        disabled={portalLoading}
-                      >
-                        Manage
-                      </Button>
+                      <div className="space-y-2">
+                        <Button
+                          variant="outline"
+                          className="w-full border-slate-600"
+                          size="sm"
+                          onClick={handleManageBilling}
+                          disabled={portalLoading}
+                        >
+                          Manage
+                        </Button>
+                        <button
+                          type="button"
+                          onClick={() => setCancelDialogOpen(true)}
+                          className="w-full text-xs text-slate-500 hover:text-red-400 transition-colors"
+                        >
+                          Cancel subscription
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -827,6 +848,12 @@ function SettingsContent() {
           setTwoFactorEnabled(false);
           setMessage({ type: "success", text: "Two-factor authentication disabled." });
         }}
+      />
+      <CancelSubscriptionDialog
+        open={cancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        plan={currentPlan}
+        onCanceled={handleCanceled}
       />
     </div>
   );
