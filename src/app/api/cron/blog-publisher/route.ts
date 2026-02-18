@@ -1,12 +1,12 @@
 /**
  * Blog Publisher Cron
  *
- * Runs DAILY at 4 AM UTC. Publishes up to 2 blog posts per run.
+ * Runs DAILY at 4 AM UTC. Publishes 1 high-quality blog post per run.
  * Picks top-priority topics not yet covered, generates full posts
  * via Claude Sonnet for higher quality, saves to AutoBlogPost table.
  *
  * Schedule: 0 4 * * *  (daily at 4 AM UTC)
- * Target: 14 posts/week, 60+ posts/month
+ * Target: 7 posts/week, 30 posts/month
  */
 
 import { NextResponse } from "next/server";
@@ -20,7 +20,7 @@ import { getAdminFromEmail } from "@/lib/email";
 export const maxDuration = 300;
 
 const JOB_NAME = "blog-publisher";
-const POSTS_PER_RUN = 2; // Reduced from 3: Sonnet takes ~90-120s/post vs Haiku's 30s
+const POSTS_PER_RUN = 1; // Sonnet takes ~120-180s/post — 1 post fits within 300s Vercel limit
 const DEADLINE_MS = 270_000; // 270s safety margin (maxDuration=300)
 
 const resend = process.env.RESEND_API_KEY

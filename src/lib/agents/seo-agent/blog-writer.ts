@@ -109,10 +109,10 @@ Return ONLY the markdown content, nothing else.`;
   try {
     console.log(`[blog-writer] Generating post: ${topic.title}`);
 
-    // Use Sonnet for higher quality content (~$0.02/post vs $0.005 with Haiku
+    // Use Sonnet for higher quality content (~$0.02/post vs $0.005 with Haiku)
     const response = await anthropic.messages.create({
       model: MODEL_SONNET,
-      max_tokens: 6000,
+      max_tokens: 4096,
       temperature: 0.6,
       messages: [{ role: "user", content: prompt }],
     });
