@@ -183,17 +183,18 @@ export default function HowItWorksPage() {
           <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-slate-800 hidden md:block" />
 
           <div className="space-y-12">
-            {steps.map((step, index) => (
-              <div
-                key={step.number}
-                className={`flex flex-col md:flex-row gap-8 items-start ${
-                  index % 2 === 1 ? "md:flex-row-reverse" : ""
-                }`}
-              >
-                {/* Step number indicator */}
-                <div className="hidden md:flex flex-1 justify-end">
-                  {index % 2 === 0 && (
-                    <div className="max-w-md text-right">
+            {steps.map((step, index) => {
+              const isEven = index % 2 === 0;
+              return (
+                <div
+                  key={step.number}
+                  className={`flex flex-col md:flex-row gap-8 items-start ${
+                    isEven ? "" : "md:flex-row-reverse"
+                  }`}
+                >
+                  {/* Text content */}
+                  <div className={`flex-1 ${isEven ? "md:text-right" : ""}`}>
+                    <div className={`max-w-md ${isEven ? "md:ml-auto" : ""}`}>
                       <h3 className="text-2xl font-bold text-white mb-2">
                         {step.title}
                       </h3>
@@ -202,68 +203,35 @@ export default function HowItWorksPage() {
                         {step.details.map((detail) => (
                           <li
                             key={detail}
-                            className="flex items-center justify-end gap-2 text-slate-300"
+                            className={`flex items-center gap-2 text-slate-300 ${
+                              isEven ? "md:justify-end" : ""
+                            }`}
                           >
-                            {detail}
-                            <CheckCircle className="h-4 w-4 text-emerald-500" />
+                            {isEven && <span className="hidden md:inline">{detail}</span>}
+                            <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                            {isEven ? (
+                              <span className="md:hidden">{detail}</span>
+                            ) : (
+                              <span>{detail}</span>
+                            )}
                           </li>
                         ))}
                       </ul>
                     </div>
-                  )}
-                </div>
-
-                {/* Center icon */}
-                <div className="relative z-10 flex-shrink-0">
-                  <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center border-4 border-slate-950">
-                    <step.icon className="h-8 w-8 text-emerald-500" />
                   </div>
-                  <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold">
-                    {step.number}
-                  </div>
-                </div>
 
-                <div className="flex-1 md:hidden">
-                  <h3 className="text-2xl font-bold text-white mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-slate-400 mb-4">{step.description}</p>
-                  <ul className="space-y-2">
-                    {step.details.map((detail) => (
-                      <li
-                        key={detail}
-                        className="flex items-center gap-2 text-slate-300"
-                      >
-                        <CheckCircle className="h-4 w-4 text-emerald-500" />
-                        {detail}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="hidden md:flex flex-1">
-                  {index % 2 === 1 && (
-                    <div className="max-w-md">
-                      <h3 className="text-2xl font-bold text-white mb-2">
-                        {step.title}
-                      </h3>
-                      <p className="text-slate-400 mb-4">{step.description}</p>
-                      <ul className="space-y-2">
-                        {step.details.map((detail) => (
-                          <li
-                            key={detail}
-                            className="flex items-center gap-2 text-slate-300"
-                          >
-                            <CheckCircle className="h-4 w-4 text-emerald-500" />
-                            {detail}
-                          </li>
-                        ))}
-                      </ul>
+                  {/* Center icon */}
+                  <div className="relative z-10 flex-shrink-0">
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center border-4 border-slate-950">
+                      <step.icon className="h-8 w-8 text-emerald-500" />
                     </div>
-                  )}
+                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold">
+                      {step.number}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
