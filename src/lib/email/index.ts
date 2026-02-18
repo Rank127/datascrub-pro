@@ -2848,6 +2848,94 @@ export async function sendFreeLimitReachedEmail(
 }
 
 // ==========================================
+// Referral Program Emails
+// ==========================================
+
+// Referral Reward Email — sent to referrer when their friend converts
+export async function sendReferralRewardEmail(
+  email: string,
+  name: string,
+  referredName: string,
+  totalEarned: number // cents
+) {
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 8px;">
+      <div style="font-size: 48px; line-height: 1;">&#127881;</div>
+    </div>
+    <h1 style="color: #10b981; margin-top: 0; text-align: center;">You Earned $10!</h1>
+    <p style="font-size: 16px; line-height: 1.6; text-align: center;">
+      Hi ${name || "there"}, your friend <strong>${referredName || "someone you referred"}</strong> just subscribed to ${APP_NAME}!
+    </p>
+
+    <div style="background: linear-gradient(135deg, #065f46, #0f766e); border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center;">
+      <p style="margin: 0 0 4px 0; color: #a7f3d0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Credit Applied</p>
+      <p style="margin: 0; color: #ffffff; font-size: 36px; font-weight: bold;">$10.00</p>
+      <p style="margin: 8px 0 0 0; color: #a7f3d0; font-size: 14px;">
+        Total earned: $${(totalEarned / 100).toFixed(2)}
+      </p>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6; text-align: center; color: #94a3b8;">
+      Your $10 credit has been applied to your account and will be deducted from your next billing cycle.
+    </p>
+
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
+      <p style="margin: 0 0 8px 0; color: #e2e8f0; font-size: 16px; font-weight: 600;">Want to earn more?</p>
+      <p style="margin: 0; color: #94a3b8; font-size: 14px;">
+        Share your referral link with friends and earn $10 for each one who subscribes.
+      </p>
+    </div>
+
+    ${buttonHtml("View Your Referrals", `${APP_URL}/dashboard`)}
+  `);
+
+  return sendEmail(email, `You earned $10! ${referredName || "Your friend"} joined ${APP_NAME}`, html);
+}
+
+// Referral Welcome Email — sent to referred user on signup
+export async function sendReferralWelcomeEmail(
+  email: string,
+  name: string,
+  referrerName: string
+) {
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 8px;">
+      <div style="font-size: 48px; line-height: 1;">&#127873;</div>
+    </div>
+    <h1 style="color: #10b981; margin-top: 0; text-align: center;">Welcome! You've Got $10 Off</h1>
+    <p style="font-size: 16px; line-height: 1.6; text-align: center;">
+      Hi ${name || "there"}, ${referrerName || "your friend"} referred you to ${APP_NAME} — and you get <strong style="color: #10b981;">$10 off</strong> your first subscription!
+    </p>
+
+    <div style="background: linear-gradient(135deg, #065f46, #0f766e); border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center;">
+      <p style="margin: 0 0 4px 0; color: #a7f3d0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Your Discount</p>
+      <p style="margin: 0; color: #ffffff; font-size: 36px; font-weight: bold;">$10 OFF</p>
+      <p style="margin: 8px 0 0 0; color: #a7f3d0; font-size: 14px;">
+        Applied automatically when you upgrade
+      </p>
+    </div>
+
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <p style="margin: 0 0 12px 0; font-weight: 600; color: #10b981;">What you get with ${APP_NAME}:</p>
+      <ul style="margin: 0; padding-left: 20px; color: #e2e8f0; line-height: 2;">
+        <li>Automated data broker removal requests</li>
+        <li>Continuous monitoring for new exposures</li>
+        <li>Privacy protection score tracking</li>
+        <li>Monthly scan summaries</li>
+      </ul>
+    </div>
+
+    ${buttonHtml("Upgrade Now — Save $10", `${APP_URL}/dashboard/checkout`)}
+
+    <p style="font-size: 13px; color: #64748b; text-align: center; margin-top: 16px;">
+      Your $10 credit will be automatically applied at checkout.
+    </p>
+  `);
+
+  return sendEmail(email, `${referrerName || "Your friend"} gave you $10 off ${APP_NAME}!`, html);
+}
+
+// ==========================================
 // Batched Removal Status Updates (Preference-Aware)
 // ==========================================
 

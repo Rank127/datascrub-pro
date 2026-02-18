@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { encrypt } from "@/lib/encryption/crypto";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendReferralWelcomeEmail } from "@/lib/email";
 import { enrollInDripCampaign } from "@/lib/email/drip-campaigns";
 import { trackReferralSignup } from "@/lib/referrals";
 import { rateLimit, getClientIdentifier, rateLimitResponse } from "@/lib/rate-limit";
@@ -79,7 +79,21 @@ export async function POST(request: Request) {
 
     // Track referral if code provided (non-blocking)
     if (referralCode) {
-      trackReferralSignup(referralCode, user.id).catch((e) => captureError("register-referral-tracking", e instanceof Error ? e : new Error(String(e))));
+      trackReferralSignup(referralCode, user.id)
+        .then(async (tracked) => {
+          if (!tracked) return;
+          // Look up referrer name and send welcome email to referred user
+          const referral = await prisma.referral.findFirst({
+            where: { referredUserId: user.id },
+            select: { referrer: { select: { name: true } } },
+          });
+          if (referral?.referrer?.name) {
+            await sendReferralWelcomeEmail(email, name, referral.referrer.name);
+          } else {
+            await sendReferralWelcomeEmail(email, name, "Your friend");
+          }
+        })
+        .catch((e) => captureError("register-referral-tracking", e instanceof Error ? e : new Error(String(e))));
     }
 
     return NextResponse.json(

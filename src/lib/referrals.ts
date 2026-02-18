@@ -7,6 +7,7 @@
 
 import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
+import { stripe } from "@/lib/stripe";
 
 const REFERRAL_REWARD_CENTS = 1000; // $10.00
 const REFERRED_DISCOUNT_CENTS = 1000; // $10.00 off first payment
@@ -196,9 +197,26 @@ export async function processReferralReward(userId: string): Promise<{
       },
     });
 
-    // Here you would credit the referrer's account
-    // For now, we just log it - in production, integrate with payment system
-    console.log(`[Referral] Reward processed: $${REFERRAL_REWARD_CENTS / 100} to ${referral.referrerId}`);
+    // Credit referrer's Stripe customer balance
+    const referrerSub = await prisma.subscription.findUnique({
+      where: { userId: referral.referrerId },
+      select: { stripeCustomerId: true },
+    });
+
+    if (referrerSub?.stripeCustomerId) {
+      try {
+        await stripe.customers.createBalanceTransaction(referrerSub.stripeCustomerId, {
+          amount: -REFERRAL_REWARD_CENTS, // Negative = credit
+          currency: "usd",
+          description: "Referral reward — friend subscribed",
+        });
+        console.log(`[Referral] $${REFERRAL_REWARD_CENTS / 100} Stripe credit applied to customer ${referrerSub.stripeCustomerId}`);
+      } catch (stripeErr) {
+        console.error("[Referral] Stripe balance credit failed (reward still tracked in DB):", stripeErr);
+      }
+    } else {
+      console.log(`[Referral] Reward tracked in DB for ${referral.referrerId} — no Stripe customer yet, credit will apply on signup`);
+    }
 
     return {
       rewarded: true,

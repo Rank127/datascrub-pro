@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
 import { stripe, getPlanFromPriceId } from "@/lib/stripe";
-import { sendSubscriptionEmail, sendRefundConfirmationEmail, sendCorporateWelcomeEmail } from "@/lib/email";
+import { sendSubscriptionEmail, sendRefundConfirmationEmail, sendCorporateWelcomeEmail, sendReferralRewardEmail } from "@/lib/email";
 import { createPaymentIssueTicket } from "@/lib/support/ticket-service";
 import { activateCorporateAccount, handleOverdueInvoice } from "@/lib/corporate/billing";
+import { trackReferralConversion, processReferralReward } from "@/lib/referrals";
 import { captureError } from "@/lib/error-reporting";
 import { logAudit } from "@/lib/rbac/audit-log";
 import { CORPORATE_TIERS } from "@/lib/corporate/types";
@@ -219,6 +220,40 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   if (user?.email) {
     sendSubscriptionEmail(user.email, user.name || "", plan).catch((e) => captureError("stripe-subscription-email", e instanceof Error ? e : new Error(String(e))));
   }
+
+  // Process referral conversion + reward (non-blocking)
+  (async () => {
+    try {
+      const converted = await trackReferralConversion(userId);
+      if (!converted) return;
+
+      const reward = await processReferralReward(userId);
+      if (!reward.rewarded || !reward.referrerId) return;
+
+      // Send reward email to referrer
+      const referrer = await prisma.user.findUnique({
+        where: { id: reward.referrerId },
+        select: { email: true, name: true },
+      });
+
+      if (referrer?.email) {
+        // Get total earnings for this referrer
+        const { _sum } = await prisma.referral.aggregate({
+          where: { referrerId: reward.referrerId, status: "rewarded" },
+          _sum: { rewardAmount: true },
+        });
+
+        await sendReferralRewardEmail(
+          referrer.email,
+          referrer.name || "",
+          user?.name || "A friend",
+          _sum.rewardAmount || reward.amount || 0
+        );
+      }
+    } catch (e) {
+      captureError("stripe-referral-reward", e instanceof Error ? e : new Error(String(e)));
+    }
+  })();
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {

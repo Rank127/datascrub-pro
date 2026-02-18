@@ -10,6 +10,7 @@ import { CompactExposures } from "@/components/dashboard/compact-exposures";
 import { RemovalProgressCompact } from "@/components/dashboard/removal-progress-compact";
 import { BrokerStatusCompact } from "@/components/dashboard/broker-status-compact";
 import { RemovalWizard } from "@/components/dashboard/removal-wizard";
+import { ReferralWidget } from "@/components/dashboard/referral-widget";
 import { Search, Loader2, Bot, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -259,6 +260,9 @@ export default function DashboardPage() {
 
       {/* 5. Broker Status - Collapsed by default */}
       <BrokerStatusCompact brokers={brokerStats} />
+
+      {/* 6. Referral Widget - Refer & Earn */}
+      <ReferralWidget />
 
       {/* AI Shield - Only show for Enterprise users, compact summary */}
       {stats.userPlan === "ENTERPRISE" && stats.aiProtection && stats.aiProtection.total > 0 && (
