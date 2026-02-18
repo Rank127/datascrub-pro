@@ -11,6 +11,9 @@ import {
   ArrowLeft,
   Lock,
   Mail,
+  Copy,
+  Check,
+  Share2,
 } from "lucide-react";
 import Link from "next/link";
 import { trackEvents } from "@/components/analytics/retargeting-pixels";
@@ -133,9 +136,11 @@ export function PrivacyScoreQuiz() {
   const [showEmailCapture, setShowEmailCapture] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const totalScore = Object.values(answers).reduce((sum, val) => sum + val, 0);
+  const displayScore = 100 - totalScore;
   const scoreInfo = getScoreLevel(totalScore);
 
   const handleAnswer = (questionId: string, value: number) => {
@@ -284,6 +289,72 @@ export function PrivacyScoreQuiz() {
               Start Free Data Scan
             </Button>
           </Link>
+        </div>
+
+        {/* Share Section */}
+        <div className="mt-6 pt-6 border-t border-slate-700">
+          <div className="flex items-center gap-2 justify-center mb-3">
+            <Share2 className="h-4 w-4 text-slate-400" />
+            <span className="text-sm font-medium text-slate-400">Share Your Score</span>
+          </div>
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => {
+                const url = `https://ghostmydata.com/privacy-score/results?score=${displayScore}&level=${scoreInfo.level}`;
+                navigator.clipboard.writeText(url).then(() => {
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                });
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm text-slate-300 transition-colors"
+            >
+              {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+              {copied ? "Copied!" : "Copy Link"}
+            </button>
+            <button
+              onClick={() => {
+                const url = `https://ghostmydata.com/privacy-score/results?score=${displayScore}&level=${scoreInfo.level}`;
+                const text = `I scored ${displayScore}/100 on the GhostMyData Privacy Score Quiz. How exposed is YOUR data? Take the free quiz:`;
+                window.open(
+                  `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+                  "_blank",
+                  "width=550,height=420"
+                );
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm text-slate-300 transition-colors"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              Twitter
+            </button>
+            <button
+              onClick={() => {
+                const url = `https://ghostmydata.com/privacy-score/results?score=${displayScore}&level=${scoreInfo.level}`;
+                window.open(
+                  `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+                  "_blank",
+                  "width=550,height=420"
+                );
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm text-slate-300 transition-colors"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              Facebook
+            </button>
+            <button
+              onClick={() => {
+                const url = `https://ghostmydata.com/privacy-score/results?score=${displayScore}&level=${scoreInfo.level}`;
+                window.open(
+                  `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+                  "_blank",
+                  "width=550,height=420"
+                );
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm text-slate-300 transition-colors"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              LinkedIn
+            </button>
+          </div>
         </div>
       </div>
     );
