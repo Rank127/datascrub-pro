@@ -427,7 +427,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
 }
 
 // New Exposure Alert Email
-interface ExposureAlert {
+export interface ExposureAlert {
   count: number;
   critical: number;
   high: number;
@@ -1366,7 +1366,7 @@ interface ManualRemovalInfo {
   instructions?: string;
 }
 
-interface BulkRemovalSummary {
+export interface BulkRemovalSummary {
   totalProcessed: number;
   successCount: number;
   failCount: number;
@@ -1650,7 +1650,7 @@ interface RemovalStatusUpdate {
   updatedAt?: Date;
 }
 
-interface RemovalDigestData {
+export interface RemovalDigestData {
   completed: RemovalStatusUpdate[];
   inProgress: RemovalStatusUpdate[];
   submitted: RemovalStatusUpdate[];
@@ -3006,6 +3006,150 @@ export async function queueRemovalStatusUpdate(
 }
 
 /**
+ * Queue an exposure alert for daily consolidated digest.
+ * Checks user's emailNotifications + newExposureAlerts before queueing.
+ */
+export async function queueExposureAlert(
+  userId: string,
+  alert: ExposureAlert
+): Promise<{ queued: boolean; reason?: string }> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, name: true, emailNotifications: true, newExposureAlerts: true },
+  });
+
+  if (!user) return { queued: false, reason: "User not found" };
+  if (!user.emailNotifications) return { queued: false, reason: "Email notifications disabled" };
+  if (!user.newExposureAlerts) return { queued: false, reason: "Exposure alerts disabled" };
+
+  await prisma.emailQueue.create({
+    data: {
+      toEmail: user.email,
+      subject: `${alert.count} New Exposures Found`,
+      htmlContent: "",
+      emailType: "EXPOSURE_ALERT_PENDING",
+      priority: 4,
+      userId,
+      context: JSON.stringify({ userName: user.name || "", alert, queuedAt: new Date().toISOString() }),
+      status: "QUEUED",
+      processAt: new Date(),
+    },
+  });
+
+  console.log(`[Email] Queued exposure alert for ${user.email}: ${alert.count} exposures`);
+  return { queued: true };
+}
+
+/**
+ * Queue a bulk removal summary for daily consolidated digest.
+ * Checks user's emailNotifications + removalUpdates before queueing.
+ */
+export async function queueBulkRemovalSummary(
+  userId: string,
+  summary: BulkRemovalSummary
+): Promise<{ queued: boolean; reason?: string }> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, name: true, emailNotifications: true, removalUpdates: true },
+  });
+
+  if (!user) return { queued: false, reason: "User not found" };
+  if (!user.emailNotifications) return { queued: false, reason: "Email notifications disabled" };
+  if (!user.removalUpdates) return { queued: false, reason: "Removal updates disabled" };
+
+  await prisma.emailQueue.create({
+    data: {
+      toEmail: user.email,
+      subject: `Bulk Removal Summary`,
+      htmlContent: "",
+      emailType: "BULK_REMOVAL_PENDING",
+      priority: 5,
+      userId,
+      context: JSON.stringify({ userName: user.name || "", summary, queuedAt: new Date().toISOString() }),
+      status: "QUEUED",
+      processAt: new Date(),
+    },
+  });
+
+  console.log(`[Email] Queued bulk removal summary for ${user.email}: ${summary.totalProcessed} processed`);
+  return { queued: true };
+}
+
+/**
+ * Queue a monthly recap for daily consolidated digest (used on 1st of month).
+ * Checks user's emailNotifications + weeklyReports before queueing.
+ */
+export async function queueMonthlyRecap(
+  userId: string,
+  data: MonthlyScanSummaryData
+): Promise<{ queued: boolean; reason?: string }> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, name: true, emailNotifications: true, weeklyReports: true },
+  });
+
+  if (!user) return { queued: false, reason: "User not found" };
+  if (!user.emailNotifications) return { queued: false, reason: "Email notifications disabled" };
+  if (!user.weeklyReports) return { queued: false, reason: "Reports disabled" };
+
+  await prisma.emailQueue.create({
+    data: {
+      toEmail: user.email,
+      subject: `Monthly Privacy Report`,
+      htmlContent: "",
+      emailType: "MONTHLY_RECAP_PENDING",
+      priority: 5,
+      userId,
+      context: JSON.stringify({ userName: user.name || "", monthlyData: data, queuedAt: new Date().toISOString() }),
+      status: "QUEUED",
+      processAt: new Date(),
+    },
+  });
+
+  console.log(`[Email] Queued monthly recap for ${user.email}: ${data.monthLabel}`);
+  return { queued: true };
+}
+
+/**
+ * Queue a batch removal digest (completed/failed/submitted arrays) for daily consolidated digest.
+ * Used by verification-service and removal-service batch functions.
+ * Checks user's emailNotifications + removalUpdates before queueing.
+ */
+export async function queueRemovalDigest(
+  userId: string,
+  digest: RemovalDigestData
+): Promise<{ queued: boolean; reason?: string }> {
+  const totalItems = digest.completed.length + digest.inProgress.length + digest.submitted.length + digest.failed.length;
+  if (totalItems === 0) return { queued: false, reason: "No updates" };
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, name: true, emailNotifications: true, removalUpdates: true },
+  });
+
+  if (!user) return { queued: false, reason: "User not found" };
+  if (!user.emailNotifications) return { queued: false, reason: "Email notifications disabled" };
+  if (!user.removalUpdates) return { queued: false, reason: "Removal updates disabled" };
+
+  await prisma.emailQueue.create({
+    data: {
+      toEmail: user.email,
+      subject: `Removal Status Digest`,
+      htmlContent: "",
+      emailType: "REMOVAL_DIGEST_PENDING",
+      priority: 5,
+      userId,
+      context: JSON.stringify({ userName: user.name || "", digest, queuedAt: new Date().toISOString() }),
+      status: "QUEUED",
+      processAt: new Date(),
+    },
+  });
+
+  console.log(`[Email] Queued removal digest for ${user.email}: ${totalItems} items`);
+  return { queued: true };
+}
+
+/**
  * Build context for enhanced removal digest emails.
  * Queries total exposures, removal status breakdown, and effective plan.
  */
@@ -3043,14 +3187,272 @@ export async function buildRemovalDigestContext(userId: string): Promise<Removal
   };
 }
 
+// ==========================================
+// Consolidated Daily Privacy Digest
+// ==========================================
+
+interface ConsolidatedDigestData {
+  exposureAlerts: ExposureAlert[];
+  removalUpdates: RemovalDigestData;
+  bulkSummaries: BulkRemovalSummary[];
+  monthlyRecap: MonthlyScanSummaryData | null;
+}
+
+const CONSOLIDATED_DIGEST_TYPES = [
+  "REMOVAL_STATUS_PENDING",
+  "EXPOSURE_ALERT_PENDING",
+  "BULK_REMOVAL_PENDING",
+  "MONTHLY_RECAP_PENDING",
+  "REMOVAL_DIGEST_PENDING",
+] as const;
+
 /**
- * Process all pending removal status updates and send batched digest emails.
- * Should be called once daily by a cron job.
- * Groups updates by user and sends one digest email per user.
- *
- * @returns Statistics about processed updates
+ * Build dynamic subject line based on digest contents.
  */
-export async function processPendingRemovalDigests(): Promise<{
+function buildConsolidatedSubject(data: ConsolidatedDigestData): string {
+  const parts: string[] = [];
+
+  const totalExposures = data.exposureAlerts.reduce((sum, a) => sum + a.count, 0);
+  if (totalExposures > 0) {
+    parts.push(`${totalExposures} new exposure${totalExposures !== 1 ? "s" : ""}`);
+  }
+
+  const totalRemovals =
+    data.removalUpdates.completed.length +
+    data.removalUpdates.inProgress.length +
+    data.removalUpdates.submitted.length +
+    data.removalUpdates.failed.length;
+  if (totalRemovals > 0) {
+    parts.push(`${totalRemovals} removal update${totalRemovals !== 1 ? "s" : ""}`);
+  }
+
+  const totalBulk = data.bulkSummaries.reduce((sum, s) => sum + s.totalProcessed, 0);
+  if (totalBulk > 0) {
+    parts.push(`${totalBulk} bulk removal${totalBulk !== 1 ? "s" : ""}`);
+  }
+
+  if (data.monthlyRecap) {
+    parts.push("Monthly Privacy Report");
+  }
+
+  if (parts.length === 0) return "Your Daily Privacy Digest";
+  return parts.join(" + ");
+}
+
+/**
+ * Build consolidated digest HTML with conditional sections.
+ */
+function buildConsolidatedDigestHtml(
+  name: string,
+  data: ConsolidatedDigestData,
+  context: RemovalDigestContext | null,
+  effectivePlan: string
+): string {
+  const sections: string[] = [];
+
+  // SECTION 1: NEW EXPOSURES
+  if (data.exposureAlerts.length > 0) {
+    const totalCount = data.exposureAlerts.reduce((sum, a) => sum + a.count, 0);
+    const totalCritical = data.exposureAlerts.reduce((sum, a) => sum + a.critical, 0);
+    const totalHigh = data.exposureAlerts.reduce((sum, a) => sum + a.high, 0);
+    const allSources = [...new Set(data.exposureAlerts.flatMap(a => a.sources))];
+
+    const severityText = totalCritical > 0
+      ? `<span style="color: #ef4444; font-weight: bold;">${totalCritical} critical</span>`
+      : totalHigh > 0
+      ? `<span style="color: #f97316; font-weight: bold;">${totalHigh} high-risk</span>`
+      : "";
+
+    sections.push(`
+      <div style="margin: 24px 0; padding: 20px; background-color: #0f172a; border-radius: 8px; border-left: 4px solid #f97316;">
+        <h2 style="color: #f97316; margin: 0 0 12px 0; font-size: 18px;">New Exposures Found</h2>
+        <p style="font-size: 15px; line-height: 1.5; margin: 0 0 12px 0;">
+          <strong>${totalCount}</strong> new data exposure${totalCount !== 1 ? "s" : ""} detected${severityText ? `, including ${severityText} findings` : ""}.
+        </p>
+        ${allSources.length > 0 ? `
+          <p style="margin: 0 0 8px 0; font-weight: 600; color: #94a3b8; font-size: 13px;">Sources:</p>
+          <ul style="margin: 0; padding-left: 20px; color: #e2e8f0; font-size: 14px;">
+            ${allSources.slice(0, 5).map(s => `<li>${s}</li>`).join("")}
+            ${allSources.length > 5 ? `<li style="color: #94a3b8;">...and ${allSources.length - 5} more</li>` : ""}
+          </ul>
+        ` : ""}
+        <div style="margin-top: 16px;">
+          <a href="${APP_URL}/dashboard/exposures" style="color: #10b981; font-weight: 600; text-decoration: none;">Review Exposures &rarr;</a>
+        </div>
+      </div>
+    `);
+  }
+
+  // SECTION 2: REMOVAL ACTIVITY
+  const removalTotal =
+    data.removalUpdates.completed.length +
+    data.removalUpdates.inProgress.length +
+    data.removalUpdates.submitted.length +
+    data.removalUpdates.failed.length;
+
+  if (removalTotal > 0) {
+    // Progress bar
+    let progressHtml = "";
+    if (context && context.totalRemovalRequests > 0) {
+      const pct = Math.round((context.completedRemovals / context.totalRemovalRequests) * 100);
+      progressHtml = `
+        <div style="margin: 12px 0 16px 0;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 4px;">
+            <span>${context.completedRemovals} of ${context.totalRemovalRequests} removals complete</span>
+            <span>${pct}%</span>
+          </div>
+          <div style="background-color: #334155; border-radius: 4px; height: 8px; overflow: hidden;">
+            <div style="background-color: #10b981; height: 100%; width: ${pct}%; border-radius: 4px;"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Build table rows per status
+    const buildRows = (items: RemovalStatusUpdate[], color: string, label: string) => {
+      if (items.length === 0) return "";
+      return items.slice(0, 10).map(item => `
+        <tr>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #334155; color: #e2e8f0; font-size: 14px;">${item.sourceName}</td>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #334155; color: #94a3b8; font-size: 13px;">${item.dataType}</td>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #334155; text-align: right;">
+            <span style="color: ${color}; font-size: 12px; font-weight: 600;">${label}</span>
+          </td>
+        </tr>
+      `).join("") + (items.length > 10 ? `<tr><td colspan="3" style="padding: 8px 12px; color: #64748b; font-size: 12px;">...and ${items.length - 10} more ${label.toLowerCase()}</td></tr>` : "");
+    };
+
+    const tableRows =
+      buildRows(data.removalUpdates.completed, "#10b981", "Removed") +
+      buildRows(data.removalUpdates.submitted, "#3b82f6", "Submitted") +
+      buildRows(data.removalUpdates.inProgress, "#f97316", "In Progress") +
+      buildRows(data.removalUpdates.failed, "#ef4444", "Failed");
+
+    sections.push(`
+      <div style="margin: 24px 0; padding: 20px; background-color: #0f172a; border-radius: 8px; border-left: 4px solid #10b981;">
+        <h2 style="color: #10b981; margin: 0 0 12px 0; font-size: 18px;">Removal Activity</h2>
+        ${progressHtml}
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="padding: 8px 12px; text-align: left; color: #94a3b8; font-weight: 500; font-size: 12px; border-bottom: 1px solid #475569;">Source</th>
+              <th style="padding: 8px 12px; text-align: left; color: #94a3b8; font-weight: 500; font-size: 12px; border-bottom: 1px solid #475569;">Data</th>
+              <th style="padding: 8px 12px; text-align: right; color: #94a3b8; font-weight: 500; font-size: 12px; border-bottom: 1px solid #475569;">Status</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+    `);
+  }
+
+  // SECTION 3: BULK REMOVAL SUMMARY
+  if (data.bulkSummaries.length > 0) {
+    const totalProcessed = data.bulkSummaries.reduce((sum, s) => sum + s.totalProcessed, 0);
+    const totalSuccess = data.bulkSummaries.reduce((sum, s) => sum + s.successCount, 0);
+    const totalManual = data.bulkSummaries.reduce((sum, s) => sum + (s.manualRemovals?.length || 0), 0);
+    const allSources = [...new Set(data.bulkSummaries.flatMap(s => s.sources))];
+
+    sections.push(`
+      <div style="margin: 24px 0; padding: 20px; background-color: #0f172a; border-radius: 8px; border-left: 4px solid #3b82f6;">
+        <h2 style="color: #3b82f6; margin: 0 0 12px 0; font-size: 18px;">Bulk Removal Summary</h2>
+        <p style="font-size: 15px; line-height: 1.5; margin: 0 0 8px 0;">
+          <strong>${totalSuccess}</strong> auto-submitted${totalManual > 0 ? `, <strong>${totalManual}</strong> require manual action` : ""} (${totalProcessed} total processed)
+        </p>
+        ${allSources.length > 0 ? `
+          <p style="margin: 8px 0 4px 0; font-weight: 600; color: #94a3b8; font-size: 13px;">Brokers:</p>
+          <p style="margin: 0; color: #e2e8f0; font-size: 14px;">${allSources.slice(0, 10).join(", ")}${allSources.length > 10 ? ` +${allSources.length - 10} more` : ""}</p>
+        ` : ""}
+      </div>
+    `);
+  }
+
+  // SECTION 4: MONTHLY RECAP
+  if (data.monthlyRecap) {
+    const mr = data.monthlyRecap;
+    const scoreColor = mr.protectionScore >= 70 ? "#10b981" : mr.protectionScore >= 40 ? "#f97316" : "#ef4444";
+    const scoreChange = mr.protectionScore - mr.previousProtectionScore;
+    const trend = scoreChange === 0 ? "unchanged" : scoreChange > 0 ? `+${scoreChange} pts` : `${scoreChange} pts`;
+
+    sections.push(`
+      <div style="margin: 24px 0; padding: 20px; background-color: #0f172a; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+        <h2 style="color: #8b5cf6; margin: 0 0 16px 0; font-size: 18px;">Monthly Recap &mdash; ${mr.monthLabel}</h2>
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div style="font-size: 48px; font-weight: bold; color: ${scoreColor};">${mr.protectionScore}%</div>
+          <div style="font-size: 13px; color: #94a3b8;">Protection Score (${trend})</div>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8;">Active Exposures</td>
+            <td style="padding: 6px 0; text-align: right; color: #e2e8f0; font-weight: 600;">${mr.totalActiveExposures}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8;">New This Month</td>
+            <td style="padding: 6px 0; text-align: right; color: #e2e8f0; font-weight: 600;">${mr.newExposuresThisMonth}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8;">Removals Completed</td>
+            <td style="padding: 6px 0; text-align: right; color: #10b981; font-weight: 600;">${mr.removalsCompletedThisMonth}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8;">Pending Removals</td>
+            <td style="padding: 6px 0; text-align: right; color: #f97316; font-weight: 600;">${mr.pendingRemovals}</td>
+          </tr>
+        </table>
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #334155;">
+          <p style="margin: 0 0 4px 0; font-weight: 600; color: #94a3b8; font-size: 12px;">SEVERITY BREAKDOWN</p>
+          <p style="margin: 0; font-size: 13px;">
+            ${mr.criticalCount > 0 ? `<span style="color: #ef4444;">${mr.criticalCount} Critical</span> &nbsp;` : ""}
+            ${mr.highCount > 0 ? `<span style="color: #f97316;">${mr.highCount} High</span> &nbsp;` : ""}
+            ${mr.mediumCount > 0 ? `<span style="color: #eab308;">${mr.mediumCount} Medium</span> &nbsp;` : ""}
+            ${mr.lowCount > 0 ? `<span style="color: #94a3b8;">${mr.lowCount} Low</span>` : ""}
+          </p>
+        </div>
+        ${mr.topSources.length > 0 ? `
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #334155;">
+            <p style="margin: 0 0 4px 0; font-weight: 600; color: #94a3b8; font-size: 12px;">TOP SOURCES</p>
+            <p style="margin: 0; color: #e2e8f0; font-size: 13px;">${mr.topSources.map(s => `${s.sourceName} (${s.count})`).join(", ")}</p>
+          </div>
+        ` : ""}
+      </div>
+    `);
+  }
+
+  // UPGRADE CTA for FREE users
+  const upgradeCta = effectivePlan === "FREE" ? `
+    <div style="margin: 24px 0; padding: 20px; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 8px; border: 1px solid #334155; text-align: center;">
+      <p style="font-size: 16px; font-weight: 600; color: #e2e8f0; margin: 0 0 8px 0;">
+        Upgrade to Pro for Automatic Removals
+      </p>
+      <p style="font-size: 14px; color: #94a3b8; margin: 0 0 16px 0;">
+        Get unlimited scans, auto-removal, and priority support starting at $9.99/mo.
+      </p>
+      <a href="${APP_URL}/pricing" style="display: inline-block; background-color: #10b981; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+        View Plans &rarr;
+      </a>
+    </div>
+  ` : "";
+
+  return baseTemplate(`
+    <h1 style="color: #10b981; margin-top: 0; text-align: center; font-size: 22px;">
+      Your Daily Privacy Digest
+    </h1>
+    <p style="font-size: 15px; line-height: 1.5; text-align: center; color: #94a3b8;">
+      Hi ${name || "there"}, here's your daily update.
+    </p>
+    ${sections.join("")}
+    ${upgradeCta}
+    ${buttonHtml("View Dashboard", `${APP_URL}/dashboard`)}
+  `);
+}
+
+/**
+ * Process all pending digest items and send ONE consolidated email per user.
+ * Handles: REMOVAL_STATUS_PENDING, EXPOSURE_ALERT_PENDING, BULK_REMOVAL_PENDING,
+ * MONTHLY_RECAP_PENDING, REMOVAL_DIGEST_PENDING.
+ * Called daily at 10AM UTC by the removal-digest cron.
+ */
+export async function processConsolidatedDigests(): Promise<{
   usersProcessed: number;
   emailsSent: number;
   updatesProcessed: number;
@@ -3058,76 +3460,111 @@ export async function processPendingRemovalDigests(): Promise<{
 }> {
   const stats = { usersProcessed: 0, emailsSent: 0, updatesProcessed: 0, errors: 0 };
 
-  // Get all pending removal status updates
-  const pendingUpdates = await prisma.emailQueue.findMany({
+  // Get ALL pending digest items across all types
+  const pendingItems = await prisma.emailQueue.findMany({
     where: {
-      emailType: "REMOVAL_STATUS_PENDING",
+      emailType: { in: [...CONSOLIDATED_DIGEST_TYPES] },
       status: "QUEUED",
     },
     orderBy: { createdAt: "asc" },
   });
 
-  if (pendingUpdates.length === 0) {
-    console.log("[Email Digest] No pending removal updates to process");
+  if (pendingItems.length === 0) {
+    console.log("[Consolidated Digest] No pending items to process");
     return stats;
   }
 
-  console.log(`[Email Digest] Processing ${pendingUpdates.length} pending removal updates`);
+  console.log(`[Consolidated Digest] Processing ${pendingItems.length} pending items`);
 
-  // Group updates by user
-  const userUpdates = new Map<string, {
+  // Group by userId
+  const userItems = new Map<string, {
     email: string;
     name: string;
-    updates: Array<{
-      sourceName: string;
-      source: string;
-      dataType: string;
-      status: "SUBMITTED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
-    }>;
     queueIds: string[];
+    exposureAlerts: ExposureAlert[];
+    removalUpdates: RemovalDigestData;
+    bulkSummaries: BulkRemovalSummary[];
+    monthlyRecap: MonthlyScanSummaryData | null;
   }>();
 
-  for (const queueItem of pendingUpdates) {
-    if (!queueItem.userId || !queueItem.context) continue;
+  for (const item of pendingItems) {
+    if (!item.userId || !item.context) continue;
 
     try {
-      const context = JSON.parse(queueItem.context);
-      const userId = queueItem.userId;
+      const ctx = JSON.parse(item.context);
+      const userId = item.userId;
 
-      let entry = userUpdates.get(userId);
+      let entry = userItems.get(userId);
       if (!entry) {
         entry = {
-          email: queueItem.toEmail,
-          name: context.userName || "",
-          updates: [],
+          email: item.toEmail,
+          name: ctx.userName || "",
           queueIds: [],
+          exposureAlerts: [],
+          removalUpdates: { completed: [], inProgress: [], submitted: [], failed: [] },
+          bulkSummaries: [],
+          monthlyRecap: null,
         };
-        userUpdates.set(userId, entry);
+        userItems.set(userId, entry);
       }
-
-      entry.updates.push(context.update);
-      entry.queueIds.push(queueItem.id);
+      entry.queueIds.push(item.id);
       stats.updatesProcessed++;
+
+      switch (item.emailType) {
+        case "EXPOSURE_ALERT_PENDING":
+          if (ctx.alert) entry.exposureAlerts.push(ctx.alert);
+          break;
+
+        case "REMOVAL_STATUS_PENDING":
+          if (ctx.update) {
+            const u = ctx.update;
+            const mapped = { sourceName: u.sourceName, source: u.source, dataType: u.dataType, status: u.status };
+            switch (u.status) {
+              case "COMPLETED": entry.removalUpdates.completed.push(mapped); break;
+              case "IN_PROGRESS": entry.removalUpdates.inProgress.push(mapped); break;
+              case "SUBMITTED": entry.removalUpdates.submitted.push(mapped); break;
+              case "FAILED": entry.removalUpdates.failed.push(mapped); break;
+            }
+          }
+          break;
+
+        case "REMOVAL_DIGEST_PENDING":
+          if (ctx.digest) {
+            const d = ctx.digest as RemovalDigestData;
+            entry.removalUpdates.completed.push(...(d.completed || []));
+            entry.removalUpdates.inProgress.push(...(d.inProgress || []));
+            entry.removalUpdates.submitted.push(...(d.submitted || []));
+            entry.removalUpdates.failed.push(...(d.failed || []));
+          }
+          break;
+
+        case "BULK_REMOVAL_PENDING":
+          if (ctx.summary) entry.bulkSummaries.push(ctx.summary);
+          break;
+
+        case "MONTHLY_RECAP_PENDING":
+          if (ctx.monthlyData) entry.monthlyRecap = ctx.monthlyData;
+          break;
+      }
     } catch (error) {
-      captureError(`[Email Digest] Error parsing queue item ${queueItem.id}`, error);
+      captureError(`[Consolidated Digest] Error parsing queue item ${item.id}`, error);
       stats.errors++;
     }
   }
 
-  console.log(`[Email Digest] Grouped updates for ${userUpdates.size} users`);
+  console.log(`[Consolidated Digest] Grouped items for ${userItems.size} users`);
 
-  // Send digest email to each user
-  for (const [userId, data] of userUpdates) {
+  // Send ONE consolidated email per user
+  for (const [userId, data] of userItems) {
     try {
-      // Re-check user preferences (they may have changed)
+      // Re-check master email preference
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { emailNotifications: true, removalUpdates: true },
+        select: { emailNotifications: true },
       });
 
-      if (!user?.emailNotifications || !user?.removalUpdates) {
-        console.log(`[Email Digest] Skipping user ${userId} - notifications now disabled`);
-        // Mark as sent (skipped) to clear the queue
+      if (!user?.emailNotifications) {
+        console.log(`[Consolidated Digest] Skipping user ${userId} - email notifications disabled`);
         await prisma.emailQueue.updateMany({
           where: { id: { in: data.queueIds } },
           data: { status: "SENT", sentAt: new Date() },
@@ -3135,67 +3572,42 @@ export async function processPendingRemovalDigests(): Promise<{
         continue;
       }
 
-      // Organize updates by status
-      const digest: RemovalDigestData = {
-        completed: [],
-        inProgress: [],
-        submitted: [],
-        failed: [],
+      // Build context for progress bar
+      const digestContext = await buildRemovalDigestContext(userId);
+      const effectivePlan = digestContext.effectivePlan;
+
+      const consolidated: ConsolidatedDigestData = {
+        exposureAlerts: data.exposureAlerts,
+        removalUpdates: data.removalUpdates,
+        bulkSummaries: data.bulkSummaries,
+        monthlyRecap: data.monthlyRecap,
       };
 
-      for (const update of data.updates) {
-        const item = {
-          sourceName: update.sourceName,
-          source: update.source,
-          dataType: update.dataType,
-          status: update.status,
-        };
+      const subject = buildConsolidatedSubject(consolidated);
+      const html = buildConsolidatedDigestHtml(data.name, consolidated, digestContext, effectivePlan);
 
-        switch (update.status) {
-          case "COMPLETED":
-            digest.completed.push(item);
-            break;
-          case "IN_PROGRESS":
-            digest.inProgress.push(item);
-            break;
-          case "SUBMITTED":
-            digest.submitted.push(item);
-            break;
-          case "FAILED":
-            digest.failed.push(item);
-            break;
-        }
-      }
-
-      // Build context for enhanced template
-      const digestContext = await buildRemovalDigestContext(userId);
-
-      // Send the digest email
-      const result = await sendRemovalStatusDigestEmail(data.email, data.name, digest, digestContext);
+      const result = await sendEmail(data.email, subject, html);
 
       if (result.success) {
         stats.emailsSent++;
-        // Mark queue items as sent
         await prisma.emailQueue.updateMany({
           where: { id: { in: data.queueIds } },
           data: { status: "SENT", sentAt: new Date() },
         });
-        console.log(`[Email Digest] Sent digest to ${data.email}: ${data.updates.length} updates`);
+        console.log(`[Consolidated Digest] Sent to ${data.email}: ${data.queueIds.length} items consolidated`);
       } else {
         stats.errors++;
-        captureError(`[Email Digest] Failed to send to ${data.email}`, result);
+        captureError(`[Consolidated Digest] Failed to send to ${data.email}`, result);
       }
 
       stats.usersProcessed++;
-
-      // Small delay between sends
       await new Promise(resolve => setTimeout(resolve, 200));
     } catch (error) {
-      captureError(`[Email Digest] Error processing user ${userId}`, error);
+      captureError(`[Consolidated Digest] Error processing user ${userId}`, error);
       stats.errors++;
     }
   }
 
-  console.log(`[Email Digest] Complete: ${stats.emailsSent} emails sent to ${stats.usersProcessed} users, ${stats.updatesProcessed} updates processed, ${stats.errors} errors`);
+  console.log(`[Consolidated Digest] Complete: ${stats.emailsSent} emails to ${stats.usersProcessed} users, ${stats.updatesProcessed} items processed, ${stats.errors} errors`);
   return stats;
 }

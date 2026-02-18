@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption/crypto";
-import { sendExposureAlertEmail } from "@/lib/email";
+import { queueExposureAlert } from "@/lib/email";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import {
   ScanOrchestrator,
@@ -337,18 +337,16 @@ export async function POST(request: Request) {
       }),
     ]);
 
-    // Send exposure alert email if exposures found (non-blocking)
+    // Queue exposure alert for daily consolidated digest (non-blocking, respects preferences)
     if (exposures.length > 0 && session.user.email) {
-      // Count severity from new exposures only (not all scan results)
       const critical = exposures.filter(e => e.severity === "CRITICAL").length;
       const high = exposures.filter(e => e.severity === "HIGH").length;
       const sources = [...new Set(exposures.map(e => e.sourceName))];
 
-      sendExposureAlertEmail(
-        session.user.email,
-        session.user.name || "",
+      queueExposureAlert(
+        session.user.id,
         { count: exposures.length, critical, high, sources }
-      ).catch((e) => { import("@/lib/error-reporting").then(m => m.captureError("scan-exposure-email", e instanceof Error ? e : new Error(String(e)))); });
+      ).catch((e) => { import("@/lib/error-reporting").then(m => m.captureError("scan-exposure-queue", e instanceof Error ? e : new Error(String(e)))); });
 
       // Create an alert record
       await prisma.alert.create({

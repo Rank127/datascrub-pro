@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { sendWeeklyReportEmail, sendMonthlyScanSummaryEmail } from "@/lib/email";
+import { sendWeeklyReportEmail, queueMonthlyRecap } from "@/lib/email";
 import type { MonthlyScanSummaryData } from "@/lib/email";
 import { getEffectivePlanWithFamily } from "@/lib/family/get-family-plan";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
@@ -270,13 +270,12 @@ export async function GET(request: Request) {
             monthLabel,
           };
 
-          const result = await sendMonthlyScanSummaryEmail(user.email, user.name || "", summaryData);
+          const result = await queueMonthlyRecap(user.id, summaryData);
 
-          if (result.success) {
+          if (result.queued) {
             sentCount++;
           } else {
-            errorCount++;
-            console.error(`Failed to send monthly report to ${user.email}:`, "error" in result ? result.error : "Unknown error");
+            console.log(`Skipped monthly recap for ${user.email}: ${result.reason}`);
           }
         } catch (error) {
           errorCount++;

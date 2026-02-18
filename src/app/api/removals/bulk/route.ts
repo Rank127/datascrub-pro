@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getDataBrokerInfo, getSubsidiaries, isParentBroker, getOptOutInstructions } from "@/lib/removers/data-broker-directory";
-import { getEmailQuotaStatus, sendBulkRemovalSummaryEmail, sendBulkCCPARemovalRequest, canSendEmail } from "@/lib/email";
+import { getEmailQuotaStatus, queueBulkRemovalSummary, sendBulkCCPARemovalRequest, canSendEmail } from "@/lib/email";
 import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
 import { getEffectivePlan } from "@/lib/family/family-service";
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     // Get user info for summary email
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { email: true },
+      select: { email: true, emailNotifications: true, removalUpdates: true },
     });
     const userName = session.user.name || user?.email?.split("@")[0] || "User";
     const userEmail = user?.email || session.user.email;
@@ -432,21 +432,17 @@ export async function POST(request: Request) {
       totalProcessed++;
     }
 
-    // Send a single summary email to user with ALL info (auto + manual)
-    if ((successCount > 0 || manualExposures.length > 0) && userEmail) {
-      try {
-        await sendBulkRemovalSummaryEmail(userEmail, userName, {
-          totalProcessed: successCount + manualExposures.length,
-          successCount,
-          failCount,
-          sources: [...new Set(processedSources)], // Unique broker names for auto-submitted
-          consolidatedCount: totalConsolidated,
-          manualRemovals: manualRemovalDetails, // All manual removal details
-          emailsSent,
-        });
-      } catch (emailError) {
-        console.error("Failed to send bulk removal summary email:", emailError);
-      }
+    // Queue bulk removal summary for daily consolidated digest (preference checks handled by queue function)
+    if ((successCount > 0 || manualExposures.length > 0)) {
+      queueBulkRemovalSummary(userId, {
+        totalProcessed: successCount + manualExposures.length,
+        successCount,
+        failCount,
+        sources: [...new Set(processedSources)],
+        consolidatedCount: totalConsolidated,
+        manualRemovals: manualRemovalDetails,
+        emailsSent,
+      }).catch((e) => console.error("Failed to queue bulk removal summary:", e));
     }
 
     // Get updated quota status

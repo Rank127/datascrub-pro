@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { sendCCPARemovalRequest, sendRemovalStatusDigestEmail, queueRemovalStatusUpdate } from "@/lib/email";
+import { sendCCPARemovalRequest, queueRemovalDigest, queueRemovalStatusUpdate } from "@/lib/email";
 import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, isKnownDataBroker, getNotBrokerReason, type DataBrokerInfo } from "./data-broker-directory";
 import { calculateVerifyAfterDate } from "./verification-service";
 import { attemptAutomatedOptOut, isAutomationEnabled, getBestAutomationMethod, canAutomateBroker } from "./browser-automation";
@@ -1683,12 +1683,12 @@ export async function processPendingRemovalsBatch(limit: number = 20, deadline?:
     await new Promise(resolve => setTimeout(resolve, 500));
   }
 
-  // Send ONE digest email per user with all their submitted removals
-  console.log(`[Batch Removal] Sending digest emails to ${userUpdates.size} users`);
-  for (const [_userId, userData] of userUpdates) {
+  // Queue ONE digest per user for daily consolidated email
+  console.log(`[Batch Removal] Queuing digest for ${userUpdates.size} users`);
+  for (const [userId, userData] of userUpdates) {
     if (userData.submitted.length > 0) {
       try {
-        await sendRemovalStatusDigestEmail(userData.email, userData.name, {
+        const result = await queueRemovalDigest(userId, {
           completed: [],
           inProgress: [],
           submitted: userData.submitted.map(s => ({
@@ -1697,10 +1697,12 @@ export async function processPendingRemovalsBatch(limit: number = 20, deadline?:
           })),
           failed: [],
         });
-        stats.emailsSent++;
-        console.log(`[Batch Removal] Sent digest to ${userData.email}: ${userData.submitted.length} submitted`);
+        if (result.queued) {
+          stats.emailsSent++;
+          console.log(`[Batch Removal] Queued digest for ${userData.email}: ${userData.submitted.length} submitted`);
+        }
       } catch (error) {
-        console.error(`[Batch Removal] Failed to send digest to ${userData.email}:`, error);
+        console.error(`[Batch Removal] Failed to queue digest for ${userData.email}:`, error);
       }
     }
   }
@@ -1829,12 +1831,12 @@ export async function retryFailedRemovalsBatch(limit: number = 20, deadline?: nu
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  // Send ONE digest email per user with all their retried removals
-  console.log(`[Retry Batch] Sending digest emails to ${userUpdates.size} users`);
-  for (const [_userId, userData] of userUpdates) {
+  // Queue ONE digest per user for daily consolidated email
+  console.log(`[Retry Batch] Queuing digest for ${userUpdates.size} users`);
+  for (const [userId, userData] of userUpdates) {
     if (userData.submitted.length > 0) {
       try {
-        await sendRemovalStatusDigestEmail(userData.email, userData.name, {
+        const result = await queueRemovalDigest(userId, {
           completed: [],
           inProgress: [],
           submitted: userData.submitted.map(s => ({
@@ -1843,10 +1845,12 @@ export async function retryFailedRemovalsBatch(limit: number = 20, deadline?: nu
           })),
           failed: [],
         });
-        stats.emailsSent++;
-        console.log(`[Retry Batch] Sent digest to ${userData.email}: ${userData.submitted.length} retried`);
+        if (result.queued) {
+          stats.emailsSent++;
+          console.log(`[Retry Batch] Queued digest for ${userData.email}: ${userData.submitted.length} retried`);
+        }
       } catch (error) {
-        console.error(`[Retry Batch] Failed to send digest to ${userData.email}:`, error);
+        console.error(`[Retry Batch] Failed to queue digest for ${userData.email}:`, error);
       }
     }
   }

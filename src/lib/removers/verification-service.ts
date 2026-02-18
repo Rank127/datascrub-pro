@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption/crypto";
-import { sendRemovalStatusDigestEmail, buildRemovalDigestContext } from "@/lib/email";
+import { queueRemovalDigest } from "@/lib/email";
 import { checkAndFireFirstRemovalMilestone } from "@/lib/removals/milestone-service";
 // SMS for removal updates disabled - only exposure and breach alerts
 import { LeakCheckScanner } from "@/lib/scanners/breaches/leakcheck";
@@ -597,8 +597,8 @@ export async function runVerificationBatch(deadline?: number): Promise<{
     await new Promise(resolve => setTimeout(resolve, 15000));
   }
 
-  // Send ONE digest email per user with all their updates
-  console.log(`[Verification] Sending digest emails to ${userUpdates.size} users`);
+  // Queue ONE digest per user for daily consolidated email
+  console.log(`[Verification] Queuing digest for ${userUpdates.size} users`);
   for (const [userId, userData] of userUpdates) {
     try {
       const digestData = {
@@ -608,8 +608,8 @@ export async function runVerificationBatch(deadline?: number): Promise<{
           dataType: u.dataType,
           status: "COMPLETED" as const,
         })),
-        inProgress: [],
-        submitted: [],
+        inProgress: [] as Array<{ sourceName: string; source: string; dataType: string; status: "IN_PROGRESS" }>,
+        submitted: [] as Array<{ sourceName: string; source: string; dataType: string; status: "SUBMITTED" }>,
         failed: userData.failed.map(u => ({
           sourceName: u.sourceName,
           source: u.source,
@@ -617,15 +617,13 @@ export async function runVerificationBatch(deadline?: number): Promise<{
           status: "FAILED" as const,
         })),
       };
-      const context = await buildRemovalDigestContext(userId);
-      await sendRemovalStatusDigestEmail(userData.email, userData.name, digestData, context);
-      stats.emailsSent++;
-      console.log(`[Verification] Sent digest to ${userData.email}: ${userData.completed.length} completed, ${userData.failed.length} failed`);
-
-      // SMS for removal updates disabled - only email notifications sent
-      // Users receive SMS for exposures and breach alerts only
+      const result = await queueRemovalDigest(userId, digestData);
+      if (result.queued) {
+        stats.emailsSent++;
+        console.log(`[Verification] Queued digest for ${userData.email}: ${userData.completed.length} completed, ${userData.failed.length} failed`);
+      }
     } catch (error) {
-      console.error(`[Verification] Failed to send digest to ${userData.email}:`, error);
+      console.error(`[Verification] Failed to queue digest for ${userData.email}:`, error);
     }
   }
 
