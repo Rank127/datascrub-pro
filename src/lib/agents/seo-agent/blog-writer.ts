@@ -33,6 +33,55 @@ function estimateReadTime(content: string): string {
 }
 
 /**
+ * Article formats to vary the structure of generated posts
+ * Rotated based on topic slug hash to ensure deterministic but varied output
+ */
+const ARTICLE_FORMATS = [
+  {
+    name: "deep-dive",
+    instruction: `Write a deep-dive investigative article. Open with a compelling real-world scenario or anecdote. Use narrative flow between sections — no TL;DR. Build the argument progressively. End with a forward-looking conclusion, not a sales pitch.`,
+  },
+  {
+    name: "practical-guide",
+    instruction: `Write a practical step-by-step guide. Open with 1-2 sentences on why this matters RIGHT NOW. Use numbered steps with clear action items. Include "Pro tip:" callouts in bold. End with a quick-reference checklist summary.`,
+  },
+  {
+    name: "myth-busting",
+    instruction: `Write a myth-busting article. Open with the most common misconception about this topic. Structure as "Myth vs Reality" sections. Use bold for myth statements and follow each with the factual correction. End with a "What you should actually do" section.`,
+  },
+  {
+    name: "explainer",
+    instruction: `Write a clear explainer article. Open with a simple analogy that makes the topic relatable. Use short paragraphs (2-3 sentences max). Include a "Key takeaway:" at the end of each major section. Build complexity gradually. End with "The bottom line" summary.`,
+  },
+  {
+    name: "opinion-analysis",
+    instruction: `Write an opinionated analysis piece. Open with a bold, specific claim. Back it up with data and examples. Acknowledge counterarguments honestly. Use first-person plural ("we've seen", "our data shows") sparingly but naturally. End with a clear recommendation.`,
+  },
+];
+
+/**
+ * Writing voice variations to avoid uniform AI tone
+ */
+const VOICE_VARIATIONS = [
+  "Write in a direct, no-nonsense tone. Short sentences. Get to the point fast. Cut any word that doesn't earn its place.",
+  "Write in a warm, conversational tone — like explaining this to a smart friend over coffee. Use contractions. Ask occasional rhetorical questions.",
+  "Write in a professional, authoritative tone. Use precise language. Back every claim with evidence. Avoid hedging words like 'might' or 'could'.",
+  "Write in an engaging, slightly urgent tone. This topic matters and the reader needs to act. Use concrete numbers and deadlines where possible.",
+  "Write in a calm, reassuring tone. The reader may feel overwhelmed — guide them step by step. Acknowledge that this is complex but manageable.",
+];
+
+/**
+ * Simple hash function to deterministically pick format/voice from slug
+ */
+function hashSlug(slug: string): number {
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = ((hash << 5) - hash + slug.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
+/**
  * Map topic category to blog category display name
  */
 function categoryDisplayName(category: string): string {
@@ -70,7 +119,12 @@ export async function writeBlogPost(
 
   const outline = generateBlogOutline(topic);
 
-  const prompt = `You are an expert privacy journalist and cybersecurity writer. Write an in-depth, SEO-optimized blog post for GhostMyData (ghostmydata.com), a data privacy removal service that scans 2,100+ data brokers and uses 24 AI agents to automate removals.
+  // Deterministically pick format and voice based on slug
+  const slugHash = hashSlug(topic.slug);
+  const format = ARTICLE_FORMATS[slugHash % ARTICLE_FORMATS.length];
+  const voice = VOICE_VARIATIONS[(slugHash >> 4) % VOICE_VARIATIONS.length];
+
+  const prompt = `You are an expert privacy journalist and cybersecurity writer for GhostMyData (ghostmydata.com), a data privacy removal service that scans 2,100+ data brokers and uses 24 AI agents to automate removals.
 
 **Topic:** ${topic.title}
 **Target Keywords:** ${topic.keywords.join(", ")}
@@ -79,18 +133,19 @@ export async function writeBlogPost(
 **Outline to follow:**
 ${outline.map((section, i) => `${i + 1}. ${section}`).join("\n")}
 
+**Article Format:** ${format.name}
+${format.instruction}
+
+**Voice:** ${voice}
+
 **Content Requirements:**
-- Start with a 1-2 sentence **TL;DR** summary in bold at the very top of the post
 - Write 1,500-2,500 words of genuinely helpful, expert-level content
 - Use markdown formatting with ## for main sections and ### for subsections
-- Use question-based ## headings where natural (e.g., "## How Long Does Spokeo Removal Take?" instead of "## Removal Timeframe")
-- Start each ## section by directly answering the heading question in 40-60 words. This is critical for Google AI Overview extraction.
+- Vary heading styles — mix statements, questions, and "how to" formats. NOT every heading should be a question.
 - Reference GhostMyData operational data where relevant (e.g., "Based on our removal data...", "Our analysis of thousands of removal requests shows...")
 - Weave target keywords naturally (1-2% density) — never keyword stuff
-- Write in a confident, authoritative but conversational tone — like a knowledgeable friend
 - Include specific, actionable steps with exact URLs, menu paths, or button names where applicable
 - Reference relevant privacy laws (CCPA, GDPR, state laws) with actual legal citations where appropriate
-- Include a FAQ section at the end with 4-6 questions using ### format — target "People Also Ask" queries
 - End with a natural CTA mentioning GhostMyData (not salesy — helpful)
 - Do NOT include a title (## or #) at the top — the title is handled separately
 - Do NOT include any images, image placeholders, or markdown image syntax
@@ -99,6 +154,17 @@ ${outline.map((section, i) => `${i + 1}. ${section}`).join("\n")}
 - For data broker articles, reference that GhostMyData covers 2,100+ brokers vs competitors' 35-500
 - For scam/security articles, explain how data brokers contribute to the problem and link to scan
 
+**CRITICAL — Avoid AI-Sounding Patterns:**
+- NEVER start with "In today's digital landscape", "In an era of", "In the ever-evolving", or any similar throat-clearing
+- NEVER use "It's important to note that", "It's worth mentioning", "Navigating the complex world of"
+- NEVER write "In conclusion" or "To sum up" — just make your final point
+- NEVER use "leverage", "utilize", "empower", "robust", "cutting-edge", "seamless" — use plain English
+- NEVER use "comprehensive guide" or "ultimate guide" in the body text
+- Vary sentence length dramatically — mix 5-word punches with longer explanatory sentences
+- Use specific numbers, dates, and proper nouns instead of vague phrases
+- Include at least one contrarian or surprising point that challenges common assumptions
+- Write like a real person with opinions, not a knowledge aggregator
+
 **Quality Standards:**
 - Write as if publishing on a major cybersecurity outlet (Krebs on Security, The Verge, Wired)
 - Every claim must be factually accurate — do not invent statistics or studies
@@ -106,7 +172,6 @@ ${outline.map((section, i) => `${i + 1}. ${section}`).join("\n")}
 - Include real-world examples or scenarios to illustrate points
 - Anticipate follow-up questions and address them proactively
 - Each section should provide unique value — no filler paragraphs
-- Use transition sentences between sections for natural reading flow
 
 Return ONLY the markdown content, nothing else.`;
 
@@ -114,10 +179,12 @@ Return ONLY the markdown content, nothing else.`;
     console.log(`[blog-writer] Generating post: ${topic.title}`);
 
     // Use Sonnet for higher quality content (~$0.02/post vs $0.005 with Haiku)
+    // Vary temperature between 0.7–0.9 for more natural variation across posts
+    const temperature = 0.7 + (slugHash % 3) * 0.1;
     const response = await anthropic.messages.create({
       model: MODEL_SONNET,
       max_tokens: 4096,
-      temperature: 0.6,
+      temperature,
       messages: [{ role: "user", content: prompt }],
     });
 

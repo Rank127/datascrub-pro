@@ -238,6 +238,10 @@ export default function ComparePrivacyBeePage() {
         </div>
       </div>
 
+      <p className="text-sm italic text-slate-500 -mt-8 mb-16 text-center max-w-4xl mx-auto">
+        Pricing and features current as of February 2026. Data compiled from publicly available information on each provider&apos;s website. Visit each provider for the most current details.
+      </p>
+
       {/* Pricing Comparison */}
       <div className="mb-16">
         <h2 className="text-2xl font-bold text-white mb-8 text-center">Pricing Breakdown</h2>

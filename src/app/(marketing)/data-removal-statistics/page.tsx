@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { BreadcrumbSchema, FAQSchema } from "@/components/seo/structured-data";
-import { APP_URL } from "@/lib/constants";
+import { getPublicStats } from "@/lib/stats";
+
+export const revalidate = 3600; // ISR: regenerate every hour
 
 export const metadata: Metadata = {
   title: "Data Broker Removal Statistics 2026 | GhostMyData",
@@ -68,40 +70,13 @@ const faqs = [
   },
 ];
 
-interface StatsData {
-  overview: {
-    totalRemovals: number;
-    completedRemovals: number;
-    successRate: number;
-    avgCompletionHours: number;
-    totalBrokersTracked: number;
-  };
-  statusDistribution: {
-    completed: number;
-    pending: number;
-    submitted: number;
-    inProgress: number;
-  };
-  severityDistribution: Record<string, number>;
-  removalMethods: Record<string, number>;
-  topBrokers: { name: string; successRate: number; completedRemovals: number }[];
-  worstBrokers: { name: string; successRate: number; completedRemovals: number }[];
-}
-
-async function getStats(): Promise<StatsData | null> {
-  try {
-    const res = await fetch(`${APP_URL}/api/public/stats`, {
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
-    return null;
-  }
-}
-
 export default async function DataRemovalStatisticsPage() {
-  const stats = await getStats();
+  let stats;
+  try {
+    stats = await getPublicStats();
+  } catch {
+    stats = null;
+  }
 
   const totalRemovals = stats?.overview.totalRemovals ?? 0;
   const successRate = stats?.overview.successRate ?? 0;
@@ -366,8 +341,49 @@ export default async function DataRemovalStatisticsPage() {
           </div>
         </section>
 
-        {/* FAQ */}
+        {/* Methodology */}
         <section className="py-16">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <h2 className="text-3xl font-bold text-white text-center mb-8">
+              How We Calculate These Statistics
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-2">Data Sources</h3>
+                <p className="text-gray-400">
+                  All statistics are derived from GhostMyData&apos;s live removal
+                  pipeline — real opt-out requests submitted to data brokers on
+                  behalf of our users.
+                </p>
+              </div>
+              <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-2">Aggregation</h3>
+                <p className="text-gray-400">
+                  Data is anonymized and aggregated across all users. No
+                  individual user data is exposed in these statistics.
+                </p>
+              </div>
+              <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-2">Update Frequency</h3>
+                <p className="text-gray-400">
+                  Statistics are refreshed hourly from our operational database,
+                  ensuring the numbers reflect current performance.
+                </p>
+              </div>
+              <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-2">Success Criteria</h3>
+                <p className="text-gray-400">
+                  A removal is marked successful when the data broker confirms
+                  deletion or our verification scan confirms the listing is gone
+                  from the broker&apos;s site.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="py-16 bg-gray-800/50">
           <div className="container mx-auto px-4 max-w-4xl">
             <h2 className="text-3xl font-bold text-white text-center mb-12">
               Frequently Asked Questions

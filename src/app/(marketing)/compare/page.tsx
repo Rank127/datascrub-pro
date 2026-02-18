@@ -258,6 +258,10 @@ export default function ComparePage() {
         </table>
       </div>
 
+      <p className="text-sm italic text-slate-500 mt-4 mb-8 text-center max-w-4xl mx-auto">
+        Pricing and features current as of February 2026. Data compiled from publicly available information on each provider&apos;s website. Visit each provider for the most current details.
+      </p>
+
       {/* Competitor Comparisons Grid */}
       <div className="mb-16">
         <h2 className="text-2xl font-bold text-white mb-8 text-center">Compare GhostMyData with Top Services</h2>

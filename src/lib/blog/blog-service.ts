@@ -144,3 +144,11 @@ export async function getAllSlugs(): Promise<string[]> {
   const posts = await getAllPostsCombined();
   return posts.map((p) => p.slug);
 }
+
+/**
+ * Get the set of static post slugs (from posts.ts, not DB)
+ * Used by sitemap to distinguish static vs auto-generated posts
+ */
+export function getStaticPostSlugs(): Set<string> {
+  return new Set(getStaticPosts().map((p) => p.slug));
+}

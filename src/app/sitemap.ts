@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { getAllPostsCombined } from "@/lib/blog/blog-service";
+import { getAllPostsCombined, getStaticPostSlugs } from "@/lib/blog/blog-service";
 import { APP_URL } from "@/lib/constants";
 import { getRemovableBrokerSlugs, EXISTING_MANUAL_PAGES } from "@/lib/broker-pages/broker-page-data";
 import { getAllStateSlugs } from "@/lib/state-data";
@@ -66,13 +66,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Blog posts (static + auto-generated from DB)
+  // Stagger: exclude auto-generated posts published within last 7 days to avoid bulk URL discovery
   const posts = await getAllPostsCombined();
-  const blogSitemap = posts.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post.updatedAt || post.publishedAt,
-    changeFrequency: "weekly" as const,
-    priority: post.featured ? 0.8 : 0.7,
-  }));
+  const staticSlugs = getStaticPostSlugs();
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const blogSitemap = posts
+    .filter((post) => {
+      if (staticSlugs.has(post.slug)) return true;
+      return new Date(post.publishedAt) <= sevenDaysAgo;
+    })
+    .map((post) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: post.updatedAt || post.publishedAt,
+      changeFrequency: "weekly" as const,
+      priority: post.featured ? 0.8 : 0.7,
+    }));
 
   return [...staticSitemap, ...brokerSitemap, ...stateSitemap, ...blogSitemap];
 }

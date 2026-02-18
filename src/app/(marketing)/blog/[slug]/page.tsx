@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllPostsCombined, getPostBySlugCombined } from "@/lib/blog/blog-service";
+import { getPostBySlug as getStaticPostBySlug } from "@/lib/blog/posts";
 import { BreadcrumbSchema, BlogPostingSchema, HowToSchema, type HowToStep } from "@/components/seo/structured-data";
 import { Calendar, Clock, ArrowLeft, ArrowRight, User, Tag } from "lucide-react";
 import { NewsletterCapture } from "@/components/blog/newsletter-capture";
@@ -61,11 +62,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  // Noindex thin auto-generated posts (< 1000 words) to avoid scaled content penalties
+  const isStaticPost = !!getStaticPostBySlug(slug);
+  const wordCount = post.content.split(/\s+/).length;
+  const shouldNoindex = !isStaticPost && wordCount < 1000;
+
   return {
     title: post.title,
     description: post.description,
     keywords: post.tags,
     authors: [{ name: post.author }],
+    ...(shouldNoindex && { robots: { index: false, follow: true } }),
     alternates: {
       canonical: `https://ghostmydata.com/blog/${post.slug}`,
     },
