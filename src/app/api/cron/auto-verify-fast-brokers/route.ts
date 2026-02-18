@@ -17,6 +17,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 import { checkAndFireFirstRemovalMilestone } from "@/lib/removals/milestone-service";
+import { queueRemovalStatusUpdate } from "@/lib/email";
 import {
   acquireJobLock,
   releaseJobLock,
@@ -100,7 +101,7 @@ export async function GET(request: Request) {
         },
         include: {
           exposure: {
-            select: { id: true, source: true, sourceName: true },
+            select: { id: true, source: true, sourceName: true, dataType: true },
           },
           user: {
             select: { id: true, email: true },
@@ -155,6 +156,14 @@ export async function GET(request: Request) {
             removal.exposure.sourceName || broker,
             removal.id
           ).catch(console.error);
+
+          // Queue removal status update for daily digest email
+          queueRemovalStatusUpdate(removal.userId, {
+            sourceName: removal.exposure.sourceName || broker,
+            source: broker,
+            status: "COMPLETED",
+            dataType: removal.exposure.dataType || "Personal Information",
+          }).catch(console.error);
 
           totalVerified++;
           brokerResults[broker].verified++;

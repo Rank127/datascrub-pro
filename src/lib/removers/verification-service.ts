@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption/crypto";
-import { sendRemovalStatusDigestEmail } from "@/lib/email";
+import { sendRemovalStatusDigestEmail, buildRemovalDigestContext } from "@/lib/email";
 import { checkAndFireFirstRemovalMilestone } from "@/lib/removals/milestone-service";
 // SMS for removal updates disabled - only exposure and breach alerts
 import { LeakCheckScanner } from "@/lib/scanners/breaches/leakcheck";
@@ -599,9 +599,9 @@ export async function runVerificationBatch(deadline?: number): Promise<{
 
   // Send ONE digest email per user with all their updates
   console.log(`[Verification] Sending digest emails to ${userUpdates.size} users`);
-  for (const [_userId, userData] of userUpdates) {
+  for (const [userId, userData] of userUpdates) {
     try {
-      await sendRemovalStatusDigestEmail(userData.email, userData.name, {
+      const digestData = {
         completed: userData.completed.map(u => ({
           sourceName: u.sourceName,
           source: u.source,
@@ -616,7 +616,9 @@ export async function runVerificationBatch(deadline?: number): Promise<{
           dataType: u.dataType,
           status: "FAILED" as const,
         })),
-      });
+      };
+      const context = await buildRemovalDigestContext(userId);
+      await sendRemovalStatusDigestEmail(userData.email, userData.name, digestData, context);
       stats.emailsSent++;
       console.log(`[Verification] Sent digest to ${userData.email}: ${userData.completed.length} completed, ${userData.failed.length} failed`);
 

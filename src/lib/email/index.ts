@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { isEmailBlocklisted, getBlocklistEntry } from "@/lib/removers/blocklist";
 import { captureError } from "@/lib/error-reporting";
 import { isEmailSuppressed, recordBounce, categorizeEmail, lookupBrokerByEmail } from "@/lib/email/suppression";
+import { getEffectivePlanWithFamily } from "@/lib/family/get-family-plan";
 
 // Lazy-initialize Resend client to ensure env vars are loaded
 let _resend: Resend | null = null;
@@ -1461,10 +1462,19 @@ interface RemovalDigestData {
   failed: RemovalStatusUpdate[];
 }
 
+export interface RemovalDigestContext {
+  totalExposures: number;
+  completedRemovals: number;
+  totalRemovalRequests: number;
+  effectivePlan: string;
+  allRemovalsComplete: boolean;
+}
+
 export async function sendRemovalStatusDigestEmail(
   email: string,
   name: string,
-  digest: RemovalDigestData
+  digest: RemovalDigestData,
+  context?: RemovalDigestContext
 ) {
   const totalUpdates =
     digest.completed.length +
@@ -1527,25 +1537,25 @@ export async function sendRemovalStatusDigestEmail(
 
   const completedSection = buildStatusSection(
     "Successfully Removed",
-    "✅",
+    "&#9989;",
     "#10b981",
     digest.completed
   );
   const inProgressSection = buildStatusSection(
     "In Progress",
-    "⏳",
+    "&#9203;",
     "#f97316",
     digest.inProgress
   );
   const submittedSection = buildStatusSection(
     "Submitted",
-    "📤",
+    "&#128228;",
     "#3b82f6",
     digest.submitted
   );
   const failedSection = buildStatusSection(
     "Requires Attention",
-    "⚠️",
+    "&#9888;&#65039;",
     "#ef4444",
     digest.failed
   );
@@ -1580,35 +1590,127 @@ export async function sendRemovalStatusDigestEmail(
     </div>
   `;
 
-  const html = baseTemplate(`
+  // Enhanced header, progress bar, and upgrade CTA when context is provided
+  let headerHtml = `
     <h1 style="color: #10b981; margin-top: 0; text-align: center;">
-      📊 Removal Status Update
+      &#128202; Removal Status Update
     </h1>
     <p style="font-size: 16px; line-height: 1.6; text-align: center; color: #94a3b8;">
       Hi ${name || "there"}, here's a summary of your data removal progress.
     </p>
+  `;
+  let progressBarHtml = "";
+  let upgradeCta = "";
+  let allCompleteHtml = "";
+
+  if (context && digest.completed.length > 0) {
+    // Enhanced celebratory header
+    if (context.allRemovalsComplete) {
+      headerHtml = `
+        <div style="text-align: center; margin-bottom: 8px;">
+          <div style="font-size: 48px; line-height: 1;">&#127881;&#127881;&#127881;</div>
+        </div>
+        <h1 style="color: #10b981; margin-top: 0; text-align: center;">
+          All Your Removals Are Complete!
+        </h1>
+        <p style="font-size: 16px; line-height: 1.6; text-align: center; color: #94a3b8;">
+          Hi ${name || "there"}, every removal request has been processed. Your data is protected.
+        </p>
+      `;
+      allCompleteHtml = `
+        <div style="background-color: #0f172a; border-radius: 8px; padding: 24px; margin: 24px 0; text-align: center;">
+          <div style="font-size: 36px; line-height: 1; margin-bottom: 12px;">&#128737;&#65039; &#9989; &#128272;</div>
+          <p style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #10b981;">
+            ${context.completedRemovals} removal${context.completedRemovals !== 1 ? "s" : ""} complete
+          </p>
+          <p style="margin: 0; font-size: 14px; color: #94a3b8;">
+            Your personal data has been removed from ${context.completedRemovals} source${context.completedRemovals !== 1 ? "s" : ""}. We'll continue monitoring to make sure it stays gone.
+          </p>
+        </div>
+      `;
+    } else {
+      headerHtml = `
+        <div style="text-align: center; margin-bottom: 8px;">
+          <div style="font-size: 48px; line-height: 1;">&#128170;</div>
+        </div>
+        <h1 style="color: #10b981; margin-top: 0; text-align: center;">
+          Your Data Is Being Erased
+        </h1>
+        <p style="font-size: 16px; line-height: 1.6; text-align: center; color: #94a3b8;">
+          Hi ${name || "there"}, great progress on your data removals!
+        </p>
+      `;
+    }
+
+    // Progress bar
+    if (context.totalRemovalRequests > 0) {
+      const pct = Math.round((context.completedRemovals / context.totalRemovalRequests) * 100);
+      progressBarHtml = `
+        <div style="margin: 24px 0;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 14px; color: #94a3b8;">${context.completedRemovals} of ${context.totalRemovalRequests} removals complete</span>
+            <span style="font-size: 14px; font-weight: 600; color: #10b981;">${pct}%</span>
+          </div>
+          <div style="background-color: #334155; border-radius: 999px; height: 12px; overflow: hidden;">
+            <div style="background: linear-gradient(90deg, #10b981, #34d399); height: 100%; border-radius: 999px; width: ${pct}%;"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Upgrade CTA for FREE users
+    if (context.effectivePlan === "FREE") {
+      const usedOfFree = Math.min(context.completedRemovals, 3);
+      upgradeCta = `
+        <div style="background: linear-gradient(135deg, #065f46, #0f766e); border-radius: 8px; padding: 24px; margin: 24px 0; text-align: center;">
+          <p style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: white;">
+            You've used ${usedOfFree} of 3 free removals
+          </p>
+          <p style="margin: 0 0 4px 0; font-size: 14px; color: #a7f3d0;">
+            Unlock unlimited automated removals and continuous monitoring.
+          </p>
+          <p style="margin: 0 0 16px 0; font-size: 14px; color: #a7f3d0;">
+            Pro $9.99/mo &bull; Enterprise $22.50/mo
+          </p>
+          <a href="${APP_URL}/dashboard/billing" style="display: inline-block; background-color: white; color: #065f46; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+            View Plans
+          </a>
+        </div>
+      `;
+    }
+  }
+
+  const html = baseTemplate(`
+    ${headerHtml}
+    ${progressBarHtml}
     ${summaryHtml}
+    ${allCompleteHtml}
     ${completedSection}
     ${inProgressSection}
     ${submittedSection}
     ${failedSection}
+    ${upgradeCta}
     ${buttonHtml("View All Removals", `${APP_URL}/dashboard/removals`)}
     <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 24px;">
       Data brokers typically process removal requests within 30-45 days.
     </p>
   `);
 
-  // Generate subject line based on most significant update
-  let subject = "📊 Removal Status Update";
-  if (digest.completed.length > 0) {
-    subject = `✅ ${digest.completed.length} removal${digest.completed.length > 1 ? "s" : ""} completed`;
-    if (digest.inProgress.length > 0 || digest.submitted.length > 0) {
+  // Generate subject line based on context and most significant update
+  let subject = "Removal Status Update";
+  if (context?.allRemovalsComplete && context.completedRemovals > 0) {
+    subject = `All ${context.completedRemovals} removals complete — your data is protected`;
+  } else if (digest.completed.length > 0) {
+    subject = `${digest.completed.length} removal${digest.completed.length > 1 ? "s" : ""} completed`;
+    if (context && context.totalRemovalRequests > context.completedRemovals) {
+      subject += ` (${context.completedRemovals}/${context.totalRemovalRequests} total)`;
+    } else if (digest.inProgress.length > 0 || digest.submitted.length > 0) {
       subject += `, ${digest.inProgress.length + digest.submitted.length} in progress`;
     }
   } else if (digest.failed.length > 0) {
-    subject = `⚠️ ${digest.failed.length} removal${digest.failed.length > 1 ? "s" : ""} need attention`;
+    subject = `${digest.failed.length} removal${digest.failed.length > 1 ? "s" : ""} need attention`;
   } else if (digest.inProgress.length > 0) {
-    subject = `⏳ ${digest.inProgress.length} removal${digest.inProgress.length > 1 ? "s" : ""} in progress`;
+    subject = `${digest.inProgress.length} removal${digest.inProgress.length > 1 ? "s" : ""} in progress`;
   }
 
   return sendEmail(email, subject, html);
@@ -2479,6 +2581,44 @@ export async function queueRemovalStatusUpdate(
 }
 
 /**
+ * Build context for enhanced removal digest emails.
+ * Queries total exposures, removal status breakdown, and effective plan.
+ */
+export async function buildRemovalDigestContext(userId: string): Promise<RemovalDigestContext> {
+  const [statusBreakdown, exposureCount, effectivePlan] = await Promise.all([
+    prisma.removalRequest.groupBy({
+      by: ["status"],
+      where: { userId },
+      _count: { id: true },
+    }),
+    prisma.exposure.count({ where: { userId } }),
+    getEffectivePlanWithFamily(userId),
+  ]);
+
+  let completedRemovals = 0;
+  let totalRemovalRequests = 0;
+  let hasActiveRemovals = false;
+
+  for (const group of statusBreakdown) {
+    totalRemovalRequests += group._count.id;
+    if (group.status === "COMPLETED") {
+      completedRemovals = group._count.id;
+    }
+    if (["PENDING", "SUBMITTED", "IN_PROGRESS", "REQUIRES_MANUAL"].includes(group.status)) {
+      hasActiveRemovals = true;
+    }
+  }
+
+  return {
+    totalExposures: exposureCount,
+    completedRemovals,
+    totalRemovalRequests,
+    effectivePlan,
+    allRemovalsComplete: !hasActiveRemovals && completedRemovals > 0,
+  };
+}
+
+/**
  * Process all pending removal status updates and send batched digest emails.
  * Should be called once daily by a cron job.
  * Groups updates by user and sends one digest email per user.
@@ -2602,8 +2742,11 @@ export async function processPendingRemovalDigests(): Promise<{
         }
       }
 
+      // Build context for enhanced template
+      const digestContext = await buildRemovalDigestContext(userId);
+
       // Send the digest email
-      const result = await sendRemovalStatusDigestEmail(data.email, data.name, digest);
+      const result = await sendRemovalStatusDigestEmail(data.email, data.name, digest, digestContext);
 
       if (result.success) {
         stats.emailsSent++;
