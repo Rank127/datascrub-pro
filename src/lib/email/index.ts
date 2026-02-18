@@ -599,6 +599,201 @@ export async function sendWeeklyReportEmail(email: string, name: string, report:
   return sendEmail(email, `📊 Your Weekly Privacy Report - Risk Score: ${report.riskScore}`, html);
 }
 
+// ==========================================
+// Monthly Scan Summary Email
+// ==========================================
+
+export interface MonthlyScanSummaryData {
+  // Exposure stats
+  totalActiveExposures: number;
+  newExposuresThisMonth: number;
+  previousMonthNewExposures: number;
+  // Severity breakdown (active)
+  criticalCount: number;
+  highCount: number;
+  mediumCount: number;
+  lowCount: number;
+  // Removal stats
+  removalsCompletedThisMonth: number;
+  totalRemovalsCompleted: number;
+  pendingRemovals: number;
+  // Protection
+  protectionScore: number; // 0-100 (removed / total)
+  previousProtectionScore: number;
+  // Top sources
+  topSources: Array<{ sourceName: string; count: number }>;
+  // Plan
+  effectivePlan: string;
+  // Month label
+  monthLabel: string; // e.g. "January 2026"
+}
+
+export async function sendMonthlyScanSummaryEmail(
+  email: string,
+  name: string,
+  data: MonthlyScanSummaryData
+) {
+  const scoreColor = data.protectionScore >= 70 ? "#10b981" : data.protectionScore >= 40 ? "#f97316" : "#ef4444";
+  const scoreChange = data.protectionScore - data.previousProtectionScore;
+  const scoreChangeText = scoreChange === 0
+    ? "unchanged"
+    : scoreChange > 0
+    ? `<span style="color: #10b981;">&#9650; ${scoreChange} pts better</span>`
+    : `<span style="color: #ef4444;">&#9660; ${Math.abs(scoreChange)} pts worse</span>`;
+
+  const exposureChangeText = data.previousMonthNewExposures === 0
+    ? ""
+    : data.newExposuresThisMonth <= data.previousMonthNewExposures
+    ? `<span style="color: #10b981;">(&#9660; ${data.previousMonthNewExposures - data.newExposuresThisMonth} vs last month)</span>`
+    : `<span style="color: #ef4444;">(&#9650; ${data.newExposuresThisMonth - data.previousMonthNewExposures} vs last month)</span>`;
+
+  // Severity breakdown
+  const severityRows = [
+    { label: "Critical", count: data.criticalCount, color: "#ef4444" },
+    { label: "High", count: data.highCount, color: "#f97316" },
+    { label: "Medium", count: data.mediumCount, color: "#eab308" },
+    { label: "Low", count: data.lowCount, color: "#3b82f6" },
+  ].filter(r => r.count > 0);
+
+  const severityHtml = severityRows.length > 0 ? `
+    <div style="margin: 20px 0;">
+      <p style="font-size: 14px; color: #94a3b8; margin: 0 0 12px 0; font-weight: 500;">Active Exposures by Severity</p>
+      ${severityRows.map(r => {
+        const pct = data.totalActiveExposures > 0 ? Math.round((r.count / data.totalActiveExposures) * 100) : 0;
+        return `
+          <div style="margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span style="font-size: 13px; color: ${r.color};">${r.label}</span>
+              <span style="font-size: 13px; color: #e2e8f0;">${r.count}</span>
+            </div>
+            <div style="background-color: #334155; border-radius: 999px; height: 6px; overflow: hidden;">
+              <div style="background-color: ${r.color}; height: 100%; border-radius: 999px; width: ${pct}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  ` : "";
+
+  // Top sources
+  const topSourcesHtml = data.topSources.length > 0 ? `
+    <div style="margin: 20px 0;">
+      <p style="font-size: 14px; color: #94a3b8; margin: 0 0 12px 0; font-weight: 500;">Top Data Brokers With Your Data</p>
+      <div style="background-color: #0f172a; border-radius: 8px; overflow: hidden;">
+        ${data.topSources.map((s, i) => `
+          <div style="padding: 10px 12px; ${i < data.topSources.length - 1 ? "border-bottom: 1px solid #1e293b;" : ""}">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #e2e8f0; font-size: 14px;">${s.sourceName}</span>
+              <span style="color: #94a3b8; font-size: 13px;">${s.count} exposure${s.count !== 1 ? "s" : ""}</span>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  ` : "";
+
+  // Upgrade CTA for FREE users
+  const upgradeCta = data.effectivePlan === "FREE" ? `
+    <div style="background: linear-gradient(135deg, #065f46, #0f766e); border-radius: 8px; padding: 24px; margin: 24px 0; text-align: center;">
+      <p style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: white;">
+        Remove all ${data.totalActiveExposures} exposures automatically
+      </p>
+      <p style="margin: 0 0 16px 0; font-size: 14px; color: #a7f3d0;">
+        Upgrade to unlock unlimited removals and continuous monitoring.
+      </p>
+      <a href="${APP_URL}/dashboard/checkout?plan=PRO" style="display: inline-block; background-color: white; color: #065f46; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+        Upgrade to Pro — $9.99/mo
+      </a>
+      <p style="margin: 8px 0 0 0; font-size: 13px; color: #a7f3d0;">
+        or <a href="${APP_URL}/dashboard/checkout" style="color: white; text-decoration: underline;">Enterprise at $22.50/mo</a> for dark web monitoring + family plan
+      </p>
+    </div>
+  ` : "";
+
+  const html = baseTemplate(`
+    <h1 style="color: #10b981; margin-top: 0; text-align: center;">
+      &#128202; Monthly Privacy Report
+    </h1>
+    <p style="font-size: 14px; color: #64748b; text-align: center; margin-top: -8px;">
+      ${data.monthLabel}
+    </p>
+    <p style="font-size: 16px; line-height: 1.6; text-align: center; color: #94a3b8;">
+      Hi ${name || "there"}, here's your monthly privacy summary.
+    </p>
+
+    <!-- Protection Score -->
+    <div style="text-align: center; margin: 28px 0;">
+      <div style="display: inline-block; width: 110px; height: 110px; border-radius: 50%; background: conic-gradient(${scoreColor} ${data.protectionScore}%, #334155 ${data.protectionScore}%); position: relative;">
+        <div style="position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 28px; font-weight: bold; color: ${scoreColor};">${data.protectionScore}</span>
+        </div>
+      </div>
+      <p style="color: #94a3b8; margin-top: 8px; font-size: 14px;">
+        Protection Score (${scoreChangeText})
+      </p>
+    </div>
+
+    <!-- Key Stats Grid -->
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Active Exposures</td>
+          <td style="padding: 12px 0; color: ${data.totalActiveExposures > 0 ? '#ef4444' : '#10b981'}; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">${data.totalActiveExposures}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">New This Month</td>
+          <td style="padding: 12px 0; color: ${data.newExposuresThisMonth > 0 ? '#f97316' : '#10b981'}; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">
+            ${data.newExposuresThisMonth > 0 ? '+' : ''}${data.newExposuresThisMonth} ${exposureChangeText}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Removals Completed</td>
+          <td style="padding: 12px 0; color: #10b981; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">${data.removalsCompletedThisMonth}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8; border-bottom: 1px solid #334155;">Total Removed (All Time)</td>
+          <td style="padding: 12px 0; color: #10b981; text-align: right; font-weight: 600; border-bottom: 1px solid #334155;">${data.totalRemovalsCompleted}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #94a3b8;">Pending Removals</td>
+          <td style="padding: 12px 0; color: #e2e8f0; text-align: right; font-weight: 600;">${data.pendingRemovals}</td>
+        </tr>
+      </table>
+    </div>
+
+    ${severityHtml}
+    ${topSourcesHtml}
+
+    <!-- Removal Progress Bar -->
+    ${data.totalRemovalsCompleted > 0 || data.pendingRemovals > 0 ? `
+      <div style="margin: 24px 0;">
+        <p style="font-size: 14px; color: #94a3b8; margin: 0 0 8px 0;">Removal Progress</p>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span style="font-size: 13px; color: #94a3b8;">${data.totalRemovalsCompleted} removed</span>
+          <span style="font-size: 13px; color: #94a3b8;">${data.pendingRemovals} pending</span>
+        </div>
+        <div style="background-color: #334155; border-radius: 999px; height: 10px; overflow: hidden;">
+          <div style="background: linear-gradient(90deg, #10b981, #34d399); height: 100%; border-radius: 999px; width: ${data.totalRemovalsCompleted + data.pendingRemovals > 0 ? Math.round((data.totalRemovalsCompleted / (data.totalRemovalsCompleted + data.pendingRemovals + data.totalActiveExposures)) * 100) : 0}%;"></div>
+        </div>
+      </div>
+    ` : ""}
+
+    ${upgradeCta}
+    ${buttonHtml("View Full Dashboard", `${APP_URL}/dashboard`)}
+    <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 16px;">
+      You receive this report monthly. Manage frequency in <a href="${APP_URL}/dashboard/settings" style="color: #10b981;">notification settings</a>.
+    </p>
+  `);
+
+  const subject = data.removalsCompletedThisMonth > 0
+    ? `${data.monthLabel}: ${data.removalsCompletedThisMonth} removed, ${data.totalActiveExposures} remaining`
+    : `${data.monthLabel}: ${data.totalActiveExposures} exposures — your privacy report`;
+
+  return sendEmail(email, subject, html, {
+    emailType: "MONTHLY_SCAN_SUMMARY",
+  });
+}
+
 // Subscription Confirmation Email
 export async function sendSubscriptionEmail(email: string, name: string, plan: "PRO" | "ENTERPRISE") {
   const features = plan === "ENTERPRISE"
