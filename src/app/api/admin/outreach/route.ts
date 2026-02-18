@@ -6,6 +6,11 @@ import { checkPermission } from "@/lib/admin";
 import { getFounderFromEmail } from "@/lib/email";
 
 const FOUNDER_REPLY_TO = "rocky@ghostmydata.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://ghostmydata.com";
+
+function esc(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
 
 function personalEmailTemplate(body: string): string {
   return `<!DOCTYPE html>
@@ -20,7 +25,7 @@ ${body}
 }
 
 function buildChurnSurveyEmail(name: string): { subject: string; html: string } {
-  const firstName = name?.split(" ")[0] || "there";
+  const firstName = esc(name?.split(" ")[0] || "there");
   return {
     subject: "Quick question about your experience with GhostMyData",
     html: personalEmailTemplate(`
@@ -34,7 +39,7 @@ function buildChurnSurveyEmail(name: string): { subject: string; html: string } 
 }
 
 function buildEnterpriseInterviewEmail(name: string): { subject: string; html: string } {
-  const firstName = name?.split(" ")[0] || "there";
+  const firstName = esc(name?.split(" ")[0] || "there");
   return {
     subject: "15 minutes? (GhostMyData founder)",
     html: personalEmailTemplate(`
@@ -43,6 +48,53 @@ function buildEnterpriseInterviewEmail(name: string): { subject: string; html: s
 <p>Would you have 15 minutes for a quick call or video chat this week? I want to understand what's working well, what could be better, and where you'd like to see us go next.</p>
 <p>No agenda, no sales pitch — just a conversation. Reply to this email and we'll find a time that works.</p>
 <p>Thanks for being an early supporter,<br>Rocky Kathuria<br><span style="color: #666; font-size: 14px;">Founder, GhostMyData</span></p>
+    `),
+  };
+}
+
+interface ExposureTarget {
+  email: string;
+  name: string | null;
+  exposureCount: number;
+  topBrokers: string[];
+  severityCounts: { critical: number; high: number; medium: number };
+}
+
+function buildFreeUserExposureEmail(target: ExposureTarget): { subject: string; html: string } {
+  const firstName = esc(target.name?.split(" ")[0] || "there");
+  const brokerList = target.topBrokers.slice(0, 5).map((b) => esc(b));
+  const urgentCount = target.severityCounts.critical + target.severityCounts.high;
+
+  const subject = urgentCount > 0
+    ? `${target.exposureCount} sites have your personal data — ${urgentCount} are high risk`
+    : `Your personal data was found on ${target.exposureCount} sites`;
+
+  const brokerHtml = brokerList.length > 0
+    ? `<ul style="margin: 12px 0; padding-left: 20px;">${brokerList.map((b) => `<li style="margin-bottom: 4px;">${b}</li>`).join("")}${target.topBrokers.length > 5 ? `<li style="margin-bottom: 4px; color: #888;">...and ${target.exposureCount - 5} more</li>` : ""}</ul>`
+    : "";
+
+  const urgentLine = urgentCount > 0
+    ? `<p style="color: #c0392b; font-weight: bold;">${urgentCount} of these are high-risk exposures that include sensitive personal information.</p>`
+    : "";
+
+  return {
+    subject,
+    html: personalEmailTemplate(`
+<p>Hi ${firstName},</p>
+<p>This is Rocky from GhostMyData. When you scanned your data with us, we found your personal information on <strong>${target.exposureCount} sites</strong>, including:</p>
+${brokerHtml}
+${urgentLine}
+<p>Right now these sites are selling or sharing your data — your name, email, phone number, and more — to anyone who searches for you.</p>
+<p>With a Pro plan, we automatically send legal removal requests to every one of these sites on your behalf. Most removals complete within 2-4 weeks, and we keep monitoring to make sure your data stays gone.</p>
+<p style="margin: 24px 0;">
+  <a href="${APP_URL}/pricing" style="background-color: #10b981; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-family: -apple-system, sans-serif; font-size: 15px;">Remove My Data — $9.99/mo</a>
+</p>
+<p>Questions? Just reply to this email — I read every one.</p>
+<p>Best,<br>Rocky Kathuria<br><span style="color: #666; font-size: 14px;">Founder, GhostMyData</span></p>
+<p style="font-size: 12px; color: #999; margin-top: 32px; border-top: 1px solid #eee; padding-top: 16px;">
+  You're receiving this because you signed up for GhostMyData and ran a data scan.
+  <a href="${APP_URL}/dashboard/settings" style="color: #999;">Manage preferences</a>
+</p>
     `),
   };
 }
@@ -66,14 +118,19 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { type, dryRun } = body as { type: string; dryRun?: boolean };
 
-    if (!type || !["churn_survey", "enterprise_interview"].includes(type)) {
+    const validTypes = ["churn_survey", "enterprise_interview", "free_user_exposure"];
+    if (!type || !validTypes.includes(type)) {
       return NextResponse.json(
-        { error: "Invalid type. Must be 'churn_survey' or 'enterprise_interview'" },
+        { error: `Invalid type. Must be one of: ${validTypes.join(", ")}` },
         { status: 400 }
       );
     }
 
-    // Query target users
+    if (type === "free_user_exposure") {
+      return handleFreeUserExposure(dryRun);
+    }
+
+    // Query target users for churn_survey / enterprise_interview
     let targets: { email: string; name: string | null }[];
 
     if (type === "churn_survey") {
@@ -157,4 +214,142 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Free user exposure campaign — sends personalized emails showing
+ * each free user's actual exposure count and top broker names.
+ * Filters out test accounts and users with notifications disabled.
+ */
+async function handleFreeUserExposure(dryRun?: boolean) {
+  // Exclude test/internal emails
+  const excludePatterns = [
+    "test@", "example.com", "example.org", "ghostmydata.com",
+    "rank1its", "ziprecruiter.com", "invalid.test",
+  ];
+
+  // Find free users who have exposures and have email notifications enabled
+  const freeUsersWithExposures: {
+    userId: string;
+    email: string;
+    name: string | null;
+    _count: number;
+  }[] = await prisma.$queryRaw`
+    SELECT
+      u.id as "userId",
+      u.email,
+      u.name,
+      COUNT(e.id)::int as "_count"
+    FROM "User" u
+    JOIN "Exposure" e ON e."userId" = u.id
+    WHERE u.plan = 'FREE'
+      AND u."emailNotifications" = true
+      AND e.status IN ('ACTIVE', 'MONITORING')
+    GROUP BY u.id, u.email, u.name
+    HAVING COUNT(e.id) >= 3
+    ORDER BY COUNT(e.id) DESC
+  `;
+
+  // Filter out test accounts
+  const realUsers = freeUsersWithExposures.filter((u) =>
+    u.email && !excludePatterns.some((p) => u.email.toLowerCase().includes(p))
+  );
+
+  // Build detailed targets with broker info and severity
+  const targets: (ExposureTarget & { userId: string })[] = [];
+
+  for (const user of realUsers) {
+    // Top brokers by count
+    const topBrokers: { sourceName: string; count: bigint }[] = await prisma.$queryRaw`
+      SELECT "sourceName", COUNT(*)::bigint as count
+      FROM "Exposure"
+      WHERE "userId" = ${user.userId}
+        AND status IN ('ACTIVE', 'MONITORING')
+        AND "sourceName" IS NOT NULL
+      GROUP BY "sourceName"
+      ORDER BY count DESC
+      LIMIT 8
+    `;
+
+    // Severity breakdown
+    const severities: { severity: string; count: bigint }[] = await prisma.$queryRaw`
+      SELECT severity, COUNT(*)::bigint as count
+      FROM "Exposure"
+      WHERE "userId" = ${user.userId}
+        AND status IN ('ACTIVE', 'MONITORING')
+      GROUP BY severity
+    `;
+
+    const sevMap: Record<string, number> = {};
+    severities.forEach((s) => { sevMap[s.severity] = Number(s.count); });
+
+    targets.push({
+      userId: user.userId,
+      email: user.email,
+      name: user.name,
+      exposureCount: user._count,
+      topBrokers: topBrokers.map((b) => b.sourceName),
+      severityCounts: {
+        critical: sevMap["CRITICAL"] || 0,
+        high: sevMap["HIGH"] || 0,
+        medium: sevMap["MEDIUM"] || 0,
+      },
+    });
+  }
+
+  if (dryRun) {
+    return NextResponse.json({
+      status: "dry_run",
+      type: "free_user_exposure",
+      targetCount: targets.length,
+      targets: targets.map((t) => ({
+        email: t.email,
+        name: t.name,
+        exposureCount: t.exposureCount,
+        topBrokers: t.topBrokers.slice(0, 5),
+        urgentCount: t.severityCounts.critical + t.severityCounts.high,
+      })),
+    });
+  }
+
+  if (targets.length === 0) {
+    return NextResponse.json({ status: "no_targets", type: "free_user_exposure", sent: 0 });
+  }
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const from = getFounderFromEmail();
+  const results: { email: string; success: boolean; exposureCount: number; error?: string }[] = [];
+
+  for (const target of targets) {
+    const { subject, html } = buildFreeUserExposureEmail(target);
+
+    try {
+      await resend.emails.send({
+        from,
+        to: target.email,
+        replyTo: FOUNDER_REPLY_TO,
+        subject,
+        html,
+      });
+      results.push({ email: target.email, success: true, exposureCount: target.exposureCount });
+    } catch (err) {
+      results.push({
+        email: target.email,
+        success: false,
+        exposureCount: target.exposureCount,
+        error: err instanceof Error ? err.message : "Send failed",
+      });
+    }
+  }
+
+  const sent = results.filter((r) => r.success).length;
+  const failed = results.filter((r) => !r.success).length;
+
+  return NextResponse.json({
+    status: "sent",
+    type: "free_user_exposure",
+    sent,
+    failed,
+    results,
+  });
 }
