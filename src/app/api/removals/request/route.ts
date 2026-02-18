@@ -7,6 +7,7 @@ import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
 import { isAdmin as _isAdmin } from "@/lib/admin";
 import { getEffectivePlan } from "@/lib/family/family-service";
+import { sendFreeLimitReachedEmail } from "@/lib/email";
 
 const requestSchema = z.object({
   exposureId: z.string(),
@@ -168,6 +169,9 @@ export async function POST(request: Request) {
     if (!txResult.ok) {
       switch (txResult.code) {
         case "QUOTA":
+          // Send upgrade email (async, once per month, non-blocking)
+          sendFreeLimitReachedEmail(session.user.id).catch(console.error);
+
           return NextResponse.json(
             {
               error: `You've reached your monthly removal limit (${txResult.limit} removals). Upgrade your plan for unlimited removals.`,

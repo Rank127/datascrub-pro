@@ -26,6 +26,7 @@ import { EmptyState } from "@/components/dashboard/empty-state";
 import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 import { Pagination } from "@/components/dashboard/pagination";
 import { UpgradeCta } from "@/components/dashboard/upgrade-cta";
+import { FreeLimitDialog } from "@/components/dashboard/free-limit-dialog";
 import { Input } from "@/components/ui/input";
 import {
   AlertTriangle,
@@ -95,6 +96,8 @@ function ExposuresPageContent() {
     searchParams.get("search") || ""
   );
   const [showHelp, setShowHelp] = useState(false);
+  const [showFreeLimitDialog, setShowFreeLimitDialog] = useState(false);
+  const [freeLimitInfo, setFreeLimitInfo] = useState<{ usage: number; limit: number }>({ usage: 3, limit: 3 });
   const { isFreePlan } = useSubscription();
 
   // Show upgrade banner only for actual FREE users (not family members with inherited plans)
@@ -207,14 +210,8 @@ function ExposuresPageContent() {
       } else {
         const data = await response.json();
         if (data.requiresUpgrade) {
-          toast.error(
-            <div>
-              {data.error}{" "}
-              <a href="/pricing" className="text-emerald-400 underline">
-                View Plans
-              </a>
-            </div>
-          );
+          setFreeLimitInfo({ usage: data.currentUsage || 3, limit: data.limit || 3 });
+          setShowFreeLimitDialog(true);
         } else {
           toast.error(data.error || "Failed to request removal");
         }
@@ -275,15 +272,7 @@ function ExposuresPageContent() {
         toast.success(`${successCount} removal request(s) submitted`);
       }
       if (hasUpgradeError) {
-        toast.error(
-          <div>
-            You&apos;ve reached your removal limit.{" "}
-            <a href="/pricing" className="text-emerald-400 underline">
-              Upgrade your plan
-            </a>{" "}
-            for unlimited removals.
-          </div>
-        );
+        setShowFreeLimitDialog(true);
       }
       setSelectedIds(new Set());
       fetchExposures();
@@ -646,6 +635,15 @@ function ExposuresPageContent() {
           )}
         </CardContent>
       </Card>
+
+      {/* Free Limit Upgrade Dialog */}
+      <FreeLimitDialog
+        open={showFreeLimitDialog}
+        onClose={() => setShowFreeLimitDialog(false)}
+        activeExposures={actionableExposures.length}
+        removalsUsed={freeLimitInfo.usage}
+        limit={freeLimitInfo.limit}
+      />
     </div>
   );
 }

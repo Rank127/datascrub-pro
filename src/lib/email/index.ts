@@ -2511,6 +2511,148 @@ export async function sendFirstRemovalMilestoneEmail(
 }
 
 // ==========================================
+// Free Limit Reached Email (Upgrade Prompt)
+// ==========================================
+
+/**
+ * Send an upgrade prompt email when a FREE user hits their 3 removal/month limit.
+ * Shows remaining unprotected exposures and pricing to drive conversions.
+ * Deduplicates: only sends once per calendar month per user.
+ */
+export async function sendFreeLimitReachedEmail(
+  userId: string
+) {
+  // Deduplicate: check if we already sent this month
+  const currentMonth = new Date();
+  currentMonth.setDate(1);
+  currentMonth.setHours(0, 0, 0, 0);
+
+  const alreadySent = await prisma.emailQueue.findFirst({
+    where: {
+      userId,
+      emailType: "FREE_LIMIT_REACHED",
+      createdAt: { gte: currentMonth },
+    },
+  });
+
+  if (alreadySent) {
+    return { success: true, skipped: true, reason: "Already sent this month" };
+  }
+
+  // Get user info + exposure stats
+  const [user, exposureStats, removalCount] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, name: true, emailNotifications: true },
+    }),
+    prisma.exposure.groupBy({
+      by: ["status"],
+      where: { userId },
+      _count: { id: true },
+    }),
+    prisma.removalRequest.count({
+      where: { userId, status: "COMPLETED" },
+    }),
+  ]);
+
+  if (!user?.email || !user.emailNotifications) {
+    return { success: false, skipped: true, reason: "User not found or notifications disabled" };
+  }
+
+  // Calculate stats
+  let activeExposures = 0;
+  let totalExposures = 0;
+  for (const group of exposureStats) {
+    totalExposures += group._count.id;
+    if (group.status === "ACTIVE") {
+      activeExposures = group._count.id;
+    }
+  }
+
+  // Get top 5 active sources for specificity
+  const topSources = await prisma.exposure.findMany({
+    where: { userId, status: "ACTIVE" },
+    select: { sourceName: true },
+    distinct: ["sourceName"],
+    take: 5,
+    orderBy: { severity: "desc" },
+  });
+
+  const sourceNames = topSources.map(s => s.sourceName);
+  const moreCount = Math.max(0, activeExposures - sourceNames.length);
+
+  const sourceListHtml = sourceNames.length > 0
+    ? `
+      <div style="background-color: #0f172a; border-radius: 8px; padding: 16px; margin: 20px 0;">
+        <p style="margin: 0 0 12px 0; font-size: 14px; color: #94a3b8; font-weight: 500;">Your data is still exposed on:</p>
+        ${sourceNames.map(name => `
+          <div style="padding: 6px 0; border-bottom: 1px solid #1e293b;">
+            <span style="color: #ef4444;">&#9679;</span>
+            <span style="color: #e2e8f0; margin-left: 8px;">${name}</span>
+          </div>
+        `).join("")}
+        ${moreCount > 0 ? `
+          <p style="margin: 8px 0 0 0; font-size: 13px; color: #64748b;">...and ${moreCount} more source${moreCount !== 1 ? "s" : ""}</p>
+        ` : ""}
+      </div>
+    `
+    : "";
+
+  const html = baseTemplate(`
+    <div style="text-align: center; margin-bottom: 8px;">
+      <div style="font-size: 48px; line-height: 1;">&#128275;</div>
+    </div>
+    <h1 style="color: #f59e0b; margin-top: 0; text-align: center;">
+      You've Used All 3 Free Removals
+    </h1>
+    <p style="font-size: 16px; line-height: 1.6; text-align: center; color: #94a3b8;">
+      Hi ${user.name || "there"}, you've completed <strong style="color: #10b981;">${removalCount}</strong> removal${removalCount !== 1 ? "s" : ""}
+      — but <strong style="color: #ef4444;">${activeExposures}</strong> exposure${activeExposures !== 1 ? "s" : ""} remain${activeExposures === 1 ? "s" : ""} unprotected.
+    </p>
+    ${sourceListHtml}
+    <div style="background-color: #0f172a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+      <p style="margin: 0 0 8px 0; font-size: 14px; color: #94a3b8;">Every day your data stays exposed, it can be:</p>
+      <ul style="margin: 0; padding-left: 20px; color: #e2e8f0; line-height: 2; font-size: 14px;">
+        <li>Sold to telemarketers and scammers</li>
+        <li>Used for identity theft or phishing attacks</li>
+        <li>Aggregated to build a complete profile of you</li>
+      </ul>
+    </div>
+    <div style="background: linear-gradient(135deg, #065f46, #0f766e); border-radius: 8px; padding: 24px; margin: 24px 0; text-align: center;">
+      <p style="margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: white;">
+        Unlock Unlimited Removals
+      </p>
+      <p style="margin: 0 0 16px 0; font-size: 14px; color: #a7f3d0;">
+        Remove your data from all ${activeExposures}+ sources automatically.
+      </p>
+      <div style="margin-bottom: 12px;">
+        <a href="${APP_URL}/dashboard/checkout?plan=PRO" style="display: inline-block; background-color: white; color: #065f46; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
+          Upgrade to Pro — $9.99/mo
+        </a>
+      </div>
+      <p style="margin: 0; font-size: 13px; color: #a7f3d0;">
+        or <a href="${APP_URL}/dashboard/checkout" style="color: white; text-decoration: underline;">Enterprise at $22.50/mo</a> for dark web monitoring + family plan
+      </p>
+    </div>
+    ${buttonHtml("View Your Exposures", `${APP_URL}/dashboard/exposures`)}
+    <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 16px;">
+      Your 3 free removals reset at the start of each month.
+    </p>
+  `);
+
+  return sendEmail(
+    user.email,
+    `${activeExposures} exposures still at risk — unlock unlimited removals`,
+    html,
+    {
+      emailType: "FREE_LIMIT_REACHED",
+      userId,
+      priority: 4,
+    }
+  );
+}
+
+// ==========================================
 // Batched Removal Status Updates (Preference-Aware)
 // ==========================================
 
