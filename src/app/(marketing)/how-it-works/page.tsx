@@ -220,7 +220,7 @@ export default function HowItWorksPage() {
                     </div>
                   </div>
 
-                  {/* Center icon */}
+                  {/* Center icon — sits on the timeline */}
                   <div className="relative z-10 flex-shrink-0">
                     <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center border-4 border-slate-950">
                       <step.icon className="h-8 w-8 text-emerald-500" />
@@ -229,6 +229,9 @@ export default function HowItWorksPage() {
                       {step.number}
                     </div>
                   </div>
+
+                  {/* Empty spacer — keeps icon centered on timeline */}
+                  <div className="hidden md:block flex-1" />
                 </div>
               );
             })}
