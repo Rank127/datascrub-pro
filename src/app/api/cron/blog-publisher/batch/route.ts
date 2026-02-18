@@ -2,8 +2,8 @@
  * Blog Batch Publisher — one-time blitz endpoint
  *
  * Generates and publishes as many blog posts as possible within the time limit.
- * Processes topics sequentially (each takes ~30-40s via Claude Haiku).
- * With maxDuration=300s, can publish ~7-8 posts per call.
+ * Processes topics sequentially (each takes ~90-120s via Claude Sonnet).
+ * With maxDuration=300s, can publish ~2-3 posts per call.
  *
  * Call multiple times to drain the entire topic queue.
  *
