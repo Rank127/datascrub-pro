@@ -81,6 +81,16 @@ function baseTemplate(content: string): string {
   `;
 }
 
+// HTML entity escaping — prevents XSS via user-supplied data in email templates
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // Button component
 function buttonHtml(text: string, url: string): string {
   return `
@@ -3272,7 +3282,7 @@ function buildConsolidatedDigestHtml(
         ${allSources.length > 0 ? `
           <p style="margin: 0 0 8px 0; font-weight: 600; color: #94a3b8; font-size: 13px;">Sources:</p>
           <ul style="margin: 0; padding-left: 20px; color: #e2e8f0; font-size: 14px;">
-            ${allSources.slice(0, 5).map(s => `<li>${s}</li>`).join("")}
+            ${allSources.slice(0, 5).map(s => `<li>${escapeHtml(s)}</li>`).join("")}
             ${allSources.length > 5 ? `<li style="color: #94a3b8;">...and ${allSources.length - 5} more</li>` : ""}
           </ul>
         ` : ""}
@@ -3313,8 +3323,8 @@ function buildConsolidatedDigestHtml(
       if (items.length === 0) return "";
       return items.slice(0, 10).map(item => `
         <tr>
-          <td style="padding: 8px 12px; border-bottom: 1px solid #334155; color: #e2e8f0; font-size: 14px;">${item.sourceName}</td>
-          <td style="padding: 8px 12px; border-bottom: 1px solid #334155; color: #94a3b8; font-size: 13px;">${item.dataType}</td>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #334155; color: #e2e8f0; font-size: 14px;">${escapeHtml(item.sourceName)}</td>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #334155; color: #94a3b8; font-size: 13px;">${escapeHtml(item.dataType)}</td>
           <td style="padding: 8px 12px; border-bottom: 1px solid #334155; text-align: right;">
             <span style="color: ${color}; font-size: 12px; font-weight: 600;">${label}</span>
           </td>
@@ -3361,7 +3371,7 @@ function buildConsolidatedDigestHtml(
         </p>
         ${allSources.length > 0 ? `
           <p style="margin: 8px 0 4px 0; font-weight: 600; color: #94a3b8; font-size: 13px;">Brokers:</p>
-          <p style="margin: 0; color: #e2e8f0; font-size: 14px;">${allSources.slice(0, 10).join(", ")}${allSources.length > 10 ? ` +${allSources.length - 10} more` : ""}</p>
+          <p style="margin: 0; color: #e2e8f0; font-size: 14px;">${allSources.slice(0, 10).map(s => escapeHtml(s)).join(", ")}${allSources.length > 10 ? ` +${allSources.length - 10} more` : ""}</p>
         ` : ""}
       </div>
     `);
@@ -3376,7 +3386,7 @@ function buildConsolidatedDigestHtml(
 
     sections.push(`
       <div style="margin: 24px 0; padding: 20px; background-color: #0f172a; border-radius: 8px; border-left: 4px solid #8b5cf6;">
-        <h2 style="color: #8b5cf6; margin: 0 0 16px 0; font-size: 18px;">Monthly Recap &mdash; ${mr.monthLabel}</h2>
+        <h2 style="color: #8b5cf6; margin: 0 0 16px 0; font-size: 18px;">Monthly Recap &mdash; ${escapeHtml(mr.monthLabel)}</h2>
         <div style="text-align: center; margin-bottom: 16px;">
           <div style="font-size: 48px; font-weight: bold; color: ${scoreColor};">${mr.protectionScore}%</div>
           <div style="font-size: 13px; color: #94a3b8;">Protection Score (${trend})</div>
@@ -3411,7 +3421,7 @@ function buildConsolidatedDigestHtml(
         ${mr.topSources.length > 0 ? `
           <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #334155;">
             <p style="margin: 0 0 4px 0; font-weight: 600; color: #94a3b8; font-size: 12px;">TOP SOURCES</p>
-            <p style="margin: 0; color: #e2e8f0; font-size: 13px;">${mr.topSources.map(s => `${s.sourceName} (${s.count})`).join(", ")}</p>
+            <p style="margin: 0; color: #e2e8f0; font-size: 13px;">${mr.topSources.map(s => `${escapeHtml(s.sourceName)} (${s.count})`).join(", ")}</p>
           </div>
         ` : ""}
       </div>
@@ -3438,7 +3448,7 @@ function buildConsolidatedDigestHtml(
       Your Daily Privacy Digest
     </h1>
     <p style="font-size: 15px; line-height: 1.5; text-align: center; color: #94a3b8;">
-      Hi ${name || "there"}, here's your daily update.
+      Hi ${escapeHtml(name || "there")}, here's your daily update.
     </p>
     ${sections.join("")}
     ${upgradeCta}
@@ -3543,7 +3553,7 @@ export async function processConsolidatedDigests(): Promise<{
           break;
 
         case "MONTHLY_RECAP_PENDING":
-          if (ctx.monthlyData) entry.monthlyRecap = ctx.monthlyData;
+          if (ctx.monthlyData && !entry.monthlyRecap) entry.monthlyRecap = ctx.monthlyData;
           break;
       }
     } catch (error) {
@@ -3598,6 +3608,11 @@ export async function processConsolidatedDigests(): Promise<{
       } else {
         stats.errors++;
         captureError(`[Consolidated Digest] Failed to send to ${data.email}`, result);
+        // Mark as FAILED to prevent duplicate sends on next cron run
+        await prisma.emailQueue.updateMany({
+          where: { id: { in: data.queueIds } },
+          data: { status: "FAILED" },
+        }).catch(err => captureError("[Consolidated Digest] Failed to mark items as FAILED", err));
       }
 
       stats.usersProcessed++;

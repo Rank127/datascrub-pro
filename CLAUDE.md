@@ -29,6 +29,17 @@
 - **Admin URL Corrections**: `POST /api/admin/url-corrections` validates new URLs and generates code snippets
 - **Link Checker Enhanced**: Auto-applies corrections, tries pattern variations for unknown broken links, includes suggestions in reports
 
+## Consolidated Daily Privacy Digest (Feb 2026)
+All user-facing exposure + removal emails are queued to `EmailQueue` and sent as ONE consolidated email per user at 10AM UTC.
+
+- **Queue functions** (in `src/lib/email/index.ts`): `queueExposureAlert()`, `queueBulkRemovalSummary()`, `queueMonthlyRecap()`, `queueRemovalDigest()` — each checks user preferences before queueing
+- **Processor**: `processConsolidatedDigests()` — handles 5 queue types: `REMOVAL_STATUS_PENDING`, `EXPOSURE_ALERT_PENDING`, `BULK_REMOVAL_PENDING`, `MONTHLY_RECAP_PENDING`, `REMOVAL_DIGEST_PENDING`
+- **Cron**: `consolidated-digest` at route `/api/cron/removal-digest`, schedule `0 10 * * *`
+- **Timing**: Events queue throughout day → reports cron queues monthly at 8AM → digest cron sends at 10AM
+- **NOT consolidated** (separate paths): drip campaigns, follow-up reminders, rescan reminders, milestone emails, free-user digest, weekly reports
+- **Security**: `escapeHtml()` on all user-supplied data; failed sends marked FAILED to prevent duplicates
+- **Important**: When adding new user-facing email sends, use `queueExposureAlert/queueBulkRemovalSummary/queueRemovalDigest/queueMonthlyRecap` instead of sending directly — this ensures consolidation into the daily digest
+
 ## Mastermind Pipeline Context (Feb 2026)
 - **Formatted Metrics**: `formatMetricsWithContext()` replaces raw `JSON.stringify()` — includes status definitions, expected ranges, pipeline health
 - **Directive Constraints**: System prompt includes hard bounds and "NEVER set removal_rate_per_broker below 5"
