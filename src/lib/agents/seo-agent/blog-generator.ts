@@ -10,7 +10,11 @@ export type BlogCategory =
   | "guide"
   | "comparison"
   | "state-privacy"
-  | "legal";
+  | "legal"
+  | "scam"
+  | "tool-review"
+  | "platform-privacy"
+  | "ai-privacy";
 
 export interface BlogTopic {
   title: string;
@@ -86,6 +90,776 @@ const DATA_BROKERS = [
   { name: "TransUnion", slug: "transunion" },
   { name: "Verisk", slug: "verisk" },
   { name: "CoreLogic", slug: "corelogic" },
+  // New brokers from Incogni's 85+ list that we don't cover
+  { name: "NuMLookup", slug: "numlookup" },
+  { name: "VoterRecords", slug: "voterrecords" },
+  { name: "PeopleWhiz", slug: "peoplewhiz" },
+  { name: "SpyDialer", slug: "spydialer" },
+  { name: "411Locate", slug: "411locate" },
+  { name: "FastBackgroundCheck", slug: "fastbackgroundcheck" },
+  { name: "NeighborWho", slug: "neighborwho" },
+  { name: "PrivateRecords.net", slug: "privaterecords" },
+  { name: "USAPeopleSearch", slug: "usapeoplesearch" },
+  { name: "Innovis", slug: "innovis" },
+  { name: "HomeMetry", slug: "homemetry" },
+  { name: "BlockShopper", slug: "blockshopper" },
+  { name: "GoLookUp", slug: "golookup" },
+  { name: "Social Catfish", slug: "social-catfish" },
+  { name: "PeopleSearchNow", slug: "peoplesearchnow" },
+  { name: "OpenPublicRecords", slug: "openpublicrecords" },
+  { name: "NumBerville", slug: "numberville" },
+  { name: "SageStream", slug: "sagestream" },
+  { name: "Persopo", slug: "persopo" },
+  { name: "IDTrue", slug: "idtrue" },
+  { name: "InfoTracer", slug: "infotracer" },
+  { name: "StateRecords", slug: "staterecords" },
+  { name: "OfficialUSA", slug: "officialusa" },
+  { name: "TrueCaller", slug: "truecaller" },
+  { name: "ArrestFacts", slug: "arrestfacts" },
+  { name: "BackgroundAlert", slug: "backgroundalert" },
+  { name: "BackgroundCheckRun", slug: "backgroundcheckrun" },
+  { name: "RedPlum", slug: "redplum" },
+  { name: "PublicDataUSA", slug: "publicdatausa" },
+  { name: "Ownerly", slug: "ownerly" },
+  { name: "SearchPublicRecords", slug: "searchpublicrecords" },
+  { name: "Rehold", slug: "rehold" },
+  { name: "OKCaller", slug: "okcaller" },
+  { name: "CallTruth", slug: "calltruth" },
+  { name: "KiwiSearches", slug: "kiwisearches" },
+  { name: "LocatePeople", slug: "locatepeople" },
+  { name: "PeopleByName", slug: "peoplebyname" },
+  { name: "PublicDataCheck", slug: "publicdatacheck-opt-out" },
+];
+
+// ============================================================================
+// SCAM & FRAUD ARTICLES (priority 9) — Incogni has 20+ of these
+// ============================================================================
+const SCAM_ARTICLES: BlogTopic[] = [
+  {
+    title: "Amazon Scam Texts: How to Spot and Stop Them in 2026",
+    slug: "amazon-scam-texts-how-to-spot-stop",
+    keywords: ["amazon scam text", "fake amazon text", "amazon text message scam", "amazon order scam"],
+    category: "scam",
+    priority: 9,
+  },
+  {
+    title: "UPS Text Scam: How to Identify Fake Delivery Notifications",
+    slug: "ups-text-scam-fake-delivery-notifications",
+    keywords: ["UPS text scam", "fake delivery text", "UPS scam message", "package delivery scam"],
+    category: "scam",
+    priority: 9,
+  },
+  {
+    title: "PayPal Scams: How to Protect Your Account in 2026",
+    slug: "paypal-scams-protect-your-account",
+    keywords: ["PayPal scam", "PayPal phishing", "fake PayPal email", "PayPal fraud"],
+    category: "scam",
+    priority: 9,
+  },
+  {
+    title: "Cash App Scams: The Most Common Schemes and How to Avoid Them",
+    slug: "cash-app-scams-how-to-avoid",
+    keywords: ["Cash App scam", "Cash App fraud", "fake Cash App payment", "Cash App money flip scam"],
+    category: "scam",
+    priority: 9,
+  },
+  {
+    title: "Geek Squad Scam Emails: How to Spot Fake Renewal Notices",
+    slug: "geek-squad-scam-emails-fake-renewal",
+    keywords: ["Geek Squad scam", "fake Geek Squad email", "Geek Squad renewal scam", "Best Buy scam"],
+    category: "scam",
+    priority: 9,
+  },
+  {
+    title: "Venmo Scams: How to Protect Yourself from Payment Fraud",
+    slug: "venmo-scams-protect-payment-fraud",
+    keywords: ["Venmo scam", "Venmo phishing", "Venmo fraud", "fake Venmo payment"],
+    category: "scam",
+    priority: 8,
+  },
+  {
+    title: "Telegram Scams: How to Stay Safe on the Messaging App",
+    slug: "telegram-scams-stay-safe",
+    keywords: ["Telegram scam", "Telegram fraud", "Telegram phishing", "fake Telegram bot"],
+    category: "scam",
+    priority: 8,
+  },
+  {
+    title: "Wells Fargo Text Scam: How to Spot Fake Bank Alerts",
+    slug: "wells-fargo-text-scam-fake-bank-alerts",
+    keywords: ["Wells Fargo scam text", "fake bank text", "bank text scam", "Wells Fargo phishing"],
+    category: "scam",
+    priority: 8,
+  },
+  {
+    title: "USPS Text Scam: How to Identify Fake Postal Service Messages",
+    slug: "usps-text-scam-fake-postal-messages",
+    keywords: ["USPS text scam", "USPS fake text", "postal scam text", "fake USPS tracking"],
+    category: "scam",
+    priority: 8,
+  },
+  {
+    title: "How Scammers Get Your Personal Information (And How to Stop Them)",
+    slug: "how-scammers-get-your-personal-information",
+    keywords: ["how scammers get info", "scammer personal data", "stop scammers", "protect personal information"],
+    category: "scam",
+    priority: 10,
+  },
+  {
+    title: "Toll Road Text Scam: How to Spot Fake E-ZPass and SunPass Texts",
+    slug: "toll-road-text-scam-ezpass-sunpass",
+    keywords: ["toll road scam text", "E-ZPass scam", "SunPass scam", "fake toll text"],
+    category: "scam",
+    priority: 9,
+  },
+  {
+    title: "Medicare Scam Calls: How to Stop Them for Good",
+    slug: "medicare-scam-calls-how-to-stop",
+    keywords: ["Medicare scam calls", "stop Medicare calls", "Medicare phone scam", "fake Medicare call"],
+    category: "scam",
+    priority: 8,
+  },
+  {
+    title: "Snapchat Scams: How to Protect Your Account and Privacy",
+    slug: "snapchat-scams-protect-account-privacy",
+    keywords: ["Snapchat scam", "Snapchat phishing", "Snapchat hack", "Snapchat fraud"],
+    category: "scam",
+    priority: 7,
+  },
+  {
+    title: "Health Insurance Scam Calls: How to Stop Them",
+    slug: "health-insurance-scam-calls-how-to-stop",
+    keywords: ["health insurance scam calls", "stop insurance calls", "fake insurance call", "unwanted health calls"],
+    category: "scam",
+    priority: 8,
+  },
+  {
+    title: "What to Do If a Scammer Has Your Phone Number",
+    slug: "what-to-do-scammer-has-your-phone-number",
+    keywords: ["scammer has phone number", "phone number compromised", "scammer phone", "protect phone number"],
+    category: "scam",
+    priority: 9,
+  },
+  {
+    title: "How to Identify a Fake Text Message (With Examples)",
+    slug: "how-to-identify-fake-text-message",
+    keywords: ["fake text message", "identify scam text", "smishing examples", "spot fake text"],
+    category: "scam",
+    priority: 9,
+  },
+  {
+    title: "What Happens If You Answer a Spam Call? Here's the Truth",
+    slug: "what-happens-if-you-answer-spam-call",
+    keywords: ["answer spam call", "what happens spam call", "robocall danger", "spam call risk"],
+    category: "scam",
+    priority: 8,
+  },
+  {
+    title: "Number Spoofing: What It Is and How to Stop It",
+    slug: "number-spoofing-what-it-is-how-to-stop",
+    keywords: ["number spoofing", "caller ID spoofing", "stop spoofed calls", "fake caller ID"],
+    category: "scam",
+    priority: 8,
+  },
+];
+
+// ============================================================================
+// PLATFORM PRIVACY GUIDES (priority 8) — "How to Make [Platform] Private"
+// ============================================================================
+const PLATFORM_PRIVACY: BlogTopic[] = [
+  {
+    title: "How to Make Your Instagram Account Private (Complete Guide)",
+    slug: "how-to-make-instagram-private",
+    keywords: ["make Instagram private", "Instagram privacy settings", "private Instagram account", "Instagram security"],
+    category: "platform-privacy",
+    priority: 8,
+  },
+  {
+    title: "How to Make Your Facebook Account Private in 2026",
+    slug: "how-to-make-facebook-private",
+    keywords: ["make Facebook private", "Facebook privacy settings", "Facebook security", "lock down Facebook"],
+    category: "platform-privacy",
+    priority: 8,
+  },
+  {
+    title: "How to Make Your X (Twitter) Account Private",
+    slug: "how-to-make-twitter-x-private",
+    keywords: ["make Twitter private", "X privacy settings", "Twitter security", "protected tweets"],
+    category: "platform-privacy",
+    priority: 8,
+  },
+  {
+    title: "How to Make Your TikTok Account Private",
+    slug: "how-to-make-tiktok-private",
+    keywords: ["make TikTok private", "TikTok privacy settings", "TikTok security", "private TikTok"],
+    category: "platform-privacy",
+    priority: 8,
+  },
+  {
+    title: "How to Make Your LinkedIn Profile Private",
+    slug: "how-to-make-linkedin-private",
+    keywords: ["LinkedIn private", "LinkedIn privacy settings", "hide LinkedIn profile", "LinkedIn anonymous"],
+    category: "platform-privacy",
+    priority: 9,
+  },
+  {
+    title: "How to Make Your Venmo Account Private",
+    slug: "how-to-make-venmo-private",
+    keywords: ["Venmo private", "Venmo privacy settings", "hide Venmo transactions", "Venmo security"],
+    category: "platform-privacy",
+    priority: 8,
+  },
+  {
+    title: "How to Make Your Snapchat Account Private",
+    slug: "how-to-make-snapchat-private",
+    keywords: ["Snapchat private", "Snapchat privacy settings", "Snapchat security", "lock Snapchat"],
+    category: "platform-privacy",
+    priority: 7,
+  },
+  {
+    title: "How to Make Your Pinterest Account Private",
+    slug: "how-to-make-pinterest-private",
+    keywords: ["Pinterest private", "Pinterest privacy settings", "hide Pinterest profile", "Pinterest security"],
+    category: "platform-privacy",
+    priority: 7,
+  },
+  {
+    title: "How to Delete Your X (Twitter) Account Permanently",
+    slug: "how-to-delete-twitter-x-account",
+    keywords: ["delete Twitter account", "delete X account", "deactivate Twitter", "remove Twitter"],
+    category: "platform-privacy",
+    priority: 8,
+  },
+  {
+    title: "How to Delete Your Gmail Account Without Losing Everything",
+    slug: "how-to-delete-gmail-account-safely",
+    keywords: ["delete Gmail account", "remove Gmail", "Google account deletion", "Gmail privacy"],
+    category: "platform-privacy",
+    priority: 8,
+  },
+];
+
+// ============================================================================
+// STOP SPAM GUIDES (priority 9) — High search volume
+// ============================================================================
+const STOP_SPAM_GUIDES: BlogTopic[] = [
+  {
+    title: "How to Stop Spam Calls on iPhone (2026 Guide)",
+    slug: "how-to-stop-spam-calls-iphone",
+    keywords: ["stop spam calls iPhone", "block spam calls iPhone", "iPhone spam filter", "silence unknown callers"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "How to Stop Spam Calls on Android (2026 Guide)",
+    slug: "how-to-stop-spam-calls-android",
+    keywords: ["stop spam calls Android", "block spam calls Android", "Android call filter", "spam protection Android"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "How to Stop Spam Texts: The Complete 2026 Guide",
+    slug: "how-to-stop-spam-texts-complete-guide",
+    keywords: ["stop spam texts", "block spam texts", "spam text messages", "unwanted text messages"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "How to Stop Spam Emails in Gmail, Outlook, and Yahoo",
+    slug: "how-to-stop-spam-emails-gmail-outlook-yahoo",
+    keywords: ["stop spam emails", "block spam Gmail", "spam filter Outlook", "reduce spam"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "How to Stop Junk Mail: Physical Mail Privacy Guide",
+    slug: "how-to-stop-junk-mail-physical-privacy",
+    keywords: ["stop junk mail", "opt out junk mail", "stop physical spam", "DMAchoice"],
+    category: "guide",
+    priority: 8,
+  },
+  {
+    title: "Best Free Spam Call Blockers for iPhone in 2026",
+    slug: "best-free-spam-call-blockers-iphone",
+    keywords: ["spam call blocker iPhone", "free call blocker", "best spam filter iPhone", "block robocalls"],
+    category: "guide",
+    priority: 8,
+  },
+  {
+    title: "Best Free Spam Call Blockers for Android in 2026",
+    slug: "best-free-spam-call-blockers-android",
+    keywords: ["spam call blocker Android", "free call blocker Android", "best spam filter Android", "block robocalls Android"],
+    category: "guide",
+    priority: 8,
+  },
+  {
+    title: "Why Am I Getting So Many Spam Calls? (And How to Stop Them)",
+    slug: "why-getting-so-many-spam-calls",
+    keywords: ["why spam calls", "too many spam calls", "spam call increase", "random calls"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "How to Block No Caller ID Calls on iPhone",
+    slug: "how-to-block-no-caller-id-iphone",
+    keywords: ["block no caller ID", "block unknown calls iPhone", "no caller ID block", "silence unknown callers"],
+    category: "guide",
+    priority: 8,
+  },
+  {
+    title: "Potential Spam Calls: What They Are and How to Handle Them",
+    slug: "potential-spam-calls-what-they-are",
+    keywords: ["potential spam call", "spam likely call", "scam likely", "spam risk call"],
+    category: "guide",
+    priority: 8,
+  },
+];
+
+// ============================================================================
+// "WHAT CAN SOMEONE DO" ARTICLES (priority 9) — High search volume
+// ============================================================================
+const WHAT_SOMEONE_CAN_DO: BlogTopic[] = [
+  {
+    title: "What Can Someone Do with Your Phone Number? More Than You Think",
+    slug: "what-can-someone-do-with-your-phone-number",
+    keywords: ["what can someone do phone number", "phone number danger", "phone number exposed", "phone number privacy"],
+    category: "security",
+    priority: 9,
+  },
+  {
+    title: "What Can Someone Do with Your IP Address?",
+    slug: "what-can-someone-do-with-your-ip-address",
+    keywords: ["what can someone do IP address", "IP address danger", "IP address exposed", "IP privacy"],
+    category: "security",
+    priority: 9,
+  },
+  {
+    title: "What Can Someone Do with Your Name and Address?",
+    slug: "what-can-someone-do-with-name-and-address",
+    keywords: ["what can someone do name address", "name address danger", "doxxing name address", "personal info exposed"],
+    category: "security",
+    priority: 9,
+  },
+  {
+    title: "What Can Someone Do with Your Email Address?",
+    slug: "what-can-someone-do-with-your-email",
+    keywords: ["what can someone do email", "email address danger", "email exposed risk", "email privacy"],
+    category: "security",
+    priority: 9,
+  },
+  {
+    title: "Can Someone Steal Your Identity with Just Your Name and Date of Birth?",
+    slug: "can-someone-steal-identity-name-date-of-birth",
+    keywords: ["steal identity name DOB", "identity theft birthday", "name and birthday danger", "identity theft risk"],
+    category: "security",
+    priority: 8,
+  },
+  {
+    title: "What Can Someone Do with Your Social Security Number?",
+    slug: "what-can-someone-do-with-your-ssn",
+    keywords: ["what can someone do SSN", "SSN stolen", "social security number danger", "SSN identity theft"],
+    category: "security",
+    priority: 9,
+  },
+  {
+    title: "What If Someone Uses Your Address Without Permission?",
+    slug: "someone-uses-your-address-without-permission",
+    keywords: ["someone using my address", "address fraud", "unauthorized address use", "mail fraud"],
+    category: "security",
+    priority: 8,
+  },
+];
+
+// ============================================================================
+// BACKGROUND CHECK GUIDES (priority 8) — Incogni has 6+ of these
+// ============================================================================
+const BACKGROUND_CHECK_GUIDES: BlogTopic[] = [
+  {
+    title: "What Shows Up on a Background Check? Complete Breakdown",
+    slug: "what-shows-up-on-background-check",
+    keywords: ["what shows background check", "background check results", "background check information", "background check records"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "How to Run a Background Check on Yourself (Free and Paid)",
+    slug: "how-to-run-background-check-on-yourself",
+    keywords: ["background check yourself", "self background check", "check my background", "personal background check"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "Incorrect Information on Your Background Check? Here's What to Do",
+    slug: "incorrect-information-background-check",
+    keywords: ["wrong background check", "incorrect background check", "dispute background check", "background check error"],
+    category: "guide",
+    priority: 8,
+  },
+  {
+    title: "Can You Pass a Background Check with a Misdemeanor?",
+    slug: "pass-background-check-with-misdemeanor",
+    keywords: ["background check misdemeanor", "misdemeanor job", "criminal record background", "misdemeanor employment"],
+    category: "guide",
+    priority: 8,
+  },
+  {
+    title: "Is a Background Check Legal Without Your Permission?",
+    slug: "is-background-check-legal-without-permission",
+    keywords: ["background check without consent", "unauthorized background check", "background check laws", "FCRA background"],
+    category: "guide",
+    priority: 8,
+  },
+  {
+    title: "Do Arrests Show Up on Background Checks?",
+    slug: "do-arrests-show-up-background-checks",
+    keywords: ["arrests background check", "arrest record background", "pending charges background", "arrest vs conviction"],
+    category: "guide",
+    priority: 8,
+  },
+];
+
+// ============================================================================
+// AI & LLM PRIVACY (priority 9) — Emerging high-value topic
+// ============================================================================
+const AI_PRIVACY_TOPICS: BlogTopic[] = [
+  {
+    title: "How to Remove Yourself from OpenAI and Other AI Training Data",
+    slug: "remove-yourself-from-openai-ai-training",
+    keywords: ["remove from OpenAI", "AI training data opt out", "ChatGPT data removal", "AI privacy"],
+    category: "ai-privacy",
+    priority: 10,
+  },
+  {
+    title: "Is Your Data Being Used to Train AI? How to Find Out and Opt Out",
+    slug: "is-your-data-training-ai-opt-out",
+    keywords: ["AI training data", "opt out AI training", "data used by AI", "AI data collection"],
+    category: "ai-privacy",
+    priority: 9,
+  },
+  {
+    title: "LinkedIn Is Using Your Data to Train AI: How to Opt Out",
+    slug: "linkedin-ai-training-opt-out",
+    keywords: ["LinkedIn AI training", "LinkedIn data AI", "LinkedIn opt out AI", "LinkedIn privacy"],
+    category: "ai-privacy",
+    priority: 9,
+  },
+  {
+    title: "AI-Powered Scams in 2026: Deepfakes, Voice Cloning, and How to Protect Yourself",
+    slug: "ai-powered-scams-deepfakes-voice-cloning-2026",
+    keywords: ["AI scam", "deepfake scam", "voice cloning scam", "AI fraud"],
+    category: "ai-privacy",
+    priority: 9,
+  },
+  {
+    title: "How Data Brokers Feed AI Systems: The Privacy Risk Nobody's Talking About",
+    slug: "data-brokers-feed-ai-systems-privacy-risk",
+    keywords: ["data brokers AI", "AI personal data", "data broker AI training", "privacy risk AI"],
+    category: "ai-privacy",
+    priority: 9,
+  },
+  {
+    title: "The Best AI Privacy Settings to Change Right Now",
+    slug: "best-ai-privacy-settings-change-now",
+    keywords: ["AI privacy settings", "ChatGPT privacy", "AI data settings", "AI opt out"],
+    category: "ai-privacy",
+    priority: 8,
+  },
+  {
+    title: "Google AI Overview Is Showing Your Personal Data: Here's What to Do",
+    slug: "google-ai-overview-personal-data-what-to-do",
+    keywords: ["Google AI overview personal data", "Google AI privacy", "AI search personal info", "Google AI data"],
+    category: "ai-privacy",
+    priority: 9,
+  },
+];
+
+// ============================================================================
+// REGULATORY & TIMELY CONTENT (priority 10) — High-value topical articles
+// ============================================================================
+const REGULATORY_TOPICS: BlogTopic[] = [
+  {
+    title: "California DROP System: The New Delete Request Platform Explained",
+    slug: "california-drop-system-delete-request-platform",
+    keywords: ["California DROP", "DELETE Act", "California data deletion", "DROP platform data brokers"],
+    category: "legal",
+    priority: 10,
+  },
+  {
+    title: "New State Privacy Laws in 2026: What You Need to Know",
+    slug: "new-state-privacy-laws-2026",
+    keywords: ["new privacy laws 2026", "state privacy laws", "data privacy legislation", "privacy law updates"],
+    category: "legal",
+    priority: 10,
+  },
+  {
+    title: "The FTC's New Rules on Data Brokers: What Changes for You",
+    slug: "ftc-new-rules-data-brokers-2026",
+    keywords: ["FTC data broker rules", "FTC privacy", "federal data broker regulation", "FTC enforcement"],
+    category: "legal",
+    priority: 9,
+  },
+  {
+    title: "Is Selling Personal Data Legal? State-by-State Breakdown in 2026",
+    slug: "is-selling-personal-data-legal-state-breakdown",
+    keywords: ["selling personal data legal", "data broker laws by state", "personal data sale law", "data broker regulation"],
+    category: "legal",
+    priority: 9,
+  },
+];
+
+// ============================================================================
+// PRIVACY TOOL & BROWSER REVIEWS (priority 7) — Informational traffic
+// ============================================================================
+const PRIVACY_TOOL_REVIEWS: BlogTopic[] = [
+  {
+    title: "Best Private Browsers for Privacy in 2026 (Tested & Ranked)",
+    slug: "best-private-browsers-privacy-2026",
+    keywords: ["best private browser", "privacy browser", "secure browser 2026", "browser privacy"],
+    category: "tool-review",
+    priority: 8,
+  },
+  {
+    title: "Best Private Search Engines That Don't Track You",
+    slug: "best-private-search-engines-no-tracking",
+    keywords: ["private search engine", "search engine no tracking", "DuckDuckGo alternative", "private search"],
+    category: "tool-review",
+    priority: 8,
+  },
+  {
+    title: "Best Disposable Email Services for Privacy in 2026",
+    slug: "best-disposable-email-services-privacy",
+    keywords: ["disposable email", "temporary email", "burner email service", "anonymous email"],
+    category: "tool-review",
+    priority: 7,
+  },
+  {
+    title: "Is Private Browsing Really Private? The Truth About Incognito Mode",
+    slug: "is-private-browsing-really-private-truth",
+    keywords: ["is private browsing private", "incognito mode safe", "private browsing myth", "incognito tracking"],
+    category: "tool-review",
+    priority: 8,
+  },
+  {
+    title: "Best DNS Services for Privacy and Security in 2026",
+    slug: "best-dns-services-privacy-security",
+    keywords: ["best DNS privacy", "secure DNS", "DNS over HTTPS", "private DNS service"],
+    category: "tool-review",
+    priority: 7,
+  },
+  {
+    title: "Is Brave Browser Safe? Complete Privacy Review",
+    slug: "is-brave-browser-safe-privacy-review",
+    keywords: ["Brave browser safe", "Brave privacy", "Brave browser review", "Brave vs Chrome"],
+    category: "tool-review",
+    priority: 7,
+  },
+  {
+    title: "ProtonMail Review: Is It Worth Switching for Privacy?",
+    slug: "protonmail-review-worth-switching-privacy",
+    keywords: ["ProtonMail review", "ProtonMail privacy", "encrypted email", "ProtonMail vs Gmail"],
+    category: "tool-review",
+    priority: 7,
+  },
+  {
+    title: "Apple Hide My Email: How It Works and How to Use It",
+    slug: "apple-hide-my-email-how-it-works",
+    keywords: ["Apple Hide My Email", "iCloud email privacy", "Apple email masking", "private email Apple"],
+    category: "tool-review",
+    priority: 7,
+  },
+];
+
+// ============================================================================
+// COMPETITOR STANDALONE REVIEWS (priority 8) — Capture "X review" searches
+// ============================================================================
+const COMPETITOR_REVIEWS: BlogTopic[] = [
+  {
+    title: "DeleteMe Review 2026: Is It Worth $129/Year?",
+    slug: "deleteme-review-worth-it-2026",
+    keywords: ["DeleteMe review", "DeleteMe worth it", "DeleteMe 2026", "DeleteMe pros cons"],
+    category: "comparison",
+    priority: 8,
+  },
+  {
+    title: "Incogni Review 2026: Pros, Cons, and Our Honest Take",
+    slug: "incogni-review-pros-cons-2026",
+    keywords: ["Incogni review", "Incogni worth it", "Incogni 2026", "Incogni pros cons"],
+    category: "comparison",
+    priority: 8,
+  },
+  {
+    title: "Optery Review 2026: Is the Most Transparent Service the Best?",
+    slug: "optery-review-transparent-best-2026",
+    keywords: ["Optery review", "Optery worth it", "Optery 2026", "Optery pros cons"],
+    category: "comparison",
+    priority: 8,
+  },
+  {
+    title: "Kanary Review 2026: Y Combinator Backed but Is It Good?",
+    slug: "kanary-review-2026",
+    keywords: ["Kanary review", "Kanary worth it", "Kanary 2026", "Kanary data removal"],
+    category: "comparison",
+    priority: 8,
+  },
+  {
+    title: "OneRep Review 2026: Can You Trust It After the Krebs Investigation?",
+    slug: "onerep-review-krebs-investigation-2026",
+    keywords: ["OneRep review", "OneRep safe", "OneRep Krebs", "OneRep controversy"],
+    category: "comparison",
+    priority: 8,
+  },
+  {
+    title: "Aura Review 2026: Data Removal, Identity Theft Protection, and More",
+    slug: "aura-review-data-removal-2026",
+    keywords: ["Aura review", "Aura data removal", "Aura identity protection", "Aura worth it"],
+    category: "comparison",
+    priority: 8,
+  },
+];
+
+// ============================================================================
+// COMPREHENSIVE GUIDES — Linkable assets (priority 10)
+// ============================================================================
+const LINKABLE_ASSET_TOPICS: BlogTopic[] = [
+  {
+    title: "How to Disappear from the Internet Completely: The Ultimate Guide",
+    slug: "how-to-disappear-from-internet-completely",
+    keywords: ["disappear from internet", "remove yourself internet", "erase digital footprint", "delete online presence"],
+    category: "guide",
+    priority: 10,
+  },
+  {
+    title: "The Complete Guide to Removing Your Digital Footprint in 2026",
+    slug: "remove-digital-footprint-complete-guide-2026",
+    keywords: ["remove digital footprint", "digital footprint removal", "erase digital trail", "online privacy cleanup"],
+    category: "guide",
+    priority: 10,
+  },
+  {
+    title: "How to Remove Your Personal Information from Google Search Results",
+    slug: "remove-personal-information-google-search",
+    keywords: ["remove from Google", "Google search removal", "remove personal info Google", "Google privacy"],
+    category: "guide",
+    priority: 10,
+  },
+  {
+    title: "How Many Times Has Your Name Been Googled? Here's How to Check",
+    slug: "how-many-times-name-googled-check",
+    keywords: ["name googled how many times", "who googled me", "check if someone googled me", "name search frequency"],
+    category: "guide",
+    priority: 8,
+  },
+  {
+    title: "How to Remove Mugshots from the Internet (2026 Legal Guide)",
+    slug: "remove-mugshots-from-internet-legal-guide",
+    keywords: ["remove mugshots", "mugshot removal", "delete mugshot internet", "mugshot websites"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "How to Make Your Phone Number Unsearchable",
+    slug: "make-phone-number-unsearchable",
+    keywords: ["unsearchable phone number", "hide phone number", "phone number not findable", "phone privacy"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "How to Remove Negative Information About Yourself from the Internet",
+    slug: "remove-negative-information-internet",
+    keywords: ["remove negative info internet", "delete bad info online", "online reputation repair", "remove negative search results"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "How to Find All Accounts Linked to Your Email Address",
+    slug: "find-all-accounts-linked-to-email",
+    keywords: ["find accounts linked email", "accounts connected email", "email linked accounts", "find old accounts"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "How to Find Accounts Linked to Your Phone Number",
+    slug: "find-accounts-linked-to-phone-number",
+    keywords: ["find accounts phone number", "accounts linked phone", "phone number accounts", "find old accounts phone"],
+    category: "guide",
+    priority: 8,
+  },
+  {
+    title: "Is Doxxing Illegal? The Law in Every US State",
+    slug: "is-doxxing-illegal-every-us-state",
+    keywords: ["is doxxing illegal", "doxxing laws", "doxxing state law", "doxxing legal consequences"],
+    category: "legal",
+    priority: 9,
+  },
+  {
+    title: "How to Remove an Image from Google Search Results",
+    slug: "remove-image-from-google-search",
+    keywords: ["remove image Google", "delete photo Google search", "Google image removal", "remove picture from Google"],
+    category: "guide",
+    priority: 9,
+  },
+  {
+    title: "How to Make Your Phone Impossible to Track",
+    slug: "make-phone-impossible-to-track",
+    keywords: ["phone impossible to track", "stop phone tracking", "phone privacy", "prevent phone tracking"],
+    category: "guide",
+    priority: 8,
+  },
+  {
+    title: "Is Someone Tracking You with an AirTag? How to Find Out",
+    slug: "someone-tracking-airtag-how-to-find-out",
+    keywords: ["AirTag tracking", "find hidden AirTag", "AirTag stalking", "AirTag detection"],
+    category: "security",
+    priority: 8,
+  },
+  {
+    title: "No Caller ID vs Unknown Caller: What's the Difference?",
+    slug: "no-caller-id-vs-unknown-caller-difference",
+    keywords: ["no caller ID vs unknown", "unknown caller meaning", "no caller ID meaning", "blocked number types"],
+    category: "guide",
+    priority: 7,
+  },
+];
+
+// ============================================================================
+// EMAIL MANAGEMENT GUIDES (priority 7-8) — High search volume
+// ============================================================================
+const EMAIL_MANAGEMENT: BlogTopic[] = [
+  {
+    title: "How to Delete All Promotions in Gmail at Once",
+    slug: "delete-all-promotions-gmail",
+    keywords: ["delete promotions Gmail", "clear Gmail promotions", "bulk delete Gmail", "Gmail cleanup"],
+    category: "guide",
+    priority: 7,
+  },
+  {
+    title: "How to Unsubscribe from Emails in Bulk on Gmail",
+    slug: "unsubscribe-emails-bulk-gmail",
+    keywords: ["unsubscribe Gmail bulk", "mass unsubscribe Gmail", "Gmail unsubscribe", "stop email subscriptions"],
+    category: "guide",
+    priority: 7,
+  },
+  {
+    title: "How to Block an Email Address on Gmail, Outlook, and Yahoo",
+    slug: "how-to-block-email-address-all-providers",
+    keywords: ["block email address", "block emails Gmail", "block emails Outlook", "block sender"],
+    category: "guide",
+    priority: 7,
+  },
+  {
+    title: "How to Clear Your Gmail Inbox Fast (2026 Guide)",
+    slug: "clear-gmail-inbox-fast-guide",
+    keywords: ["clear Gmail inbox", "clean Gmail", "Gmail inbox zero", "organize Gmail"],
+    category: "guide",
+    priority: 7,
+  },
+  {
+    title: "How to Stop Getting Spam Texts from Email Addresses",
+    slug: "stop-spam-texts-from-email-addresses",
+    keywords: ["spam texts from email", "stop email spam texts", "email to SMS spam", "block email texts"],
+    category: "guide",
+    priority: 7,
+  },
 ];
 
 // ============================================================================
@@ -541,6 +1315,61 @@ export async function generateTopicIdeas(): Promise<BlogTopic[]> {
     });
   }
 
+  // --- Scam & fraud articles (18 topics, priority 7-10) ---
+  for (const topic of SCAM_ARTICLES) {
+    addIfNew(topic);
+  }
+
+  // --- Platform privacy guides (10 topics, priority 7-9) ---
+  for (const topic of PLATFORM_PRIVACY) {
+    addIfNew(topic);
+  }
+
+  // --- Stop spam guides (10 topics, priority 8-9) ---
+  for (const topic of STOP_SPAM_GUIDES) {
+    addIfNew(topic);
+  }
+
+  // --- "What can someone do" articles (7 topics, priority 8-9) ---
+  for (const topic of WHAT_SOMEONE_CAN_DO) {
+    addIfNew(topic);
+  }
+
+  // --- Background check guides (6 topics, priority 8-9) ---
+  for (const topic of BACKGROUND_CHECK_GUIDES) {
+    addIfNew(topic);
+  }
+
+  // --- AI privacy topics (7 topics, priority 8-10) ---
+  for (const topic of AI_PRIVACY_TOPICS) {
+    addIfNew(topic);
+  }
+
+  // --- Regulatory & timely content (4 topics, priority 9-10) ---
+  for (const topic of REGULATORY_TOPICS) {
+    addIfNew(topic);
+  }
+
+  // --- Privacy tool reviews (8 topics, priority 7-8) ---
+  for (const topic of PRIVACY_TOOL_REVIEWS) {
+    addIfNew(topic);
+  }
+
+  // --- Competitor standalone reviews (6 topics, priority 8) ---
+  for (const topic of COMPETITOR_REVIEWS) {
+    addIfNew(topic);
+  }
+
+  // --- Comprehensive linkable asset guides (14 topics, priority 7-10) ---
+  for (const topic of LINKABLE_ASSET_TOPICS) {
+    addIfNew(topic);
+  }
+
+  // --- Email management guides (5 topics, priority 7) ---
+  for (const topic of EMAIL_MANAGEMENT) {
+    addIfNew(topic);
+  }
+
   // Sort by priority (highest first)
   return ideas.sort((a, b) => b.priority - a.priority);
 }
@@ -614,6 +1443,38 @@ export function generateBlogOutline(topic: BlogTopic): string[] {
       "Common mistakes to avoid",
       "Advanced tips",
       "How GhostMyData can help automate this",
+    ],
+    scam: [
+      "What is this scam and how does it work",
+      "Real examples of this scam (with screenshots if possible)",
+      "Red flags: How to spot this scam instantly",
+      "What to do if you've been targeted",
+      "How to report the scam",
+      "How to protect yourself going forward (including reducing your data exposure)",
+    ],
+    "platform-privacy": [
+      "Why privacy on this platform matters",
+      "Step-by-step: How to change your privacy settings",
+      "What each privacy setting actually controls",
+      "Hidden settings most people miss",
+      "What data this platform still collects even with private settings",
+      "How data brokers get your info from social media — and how to stop it",
+    ],
+    "tool-review": [
+      "What this tool/service does and who it's for",
+      "Key features and privacy benefits",
+      "Limitations and privacy concerns",
+      "How to set it up for maximum privacy",
+      "Alternatives worth considering",
+      "Our verdict: Is it worth using?",
+    ],
+    "ai-privacy": [
+      "How AI systems collect and use your data",
+      "Where your data ends up in AI training pipelines",
+      "Step-by-step: How to opt out or remove your data",
+      "What the law says about AI and your personal data",
+      "What's coming next in AI privacy regulation",
+      "How GhostMyData monitors for AI-related data exposure",
     ],
   };
 

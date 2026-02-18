@@ -8,7 +8,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/db";
-import { MODEL_HAIKU } from "../base-agent";
+import { MODEL_HAIKU, MODEL_SONNET } from "../base-agent";
 import { type BlogTopic, generateBlogOutline } from "./blog-generator";
 import { getAllSlugs } from "@/lib/blog/blog-service";
 
@@ -45,6 +45,10 @@ function categoryDisplayName(category: string): string {
     comparison: "Service Comparison",
     "state-privacy": "State Privacy Rights",
     legal: "Legal & Rights",
+    scam: "Scam Alert",
+    "tool-review": "Privacy Tool Review",
+    "platform-privacy": "Platform Privacy",
+    "ai-privacy": "AI & Privacy",
   };
   return map[category] || "Privacy";
 }
@@ -66,7 +70,7 @@ export async function writeBlogPost(
 
   const outline = generateBlogOutline(topic);
 
-  const prompt = `Write a comprehensive, SEO-optimized blog post for a data privacy removal service called GhostMyData (ghostmydata.com).
+  const prompt = `You are an expert privacy journalist and cybersecurity writer. Write an in-depth, SEO-optimized blog post for GhostMyData (ghostmydata.com), a data privacy removal service that scans 2,100+ data brokers and uses 24 AI agents to automate removals.
 
 **Topic:** ${topic.title}
 **Target Keywords:** ${topic.keywords.join(", ")}
@@ -75,31 +79,41 @@ export async function writeBlogPost(
 **Outline to follow:**
 ${outline.map((section, i) => `${i + 1}. ${section}`).join("\n")}
 
-**Requirements:**
-- Write 1,200-2,000 words of high-quality, actionable content
+**Content Requirements:**
+- Write 1,500-2,500 words of genuinely helpful, expert-level content
 - Use markdown formatting with ## for main sections and ### for subsections
-- Include the target keywords naturally throughout (aim for 1-2% keyword density)
-- Write in a helpful, authoritative but accessible tone
-- Include specific, actionable steps readers can take
-- Reference relevant privacy laws (CCPA, GDPR) where appropriate
-- Include a FAQ section at the end with 3-5 questions in ### format
-- End with a clear CTA mentioning GhostMyData's automated removal service
+- Weave target keywords naturally (1-2% density) — never keyword stuff
+- Write in a confident, authoritative but conversational tone — like a knowledgeable friend
+- Include specific, actionable steps with exact URLs, menu paths, or button names where applicable
+- Reference relevant privacy laws (CCPA, GDPR, state laws) with actual legal citations where appropriate
+- Include a FAQ section at the end with 4-6 questions using ### format — target "People Also Ask" queries
+- End with a natural CTA mentioning GhostMyData (not salesy — helpful)
 - Do NOT include a title (## or #) at the top — the title is handled separately
 - Do NOT include any images, image placeholders, or markdown image syntax
-- Use bullet points and numbered lists for better readability
-- Include internal links where natural: [pricing](/pricing), [how it works](/how-it-works), [free scan](/register), [data broker comparison](/compare)
+- Use bullet points, numbered lists, and bold key terms for scannability
+- Include internal links where natural: [pricing](/pricing), [how it works](/how-it-works), [free scan](/register), [compare services](/compare)
+- For data broker articles, reference that GhostMyData covers 2,100+ brokers vs competitors' 35-500
+- For scam/security articles, explain how data brokers contribute to the problem and link to scan
 
-**Important:** Write factual, accurate content. Do not make up statistics. If referencing data, use general industry knowledge. The content should be genuinely helpful to someone concerned about their online privacy.
+**Quality Standards:**
+- Write as if publishing on a major cybersecurity outlet (Krebs on Security, The Verge, Wired)
+- Every claim must be factually accurate — do not invent statistics or studies
+- Use general industry knowledge and publicly available data (FTC reports, state AG data, Verizon DBIR)
+- Include real-world examples or scenarios to illustrate points
+- Anticipate follow-up questions and address them proactively
+- Each section should provide unique value — no filler paragraphs
+- Use transition sentences between sections for natural reading flow
 
 Return ONLY the markdown content, nothing else.`;
 
   try {
     console.log(`[blog-writer] Generating post: ${topic.title}`);
 
+    // Use Sonnet for higher quality content (~$0.02/post vs $0.005 with Haiku
     const response = await anthropic.messages.create({
-      model: MODEL_HAIKU,
-      max_tokens: 4096,
-      temperature: 0.7,
+      model: MODEL_SONNET,
+      max_tokens: 6000,
+      temperature: 0.6,
       messages: [{ role: "user", content: prompt }],
     });
 
