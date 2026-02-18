@@ -1,10 +1,20 @@
 import { MetadataRoute } from "next";
 import { getAllPostsCombined } from "@/lib/blog/blog-service";
 import { APP_URL } from "@/lib/constants";
+import { getRemovableBrokerSlugs, EXISTING_MANUAL_PAGES } from "@/lib/broker-pages/broker-page-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_URL;
   const currentDate = new Date().toISOString();
+
+  // Dynamic broker removal guide slugs (all eligible brokers)
+  const allBrokerSlugs = [...EXISTING_MANUAL_PAGES, ...getRemovableBrokerSlugs()];
+  const brokerSitemap = allBrokerSlugs.map(slug => ({
+    url: `${baseUrl}/remove-from/${slug}`,
+    lastModified: currentDate,
+    changeFrequency: "monthly" as const,
+    priority: 0.85,
+  }));
 
   // Static pages with their priorities and change frequencies
   const staticPages = [
@@ -21,34 +31,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/security", priority: 0.7, changeFrequency: "monthly" as const },
     { path: "/privacy", priority: 0.6, changeFrequency: "monthly" as const },
     { path: "/terms", priority: 0.5, changeFrequency: "monthly" as const },
-    // Data broker removal guides (high SEO value)
+    // Data broker removal hub (high SEO value)
     { path: "/remove-from", priority: 0.9, changeFrequency: "weekly" as const },
-    { path: "/remove-from/spokeo", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/whitepages", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/beenverified", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/intelius", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/truepeoplesearch", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/radaris", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/fastpeoplesearch", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/mylife", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/ussearch", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/peoplefinder", priority: 0.85, changeFrequency: "monthly" as const },
-    // New broker guides (Feb 2026)
-    { path: "/remove-from/truthfinder", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/instant-checkmate", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/usphonebook", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/smartbackgroundchecks", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/checkpeople", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/arrests-org", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/nuwber", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/peekyou", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/pipl", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/searchpeoplefree", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/familytreenow", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/thatsthem", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/clustrmaps", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/cocofinder", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/remove-from/zoominfo", priority: 0.85, changeFrequency: "monthly" as const },
     // Legal pages
     { path: "/cookies", priority: 0.5, changeFrequency: "monthly" as const },
     { path: "/vulnerability-disclosure", priority: 0.5, changeFrequency: "monthly" as const },
@@ -87,5 +71,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: post.featured ? 0.8 : 0.7,
   }));
 
-  return [...staticSitemap, ...blogSitemap];
+  return [...staticSitemap, ...brokerSitemap, ...blogSitemap];
 }

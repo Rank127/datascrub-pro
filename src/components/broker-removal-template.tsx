@@ -254,7 +254,7 @@ export function BrokerRemovalTemplate({ broker }: { broker: BrokerInfo }) {
             </div>
             <p className="text-sm text-slate-500 mt-4">
               <Link href="/remove-from" className="text-emerald-400 hover:text-emerald-300 underline">
-                View all 25 broker removal guides
+                View all broker removal guides
               </Link>
             </p>
           </section>

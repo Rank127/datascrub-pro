@@ -4,6 +4,7 @@ import { ArrowRight, Shield, Search, AlertTriangle, FileText, Eye, CheckCircle2,
 import { Button } from "@/components/ui/button";
 import { removeFromPage } from "@/content/pages";
 import { BreadcrumbSchema, FAQSchema } from "@/components/seo/structured-data";
+import { getAllBrokerPages, getTotalBrokerPageCount } from "@/lib/broker-pages/broker-page-data";
 
 export const metadata: Metadata = {
   title: removeFromPage.meta.title,
@@ -27,184 +28,6 @@ export const metadata: Metadata = {
     ],
   },
 };
-
-const brokers = [
-  {
-    name: "Spokeo",
-    slug: "spokeo",
-    description: "Popular people search site with 12+ billion records",
-    difficulty: "Easy",
-    time: "3-5 days",
-  },
-  {
-    name: "WhitePages",
-    slug: "whitepages",
-    description: "One of the largest people search directories",
-    difficulty: "Medium",
-    time: "24-48 hours",
-  },
-  {
-    name: "BeenVerified",
-    slug: "beenverified",
-    description: "Background check and people search service",
-    difficulty: "Easy",
-    time: "24 hours",
-  },
-  {
-    name: "Intelius",
-    slug: "intelius",
-    description: "Comprehensive background check provider",
-    difficulty: "Medium",
-    time: "7-14 days",
-  },
-  {
-    name: "PeopleFinder",
-    slug: "peoplefinder",
-    description: "Public records and people search database",
-    difficulty: "Easy",
-    time: "3-5 days",
-  },
-  {
-    name: "TruePeopleSearch",
-    slug: "truepeoplesearch",
-    description: "Free people search with detailed profiles",
-    difficulty: "Easy",
-    time: "24-72 hours",
-  },
-  {
-    name: "Radaris",
-    slug: "radaris",
-    description: "People search with property and court records",
-    difficulty: "Hard",
-    time: "7-30 days",
-  },
-  {
-    name: "FastPeopleSearch",
-    slug: "fastpeoplesearch",
-    description: "Quick people lookup with public records",
-    difficulty: "Easy",
-    time: "24-48 hours",
-  },
-  {
-    name: "MyLife",
-    slug: "mylife",
-    description: "Reputation management and people search",
-    difficulty: "Hard",
-    time: "7-14 days",
-  },
-  {
-    name: "USSearch",
-    slug: "ussearch",
-    description: "Background check and people finder service",
-    difficulty: "Medium",
-    time: "5-7 days",
-  },
-  {
-    name: "TruthFinder",
-    slug: "truthfinder",
-    description: "People search and background check site with public records",
-    difficulty: "Medium",
-    time: "7-14 days",
-  },
-  {
-    name: "Instant Checkmate",
-    slug: "instant-checkmate",
-    description: "Background check service with criminal and contact data",
-    difficulty: "Medium",
-    time: "7-14 days",
-  },
-  {
-    name: "USPhonebook",
-    slug: "usphonebook",
-    description: "Free phone number lookup and people search service",
-    difficulty: "Easy",
-    time: "24-48 hours",
-  },
-  {
-    name: "Smart Background Checks",
-    slug: "smartbackgroundchecks",
-    description: "Public records and background check aggregator",
-    difficulty: "Medium",
-    time: "3-7 days",
-  },
-  {
-    name: "Checkpeople",
-    slug: "checkpeople",
-    description: "Free people search engine with public records access",
-    difficulty: "Easy",
-    time: "24-48 hours",
-  },
-  {
-    name: "Arrests.org",
-    slug: "arrests-org",
-    description: "Mugshot and arrest record publishing site",
-    difficulty: "Hard",
-    time: "7-30 days",
-  },
-  {
-    name: "Nuwber",
-    slug: "nuwber",
-    description: "People search with detailed contact and address profiles",
-    difficulty: "Medium",
-    time: "3-7 days",
-  },
-  {
-    name: "PeekYou",
-    slug: "peekyou",
-    description: "People search engine indexing social media and web profiles",
-    difficulty: "Easy",
-    time: "24-48 hours",
-  },
-  {
-    name: "Pipl",
-    slug: "pipl",
-    description: "Large people search engine used by businesses and investigators",
-    difficulty: "Hard",
-    time: "7-14 days",
-  },
-  {
-    name: "SearchPeopleFree",
-    slug: "searchpeoplefree",
-    description: "Free people search with phone numbers and addresses",
-    difficulty: "Easy",
-    time: "24-48 hours",
-  },
-  {
-    name: "FamilyTreeNow",
-    slug: "familytreenow",
-    description: "Genealogy site exposing addresses, phones, and relatives",
-    difficulty: "Easy",
-    time: "24 hours",
-  },
-  {
-    name: "That's Them",
-    slug: "thatsthem",
-    description: "Free people search with addresses, phones, emails, and IPs",
-    difficulty: "Easy",
-    time: "24-72 hours",
-  },
-  {
-    name: "ClustrMaps",
-    slug: "clustrmaps",
-    description: "People search mapping personal info to geographic locations",
-    difficulty: "Medium",
-    time: "3-7 days",
-  },
-  {
-    name: "Cocofinder",
-    slug: "cocofinder",
-    description: "People search engine with phone lookup and address data",
-    difficulty: "Easy",
-    time: "24-48 hours",
-  },
-  {
-    name: "ZoomInfo",
-    slug: "zoominfo",
-    description: "B2B data platform with professional contact information",
-    difficulty: "Hard",
-    time: "7-14 days",
-  },
-];
 
 const faqs = [
   {
@@ -239,7 +62,35 @@ const faqs = [
   },
 ];
 
+// Category display order for the hub page
+const CATEGORY_ORDER = [
+  "People Search", "Background Check", "Phone Lookup", "Court Records",
+  "B2B Data", "Marketing Data", "Property Records", "Financial Data",
+  "AI Facial Recognition", "AI Training", "AI Image & Video", "AI Voice",
+  "Employment Data", "Tenant Screening", "Vehicle Data", "Insurance Data",
+  "Healthcare", "Genealogy", "International", "Voter & Political Data",
+  "Location Tracking", "Legal Records", "Data Broker",
+];
+
 export default function RemoveFromPage() {
+  const allBrokers = getAllBrokerPages();
+  const totalCount = getTotalBrokerPageCount();
+
+  // Group brokers by category
+  const grouped = new Map<string, typeof allBrokers>();
+  for (const broker of allBrokers) {
+    const existing = grouped.get(broker.category) ?? [];
+    existing.push(broker);
+    grouped.set(broker.category, existing);
+  }
+
+  // Sort categories by defined order
+  const sortedCategories = [...grouped.keys()].sort((a, b) => {
+    const ai = CATEGORY_ORDER.indexOf(a);
+    const bi = CATEGORY_ORDER.indexOf(b);
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
+
   // Get content sections
   const heroSection = removeFromPage.sections.find(s => s.id === "hero");
   const howBrokersWorkSection = removeFromPage.sections.find(s => s.id === "how-brokers-work");
@@ -262,8 +113,8 @@ export default function RemoveFromPage() {
           "@type": "ItemList",
           name: "Data Broker Removal Guides",
           description: "Step-by-step guides to remove your personal information from data brokers",
-          numberOfItems: brokers.length,
-          itemListElement: brokers.map((broker, index) => ({
+          numberOfItems: totalCount,
+          itemListElement: allBrokers.slice(0, 100).map((broker, index) => ({
             "@type": "ListItem",
             position: index + 1,
             name: `Remove from ${broker.name}`,
@@ -358,43 +209,52 @@ export default function RemoveFromPage() {
         </div>
       )}
 
-      {/* Broker Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-        {brokers.map((broker) => (
-          <Link
-            key={broker.slug}
-            href={`/remove-from/${broker.slug}`}
-            className="group p-6 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition-all"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">
-                {broker.name}
-              </h3>
-              <span className={`px-2 py-1 rounded text-xs ${
-                broker.difficulty === "Easy"
-                  ? "bg-green-500/10 text-green-400"
-                  : broker.difficulty === "Medium"
-                  ? "bg-yellow-500/10 text-yellow-400"
-                  : "bg-red-500/10 text-red-400"
-              }`}>
-                {broker.difficulty}
-              </span>
+      {/* Broker Grid — grouped by category */}
+      {sortedCategories.map(category => {
+        const categoryBrokers = grouped.get(category)!;
+        return (
+          <div key={category} className="mb-12">
+            <h2 className="text-2xl font-bold text-white mb-2">{category}</h2>
+            <p className="text-slate-500 text-sm mb-6">{categoryBrokers.length} removal {categoryBrokers.length === 1 ? "guide" : "guides"}</p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+              {categoryBrokers.map((broker) => (
+                <Link
+                  key={broker.slug}
+                  href={`/remove-from/${broker.slug}`}
+                  className="group p-5 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition-all"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors truncate mr-2">
+                      {broker.name}
+                    </h3>
+                    <span className={`px-2 py-0.5 rounded text-xs flex-shrink-0 ${
+                      broker.difficulty === "Easy"
+                        ? "bg-green-500/10 text-green-400"
+                        : broker.difficulty === "Medium"
+                        ? "bg-yellow-500/10 text-yellow-400"
+                        : "bg-red-500/10 text-red-400"
+                    }`}>
+                      {broker.difficulty}
+                    </span>
+                  </div>
+                  <p className="text-slate-400 text-sm mb-2 line-clamp-2">{broker.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500">
+                      Processing: {broker.time}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              ))}
             </div>
-            <p className="text-slate-400 text-sm mb-3">{broker.description}</p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-500">
-                Processing: {broker.time}
-              </span>
-              <ArrowRight className="h-4 w-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-        ))}
-      </div>
+          </div>
+        );
+      })}
 
       {/* Stats */}
       <div className="grid md:grid-cols-4 gap-8 mb-16">
         <div className="text-center p-6 bg-slate-800/30 rounded-xl">
-          <div className="text-4xl font-bold text-emerald-400 mb-2">25</div>
+          <div className="text-4xl font-bold text-emerald-400 mb-2">{totalCount}+</div>
           <div className="text-slate-400">Step-by-Step Guides</div>
         </div>
         <div className="text-center p-6 bg-slate-800/30 rounded-xl">
