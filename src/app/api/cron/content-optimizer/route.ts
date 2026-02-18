@@ -6,9 +6,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { logCronExecution } from "@/lib/cron-logger";
-import { getAdminFromEmail } from "@/lib/email";
 import { runFullSEOReport } from "@/lib/agents/seo-agent";
 import {
   calculateReadability,
@@ -30,9 +28,6 @@ export const maxDuration = 300;
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
-
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@ghostmydata.com";
 
 // Default keywords (used if keyword intelligence not available)
 const DEFAULT_KEYWORDS = [
@@ -581,138 +576,6 @@ async function runOptimization(): Promise<{
 }
 
 // ============================================================================
-// EMAIL NOTIFICATION
-// ============================================================================
-
-async function sendOptimizationReport(result: {
-  seoScore: number;
-  pagesOptimized: number;
-  improvements: string[];
-  progress: OptimizationProgress;
-  keywordStats?: {
-    totalDiscovered: number;
-    highRelevance: number;
-    gaps: number;
-    lastUpdated: string;
-  };
-}): Promise<void> {
-  if (!resend) {
-    console.log("[Content Optimizer] Email not configured, skipping report");
-    return;
-  }
-
-  const history = await loadProgress();
-  const previousScore = history.length > 1 ? history[history.length - 2]?.seoScore : result.seoScore;
-  const scoreChange = result.seoScore - previousScore;
-  const daysToTarget = Math.ceil((100 - result.seoScore) / Math.max(1, scoreChange));
-
-  const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
-    .container { max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; padding: 24px; }
-    h1 { color: #22d3ee; margin-top: 0; }
-    h2 { color: #94a3b8; font-size: 16px; margin-top: 24px; }
-    .score { font-size: 48px; font-weight: bold; text-align: center; margin: 20px 0; }
-    .score-value { color: ${result.seoScore >= 90 ? '#22c55e' : result.seoScore >= 70 ? '#eab308' : '#ef4444'}; }
-    .change { font-size: 18px; color: ${scoreChange >= 0 ? '#22c55e' : '#ef4444'}; }
-    .progress-bar { background: #334155; border-radius: 8px; height: 20px; overflow: hidden; margin: 16px 0; }
-    .progress-fill { background: linear-gradient(90deg, #22d3ee, #22c55e); height: 100%; transition: width 0.5s; }
-    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
-    .stat-box { background: #334155; border-radius: 8px; padding: 12px; text-align: center; }
-    .stat-value { font-size: 20px; font-weight: bold; color: #22d3ee; }
-    .stat-label { font-size: 12px; color: #94a3b8; }
-    .improvement { background: #334155; border-radius: 8px; padding: 12px; margin: 8px 0; }
-    .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #334155; font-size: 12px; color: #64748b; text-align: center; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Daily Content Optimization Report</h1>
-
-    <div class="score">
-      <span class="score-value">${result.seoScore}</span>/100
-      <div class="change">${scoreChange >= 0 ? '+' : ''}${scoreChange} from yesterday</div>
-    </div>
-
-    <h2>Progress to 100% Target</h2>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width: ${result.seoScore}%"></div>
-    </div>
-    <p style="text-align: center; color: #94a3b8;">
-      ${result.seoScore >= 100 ? '🎉 Target achieved!' : `Estimated ${daysToTarget > 7 ? '7+' : daysToTarget} days to reach 100%`}
-    </p>
-
-    <div class="stat-grid">
-      <div class="stat-box">
-        <div class="stat-value">${result.progress.technicalScore}</div>
-        <div class="stat-label">Technical Score</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value">${result.progress.contentScore}</div>
-        <div class="stat-label">Content Score</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value">${result.pagesOptimized}</div>
-        <div class="stat-label">Pages Optimized</div>
-      </div>
-    </div>
-
-    ${result.keywordStats ? `
-    <h2>Keyword Intelligence</h2>
-    <div class="stat-grid">
-      <div class="stat-box">
-        <div class="stat-value">${result.keywordStats.totalDiscovered}</div>
-        <div class="stat-label">Keywords Found</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value">${result.keywordStats.highRelevance}</div>
-        <div class="stat-label">High Relevance</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value">${result.keywordStats.gaps}</div>
-        <div class="stat-label">Keyword Gaps</div>
-      </div>
-    </div>
-    ` : ''}
-
-    ${result.improvements.length > 0 ? `
-    <h2>Today's Improvements</h2>
-    ${result.improvements.map(i => `<div class="improvement">${i}</div>`).join('')}
-    ` : '<p style="color: #94a3b8;">No optimizations needed today. All pages meet targets!</p>'}
-
-    <h2>Page Status</h2>
-    ${Object.entries(result.progress.pageStats).map(([url, stats]) => `
-      <div class="improvement">
-        <strong>${url.replace('https://ghostmydata.com', '')}</strong><br>
-        Words: ${stats.wordCount} | Readability: ${stats.readability} | Keywords: ${stats.keywordsFound}/5
-      </div>
-    `).join('')}
-
-    <div class="footer">
-      <p>GhostMyData Content Optimizer</p>
-      <p>Running daily to achieve 100% SEO score</p>
-    </div>
-  </div>
-</body>
-</html>`;
-
-  try {
-    await resend.emails.send({
-      from: getAdminFromEmail(),
-      to: SUPPORT_EMAIL,
-      subject: `SEO Progress: ${result.seoScore}/100 (${scoreChange >= 0 ? '+' : ''}${scoreChange}) - ${result.pagesOptimized} pages optimized`,
-      html,
-    });
-    console.log(`[Content Optimizer] Report sent to ${SUPPORT_EMAIL}`);
-  } catch (error) {
-    console.error("[Content Optimizer] Failed to send report:", error);
-  }
-}
-
-// ============================================================================
 // API ROUTES
 // ============================================================================
 
@@ -728,8 +591,7 @@ export async function GET(request: Request) {
 
     const result = await runOptimization();
 
-    // Send daily report
-    await sendOptimizationReport(result);
+    // No email notification — CronLog tracks optimization results in admin dashboard
 
     console.log(`[Content Optimizer] Complete. Score: ${result.seoScore}/100, Pages optimized: ${result.pagesOptimized}`);
 
@@ -779,10 +641,6 @@ export async function POST(request: Request) {
     console.log("[Content Optimizer] Manual run triggered");
 
     const result = await runOptimization();
-
-    if (body.sendReport !== false) {
-      await sendOptimizationReport(result);
-    }
 
     return NextResponse.json({
       success: true,

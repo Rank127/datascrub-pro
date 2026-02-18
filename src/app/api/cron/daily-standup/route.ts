@@ -52,7 +52,7 @@ export async function GET(request: Request) {
       });
     }
 
-    // 5. Send via Resend
+    // 5. Send via Resend — only when health is NOT EXCELLENT (reduce noise)
     const dateStr = new Date().toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -60,12 +60,16 @@ export async function GET(request: Request) {
     const emoji = HEALTH_EMOJI[analysis.overallHealth];
     const subject = `${emoji} Daily Cabinet Meeting: ${analysis.overallHealth.replace("_", " ")} - ${dateStr}`;
 
-    await getResend().emails.send({
-      from: getAdminFromEmail(),
-      to: [ADMIN_EMAIL],
-      subject,
-      html: emailHtml,
-    });
+    if (analysis.overallHealth !== "EXCELLENT") {
+      await getResend().emails.send({
+        from: getAdminFromEmail(),
+        to: [ADMIN_EMAIL],
+        subject,
+        html: emailHtml,
+      });
+    } else {
+      console.log(`[DailyStandup] Health is EXCELLENT — skipping email notification`);
+    }
 
     const duration = Date.now() - startTime;
 
