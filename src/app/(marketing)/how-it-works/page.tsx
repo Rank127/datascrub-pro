@@ -103,14 +103,14 @@ const steps = [
   {
     number: 5,
     icon: Bell,
-    title: "Always Watching",
+    title: "We Watch, You Relax",
     description:
-      "We keep scanning for new exposures. When your data shows up again, we alert you right away.",
+      "Once your data is removed, we keep guard. Our system runs scans around the clock so you never have to think about it again. If anything resurfaces, we handle it.",
     details: [
-      "Daily or weekly scans",
-      "Instant email alerts",
-      "Monthly reports",
-      "Verify removals worked",
+      "Continuous scans on autopilot",
+      "Instant alerts if data reappears",
+      "Auto re-removal, no action needed",
+      "Monthly privacy reports",
     ],
   },
 ];
