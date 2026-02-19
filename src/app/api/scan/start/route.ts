@@ -17,7 +17,7 @@ import { generateScreenshotUrl } from "@/lib/screenshots/screenshot-service";
 import { createScanErrorTicket } from "@/lib/support/ticket-service";
 
 // Allow longer execution time for scans (Vercel Pro: up to 300s)
-export const maxDuration = 120; // 2 minutes should be enough with parallel scanning
+export const maxDuration = 300; // Full scans with 8-9 broker batches need headroom
 
 const scanRequestSchema = z.object({
   type: z.enum(["FULL", "QUICK", "MONITORING"]),
@@ -101,8 +101,8 @@ export async function POST(request: Request) {
       });
 
       if (existingInProgressScan) {
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-        if (existingInProgressScan.createdAt < fiveMinutesAgo) {
+        const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000);
+        if (existingInProgressScan.createdAt < threeMinutesAgo) {
           await tx.scan.update({
             where: { id: existingInProgressScan.id },
             data: { status: "FAILED", completedAt: new Date() },
