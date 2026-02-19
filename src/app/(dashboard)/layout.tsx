@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { OnboardingTour } from "@/components/dashboard/onboarding-tour";
 import { FirstRemovalCelebration } from "@/components/dashboard/first-removal-celebration";
+import { IdleTimeout } from "@/components/dashboard/idle-timeout";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 export default function DashboardLayout({
@@ -25,6 +26,7 @@ export default function DashboardLayout({
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}
           </main>
+          <IdleTimeout />
         </div>
       </SessionProvider>
     );
@@ -52,6 +54,7 @@ export default function DashboardLayout({
           <main className="flex-1 overflow-y-auto p-4 lg:p-6">
             <OnboardingTour>{children}</OnboardingTour>
             <FirstRemovalCelebration />
+            <IdleTimeout />
           </main>
         </div>
       </div>
