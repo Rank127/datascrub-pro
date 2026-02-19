@@ -293,11 +293,14 @@ export async function processEmailQueue(limit: number = 10): Promise<{
   }
 
   // Get queued emails ready to process
+  // Skip consolidated digest types — those are processed by the digest cron, not the generic queue
+  const DIGEST_TYPES = ["REMOVAL_STATUS_PENDING", "EXPOSURE_ALERT_PENDING", "BULK_REMOVAL_PENDING", "MONTHLY_RECAP_PENDING", "REMOVAL_DIGEST_PENDING"];
   const queuedEmails = await prisma.emailQueue.findMany({
     where: {
       status: "QUEUED",
       processAt: { lte: new Date() },
       attempts: { lt: 3 },
+      emailType: { notIn: DIGEST_TYPES },
     },
     orderBy: [
       { priority: "asc" },  // Higher priority first (lower number)
