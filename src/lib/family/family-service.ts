@@ -735,6 +735,60 @@ export async function getEffectivePlanDetails(userId: string): Promise<PlanDetai
   };
 }
 
+/**
+ * Compute effective plan from pre-fetched user data (no DB queries).
+ * Use this in crons/batch operations to avoid N+1 queries.
+ * Include `familyMembership: { select: { familyGroup: { select: { owner: { select: { plan: true, subscription: { select: { plan: true } } } } } } } }`
+ * in your Prisma query, then pass the user object here.
+ */
+export function computeEffectivePlan(user: {
+  plan: string;
+  subscription?: { plan: string } | null;
+  familyMembership?: {
+    familyGroup: {
+      owner: {
+        plan: string;
+        subscription?: { plan: string } | null;
+      };
+    };
+  } | null;
+}): string {
+  // Check own subscription first
+  const ownPlan = user.subscription?.plan || user.plan;
+  if (ownPlan === "ENTERPRISE" || ownPlan === "PRO") return ownPlan;
+
+  // Check family membership for inherited plan
+  if (user.familyMembership) {
+    const ownerPlan =
+      user.familyMembership.familyGroup.owner.subscription?.plan ||
+      user.familyMembership.familyGroup.owner.plan;
+    if (ownerPlan === "ENTERPRISE") return "ENTERPRISE";
+  }
+
+  return ownPlan;
+}
+
+/**
+ * Prisma select fragment to include family membership data for computeEffectivePlan().
+ * Spread this into your Prisma `select` or `include` clause.
+ */
+export const FAMILY_PLAN_INCLUDE = {
+  familyMembership: {
+    select: {
+      familyGroup: {
+        select: {
+          owner: {
+            select: {
+              plan: true,
+              subscription: { select: { plan: true } },
+            },
+          },
+        },
+      },
+    },
+  },
+} as const;
+
 // ==========================================
 // HELPERS
 // ==========================================

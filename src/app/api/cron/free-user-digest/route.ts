@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { sendFreeUserExposureDigest } from "@/lib/email";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { logCronExecution } from "@/lib/cron-logger";
+import { computeEffectivePlan, FAMILY_PLAN_INCLUDE } from "@/lib/family";
 
 export const maxDuration = 120;
 
@@ -26,17 +27,17 @@ export async function GET(request: Request) {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-    const freeUsersWithExposures = await prisma.user.findMany({
+    // Query users with active exposures — filter by effective plan in-loop
+    // (can't filter family members at DB level since their DB plan is FREE but effective is ENTERPRISE)
+    const candidateUsers = await prisma.user.findMany({
       where: {
-        plan: "FREE",
+        plan: "FREE", // Pre-filter at DB level, but family members will also match
         emailNotifications: true,
-        // Has at least one active exposure
         exposures: {
           some: {
             status: "ACTIVE",
           },
         },
-        // Hasn't received digest recently (check via last exposure digest sent)
         OR: [
           { lastExposureDigestSent: null },
           { lastExposureDigestSent: { lt: oneWeekAgo } },
@@ -46,7 +47,10 @@ export async function GET(request: Request) {
         id: true,
         email: true,
         name: true,
+        plan: true,
         lastScanAt: true,
+        subscription: { select: { plan: true } },
+        ...FAMILY_PLAN_INCLUDE,
         exposures: {
           where: { status: "ACTIVE" },
           select: {
@@ -58,9 +62,13 @@ export async function GET(request: Request) {
           },
         },
       },
-      // Limit to prevent overwhelming the email quota
       take: 50,
     });
+
+    // Filter out family members who are effectively PRO/ENTERPRISE
+    const freeUsersWithExposures = candidateUsers.filter(
+      (u) => computeEffectivePlan(u) === "FREE"
+    );
 
     let sentCount = 0;
     let errorCount = 0;

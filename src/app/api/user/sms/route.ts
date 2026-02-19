@@ -9,6 +9,7 @@ import {
   isUSPhoneNumber,
   isSMSConfigured,
 } from "@/lib/sms";
+import { getEffectivePlan } from "@/lib/family";
 
 // Store pending phone numbers and codes for verification
 const pendingVerifications = new Map<string, { phone: string; code: string; expires: Date }>();
@@ -41,9 +42,10 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const isEnterprise = user.plan === "ENTERPRISE";
+    const effectivePlan = await getEffectivePlan(session.user.id);
+    const isEnterprise = effectivePlan === "ENTERPRISE";
 
-    console.log("[SMS API] User plan:", user.plan, "isEnterprise:", isEnterprise);
+    console.log("[SMS API] User DB plan:", user.plan, "effective:", effectivePlan, "isEnterprise:", isEnterprise);
 
     return NextResponse.json({
       ...user,
@@ -72,13 +74,10 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if user has Enterprise plan
-    const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { plan: true },
-    });
+    // Check if user has Enterprise plan (including family membership)
+    const effectivePlan = await getEffectivePlan(session.user.id);
 
-    if (currentUser?.plan !== "ENTERPRISE") {
+    if (effectivePlan !== "ENTERPRISE") {
       return NextResponse.json(
         { error: "SMS notifications require an Enterprise subscription" },
         { status: 403 }
@@ -130,13 +129,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if user has Enterprise plan
-    const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { plan: true },
-    });
+    // Check if user has Enterprise plan (including family membership)
+    const effectivePlanPost = await getEffectivePlan(session.user.id);
 
-    if (currentUser?.plan !== "ENTERPRISE") {
+    if (effectivePlanPost !== "ENTERPRISE") {
       return NextResponse.json(
         { error: "SMS notifications require an Enterprise subscription" },
         { status: 403 }
@@ -269,13 +265,10 @@ export async function DELETE() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if user has Enterprise plan (allow deletion regardless to clean up)
-    const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { plan: true },
-    });
+    // Check if user has Enterprise plan (including family membership)
+    const effectivePlanDel = await getEffectivePlan(session.user.id);
 
-    if (currentUser?.plan !== "ENTERPRISE") {
+    if (effectivePlanDel !== "ENTERPRISE") {
       return NextResponse.json(
         { error: "SMS notifications require an Enterprise subscription" },
         { status: 403 }

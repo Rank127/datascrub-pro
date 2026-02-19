@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { sendRescanReminderEmail } from "@/lib/email";
 import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { logCronExecution } from "@/lib/cron-logger";
+import { computeEffectivePlan, FAMILY_PLAN_INCLUDE } from "@/lib/family";
 
 // Cron job to remind FREE users to run monthly scans and auto-trigger scans for paid users
 // Runs on the 1st of each month at 10 AM UTC
@@ -56,6 +57,8 @@ export async function GET(request: Request) {
         email: true,
         name: true,
         plan: true,
+        subscription: { select: { plan: true } },
+        ...FAMILY_PLAN_INCLUDE,
         scans: {
           orderBy: { createdAt: "desc" },
           take: 1,
@@ -83,7 +86,9 @@ export async function GET(request: Request) {
         const lastScanDate = user.scans[0]?.createdAt || null;
         const exposureCount = user.exposures.length;
 
-        if (user.plan === "FREE") {
+        const effectivePlan = computeEffectivePlan(user);
+
+        if (effectivePlan === "FREE") {
           // FREE users: Send reminder email to scan manually
           await sendRescanReminderEmail(
             user.email,
@@ -94,7 +99,7 @@ export async function GET(request: Request) {
           stats.freeUsersReminded++;
           stats.emailsSent++;
         } else {
-          // PRO/ENTERPRISE users: Queue automatic scan
+          // PRO/ENTERPRISE users (including family members): Queue automatic scan
           await prisma.scan.create({
             data: {
               userId: user.id,
@@ -103,7 +108,7 @@ export async function GET(request: Request) {
             },
           });
 
-          if (user.plan === "PRO") {
+          if (effectivePlan === "PRO") {
             stats.proUsersQueued++;
           } else {
             stats.enterpriseUsersQueued++;
@@ -121,14 +126,21 @@ export async function GET(request: Request) {
 
     // Also check for users with MONITORING scan type enabled
     // These users should get automatic weekly/daily scans based on their plan
+    // Include family members — they may be FREE in DB but ENTERPRISE via family
     const usersWithMonitoring = await prisma.user.findMany({
       where: {
-        plan: { in: ["PRO", "ENTERPRISE"] },
+        OR: [
+          { plan: { in: ["PRO", "ENTERPRISE"] } },
+          { familyMembership: { familyGroup: { owner: { plan: "ENTERPRISE" } } } },
+          { familyMembership: { familyGroup: { owner: { subscription: { plan: "ENTERPRISE" } } } } },
+        ],
         profiles: { some: {} },
       },
       select: {
         id: true,
         plan: true,
+        subscription: { select: { plan: true } },
+        ...FAMILY_PLAN_INCLUDE,
         scans: {
           where: { type: "MONITORING" },
           orderBy: { createdAt: "desc" },
@@ -143,7 +155,8 @@ export async function GET(request: Request) {
     // Queue monitoring scans for users who haven't had one recently
     for (const user of usersWithMonitoring) {
       const lastMonitoringScan = user.scans[0]?.createdAt;
-      const scanInterval = user.plan === "ENTERPRISE" ? 1 : 7; // days
+      const effectiveMonPlan = computeEffectivePlan(user);
+      const scanInterval = effectiveMonPlan === "ENTERPRISE" ? 1 : 7; // days
       const intervalMs = scanInterval * 24 * 60 * 60 * 1000;
 
       if (!lastMonitoringScan || (now.getTime() - lastMonitoringScan.getTime()) > intervalMs) {

@@ -10,6 +10,7 @@
 
 import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
+import { computeEffectivePlan, FAMILY_PLAN_INCLUDE } from "@/lib/family";
 import { BaseAgent, createAgentContext } from "../base-agent";
 import {
   AgentCapability,
@@ -349,6 +350,8 @@ class SecurityAgent extends BaseAgent {
         where: userId ? { id: userId } : {},
         take: limit,
         include: {
+          subscription: { select: { plan: true } },
+          ...FAMILY_PLAN_INCLUDE,
           _count: {
             select: {
               scans: true,
@@ -365,6 +368,7 @@ class SecurityAgent extends BaseAgent {
       for (const user of users) {
         const anomalies: string[] = [];
         let riskScore = 0;
+        const userEffectivePlan = computeEffectivePlan(user);
 
         // Check for anomalous patterns
         // 1. Very high activity for new account
@@ -382,8 +386,8 @@ class SecurityAgent extends BaseAgent {
           riskScore += 0.2;
         }
 
-        // 3. Free user with excessive activity
-        if (user.plan === "FREE" && user._count.scans > 5) {
+        // 3. Free user with excessive activity (skip family members who are effectively ENTERPRISE)
+        if (userEffectivePlan === "FREE" && user._count.scans > 5) {
           anomalies.push("Free tier usage exceeds normal patterns");
           riskScore += 0.15;
         }
@@ -568,6 +572,7 @@ class SecurityAgent extends BaseAgent {
         take: 100,
         include: {
           subscription: true,
+          ...FAMILY_PLAN_INCLUDE,
           _count: {
             select: {
               scans: true,
@@ -583,6 +588,7 @@ class SecurityAgent extends BaseAgent {
       for (const user of users) {
         const indicators: FraudPreventionResult["flagged"][0]["indicators"] = [];
         let fraudScore = 0;
+        const userEffPlan = computeEffectivePlan(user);
 
         // Indicator 1: Email pattern
         if (user.email.match(/\+\d+@/)) {
@@ -594,8 +600,8 @@ class SecurityAgent extends BaseAgent {
           fraudScore += 0.1;
         }
 
-        // Indicator 2: Free user with trial abuse pattern
-        if (user.plan === "FREE" && user._count.scans > 3) {
+        // Indicator 2: Free user with trial abuse pattern (skip family members)
+        if (userEffPlan === "FREE" && user._count.scans > 3) {
           indicators.push({
             indicator: "trial_abuse",
             weight: 0.2,

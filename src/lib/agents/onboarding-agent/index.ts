@@ -10,6 +10,7 @@
 
 import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
+import { computeEffectivePlan, FAMILY_PLAN_INCLUDE } from "@/lib/family";
 import { BaseAgent, createAgentContext } from "../base-agent";
 import {
   AgentCapability,
@@ -192,6 +193,8 @@ class OnboardingAgent extends BaseAgent {
       const user = await prisma.user.findUnique({
         where: { id: userId },
         include: {
+          subscription: { select: { plan: true } },
+          ...FAMILY_PLAN_INCLUDE,
           _count: {
             select: {
               scans: true,
@@ -244,7 +247,7 @@ class OnboardingAgent extends BaseAgent {
 
       const primaryGoal = this.determinePrimaryGoal(completedSteps, user._count);
 
-      const suggestedActions = this.getSuggestedActions(completedSteps, user.plan);
+      const suggestedActions = this.getSuggestedActions(completedSteps, computeEffectivePlan(user));
 
       return this.createSuccessResult<OnboardingFlowResult>(
         {
@@ -467,6 +470,8 @@ class OnboardingAgent extends BaseAgent {
       const user = await prisma.user.findUnique({
         where: { id: userId },
         include: {
+          subscription: { select: { plan: true } },
+          ...FAMILY_PLAN_INCLUDE,
           _count: {
             select: {
               scans: true,
@@ -483,9 +488,10 @@ class OnboardingAgent extends BaseAgent {
 
       const recommendations: FeatureRecommendationResult["recommendations"] = [];
       const basedOn: string[] = [];
+      const userPlanEff = computeEffectivePlan(user);
 
-      // Recommend based on user state
-      if (user.plan === "FREE" && user._count.exposures > 5) {
+      // Recommend based on user state (use effective plan to include family members)
+      if (userPlanEff === "FREE" && user._count.exposures > 5) {
         recommendations.push({
           feature: "auto_removal",
           title: "Automated Removal",
