@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { sendCCPARemovalRequest, queueRemovalDigest, queueRemovalStatusUpdate } from "@/lib/email";
-import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, isKnownDataBroker, getNotBrokerReason, type DataBrokerInfo } from "./data-broker-directory";
+import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, isKnownDataBroker, getNotBrokerReason, isCaRegisteredBroker, type DataBrokerInfo } from "./data-broker-directory";
+import { hasActiveDropSubmission } from "@/lib/drop";
 import { calculateVerifyAfterDate } from "./verification-service";
 import { attemptAutomatedOptOut, isAutomationEnabled, getBestAutomationMethod, canAutomateBroker } from "./browser-automation";
 import type { RemovalMethod } from "@/lib/types";
@@ -1638,6 +1639,24 @@ export async function processPendingRemovalsBatch(limit: number = 20, deadline?:
       });
       stats.skipped++;
       continue;
+    }
+
+    // Skip CA-registered brokers if user has active DROP submission
+    if (isCaRegisteredBroker(request.exposure.source)) {
+      const hasDrop = await hasActiveDropSubmission(request.userId);
+      if (hasDrop) {
+        await prisma.removalRequest.update({
+          where: { id },
+          data: { status: "ACKNOWLEDGED", notes: "Covered by California DROP submission" },
+        });
+        await prisma.exposure.update({
+          where: { id: request.exposureId },
+          data: { status: "MONITORING" },
+        });
+        console.log(`[Batch Removal] Skipped ${request.exposure.source} — covered by DROP for user ${request.userId}`);
+        stats.skipped++;
+        continue;
+      }
     }
 
     try {

@@ -60,6 +60,7 @@ model User {
   whitelists             Whitelist[]
   corporateAdmin         CorporateAccount?  @relation("CorporateAdmin")
   corporateSeat          CorporateSeat?
+  dropSubmission         DropSubmission?
 
   @@index([createdAt])
   @@index([emailVerified])
@@ -1011,4 +1012,22 @@ model EmailSuppression {
   @@index([suppressed])
   @@index([brokerKey])
   @@index([category])
+}
+
+// California DROP (Delete Request and Opt-out Platform) submissions
+// Tracks whether users have submitted through CA's centralized deletion portal
+model DropSubmission {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  status          String    @default("NOT_SUBMITTED")
+  // Statuses: NOT_SUBMITTED, SUBMITTED, CONFIRMED, REVOKED
+  submittedAt     DateTime?
+  dropConfId      String?   // User-provided DROP confirmation ID
+  brokersAtSubmit Int?      // Snapshot of CA-registered broker count at time of submission
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
 }

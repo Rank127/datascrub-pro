@@ -13332,6 +13332,47 @@ export const BROKER_CATEGORIES = {
     "LOCATION_DATA_TRACKER", "VOICE_DATA_MONITOR", "FACIAL_RECOGNITION_LEAK_MONITOR",
     "AI_TRAINING_DATA_MONITOR"
   ],
+
+  // ==========================================
+  // CA DATA BROKER REGISTRY — SB 362 / DELETE Act
+  // Brokers registered with the California Attorney General per Civil Code § 1798.99.80
+  // These are covered by the DROP (Delete Request and Opt-out Platform)
+  // Source: https://oag.ca.gov/data-brokers/registration
+  // ==========================================
+  CA_REGISTERED: [
+    // Major People Search (all CA-registered)
+    "SPOKEO", "WHITEPAGES", "BEENVERIFIED", "INTELIUS", "RADARIS",
+    "TRUEPEOPLESEARCH", "PEOPLEFINDER", "MYLIFE", "INSTANTCHECKMATE",
+    "TRUTHFINDER", "PEOPLELOOKER", "THATSTHEM", "FAMILYTREENOW",
+    "PEEKYOU", "PIPL", "FASTPEOPLESEARCH", "USSEARCH",
+    // B2B / Professional Data
+    "ACXIOM", "ORACLE_DATACLOUD", "ZOOMINFO", "FULLCONTACT", "CLEARBIT",
+    "APOLLO", "LUSHA", "ROCKETREACH", "COGNISM", "SEAMLESS_AI",
+    "LEADIQ", "DATANYZE", "UPLEAD", "PEOPLE_DATA_LABS",
+    // Marketing / Data Aggregators
+    "EPSILON", "EXPERIAN_MARKETING", "LEXISNEXIS", "LIVERAMP", "NEUSTAR",
+    "NIELSEN", "LOTAME", "TAPAD", "TOWER_DATA", "DATALOGIX",
+    // Background Check / Employment
+    "THEWORKNUMBER", "CHECKR", "FIRST_ADVANTAGE",
+    // Identity / Phone
+    "NUWBER", "TRUECALLER", "HIYA", "EKATA_DATA",
+    // Location / Analytics
+    "SAFEGRAPH", "GRAVY_ANALYTICS", "PLACER_AI", "MOBILEWALLA",
+    // Insurance / Financial
+    "LN_RISK_SOLUTIONS", "VERISK",
+    // Identity Resolution / Enrichment
+    "CORESIGNAL", "PROXYCURL",
+    // Real Estate Data
+    "CORELOGIC_PROPERTY", "ATTOM_DATA",
+    // Court / Legal Records
+    "JUDYRECORDS", "UNICOURT",
+    // Voter / Political Data
+    "L2_VOTER_DATA", "ARISTOTLE_VOTER",
+    // Automotive
+    "CARFAX", "AUTOCHECK",
+    // Skip Tracing
+    "TRACERS_INFO", "IRB_SEARCH",
+  ],
 } as const;
 
 /**
@@ -13612,6 +13653,17 @@ export function getDataBrokersOnly(): Record<string, DataBrokerInfo> {
   return Object.fromEntries(
     Object.entries(DATA_BROKER_DIRECTORY).filter(([key]) => !excludeKeys.has(key))
   );
+}
+
+// Check if a broker is on the CA Data Broker Registry (covered by DROP)
+const CA_REGISTERED_SET: ReadonlySet<string> = new Set(BROKER_CATEGORIES.CA_REGISTERED);
+
+export function isCaRegisteredBroker(source: string): boolean {
+  return CA_REGISTERED_SET.has(source);
+}
+
+export function getCaRegisteredBrokerCount(): number {
+  return BROKER_CATEGORIES.CA_REGISTERED.length;
 }
 
 // Get opt-out instructions for a source

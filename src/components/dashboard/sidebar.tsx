@@ -16,6 +16,7 @@ import {
   Bell,
   FileText,
   PhoneOff,
+  Landmark,
   Settings,
   LogOut,
   Bot,
@@ -41,6 +42,7 @@ const navigation = [
   { name: "Support", href: "/dashboard/support", icon: Headphones },
   { name: "Reports", href: "/dashboard/reports", icon: FileText },
   { name: "Do Not Call", href: "/dashboard/dnc", icon: PhoneOff },
+  { name: "CA DROP", href: "/dashboard/drop", icon: Landmark },
   { name: "Settings", href: "/dashboard/settings", icon: Settings, tourId: "settings-nav" },
 ];
 
