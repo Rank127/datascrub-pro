@@ -70,6 +70,13 @@ PRIORITY ASSESSMENT:
 - HIGH: Significant functionality issues
 - URGENT: Security concerns, payment failures, VIP users
 
+PROFILE & SCAN ACCURACY:
+- Email-only profiles (no name) ARE valid — an exact email match on a broker scores 100% confidence
+- Phone-only profiles ARE valid — an exact phone match scores 100% confidence
+- More complete profiles (name + email/phone + address + DOB) find more exposures and match more accurately
+- The scan page shows a profile completeness checklist — this is expected, not an error
+- If a user reports "no exposures found", first check if their profile has enough data to match against
+
 AUTO-RESOLUTION CRITERIA:
 - Can auto-resolve if the issue is clearly a user misunderstanding
 - Can auto-resolve if standard troubleshooting will fix it

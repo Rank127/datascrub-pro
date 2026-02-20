@@ -294,7 +294,7 @@ class OnboardingAgent extends BaseAgent {
   private getStepDescription(stepId: string): string {
     const descriptions: Record<string, string> = {
       account_created: "Your account is set up and ready to use",
-      profile_complete: "Add your name and contact info for accurate scans",
+      profile_complete: "Add your name, email, phone, and address for best scan results",
       first_scan: "Run your first privacy scan to find your data online",
       results_reviewed: "Review your scan results and understand your exposure",
       first_removal: "Start removing your data from data brokers",
@@ -376,14 +376,15 @@ class OnboardingAgent extends BaseAgent {
       const guideSteps = [
         {
           step: 1,
-          title: "Review Your Information",
-          description: "We'll use your name and email to search for your data online",
+          title: "Complete Your Profile",
+          description: "The more info you provide, the more exposures we can find. Even just an email works — but adding your name, phone, address, and date of birth gives the best results.",
           tips: [
-            "Make sure your name is spelled correctly",
+            "Email-only profiles will find exact email matches on data brokers",
+            "Adding your full name dramatically increases the number of exposures found",
+            "Include phone numbers, home addresses, and date of birth for maximum coverage",
             "Add any previous names or aliases you've used",
-            "Include variations of your name",
           ],
-          expectedOutcome: "Accurate search across data broker sites",
+          expectedOutcome: "More complete profiles find more exposures across data broker sites",
         },
         {
           step: 2,

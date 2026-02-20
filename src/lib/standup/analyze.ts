@@ -45,7 +45,7 @@ Respond ONLY with valid JSON matching this schema:
   "actionItems": [{"priority": "HIGH"|"MEDIUM"|"LOW", "action": "specific action to take", "rationale": "why this matters"}],
   "suggestions": ["2-3 improvement recommendations based on trends, with specific context from the data"],
   "agentReport": "1-2 paragraph summary of agent fleet health and performance. Call out specific agents by name — highlight any with low confidence (<70%), high fallback rates, high human review rates, or that appear idle. Recommend specific improvements for underperforming agents.",
-  "operationsReport": "1-2 paragraph summary of removal pipeline and scan activity",
+  "operationsReport": "1-2 paragraph summary of removal pipeline and scan activity. Note: email-only and phone-only profiles now produce valid exposures (100% confidence on exact match) — increased exposure counts from minimal profiles is expected, not anomalous.",
   "financialReport": "1-2 paragraph summary of plan distribution and growth",
   "brokerReport": "1-2 paragraph summary of broker performance and trends",
   "ticketReport": "1-2 paragraph summary of support ticket health — open count, resolution rate, stale tickets, avg resolution time. Flag any tickets sitting idle too long.",
