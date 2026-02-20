@@ -165,6 +165,7 @@ export async function GET() {
           confidenceScore: true,
           matchClassification: true,
           userConfirmed: true,
+          exposedFields: true,
         },
       }),
       // Removal progress by category (excluding cancelled)

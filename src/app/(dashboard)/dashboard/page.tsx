@@ -56,6 +56,7 @@ interface Exposure {
   status: string;
   isWhitelisted: boolean;
   firstFoundAt: string;
+  exposedFields?: string | null;
 }
 
 interface BrokerStat {
@@ -187,6 +188,7 @@ export default function DashboardPage() {
     severity: exp.severity as Severity,
     status: exp.status,
     isWhitelisted: exp.isWhitelisted,
+    exposedFields: exp.exposedFields as string | null | undefined,
   }));
 
   return (

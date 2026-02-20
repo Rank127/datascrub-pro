@@ -175,6 +175,8 @@ model Exposure {
   validatedAt          DateTime?       // When confidence was calculated
   userConfirmed        Boolean         @default(false) // User manually confirmed this is their data
   userConfirmedAt      DateTime?       // When user confirmed
+  // Exposed data type breakdown (NEW)
+  exposedFields        String?         // JSON array: [{"type":"name"},{"type":"phone","count":3},...]
   // Precision tracking fields (NEW)
   factorsMatched       Int?            // Number of confidence factors that matched (2+ required)
   markedFalsePositive  Boolean         @default(false) // User or broker marked as false positive

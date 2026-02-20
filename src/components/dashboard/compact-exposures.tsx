@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Trash2, Shield, Search } from "lucide-react";
+import { ArrowRight, Trash2, Shield, Search, User, Phone, Mail, MapPin, Calendar, Users } from "lucide-react";
 import Link from "next/link";
 import {
   DataSourceNames,
@@ -21,7 +21,17 @@ interface Exposure {
   severity: Severity;
   status: string;
   isWhitelisted: boolean;
+  exposedFields?: string | null;
 }
+
+const FIELD_ICONS: Record<string, { icon: typeof User; tip: string }> = {
+  name: { icon: User, tip: "Name" },
+  phone: { icon: Phone, tip: "Phone" },
+  email: { icon: Mail, tip: "Email" },
+  address: { icon: MapPin, tip: "Address" },
+  age: { icon: Calendar, tip: "Age" },
+  relatives: { icon: Users, tip: "Relatives" },
+};
 
 interface CompactExposuresProps {
   exposures: Exposure[];
@@ -121,9 +131,35 @@ export function CompactExposures({
                   <div className="font-medium text-white text-sm truncate">
                     {displayName}
                   </div>
-                  <div className="text-xs text-slate-400">
-                    {dataTypeLabel} exposed
-                  </div>
+                  {exposure.exposedFields ? (() => {
+                    try {
+                      const fields: Array<{ type: string; count?: number }> = JSON.parse(exposure.exposedFields!);
+                      if (!Array.isArray(fields) || fields.length === 0) return (
+                        <div className="text-xs text-slate-400">{dataTypeLabel} exposed</div>
+                      );
+                      return (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          {fields.map((f) => {
+                            const cfg = FIELD_ICONS[f.type];
+                            if (!cfg) return null;
+                            const Icon = cfg.icon;
+                            const tip = f.count && f.count > 1 ? `${cfg.tip} (${f.count})` : cfg.tip;
+                            return (
+                              <span key={f.type} title={tip}>
+                                <Icon className="h-3 w-3 text-slate-500" />
+                              </span>
+                            );
+                          })}
+                        </div>
+                      );
+                    } catch {
+                      return <div className="text-xs text-slate-400">{dataTypeLabel} exposed</div>;
+                    }
+                  })() : (
+                    <div className="text-xs text-slate-400">
+                      {dataTypeLabel} exposed
+                    </div>
+                  )}
                 </div>
 
                 {/* Severity badge */}

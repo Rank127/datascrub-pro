@@ -61,6 +61,7 @@ interface Exposure {
   status: ExposureStatus;
   isWhitelisted: boolean;
   firstFoundAt: string;
+  exposedFields?: string | null;
   removalRequest?: {
     id: string;
     status: string;
@@ -615,6 +616,7 @@ function ExposuresPageContent() {
                   severity={exposure.severity}
                   status={exposure.status}
                   isWhitelisted={exposure.isWhitelisted}
+                  exposedFields={exposure.exposedFields}
                   firstFoundAt={new Date(exposure.firstFoundAt)}
                   onWhitelist={() => handleWhitelist(exposure.id)}
                   onUnwhitelist={() => handleUnwhitelist(exposure.id)}

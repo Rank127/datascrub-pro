@@ -14,7 +14,7 @@ import {
   type ExposureStatus,
   type ExposureType,
 } from "@/lib/types";
-import { ExternalLink, Shield, Trash2, ListChecks } from "lucide-react";
+import { ExternalLink, Shield, Trash2, ListChecks, User, Phone, Mail, MapPin, Calendar, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ExposureCardProps {
@@ -33,9 +33,25 @@ interface ExposureCardProps {
   onRemove?: () => void;
   selected?: boolean;
   onSelect?: (id: string) => void;
+  exposedFields?: string | null;
   showCheckbox?: boolean;
   clickable?: boolean; // Make the card clickable to navigate to filtered view
 }
+
+interface ExposedFieldItem {
+  type: string;
+  count?: number;
+  value?: string;
+}
+
+const EXPOSED_FIELD_CONFIG: Record<string, { icon: typeof User; label: string }> = {
+  name: { icon: User, label: "Name" },
+  phone: { icon: Phone, label: "Phone" },
+  email: { icon: Mail, label: "Email" },
+  address: { icon: MapPin, label: "Address" },
+  age: { icon: Calendar, label: "Age" },
+  relatives: { icon: Users, label: "Relatives" },
+};
 
 const dataTypeLabels: Record<ExposureType, string> = {
   EMAIL: "Email Address",
@@ -81,6 +97,7 @@ export function ExposureCard({
   onRemove,
   selected,
   onSelect,
+  exposedFields,
   showCheckbox = false,
   clickable = false,
 }: ExposureCardProps) {
@@ -146,6 +163,36 @@ export function ExposureCard({
                 {dataPreview}
               </p>
             )}
+
+            {exposedFields && (() => {
+              try {
+                const fields: ExposedFieldItem[] = JSON.parse(exposedFields);
+                if (!Array.isArray(fields) || fields.length === 0) return null;
+                return (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {fields.map((field) => {
+                      const config = EXPOSED_FIELD_CONFIG[field.type];
+                      if (!config) return null;
+                      const Icon = config.icon;
+                      const label = field.count && field.count > 1
+                        ? `${config.label} (${field.count})`
+                        : config.label;
+                      return (
+                        <span
+                          key={field.type}
+                          className="inline-flex items-center gap-1 text-xs text-slate-400 bg-slate-700/50 px-1.5 py-0.5 rounded"
+                        >
+                          <Icon className="h-3 w-3" />
+                          {label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                );
+              } catch {
+                return null;
+              }
+            })()}
 
             <p className="text-xs text-slate-500 mt-2">
               Found: {new Date(firstFoundAt).toLocaleDateString()}

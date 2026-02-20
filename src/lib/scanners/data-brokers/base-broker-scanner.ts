@@ -251,6 +251,25 @@ export abstract class BaseBrokerScanner extends BaseScanner {
 
     const dataPreview = this.buildDataPreview(searchResult, input);
 
+    // Compute exposed field types from search results
+    const exposedFields: Array<{ type: string; count?: number; value?: string }> = [];
+    exposedFields.push({ type: "name" }); // Always present if result exists
+    if (searchResult.phones?.length) {
+      exposedFields.push({ type: "phone", count: searchResult.phones.length });
+    }
+    if (searchResult.emails?.length) {
+      exposedFields.push({ type: "email", count: searchResult.emails.length });
+    }
+    if (searchResult.addresses?.length) {
+      exposedFields.push({ type: "address", count: searchResult.addresses.length });
+    }
+    if (searchResult.age) {
+      exposedFields.push({ type: "age", value: searchResult.age });
+    }
+    if (searchResult.relatives?.length) {
+      exposedFields.push({ type: "relatives", count: searchResult.relatives.length });
+    }
+
     return {
       source: this.config.source,
       sourceName: this.config.name,
@@ -269,6 +288,7 @@ export abstract class BaseBrokerScanner extends BaseScanner {
         optOutInstructions: this.config.optOutInstructions,
         estimatedRemovalDays: this.config.estimatedRemovalDays,
         privacyEmail: this.config.privacyEmail,
+        exposedFields,
       },
       confidence,
     };

@@ -178,22 +178,26 @@ export async function POST(request: Request) {
     const scanResults = await orchestrator.runScan(scanInput);
 
     // Log scan results summary
+    const projectedCount = scanResults.filter(r => r.confidence?.classification === "PROJECTED").length;
+    const scannedCount = scanResults.length - projectedCount;
     const resultsByConfidence = {
-      confirmed: scanResults.filter(r => (r.confidence?.score ?? 100) >= 80).length,
+      confirmed: scanResults.filter(r => {
+        const c = r.confidence?.classification;
+        return c === "CONFIRMED" || (r.confidence?.score ?? 100) >= 75;
+      }).length,
       likely: scanResults.filter(r => {
         const score = r.confidence?.score ?? 100;
-        return score >= 60 && score < 80;
+        const c = r.confidence?.classification;
+        return c !== "PROJECTED" && score >= 50 && score < 75;
       }).length,
-      possible: scanResults.filter(r => {
-        const score = r.confidence?.score ?? 100;
-        return score >= 40 && score < 60;
-      }).length,
-      rejected: scanResults.filter(r => (r.confidence?.score ?? 100) < 40).length,
+      projected: projectedCount,
+      rejected: scanResults.filter(r => (r.confidence?.score ?? 100) < 25).length,
     };
     console.log(
-      `[Scan] Raw results: ${scanResults.length} total ` +
-      `(${resultsByConfidence.confirmed} confirmed, ${resultsByConfidence.likely} likely, ` +
-      `${resultsByConfidence.possible} possible, ${resultsByConfidence.rejected} rejected)`
+      `[Scan] Results: ${scanResults.length} total ` +
+      `(${scannedCount} scanned + ${projectedCount} projected) — ` +
+      `${resultsByConfidence.confirmed} confirmed, ${resultsByConfidence.likely} likely, ` +
+      `${resultsByConfidence.projected} projected, ${resultsByConfidence.rejected} rejected`
     );
 
     // Get existing exposures for this user to avoid duplicates (only non-removed)
@@ -260,9 +264,11 @@ export async function POST(request: Request) {
     // All exposures start as ACTIVE - users manually initiate removals
     const exposures = await Promise.all(
       newExposures.map((result) => {
-        // Generate proof screenshot URL if we have a source URL
+        const isProjected = result.confidence?.classification === "PROJECTED";
+
+        // Generate proof screenshot URL only for real scanned results (not projected)
         let proofScreenshot: string | null = null;
-        if (result.sourceUrl && !result.sourceUrl.startsWith('mailto:')) {
+        if (!isProjected && result.sourceUrl && !result.sourceUrl.startsWith('mailto:')) {
           try {
             proofScreenshot = generateScreenshotUrl(result.sourceUrl, { delay: 2 });
           } catch (e) {
@@ -272,7 +278,8 @@ export async function POST(request: Request) {
 
         // Determine if manual review is required based on confidence score
         const confidenceScore = result.confidence?.score ?? 100; // Default high if no confidence data
-        const requiresManualReview = confidenceScore < CONFIDENCE_THRESHOLDS.AUTO_PROCEED;
+        // Projected exposures don't require manual action — they're statistical projections
+        const requiresManualReview = isProjected ? false : confidenceScore < CONFIDENCE_THRESHOLDS.AUTO_PROCEED;
 
         // Log confidence-based decisions
         if (requiresManualReview) {
@@ -280,6 +287,11 @@ export async function POST(request: Request) {
             `[Scan] ${result.sourceName}: Confidence ${confidenceScore} < ${CONFIDENCE_THRESHOLDS.AUTO_PROCEED}, requires manual review`
           );
         }
+
+        // Extract exposed fields from rawData (computed by scanners/projector)
+        const exposedFields = result.rawData?.exposedFields
+          ? JSON.stringify(result.rawData.exposedFields)
+          : null;
 
         return prisma.exposure.create({
           data: {
@@ -294,11 +306,13 @@ export async function POST(request: Request) {
             // All exposures start as ACTIVE - users manually initiate removals
             status: "ACTIVE",
             isWhitelisted: false,
-            // Require manual action for low-confidence matches
+            // Projected exposures don't require manual action
             requiresManualAction: requiresManualReview,
-            // Proof screenshot (captured on-demand when URL is accessed)
+            // Proof screenshot only for real scans (not projected)
             proofScreenshot,
             proofScreenshotAt: proofScreenshot ? new Date() : null,
+            // Exposed data type breakdown
+            exposedFields,
             // Confidence scoring data
             confidenceScore: result.confidence?.score ?? null,
             confidenceFactors: result.confidence?.factors
@@ -316,7 +330,9 @@ export async function POST(request: Request) {
       })
     );
 
-    console.log(`[Scan] New: ${exposures.length}, Updated: ${updatedExposureIds.length}, Skipped: ${scanResults.length - newExposures.length - updatedExposureIds.length}`);
+    const newProjectedCount = newExposures.filter(r => r.confidence?.classification === "PROJECTED").length;
+    const newScannedCount = exposures.length - newProjectedCount;
+    console.log(`[Scan] New: ${exposures.length} (${newScannedCount} scanned + ${newProjectedCount} projected), Updated: ${updatedExposureIds.length}, Skipped: ${scanResults.length - newExposures.length - updatedExposureIds.length}`);
 
     // Update scan record and user's lastScanAt
     const completedAt = new Date();
@@ -374,6 +390,9 @@ export async function POST(request: Request) {
       low: exposures.filter(e => e.severity === "LOW").length,
     };
 
+    // Get projection stats from the orchestrator
+    const projectionStats = orchestrator.getProjectionStats();
+
     return NextResponse.json({
       scanId: scan.id,
       exposuresFound: exposures.length,
@@ -381,6 +400,13 @@ export async function POST(request: Request) {
       status: "COMPLETED",
       severityCounts,
       userPlan,
+      // Projection breakdown
+      scannedExposures: exposures.length - newProjectedCount,
+      projectedExposures: newProjectedCount,
+      projectionStats: projectionStats ? {
+        confirmedSources: projectionStats.confirmedSources,
+        projected: projectionStats.projectedCount,
+      } : null,
     });
   } catch (error) {
     console.error("Scan error:", error);
