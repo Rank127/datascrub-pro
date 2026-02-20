@@ -167,8 +167,14 @@ export {
 } from "./billing-agent";
 
 // ============================================================================
-// INTELLIGENCE AGENTS (3)
+// INTELLIGENCE AGENTS (4)
 // ============================================================================
+
+export {
+  getBrokerDiscoveryAgent,
+  BrokerDiscoveryAgent,
+  runBrokerDiscovery,
+} from "./broker-discovery-agent";
 
 export {
   getBrokerIntelAgent,

@@ -1,6 +1,7 @@
 import type { Scanner, ScanInput, ScanResult } from "./base-scanner";
 import { MockDataBrokerScanner } from "./data-brokers/mock-broker-scanner";
 import { createRealBrokerScanners } from "./data-brokers";
+import { loadDynamicScanners } from "./data-brokers/dynamic-broker-scanner";
 import { HaveIBeenPwnedScanner } from "./breaches/haveibeenpwned";
 import { DehashedScanner } from "./breaches/dehashed";
 import { LeakCheckScanner } from "./breaches/leakcheck";
@@ -32,11 +33,20 @@ export class ScanOrchestrator {
   private scanners: Scanner[] = [];
   private lastProjectionStats: ProjectionStats | null = null;
 
-  constructor(options: ScanOptions) {
-    this.initializeScanners(options);
+  private constructor() {
+    // Use ScanOrchestrator.create() instead
   }
 
-  private initializeScanners(options: ScanOptions) {
+  /**
+   * Async factory — loads static + dynamic scanners
+   */
+  static async create(options: ScanOptions): Promise<ScanOrchestrator> {
+    const orchestrator = new ScanOrchestrator();
+    await orchestrator.initializeScanners(options);
+    return orchestrator;
+  }
+
+  private async initializeScanners(options: ScanOptions) {
     const { type, userPlan } = options;
 
     // HIBP for all users (breach scanning)
@@ -64,6 +74,17 @@ export class ScanOrchestrator {
         console.log(`[ScanOrchestrator] Using REAL data broker scanners (${realScanners.length} scanners)`);
         console.log(`[ScanOrchestrator] Scanners: ${realScanners.map(s => s.name).join(", ")}`);
         this.scanners.push(...realScanners);
+
+        // Load dynamic scanners from DB (graceful degradation on failure)
+        try {
+          const dynamicScanners = await loadDynamicScanners();
+          if (dynamicScanners.length > 0) {
+            console.log(`[ScanOrchestrator] Loaded ${dynamicScanners.length} dynamic scanners: ${dynamicScanners.map(s => s.name).join(", ")}`);
+            this.scanners.push(...dynamicScanners);
+          }
+        } catch (error) {
+          console.error("[ScanOrchestrator] Failed to load dynamic scanners (continuing with static only):", error);
+        }
       } else {
         console.log("[ScanOrchestrator] Using MOCK data broker scanners");
         this.scanners.push(...MockDataBrokerScanner.createAll());

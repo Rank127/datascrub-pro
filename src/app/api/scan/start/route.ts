@@ -184,8 +184,8 @@ export async function POST(request: Request) {
     // Prepare profile data for scanning
     const scanInput = await prepareProfileForScan(profile, decrypt);
 
-    // Initialize orchestrator
-    const orchestrator = new ScanOrchestrator({
+    // Initialize orchestrator (async — loads static + dynamic scanners)
+    const orchestrator = await ScanOrchestrator.create({
       type: type as ScanType,
       userPlan,
     });

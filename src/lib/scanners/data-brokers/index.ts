@@ -13,6 +13,12 @@ export { FastPeopleSearchScanner } from "./fastpeoplesearch-scanner";
 export { RadarisScanner } from "./radaris-scanner";
 export { InteliusScanner } from "./intelius-scanner";
 export { PeopleFinderScanner } from "./peoplefinder-scanner";
+export { TruthFinderScanner } from "./truthfinder-scanner";
+export { InstantCheckmateScanner } from "./instantcheckmate-scanner";
+export { PeopleLookerScanner } from "./peoplelooker-scanner";
+export { MyLifeScanner } from "./mylife-scanner";
+export { NuwberScanner } from "./nuwber-scanner";
+export { CheckPeopleScanner } from "./checkpeople-scanner";
 
 // Manual check scanners for sites with advanced bot protection
 export {
@@ -27,12 +33,22 @@ export { MockDataBrokerScanner } from "./mock-broker-scanner";
 // All brokers scanner - generates check links for ALL 2,100+ brokers
 export { AllBrokersScanner, createAllBrokersScanner } from "./all-brokers-scanner";
 
+// Dynamic broker scanner — reads config from DB, no code deploy needed
+export { DynamicBrokerScanner, loadDynamicScanners } from "./dynamic-broker-scanner";
+export type { ParsingRules, DynamicScannerRow } from "./dynamic-broker-scanner";
+
 import { SpokeoScanner } from "./spokeo-scanner";
 import { WhitePagesScanner } from "./whitepages-scanner";
 import { BeenVerifiedScanner } from "./beenverified-scanner";
 import { TruePeopleSearchScanner } from "./truepeoplesearch-scanner";
 import { RadarisScanner } from "./radaris-scanner";
 import { InteliusScanner } from "./intelius-scanner";
+import { TruthFinderScanner } from "./truthfinder-scanner";
+import { InstantCheckmateScanner } from "./instantcheckmate-scanner";
+import { PeopleLookerScanner } from "./peoplelooker-scanner";
+import { MyLifeScanner } from "./mylife-scanner";
+import { NuwberScanner } from "./nuwber-scanner";
+import { CheckPeopleScanner } from "./checkpeople-scanner";
 import {
   createFastPeopleSearchManualScanner,
   createPeopleFinderManualScanner,
@@ -63,6 +79,12 @@ export function createRealBrokerScanners(): Scanner[] {
     createFastPeopleSearchManualScanner(), // Manual check - advanced bot protection
     new RadarisScanner(),
     new InteliusScanner(),
+    new TruthFinderScanner(),
+    new InstantCheckmateScanner(),
+    new PeopleLookerScanner(),
+    new MyLifeScanner(),
+    new NuwberScanner(),
+    new CheckPeopleScanner(),
     createPeopleFinderManualScanner(), // Manual check - advanced bot protection
     // NOTE: AllBrokersScanner removed - it created fake "potential" exposures
     // for 2,100+ brokers without confirming user is actually listed
@@ -89,6 +111,12 @@ export function getScannerBySource(source: string): Scanner | null {
     TRUEPEOPLESEARCH: TruePeopleSearchScanner,
     RADARIS: RadarisScanner,
     INTELIUS: InteliusScanner,
+    TRUTHFINDER: TruthFinderScanner,
+    INSTANTCHECKMATE: InstantCheckmateScanner,
+    PEOPLELOOKER: PeopleLookerScanner,
+    MYLIFE: MyLifeScanner,
+    NUWBER: NuwberScanner,
+    CHECKPEOPLE: CheckPeopleScanner,
   };
 
   const ScannerClass = scannerMap[source];
@@ -107,6 +135,12 @@ export const SUPPORTED_DATA_BROKERS = [
   "RADARIS",
   "INTELIUS",
   "PEOPLEFINDER",
+  "TRUTHFINDER",
+  "INSTANTCHECKMATE",
+  "PEOPLELOOKER",
+  "MYLIFE",
+  "NUWBER",
+  "CHECKPEOPLE",
 ] as const;
 
 export type SupportedDataBroker = (typeof SUPPORTED_DATA_BROKERS)[number];

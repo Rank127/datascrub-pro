@@ -1094,3 +1094,49 @@ model DropSubmission {
 
   @@index([status])
 }
+
+// Dynamic scanner configurations — populated by broker-discovery-agent
+// Allows adding new broker scanners via DB config instead of code deploys
+model DynamicScannerConfig {
+  id                  String    @id @default(cuid())
+  brokerKey           String    @unique    // "THATSTHEM", "PEEKYOU", etc.
+  brokerName          String               // "ThatsThem"
+  enabled             Boolean   @default(false)
+
+  // URL template — uses {firstName}, {lastName}, {state}, {city}, {fullName}
+  searchUrlTemplate   String    // "https://thatsthem.com/name/{firstName}-{lastName}/{city}-{state}"
+  baseUrl             String    // "https://thatsthem.com"
+
+  // Opt-out info (kept up-to-date by agent)
+  optOutUrl           String?
+  optOutEmail         String?
+  estimatedRemovalDays Int      @default(14)
+
+  // Parsing rules (JSON string)
+  // { noResultIndicators: string[], resultIndicators: string[], extractionPatterns: { name?, location?, age?, phone?, email? } }
+  parsingRules        String
+
+  // Proxy settings
+  usePremiumProxy     Boolean   @default(true)
+  useStealthProxy     Boolean   @default(false)
+  delayMs             Int       @default(3000)
+
+  // Discovery metadata
+  discoveredBy        String?   // "agent" | "manual"
+  discoveryScore      Float?    // 0-100 priority based on exposure frequency
+
+  // Validation & health
+  validationStatus    String    @default("PENDING")  // PENDING | VALIDATED | FAILED | DISABLED
+  validationScore     Float?    // 0-1 accuracy measure
+  lastValidatedAt     DateTime?
+  consecutiveFailures Int       @default(0)
+  lastScanAt          DateTime?
+  totalScans          Int       @default(0)
+  successfulScans     Int       @default(0)
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([enabled, validationStatus])
+  @@index([discoveryScore])
+}
