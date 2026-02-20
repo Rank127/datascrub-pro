@@ -110,9 +110,9 @@ const dataSources = [
   { name: "WhitePages", type: "Data Broker" },
   { name: "BeenVerified", type: "Data Broker" },
   { name: "Have I Been Pwned", type: "Breach Database" },
-  { name: "Dark Web Forums", type: "Dark Web" },
-  { name: "LinkedIn", type: "Social Media" },
-  { name: "Facebook", type: "Social Media" },
+  { name: "Radaris", type: "Data Broker" },
+  { name: "TruePeopleSearch", type: "Data Broker" },
+  { name: "Intelius", type: "Data Broker" },
   { name: "And 2,100+ more...", type: "" },
 ];
 
