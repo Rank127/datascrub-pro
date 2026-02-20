@@ -103,7 +103,7 @@ export const BUSINESS_CONTEXT: BusinessContext = {
   ],
 
   uniqueAdvantages: [
-    "24 AI agents operating autonomously (most competitors use manual processes)",
+    "Fully automated removal pipeline (most competitors use manual processes)",
     "2,100+ data source coverage (among the broadest in market)",
     "Automated CCPA/GDPR legal letter generation",
     "Family plans with shared management dashboard",

@@ -185,7 +185,7 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-semibold text-white mb-4">4. AI Usage Disclosure</h2>
             <div className="bg-slate-800/30 rounded-lg p-6 border border-slate-700">
               <p className="text-slate-400 mb-4">
-                We use AI agents internally to improve our service. Here is how:
+                We use automated systems internally to improve our service. Here is how:
               </p>
               <ul className="list-disc list-inside text-slate-400 space-y-2 mb-4">
                 <li><strong className="text-slate-300">Scan Automation:</strong> AI helps identify your data across broker sites faster</li>

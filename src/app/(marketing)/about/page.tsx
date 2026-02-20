@@ -107,9 +107,9 @@ export default function AboutPage() {
               </p>
               <p>
                 GhostMyData automates this entire process. Our platform scans
-                2,100+ data brokers, submits removal requests through 24 AI
-                agents, tracks compliance deadlines, and monitors for re-listings
-                — all on autopilot.
+                2,100+ data brokers, submits removal requests to every broker
+                where you appear, tracks compliance deadlines, and monitors for
+                re-listings — automatically.
               </p>
             </div>
           </div>
@@ -142,8 +142,8 @@ export default function AboutPage() {
                   Remove It
                 </h3>
                 <p className="text-gray-400 text-sm">
-                  Our AI agents submit legally compliant removal requests to
-                  every broker where you appear.
+                  We submit legally compliant removal requests to every broker
+                  where you appear.
                 </p>
               </div>
               <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6 text-center">

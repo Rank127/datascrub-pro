@@ -124,7 +124,7 @@ export async function writeBlogPost(
   const format = ARTICLE_FORMATS[slugHash % ARTICLE_FORMATS.length];
   const voice = VOICE_VARIATIONS[(slugHash >> 4) % VOICE_VARIATIONS.length];
 
-  const prompt = `You are an expert privacy journalist and cybersecurity writer for GhostMyData (ghostmydata.com), a data privacy removal service that scans 2,100+ data brokers and uses 24 AI agents to automate removals.
+  const prompt = `You are an expert privacy journalist and cybersecurity writer for GhostMyData (ghostmydata.com), a data privacy removal service that automates removals across 2,100+ data brokers.
 
 **Topic:** ${topic.title}
 **Target Keywords:** ${topic.keywords.join(", ")}

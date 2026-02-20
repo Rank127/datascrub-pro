@@ -229,7 +229,7 @@ export default function ComparePage() {
             </tr>
             <tr className="border-b border-slate-800">
               <td className="px-4 py-3 font-medium text-slate-300">Automated Removal</td>
-              <td className="px-4 py-3 text-emerald-400 font-semibold">24 AI agents</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">Fully automated</td>
               <td className="px-4 py-3">Manual team</td>
               <td className="px-4 py-3">Automated</td>
               <td className="px-4 py-3">Automated</td>

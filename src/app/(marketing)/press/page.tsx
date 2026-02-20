@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 
 const keyStats = [
   { stat: "2,100+", label: "Data Brokers Scanned" },
-  { stat: "24", label: "AI Agents Deployed" },
+  { stat: "24/7", label: "Automated Monitoring" },
   { stat: "50", label: "US States Covered" },
   { stat: "350+", label: "Removal Guides Published" },
 ];
@@ -48,8 +48,8 @@ const milestones = [
   },
   {
     date: "2025",
-    title: "AI Agent System Deployed",
-    description: "24 AI agents deployed for automated removal processing and compliance tracking.",
+    title: "Automated Removal System Deployed",
+    description: "Automated removal processing and compliance tracking deployed.",
   },
   {
     date: "2026",
@@ -106,12 +106,10 @@ export default function PressPage() {
                 privacy platform that helps individuals find and remove their
                 personal information from data brokers, breach databases, and the
                 dark web. The platform scans 2,100+ data brokers — more than any
-                competing service — and uses 24 AI agents to automate the removal
-                process.
+                competing service — and automates the removal process.
               </p>
               <p>
-                Unlike manual removal services that rely on human operators,
-                GhostMyData&apos;s AI-powered pipeline submits legally compliant
+                GhostMyData&apos;s automated platform submits legally compliant
                 removal requests (CCPA, GDPR, and state-specific), tracks
                 response deadlines, escalates non-compliant brokers, and
                 continuously monitors for re-listings.
@@ -159,7 +157,7 @@ export default function PressPage() {
                 <p className="text-gray-300 italic">
                   &quot;GhostMyData is a data privacy platform that scans 2,100+
                   data brokers to find your personal information and automatically
-                  submits removal requests using AI agents. It monitors for
+                  submits removal requests. It monitors for
                   re-listings and includes dark web breach monitoring. Free tier
                   available, with Pro plans starting at $9.99/month.&quot;
                 </p>
