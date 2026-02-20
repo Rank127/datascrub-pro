@@ -25,6 +25,11 @@ import {
   Globe,
   AlertTriangle,
   Crown,
+  UserCircle,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -66,11 +71,53 @@ export default function ScanPage() {
   const [requiresUpgrade, setRequiresUpgrade] = useState(false);
   const [recentScans, setRecentScans] = useState<Scan[]>([]);
   const [loadingScans, setLoadingScans] = useState(true);
+  const [profileCompleteness, setProfileCompleteness] = useState<{
+    hasName: boolean;
+    hasEmail: boolean;
+    hasPhone: boolean;
+    hasAddress: boolean;
+    hasDob: boolean;
+    isComplete: boolean;
+    loading: boolean;
+  }>({ hasName: false, hasEmail: false, hasPhone: false, hasAddress: false, hasDob: false, isComplete: false, loading: true });
   const { plan: _plan, isFreePlan } = useSubscription();
 
   useEffect(() => {
     fetchRecentScans();
+    fetchProfileCompleteness();
   }, []);
+
+  const fetchProfileCompleteness = async () => {
+    try {
+      const response = await fetch("/api/profile");
+      if (response.ok) {
+        const data = await response.json();
+        const p = data.profile;
+        if (p) {
+          const hasName = !!p.fullName?.trim();
+          const hasEmail = Array.isArray(p.emails) && p.emails.length > 0;
+          const hasPhone = Array.isArray(p.phones) && p.phones.length > 0;
+          const hasAddress = Array.isArray(p.addresses) && p.addresses.length > 0;
+          const hasDob = !!p.dateOfBirth;
+          setProfileCompleteness({
+            hasName,
+            hasEmail,
+            hasPhone,
+            hasAddress,
+            hasDob,
+            isComplete: hasName && (hasEmail || hasPhone) && hasAddress && hasDob,
+            loading: false,
+          });
+        } else {
+          setProfileCompleteness(prev => ({ ...prev, loading: false }));
+        }
+      } else {
+        setProfileCompleteness(prev => ({ ...prev, loading: false }));
+      }
+    } catch {
+      setProfileCompleteness(prev => ({ ...prev, loading: false }));
+    }
+  };
 
   const fetchRecentScans = async () => {
     try {
@@ -513,6 +560,60 @@ export default function ScanPage() {
             </div>
           ) : (
             <div className="text-center space-y-4">
+              {/* Profile completeness banner */}
+              {!profileCompleteness.loading && !profileCompleteness.isComplete && (
+                <div className="mx-auto max-w-lg p-4 rounded-lg border border-amber-500/30 bg-amber-500/10 text-left">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="h-5 w-5 text-amber-400 flex-shrink-0" />
+                    <span className="font-semibold text-amber-300">Complete your profile for best results</span>
+                  </div>
+                  <p className="text-sm text-slate-300 mb-3">
+                    The more info you provide, the more exposures we can find. Add missing details to your{" "}
+                    <Link href="/dashboard/profile" className="text-emerald-400 hover:underline font-medium">
+                      profile
+                    </Link>{" "}
+                    before scanning.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className={`flex items-center gap-2 ${profileCompleteness.hasName ? "text-emerald-400" : "text-slate-400"}`}>
+                      {profileCompleteness.hasName
+                        ? <CheckCircle className="h-3.5 w-3.5" />
+                        : <UserCircle className="h-3.5 w-3.5 text-amber-400" />}
+                      Full name
+                    </div>
+                    <div className={`flex items-center gap-2 ${profileCompleteness.hasEmail ? "text-emerald-400" : "text-slate-400"}`}>
+                      {profileCompleteness.hasEmail
+                        ? <CheckCircle className="h-3.5 w-3.5" />
+                        : <Mail className="h-3.5 w-3.5 text-amber-400" />}
+                      Email address
+                    </div>
+                    <div className={`flex items-center gap-2 ${profileCompleteness.hasPhone ? "text-emerald-400" : "text-slate-400"}`}>
+                      {profileCompleteness.hasPhone
+                        ? <CheckCircle className="h-3.5 w-3.5" />
+                        : <Phone className="h-3.5 w-3.5 text-amber-400" />}
+                      Phone number
+                    </div>
+                    <div className={`flex items-center gap-2 ${profileCompleteness.hasAddress ? "text-emerald-400" : "text-slate-400"}`}>
+                      {profileCompleteness.hasAddress
+                        ? <CheckCircle className="h-3.5 w-3.5" />
+                        : <MapPin className="h-3.5 w-3.5 text-amber-400" />}
+                      Home address
+                    </div>
+                    <div className={`flex items-center gap-2 ${profileCompleteness.hasDob ? "text-emerald-400" : "text-slate-400"}`}>
+                      {profileCompleteness.hasDob
+                        ? <CheckCircle className="h-3.5 w-3.5" />
+                        : <Calendar className="h-3.5 w-3.5 text-amber-400" />}
+                      Date of birth
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!profileCompleteness.loading && profileCompleteness.isComplete && (
+                <div className="mx-auto max-w-lg flex items-center justify-center gap-2 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                  <CheckCircle className="h-4 w-4 text-emerald-400" />
+                  <span className="text-sm text-emerald-400">Profile complete — ready for best scan results</span>
+                </div>
+              )}
               <Button
                 size="lg"
                 className="bg-emerald-600 hover:bg-emerald-700"
@@ -521,13 +622,6 @@ export default function ScanPage() {
                 <Search className="mr-2 h-5 w-5" />
                 Start {scanType === "QUICK" ? "Quick" : "Full"} Scan
               </Button>
-              <p className="text-sm text-slate-500">
-                Make sure you&apos;ve completed your{" "}
-                <Link href="/dashboard/profile" className="text-emerald-500 hover:underline">
-                  profile
-                </Link>{" "}
-                before scanning
-              </p>
             </div>
           )}
         </CardContent>

@@ -1,18 +1,22 @@
 /**
- * ProfileValidator - Validates scan results against user's profile
+ * ProfileValidator - Two-Tier Confidence Model v2
  *
- * CRITICAL: This prevents false positives by comparing extracted data
- * against the user's actual profile data (name, location, age, etc.)
+ * TIER 1 — Deterministic (hard identifiers, short-circuit to 100):
+ *   Email-only profile + exact email match → 100 CONFIRMED (no name needed)
+ *   Phone-only profile + exact phone match → 100 CONFIRMED (no name needed)
+ *   Name + Email match → 100 CONFIRMED
+ *   Name + Phone match → 100 CONFIRMED
+ *   Name + Street+City+State match → 100 CONFIRMED
  *
- * Confidence Scoring (100 points max):
- * - Name Match (0-30): Exact=30, First+Last=28, Partial=15, Fuzzy=10
- * - Location Match (0-25): City+State=25, State only=15
- * - Age Match (0-20): Exact=20, ±2 years=15, ±5 years=10
- * - Data Correlation (0-15): Phone match=5, Email match=5
- * - Source Reliability (0-10): Known broker=10, Unknown=7
+ * TIER 2 — Probabilistic (soft signals, only if Tier 1 didn't match):
+ *   Name Match (0-35): Exact=35, First+Last=30, Alias=28, Partial=20, LastOnly=15, Fuzzy=10
+ *   Location Match (0-30): City+State=30, State=18, City-only=10
+ *   Age Match (0-25): Exact=25, ±2yr=18, ±5yr=12, ±10yr=5
+ *   Data Correlation (0-10): Phone partial=5, Email domain=5
  *
- * PRECISION IMPROVEMENT: Requires 2+ matching factors to create exposure.
- * Name-only matches are rejected to prevent false positives.
+ * Source reliability factor REMOVED — all scanners are known brokers, was dead weight.
+ *
+ * MIN_FACTORS: 1 for people-search brokers, 2 for all others.
  */
 
 import type { ScanInput } from "../base-scanner";
@@ -23,28 +27,15 @@ import {
   CONFIDENCE_THRESHOLDS,
 } from "../base-scanner";
 
-// Known data broker sources (more reliable than unknown sources)
-const KNOWN_DATA_BROKERS = new Set([
-  "SPOKEO",
-  "WHITEPAGES",
-  "BEENVERIFIED",
-  "TRUEPEOPLESEARCH",
-  "RADARIS",
-  "INTELIUS",
-  "FASTPEOPLESEARCH",
-  "PEOPLEFINDER",
-  "MYLIFE",
-  "USPHONEBOOK",
-  "THATSTHEM",
-  "CYBERBACKGROUNDCHECKS",
-  "INSTANTCHECKMATE",
-  "TRUTHFINDER",
-  "PEOPLESEARCHNOW",
-  "SEARCHPEOPLEFREE",
-  "FAMILYTREENOW",
-  "ADVANCEDBACKGROUNDCHECKS",
-  "USSEARCH",
-  "ZABASEARCH",
+// People-search source keys — only need 1 factor match (these are aggregated data, not user-created)
+const PEOPLE_SEARCH_SOURCES = new Set([
+  "SPOKEO", "WHITEPAGES", "BEENVERIFIED", "TRUEPEOPLESEARCH",
+  "RADARIS", "INTELIUS", "FASTPEOPLESEARCH", "PEOPLEFINDER",
+  "MYLIFE", "USPHONEBOOK", "THATSTHEM", "CYBERBACKGROUNDCHECKS",
+  "INSTANTCHECKMATE", "TRUTHFINDER", "PEOPLESEARCHNOW",
+  "SEARCHPEOPLEFREE", "FAMILYTREENOW", "ADVANCEDBACKGROUNDCHECKS",
+  "USSEARCH", "ZABASEARCH", "NUWBER", "SPYDIALER", "CHECKPEOPLE",
+  "PUBLICRECORDSNOW", "PEOPLEFINDERS", "PEOPLELOOKER",
 ]);
 
 // State name to abbreviation mapping
@@ -71,6 +62,7 @@ export interface ExtractedData {
   lastName?: string;
   city?: string;
   state?: string;
+  street?: string;
   age?: number | string;
   phones?: string[];
   emails?: string[];
@@ -84,99 +76,296 @@ export interface ValidationInput {
 
 export class ProfileValidator {
   /**
-   * Validate extracted data against user's profile
-   * Returns confidence score with detailed reasoning
-   *
-   * PRECISION IMPROVEMENT: Requires 2+ matching factors to avoid false positives.
-   * Name-only matches are rejected even if confidence score would otherwise pass.
+   * Validate extracted data against user's profile.
+   * Two-tier model: Tier 1 checks hard identifiers first (short-circuit to 100),
+   * then falls back to Tier 2 probabilistic scoring.
    */
   validate(input: ValidationInput): ConfidenceResult {
     const { profile, extracted, source } = input;
+
+    // ─── TIER 1: Deterministic hard-identifier combos ───
+    const tier1 = this.validateTier1(profile, extracted, source);
+    if (tier1) {
+      return tier1;
+    }
+
+    // ─── TIER 2: Probabilistic soft-signal scoring ───
+    return this.validateTier2(profile, extracted, source);
+  }
+
+  /**
+   * Tier 1: Deterministic matching.
+   * If any hard identifier combo matches, return score=100 CONFIRMED immediately.
+   * Returns null if no Tier 1 match found.
+   */
+  private validateTier1(
+    profile: ScanInput,
+    extracted: ExtractedData,
+    source: string
+  ): ConfidenceResult | null {
+    const reasoning: string[] = [];
+
+    // ─── Email/Phone-only profiles (no name) ───
+    // An exact email or phone match IS the user's data — no name needed
+    if (!profile.fullName) {
+      if (profile.emails?.length && this.hasExactEmailMatch(profile, extracted)) {
+        reasoning.push(
+          `TIER 1 CONFIRMED: Exact email match (no-name profile) on ${source}`,
+          `Email: exact match found`
+        );
+        console.log(`[ProfileValidator] ${source}: ★ TIER 1 — Email-only → 100 CONFIRMED`);
+        return this.buildTier1Result(reasoning, "email-only");
+      }
+
+      if (profile.phones?.length && this.hasExactPhoneMatch(profile, extracted)) {
+        reasoning.push(
+          `TIER 1 CONFIRMED: Exact phone match (no-name profile) on ${source}`,
+          `Phone: exact match found`
+        );
+        console.log(`[ProfileValidator] ${source}: ★ TIER 1 — Phone-only → 100 CONFIRMED`);
+        return this.buildTier1Result(reasoning, "phone-only");
+      }
+
+      return null; // No name and no exact email/phone match → can't be Tier 1
+    }
+
+    // ─── Name-based combos (existing logic) ───
+    const hasNameMatch = this.hasAnyNameMatch(profile, extracted);
+
+    if (!hasNameMatch) {
+      return null; // No name match at all → can't be a Tier 1 match
+    }
+
+    // Name + Email match
+    if (this.hasExactEmailMatch(profile, extracted)) {
+      reasoning.push(
+        `TIER 1 CONFIRMED: Name match + exact email match on ${source}`,
+        `Name: "${extracted.name || `${extracted.firstName} ${extracted.lastName}`}"`,
+        `Email: exact match found`
+      );
+      console.log(`[ProfileValidator] ${source}: ★ TIER 1 — Name + Email → 100 CONFIRMED`);
+      return this.buildTier1Result(reasoning, "email");
+    }
+
+    // Name + Phone match
+    if (this.hasExactPhoneMatch(profile, extracted)) {
+      reasoning.push(
+        `TIER 1 CONFIRMED: Name match + exact phone match on ${source}`,
+        `Name: "${extracted.name || `${extracted.firstName} ${extracted.lastName}`}"`,
+        `Phone: exact match found`
+      );
+      console.log(`[ProfileValidator] ${source}: ★ TIER 1 — Name + Phone → 100 CONFIRMED`);
+      return this.buildTier1Result(reasoning, "phone");
+    }
+
+    // Name + Full Address (Street + City + State) match
+    if (this.hasFullAddressMatch(profile, extracted)) {
+      reasoning.push(
+        `TIER 1 CONFIRMED: Name match + full address match on ${source}`,
+        `Name: "${extracted.name || `${extracted.firstName} ${extracted.lastName}`}"`,
+        `Address: street + city + state match found`
+      );
+      console.log(`[ProfileValidator] ${source}: ★ TIER 1 — Name + Address → 100 CONFIRMED`);
+      return this.buildTier1Result(reasoning, "address");
+    }
+
+    return null;
+  }
+
+  /**
+   * Build a Tier 1 result (always score=100, CONFIRMED)
+   */
+  private buildTier1Result(
+    reasoning: string[],
+    matchType: "email" | "phone" | "address" | "email-only" | "phone-only"
+  ): ConfidenceResult {
+    const isNoNameMatch = matchType === "email-only" || matchType === "phone-only";
+    const factors: ConfidenceFactors = {
+      nameMatch: isNoNameMatch ? 0 : 35,
+      locationMatch: matchType === "address" ? 30 : 0,
+      ageMatch: 0,
+      dataCorrelation: matchType !== "address" ? 10 : 0,
+      sourceReliability: 0,
+    };
+
+    return {
+      score: 100,
+      classification: "CONFIRMED",
+      factors,
+      reasoning,
+      validatedAt: new Date(),
+    };
+  }
+
+  /**
+   * Check if there's any name match (exact, first+last, alias, partial)
+   */
+  private hasAnyNameMatch(profile: ScanInput, extracted: ExtractedData): boolean {
+    if (!profile.fullName) return false;
+
+    const profileName = this.normalizeName(profile.fullName);
+    const profileParts = profileName.split(" ");
+    const profileFirst = profileParts[0] || "";
+    const profileLast = profileParts[profileParts.length - 1] || "";
+
+    // Check full name
+    if (extracted.name) {
+      const extractedName = this.normalizeName(extracted.name);
+      const extractedParts = extractedName.split(" ");
+      const extractedFirst = extractedParts[0] || "";
+      const extractedLast = extractedParts[extractedParts.length - 1] || "";
+
+      if (profileName === extractedName) return true;
+      if (profileFirst === extractedFirst && profileLast === extractedLast) return true;
+      if (profileName.includes(extractedName) || extractedName.includes(profileName)) return true;
+      if (profileLast === extractedLast && profileLast.length > 2) return true;
+    }
+
+    // Check firstName/lastName separately
+    if (extracted.firstName || extracted.lastName) {
+      const ef = this.normalizeName(extracted.firstName || "");
+      const el = this.normalizeName(extracted.lastName || "");
+      if (profileFirst === ef && profileLast === el) return true;
+      if (profileLast === el && el.length > 2) return true;
+    }
+
+    // Check aliases
+    if (profile.aliases && extracted.name) {
+      const extractedName = this.normalizeName(extracted.name);
+      for (const alias of profile.aliases) {
+        if (this.normalizeName(alias) === extractedName) return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Check for exact email match between profile and extracted data
+   */
+  private hasExactEmailMatch(profile: ScanInput, extracted: ExtractedData): boolean {
+    if (!profile.emails?.length || !extracted.emails?.length) return false;
+    const profileEmails = profile.emails.map(e => e.toLowerCase().trim());
+    return extracted.emails.some(e => profileEmails.includes(e.toLowerCase().trim()));
+  }
+
+  /**
+   * Check for exact phone match (last 10 digits)
+   */
+  private hasExactPhoneMatch(profile: ScanInput, extracted: ExtractedData): boolean {
+    if (!profile.phones?.length || !extracted.phones?.length) return false;
+    const profilePhones = profile.phones.map(p => this.normalizePhone(p));
+    return extracted.phones.some(p => profilePhones.includes(this.normalizePhone(p)));
+  }
+
+  /**
+   * Check for full address match (street + city + state)
+   */
+  private hasFullAddressMatch(profile: ScanInput, extracted: ExtractedData): boolean {
+    if (!profile.addresses?.length) return false;
+    if (!extracted.street || !extracted.city || !extracted.state) return false;
+
+    const extractedStreet = this.normalizeStreet(extracted.street);
+    const extractedCity = this.normalizeCity(extracted.city);
+    const extractedState = this.normalizeState(extracted.state);
+
+    for (const addr of profile.addresses) {
+      const profileStreet = this.normalizeStreet(addr.street || "");
+      const profileCity = this.normalizeCity(addr.city || "");
+      const profileState = this.normalizeState(addr.state || "");
+
+      if (
+        profileStreet === extractedStreet &&
+        profileCity === extractedCity &&
+        profileState === extractedState
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Tier 2: Probabilistic soft-signal scoring.
+   * Name (0-35) + Location (0-30) + Age (0-25) + DataCorrelation (0-10) = max 100
+   * Source reliability removed.
+   */
+  private validateTier2(
+    profile: ScanInput,
+    extracted: ExtractedData,
+    source: string
+  ): ConfidenceResult {
     const reasoning: string[] = [];
     const factors: ConfidenceFactors = {
       nameMatch: 0,
       locationMatch: 0,
       ageMatch: 0,
       dataCorrelation: 0,
-      sourceReliability: 0,
+      sourceReliability: 0, // Deprecated — always 0
     };
 
-    // 1. Name Match (0-30 points)
+    // 1. Name Match (0-35 points)
     const nameResult = this.scoreNameMatch(profile, extracted);
     factors.nameMatch = nameResult.score;
     reasoning.push(...nameResult.reasoning);
 
-    // 2. Location Match (0-25 points)
+    // 2. Location Match (0-30 points)
     const locationResult = this.scoreLocationMatch(profile, extracted);
     factors.locationMatch = locationResult.score;
     reasoning.push(...locationResult.reasoning);
 
-    // 3. Age Match (0-20 points)
+    // 3. Age Match (0-25 points)
     const ageResult = this.scoreAgeMatch(profile, extracted);
     factors.ageMatch = ageResult.score;
     reasoning.push(...ageResult.reasoning);
 
-    // 4. Data Correlation (0-15 points)
+    // 4. Data Correlation (0-10 points) — only partial matches here; exact caught by Tier 1
     const correlationResult = this.scoreDataCorrelation(profile, extracted);
     factors.dataCorrelation = correlationResult.score;
     reasoning.push(...correlationResult.reasoning);
 
-    // 5. Source Reliability (0-10 points)
-    const reliabilityResult = this.scoreSourceReliability(source);
-    factors.sourceReliability = reliabilityResult.score;
-    reasoning.push(...reliabilityResult.reasoning);
-
     // Calculate total score
     let score = Math.min(
       100,
-      factors.nameMatch +
-        factors.locationMatch +
-        factors.ageMatch +
-        factors.dataCorrelation +
-        factors.sourceReliability
+      factors.nameMatch + factors.locationMatch + factors.ageMatch + factors.dataCorrelation
     );
 
-    // PRECISION IMPROVEMENT: Count matching factors (excluding sourceReliability)
-    // Require at least MIN_FACTORS (2) matching factors to avoid false positives
+    // Count matching factors (all 4 are real match signals now)
     const factorsMatched = this.countMatchingFactors(factors);
 
-    // Log factor breakdown for debugging
+    // Determine MIN_FACTORS based on source type
+    const normalizedSource = source.toUpperCase().replace(/[^A-Z]/g, "");
+    const minFactors = PEOPLE_SEARCH_SOURCES.has(normalizedSource) ? 1 : CONFIDENCE_THRESHOLDS.MIN_FACTORS;
+
     console.log(
-      `[ProfileValidator] ${source}: Factors matched: ${factorsMatched} ` +
+      `[ProfileValidator] ${source}: Tier 2 — Factors matched: ${factorsMatched}/${minFactors} needed ` +
       `(name=${factors.nameMatch}, loc=${factors.locationMatch}, age=${factors.ageMatch}, data=${factors.dataCorrelation})`
     );
 
-    // If only one factor matched (e.g., name-only), penalize the score
-    // This prevents "John Smith in New York" from matching just because of a common name
-    if (factorsMatched < CONFIDENCE_THRESHOLDS.MIN_FACTORS) {
+    // If fewer factors than required, cap score below REJECT threshold
+    if (factorsMatched < minFactors) {
       reasoning.push(
-        `PRECISION CHECK: Only ${factorsMatched} factor(s) matched (need ${CONFIDENCE_THRESHOLDS.MIN_FACTORS}+). ` +
+        `PRECISION CHECK: Only ${factorsMatched} factor(s) matched (need ${minFactors}+). ` +
         `Reducing confidence to prevent false positive.`
       );
 
-      // Cap the score below REJECT threshold if less than MIN_FACTORS matched
-      // This ensures single-factor matches don't create exposures
-      const maxScoreForSingleFactor = CONFIDENCE_THRESHOLDS.REJECT - 1;
-      if (score > maxScoreForSingleFactor) {
+      const maxScoreForInsufficientFactors = CONFIDENCE_THRESHOLDS.REJECT - 1;
+      if (score > maxScoreForInsufficientFactors) {
         const originalScore = score;
-        score = maxScoreForSingleFactor;
+        score = maxScoreForInsufficientFactors;
         reasoning.push(
-          `Score capped to ${maxScoreForSingleFactor} due to insufficient matching factors.`
+          `Score capped to ${maxScoreForInsufficientFactors} due to insufficient matching factors.`
         );
         console.log(
-          `[ProfileValidator] ${source}: ⚠️ REJECTED - Score ${originalScore} capped to ${score} (only ${factorsMatched} factor)`
-        );
-      } else {
-        console.log(
-          `[ProfileValidator] ${source}: ⚠️ LOW CONFIDENCE - Score ${score}, only ${factorsMatched} factor`
+          `[ProfileValidator] ${source}: ⚠️ REJECTED — Score ${originalScore} capped to ${score} (${factorsMatched} factor, need ${minFactors})`
         );
       }
     } else {
       reasoning.push(
-        `PRECISION CHECK: ${factorsMatched} factors matched - sufficient for exposure creation.`
+        `PRECISION CHECK: ${factorsMatched} factors matched (${minFactors} needed) — sufficient for exposure creation.`
       );
       console.log(
-        `[ProfileValidator] ${source}: ✓ Score ${score}, ${factorsMatched} factors matched`
+        `[ProfileValidator] ${source}: ✓ Tier 2 score ${score}, ${factorsMatched} factors matched`
       );
     }
 
@@ -192,37 +381,19 @@ export class ProfileValidator {
   }
 
   /**
-   * Count the number of factors that actually matched (have a positive score).
-   * Excludes sourceReliability since that's not a match factor.
-   *
-   * A factor is considered "matched" if it has a meaningful score:
-   * - nameMatch: > 0 (any name match)
-   * - locationMatch: > 0 (any location match)
-   * - ageMatch: > 0 (any age match)
-   * - dataCorrelation: > 0 (phone or email matched)
+   * Count matching factors (positive score = matched). sourceReliability excluded.
    */
   private countMatchingFactors(factors: ConfidenceFactors): number {
     let count = 0;
-
-    // Name match (any positive score counts)
     if (factors.nameMatch > 0) count++;
-
-    // Location match (any positive score counts)
     if (factors.locationMatch > 0) count++;
-
-    // Age match (any positive score counts)
     if (factors.ageMatch > 0) count++;
-
-    // Data correlation (phone/email match)
     if (factors.dataCorrelation > 0) count++;
-
-    // Note: sourceReliability is NOT counted - it's not a match factor
-
     return count;
   }
 
   /**
-   * Score name match (0-30 points)
+   * Score name match (0-35 points) — Tier 2
    */
   private scoreNameMatch(
     profile: ScanInput,
@@ -242,13 +413,12 @@ export class ProfileValidator {
     const profileLast = profileParts[profileParts.length - 1] || "";
     const extractedName = this.normalizeName(extracted.name || "");
 
-    // Check against aliases FIRST (before partial matching)
-    // This ensures "Bob Johnson" matches alias before falling back to last-name-only
+    // Check against aliases FIRST
     if (profile.aliases && profile.aliases.length > 0 && extractedName) {
       for (const alias of profile.aliases) {
         const normalizedAlias = this.normalizeName(alias);
         if (normalizedAlias === extractedName) {
-          score = 25;
+          score = 28;
           reasoning.push(`Alias match: "${extracted.name}" matches alias "${alias}"`);
           return { score, reasoning };
         }
@@ -261,42 +431,36 @@ export class ProfileValidator {
       const extractedFirst = extractedParts[0] || "";
       const extractedLast = extractedParts[extractedParts.length - 1] || "";
 
-      // Exact full name match
       if (profileName === extractedName) {
-        score = 30;
+        score = 35;
         reasoning.push(`Exact name match: "${extracted.name}"`);
         return { score, reasoning };
       }
 
-      // First AND last name match (but middle differs or missing)
       if (profileFirst === extractedFirst && profileLast === extractedLast) {
-        score = 28;
+        score = 30;
         reasoning.push(`First and last name match: ${extractedFirst} ${extractedLast}`);
         return { score, reasoning };
       }
 
-      // Check if extracted is contained in profile or vice versa
       if (profileName.includes(extractedName) || extractedName.includes(profileName)) {
         score = 20;
         reasoning.push(`Partial name overlap: "${extracted.name}" in "${profile.fullName}"`);
         return { score, reasoning };
       }
 
-      // Last name match only
       if (profileLast === extractedLast && profileLast.length > 2) {
         score = 15;
         reasoning.push(`Last name match only: ${extractedLast}`);
         return { score, reasoning };
       }
 
-      // First name match only
       if (profileFirst === extractedFirst && profileFirst.length > 2) {
         score = 10;
         reasoning.push(`First name match only: ${extractedFirst}`);
         return { score, reasoning };
       }
 
-      // Fuzzy match (Levenshtein distance <= 2)
       const distance = this.levenshteinDistance(profileName, extractedName);
       if (distance <= 2) {
         score = 10;
@@ -311,7 +475,7 @@ export class ProfileValidator {
       const extractedLast = this.normalizeName(extracted.lastName || "");
 
       if (profileFirst === extractedFirst && profileLast === extractedLast) {
-        score = 28;
+        score = 30;
         reasoning.push(`First+Last name match: ${extractedFirst} ${extractedLast}`);
         return { score, reasoning };
       }
@@ -334,7 +498,7 @@ export class ProfileValidator {
   }
 
   /**
-   * Score location match (0-25 points)
+   * Score location match (0-30 points) — Tier 2
    */
   private scoreLocationMatch(
     profile: ScanInput,
@@ -363,20 +527,20 @@ export class ProfileValidator {
       if (extractedCity && extractedState) {
         if (profileCity === extractedCity && profileState === extractedState) {
           reasoning.push(`City+State match: ${extracted.city}, ${extracted.state}`);
-          return { score: 25, reasoning };
+          return { score: 30, reasoning };
         }
       }
 
       // State only match
       if (extractedState && profileState === extractedState) {
         reasoning.push(`State match only: ${extracted.state}`);
-        return { score: 15, reasoning };
+        return { score: 18, reasoning };
       }
 
       // City only match (less reliable due to common city names)
       if (extractedCity && profileCity === extractedCity) {
         reasoning.push(`City match only (no state): ${extracted.city}`);
-        return { score: 8, reasoning };
+        return { score: 10, reasoning };
       }
     }
 
@@ -387,7 +551,7 @@ export class ProfileValidator {
   }
 
   /**
-   * Score age match (0-20 points)
+   * Score age match (0-25 points) — Tier 2
    */
   private scoreAgeMatch(
     profile: ScanInput,
@@ -425,17 +589,17 @@ export class ProfileValidator {
 
     if (ageDiff === 0) {
       reasoning.push(`Exact age match: ${extractedAge}`);
-      return { score: 20, reasoning };
+      return { score: 25, reasoning };
     }
 
     if (ageDiff <= 2) {
       reasoning.push(`Age within 2 years: profile=${profileAge}, extracted=${extractedAge}`);
-      return { score: 15, reasoning };
+      return { score: 18, reasoning };
     }
 
     if (ageDiff <= 5) {
       reasoning.push(`Age within 5 years: profile=${profileAge}, extracted=${extractedAge}`);
-      return { score: 10, reasoning };
+      return { score: 12, reasoning };
     }
 
     if (ageDiff <= 10) {
@@ -448,7 +612,9 @@ export class ProfileValidator {
   }
 
   /**
-   * Score data correlation - phone/email matches (0-15 points)
+   * Score data correlation — partial phone/email matches (0-10 points) — Tier 2
+   * Exact phone/email matches are already caught by Tier 1, so this catches
+   * partial matches (phone prefix, email domain).
    */
   private scoreDataCorrelation(
     profile: ScanInput,
@@ -458,68 +624,54 @@ export class ProfileValidator {
     let score = 0;
 
     // Phone match (0-5 points)
-    if (profile.phones && profile.phones.length > 0 && extracted.phones && extracted.phones.length > 0) {
-      const profilePhones = profile.phones.map((p) => this.normalizePhone(p));
-      const extractedPhones = extracted.phones.map((p) => this.normalizePhone(p));
+    if (profile.phones?.length && extracted.phones?.length) {
+      const profilePhones = profile.phones.map(p => this.normalizePhone(p));
+      const extractedPhones = extracted.phones.map(p => this.normalizePhone(p));
 
       for (const extractedPhone of extractedPhones) {
+        // Exact match
         if (profilePhones.includes(extractedPhone)) {
           score += 5;
           reasoning.push(`Phone match: ${this.maskPhone(extractedPhone)}`);
+          break;
+        }
+        // Partial match (last 7 digits match — same local number, area code differs)
+        const last7 = extractedPhone.slice(-7);
+        if (profilePhones.some(p => p.endsWith(last7)) && last7.length === 7) {
+          score += 3;
+          reasoning.push(`Phone partial match (last 7 digits): ${this.maskPhone(extractedPhone)}`);
           break;
         }
       }
     }
 
     // Email match (0-5 points)
-    if (profile.emails && profile.emails.length > 0 && extracted.emails && extracted.emails.length > 0) {
-      const profileEmails = profile.emails.map((e) => e.toLowerCase().trim());
-      const extractedEmails = extracted.emails.map((e) => e.toLowerCase().trim());
+    if (profile.emails?.length && extracted.emails?.length) {
+      const profileEmails = profile.emails.map(e => e.toLowerCase().trim());
+      const extractedEmails = extracted.emails.map(e => e.toLowerCase().trim());
 
       for (const extractedEmail of extractedEmails) {
+        // Exact match
         if (profileEmails.includes(extractedEmail)) {
           score += 5;
           reasoning.push(`Email match: ${this.maskEmail(extractedEmail)}`);
           break;
         }
+        // Domain match (same email provider — weak but positive signal)
+        const extractedDomain = extractedEmail.split("@")[1];
+        if (extractedDomain && profileEmails.some(e => e.split("@")[1] === extractedDomain)) {
+          score += 2;
+          reasoning.push(`Email domain match: @${extractedDomain}`);
+          break;
+        }
       }
-    }
-
-    // Bonus for multiple correlations
-    if (score >= 10) {
-      score = Math.min(15, score + 5);
-      reasoning.push("Multiple data correlations (+5 bonus)");
     }
 
     if (score === 0) {
       reasoning.push("No phone/email correlation found");
     }
 
-    return { score, reasoning };
-  }
-
-  /**
-   * Score source reliability (0-10 points)
-   */
-  private scoreSourceReliability(source: string): { score: number; reasoning: string[] } {
-    const reasoning: string[] = [];
-    const normalizedSource = source.toUpperCase().replace(/[^A-Z]/g, "");
-
-    if (KNOWN_DATA_BROKERS.has(normalizedSource)) {
-      reasoning.push(`Known data broker: ${source}`);
-      return { score: 10, reasoning };
-    }
-
-    // Check for partial matches (e.g., "SPOKEO_PREMIUM" should match "SPOKEO")
-    for (const knownBroker of KNOWN_DATA_BROKERS) {
-      if (normalizedSource.includes(knownBroker) || knownBroker.includes(normalizedSource)) {
-        reasoning.push(`Recognized broker variant: ${source}`);
-        return { score: 9, reasoning };
-      }
-    }
-
-    reasoning.push(`Unknown source (reliability reduced): ${source}`);
-    return { score: 7, reasoning };
+    return { score: Math.min(10, score), reasoning };
   }
 
   // =========================================================================
@@ -540,16 +692,32 @@ export class ProfileValidator {
 
   private normalizeState(state: string): string {
     const cleaned = state.toLowerCase().trim();
-    // If it's already a 2-letter abbreviation
     if (cleaned.length === 2) {
       return cleaned.toUpperCase();
     }
-    // Convert full name to abbreviation
     return STATE_ABBREVIATIONS[cleaned] || cleaned.toUpperCase();
   }
 
   private normalizePhone(phone: string): string {
     return phone.replace(/\D/g, "").slice(-10); // Last 10 digits
+  }
+
+  private normalizeStreet(street: string): string {
+    return street
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, " ")
+      // Normalize common abbreviations
+      .replace(/\bstreet\b/g, "st")
+      .replace(/\bavenue\b/g, "ave")
+      .replace(/\bdrive\b/g, "dr")
+      .replace(/\broad\b/g, "rd")
+      .replace(/\blane\b/g, "ln")
+      .replace(/\bcourt\b/g, "ct")
+      .replace(/\bboulevard\b/g, "blvd")
+      .replace(/\bapartment\b/g, "apt")
+      .replace(/\bsuite\b/g, "ste");
   }
 
   private calculateAge(dob: string): number | null {
@@ -572,7 +740,6 @@ export class ProfileValidator {
   }
 
   private parseAge(ageStr: string): number | null {
-    // Handle formats like "45", "45 years old", "Age: 45", "40-50", etc.
     const match = ageStr.match(/(\d+)/);
     if (match) {
       return parseInt(match[1], 10);
@@ -618,9 +785,9 @@ export class ProfileValidator {
           matrix[i][j] = matrix[i - 1][j - 1];
         } else {
           matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1, // substitution
-            matrix[i][j - 1] + 1, // insertion
-            matrix[i - 1][j] + 1 // deletion
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
           );
         }
       }
