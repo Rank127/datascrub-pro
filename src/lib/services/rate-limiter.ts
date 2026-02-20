@@ -341,24 +341,26 @@ export function canUseService(service: string): boolean {
 }
 
 // ============================================
-// LeakCheck Lifetime Credit Management
+// LeakCheck Daily Quota Management
 // ============================================
+// Lifetime plan ($69.99 one-time): 400 emails+usernames/day, 30 keywords/day, 3 RPS
 
 interface LeakCheckCredits {
   used: number;
+  resetDate: string; // daily reset key
   apiCreditsRemaining: number | null;
   lastCheckedAt: number;
 }
 
 const leakCheckCredits: LeakCheckCredits = {
   used: 0,
+  resetDate: "",
   apiCreditsRemaining: null,
   lastCheckedAt: 0,
 };
 
-// LeakCheck lifetime plan — unlimited API access (upgraded Feb 20, 2026)
-// Safety cap prevents runaway usage; override via env var if needed
-const LEAKCHECK_LIFETIME_LIMIT = parseInt(process.env.LEAKCHECK_LIFETIME_LIMIT || "100000");
+// LeakCheck daily limit: 400 emails/usernames per day
+const LEAKCHECK_DAILY_LIMIT = parseInt(process.env.LEAKCHECK_DAILY_LIMIT || "400");
 
 // LeakCheck rate limit: 3 requests per second
 const LEAKCHECK_RPS_LIMIT = 3;
@@ -367,18 +369,30 @@ const LEAKCHECK_MIN_DELAY_MS = Math.ceil(1000 / LEAKCHECK_RPS_LIMIT); // ~334ms 
 // Warning at 80% (320 queries used)
 const LEAKCHECK_WARNING_THRESHOLD = 0.8;
 
-// Critical at 95% (380 queries used) - be very conservative
+// Critical at 95% (380 queries used) - stop to preserve remaining
 const LEAKCHECK_CRITICAL_THRESHOLD = 0.95;
 
 // Track last request time for RPS limiting
 let leakCheckLastRequestAt = 0;
 
+function getLeakCheckDailyState(): LeakCheckCredits {
+  const today = getTodayKey();
+  if (leakCheckCredits.resetDate !== today) {
+    // New day — reset daily counter, keep API credits (refreshed by balance check)
+    leakCheckCredits.used = 0;
+    leakCheckCredits.resetDate = today;
+    leakCheckCredits.apiCreditsRemaining = null;
+  }
+  return leakCheckCredits;
+}
+
 /**
- * Update LeakCheck credits from API
+ * Update LeakCheck credits from API balance check
  */
 export function updateLeakCheckApiCredits(creditsRemaining: number): void {
-  leakCheckCredits.apiCreditsRemaining = creditsRemaining;
-  leakCheckCredits.lastCheckedAt = Date.now();
+  const state = getLeakCheckDailyState();
+  state.apiCreditsRemaining = creditsRemaining;
+  state.lastCheckedAt = Date.now();
 }
 
 /**
@@ -395,29 +409,34 @@ export function getLeakCheckWaitTime(): number {
 }
 
 /**
- * Record LeakCheck query usage (both lifetime and RPS tracking)
+ * Record LeakCheck query usage (daily counter + RPS tracking)
  */
 export function recordLeakCheckUsage(): void {
-  leakCheckCredits.used++;
+  const state = getLeakCheckDailyState();
+  state.used++;
   leakCheckLastRequestAt = Date.now();
-  if (leakCheckCredits.apiCreditsRemaining !== null && leakCheckCredits.apiCreditsRemaining > 0) {
-    leakCheckCredits.apiCreditsRemaining--;
+  if (state.apiCreditsRemaining !== null && state.apiCreditsRemaining > 0) {
+    state.apiCreditsRemaining--;
   }
 }
 
 /**
- * Check if LeakCheck can be used
+ * Check if LeakCheck can be used (daily quota)
  */
 export function canUseLeakCheck(): { allowed: boolean; reason?: string } {
-  // If we have API data, use it
-  if (leakCheckCredits.apiCreditsRemaining !== null) {
-    if (leakCheckCredits.apiCreditsRemaining <= 0) {
-      return { allowed: false, reason: "Lifetime queries exhausted" };
+  const state = getLeakCheckDailyState();
+
+  // If we have API data, use it as source of truth
+  if (state.apiCreditsRemaining !== null) {
+    if (state.apiCreditsRemaining <= 0) {
+      return { allowed: false, reason: "Daily query limit reached (resets midnight UTC)" };
     }
-    const percentUsed = (LEAKCHECK_LIFETIME_LIMIT - leakCheckCredits.apiCreditsRemaining) / LEAKCHECK_LIFETIME_LIMIT;
-    if (percentUsed >= LEAKCHECK_CRITICAL_THRESHOLD) {
-      return { allowed: false, reason: "Conserving remaining lifetime queries" };
-    }
+  }
+
+  // Fall back to internal daily tracking
+  const percentUsed = state.used / LEAKCHECK_DAILY_LIMIT;
+  if (percentUsed >= LEAKCHECK_CRITICAL_THRESHOLD) {
+    return { allowed: false, reason: `Daily limit nearly reached (${state.used}/${LEAKCHECK_DAILY_LIMIT})` };
   }
 
   return { allowed: true };
@@ -429,14 +448,15 @@ export function canUseLeakCheck(): { allowed: boolean; reason?: string } {
 export function getLeakCheckStatus(): {
   queriesUsed: number;
   queriesRemaining: number;
-  lifetimeLimit: number;
+  dailyLimit: number;
   percentUsed: number;
   status: "healthy" | "warning" | "critical";
   apiCreditsRemaining: number | null;
 } {
-  const remaining = leakCheckCredits.apiCreditsRemaining ?? (LEAKCHECK_LIFETIME_LIMIT - leakCheckCredits.used);
-  const used = LEAKCHECK_LIFETIME_LIMIT - remaining;
-  const percentUsed = Math.round((used / LEAKCHECK_LIFETIME_LIMIT) * 100);
+  const state = getLeakCheckDailyState();
+  const remaining = state.apiCreditsRemaining ?? (LEAKCHECK_DAILY_LIMIT - state.used);
+  const used = LEAKCHECK_DAILY_LIMIT - remaining;
+  const percentUsed = Math.round((used / LEAKCHECK_DAILY_LIMIT) * 100);
 
   let status: "healthy" | "warning" | "critical" = "healthy";
   if (percentUsed >= LEAKCHECK_CRITICAL_THRESHOLD * 100) {
@@ -448,10 +468,10 @@ export function getLeakCheckStatus(): {
   return {
     queriesUsed: used,
     queriesRemaining: remaining,
-    lifetimeLimit: LEAKCHECK_LIFETIME_LIMIT,
+    dailyLimit: LEAKCHECK_DAILY_LIMIT,
     percentUsed,
     status,
-    apiCreditsRemaining: leakCheckCredits.apiCreditsRemaining,
+    apiCreditsRemaining: state.apiCreditsRemaining,
   };
 }
 
@@ -468,7 +488,7 @@ export function getServiceStatus(service: string): {
 } {
   const limits: Record<string, number> = {
     hibp: parseInt(process.env.HIBP_DAILY_LIMIT || "50"),
-    leakcheck: parseInt(process.env.LEAKCHECK_DAILY_LIMIT || "50"),
+    leakcheck: parseInt(process.env.LEAKCHECK_DAILY_LIMIT || "400"),
     scrapingbee: parseInt(process.env.SCRAPINGBEE_DAILY_LIMIT || "100"),
     resend: parseInt(process.env.DAILY_EMAIL_LIMIT || "90"),
   };

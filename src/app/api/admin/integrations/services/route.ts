@@ -277,9 +277,9 @@ async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
       rateLimit: {
         status: internalStatus.status,
         used: internalStatus.queriesUsed,
-        limit: internalStatus.lifetimeLimit,
+        limit: internalStatus.dailyLimit,
         percentUsed: internalStatus.percentUsed,
-        resetAt: "lifetime (never resets)",
+        resetAt: "midnight UTC (daily)",
       },
     };
   }
@@ -294,9 +294,9 @@ async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
       const data = await response.json();
       // LeakCheck returns: queries_left or balance
       const queriesRemaining = data.queries_left ?? data.balance ?? 0;
-      const lifetimeLimit = internalStatus.lifetimeLimit; // Unlimited lifetime plan (safety cap via env)
-      const queriesUsed = lifetimeLimit - queriesRemaining;
-      const percentUsed = Math.round((queriesUsed / lifetimeLimit) * 100);
+      const dailyLimit = internalStatus.dailyLimit; // 400/day lifetime plan
+      const queriesUsed = dailyLimit - queriesRemaining;
+      const percentUsed = Math.round((queriesUsed / dailyLimit) * 100);
 
       // Sync with internal tracking
       updateLeakCheckApiCredits(queriesRemaining);
@@ -307,27 +307,27 @@ async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
 
       if (queriesRemaining <= 0) {
         status = "critical";
-        recommendation = "Lifetime queries exhausted - using HIBP fallback";
+        recommendation = "Daily query limit reached - resets midnight UTC";
       } else if (percentUsed >= 95) {
         status = "critical";
-        recommendation = `Only ${queriesRemaining} queries left (lifetime plan - no renewal)`;
+        recommendation = `Only ${queriesRemaining} queries left today`;
       } else if (percentUsed >= 80) {
         status = "warning";
-        recommendation = `${queriesRemaining} queries remaining (lifetime - conserve usage)`;
+        recommendation = `${queriesRemaining} queries remaining today`;
       }
 
       return {
         status: "connected",
         message: queriesRemaining <= 0
-          ? "Lifetime queries exhausted - using HIBP"
-          : `LeakCheck (${queriesRemaining}/${lifetimeLimit} lifetime)`,
+          ? "Daily limit reached - resets midnight UTC"
+          : `LeakCheck (${queriesRemaining}/${dailyLimit} today)`,
         credits: queriesRemaining,
         rateLimit: {
           status,
           used: queriesUsed,
-          limit: lifetimeLimit,
+          limit: dailyLimit,
           percentUsed,
-          resetAt: "lifetime (never resets)",
+          resetAt: "midnight UTC (daily)",
           recommendation,
         },
       };
@@ -340,28 +340,28 @@ async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
       // Use internal tracking on API error
       return {
         status: "connected",
-        message: `~${internalStatus.queriesRemaining} queries left (API unavailable)`,
+        message: `~${internalStatus.queriesRemaining} queries left today (API unavailable)`,
         credits: internalStatus.queriesRemaining,
         rateLimit: {
           status: internalStatus.status,
           used: internalStatus.queriesUsed,
-          limit: internalStatus.lifetimeLimit,
+          limit: internalStatus.dailyLimit,
           percentUsed: internalStatus.percentUsed,
-          resetAt: "lifetime (never resets)",
+          resetAt: "midnight UTC (daily)",
         },
       };
     }
   } catch (_error) {
     return {
       status: "connected",
-      message: `~${internalStatus.queriesRemaining} queries left (API error)`,
+      message: `~${internalStatus.queriesRemaining} queries left today (API error)`,
       credits: internalStatus.queriesRemaining,
       rateLimit: {
         status: internalStatus.status,
         used: internalStatus.queriesUsed,
-        limit: internalStatus.lifetimeLimit,
+        limit: internalStatus.dailyLimit,
         percentUsed: internalStatus.percentUsed,
-        resetAt: "lifetime (never resets)",
+        resetAt: "midnight UTC (daily)",
       },
     };
   }

@@ -148,7 +148,7 @@ export class LeakCheckScanner extends BaseScanner {
     }
 
     const status = getLeakCheckStatus();
-    console.log(`[LeakCheck] Using paid API v2 (${status.queriesRemaining}/${status.lifetimeLimit} queries remaining - lifetime plan)`);
+    console.log(`[LeakCheck] Using paid API v2 (${status.queriesRemaining}/${status.dailyLimit} queries remaining today)`);
 
     // Check emails
     if (input.emails?.length) {
