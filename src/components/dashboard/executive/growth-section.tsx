@@ -13,6 +13,7 @@ import {
   Lightbulb,
   Clock,
 } from "lucide-react";
+import { PromoRecommendationsWidget } from "./promo-recommendations-widget";
 
 interface GrowthSectionProps {
   data?: GrowthMetrics;
@@ -64,6 +65,9 @@ export function GrowthSection({ data }: GrowthSectionProps) {
           variant={data.referrals.conversionRate >= 10 ? "success" : data.referrals.conversionRate >= 5 ? "warning" : "default"}
         />
       </div>
+
+      {/* Promo Recommendations */}
+      <PromoRecommendationsWidget />
 
       {/* Power Users Table + User Segments */}
       <div className="grid gap-4 md:grid-cols-2">

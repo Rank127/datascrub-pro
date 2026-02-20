@@ -11,6 +11,7 @@ import { verifyCronAuth, cronUnauthorizedResponse } from "@/lib/cron-auth";
 import { reportIssue } from "@/lib/agents/orchestrator/remediation-engine";
 import { captureError } from "@/lib/error-reporting";
 import { getAdminFromEmail } from "@/lib/email";
+import { expireOldRecommendations } from "@/lib/promo";
 
 export const maxDuration = 300;
 
@@ -1092,6 +1093,17 @@ export async function GET(request: Request) {
       status: "WARN",
       message: `Operations Agent anomaly detection failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     });
+  }
+
+  // ========== PROMO RECOMMENDATION EXPIRY ==========
+
+  try {
+    const expiredCount = await expireOldRecommendations();
+    if (expiredCount > 0) {
+      console.log(`[Health Check] Expired ${expiredCount} old promo recommendations`);
+    }
+  } catch (error) {
+    console.error("[Health Check] Failed to expire promo recommendations:", error);
   }
 
   // ========== COMPILE REPORT ==========

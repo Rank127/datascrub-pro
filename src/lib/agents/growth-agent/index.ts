@@ -22,6 +22,7 @@ import {
 import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 import { hormoziValueScore } from "@/lib/mastermind/frameworks";
+import { createRecommendation } from "@/lib/promo";
 
 // ============================================================================
 // CONSTANTS
@@ -448,6 +449,17 @@ class GrowthAgent extends BaseAgent {
         const isUpsellCandidate = (upsellValue / 100) >= upsellConfidenceMin;
         if (isUpsellCandidate) {
           segments.push("upsell_candidate");
+
+          // Fire-and-forget: create promo recommendation for FREE users
+          if (user.plan === "FREE") {
+            createRecommendation({
+              userId: user.id,
+              promoType: "URGENCY",
+              reason: `Power user (score ${score}) with segments: ${segments.join(", ")}`,
+              confidence: upsellValue / 100,
+              agentId: this.id,
+            }).catch(() => {});
+          }
         }
 
         powerUsers.push({

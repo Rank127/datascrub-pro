@@ -24,6 +24,7 @@ import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 import { hormoziValueScore, buffettCompetenceCheck } from "@/lib/mastermind/frameworks";
 import { recordOutcome } from "@/lib/agents/learning";
+import { createRecommendation } from "@/lib/promo";
 
 // ============================================================================
 // CONSTANTS
@@ -465,6 +466,15 @@ Pricing changes require manual admin action via Stripe dashboard. Your role is A
               reason: `${reason}${competenceResult.confidence === "HIGH" ? " (high-confidence recommendation)" : ""}`,
               confidence,
             });
+
+            // Fire-and-forget: create promo recommendation for admin review
+            createRecommendation({
+              userId: user.id,
+              promoType: "DISCOUNT",
+              reason: `${reason}${competenceResult.confidence === "HIGH" ? " (high-confidence recommendation)" : ""}`,
+              confidence,
+              agentId: this.id,
+            }).catch(() => {});
           }
         }
       }
