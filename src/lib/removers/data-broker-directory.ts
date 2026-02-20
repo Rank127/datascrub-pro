@@ -558,10 +558,10 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   // ==========================================
   WEBMD: {
     name: "WebMD",
-    optOutUrl: "https://www.webmd.com/about-webmd-policies/privacy-policy",
-    privacyEmail: "privacy@webmd.com",
-    removalMethod: "EMAIL",
+    optOutUrl: "https://privacyportal.onetrust.com/webform/ebe19500-bc8d-487f-9d89-98fde8b270e2/60a751e1-3b35-4476-9779-bf0dc428fb93",
+    removalMethod: "FORM",
     estimatedDays: 30,
+    notes: "Does NOT accept email requests. Must use OneTrust privacy portal form.",
   },
   HEALTHLINE: {
     name: "Healthline",
@@ -4377,10 +4377,10 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   WEBMD_PROVIDER: {
     name: "WebMD Provider Directory",
-    optOutUrl: "https://www.webmd.com/about-webmd-policies/privacy-policy",
-    privacyEmail: "privacy@webmd.com",
-    removalMethod: "EMAIL",
+    optOutUrl: "https://privacyportal.onetrust.com/webform/ebe19500-bc8d-487f-9d89-98fde8b270e2/60a751e1-3b35-4476-9779-bf0dc428fb93",
+    removalMethod: "FORM",
     estimatedDays: 21,
+    notes: "Does NOT accept email requests. Must use OneTrust privacy portal form.",
   },
   VITALS_DIRECTORY: {
     name: "Vitals.com",
@@ -5491,10 +5491,11 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   },
   KOMODO_HEALTH: {
     name: "Komodo Health",
-    optOutUrl: "https://www.komodohealth.com/privacy",
-    privacyEmail: "privacy@komodohealth.com",
-    removalMethod: "EMAIL",
+    optOutUrl: "https://www.komodohealth.com/privacy-notice/",
+    removalMethod: "FORM",
     estimatedDays: 30,
+    notes: "B2B healthcare data. Does NOT accept email requests. CA residents must submit via privacy notice form. Requires NPI for healthcare professionals.",
+    category: "OTHER",
   },
   SYMPHONY_HEALTH: {
     name: "Symphony Health (IQVIA)",
