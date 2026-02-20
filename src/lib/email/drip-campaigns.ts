@@ -339,7 +339,7 @@ function getDripEmailTemplate(templateId: DripTemplateId, name: string, data?: D
 
     ${hasRemovals ? `
     <div class="upgrade-box">
-      <p>Free plan includes 3 removals per month. <strong style="color: #e2e8f0;">Unlock unlimited removals</strong> and continuous monitoring with Pro.</p>
+      <p>Your free scan shows where you're exposed. <strong style="color: #e2e8f0;">Upgrade to unlock automated removals</strong> and continuous monitoring with Pro.</p>
       <a href="${appendUtm(`${APP_URL}/dashboard/billing`, 'first_removal_coming')}" class="btn-secondary">See Upgrade Options &rarr;</a>
     </div>
     ` : ""}

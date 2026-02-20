@@ -227,8 +227,8 @@ export function ExposureCard({
               </Button>
             )}
 
-            {/* Remove button - request opt-out from broker */}
-            {!isWhitelisted && status === "ACTIVE" && (
+            {/* Remove button - request opt-out from broker (hidden for FREE users via onRemove=undefined) */}
+            {onRemove && !isWhitelisted && status === "ACTIVE" && (
               <Button
                 variant="ghost"
                 size="icon"

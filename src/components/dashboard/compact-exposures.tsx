@@ -35,7 +35,7 @@ const FIELD_ICONS: Record<string, { icon: typeof User; tip: string }> = {
 
 interface CompactExposuresProps {
   exposures: Exposure[];
-  onRemove: (id: string) => void;
+  onRemove?: (id: string) => void;
   onWhitelist: (id: string) => void;
   className?: string;
 }
@@ -177,6 +177,7 @@ export function CompactExposures({
                 {/* Action button */}
                 {isActive && (
                   <div className="flex gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {onRemove && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -189,6 +190,7 @@ export function CompactExposures({
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"

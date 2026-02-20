@@ -371,7 +371,8 @@ export async function POST(request: Request) {
     ]);
 
     // Queue exposure alert for daily consolidated digest (non-blocking, respects preferences)
-    if (exposures.length > 0 && session.user.email) {
+    // FREE users don't get digest emails — paid feature only
+    if (exposures.length > 0 && session.user.email && userPlan !== "FREE") {
       const critical = exposures.filter(e => e.severity === "CRITICAL").length;
       const high = exposures.filter(e => e.severity === "HIGH").length;
       const sources = [...new Set(exposures.map(e => e.sourceName))];

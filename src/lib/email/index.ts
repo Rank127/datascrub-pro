@@ -1872,11 +1872,10 @@ export async function sendRemovalStatusDigestEmail(
 
     // Upgrade CTA for FREE users
     if (context.effectivePlan === "FREE") {
-      const usedOfFree = Math.min(context.completedRemovals, 3);
       upgradeCta = `
         <div style="background: linear-gradient(135deg, #065f46, #0f766e); border-radius: 8px; padding: 24px; margin: 24px 0; text-align: center;">
           <p style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: white;">
-            You've used ${usedOfFree} of 3 free removals
+            Removals require an upgrade
           </p>
           <p style="margin: 0 0 4px 0; font-size: 14px; color: #a7f3d0;">
             Unlock unlimited automated removals and continuous monitoring.
@@ -2727,7 +2726,7 @@ export async function sendFirstRemovalMilestoneEmail(
 // ==========================================
 
 /**
- * Send an upgrade prompt email when a FREE user hits their 3 removal/month limit.
+ * Send an upgrade prompt email when a FREE user tries to request a removal.
  * Shows remaining unprotected exposures and pricing to drive conversions.
  * Deduplicates: only sends once per calendar month per user.
  */
@@ -2815,7 +2814,7 @@ export async function sendFreeLimitReachedEmail(
       <div style="font-size: 48px; line-height: 1;">&#128275;</div>
     </div>
     <h1 style="color: #f59e0b; margin-top: 0; text-align: center;">
-      You've Used All 3 Free Removals
+      Removals Require an Upgrade
     </h1>
     <p style="font-size: 16px; line-height: 1.6; text-align: center; color: #94a3b8;">
       Hi ${user.name || "there"}, you've completed <strong style="color: #10b981;">${removalCount}</strong> removal${removalCount !== 1 ? "s" : ""}
@@ -2848,7 +2847,7 @@ export async function sendFreeLimitReachedEmail(
     </div>
     ${buttonHtml("View Your Exposures", `${APP_URL}/dashboard/exposures`)}
     <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 16px;">
-      Your 3 free removals reset at the start of each month.
+      Your free scan shows where your data is exposed. Upgrade to remove it.
     </p>
   `);
 
@@ -3036,6 +3035,11 @@ export async function queueExposureAlert(
   });
 
   if (!user) return { queued: false, reason: "User not found" };
+
+  // FREE users don't get digest emails — paid feature only
+  const effectivePlan = await getEffectivePlanWithFamily(userId);
+  if (effectivePlan === "FREE") return { queued: false, reason: "Free plan" };
+
   if (!user.emailNotifications) return { queued: false, reason: "Email notifications disabled" };
   if (!user.newExposureAlerts) return { queued: false, reason: "Exposure alerts disabled" };
 
@@ -3071,6 +3075,11 @@ export async function queueBulkRemovalSummary(
   });
 
   if (!user) return { queued: false, reason: "User not found" };
+
+  // FREE users don't get digest emails — paid feature only
+  const effectivePlan = await getEffectivePlanWithFamily(userId);
+  if (effectivePlan === "FREE") return { queued: false, reason: "Free plan" };
+
   if (!user.emailNotifications) return { queued: false, reason: "Email notifications disabled" };
   if (!user.removalUpdates) return { queued: false, reason: "Removal updates disabled" };
 
@@ -3106,6 +3115,11 @@ export async function queueMonthlyRecap(
   });
 
   if (!user) return { queued: false, reason: "User not found" };
+
+  // FREE users don't get digest emails — paid feature only
+  const effectivePlan = await getEffectivePlanWithFamily(userId);
+  if (effectivePlan === "FREE") return { queued: false, reason: "Free plan" };
+
   if (!user.emailNotifications) return { queued: false, reason: "Email notifications disabled" };
   if (!user.weeklyReports) return { queued: false, reason: "Reports disabled" };
 
@@ -3145,6 +3159,11 @@ export async function queueRemovalDigest(
   });
 
   if (!user) return { queued: false, reason: "User not found" };
+
+  // FREE users don't get digest emails — paid feature only
+  const effectivePlan = await getEffectivePlanWithFamily(userId);
+  if (effectivePlan === "FREE") return { queued: false, reason: "Free plan" };
+
   if (!user.emailNotifications) return { queued: false, reason: "Email notifications disabled" };
   if (!user.removalUpdates) return { queued: false, reason: "Removal updates disabled" };
 

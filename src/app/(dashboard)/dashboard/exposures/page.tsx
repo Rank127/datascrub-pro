@@ -309,10 +309,10 @@ function ExposuresPageContent() {
             }
             description={
               <p className="max-w-xl">
-                Your data is exposed on <strong className="text-amber-300">{totalExposures}</strong> of{" "}
-                <strong className="text-amber-300">{TOTAL_KNOWN_BROKERS.toLocaleString()}+</strong> known
-                broker sites. <strong className="text-amber-300">Upgrade to Enterprise</strong> for maximum
-                protection — dark web monitoring, family plan, AI Shield &amp; more.
+                Your free scan found <strong className="text-amber-300">{totalExposures}</strong> exposures across{" "}
+                <strong className="text-amber-300">{TOTAL_KNOWN_BROKERS.toLocaleString()}+</strong> broker sites.{" "}
+                <strong className="text-amber-300">Upgrade to start removing your data</strong> — automated opt-out
+                requests, monitoring, dark web alerts &amp; more.
               </p>
             }
             features={["Automated removals from 2,000+ brokers", "Dark web monitoring", "Family plan (5 profiles)", "AI Shield protection"]}
@@ -521,8 +521,8 @@ function ExposuresPageContent() {
         </Card>
       )}
 
-      {/* Bulk Actions Bar */}
-      {someSelected && (
+      {/* Bulk Actions Bar (hidden for FREE users — removals are paid-only) */}
+      {!isFreePlan && someSelected && (
         <Card className="bg-emerald-900/30 border-emerald-700/50">
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
@@ -566,7 +566,7 @@ function ExposuresPageContent() {
                   Select exposures to take bulk actions
                 </CardDescription>
               </div>
-              {actionableExposures.length > 0 && (
+              {!isFreePlan && actionableExposures.length > 0 && (
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="select-all"
@@ -620,8 +620,8 @@ function ExposuresPageContent() {
                   firstFoundAt={new Date(exposure.firstFoundAt)}
                   onWhitelist={() => handleWhitelist(exposure.id)}
                   onUnwhitelist={() => handleUnwhitelist(exposure.id)}
-                  onRemove={() => handleRemove(exposure.id)}
-                  showCheckbox={true}
+                  onRemove={isFreePlan ? undefined : () => handleRemove(exposure.id)}
+                  showCheckbox={!isFreePlan}
                   selected={selectedIds.has(exposure.id)}
                   onSelect={toggleSelect}
                 />

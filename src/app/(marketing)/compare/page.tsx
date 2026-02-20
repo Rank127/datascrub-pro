@@ -193,7 +193,7 @@ export default function ComparePage() {
             </tr>
             <tr className="border-b border-slate-800">
               <td className="px-4 py-3 font-medium text-slate-300">Free Tier</td>
-              <td className="px-4 py-3 text-emerald-400 font-semibold">Yes (3 removals/mo)</td>
+              <td className="px-4 py-3 text-emerald-400 font-semibold">Yes (free scan)</td>
               <td className="px-4 py-3">No</td>
               <td className="px-4 py-3">No</td>
               <td className="px-4 py-3">Scan only</td>

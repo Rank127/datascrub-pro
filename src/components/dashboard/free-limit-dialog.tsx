@@ -39,15 +39,15 @@ export function FreeLimitDialog({
             <Lock className="h-12 w-12 text-amber-400 mx-auto" />
           </div>
           <DialogTitle className="text-2xl text-amber-400">
-            Free Removal Limit Reached
+            Removals Require an Upgrade
           </DialogTitle>
           <DialogDescription className="text-slate-300 text-base mt-2">
-            You&apos;ve used all {limit} free removals this month.
+            Data removals are available on Pro and Enterprise plans.
             {activeExposures > 0 && (
               <>
-                {" "}Your data is still exposed on{" "}
+                {" "}Your data is exposed on{" "}
                 <strong className="text-red-400">{activeExposures}</strong>{" "}
-                source{activeExposures !== 1 ? "s" : ""}.
+                source{activeExposures !== 1 ? "s" : ""} — upgrade to start removing it.
               </>
             )}
           </DialogDescription>
@@ -102,7 +102,7 @@ export function FreeLimitDialog({
           </div>
 
           <p className="text-xs text-slate-500 text-center">
-            Free removals reset at the start of each month.
+            Your free scan shows where your data is exposed. Upgrade to remove it.
           </p>
         </div>
       </DialogContent>

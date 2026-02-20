@@ -11,7 +11,8 @@ import { RemovalProgressCompact } from "@/components/dashboard/removal-progress-
 import { BrokerStatusCompact } from "@/components/dashboard/broker-status-compact";
 import { RemovalWizard } from "@/components/dashboard/removal-wizard";
 import { ReferralWidget } from "@/components/dashboard/referral-widget";
-import { Search, Loader2, Bot, ArrowRight } from "lucide-react";
+import { UpgradeCta } from "@/components/dashboard/upgrade-cta";
+import { Search, Loader2, Bot, ArrowRight, Crown, Shield } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import type { DataSource, ExposureType, Severity } from "@/lib/types";
@@ -231,8 +232,8 @@ export default function DashboardPage() {
         whitelistedCount={stats.whitelistedItems}
       />
 
-      {/* 3. Removal Progress - Single bar with optional breakdown */}
-      {!showRemovalWizard && (
+      {/* 3. Removal Progress - Single bar with optional breakdown (paid users only) */}
+      {stats.userPlan !== "FREE" && !showRemovalWizard && (
         <RemovalProgressCompact
           removalProgress={removalProgress}
           pendingRemovals={stats.activeExposures}
@@ -240,8 +241,8 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Removal Wizard - Full wizard mode */}
-      {showRemovalWizard && (
+      {/* Removal Wizard - Full wizard mode (paid users only) */}
+      {stats.userPlan !== "FREE" && showRemovalWizard && (
         <RemovalWizard
           onComplete={() => {
             setShowRemovalWizard(false);
@@ -251,11 +252,29 @@ export default function DashboardPage() {
         />
       )}
 
+      {/* Upgrade CTA for FREE users (replaces removal progress) */}
+      {stats.userPlan === "FREE" && stats.activeExposures > 0 && (
+        <UpgradeCta
+          icon={<Shield className="h-8 w-8 text-amber-400" />}
+          title="Start Removing Your Data"
+          description={
+            <p className="max-w-xl">
+              Your scan found <strong className="text-amber-300">{stats.activeExposures}</strong> active exposures.
+              Upgrade to start automated removals from data brokers.
+            </p>
+          }
+          features={["Automated removals from 2,000+ brokers", "Real-time monitoring", "Email alerts & progress tracking"]}
+          ctaText={<><Crown className="h-4 w-4 mr-2" />Upgrade to Start Removing</>}
+          ctaHref="/dashboard/checkout"
+          colorScheme="amber"
+        />
+      )}
+
       {/* 4. Recent Exposures - Compact table view */}
       {compactExposures.length > 0 && (
         <CompactExposures
           exposures={compactExposures}
-          onRemove={handleRemove}
+          onRemove={stats.userPlan !== "FREE" ? handleRemove : undefined}
           onWhitelist={handleWhitelist}
         />
       )}

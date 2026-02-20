@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
     // Check removal limits based on plan
     const removalLimits: Record<Plan, number> = {
-      FREE: 3,
+      FREE: 0,
       PRO: -1, // unlimited
       ENTERPRISE: -1, // unlimited
     };

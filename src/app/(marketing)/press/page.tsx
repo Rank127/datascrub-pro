@@ -117,7 +117,7 @@ export default function PressPage() {
                 continuously monitors for re-listings.
               </p>
               <p>
-                The company offers a free tier with 3 removals per month, a Pro
+                The company offers a free scan to see your exposure, a Pro
                 plan at $9.99/month (billed annually), and an Enterprise plan
                 with dark web monitoring, family plans, and daily monitoring at
                 $22.50/month (billed annually).
