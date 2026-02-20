@@ -23,6 +23,7 @@ import {
 } from "../types";
 import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
+import { recordOutcome } from "@/lib/agents/learning";
 
 // ============================================================================
 // CONSTANTS
@@ -568,7 +569,25 @@ Generate a helpful, empathetic response in JSON format.`,
         });
 
         wasAutoResolved = true;
+
+        // Record learning outcome — auto-resolved successfully
+        recordOutcome({
+          agentId: this.id,
+          capability: "process-ticket",
+          outcomeType: "SUCCESS",
+          context: { ticketId, ticketType: analysis.type, autoResolved: true },
+          outcome: { priority: response.priority, responseLength: response.response.length },
+        }).catch(() => {});
       } else {
+        // Record learning outcome — needed human review
+        recordOutcome({
+          agentId: this.id,
+          capability: "process-ticket",
+          outcomeType: analysis.needsEscalation ? "PARTIAL" : "PARTIAL",
+          context: { ticketId, ticketType: analysis.type, needsEscalation: analysis.needsEscalation },
+          outcome: { priority: response.priority, escalated: analysis.needsEscalation },
+        }).catch(() => {});
+
         // Save draft response and update status
         await prisma.supportTicket.update({
           where: { id: ticketId },

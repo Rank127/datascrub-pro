@@ -26,6 +26,7 @@ import { executeRemoval as executeRemovalService } from "@/lib/removers/removal-
 import { getDataBrokerInfo } from "@/lib/removers/data-broker-directory";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 import { dalioRiskAssessment } from "@/lib/mastermind/frameworks";
+import { getBrokerLearning } from "@/lib/agents/learning";
 
 // ============================================================================
 // CONSTANTS
@@ -235,33 +236,75 @@ class RemovalAgent extends BaseAgent {
         );
       }
 
-      // Determine method based on broker info
+      // Check learned broker intelligence before using directory defaults
+      const learned = await getBrokerLearning(source);
+
+      if (learned?.rejectsEmail && learned.methodConfidence >= 0.8) {
+        return this.createSuccessResult<StrategyResult>(
+          {
+            strategy: "learned-form",
+            method: learned.formUrl ? "AUTO_FORM" : "MANUAL_GUIDE",
+            confidence: learned.methodConfidence,
+            estimatedDays: learned.avgResponseDays || 30,
+            brokerInfo: brokerInfo
+              ? { name: brokerInfo.name, privacyEmail: brokerInfo.privacyEmail, optOutUrl: learned.formUrl || brokerInfo.optOutUrl }
+              : undefined,
+            reasoning: `Learned: broker rejects email (confidence ${learned.methodConfidence.toFixed(2)}). Using ${learned.preferredMethod}.`,
+          },
+          {
+            capability: "select-strategy",
+            requestId: context.requestId,
+            duration: Date.now() - startTime,
+            usedFallback: false,
+            executedAt: new Date(),
+          },
+          { confidence: learned.methodConfidence }
+        );
+      }
+
+      // Determine method based on broker info (static directory)
       let method: StrategyResult["method"] = "MANUAL_GUIDE";
       let confidence = 0.5;
       let estimatedDays = 45; // Default to 45 days
 
       if (brokerInfo) {
-        if (brokerInfo.removalMethod === "EMAIL" && brokerInfo.privacyEmail) {
-          method = "AUTO_EMAIL";
-          confidence = 0.85;
-          estimatedDays = 30;
-        } else if (
-          brokerInfo.removalMethod === "FORM" &&
-          brokerInfo.optOutUrl
-        ) {
-          method = "AUTO_FORM";
-          confidence = 0.75;
-          estimatedDays = 14;
-        } else if (brokerInfo.removalMethod === "BOTH") {
-          // Prefer form if available
-          if (brokerInfo.optOutUrl) {
+        // If we've learned a preferred method with moderate confidence, use it
+        if (learned?.preferredMethod && learned.methodConfidence >= 0.6) {
+          if (learned.preferredMethod === "EMAIL" && brokerInfo.privacyEmail) {
+            method = "AUTO_EMAIL";
+            confidence = learned.methodConfidence;
+            estimatedDays = learned.avgResponseDays || 30;
+          } else if (learned.preferredMethod === "FORM" && (learned.formUrl || brokerInfo.optOutUrl)) {
             method = "AUTO_FORM";
-            confidence = 0.8;
-            estimatedDays = 14;
-          } else if (brokerInfo.privacyEmail) {
+            confidence = learned.methodConfidence;
+            estimatedDays = learned.avgResponseDays || 14;
+          }
+        }
+
+        // Fall back to static directory if no learned method
+        if (method === "MANUAL_GUIDE") {
+          if (brokerInfo.removalMethod === "EMAIL" && brokerInfo.privacyEmail) {
             method = "AUTO_EMAIL";
             confidence = 0.85;
             estimatedDays = 30;
+          } else if (
+            brokerInfo.removalMethod === "FORM" &&
+            brokerInfo.optOutUrl
+          ) {
+            method = "AUTO_FORM";
+            confidence = 0.75;
+            estimatedDays = 14;
+          } else if (brokerInfo.removalMethod === "BOTH") {
+            // Prefer form if available
+            if (brokerInfo.optOutUrl) {
+              method = "AUTO_FORM";
+              confidence = 0.8;
+              estimatedDays = 14;
+            } else if (brokerInfo.privacyEmail) {
+              method = "AUTO_EMAIL";
+              confidence = 0.85;
+              estimatedDays = 30;
+            }
           }
         }
       }

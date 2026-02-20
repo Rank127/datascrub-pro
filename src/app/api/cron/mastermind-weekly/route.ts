@@ -137,6 +137,7 @@ CRITICAL CONSTRAINTS:
 2. Large "submitted" counts are NORMAL — brokers have 45-day legal response windows
 3. Large "pending" counts are NORMAL — queue clears at 3,600/day capacity
 4. Only adjust parameters where metrics show a clear, data-driven need for change
+5. NEVER generate directives related to pricing, plan prices, discounts, coupons, trials, or free tier limits — these are admin-only and will be rejected by the system
 
 Respond with valid JSON only:
 {

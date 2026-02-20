@@ -799,6 +799,15 @@ model BrokerIntelligence {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
+  // Learning fields — populated by agent outcome analysis
+  preferredMethod    String?   // Learned: EMAIL, FORM, BOTH — overrides directory default
+  rejectsEmail       Boolean   @default(false)  // Learned from broker responses
+  requiresForm       Boolean   @default(false)
+  formUrl            String?   // Learned form URL from broker responses
+  avgResponseDays    Int?      // Learned average response time
+  lastMethodUpdate   DateTime? // When preferredMethod was last updated
+  methodConfidence   Float?    // 0-1, how confident we are in the learned method
+
   @@index([source])
   @@index([falsePositiveRate])
   @@index([successRate])
@@ -988,6 +997,14 @@ model AutoBlogPost {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  // Performance tracking — populated by analytics sync
+  pageViews30d       Int       @default(0)
+  avgTimeOnPage      Int?      // seconds
+  bounceRate         Float?
+  searchImpressions  Int       @default(0)
+  searchClicks       Int       @default(0)
+  lastAnalyticsSync  DateTime?
+
   @@index([status])
   @@index([publishedAt])
 }
@@ -1012,6 +1029,26 @@ model EmailSuppression {
   @@index([suppressed])
   @@index([brokerKey])
   @@index([category])
+}
+
+// Agent learning outcomes — tracks what happened after agent decisions
+// Used to extract patterns and inject learning context into future AI calls
+model AgentOutcome {
+  id            String    @id @default(cuid())
+  agentId       String
+  capability    String
+  executionId   String?   // Links to AgentExecution
+  outcomeType   String    // SUCCESS, FAILURE, PARTIAL, REJECTED, TIMEOUT
+  inputHash     String?   // Hash of key input params for pattern matching
+  context       String?   // JSON: broker key, ticket type, etc.
+  outcome       String?   // JSON: what actually happened
+  lessonLearned String?   // AI-generated one-line insight (populated by learning cron)
+  appliedAt     DateTime? // When this lesson was used in a decision
+  createdAt     DateTime  @default(now())
+
+  @@index([agentId, capability])
+  @@index([agentId, outcomeType])
+  @@index([createdAt])
 }
 
 // California DROP (Delete Request and Opt-out Platform) submissions

@@ -13412,6 +13412,35 @@ export function getDataBrokerInfo(source: string): DataBrokerInfo | null {
 }
 
 /**
+ * Get data broker info with learned method overlay.
+ * Reads BrokerIntelligence for learned preferences (e.g., broker rejects email → use FORM).
+ * Falls back to static directory if no learning data exists.
+ */
+export async function getDataBrokerInfoWithLearning(source: string): Promise<DataBrokerInfo | null> {
+  const base = getDataBrokerInfo(source);
+  if (!base) return base;
+
+  try {
+    // Lazy import to avoid circular deps — this file is imported early
+    const { getBrokerLearning } = await import("@/lib/agents/learning");
+    const intel = await getBrokerLearning(source);
+
+    if (intel?.preferredMethod && intel.methodConfidence >= 0.8) {
+      return {
+        ...base,
+        removalMethod: intel.preferredMethod as RemovalMethod,
+        optOutUrl: intel.formUrl || base.optOutUrl,
+        notes: `${base.notes || ""} [Learned: prefers ${intel.preferredMethod}]`.trim(),
+      };
+    }
+  } catch {
+    // Learning lookup failed — return base info
+  }
+
+  return base;
+}
+
+/**
  * Check if a source is a known data broker that we should send removals to.
  *
  * PRECISION IMPROVEMENT: Only returns true for actual data brokers.

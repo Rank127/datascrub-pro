@@ -25,6 +25,7 @@ import { registerAgent } from "../registry";
 import { sendManualActionRequiredEmail } from "@/lib/email";
 import { DATA_BROKER_DIRECTORY } from "@/lib/removers/data-broker-directory";
 import { getRetriggerCount, logRetriggerAttempt } from "@/lib/cron-logger";
+import { processBrokerResponseSignal } from "@/lib/agents/learning";
 
 // ============================================================================
 // CONSTANTS
@@ -963,6 +964,11 @@ class OperationsAgent extends BaseAgent {
             action: "Updated to IN_PROGRESS",
             status: "Broker confirmed removal initiated",
           });
+          // Record learning signal — email method worked for this broker
+          processBrokerResponseSignal({
+            brokerKey: email.broker,
+            responseCategory: "CONFIRMED_REMOVAL",
+          }).catch(() => {});
           break;
 
         case "NO_RECORD":
@@ -975,6 +981,10 @@ class OperationsAgent extends BaseAgent {
             action: "Marked as REMOVED",
             status: "Broker confirmed no record exists",
           });
+          processBrokerResponseSignal({
+            brokerKey: email.broker,
+            responseCategory: "NO_RECORD",
+          }).catch(() => {});
           break;
 
         case "REQUIRES_MANUAL":
@@ -987,6 +997,18 @@ class OperationsAgent extends BaseAgent {
             action: "Marked REQUIRES_MANUAL",
             status: email.instructions || "Manual action required",
           });
+          // Record learning signal — broker requires form/manual action (rejects email)
+          const requiresForm = email.instructions?.toLowerCase().includes("form") ||
+            email.instructions?.toLowerCase().includes("portal") ||
+            email.instructions?.toLowerCase().includes("visit");
+          const formUrl = email.instructions?.match(/https?:\/\/[^\s]+/)?.[0];
+          processBrokerResponseSignal({
+            brokerKey: email.broker,
+            rejectsEmail: true,
+            requiresForm: !!requiresForm,
+            formUrl: formUrl || undefined,
+            responseCategory: "REQUIRES_MANUAL",
+          }).catch(() => {});
           break;
 
         default:

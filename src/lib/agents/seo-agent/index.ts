@@ -57,6 +57,7 @@ import {
 } from "../shared/keyword-intelligence";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 import { carlsenPositionalScore } from "@/lib/mastermind/frameworks";
+import { prisma } from "@/lib/db";
 
 // ============================================================================
 // CONSTANTS
@@ -234,6 +235,52 @@ Focus on privacy and data protection related keywords. Prioritize high-impact is
     this.handlers.set("full-report", this.handleFullReport.bind(this));
     this.handlers.set("get-report", this.handleGetReport.bind(this));
     this.handlers.set("keyword-research", this.handleKeywordResearch.bind(this));
+  }
+
+  /**
+   * Override: inject content performance data into learning context.
+   * Includes top/bottom performing posts so AI knows what works.
+   */
+  protected async getLearningContext(capability: string, _input?: unknown): Promise<string> {
+    // Get base learning context (lessons from AgentOutcome)
+    const baseLessons = await super.getLearningContext(capability, _input);
+
+    // For content-related capabilities, add blog performance data
+    if (["blog-ideas", "content-analysis", "keyword-research"].includes(capability)) {
+      try {
+        const [topPosts, bottomPosts] = await Promise.all([
+          prisma.autoBlogPost.findMany({
+            where: { status: "PUBLISHED", pageViews30d: { gt: 0 } },
+            orderBy: { pageViews30d: "desc" },
+            take: 3,
+            select: { title: true, category: true, pageViews30d: true, searchClicks: true },
+          }),
+          prisma.autoBlogPost.findMany({
+            where: { status: "PUBLISHED", pageViews30d: { gt: 0 } },
+            orderBy: { pageViews30d: "asc" },
+            take: 3,
+            select: { title: true, category: true, pageViews30d: true, searchClicks: true },
+          }),
+        ]);
+
+        if (topPosts.length > 0) {
+          const perfContext =
+            "\n\n## Content Performance Data\n" +
+            "**Top performing posts:**\n" +
+            topPosts.map((p) => `- "${p.title}" (${p.category}): ${p.pageViews30d} views, ${p.searchClicks} clicks`).join("\n") +
+            (bottomPosts.length > 0
+              ? "\n**Lowest performing posts:**\n" +
+                bottomPosts.map((p) => `- "${p.title}" (${p.category}): ${p.pageViews30d} views, ${p.searchClicks} clicks`).join("\n")
+              : "");
+
+          return baseLessons + perfContext;
+        }
+      } catch {
+        // Performance data unavailable — return base only
+      }
+    }
+
+    return baseLessons;
   }
 
   private getBaseUrl(): string {

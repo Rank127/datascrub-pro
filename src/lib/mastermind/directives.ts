@@ -126,6 +126,43 @@ export async function getDirectivesForDomain(category: string): Promise<Record<s
 }
 
 // ============================================================================
+// FORBIDDEN DIRECTIVES — Keys that agents may NEVER write
+// Pricing, plan tiers, and Stripe configuration are admin-only.
+// Any attempt to set these is rejected with a logged warning.
+// ============================================================================
+
+const FORBIDDEN_DIRECTIVE_PREFIXES = [
+  "pricing_",       // e.g. pricing_pro_monthly, pricing_enterprise_yearly
+  "price_",         // e.g. price_override, price_discount
+  "stripe_",        // e.g. stripe_price_id, stripe_coupon
+  "plan_price",     // e.g. plan_price_pro, plan_price_enterprise
+  "discount_",      // e.g. discount_percentage, discount_code
+  "coupon_",        // e.g. coupon_create, coupon_apply
+  "trial_",         // e.g. trial_days, trial_extend
+] as const;
+
+const FORBIDDEN_DIRECTIVE_KEYS = new Set([
+  "pro_monthly_price",
+  "pro_yearly_price",
+  "enterprise_monthly_price",
+  "enterprise_yearly_price",
+  "free_tier_limit",
+  "free_removal_limit",
+  "plan_pricing",
+  "stripe_price_ids",
+  "billing_price_override",
+  "billing_plan_change",
+  "billing_discount",
+  "billing_coupon",
+  "billing_trial_extend",
+]);
+
+function isDirectiveForbidden(key: string): boolean {
+  if (FORBIDDEN_DIRECTIVE_KEYS.has(key)) return true;
+  return FORBIDDEN_DIRECTIVE_PREFIXES.some((prefix) => key.startsWith(prefix));
+}
+
+// ============================================================================
 // DIRECTIVE BOUNDS — Prevent destructive values from board meetings
 // ============================================================================
 
@@ -164,6 +201,16 @@ function clampDirectiveValue(key: string, value: unknown): unknown {
  * Write/upsert a single directive.
  */
 export async function setDirective(opts: DirectiveInput): Promise<void> {
+  // HARD GUARD: Pricing directives are NEVER writable by agents or board meetings.
+  // Pricing changes require manual admin action via Stripe dashboard.
+  if (isDirectiveForbidden(opts.key)) {
+    console.error(
+      `[Directives] BLOCKED: Attempted to set forbidden directive "${opts.key}" from source "${opts.source}". ` +
+      `Pricing, plan tiers, and Stripe configuration can only be changed manually by an admin.`
+    );
+    return; // Silently reject — do not throw (callers should not break)
+  }
+
   try {
     await prisma.strategicDirective.upsert({
       where: {
@@ -206,6 +253,12 @@ export async function applyMastermindDirectives(
   let written = 0;
 
   for (const d of directives) {
+    // Skip forbidden pricing directives — setDirective also checks, but log at bulk level too
+    if (isDirectiveForbidden(d.key)) {
+      console.warn(`[Directives] SKIPPED forbidden directive "${d.key}" in bulk apply from "${source}"`);
+      continue;
+    }
+
     try {
       const clampedValue = clampDirectiveValue(d.key, d.value);
       await setDirective({

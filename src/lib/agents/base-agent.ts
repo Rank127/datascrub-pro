@@ -31,6 +31,7 @@ import {
   SuggestedAction,
 } from "./types";
 import { captureError } from "@/lib/error-reporting";
+import { getLessonsForAgent } from "@/lib/agents/learning";
 
 // ============================================================================
 // CONSTANTS
@@ -398,11 +399,15 @@ export abstract class BaseAgent implements Agent {
     // Build the user message
     const userMessage = this.buildUserMessage(capability, input, context);
 
+    // Inject learning context (appends learned patterns if any exist)
+    const learningContext = await this.getLearningContext(capability, input);
+    const systemPrompt = this.getSystemPrompt() + learningContext;
+
     // Call Claude
     const response = await this.anthropic.messages.create({
       model: this.config.model || DEFAULT_MODEL,
       max_tokens: this.config.maxTokens || DEFAULT_MAX_TOKENS,
-      system: this.getSystemPrompt(),
+      system: systemPrompt,
       messages: [{ role: "user", content: userMessage }],
     });
 
@@ -702,10 +707,14 @@ Please process this request and return a JSON response.
 
     const userMessage = this.buildUserMessage(capability, input, context);
 
+    // Inject learning context
+    const learningContext = await this.getLearningContext(capability, input);
+    const systemPrompt = this.getSystemPrompt() + learningContext;
+
     const response = await this.anthropic.messages.create({
       model,
       max_tokens: this.config.maxTokens || DEFAULT_MAX_TOKENS,
-      system: this.getSystemPrompt(),
+      system: systemPrompt,
       messages: [{ role: "user", content: userMessage }],
     });
 
@@ -783,6 +792,18 @@ Please process this request and return a JSON response.
   protected async getDirective<T>(key: string, defaultValue: T): Promise<T> {
     const { getDirective } = await import("@/lib/mastermind/directives");
     return getDirective(key, defaultValue);
+  }
+
+  /**
+   * Get learning context for a capability — recent lessons from past outcomes.
+   * Override in subclasses for domain-specific learning context.
+   * Returns empty string if no lessons exist (adds zero overhead).
+   */
+  protected async getLearningContext(
+    capability: string,
+    _input?: unknown
+  ): Promise<string> {
+    return getLessonsForAgent(this.id, capability, 5);
   }
 
   /**

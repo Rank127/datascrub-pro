@@ -10,6 +10,7 @@ import { checkAndFireFirstRemovalMilestone } from "@/lib/removals/milestone-serv
 import { getBlocklistEntry } from "./blocklist";
 import { CONFIDENCE_THRESHOLDS } from "@/lib/scanners/base-scanner";
 import { getDirective } from "@/lib/mastermind/directives";
+import { recordRemovalOutcome } from "@/lib/agents/learning";
 
 const MAX_REMOVAL_ATTEMPTS = 3;
 const MAX_REQUESTS_PER_BROKER_PER_DAY = 100; // Increased from 25 - clearing backlog with handful of users
@@ -536,6 +537,16 @@ export async function executeRemoval(
   // Cast to string to handle both new and legacy method names in the database
   const method = removalRequest.method as string;
 
+  // Helper: record learning outcome (fire-and-forget, never blocks)
+  const recordLearning = (result: RemovalExecutionResult) => {
+    recordRemovalOutcome(removalRequestId, source, {
+      success: result.success,
+      method: result.method,
+      message: result.message,
+      isNonRemovable: result.isNonRemovable,
+    }).catch(() => {}); // Swallow — learning must never break removals
+  };
+
   try {
     switch (method) {
       // Handle both new (AUTO_EMAIL) and legacy (EMAIL) method names
@@ -567,22 +578,26 @@ export async function executeRemoval(
               });
             }
 
-            return {
+            const emailSuccessResult: RemovalExecutionResult = {
               success: true,
               method: "AUTO_EMAIL",
               message: `CCPA/GDPR removal request sent to ${brokerInfo.name}`,
             };
+            recordLearning(emailSuccessResult);
+            return emailSuccessResult;
           }
         }
 
         // Fall back to manual if email fails - mark as REQUIRES_MANUAL
         await updateRemovalStatus(removalRequestId, "REQUIRES_MANUAL");
-        return {
+        const emailFallbackResult: RemovalExecutionResult = {
           success: true,
           method: "MANUAL_GUIDE",
           message: `Could not send automated email. Please use the manual opt-out process.`,
           instructions: getOptOutInstructions(source),
         };
+        recordLearning(emailFallbackResult);
+        return emailFallbackResult;
       }
 
       // Handle both new (AUTO_FORM) and legacy (FORM) method names
@@ -639,11 +654,13 @@ export async function executeRemoval(
               });
             }
 
-            return {
+            const formSuccessResult: RemovalExecutionResult = {
               success: true,
               method: "AUTO_FORM",
               message: `Form submitted automatically for ${brokerInfo.name}`,
             };
+            recordLearning(formSuccessResult);
+            return formSuccessResult;
           }
 
           // Automation failed - log it but try email fallback below
@@ -677,11 +694,13 @@ export async function executeRemoval(
               });
             }
 
-            return {
+            const formEmailFallbackResult: RemovalExecutionResult = {
               success: true,
               method: "AUTO_EMAIL",
               message: `CCPA/GDPR removal request sent to ${brokerInfo.name} (email fallback - form has Cloudflare protection)`,
             };
+            recordLearning(formEmailFallbackResult);
+            return formEmailFallbackResult;
           }
 
           console.log(`[Removal] Email fallback also failed for ${source}`);
@@ -690,12 +709,14 @@ export async function executeRemoval(
         // Both form and email failed - fall back to manual
         await updateRemovalStatus(removalRequestId, "REQUIRES_MANUAL");
 
-        return {
+        const formManualFallbackResult: RemovalExecutionResult = {
           success: true,
           method: "MANUAL_GUIDE",
           message: `Please complete the opt-out form for ${brokerInfo.name}`,
           instructions: getOptOutInstructions(source),
         };
+        recordLearning(formManualFallbackResult);
+        return formManualFallbackResult;
       }
 
       case "MANUAL_GUIDE": {
@@ -735,11 +756,13 @@ export async function executeRemoval(
       error instanceof Error ? error.message : "Unknown error"
     );
 
-    return {
+    const errorResult: RemovalExecutionResult = {
       success: false,
       method: method as RemovalMethod,
       message: "Failed to execute removal request",
     };
+    recordLearning(errorResult);
+    return errorResult;
   }
 }
 

@@ -23,6 +23,7 @@ import {
 import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 import { hormoziValueScore, buffettCompetenceCheck } from "@/lib/mastermind/frameworks";
+import { recordOutcome } from "@/lib/agents/learning";
 
 // ============================================================================
 // CONSTANTS
@@ -123,7 +124,15 @@ class BillingAgent extends BaseAgent {
   ];
 
   protected getSystemPrompt(): string {
-    const base = `You are the Billing Agent for GhostMyData. Analyze user behavior to predict churn and identify upsell opportunities.`;
+    const base = `You are the Billing Agent for GhostMyData. Analyze user behavior to predict churn and identify upsell opportunities.
+
+HARD CONSTRAINT — PRICING IS READ-ONLY:
+You must NEVER modify, suggest modifications to, or generate directives that change:
+- Stripe price IDs, plan prices, or billing amounts
+- Discount codes, coupons, or trial periods
+- Free tier limits or removal quotas
+- Any pricing-related configuration
+Pricing changes require manual admin action via Stripe dashboard. Your role is ANALYSIS ONLY.`;
     const mastermind = buildAgentMastermindPrompt("commerce-sales", 3);
     return `${base}${mastermind}`;
   }
@@ -338,6 +347,17 @@ class BillingAgent extends BaseAgent {
                 ? "Monitor and engage"
                 : undefined,
         });
+      }
+
+      // Record churn predictions as outcomes (for later validation against actual cancellations)
+      for (const pred of predictions.filter((p) => p.churnRisk > 0.3)) {
+        recordOutcome({
+          agentId: this.id,
+          capability: "predict-churn",
+          outcomeType: "PARTIAL", // Will be updated to SUCCESS/FAILURE when validated
+          context: { userId: pred.userId, churnRisk: pred.churnRisk },
+          outcome: { factors: pred.factors, recommendedAction: pred.recommendedAction },
+        }).catch(() => {});
       }
 
       return this.createSuccessResult<ChurnResult>(
