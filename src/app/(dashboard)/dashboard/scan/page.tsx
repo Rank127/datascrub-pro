@@ -49,6 +49,7 @@ interface Scan {
   progress: number;
   createdAt: string;
   completedAt: string | null;
+  possiblyStuck?: boolean;
 }
 
 export default function ScanPage() {
@@ -158,12 +159,18 @@ export default function ScanPage() {
     }, 500);
 
     try {
+      // 4-minute client timeout — server has 5 min max, so if we hit this the scan likely stalled
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4 * 60 * 1000);
+
       const response = await fetch("/api/scan/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: scanType }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       clearInterval(progressInterval);
 
       if (!response.ok) {
@@ -186,9 +193,13 @@ export default function ScanPage() {
       trackScanCompleted(scanType, data.exposuresFound, data.sourcesChecked);
 
       fetchRecentScans();
-    } catch (_err) {
+    } catch (err) {
       clearInterval(progressInterval);
-      setError("An error occurred. Please try again.");
+      if (err instanceof DOMException && err.name === "AbortError") {
+        setError("Scan is taking longer than expected. Check back in a few minutes — your results will appear here.");
+      } else {
+        setError("An error occurred. Please try again.");
+      }
     } finally {
       setIsScanning(false);
     }
@@ -727,6 +738,12 @@ export default function ScanPage() {
                         {new Date(scan.createdAt).toLocaleDateString()} at{" "}
                         {new Date(scan.createdAt).toLocaleTimeString()}
                       </p>
+                      {scan.possiblyStuck && (
+                        <p className="text-xs text-amber-400 flex items-center gap-1 mt-0.5">
+                          <AlertTriangle className="h-3 w-3" />
+                          This scan may have stalled. Try starting a new one.
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">

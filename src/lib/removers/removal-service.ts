@@ -353,6 +353,30 @@ export async function executeRemoval(
       },
     });
 
+    // Create user alert (with dedup) so they know a review is needed
+    try {
+      const existingAlert = await prisma.alert.findFirst({
+        where: {
+          userId,
+          type: "CONFIRMATION_NEEDED",
+          metadata: { contains: removalRequest.exposureId },
+        },
+      });
+      if (!existingAlert) {
+        await prisma.alert.create({
+          data: {
+            userId,
+            type: "CONFIRMATION_NEEDED",
+            title: "Review needed",
+            message: `We found a possible match on ${removalRequest.exposure.sourceName} (${confidenceScore}% confidence). Confirm this is your data to proceed with removal.`,
+            metadata: JSON.stringify({ exposureId: removalRequest.exposureId }),
+          },
+        });
+      }
+    } catch (alertError) {
+      console.warn("[Removal] Failed to create confirmation alert:", alertError);
+    }
+
     return {
       success: false,
       method: "MANUAL_GUIDE",
@@ -362,6 +386,67 @@ export async function executeRemoval(
         `To prevent sending removal requests for the wrong person, please review and confirm this is your data. ` +
         `Once confirmed, the removal will proceed automatically.`,
     };
+  }
+
+  // =========================================================================
+  // BROKER FP RATE GATE: Block auto-removal for brokers with high false-positive rates
+  // Requires user confirmation when >30% of exposures from this broker are false positives
+  // =========================================================================
+  if (!userConfirmed) {
+    try {
+      const brokerIntel = await prisma.brokerIntelligence.findUnique({
+        where: { source: removalRequest.exposure.source },
+        select: { falsePositiveRate: true, totalExposures: true },
+      });
+
+      if (
+        brokerIntel &&
+        brokerIntel.falsePositiveRate > 0.3 &&
+        brokerIntel.totalExposures >= 5
+      ) {
+        const fpPct = Math.round(brokerIntel.falsePositiveRate * 100);
+        console.log(
+          `[Removal] BLOCKED: Broker ${removalRequest.exposure.source} has ${fpPct}% FP rate (${brokerIntel.totalExposures} exposures) — requires user confirmation`
+        );
+
+        await prisma.removalRequest.update({
+          where: { id: removalRequestId },
+          data: {
+            status: "PENDING",
+            notes: `Awaiting user confirmation. Broker has ${fpPct}% false-positive rate across ${brokerIntel.totalExposures} exposures.`,
+          },
+        });
+
+        // Create user alert (deduped)
+        const existingAlert = await prisma.alert.findFirst({
+          where: {
+            userId,
+            type: "CONFIRMATION_NEEDED",
+            metadata: { contains: removalRequest.exposureId },
+          },
+        });
+        if (!existingAlert) {
+          await prisma.alert.create({
+            data: {
+              userId,
+              type: "CONFIRMATION_NEEDED",
+              title: "Review needed",
+              message: `${removalRequest.exposure.sourceName} has a high false-positive rate (${fpPct}%). Please confirm this is your data before we send a removal request.`,
+              metadata: JSON.stringify({ exposureId: removalRequest.exposureId }),
+            },
+          });
+        }
+
+        return {
+          success: false,
+          method: "MANUAL_GUIDE",
+          message: `User confirmation required — broker has ${fpPct}% false-positive rate`,
+        };
+      }
+    } catch (fpGateError) {
+      // Graceful degradation — if BrokerIntelligence query fails, proceed with removal
+      console.warn("[Removal] Broker FP rate gate check failed, proceeding:", fpGateError);
+    }
   }
 
   // Get user's profile for removal request details
@@ -1034,15 +1119,13 @@ export async function markExposureFalsePositive(
     }[reason];
 
     // Update exposure as false positive
-    // Note: Uses status field which exists, and new fields will be added after migration
     await prisma.exposure.update({
       where: { id: exposureId },
       data: {
         status: "FALSE_POSITIVE",
-        // These fields will be available after running prisma migrate:
-        // markedFalsePositive: true,
-        // falsePositiveReason: notes ? `${reasonText}: ${notes}` : reasonText,
-        // falsePositiveAt: new Date(),
+        markedFalsePositive: true,
+        falsePositiveReason: notes ? `${reasonText}: ${notes}` : reasonText,
+        falsePositiveAt: new Date(),
       },
     });
 
@@ -1336,10 +1419,19 @@ export async function getPendingRemovalsForAutomation(limit: number = 50): Promi
   const now = new Date();
 
   // Get all pending removals with their broker source and severity
+  // Filter out false-positive and low-confidence unconfirmed exposures to avoid wasted cycles
   const pendingRemovals = await prisma.removalRequest.findMany({
     where: {
       status: "PENDING",
       attempts: { lt: 3 }, // Haven't exceeded retry limit
+      exposure: {
+        markedFalsePositive: false,
+        OR: [
+          { confidenceScore: null },
+          { confidenceScore: { gte: 75 } },
+          { userConfirmed: true },
+        ],
+      },
     },
     include: {
       exposure: { select: { source: true, severity: true } },
@@ -1598,6 +1690,7 @@ export async function processPendingRemovalsBatch(limit: number = 20, deadline?:
   failed: number;
   skipped: number;
   emailsSent: number;
+  confidenceBlocked: number;
   brokerDistribution: Record<string, number>;
   timeBoxed: boolean;
 }> {
@@ -1605,7 +1698,7 @@ export async function processPendingRemovalsBatch(limit: number = 20, deadline?:
   const isFrozen = await getDirective<boolean>("compliance_freeze", false);
   if (isFrozen) {
     console.log("[processPendingRemovalsBatch] COMPLIANCE FREEZE active — skipping all processing");
-    return { processed: 0, successful: 0, failed: 0, skipped: 0, emailsSent: 0, brokerDistribution: {}, timeBoxed: false };
+    return { processed: 0, successful: 0, failed: 0, skipped: 0, emailsSent: 0, confidenceBlocked: 0, brokerDistribution: {}, timeBoxed: false };
   }
 
   const stats = {
@@ -1614,6 +1707,7 @@ export async function processPendingRemovalsBatch(limit: number = 20, deadline?:
     failed: 0,
     skipped: 0,
     emailsSent: 0,
+    confidenceBlocked: 0,
     brokerDistribution: {} as Record<string, number>,
     timeBoxed: false,
   };
@@ -1687,6 +1781,11 @@ export async function processPendingRemovalsBatch(limit: number = 20, deadline?:
       const result = await executeRemoval(id, request.userId, { skipUserNotification: true });
       stats.processed++;
 
+      // Track confidence-blocked items
+      if (!result.success && result.message.includes("confirmation required")) {
+        stats.confidenceBlocked++;
+      }
+
       if (result.success && (result.method === "AUTO_EMAIL" || result.method === "AUTO_FORM")) {
         stats.successful++;
 
@@ -1750,7 +1849,7 @@ export async function processPendingRemovalsBatch(limit: number = 20, deadline?:
   }
 
   const brokerDist = Object.entries(stats.brokerDistribution).map(([b, c]) => `${b}:${c}`).join(", ");
-  console.log(`[Batch Removal] Complete: ${stats.successful} successful, ${stats.failed} failed, ${stats.skipped} skipped, ${stats.emailsSent} digest emails`);
+  console.log(`[Batch Removal] Complete: ${stats.successful} successful, ${stats.failed} failed, ${stats.skipped} skipped, ${stats.confidenceBlocked} confidence-blocked, ${stats.emailsSent} digest emails`);
   if (brokerDist) {
     console.log(`[Batch Removal] Broker distribution: ${brokerDist}`);
   }

@@ -24,6 +24,7 @@ import {
 import { registerAgent } from "../registry";
 import { sendManualActionRequiredEmail } from "@/lib/email";
 import { DATA_BROKER_DIRECTORY } from "@/lib/removers/data-broker-directory";
+import { markExposureFalsePositive } from "@/lib/removers/removal-service";
 import { getRetriggerCount, logRetriggerAttempt } from "@/lib/cron-logger";
 import { processBrokerResponseSignal } from "@/lib/agents/learning";
 
@@ -975,10 +976,13 @@ class OperationsAgent extends BaseAgent {
           noRecordFound++;
           // Mark as REMOVED - no action needed
           await this.updateRemovalRequest(email, "REMOVED", "No record found - user data not present");
+          // Also mark the exposure as false positive — closes the learning loop:
+          // broker says "not found" → exposure marked FP → falsePositiveRate increases → future removals gated
+          await this.markExposureAsFalsePositive(email);
           updates.push({
             broker: email.broker,
             userName: email.userName,
-            action: "Marked as REMOVED",
+            action: "Marked as REMOVED + False Positive",
             status: "Broker confirmed no record exists",
           });
           processBrokerResponseSignal({
@@ -1264,6 +1268,49 @@ class OperationsAgent extends BaseAgent {
       console.log(`[Operations Agent] Updated ${email.broker} removal for ${email.userName}: ${status}`);
     } catch (error) {
       console.error(`[Operations Agent] Failed to update removal request:`, error);
+    }
+  }
+
+  /**
+   * Mark exposure as false positive when broker responds "no record found".
+   * Closes the learning loop: broker says not found → exposure marked FP → FP rate increases → future removals gated.
+   */
+  private async markExposureAsFalsePositive(email: ParsedReturnEmail): Promise<void> {
+    try {
+      const user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: email.userEmail },
+            { email: email.userEmail.toLowerCase() },
+          ],
+        },
+        select: { id: true },
+      });
+      if (!user) return;
+
+      const removalRequest = await prisma.removalRequest.findFirst({
+        where: {
+          exposure: {
+            userId: user.id,
+            source: { contains: email.broker },
+          },
+          status: "COMPLETED",
+        },
+        select: { exposureId: true },
+        orderBy: { updatedAt: "desc" },
+      });
+      if (!removalRequest) return;
+
+      await markExposureFalsePositive(
+        removalRequest.exposureId,
+        user.id,
+        "BROKER_NOT_FOUND",
+        `Broker ${email.broker} confirmed: no record found for ${email.userName}`
+      );
+      console.log(`[Operations Agent] Marked exposure ${removalRequest.exposureId} as false positive (broker: ${email.broker})`);
+    } catch (error) {
+      // Never block the main flow — learning is best-effort
+      console.warn("[Operations Agent] Failed to mark exposure as false positive:", error);
     }
   }
 

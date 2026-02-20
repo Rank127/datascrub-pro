@@ -113,7 +113,13 @@ export async function POST(request: Request) {
           id: { in: exposureIds },
           userId,
           isWhitelisted: false,
-          status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS"] },
+          markedFalsePositive: false,
+          status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS", "FALSE_POSITIVE"] },
+          OR: [
+            { confidenceScore: null },
+            { confidenceScore: { gte: 75 } },
+            { userConfirmed: true },
+          ],
         },
         select: { id: true, source: true, sourceName: true },
       });
@@ -123,7 +129,13 @@ export async function POST(request: Request) {
         where: {
           userId,
           isWhitelisted: false,
-          status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS"] },
+          markedFalsePositive: false,
+          status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS", "FALSE_POSITIVE"] },
+          OR: [
+            { confidenceScore: null },
+            { confidenceScore: { gte: 75 } },
+            { userConfirmed: true },
+          ],
         },
         select: { id: true, source: true, sourceName: true },
       });
@@ -145,7 +157,13 @@ export async function POST(request: Request) {
         where: {
           userId,
           isWhitelisted: false,
-          status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS"] },
+          markedFalsePositive: false,
+          status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS", "FALSE_POSITIVE"] },
+          OR: [
+            { confidenceScore: null },
+            { confidenceScore: { gte: 75 } },
+            { userConfirmed: true },
+          ],
         },
         select: { id: true, source: true, sourceName: true },
       });
@@ -485,12 +503,18 @@ export async function GET(_request: Request) {
 
     const userId = session.user.id;
 
-    // Get all pending exposures
+    // Get all pending exposures (exclude false positives and low-confidence unconfirmed)
     const pendingExposures = await prisma.exposure.findMany({
       where: {
         userId,
         isWhitelisted: false,
-        status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS"] },
+        markedFalsePositive: false,
+        status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS", "FALSE_POSITIVE"] },
+        OR: [
+          { confidenceScore: null },
+          { confidenceScore: { gte: 75 } },
+          { userConfirmed: true },
+        ],
       },
       select: { id: true, source: true, sourceName: true },
     });

@@ -501,9 +501,10 @@ export async function GET(request: Request) {
 
   // ========== DATA INTEGRITY TESTS ==========
 
-  // Test 9: Stuck Scans (running for more than 1 hour)
+  // Test 9: Stuck Scans (running for more than 10 minutes)
+  // With 29 users and max 300s Vercel timeout, no scan should exceed 5 min. 10 min is generous.
   try {
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const oneHourAgo = new Date(Date.now() - 10 * 60 * 1000);
     const stuckScans = await prisma.scan.findMany({
       where: {
         status: "IN_PROGRESS",
@@ -1092,6 +1093,36 @@ export async function GET(request: Request) {
       name: "Operations Agent Anomalies",
       status: "WARN",
       message: `Operations Agent anomaly detection failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+    });
+  }
+
+  // Test 23: High False-Positive Rate Brokers
+  try {
+    const { getHighFalsePositiveBrokers } = await import("@/lib/removers/removal-service");
+    const highFpBrokers = await getHighFalsePositiveBrokers(5, 0.3);
+
+    if (highFpBrokers.length > 0) {
+      const brokerList = highFpBrokers
+        .map(b => `${b.sourceName || b.source} (${Math.round(b.falsePositiveRate * 100)}% FP, ${b.totalExposures} exposures)`)
+        .join("; ");
+      tests.push({
+        name: "High FP Rate Brokers",
+        status: "WARN",
+        message: `${highFpBrokers.length} broker(s) with >30% false-positive rate: ${brokerList}`,
+        actionRequired: "Review these brokers — high FP rate may indicate scanner misconfiguration",
+      });
+    } else {
+      tests.push({
+        name: "High FP Rate Brokers",
+        status: "PASS",
+        message: "No brokers with high false-positive rates",
+      });
+    }
+  } catch (error) {
+    tests.push({
+      name: "High FP Rate Brokers",
+      status: "WARN",
+      message: `Could not check broker FP rates: ${error instanceof Error ? error.message : "Unknown error"}`,
     });
   }
 

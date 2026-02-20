@@ -24,6 +24,11 @@ const scanRequestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  // Hoist orchestrator so catch block can save partial results on crash
+  let orchestrator: ScanOrchestrator | null = null;
+  let scanId: string | null = null;
+  let scanUserId: string | null = null;
+
   try {
     const session = await auth();
 
@@ -180,12 +185,14 @@ export async function POST(request: Request) {
     }
 
     const { scan, profile } = txResult;
+    scanId = scan.id;
+    scanUserId = session.user.id;
 
     // Prepare profile data for scanning
     const scanInput = await prepareProfileForScan(profile, decrypt);
 
     // Initialize orchestrator (async — loads static + dynamic scanners)
-    const orchestrator = await ScanOrchestrator.create({
+    orchestrator = await ScanOrchestrator.create({
       type: type as ScanType,
       userPlan,
     });
@@ -452,6 +459,55 @@ export async function POST(request: Request) {
             },
           });
           console.log(`[Scan] Marked scan ${failedScan.id} as FAILED due to error`);
+
+          // Save partial results if orchestrator has any (crash recovery)
+          if (orchestrator) {
+            const partialResults = orchestrator.getPartialResults();
+            if (partialResults.length > 0) {
+              console.log(`[Scan] Saving ${partialResults.length} partial results from crashed scan`);
+              try {
+                for (const result of partialResults) {
+                  await prisma.exposure.create({
+                    data: {
+                      userId: session.user.id,
+                      scanId: failedScan.id,
+                      source: result.source,
+                      sourceUrl: result.sourceUrl || null,
+                      sourceName: result.sourceName,
+                      dataType: result.dataType,
+                      dataPreview: result.dataPreview || null,
+                      severity: result.severity,
+                      status: "ACTIVE",
+                      isWhitelisted: false,
+                      confidenceScore: result.confidence?.score ?? null,
+                      matchClassification: result.confidence?.classification ?? null,
+                      userConfirmed: false,
+                    },
+                  }).catch(() => {}); // Skip duplicates silently
+                }
+                // Update scan with partial count
+                await prisma.scan.update({
+                  where: { id: failedScan.id },
+                  data: { exposuresFound: partialResults.length },
+                });
+              } catch (partialError) {
+                console.error("[Scan] Failed to save partial results:", partialError);
+              }
+            }
+          }
+
+          // Create user-facing alert so they know the scan failed
+          await prisma.alert.create({
+            data: {
+              userId: session.user.id,
+              type: "SCAN_FAILED",
+              title: "Scan encountered an error",
+              message: "Your scan ran into a problem. Please try again. If it keeps happening, our team has been notified.",
+              metadata: JSON.stringify({ scanId: failedScan.id }),
+            },
+          }).catch((alertError) => {
+            console.error("[Scan] Failed to create alert:", alertError);
+          });
 
           // Create support ticket for the scan error
           const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";

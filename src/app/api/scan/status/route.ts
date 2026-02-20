@@ -32,7 +32,12 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Scan not found" }, { status: 404 });
       }
 
-      return NextResponse.json({ scan });
+      // Flag scans that may be stuck (IN_PROGRESS for >5 minutes)
+      const possiblyStuck = scan.status === "IN_PROGRESS" &&
+        scan.startedAt &&
+        Date.now() - new Date(scan.startedAt).getTime() > 5 * 60 * 1000;
+
+      return NextResponse.json({ scan, possiblyStuck });
     }
 
     // Get all scans for user
@@ -47,7 +52,15 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json({ scans });
+    // Add possiblyStuck flag to each scan
+    const scansWithStuckFlag = scans.map(scan => ({
+      ...scan,
+      possiblyStuck: scan.status === "IN_PROGRESS" &&
+        scan.startedAt &&
+        Date.now() - new Date(scan.startedAt).getTime() > 5 * 60 * 1000,
+    }));
+
+    return NextResponse.json({ scans: scansWithStuckFlag });
   } catch (error) {
     console.error("Scan status error:", error);
     return NextResponse.json(

@@ -51,6 +51,10 @@ export async function POST(request: Request) {
     const markedManual = await markNonAutomatableAsManual();
     console.log(`[Cron: Clear Pending Queue] Marked ${markedManual} as REQUIRES_MANUAL`);
 
+    // Step 1.5: Escalate items stuck PENDING for >3 days
+    const escalated = await escalateStuckPendingItems();
+    console.log(`[Cron: Clear Pending Queue] Escalated ${escalated} stuck items (>3 days PENDING)`);
+
     // Step 2: Check current queue status
     const queueStatus = await getQueueStatus();
     console.log(`[Cron: Clear Pending Queue] Queue: ${queueStatus.pending} pending, ${queueStatus.automatable} automatable`);
@@ -93,6 +97,7 @@ export async function POST(request: Request) {
       duration: `${(duration / 1000).toFixed(1)}s`,
       timeBoxed: wasTimeBoxed,
       markedAsManual: markedManual,
+      escalatedStuck: escalated,
       queueBefore: queueStatus,
       queueAfter: finalQueueStatus,
       emailQueue: {
@@ -226,6 +231,76 @@ async function getQueueStatus() {
     automatable,
     requiresManual: pending - automatable,
   };
+}
+
+/**
+ * Escalate items stuck in PENDING for more than 3 days.
+ * - If blocked by confidence gate (low confidence + not user-confirmed): mark REQUIRES_MANUAL
+ * - Otherwise: mark REQUIRES_MANUAL + create support ticket
+ * Guarantees nothing stays PENDING longer than 3 days.
+ */
+async function escalateStuckPendingItems(): Promise<number> {
+  const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+
+  const stuckItems = await prisma.removalRequest.findMany({
+    where: {
+      status: "PENDING",
+      createdAt: { lt: threeDaysAgo },
+      attempts: { lt: 3 },
+    },
+    include: {
+      exposure: {
+        select: {
+          id: true,
+          source: true,
+          sourceName: true,
+          confidenceScore: true,
+          userConfirmed: true,
+        },
+      },
+    },
+    take: 100,
+  });
+
+  let escalated = 0;
+
+  for (const item of stuckItems) {
+    const isConfidenceBlocked =
+      item.exposure.confidenceScore !== null &&
+      item.exposure.confidenceScore < 75 &&
+      !item.exposure.userConfirmed;
+
+    const note = isConfidenceBlocked
+      ? `Escalated: Stuck >3 days — blocked by confidence gate (${item.exposure.confidenceScore}%). Needs user confirmation.`
+      : `Escalated: Stuck >3 days in PENDING. Internal ticket created for team review.`;
+
+    await prisma.removalRequest.update({
+      where: { id: item.id },
+      data: {
+        status: "REQUIRES_MANUAL",
+        notes: note,
+      },
+    });
+
+    // Only create support ticket for non-confidence-gate cases
+    if (!isConfidenceBlocked) {
+      try {
+        await createRemovalFailedTicket(
+          item.userId,
+          item.id,
+          item.exposure.id,
+          item.exposure.sourceName || item.exposure.source,
+          note
+        );
+      } catch (ticketError) {
+        console.warn(`[Cron: Clear Pending Queue] Failed to create escalation ticket:`, ticketError);
+      }
+    }
+
+    escalated++;
+  }
+
+  return escalated;
 }
 
 // Also allow GET for manual testing

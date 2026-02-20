@@ -32,6 +32,7 @@ export interface ScanOptions {
 export class ScanOrchestrator {
   private scanners: Scanner[] = [];
   private lastProjectionStats: ProjectionStats | null = null;
+  private partialResults: ScanResult[] = [];
 
   private constructor() {
     // Use ScanOrchestrator.create() instead
@@ -159,6 +160,9 @@ export class ScanOrchestrator {
         }
       }
 
+      // Track partial results after each batch for crash recovery
+      this.partialResults = [...allResults];
+
       // Small delay between batches to avoid rate limiting
       if (i + BATCH_SIZE < this.scanners.length) {
         console.log(`[ScanOrchestrator] Waiting 1s before next batch...`);
@@ -193,6 +197,14 @@ export class ScanOrchestrator {
     }
 
     return allResults;
+  }
+
+  /**
+   * Get results accumulated so far from completed batches.
+   * Used for crash recovery — saves partial results even if a later batch fails.
+   */
+  getPartialResults(): ScanResult[] {
+    return this.partialResults;
   }
 
   /**
