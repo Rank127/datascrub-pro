@@ -8,6 +8,7 @@ import { getRemediationEngine } from "@/lib/agents";
 import { logCronExecution } from "@/lib/cron-logger";
 import { verifyCronAuth } from "@/lib/cron-auth";
 import { getAdminFromEmail } from "@/lib/email";
+import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
 
 // Initialize Resend for critical SEO alerts only
@@ -100,18 +101,51 @@ export async function GET(request: Request) {
       );
     }
 
-    // Send email if score is low or there are critical issues
+    // Only email if score dropped significantly from last run (not on every run)
     const adminEmail = process.env.ADMIN_EMAILS?.split(",")[0];
-    const hasLowScore = result.report.overallScore < 70;
-    const hasCriticalIssues = result.report.criticalIssues && result.report.criticalIssues.length > 0;
+    const currentScore = result.report.overallScore;
 
-    if (adminEmail && (hasLowScore || hasCriticalIssues)) {
-      console.log("[SEO Agent Cron] Sending alert email...");
+    // Get last SEO score from CronLog to detect changes
+    let shouldEmail = false;
+    let emailReason = "";
+    try {
+      const lastRun = await prisma.cronLog.findFirst({
+        where: { jobName: "seo-agent", status: "SUCCESS" },
+        orderBy: { createdAt: "desc" },
+      });
+      if (lastRun?.metadata) {
+        const lastMeta = JSON.parse(lastRun.metadata);
+        const lastScore = lastMeta.score;
+        if (typeof lastScore === "number") {
+          const scoreDrop = lastScore - currentScore;
+          if (scoreDrop >= 5) {
+            shouldEmail = true;
+            emailReason = `Score dropped ${scoreDrop} points (${lastScore} → ${currentScore})`;
+          }
+        } else {
+          // First run with score tracking — email if below 70
+          shouldEmail = currentScore < 70;
+          emailReason = `Score ${currentScore}/100 (first tracked run)`;
+        }
+      } else {
+        shouldEmail = currentScore < 70;
+        emailReason = `Score ${currentScore}/100 (no previous data)`;
+      }
+    } catch {
+      // If we can't check history, only email on very low scores
+      shouldEmail = currentScore < 60;
+      emailReason = `Score ${currentScore}/100 (history check failed)`;
+    }
+
+    if (adminEmail && shouldEmail) {
+      console.log(`[SEO Agent Cron] Sending alert: ${emailReason}`);
       await sendSEOAlertEmail(
         adminEmail,
-        `GhostMyData SEO Alert - Score: ${result.report.overallScore}/100`,
+        `GhostMyData SEO Alert - Score: ${currentScore}/100`,
         result.emailContent || ""
       );
+    } else {
+      console.log(`[SEO Agent Cron] Score ${currentScore}/100 — no email needed (stable or improving)`);
     }
 
     console.log(`[SEO Agent Cron] Run complete. Score: ${result.report.overallScore}/100`);
@@ -130,7 +164,8 @@ export async function GET(request: Request) {
       jobName: "seo-agent",
       status: "SUCCESS",
       duration: Date.now() - startTime,
-      message: `Score: ${result.report.overallScore}/100, ${remediationStats.totalAutoRemediated} auto-remediated`,
+      message: `Score: ${currentScore}/100, ${remediationStats.totalAutoRemediated} auto-remediated`,
+      metadata: { score: currentScore, criticalIssues: result.report.criticalIssues?.length ?? 0 },
     });
 
     return NextResponse.json({

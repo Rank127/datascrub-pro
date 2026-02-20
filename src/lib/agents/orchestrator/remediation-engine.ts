@@ -930,13 +930,20 @@ class RemediationEngine {
         }
       }
 
-      // Determine final status
+      // Determine final status — check both success AND needsHumanReview
+      // An action that "succeeds" but says needsHumanReview=true means it generated
+      // suggestions but didn't actually apply any fix (e.g., content-agent generate-meta)
       const allAutoExecuteActions = plan.actions.filter((a) => a.autoExecute);
-      const successCount = [...plan.actionResults.values()].filter(
-        (r) => r.success
+      const actionResults = [...plan.actionResults.values()];
+      const successCount = actionResults.filter((r) => r.success).length;
+      const needsReviewCount = actionResults.filter(
+        (r) => r.success && r.needsHumanReview
       ).length;
 
-      if (successCount === allAutoExecuteActions.length) {
+      if (needsReviewCount > 0) {
+        // Agent ran but didn't apply fixes — escalate for human review
+        plan.status = "needs_human_review";
+      } else if (successCount === allAutoExecuteActions.length) {
         plan.status = "completed";
       } else if (successCount > 0) {
         plan.status = "partially_completed";
