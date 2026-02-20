@@ -356,8 +356,9 @@ const leakCheckCredits: LeakCheckCredits = {
   lastCheckedAt: 0,
 };
 
-// LeakCheck lifetime limit (400 queries total, never renews)
-const LEAKCHECK_LIFETIME_LIMIT = parseInt(process.env.LEAKCHECK_LIFETIME_LIMIT || "400");
+// LeakCheck lifetime plan — unlimited API access (upgraded Feb 20, 2026)
+// Safety cap prevents runaway usage; override via env var if needed
+const LEAKCHECK_LIFETIME_LIMIT = parseInt(process.env.LEAKCHECK_LIFETIME_LIMIT || "100000");
 
 // LeakCheck rate limit: 3 requests per second
 const LEAKCHECK_RPS_LIMIT = 3;

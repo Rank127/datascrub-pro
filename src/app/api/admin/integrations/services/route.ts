@@ -294,7 +294,7 @@ async function checkLeakCheckStatus(): Promise<LeakCheckServiceStatus> {
       const data = await response.json();
       // LeakCheck returns: queries_left or balance
       const queriesRemaining = data.queries_left ?? data.balance ?? 0;
-      const lifetimeLimit = internalStatus.lifetimeLimit; // 400 for lifetime plan
+      const lifetimeLimit = internalStatus.lifetimeLimit; // Unlimited lifetime plan (safety cap via env)
       const queriesUsed = lifetimeLimit - queriesRemaining;
       const percentUsed = Math.round((queriesUsed / lifetimeLimit) * 100);
 

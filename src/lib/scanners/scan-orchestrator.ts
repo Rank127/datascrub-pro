@@ -52,9 +52,9 @@ export class ScanOrchestrator {
     // HIBP for all users (breach scanning)
     this.scanners.push(new HaveIBeenPwnedScanner());
 
-    // LeakCheck only for Enterprise (limited lifetime queries - 400 total)
-    if (userPlan === "ENTERPRISE") {
-      console.log("[ScanOrchestrator] Adding LeakCheck Scanner (Enterprise feature - 400 lifetime queries)");
+    // LeakCheck for all paid users (lifetime plan — unlimited queries, 3 RPS)
+    if (userPlan === "PRO" || userPlan === "ENTERPRISE") {
+      console.log("[ScanOrchestrator] Adding LeakCheck Scanner (paid feature — lifetime plan)");
       this.scanners.push(new LeakCheckScanner());
     }
 

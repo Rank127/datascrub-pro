@@ -32,7 +32,7 @@ interface LeakCheckResponse {
 /**
  * Global rate limiting queue for LeakCheck API
  * - 3 requests per second (RPS) limit
- * - 400 lifetime queries (tracked by rate-limiter.ts)
+ * - Lifetime plan: unlimited queries (safety cap in rate-limiter.ts)
  * Uses the centralized rate limiter for tracking
  */
 class RateLimitQueue {
