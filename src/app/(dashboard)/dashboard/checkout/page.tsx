@@ -32,9 +32,9 @@ const PLANS = {
     discount: "50% OFF",
     icon: <Zap className="h-6 w-6 text-emerald-400" />,
     features: [
-      "50 scans per month",
+      "10 scans per month",
       "Automated removal requests",
-      "Weekly monitoring scans",
+      "Continuous monitoring",
       "Priority support",
       "Email & form opt-out automation",
       "Removal tracking dashboard",
@@ -53,11 +53,11 @@ const PLANS = {
     icon: <Crown className="h-6 w-6 text-purple-400" />,
     features: [
       "Unlimited scans",
-      "Automated removal from 2,000+ brokers",
+      "Automated removal from 2,100+ brokers",
       "Dark web monitoring",
       "Family plan — up to 5 profiles",
-      "Daily monitoring",
-      "API access",
+      "Continuous monitoring",
+      "Custom removal requests",
       "Dedicated support & verification",
     ],
     color: "purple",
@@ -379,8 +379,8 @@ function CheckoutContent() {
     "Dark web monitoring",
     "Family plan — up to 5 profiles",
     "AI Shield protection",
-    "Daily monitoring",
-    "API access",
+    "Continuous monitoring",
+    "Custom removal requests",
     "Do Not Call registry",
   ];
 

@@ -814,8 +814,8 @@ export async function sendMonthlyScanSummaryEmail(
 // Subscription Confirmation Email
 export async function sendSubscriptionEmail(email: string, name: string, plan: "PRO" | "ENTERPRISE") {
   const features = plan === "ENTERPRISE"
-    ? ["Unlimited scans", "Dark web monitoring", "Family plan (5 profiles)", "Daily monitoring", "API access", "Priority support"]
-    : ["50 scans/month", "Automated removals", "Weekly monitoring", "Priority support"];
+    ? ["Unlimited scans", "Dark web monitoring", "Family plan (up to 5 profiles)", "Continuous monitoring", "Dedicated support"]
+    : ["10 scans/month", "Automated removals", "Continuous monitoring", "Priority support"];
 
   const html = baseTemplate(`
     <h1 style="color: #10b981; margin-top: 0;">🎉 Welcome to ${APP_NAME} ${plan}!</h1>

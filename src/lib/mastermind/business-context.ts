@@ -61,7 +61,7 @@ export const BUSINESS_CONTEXT: BusinessContext = {
       name: "Enterprise",
       price: "$269.95/year ($22.50/mo effective, 55% OFF from $49.99/mo)",
       features:
-        "Everything in Pro + family plan (up to 5 members), dedicated support, advanced analytics, API access. Annual billing only.",
+        "Everything in Pro + family plan (up to 5 members), dedicated support, custom removal requests, dark web monitoring. Annual billing only.",
     },
   ],
 

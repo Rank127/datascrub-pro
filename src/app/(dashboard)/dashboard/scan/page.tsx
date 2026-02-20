@@ -325,7 +325,7 @@ export default function ScanPage() {
               <Globe className="h-5 w-5 text-blue-500" />
               <CardTitle className="text-white">Full Scan</CardTitle>
               <Badge className="bg-emerald-500/20 text-emerald-400 border-0">
-                {isFreePlan ? "Free Trial" : "Recommended"}
+                {isFreePlan ? "Free Plan" : "Recommended"}
               </Badge>
             </div>
             <CardDescription className="text-slate-400">

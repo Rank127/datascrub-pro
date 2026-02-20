@@ -72,7 +72,7 @@ export async function POST(request: Request) {
 
     const scanLimits: Record<Plan, number> = {
       FREE: 2,
-      PRO: 50,
+      PRO: 10,
       ENTERPRISE: -1, // unlimited
     };
 

@@ -422,7 +422,7 @@ export default function HomePage() {
                   {[
                     "10 scans per month",
                     "Automated removal requests",
-                    "Weekly monitoring",
+                    "Continuous monitoring",
                     "Priority support",
                   ].map((feature) => (
                     <li key={feature} className="flex items-center gap-2 text-slate-300">
@@ -433,7 +433,7 @@ export default function HomePage() {
                 </ul>
                 <Link href="/register">
                   <Button className="w-full bg-emerald-600 hover:bg-emerald-700 animate-glow-pulse">
-                    Start Free Trial
+                    Get Started
                   </Button>
                 </Link>
               </div>
@@ -468,7 +468,7 @@ export default function HomePage() {
                 </ul>
                 <Link href="/register">
                   <Button variant="outline" className="w-full border-slate-600">
-                    Start Free Trial
+                    Get Started
                   </Button>
                 </Link>
               </div>

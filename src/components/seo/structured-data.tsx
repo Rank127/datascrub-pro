@@ -171,7 +171,7 @@ export function ServiceSchema() {
           itemOffered: {
             "@type": "Service",
             name: "Enterprise Plan",
-            description: "Dark web monitoring, family plan, daily monitoring, API access",
+            description: "Dark web monitoring, family plan, continuous monitoring, custom removal requests",
           },
           price: "49.99",
           priceCurrency: "USD",
