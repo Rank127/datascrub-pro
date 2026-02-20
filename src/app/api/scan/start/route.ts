@@ -121,6 +121,18 @@ export async function POST(request: Request) {
         return { ok: false as const, code: "NO_PROFILE" as const };
       }
 
+      // Require at least one email in profile — we only scan profile data
+      const hasProfileEmail = foundProfile.emails ? (() => {
+        try {
+          const decrypted = JSON.parse(decrypt(foundProfile.emails));
+          return Array.isArray(decrypted) && decrypted.length > 0;
+        } catch { return false; }
+      })() : false;
+
+      if (!hasProfileEmail) {
+        return { ok: false as const, code: "INCOMPLETE_PROFILE" as const };
+      }
+
       const newScan = await tx.scan.create({
         data: {
           userId: session.user.id,
@@ -156,7 +168,12 @@ export async function POST(request: Request) {
           );
         case "NO_PROFILE":
           return NextResponse.json(
-            { error: "Please complete your profile before scanning" },
+            { error: "Please complete your profile before scanning", profileIncomplete: true },
+            { status: 400 }
+          );
+        case "INCOMPLETE_PROFILE":
+          return NextResponse.json(
+            { error: "Please add at least one email address to your profile before scanning. We only scan data from your profile.", profileIncomplete: true },
             { status: 400 }
           );
       }

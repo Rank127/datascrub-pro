@@ -69,6 +69,7 @@ export default function ScanPage() {
   } | null>(null);
   const [error, setError] = useState("");
   const [requiresUpgrade, setRequiresUpgrade] = useState(false);
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
   const [recentScans, setRecentScans] = useState<Scan[]>([]);
   const [loadingScans, setLoadingScans] = useState(true);
   const [profileCompleteness, setProfileCompleteness] = useState<{
@@ -138,6 +139,7 @@ export default function ScanPage() {
     setIsScanning(true);
     setError("");
     setRequiresUpgrade(false);
+    setProfileIncomplete(false);
     setScanResult(null);
     setScanProgress(0);
 
@@ -169,6 +171,9 @@ export default function ScanPage() {
         setError(data.error || "Scan failed");
         if (data.requiresUpgrade) {
           setRequiresUpgrade(true);
+        }
+        if (data.profileIncomplete) {
+          setProfileIncomplete(true);
         }
         return;
       }
@@ -374,6 +379,14 @@ export default function ScanPage() {
                     View Plans
                   </Link>
                 )}
+                {profileIncomplete && (
+                  <Link
+                    href="/dashboard/profile"
+                    className="ml-2 text-emerald-400 hover:text-emerald-300 underline font-medium"
+                  >
+                    Go to Profile
+                  </Link>
+                )}
               </AlertDescription>
             </Alert>
           )}
@@ -561,18 +574,64 @@ export default function ScanPage() {
           ) : (
             <div className="text-center space-y-4">
               {/* Profile completeness banner */}
-              {!profileCompleteness.loading && !profileCompleteness.isComplete && (
+              {!profileCompleteness.loading && !profileCompleteness.hasEmail && (
+                <div className="mx-auto max-w-lg p-4 rounded-lg border border-red-500/30 bg-red-500/10 text-left">
+                  <div className="flex items-center gap-2 mb-2">
+                    <XCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
+                    <span className="font-semibold text-red-300">Profile required before scanning</span>
+                  </div>
+                  <p className="text-sm text-slate-300 mb-3">
+                    We only scan information from your profile. Add at least your email address to get started.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                    <div className={`flex items-center gap-2 ${profileCompleteness.hasName ? "text-emerald-400" : "text-slate-400"}`}>
+                      {profileCompleteness.hasName
+                        ? <CheckCircle className="h-3.5 w-3.5" />
+                        : <UserCircle className="h-3.5 w-3.5 text-red-400" />}
+                      Full name
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <Mail className="h-3.5 w-3.5 text-red-400" />
+                      Email address <span className="text-red-400 text-xs">(required)</span>
+                    </div>
+                    <div className={`flex items-center gap-2 ${profileCompleteness.hasPhone ? "text-emerald-400" : "text-slate-400"}`}>
+                      {profileCompleteness.hasPhone
+                        ? <CheckCircle className="h-3.5 w-3.5" />
+                        : <Phone className="h-3.5 w-3.5 text-red-400" />}
+                      Phone number
+                    </div>
+                    <div className={`flex items-center gap-2 ${profileCompleteness.hasAddress ? "text-emerald-400" : "text-slate-400"}`}>
+                      {profileCompleteness.hasAddress
+                        ? <CheckCircle className="h-3.5 w-3.5" />
+                        : <MapPin className="h-3.5 w-3.5 text-red-400" />}
+                      Home address
+                    </div>
+                    <div className={`flex items-center gap-2 ${profileCompleteness.hasDob ? "text-emerald-400" : "text-slate-400"}`}>
+                      {profileCompleteness.hasDob
+                        ? <CheckCircle className="h-3.5 w-3.5" />
+                        : <Calendar className="h-3.5 w-3.5 text-red-400" />}
+                      Date of birth
+                    </div>
+                  </div>
+                  <Link href="/dashboard/profile">
+                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+                      <UserCircle className="mr-2 h-4 w-4" />
+                      Complete Your Profile
+                    </Button>
+                  </Link>
+                </div>
+              )}
+              {!profileCompleteness.loading && profileCompleteness.hasEmail && !profileCompleteness.isComplete && (
                 <div className="mx-auto max-w-lg p-4 rounded-lg border border-amber-500/30 bg-amber-500/10 text-left">
                   <div className="flex items-center gap-2 mb-2">
                     <AlertTriangle className="h-5 w-5 text-amber-400 flex-shrink-0" />
-                    <span className="font-semibold text-amber-300">Complete your profile for best results</span>
+                    <span className="font-semibold text-amber-300">Add more info for better results</span>
                   </div>
                   <p className="text-sm text-slate-300 mb-3">
                     The more info you provide, the more exposures we can find. Add missing details to your{" "}
                     <Link href="/dashboard/profile" className="text-emerald-400 hover:underline font-medium">
                       profile
-                    </Link>{" "}
-                    before scanning.
+                    </Link>.
                   </p>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className={`flex items-center gap-2 ${profileCompleteness.hasName ? "text-emerald-400" : "text-slate-400"}`}>
@@ -581,10 +640,8 @@ export default function ScanPage() {
                         : <UserCircle className="h-3.5 w-3.5 text-amber-400" />}
                       Full name
                     </div>
-                    <div className={`flex items-center gap-2 ${profileCompleteness.hasEmail ? "text-emerald-400" : "text-slate-400"}`}>
-                      {profileCompleteness.hasEmail
-                        ? <CheckCircle className="h-3.5 w-3.5" />
-                        : <Mail className="h-3.5 w-3.5 text-amber-400" />}
+                    <div className="flex items-center gap-2 text-emerald-400">
+                      <CheckCircle className="h-3.5 w-3.5" />
                       Email address
                     </div>
                     <div className={`flex items-center gap-2 ${profileCompleteness.hasPhone ? "text-emerald-400" : "text-slate-400"}`}>
@@ -614,14 +671,25 @@ export default function ScanPage() {
                   <span className="text-sm text-emerald-400">Profile complete — ready for best scan results</span>
                 </div>
               )}
-              <Button
-                size="lg"
-                className="bg-emerald-600 hover:bg-emerald-700"
-                onClick={startScan}
-              >
-                <Search className="mr-2 h-5 w-5" />
-                Start {scanType === "QUICK" ? "Quick" : "Full"} Scan
-              </Button>
+              {profileCompleteness.hasEmail ? (
+                <Button
+                  size="lg"
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                  onClick={startScan}
+                >
+                  <Search className="mr-2 h-5 w-5" />
+                  Start {scanType === "QUICK" ? "Quick" : "Full"} Scan
+                </Button>
+              ) : !profileCompleteness.loading ? (
+                <Button
+                  size="lg"
+                  className="bg-slate-600 cursor-not-allowed opacity-50"
+                  disabled
+                >
+                  <Search className="mr-2 h-5 w-5" />
+                  Complete Profile to Scan
+                </Button>
+              ) : null}
             </div>
           )}
         </CardContent>
