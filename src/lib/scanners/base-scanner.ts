@@ -6,25 +6,27 @@ import type { DataSource, ExposureType, Severity } from "@/lib/types";
 // ============================================================================
 
 export interface ConfidenceFactors {
-  nameMatch: number;       // 0-30: Exact=30, First+Last=28, Partial=15, Fuzzy=10
-  locationMatch: number;   // 0-25: City+State=25, State only=15
-  ageMatch: number;        // 0-20: Exact=20, ±2 years=15, ±5 years=10
-  dataCorrelation: number; // 0-15: Phone match=5, Email match=5
-  sourceReliability: number; // 0-10: Known broker=10, Unknown=7
+  nameMatch: number;       // 0-35: Exact=35, First+Last=30, Alias=28, Partial=20, LastOnly=15, Fuzzy=10
+  locationMatch: number;   // 0-30: City+State=30, State=18, City-only=10
+  ageMatch: number;        // 0-25: Exact=25, ±2yr=18, ±5yr=12, ±10yr=5
+  dataCorrelation: number; // 0-10: Phone partial=5, Email domain=5 (exact matches caught in Tier 1)
+  sourceReliability: number; // DEPRECATED — always 0, kept for schema compatibility
+  projectionSource?: string;   // Source broker key for PROJECTED exposures
+  projectionWeight?: number;   // Relationship weight used for projection (0-1)
 }
 
 export type MatchClassification =
-  | "CONFIRMED"   // 80-100: Auto-removal OK
-  | "LIKELY"      // 60-79: Auto-removal with caution
-  | "POSSIBLE"    // 40-59: Manual review required
-  | "UNLIKELY"    // 20-39: Manual review, likely false positive
-  | "REJECTED";   // 0-19: Don't create exposure
+  | "CONFIRMED"   // 75-100: Auto-removal OK (or any Tier 1 deterministic match)
+  | "LIKELY"      // 50-74: Auto-removal with caution
+  | "POSSIBLE"    // 25-49: Manual review required
+  | "REJECTED"    // 0-24: Don't create exposure
+  | "PROJECTED";  // Projected from confirmed exposure on related broker
 
 export const CONFIDENCE_THRESHOLDS = {
-  AUTO_PROCEED: 80,   // Minimum score for auto-removal without confirmation
-  MANUAL_REVIEW: 50,  // Raised from 40 - below this requires manual review
-  REJECT: 35,         // Raised from 20 - below this don't create exposure at all
-  MIN_FACTORS: 2,     // Minimum number of matching factors required (prevents name-only matches)
+  AUTO_PROCEED: 75,   // Minimum score for auto-removal without confirmation (lowered: Tier 2 realistic max ~80)
+  MANUAL_REVIEW: 40,  // Below this requires manual review
+  REJECT: 25,         // Below this don't create exposure at all
+  MIN_FACTORS: 2,     // Minimum number of matching factors required (1 for people-search brokers)
 } as const;
 
 export interface ConfidenceResult {
@@ -39,10 +41,9 @@ export interface ConfidenceResult {
  * Classify a confidence score into a match classification
  */
 export function classifyConfidence(score: number): MatchClassification {
-  if (score >= 80) return "CONFIRMED";
-  if (score >= 60) return "LIKELY";
-  if (score >= 40) return "POSSIBLE";
-  if (score >= 20) return "UNLIKELY";
+  if (score >= 75) return "CONFIRMED";
+  if (score >= 50) return "LIKELY";
+  if (score >= 25) return "POSSIBLE";
   return "REJECTED";
 }
 

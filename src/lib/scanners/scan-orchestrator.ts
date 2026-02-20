@@ -7,6 +7,7 @@ import { LeakCheckScanner } from "./breaches/leakcheck";
 import { SocialMediaScanner } from "./social/social-scanner";
 import { AIProtectionScanner } from "./ai-protection";
 import { getBrokerCount } from "../removers/data-broker-directory";
+import { projectExposures, type ProjectionStats } from "./exposure-projector";
 import type { Plan, ScanType } from "@/lib/types";
 
 // Configuration: Set to true to use real data broker scanners
@@ -29,6 +30,7 @@ export interface ScanOptions {
 
 export class ScanOrchestrator {
   private scanners: Scanner[] = [];
+  private lastProjectionStats: ProjectionStats | null = null;
 
   constructor(options: ScanOptions) {
     this.initializeScanners(options);
@@ -143,7 +145,20 @@ export class ScanOrchestrator {
       }
     }
 
-    console.log(`[ScanOrchestrator] All scanners complete. Total results: ${allResults.length}`);
+    console.log(`[ScanOrchestrator] All scanners complete. Scanned results: ${allResults.length}`);
+
+    // ─── Exposure Projection ───
+    // After all scanners finish, project confirmed exposures onto related brokers
+    const { projected, stats: projectionStats } = projectExposures(allResults, input);
+    this.lastProjectionStats = projectionStats;
+
+    if (projected.length > 0) {
+      allResults.push(...projected);
+      console.log(
+        `[ScanOrchestrator] After projection: ${allResults.length} total ` +
+        `(${allResults.length - projected.length} scanned + ${projected.length} projected)`
+      );
+    }
 
     // Final progress update
     if (onProgress) {
@@ -157,6 +172,13 @@ export class ScanOrchestrator {
     }
 
     return allResults;
+  }
+
+  /**
+   * Get the stats from the last projection run.
+   */
+  getProjectionStats(): ProjectionStats | null {
+    return this.lastProjectionStats;
   }
 
   getScannerCount(): number {
