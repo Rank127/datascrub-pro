@@ -53,7 +53,9 @@ For strategy selection:
 - Return structured JSON with strategy details
 
 For batch processing:
-- Prioritize by user plan (Enterprise > Pro > Free) and exposure severity
+- ONLY process removals for PAID users (PRO and ENTERPRISE) — never for FREE users
+- FREE users get scans only — no auto-removal emails, no monitoring, no removal processing
+- Prioritize by user plan (Enterprise > Pro) and exposure severity
 - Respect rate limits per broker (max ${MAX_REQUESTS_PER_BROKER_PER_DAY}/day, ${MIN_MINUTES_BETWEEN_SAME_BROKER}min spacing)
 - Skip non-removable sources (breaches, dark web)
 - Return progress and results in structured format

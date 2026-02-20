@@ -351,7 +351,7 @@ class OnboardingAgent extends BaseAgent {
       actions.push("Review and remove found exposures");
     }
     if (plan === "FREE") {
-      actions.push("Upgrade to automate your privacy protection");
+      actions.push("Upgrade to unlock auto-removals and monitoring");
     }
     if (!completedSteps.includes("notifications_configured")) {
       actions.push("Set up privacy alerts");
@@ -420,8 +420,8 @@ class OnboardingAgent extends BaseAgent {
       const afterScan = [
         "Review each exposure to understand the risk",
         "Prioritize high-severity exposures for removal",
-        "Set up monitoring for ongoing protection",
-        "Consider upgrading for automated removal",
+        "Upgrade to PRO to unlock automated removals, monitoring, and email notifications",
+        "Free accounts can scan and view exposures — paid plans handle the rest automatically",
       ];
 
       return this.createSuccessResult<FirstScanGuideResult>(
@@ -496,8 +496,8 @@ class OnboardingAgent extends BaseAgent {
         recommendations.push({
           feature: "auto_removal",
           title: "Automated Removal",
-          description: "Let us automatically remove your data from data brokers",
-          benefit: `Remove ${user._count.exposures} exposures without manual effort`,
+          description: "Your free scan found exposures — upgrade to have us automatically remove them, monitor for re-listings, and send removal emails on your behalf",
+          benefit: `Remove ${user._count.exposures} exposures without manual effort — free plans can scan but don't include removals or monitoring`,
           priority: "HIGH",
           actionUrl: "/upgrade",
         });
