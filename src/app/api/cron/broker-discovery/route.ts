@@ -35,6 +35,11 @@ export async function GET(request: Request) {
     const isTimeBoxed = Date.now() >= deadline;
 
     const summary = {
+      scannerHealthAnalyzed: results.scannerHealth.scannersAnalyzed,
+      scannerHealthIssues: results.scannerHealth.issues.length,
+      degradedScanners: results.scannerHealth.degradedScanners,
+      proxyUpgrades: results.scannerHealth.proxyUpgrades,
+      regressions: results.scannerHealth.regressions,
       candidates: results.discovered.candidates.length,
       probed: results.probed.length,
       probeSuccesses: results.probed.filter((p) => p.success).length,
@@ -46,7 +51,12 @@ export async function GET(request: Request) {
       optOutUpdated: results.optOutChecks.updated,
     };
 
+    const healthNote = summary.scannerHealthIssues > 0
+      ? `Scanner health: ${summary.scannerHealthIssues} issues (${summary.degradedScanners} degraded, ${summary.proxyUpgrades} need proxy upgrade, ${summary.regressions} regressions). `
+      : `Scanner health: ${summary.scannerHealthAnalyzed} analyzed, all healthy. `;
+
     const message =
+      healthNote +
       `Discovered ${summary.candidates} candidates, probed ${summary.probed} (${summary.probeSuccesses} success). ` +
       `Validated ${summary.scannersValidated} scanners (${summary.scannersEnabled} enabled, ${summary.scannersDisabled} disabled). ` +
       `Opt-out: ${summary.optOutChecked} checked, ${summary.optOutBroken} broken, ${summary.optOutUpdated} updated.`;
@@ -61,18 +71,32 @@ export async function GET(request: Request) {
       metadata: summary,
     });
 
-    // Send admin alert if scanners were newly enabled or disabled
-    if (summary.scannersEnabled > 0 || summary.scannersDisabled > 0) {
+    // Send admin alert if scanners changed or health issues found
+    const hasHealthIssues = results.scannerHealth.issues.filter(i => i.severity === "HIGH").length > 0;
+    if (summary.scannersEnabled > 0 || summary.scannersDisabled > 0 || hasHealthIssues) {
       try {
         const resendKey = process.env.RESEND_API_KEY;
         if (resendKey) {
           const resend = new Resend(resendKey);
+
+          // Build scanner health section for email
+          const healthSection = results.scannerHealth.issues.length > 0
+            ? `<h3 style="color:#ef4444">Scanner Health Issues</h3>
+               <ul>${results.scannerHealth.issues.map(i =>
+                 `<li><strong>${i.scannerName}</strong>: ${i.issue} — ${i.detail} (success: ${i.metrics.successRate}%, blocked: ${i.metrics.blockRate}%)</li>`
+               ).join("")}</ul>`
+            : `<p style="color:#10b981"><strong>Scanner Health:</strong> ${summary.scannerHealthAnalyzed} scanners analyzed, all healthy</p>`;
+
           await resend.emails.send({
             from: getAdminFromEmail(),
             to: ALERT_RECIPIENT,
-            subject: `[Broker Discovery] ${summary.scannersEnabled} enabled, ${summary.scannersDisabled} disabled`,
+            subject: hasHealthIssues
+              ? `[Broker Discovery] ${results.scannerHealth.issues.length} scanner health issues detected`
+              : `[Broker Discovery] ${summary.scannersEnabled} enabled, ${summary.scannersDisabled} disabled`,
             html: `
               <h2>Broker Discovery Agent Report</h2>
+              ${healthSection}
+              <h3>Discovery & Validation</h3>
               <p><strong>Candidates discovered:</strong> ${summary.candidates}</p>
               <p><strong>Sites probed:</strong> ${summary.probed} (${summary.probeSuccesses} successful)</p>
               <p><strong>Scanners enabled:</strong> ${summary.scannersEnabled}</p>

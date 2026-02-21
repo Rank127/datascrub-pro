@@ -1,4 +1,4 @@
-import { BaseScanner, type ScanInput, type ScanResult } from "../base-scanner";
+import { BaseScanner, type ScanInput, type ScanResult, type ConfidenceResult } from "../base-scanner";
 import { DataSourceNames } from "@/lib/types";
 import { getHIBPWaitTime, recordHIBPRequest, canUseService } from "@/lib/services/rate-limiter";
 
@@ -68,6 +68,24 @@ export class HaveIBeenPwnedScanner extends BaseScanner {
         for (const breach of breaches) {
           const severity = this.calculateBreachSeverity(breach);
 
+          // HIBP breaches are verified exact email matches — always CONFIRMED
+          const confidence: ConfidenceResult = {
+            score: 100,
+            classification: "CONFIRMED",
+            factors: {
+              nameMatch: 0,
+              locationMatch: 0,
+              ageMatch: 0,
+              dataCorrelation: 10,
+              sourceReliability: 0,
+            },
+            reasoning: [
+              `Exact email match in verified breach database: ${breach.Title}`,
+              `Breach date: ${breach.BreachDate}, verified: ${breach.IsVerified}`,
+            ],
+            validatedAt: new Date(),
+          };
+
           results.push({
             source: "HAVEIBEENPWNED",
             sourceName: `${DataSourceNames.HAVEIBEENPWNED} - ${breach.Title}`,
@@ -75,6 +93,7 @@ export class HaveIBeenPwnedScanner extends BaseScanner {
             dataType: "EMAIL",
             dataPreview: this.maskData(email, "EMAIL"),
             severity,
+            confidence,
             rawData: {
               breachName: breach.Name,
               breachDate: breach.BreachDate,

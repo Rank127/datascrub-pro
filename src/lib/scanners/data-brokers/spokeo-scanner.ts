@@ -22,6 +22,7 @@ export class SpokeoScanner extends BaseBrokerScanner {
     estimatedRemovalDays: 3,
     privacyEmail: "privacy@spokeo.com",
     requiresVerification: true,
+    usePremiumProxy: true,
     rateLimit: {
       requestsPerMinute: 10,
       delayMs: 2000, // Reduced for parallel execution

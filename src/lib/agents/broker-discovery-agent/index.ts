@@ -62,6 +62,28 @@ interface OptOutValidationResult {
   updated: number;
 }
 
+interface ScannerHealthIssue {
+  scannerName: string;
+  issue: "NEEDS_PROXY_UPGRADE" | "DEGRADED" | "SLOW" | "REGRESSION";
+  severity: "HIGH" | "MEDIUM" | "LOW";
+  detail: string;
+  metrics: {
+    successRate: number;
+    blockRate: number;
+    avgResponseTimeMs: number;
+    totalScans: number;
+  };
+}
+
+interface ScannerHealthResult {
+  scannersAnalyzed: number;
+  issues: ScannerHealthIssue[];
+  degradedScanners: number;
+  proxyUpgrades: number;
+  regressions: number;
+  slowScanners: number;
+}
+
 // ─── Agent ───
 
 class BrokerDiscoveryAgent extends BaseAgent {
@@ -102,6 +124,12 @@ class BrokerDiscoveryAgent extends BaseAgent {
       description: "HTTP check all opt-out URLs, update health tracking",
       requiresAI: false,
     },
+    {
+      id: "monitor-scanner-health",
+      name: "Monitor Scanner Health",
+      description: "Analyze scanner success rates and flag degraded scanners",
+      requiresAI: false,
+    },
   ];
 
   protected getSystemPrompt(): string {
@@ -113,6 +141,7 @@ class BrokerDiscoveryAgent extends BaseAgent {
     this.handlers.set("probe-broker-site", this.handleProbeBrokerSite.bind(this));
     this.handlers.set("validate-scanners", this.handleValidateScanners.bind(this));
     this.handlers.set("validate-optout-urls", this.handleValidateOptOutUrls.bind(this));
+    this.handlers.set("monitor-scanner-health", this.handleMonitorScannerHealth.bind(this));
   }
 
   protected async executeRuleBased<T>(
@@ -548,6 +577,157 @@ If the site doesn't look like a people-search/data-broker, return {"error": "not
       );
     }
   }
+
+  // ─── Capability: monitor-scanner-health ───
+
+  private async handleMonitorScannerHealth(
+    _input: unknown,
+    context: AgentContext
+  ): Promise<AgentResult<ScannerHealthResult>> {
+    const startTime = Date.now();
+
+    try {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      // Query scanner health logs from last 7 days, grouped by scanner
+      const healthLogs = await prisma.scannerHealthLog.groupBy({
+        by: ["scannerName"],
+        where: {
+          createdAt: { gte: sevenDaysAgo },
+          scannerType: { in: ["STATIC_BROKER", "DYNAMIC_BROKER"] },
+        },
+        _count: { id: true },
+        _avg: { responseTimeMs: true },
+      });
+
+      if (healthLogs.length === 0) {
+        return this.createSuccessResult<ScannerHealthResult>(
+          { scannersAnalyzed: 0, issues: [], degradedScanners: 0, proxyUpgrades: 0, regressions: 0, slowScanners: 0 },
+          { capability: "monitor-scanner-health", requestId: context.requestId, duration: Date.now() - startTime },
+          { confidence: 0.9 }
+        );
+      }
+
+      const issues: ScannerHealthIssue[] = [];
+
+      // For each scanner, get detailed status breakdown
+      for (const log of healthLogs) {
+        const totalScans = log._count.id;
+        const avgResponseTimeMs = log._avg.responseTimeMs || 0;
+
+        // Get per-status counts for this scanner
+        const statusBreakdown = await prisma.scannerHealthLog.groupBy({
+          by: ["status"],
+          where: {
+            scannerName: log.scannerName,
+            createdAt: { gte: sevenDaysAgo },
+          },
+          _count: { id: true },
+        });
+
+        const statusMap: Record<string, number> = {};
+        for (const s of statusBreakdown) {
+          statusMap[s.status] = s._count.id;
+        }
+
+        const successCount = statusMap["SUCCESS"] || 0;
+        const blockedCount = statusMap["BLOCKED"] || 0;
+        const _failedCount = (statusMap["FAILED"] || 0) + (statusMap["TIMEOUT"] || 0);
+        const _emptyCount = statusMap["EMPTY"] || 0;
+
+        const successRate = totalScans > 0 ? successCount / totalScans : 0;
+        const blockRate = totalScans > 0 ? blockedCount / totalScans : 0;
+
+        const metrics = {
+          successRate: Math.round(successRate * 100),
+          blockRate: Math.round(blockRate * 100),
+          avgResponseTimeMs: Math.round(avgResponseTimeMs),
+          totalScans,
+        };
+
+        // Rule: >80% blocked across 3+ scans → needs proxy upgrade
+        if (blockRate > 0.8 && totalScans >= 3) {
+          issues.push({
+            scannerName: log.scannerName,
+            issue: "NEEDS_PROXY_UPGRADE",
+            severity: "HIGH",
+            detail: `${Math.round(blockRate * 100)}% blocked rate across ${totalScans} scans — likely needs stealth proxy`,
+            metrics,
+          });
+        }
+
+        // Rule: 0% success across 5+ scans → degraded
+        if (successRate === 0 && totalScans >= 5) {
+          issues.push({
+            scannerName: log.scannerName,
+            issue: "DEGRADED",
+            severity: "HIGH",
+            detail: `0% success rate across ${totalScans} scans — recommend converting to manual-check scanner`,
+            metrics,
+          });
+        }
+
+        // Rule: avg response time > 25s → slow
+        if (avgResponseTimeMs > 25000) {
+          issues.push({
+            scannerName: log.scannerName,
+            issue: "SLOW",
+            severity: "MEDIUM",
+            detail: `Average response time ${Math.round(avgResponseTimeMs / 1000)}s exceeds 25s threshold`,
+            metrics,
+          });
+        }
+
+        // Rule: <30% success but had results before → regression
+        if (successRate < 0.3 && totalScans >= 3) {
+          // Check if this scanner ever had success in older logs
+          const olderSuccess = await prisma.scannerHealthLog.count({
+            where: {
+              scannerName: log.scannerName,
+              status: "SUCCESS",
+              createdAt: { lt: sevenDaysAgo },
+            },
+          });
+
+          if (olderSuccess > 0) {
+            issues.push({
+              scannerName: log.scannerName,
+              issue: "REGRESSION",
+              severity: "HIGH",
+              detail: `Success rate dropped to ${Math.round(successRate * 100)}% (was previously working) — site may have changed structure`,
+              metrics,
+            });
+          }
+        }
+      }
+
+      const result: ScannerHealthResult = {
+        scannersAnalyzed: healthLogs.length,
+        issues,
+        degradedScanners: issues.filter(i => i.issue === "DEGRADED").length,
+        proxyUpgrades: issues.filter(i => i.issue === "NEEDS_PROXY_UPGRADE").length,
+        regressions: issues.filter(i => i.issue === "REGRESSION").length,
+        slowScanners: issues.filter(i => i.issue === "SLOW").length,
+      };
+
+      if (issues.length > 0) {
+        console.log(`[BrokerDiscoveryAgent] Scanner health issues: ${issues.map(i => `${i.scannerName}:${i.issue}`).join(", ")}`);
+      }
+
+      return this.createSuccessResult<ScannerHealthResult>(
+        result,
+        { capability: "monitor-scanner-health", requestId: context.requestId, duration: Date.now() - startTime },
+        { confidence: 0.95 }
+      );
+    } catch (error) {
+      return this.createErrorResult<ScannerHealthResult>(
+        { code: "SCANNER_HEALTH_FAILED", message: error instanceof Error ? error.message : String(error), retryable: true },
+        startTime,
+        "monitor-scanner-health",
+        context.requestId
+      );
+    }
+  }
 }
 
 // ─── Singleton & Registry ───
@@ -567,6 +747,7 @@ export function getBrokerDiscoveryAgent(): BrokerDiscoveryAgent {
  * Returns summary of actions taken.
  */
 export async function runBrokerDiscovery(): Promise<{
+  scannerHealth: ScannerHealthResult;
   discovered: DiscoveryResult;
   probed: ProbeResult[];
   validated: ValidationResult;
@@ -578,6 +759,14 @@ export async function runBrokerDiscovery(): Promise<{
   const context = createAgentContext({
     invocationType: InvocationTypes.CRON,
   });
+
+  // Step 0 (NEW): Monitor scanner health — findings inform discovery priorities
+  const healthResult = await agent.execute<ScannerHealthResult>(
+    "monitor-scanner-health",
+    {},
+    context
+  );
+  const scannerHealth = healthResult.data || { scannersAnalyzed: 0, issues: [], degradedScanners: 0, proxyUpgrades: 0, regressions: 0, slowScanners: 0 };
 
   // Step 1: Discover top offenders
   const discoveryResult = await agent.execute<DiscoveryResult>(
@@ -616,7 +805,7 @@ export async function runBrokerDiscovery(): Promise<{
   );
   const optOutChecks = optOutResult.data || { checked: 0, healthy: 0, broken: 0, updated: 0 };
 
-  return { discovered, probed, validated, optOutChecks };
+  return { scannerHealth, discovered, probed, validated, optOutChecks };
 }
 
 export { BrokerDiscoveryAgent };

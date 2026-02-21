@@ -1,4 +1,4 @@
-import { BaseScanner, type ScanInput, type ScanResult } from "../base-scanner";
+import { BaseScanner, type ScanInput, type ScanResult, type ConfidenceResult } from "../base-scanner";
 import type { DataSource } from "@/lib/types";
 
 export interface ManualCheckConfig {
@@ -10,6 +10,12 @@ export interface ManualCheckConfig {
   estimatedRemovalDays: number;
   privacyEmail?: string;
   buildSearchUrl: (input: ScanInput) => string | null;
+  /**
+   * If true, calculate confidence based on user profile completeness.
+   * Used for PEOPLE_SEARCH aggregators where having a mailing address
+   * means you're almost certainly listed (they compile from public records).
+   */
+  profileBasedConfidence?: boolean;
 }
 
 /**
@@ -42,6 +48,17 @@ export class ManualCheckScanner extends BaseScanner {
 
     console.log(`[${this.config.name}] Manual check required - returning link for user`);
 
+    // Calculate profile-based confidence for people-search aggregators
+    const confidence = this.config.profileBasedConfidence
+      ? this.calculateProfileConfidence(input)
+      : undefined;
+
+    if (confidence) {
+      console.log(
+        `[${this.config.name}] Profile-based confidence: ${confidence.score} (${confidence.classification})`
+      );
+    }
+
     // Return a special result that indicates manual verification is needed
     return [{
       source: this.config.source,
@@ -49,7 +66,8 @@ export class ManualCheckScanner extends BaseScanner {
       sourceUrl: searchUrl,
       dataType: "COMBINED_PROFILE",
       dataPreview: `Manual check required - click to verify`,
-      severity: "LOW", // Low severity since we don't know if they're actually listed
+      severity: confidence && confidence.score >= 50 ? "MEDIUM" : "LOW",
+      confidence,
       rawData: {
         manualCheckRequired: true,
         searchUrl,
@@ -60,6 +78,61 @@ export class ManualCheckScanner extends BaseScanner {
         reason: "This site has advanced bot protection. Please click the link to check if your information is listed.",
       },
     }];
+  }
+
+  /**
+   * Calculate confidence for people-search aggregators based on profile data.
+   *
+   * People-search sites compile from public records (voter rolls, property records,
+   * court filings, phone directories). If someone has a US mailing address,
+   * they are almost certainly listed on these aggregators.
+   *
+   * Score tiers:
+   *   Name + Address (city+state) → 65 LIKELY — very high probability
+   *   Name + State only → 55 LIKELY — probable
+   *   Name only → 40 POSSIBLE — below projection threshold (won't cascade)
+   */
+  private calculateProfileConfidence(input: ScanInput): ConfidenceResult | undefined {
+    if (!input.fullName) return undefined;
+
+    const reasoning: string[] = [];
+    let score = 0;
+
+    // Base: name is present (required for people-search)
+    score = 35; // nameMatch equivalent
+    reasoning.push(`Name present: "${input.fullName}"`);
+
+    // Address boosts confidence significantly (public records = listed)
+    const addr = input.addresses?.[0];
+    if (addr?.city && addr?.state) {
+      score += 30; // locationMatch equivalent
+      reasoning.push(`Address on file: ${addr.city}, ${addr.state} — high public record probability`);
+    } else if (addr?.state) {
+      score += 20;
+      reasoning.push(`State on file: ${addr.state} — moderate public record probability`);
+    }
+
+    // Cap at 65 — this is an estimate, not a confirmed scrape
+    score = Math.min(65, score);
+
+    reasoning.push(
+      `Profile-based estimate for ${this.config.name} (people-search aggregator). ` +
+      `Not confirmed by scraping — site has bot protection.`
+    );
+
+    return {
+      score,
+      classification: score >= 50 ? "LIKELY" : "POSSIBLE",
+      factors: {
+        nameMatch: input.fullName ? 35 : 0,
+        locationMatch: addr?.city && addr?.state ? 30 : (addr?.state ? 20 : 0),
+        ageMatch: 0,
+        dataCorrelation: 0,
+        sourceReliability: 0,
+      },
+      reasoning,
+      validatedAt: new Date(),
+    };
   }
 }
 
@@ -102,6 +175,7 @@ export function createFastPeopleSearchManualScanner(): ManualCheckScanner {
     source: "FASTPEOPLESEARCH",
     baseUrl: "https://www.fastpeoplesearch.com",
     optOutUrl: "https://www.fastpeoplesearch.com/removal",
+    profileBasedConfidence: true, // PEOPLE_SEARCH aggregator — uses public records
     optOutInstructions:
       "1. Go to fastpeoplesearch.com and search for your name\n" +
       "2. Find your listing and view your profile\n" +
@@ -140,6 +214,7 @@ export function createPeopleFinderManualScanner(): ManualCheckScanner {
     source: "PEOPLEFINDER",
     baseUrl: "https://www.peoplefinders.com",
     optOutUrl: "https://www.peoplefinders.com/manage",
+    profileBasedConfidence: true, // PEOPLE_SEARCH aggregator — uses public records
     optOutInstructions:
       "1. Go to peoplefinders.com/manage\n" +
       "2. Enter your first name, last name, and state\n" +

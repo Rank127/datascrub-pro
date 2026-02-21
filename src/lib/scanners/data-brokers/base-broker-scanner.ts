@@ -60,8 +60,17 @@ const BROWSER_HEADERS = {
   "Upgrade-Insecure-Requests": "1",
 };
 
+export interface ScannerError {
+  type: string;   // "BOT_DETECTION", "NETWORK", "PARSE", "TIMEOUT", "UNKNOWN"
+  message: string;
+  httpStatus?: number;
+}
+
 export abstract class BaseBrokerScanner extends BaseScanner {
   abstract config: BrokerConfig;
+
+  /** Structured error from the last scan attempt (if any) */
+  lastError?: ScannerError;
 
   get name(): string {
     return this.config.name;
@@ -69,6 +78,18 @@ export abstract class BaseBrokerScanner extends BaseScanner {
 
   get source(): DataSource {
     return this.config.source;
+  }
+
+  /** Returns the structured error from the last scan, if any */
+  getLastError(): ScannerError | undefined {
+    return this.lastError;
+  }
+
+  /** Returns the proxy tier used by this scanner */
+  getProxyUsed(): string {
+    if (this.config.useStealthProxy) return "stealth";
+    if (this.config.usePremiumProxy) return "premium";
+    return "none";
   }
 
   /**
@@ -121,7 +142,18 @@ export abstract class BaseBrokerScanner extends BaseScanner {
         return retryResult.html;
       }
 
+      this.lastError = { type: "BOT_DETECTION", message: retryResult.error || `403 even with stealth proxy`, httpStatus: 403 };
       throw new Error(retryResult.error || `Failed to fetch ${url} (even with stealth proxy)`);
+    }
+
+    // Categorize the error
+    const statusCode = result.statusCode;
+    if (statusCode === 403 || statusCode === 401) {
+      this.lastError = { type: "BOT_DETECTION", message: result.error || `HTTP ${statusCode}`, httpStatus: statusCode };
+    } else if (statusCode === 429) {
+      this.lastError = { type: "BOT_DETECTION", message: result.error || "Rate limited", httpStatus: 429 };
+    } else {
+      this.lastError = { type: "NETWORK", message: result.error || `HTTP ${statusCode}`, httpStatus: statusCode || undefined };
     }
 
     throw new Error(result.error || `Failed to fetch ${url}`);
@@ -199,6 +231,18 @@ export abstract class BaseBrokerScanner extends BaseScanner {
       console.error(`[${this.config.name}] Scan error: ${errorMessage}`);
       if (errorStack) {
         console.error(`[${this.config.name}] Stack: ${errorStack.split('\n').slice(0, 3).join(' | ')}`);
+      }
+      // Categorize error if not already set by fetchHtml
+      if (!this.lastError) {
+        if (errorMessage.includes("403") || errorMessage.toLowerCase().includes("access denied")) {
+          this.lastError = { type: "BOT_DETECTION", message: errorMessage, httpStatus: 403 };
+        } else if (errorMessage.toLowerCase().includes("timeout") || errorMessage.includes("ETIMEDOUT")) {
+          this.lastError = { type: "TIMEOUT", message: errorMessage };
+        } else if (errorMessage.includes("fetch failed") || errorMessage.includes("ECONNREFUSED")) {
+          this.lastError = { type: "NETWORK", message: errorMessage };
+        } else {
+          this.lastError = { type: "UNKNOWN", message: errorMessage };
+        }
       }
       // Don't throw - return empty results on error
     }

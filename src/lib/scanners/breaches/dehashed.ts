@@ -1,4 +1,4 @@
-import { BaseScanner, type ScanInput, type ScanResult } from "../base-scanner";
+import { BaseScanner, type ScanInput, type ScanResult, type ConfidenceResult } from "../base-scanner";
 import type { DataSource, Severity } from "@/lib/types";
 
 /**
@@ -184,6 +184,23 @@ export class DehashedScanner extends BaseScanner {
       const severity = this.calculateEntrySeverity(entry);
       const dataTypes = this.getExposedDataTypes(entry);
 
+      // Dehashed results are exact search matches — always CONFIRMED
+      const confidence: ConfidenceResult = {
+        score: 100,
+        classification: "CONFIRMED",
+        factors: {
+          nameMatch: 0,
+          locationMatch: 0,
+          ageMatch: 0,
+          dataCorrelation: 10,
+          sourceReliability: 0,
+        },
+        reasoning: [
+          `Exact ${searchType.toLowerCase()} match in breach database: ${entry.database_name || "Unknown"}`,
+        ],
+        validatedAt: new Date(),
+      };
+
       results.push({
         source: "DEHASHED",
         sourceName: `Dehashed - ${entry.database_name || "Unknown Breach"}`,
@@ -191,6 +208,7 @@ export class DehashedScanner extends BaseScanner {
         dataType: this.getPrimaryDataType(entry, searchType),
         dataPreview: this.maskData(searchValue, searchType),
         severity,
+        confidence,
         rawData: {
           database: entry.database_name,
           exposedFields: dataTypes,

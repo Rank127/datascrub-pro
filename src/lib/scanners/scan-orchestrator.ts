@@ -1,6 +1,7 @@
 import type { Scanner, ScanInput, ScanResult } from "./base-scanner";
 import { MockDataBrokerScanner } from "./data-brokers/mock-broker-scanner";
 import { createRealBrokerScanners } from "./data-brokers";
+import { BaseBrokerScanner } from "./data-brokers/base-broker-scanner";
 import { loadDynamicScanners } from "./data-brokers/dynamic-broker-scanner";
 import { HaveIBeenPwnedScanner } from "./breaches/haveibeenpwned";
 import { DehashedScanner } from "./breaches/dehashed";
@@ -10,6 +11,20 @@ import { AIProtectionScanner } from "./ai-protection";
 import { getBrokerCount } from "../removers/data-broker-directory";
 import { projectExposures, type ProjectionStats } from "./exposure-projector";
 import type { Plan, ScanType } from "@/lib/types";
+
+// ─── Scanner Outcome Tracking ───
+
+export interface ScannerOutcome {
+  scannerName: string;
+  scannerType: "STATIC_BROKER" | "DYNAMIC_BROKER" | "BREACH" | "SOCIAL" | "AI_PROTECTION" | "MANUAL_CHECK";
+  status: "SUCCESS" | "FAILED" | "TIMEOUT" | "BLOCKED" | "EMPTY" | "SKIPPED";
+  errorType?: string;
+  errorMessage?: string;
+  responseTimeMs: number;
+  resultsFound: number;
+  httpStatus?: number;
+  proxyUsed?: string;
+}
 
 // Configuration: Set to true to use real data broker scanners
 // Set via environment variable or default to true for production
@@ -33,6 +48,8 @@ export class ScanOrchestrator {
   private scanners: Scanner[] = [];
   private lastProjectionStats: ProjectionStats | null = null;
   private partialResults: ScanResult[] = [];
+  private outcomes: ScannerOutcome[] = [];
+  private failedScannerCount = 0;
 
   private constructor() {
     // Use ScanOrchestrator.create() instead
@@ -103,6 +120,19 @@ export class ScanOrchestrator {
     }
   }
 
+  /** Classify scanner into a type category for health tracking */
+  private classifyScannerType(scanner: Scanner): ScannerOutcome["scannerType"] {
+    if (scanner instanceof BaseBrokerScanner) return "STATIC_BROKER";
+    if (scanner instanceof HaveIBeenPwnedScanner || scanner instanceof DehashedScanner || scanner instanceof LeakCheckScanner) return "BREACH";
+    if (scanner instanceof SocialMediaScanner) return "SOCIAL";
+    if (scanner instanceof AIProtectionScanner) return "AI_PROTECTION";
+    // Check for dynamic broker scanner by duck-typing (has "Dynamic" in name)
+    if (scanner.name.startsWith("Dynamic:")) return "DYNAMIC_BROKER";
+    // Manual check scanners generate check links
+    if (scanner.name.includes("Manual")) return "MANUAL_CHECK";
+    return "STATIC_BROKER";
+  }
+
   async runScan(
     input: ScanInput,
     onProgress?: (progress: ScanProgress) => void
@@ -127,21 +157,95 @@ export class ScanOrchestrator {
     // Separate scanners into batches to avoid hitting rate limits
     const BATCH_SIZE = 4; // Stay under ScrapingBee's limit of 5
 
-    // Helper to run a single scanner
+    // Helper to run a single scanner with outcome tracking
     const runScanner = async (scanner: Scanner): Promise<ScanResult[]> => {
+      const scannerType = this.classifyScannerType(scanner);
+      const startTime = Date.now();
+
       const isAvailable = await scanner.isAvailable();
       if (!isAvailable) {
         console.log(`[ScanOrchestrator] ${scanner.name} not available, skipping`);
+        this.outcomes.push({
+          scannerName: scanner.name,
+          scannerType,
+          status: "SKIPPED",
+          responseTimeMs: Date.now() - startTime,
+          resultsFound: 0,
+          proxyUsed: scanner instanceof BaseBrokerScanner ? scanner.getProxyUsed() : undefined,
+        });
         return [];
       }
 
       console.log(`[ScanOrchestrator] Starting ${scanner.name}...`);
       try {
         const results = await scanner.scan(input);
+        const responseTimeMs = Date.now() - startTime;
         console.log(`[ScanOrchestrator] ${scanner.name} completed with ${results.length} results`);
+
+        // Determine outcome status
+        let status: ScannerOutcome["status"] = results.length > 0 ? "SUCCESS" : "EMPTY";
+
+        // Check if the scanner had a hidden error (returned [] due to catch)
+        if (scanner instanceof BaseBrokerScanner) {
+          const lastError = scanner.getLastError();
+          if (lastError && results.length === 0) {
+            // Scanner caught an error and returned [] — classify it
+            status = lastError.type === "TIMEOUT" ? "TIMEOUT"
+              : lastError.type === "BOT_DETECTION" ? "BLOCKED"
+              : "FAILED";
+
+            this.outcomes.push({
+              scannerName: scanner.name,
+              scannerType,
+              status,
+              errorType: lastError.type,
+              errorMessage: lastError.message.substring(0, 500),
+              responseTimeMs,
+              resultsFound: 0,
+              httpStatus: lastError.httpStatus,
+              proxyUsed: scanner.getProxyUsed(),
+            });
+            return results;
+          }
+        }
+
+        this.outcomes.push({
+          scannerName: scanner.name,
+          scannerType,
+          status,
+          responseTimeMs,
+          resultsFound: results.length,
+          proxyUsed: scanner instanceof BaseBrokerScanner ? scanner.getProxyUsed() : undefined,
+        });
         return results;
       } catch (error) {
+        const responseTimeMs = Date.now() - startTime;
+        const errorMessage = error instanceof Error ? error.message : String(error);
         console.error(`[ScanOrchestrator] ${scanner.name} failed:`, error);
+
+        // Categorize the error
+        let errorType = "UNKNOWN";
+        let status: ScannerOutcome["status"] = "FAILED";
+        if (errorMessage.includes("403") || errorMessage.toLowerCase().includes("access denied")) {
+          errorType = "BOT_DETECTION";
+          status = "BLOCKED";
+        } else if (errorMessage.toLowerCase().includes("timeout") || errorMessage.includes("ETIMEDOUT")) {
+          errorType = "TIMEOUT";
+          status = "TIMEOUT";
+        } else if (errorMessage.includes("fetch failed") || errorMessage.includes("ECONNREFUSED")) {
+          errorType = "NETWORK";
+        }
+
+        this.outcomes.push({
+          scannerName: scanner.name,
+          scannerType,
+          status,
+          errorType,
+          errorMessage: errorMessage.substring(0, 500),
+          responseTimeMs,
+          resultsFound: 0,
+          proxyUsed: scanner instanceof BaseBrokerScanner ? scanner.getProxyUsed() : undefined,
+        });
         return [];
       }
     };
@@ -157,6 +261,10 @@ export class ScanOrchestrator {
       for (const result of batchResults) {
         if (result.status === "fulfilled") {
           allResults.push(...result.value);
+        } else {
+          // Promise.allSettled rejection — track it
+          this.failedScannerCount++;
+          console.error(`[ScanOrchestrator] Scanner failed in batch: ${result.reason}`);
         }
       }
 
@@ -169,6 +277,14 @@ export class ScanOrchestrator {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
+
+    // Log scanner health summary
+    const statusCounts = this.outcomes.reduce((acc, o) => {
+      acc[o.status] = (acc[o.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const statusSummary = Object.entries(statusCounts).map(([s, c]) => `${c} ${s}`).join(", ");
+    console.log(`[ScanOrchestrator] Scanner health: ${statusSummary} (${this.outcomes.length} total, ${this.failedScannerCount} rejected)`);
 
     console.log(`[ScanOrchestrator] All scanners complete. Scanned results: ${allResults.length}`);
 
@@ -220,6 +336,16 @@ export class ScanOrchestrator {
 
   getScannerNames(): string[] {
     return this.scanners.map((s) => s.name);
+  }
+
+  /** Get per-scanner outcome data from the last scan run */
+  getOutcomes(): ScannerOutcome[] {
+    return this.outcomes;
+  }
+
+  /** Get count of scanners that threw unhandled rejections */
+  getFailedCount(): number {
+    return this.failedScannerCount;
   }
 
   /**

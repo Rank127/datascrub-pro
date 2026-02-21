@@ -377,6 +377,27 @@ export async function POST(request: Request) {
       }),
     ]);
 
+    // Persist per-scanner health outcomes (non-blocking)
+    const scannerOutcomes = orchestrator.getOutcomes();
+    if (scannerOutcomes.length > 0) {
+      prisma.scannerHealthLog.createMany({
+        data: scannerOutcomes.map(o => ({
+          scanId: scan.id,
+          scannerName: o.scannerName,
+          scannerType: o.scannerType,
+          status: o.status,
+          errorType: o.errorType || null,
+          errorMessage: o.errorMessage || null,
+          responseTimeMs: o.responseTimeMs,
+          resultsFound: o.resultsFound,
+          httpStatus: o.httpStatus || null,
+          proxyUsed: o.proxyUsed || null,
+        })),
+      }).catch((e) => {
+        console.error("[Scan] Failed to persist scanner health logs:", e);
+      });
+    }
+
     // Queue exposure alert for daily consolidated digest (non-blocking, respects preferences)
     // FREE users don't get digest emails — paid feature only
     if (exposures.length > 0 && session.user.email && userPlan !== "FREE") {

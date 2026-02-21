@@ -1126,6 +1126,62 @@ export async function GET(request: Request) {
     });
   }
 
+  // ========== SCANNER HEALTH ==========
+
+  // Test 24: Scanner Success Rate — detect systemic scraping failures
+  try {
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+
+    const recentHealth = await prisma.scannerHealthLog.groupBy({
+      by: ["scannerName"],
+      where: {
+        createdAt: { gte: threeDaysAgo },
+        scannerType: "STATIC_BROKER",
+      },
+      _count: { id: true },
+      _sum: { resultsFound: true },
+    });
+
+    if (recentHealth.length === 0) {
+      tests.push({
+        name: "Scanner Success Rate",
+        status: "PASS",
+        message: "No scanner health data yet (awaiting first scan with health tracking)",
+      });
+    } else {
+      const zeroSuccessScanners = recentHealth.filter(s =>
+        s._count.id >= 2 && (s._sum.resultsFound || 0) === 0
+      );
+
+      if (zeroSuccessScanners.length > 6) {
+        tests.push({
+          name: "Scanner Success Rate",
+          status: "FAIL",
+          message: `${zeroSuccessScanners.length}/${recentHealth.length} broker scanners at 0% success rate over 3 days: ${zeroSuccessScanners.map(s => s.scannerName).join(", ")}`,
+          actionRequired: "Likely systemic bot detection — review proxy strategy and scanner health logs",
+        });
+      } else if (zeroSuccessScanners.length > 3) {
+        tests.push({
+          name: "Scanner Success Rate",
+          status: "WARN",
+          message: `${zeroSuccessScanners.length}/${recentHealth.length} broker scanners at 0% success rate over 3 days: ${zeroSuccessScanners.map(s => s.scannerName).join(", ")}`,
+        });
+      } else {
+        tests.push({
+          name: "Scanner Success Rate",
+          status: "PASS",
+          message: `${recentHealth.length} broker scanners tracked, ${zeroSuccessScanners.length} at 0% success (threshold: >6 = alert)`,
+        });
+      }
+    }
+  } catch (error) {
+    tests.push({
+      name: "Scanner Success Rate",
+      status: "WARN",
+      message: `Could not check scanner health: ${error instanceof Error ? error.message : "Unknown error"}`,
+    });
+  }
+
   // ========== PROMO RECOMMENDATION EXPIRY ==========
 
   try {

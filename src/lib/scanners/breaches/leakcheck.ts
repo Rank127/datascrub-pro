@@ -1,4 +1,4 @@
-import { BaseScanner, type ScanInput, type ScanResult } from "../base-scanner";
+import { BaseScanner, type ScanInput, type ScanResult, type ConfidenceResult } from "../base-scanner";
 import type { DataSource, Severity } from "@/lib/types";
 import { canUseLeakCheck, recordLeakCheckUsage, getLeakCheckWaitTime, getLeakCheckStatus } from "@/lib/services/rate-limiter";
 
@@ -272,6 +272,23 @@ export class LeakCheckScanner extends BaseScanner {
     const dataType = queryType === "email" ? "EMAIL" :
                      queryType === "phone" ? "PHONE" : "USERNAME";
 
+    // LeakCheck results are exact search matches — always CONFIRMED
+    const confidence: ConfidenceResult = {
+      score: 100,
+      classification: "CONFIRMED",
+      factors: {
+        nameMatch: 0,
+        locationMatch: 0,
+        ageMatch: 0,
+        dataCorrelation: 10,
+        sourceReliability: 0,
+      },
+      reasoning: [
+        `Exact ${queryType} match in breach database: ${breach.source.name}`,
+      ],
+      validatedAt: new Date(),
+    };
+
     return {
       source: "BREACH_DB",
       sourceName: `LeakCheck - ${breach.source.name}`,
@@ -279,6 +296,7 @@ export class LeakCheckScanner extends BaseScanner {
       dataType,
       dataPreview: this.maskData(query, dataType),
       severity,
+      confidence,
       rawData: {
         breachName: breach.source.name,
         breachDate: breach.source.date || "Unknown",
@@ -335,6 +353,20 @@ export class LeakCheckScanner extends BaseScanner {
           const data = await response.json();
           if (data.success && data.found > 0 && data.sources) {
             for (const source of data.sources) {
+              const pubConfidence: ConfidenceResult = {
+                score: 100,
+                classification: "CONFIRMED",
+                factors: {
+                  nameMatch: 0,
+                  locationMatch: 0,
+                  ageMatch: 0,
+                  dataCorrelation: 10,
+                  sourceReliability: 0,
+                },
+                reasoning: [`Exact email match in breach database: ${source.name}`],
+                validatedAt: new Date(),
+              };
+
               results.push({
                 source: "BREACH_DB",
                 sourceName: `LeakCheck - ${source.name}`,
@@ -342,6 +374,7 @@ export class LeakCheckScanner extends BaseScanner {
                 dataType: "EMAIL",
                 dataPreview: this.maskData(email, "EMAIL"),
                 severity: this.calculateBreachSeverity(data.fields || []),
+                confidence: pubConfidence,
                 rawData: {
                   breachName: source.name,
                   breachDate: source.date || "Unknown",
