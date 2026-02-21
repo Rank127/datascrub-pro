@@ -23,7 +23,7 @@ interface DehashedEntry {
 interface DehashedResponse {
   balance: number;
   entries: DehashedEntry[] | null;
-  success: boolean;
+  success?: boolean;
   took: string;
   total: number;
 }
@@ -169,7 +169,7 @@ export class DehashedScanner extends BaseScanner {
 
     console.log(`[Dehashed] Balance: ${data.balance} credits remaining`);
 
-    if (!data.success) {
+    if (data.success === false) {
       console.warn("[Dehashed] API returned success=false");
       return [];
     }
