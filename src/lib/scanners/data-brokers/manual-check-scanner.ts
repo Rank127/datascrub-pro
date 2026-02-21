@@ -247,3 +247,135 @@ export function createPeopleFinderManualScanner(): ManualCheckScanner {
     },
   });
 }
+
+export function createBeenVerifiedManualScanner(): ManualCheckScanner {
+  return new ManualCheckScanner({
+    name: "BeenVerified",
+    source: "BEENVERIFIED",
+    baseUrl: "https://www.beenverified.com",
+    optOutUrl: "https://www.beenverified.com/f/optout/search",
+    profileBasedConfidence: true,
+    optOutInstructions:
+      "1. Go to beenverified.com/f/optout/search\n" +
+      "2. Search for your name and state\n" +
+      "3. Find your listing and click 'Remove My Info'\n" +
+      "4. Enter your email address to receive verification\n" +
+      "5. Click the link in the confirmation email\n" +
+      "6. Your information will be removed within 24 hours",
+    estimatedRemovalDays: 1,
+    privacyEmail: "privacy@beenverified.com",
+    buildSearchUrl: (input: ScanInput) => {
+      if (!input.fullName) return null;
+
+      const nameParts = input.fullName.trim().split(/\s+/);
+      if (nameParts.length < 2) return null;
+
+      // BeenVerified is a React SPA — search URLs don't return scrapable results.
+      // Link to the opt-out search page instead.
+      return "https://www.beenverified.com/f/optout/search";
+    },
+  });
+}
+
+export function createPeopleLookerManualScanner(): ManualCheckScanner {
+  return new ManualCheckScanner({
+    name: "PeopleLooker",
+    source: "PEOPLELOOKER",
+    baseUrl: "https://www.peoplelooker.com",
+    optOutUrl: "https://www.peoplelooker.com/opt-out",
+    profileBasedConfidence: true,
+    optOutInstructions:
+      "1. Go to peoplelooker.com/opt-out\n" +
+      "2. Search for your name and state\n" +
+      "3. Find your listing and click 'Remove'\n" +
+      "4. Enter your email address for verification\n" +
+      "5. Click the confirmation link in your email\n" +
+      "6. Removal typically takes 7 days",
+    estimatedRemovalDays: 7,
+    privacyEmail: "privacy@peoplelooker.com",
+    buildSearchUrl: (input: ScanInput) => {
+      if (!input.fullName) return null;
+
+      const nameParts = input.fullName.trim().split(/\s+/);
+      if (nameParts.length < 2) return null;
+
+      const firstName = formatNameForUrl(nameParts[0]);
+      const lastName = formatNameForUrl(nameParts[nameParts.length - 1]);
+
+      // PeopleLooker is a paywall SPA — search paths redirect to generic page.
+      return `https://www.peoplelooker.com/people-search/${firstName}-${lastName}`;
+    },
+  });
+}
+
+export function createNuwberManualScanner(): ManualCheckScanner {
+  return new ManualCheckScanner({
+    name: "Nuwber",
+    source: "NUWBER",
+    baseUrl: "https://nuwber.com",
+    optOutUrl: "https://nuwber.com/removal/link",
+    profileBasedConfidence: true,
+    optOutInstructions:
+      "1. Go to nuwber.com and search for your name\n" +
+      "2. Find your listing in the results\n" +
+      "3. Click 'View Details' on your profile\n" +
+      "4. Go to nuwber.com/removal/link\n" +
+      "5. Paste your profile URL and submit\n" +
+      "6. Removal typically takes 7 days",
+    estimatedRemovalDays: 7,
+    privacyEmail: "privacy@nuwber.com",
+    buildSearchUrl: (input: ScanInput) => {
+      if (!input.fullName) return null;
+
+      const nameParts = input.fullName.trim().split(/\s+/);
+      if (nameParts.length < 2) return null;
+
+      const fullName = encodeURIComponent(input.fullName.trim());
+
+      let url = `https://nuwber.com/search?name=${fullName}`;
+      if (input.addresses?.length) {
+        const addr = input.addresses[0];
+        if (addr.state) {
+          url += `&state=${encodeURIComponent(addr.state)}`;
+        }
+      }
+      return url;
+    },
+  });
+}
+
+export function createCheckPeopleManualScanner(): ManualCheckScanner {
+  return new ManualCheckScanner({
+    name: "CheckPeople",
+    source: "CHECKPEOPLE",
+    baseUrl: "https://www.checkpeople.com",
+    optOutUrl: "https://www.checkpeople.com/opt-out",
+    profileBasedConfidence: true,
+    optOutInstructions:
+      "1. Go to checkpeople.com and search for your name\n" +
+      "2. Find your listing in the results\n" +
+      "3. Go to checkpeople.com/opt-out\n" +
+      "4. Enter your email address for verification\n" +
+      "5. Click the confirmation link in your email\n" +
+      "6. Removal typically takes 7 days",
+    estimatedRemovalDays: 7,
+    privacyEmail: "privacy@checkpeople.com",
+    buildSearchUrl: (input: ScanInput) => {
+      if (!input.fullName) return null;
+
+      const nameParts = input.fullName.trim().split(/\s+/);
+      if (nameParts.length < 2) return null;
+
+      const fullName = encodeURIComponent(input.fullName.trim());
+
+      let url = `https://www.checkpeople.com/search/results?name=${fullName}`;
+      if (input.addresses?.length) {
+        const addr = input.addresses[0];
+        if (addr.state) {
+          url += `&state=${encodeURIComponent(addr.state)}`;
+        }
+      }
+      return url;
+    },
+  });
+}

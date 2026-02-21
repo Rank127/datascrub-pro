@@ -20,11 +20,15 @@ export { MyLifeScanner } from "./mylife-scanner";
 export { NuwberScanner } from "./nuwber-scanner";
 export { CheckPeopleScanner } from "./checkpeople-scanner";
 
-// Manual check scanners for sites with advanced bot protection
+// Manual check scanners for sites with bot protection / paywall SPAs
 export {
   ManualCheckScanner,
   createFastPeopleSearchManualScanner,
   createPeopleFinderManualScanner,
+  createBeenVerifiedManualScanner,
+  createPeopleLookerManualScanner,
+  createNuwberManualScanner,
+  createCheckPeopleManualScanner,
 } from "./manual-check-scanner";
 
 // Legacy mock scanner (kept for testing/development)
@@ -39,19 +43,19 @@ export type { ParsingRules, DynamicScannerRow } from "./dynamic-broker-scanner";
 
 import { SpokeoScanner } from "./spokeo-scanner";
 import { WhitePagesScanner } from "./whitepages-scanner";
-import { BeenVerifiedScanner } from "./beenverified-scanner";
 import { TruePeopleSearchScanner } from "./truepeoplesearch-scanner";
 import { RadarisScanner } from "./radaris-scanner";
 import { InteliusScanner } from "./intelius-scanner";
 import { TruthFinderScanner } from "./truthfinder-scanner";
 import { InstantCheckmateScanner } from "./instantcheckmate-scanner";
-import { PeopleLookerScanner } from "./peoplelooker-scanner";
 import { MyLifeScanner } from "./mylife-scanner";
-import { NuwberScanner } from "./nuwber-scanner";
-import { CheckPeopleScanner } from "./checkpeople-scanner";
 import {
   createFastPeopleSearchManualScanner,
   createPeopleFinderManualScanner,
+  createBeenVerifiedManualScanner,
+  createPeopleLookerManualScanner,
+  createNuwberManualScanner,
+  createCheckPeopleManualScanner,
 } from "./manual-check-scanner";
 // createAllBrokersScanner is available for comprehensive scanning
 import type { Scanner } from "../base-scanner";
@@ -71,23 +75,23 @@ import type { Scanner } from "../base-scanner";
  */
 export function createRealBrokerScanners(): Scanner[] {
   return [
-    // Active scrapers for major brokers
+    // Active scrapers — verified working with premium proxy (Feb 2026)
     new SpokeoScanner(),
     new WhitePagesScanner(),
-    new BeenVerifiedScanner(),
     new TruePeopleSearchScanner(),
-    createFastPeopleSearchManualScanner(), // Manual check - advanced bot protection
     new RadarisScanner(),
     new InteliusScanner(),
     new TruthFinderScanner(),
-    new InstantCheckmateScanner(),
-    new PeopleLookerScanner(),
-    new MyLifeScanner(),
-    new NuwberScanner(),
-    new CheckPeopleScanner(),
-    createPeopleFinderManualScanner(), // Manual check - advanced bot protection
-    // NOTE: AllBrokersScanner removed - it created fake "potential" exposures
-    // for 2,100+ brokers without confirming user is actually listed
+    new InstantCheckmateScanner(),   // Fixed: /results/?firstName=...&lastName=... (was 404 on /people/)
+    new MyLifeScanner(),             // Fixed: /{first-last}/ path (was 404 on /pub/search)
+
+    // Manual check — sites with paywall SPAs or bot protection that blocks scraping
+    createFastPeopleSearchManualScanner(),
+    createPeopleFinderManualScanner(),
+    createBeenVerifiedManualScanner(),   // React SPA — search URLs don't return scrapable results
+    createPeopleLookerManualScanner(),   // Paywall SPA — search paths redirect to generic page
+    createNuwberManualScanner(),         // Returns 0 bytes — completely blocks scrapers
+    createCheckPeopleManualScanner(),    // All URL patterns return 404
   ];
 }
 
@@ -95,28 +99,30 @@ export function createRealBrokerScanners(): Scanner[] {
  * Get scanner by data source
  */
 export function getScannerBySource(source: string): Scanner | null {
-  // Manual check scanners (sites with advanced bot protection)
-  if (source === "FASTPEOPLESEARCH") {
-    return createFastPeopleSearchManualScanner();
-  }
-  if (source === "PEOPLEFINDER") {
-    return createPeopleFinderManualScanner();
+  // Manual check scanners (sites with bot protection / paywall SPAs)
+  const manualCheckFactories: Record<string, () => Scanner> = {
+    FASTPEOPLESEARCH: createFastPeopleSearchManualScanner,
+    PEOPLEFINDER: createPeopleFinderManualScanner,
+    BEENVERIFIED: createBeenVerifiedManualScanner,
+    PEOPLELOOKER: createPeopleLookerManualScanner,
+    NUWBER: createNuwberManualScanner,
+    CHECKPEOPLE: createCheckPeopleManualScanner,
+  };
+
+  if (manualCheckFactories[source]) {
+    return manualCheckFactories[source]();
   }
 
   // Regular scraped scanners
   const scannerMap: Record<string, new () => Scanner> = {
     SPOKEO: SpokeoScanner,
     WHITEPAGES: WhitePagesScanner,
-    BEENVERIFIED: BeenVerifiedScanner,
     TRUEPEOPLESEARCH: TruePeopleSearchScanner,
     RADARIS: RadarisScanner,
     INTELIUS: InteliusScanner,
     TRUTHFINDER: TruthFinderScanner,
     INSTANTCHECKMATE: InstantCheckmateScanner,
-    PEOPLELOOKER: PeopleLookerScanner,
     MYLIFE: MyLifeScanner,
-    NUWBER: NuwberScanner,
-    CHECKPEOPLE: CheckPeopleScanner,
   };
 
   const ScannerClass = scannerMap[source];

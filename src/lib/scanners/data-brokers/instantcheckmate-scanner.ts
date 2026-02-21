@@ -10,7 +10,7 @@ export class InstantCheckmateScanner extends BaseBrokerScanner {
     name: "Instant Checkmate",
     source: "INSTANTCHECKMATE",
     baseUrl: "https://www.instantcheckmate.com",
-    searchUrl: "https://www.instantcheckmate.com/people",
+    searchUrl: "https://www.instantcheckmate.com/results/",
     optOutUrl: "https://www.instantcheckmate.com/opt-out/",
     optOutInstructions:
       "1. Go to instantcheckmate.com/opt-out/\n" +
@@ -22,7 +22,7 @@ export class InstantCheckmateScanner extends BaseBrokerScanner {
     estimatedRemovalDays: 7,
     privacyEmail: "privacy@instantcheckmate.com",
     requiresVerification: true,
-    useStealthProxy: true, // Heavy paywall + bot detection — stealth required
+    usePremiumProxy: true, // Premium works fine — stealth not needed (verified Feb 2026)
     rateLimit: {
       requestsPerMinute: 5,
       delayMs: 3000,
@@ -35,15 +35,16 @@ export class InstantCheckmateScanner extends BaseBrokerScanner {
     const nameParts = input.fullName.trim().split(/\s+/);
     if (nameParts.length < 2) return null;
 
-    const firstName = nameParts[0].toLowerCase();
-    const lastName = nameParts[nameParts.length - 1].toLowerCase();
+    const firstName = encodeURIComponent(nameParts[0]);
+    const lastName = encodeURIComponent(nameParts[nameParts.length - 1]);
 
-    let url = `${this.config.searchUrl}/${firstName}-${lastName}/`;
+    // Use query params — the /people/ path pattern returns 404
+    let url = `${this.config.searchUrl}?firstName=${firstName}&lastName=${lastName}`;
 
     if (input.addresses?.length) {
       const addr = input.addresses[0];
       const state = this.formatStateForUrl(addr.state);
-      url += `${state}/`;
+      url += `&state=${state.toUpperCase()}`;
     }
 
     return url;
@@ -55,9 +56,11 @@ export class InstantCheckmateScanner extends BaseBrokerScanner {
     };
 
     const hasResults =
-      html.includes("people-search-results") ||
-      html.includes("person-card") ||
-      html.includes("search-result") ||
+      html.includes("person highly-likely") ||
+      html.includes("person likely") ||
+      html.includes("person-list") ||
+      html.includes("result-item") ||
+      html.includes("verified-result") ||
       html.includes("View Report") ||
       html.includes("View Full Report") ||
       (input.fullName && this.nameInHtml(html, input.fullName));

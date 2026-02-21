@@ -10,7 +10,7 @@ export class MyLifeScanner extends BaseBrokerScanner {
     name: "MyLife",
     source: "MYLIFE",
     baseUrl: "https://www.mylife.com",
-    searchUrl: "https://www.mylife.com/pub/search",
+    searchUrl: "https://www.mylife.com",
     optOutUrl: "https://www.mylife.com/ccpa/index.pubview",
     optOutInstructions:
       "1. Go to mylife.com/ccpa/index.pubview\n" +
@@ -34,23 +34,12 @@ export class MyLifeScanner extends BaseBrokerScanner {
     const nameParts = input.fullName.trim().split(/\s+/);
     if (nameParts.length < 2) return null;
 
-    const firstName = encodeURIComponent(nameParts[0]);
-    const lastName = encodeURIComponent(nameParts[nameParts.length - 1]);
+    // MyLife uses path-based URLs: /first-last/
+    // The old /pub/search?firstName=...&lastName=... endpoint returns 404
+    const firstName = nameParts[0].toLowerCase().replace(/[^a-z]/g, "");
+    const lastName = nameParts[nameParts.length - 1].toLowerCase().replace(/[^a-z]/g, "");
 
-    let url = `${this.config.searchUrl}?firstName=${firstName}&lastName=${lastName}`;
-
-    if (input.addresses?.length) {
-      const addr = input.addresses[0];
-      if (addr.city) {
-        url += `&city=${encodeURIComponent(addr.city)}`;
-      }
-      if (addr.state) {
-        const state = this.formatStateForUrl(addr.state);
-        url += `&state=${state.toUpperCase()}`;
-      }
-    }
-
-    return url;
+    return `${this.config.searchUrl}/${firstName}-${lastName}/`;
   }
 
   protected parseSearchResults(html: string, input: ScanInput): BrokerSearchResult {
@@ -64,6 +53,8 @@ export class MyLifeScanner extends BaseBrokerScanner {
       html.includes("profile-card") ||
       html.includes("View Profile") ||
       html.includes("reputation-score") ||
+      html.includes("Public Records for") ||
+      html.includes("Found)") ||
       (input.fullName && this.nameInHtml(html, input.fullName));
 
     const noResults =
