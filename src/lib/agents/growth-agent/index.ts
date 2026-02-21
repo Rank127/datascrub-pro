@@ -11,6 +11,7 @@
 import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
 import { BaseAgent, createAgentContext } from "../base-agent";
+import { getEffectivePlan } from "@/lib/family/family-service";
 import {
   AgentCapability,
   AgentContext,
@@ -389,6 +390,7 @@ class GrowthAgent extends BaseAgent {
       const powerUsers: PowerUserResult["powerUsers"] = [];
 
       for (const user of users) {
+        const effectivePlan = await getEffectivePlan(user.id);
         const tenure = Math.floor(
           (Date.now() - new Date(user.createdAt).getTime()) / (24 * 60 * 60 * 1000)
         );
@@ -410,11 +412,11 @@ class GrowthAgent extends BaseAgent {
           score += 20;
         }
 
-        // Plan score
-        if (user.plan === "ENTERPRISE") {
+        // Plan score (use effectivePlan — family members inherit ENTERPRISE)
+        if (effectivePlan === "ENTERPRISE") {
           segments.push("enterprise");
           score += 30;
-        } else if (user.plan === "PRO") {
+        } else if (effectivePlan === "PRO") {
           segments.push("pro");
           score += 15;
         }
@@ -431,7 +433,7 @@ class GrowthAgent extends BaseAgent {
         // Filter by criteria
         if (
           (criteria === "engagement" && engagementScore < 30) ||
-          (criteria === "revenue" && user.plan === "FREE") ||
+          (criteria === "revenue" && effectivePlan === "FREE") ||
           score < 40
         ) {
           continue;
@@ -439,7 +441,7 @@ class GrowthAgent extends BaseAgent {
 
         // Use Hormozi Value Equation to assess upsell potential
         const upsellValue = hormoziValueScore({
-          dreamOutcome: user.plan === "FREE" ? 8 : user.plan === "PRO" ? 6 : 4,
+          dreamOutcome: effectivePlan === "FREE" ? 8 : effectivePlan === "PRO" ? 6 : 4,
           likelihood: Math.min(1, score / 100),
           timeDelay: tenure < 30 ? 3 : tenure < 90 ? 5 : 7,
           effort: user._count.scans > 5 ? 2 : 5,
@@ -451,7 +453,7 @@ class GrowthAgent extends BaseAgent {
           segments.push("upsell_candidate");
 
           // Fire-and-forget: create promo recommendation for FREE users
-          if (user.plan === "FREE") {
+          if (effectivePlan === "FREE") {
             createRecommendation({
               userId: user.id,
               promoType: "URGENCY",
@@ -562,6 +564,7 @@ class GrowthAgent extends BaseAgent {
       const outreachQueue: string[] = [];
 
       for (const user of users) {
+        const userEffectivePlan = await getEffectivePlan(user.id);
         const verifiedRemovals = user.removalRequests.length;
         const tenure = Math.floor(
           (Date.now() - new Date(user.createdAt).getTime()) / (24 * 60 * 60 * 1000)
@@ -574,7 +577,7 @@ class GrowthAgent extends BaseAgent {
         else if (verifiedRemovals >= 1) score += 10;
 
         if (tenure >= 90) score += 20;
-        if (user.plan !== "FREE") score += 20;
+        if (userEffectivePlan !== "FREE") score += 20;
 
         if (score >= 30) {
           const protectionLevel =

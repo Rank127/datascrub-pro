@@ -49,6 +49,9 @@ export async function GET(request: Request) {
     });
 
     // Run the protocol via Claude Haiku
+    if (!process.env.ANTHROPIC_API_KEY) {
+      throw new Error("ANTHROPIC_API_KEY not configured");
+    }
     const anthropic = new Anthropic();
     const message = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",

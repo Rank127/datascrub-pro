@@ -92,9 +92,16 @@ export async function POST(request: Request) {
         : `All done! ${published.length} posts published.`,
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Batch failed";
     console.error(`[${JOB_NAME}:batch] Error:`, error);
+    await logCronExecution({
+      jobName: JOB_NAME,
+      status: "FAILED",
+      duration: Date.now() - startTime,
+      message: `Batch error: ${errorMessage}`,
+    });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Batch failed" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

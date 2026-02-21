@@ -923,6 +923,7 @@ export function getSupportAgent(): SupportAgent {
 
 export async function processTicket(ticketId: string): Promise<ProcessResult> {
   const agent = getSupportAgent();
+  await agent.initialize();
   const context = createAgentContext({
     requestId: nanoid(),
     invocationType: InvocationTypes.ON_DEMAND,
@@ -943,6 +944,7 @@ export async function processTicket(ticketId: string): Promise<ProcessResult> {
 
 export async function processPendingTickets(limit = 20): Promise<BatchResult> {
   const agent = getSupportAgent();
+  await agent.initialize();
   const context = createAgentContext({
     requestId: nanoid(),
     invocationType: InvocationTypes.CRON,

@@ -205,7 +205,7 @@ export async function GET(request: Request) {
     });
   }
 
-  try {
+  try { // Lock acquired — release in finally block
     console.log(`[${JOB_NAME}] Starting intelligent email monitoring...`);
 
     // Step 1: Run the Operations Agent's email monitoring capability
