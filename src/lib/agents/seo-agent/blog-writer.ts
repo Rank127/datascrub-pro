@@ -239,22 +239,26 @@ Return ONLY the markdown content, nothing else.`;
   }
 }
 
+export interface WriteFailure {
+  reason: string;
+}
+
 /**
  * Write and publish a blog post to the database
- * Returns the slug of the published post, or null if failed
+ * Returns the slug string on success, or a WriteFailure object on failure
  */
 export async function writeAndPublishPost(
   topic: BlogTopic
-): Promise<string | null> {
+): Promise<string | WriteFailure> {
   // Check for duplicate slugs
   const existingSlugs = await getAllSlugs();
   if (existingSlugs.includes(topic.slug)) {
     console.log(`[blog-writer] Slug already exists: ${topic.slug}, skipping`);
-    return null;
+    return { reason: "slug_exists" };
   }
 
   const post = await writeBlogPost(topic);
-  if (!post) return null;
+  if (!post) return { reason: "generation_failed" };
 
   try {
     await prisma.autoBlogPost.create({
@@ -279,6 +283,6 @@ export async function writeAndPublishPost(
     return post.slug;
   } catch (error) {
     console.error("[blog-writer] DB save failed:", error);
-    return null;
+    return { reason: "db_save_failed" };
   }
 }

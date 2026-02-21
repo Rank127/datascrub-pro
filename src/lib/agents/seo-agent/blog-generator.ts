@@ -1497,11 +1497,34 @@ export async function logBlogIdea(topic: BlogTopic): Promise<void> {
 }
 
 /**
- * Get top priority blog topics to generate
+ * Get top priority blog topics to generate.
+ * Within each priority tier, topics are shuffled so successive runs
+ * try different topics instead of always hitting the same failures.
  */
 export async function getTopBlogIdeas(
   limit: number = 5
 ): Promise<BlogTopic[]> {
   const ideas = await generateTopicIdeas();
-  return ideas.slice(0, limit);
+
+  // Group by priority, shuffle within each tier, then flatten
+  const byPriority = new Map<number, BlogTopic[]>();
+  for (const idea of ideas) {
+    const group = byPriority.get(idea.priority) || [];
+    group.push(idea);
+    byPriority.set(idea.priority, group);
+  }
+
+  const shuffled: BlogTopic[] = [];
+  const priorities = [...byPriority.keys()].sort((a, b) => b - a); // highest first
+  for (const p of priorities) {
+    const group = byPriority.get(p)!;
+    // Fisher-Yates shuffle within the priority tier
+    for (let i = group.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [group[i], group[j]] = [group[j], group[i]];
+    }
+    shuffled.push(...group);
+  }
+
+  return shuffled.slice(0, limit);
 }

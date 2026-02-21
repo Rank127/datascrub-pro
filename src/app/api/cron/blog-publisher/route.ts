@@ -45,8 +45,8 @@ export async function GET(request: Request) {
 
     console.log(`[${JOB_NAME}] Starting blog publisher (target: ${POSTS_PER_RUN} posts)...`);
 
-    // Get more ideas than we need, so we can skip collisions
-    const ideas = await getTopBlogIdeas(POSTS_PER_RUN * 3);
+    // Get more ideas than we need — extra fallbacks survive API transient failures
+    const ideas = await getTopBlogIdeas(POSTS_PER_RUN * 6);
 
     if (ideas.length === 0) {
       console.log(`[${JOB_NAME}] No new topics to write about`);
@@ -63,6 +63,7 @@ export async function GET(request: Request) {
     // Publish up to POSTS_PER_RUN posts, with time-boxing
     const published: { slug: string; title: string; category: string }[] = [];
     let attempted = 0;
+    const failedTopics: { slug: string; reason: string }[] = [];
 
     for (const idea of ideas) {
       if (published.length >= POSTS_PER_RUN) break;
@@ -74,23 +75,28 @@ export async function GET(request: Request) {
       attempted++;
       console.log(`[${JOB_NAME}] Generating post ${published.length + 1}/${POSTS_PER_RUN}: ${idea.title}`);
 
-      const slug = await writeAndPublishPost(idea);
-      if (slug) {
-        published.push({ slug, title: idea.title, category: idea.category });
-        console.log(`[${JOB_NAME}] Published: /blog/${slug}`);
+      const result = await writeAndPublishPost(idea);
+      if (typeof result === "string") {
+        published.push({ slug: result, title: idea.title, category: idea.category });
+        console.log(`[${JOB_NAME}] Published: /blog/${result}`);
+      } else {
+        failedTopics.push({ slug: idea.slug, reason: result?.reason || "unknown" });
+        console.log(`[${JOB_NAME}] Failed: ${idea.slug} — ${result?.reason || "unknown"}`);
       }
     }
 
     if (published.length === 0) {
-      console.log(`[${JOB_NAME}] Failed to publish any posts after ${attempted} attempts`);
+      const reasons = failedTopics.map(f => f.reason);
+      const uniqueReasons = [...new Set(reasons)];
+      console.log(`[${JOB_NAME}] Failed to publish any posts after ${attempted} attempts. Reasons: ${uniqueReasons.join(", ")}`);
       await logCronExecution({
         jobName: JOB_NAME,
         status: "FAILED",
         duration: Date.now() - startTime,
-        message: `Generation failed after trying ${attempted} topics`,
-        metadata: { postsPublished: 0, reason: "generation_failed", topicsAttempted: attempted },
+        message: `Generation failed after trying ${attempted} topics: ${uniqueReasons.join(", ")}`,
+        metadata: { postsPublished: 0, reason: "generation_failed", topicsAttempted: attempted, failedTopics },
       });
-      return NextResponse.json({ status: "generation_failed" });
+      return NextResponse.json({ status: "generation_failed", reasons: uniqueReasons });
     }
 
     // No email notification — CronLog tracks published posts in admin dashboard

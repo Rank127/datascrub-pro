@@ -53,10 +53,10 @@ export async function POST(request: Request) {
       }
 
       console.log(`[${JOB_NAME}:batch] [${published.length + 1}] Generating: ${idea.title}`);
-      const slug = await writeAndPublishPost(idea);
+      const result = await writeAndPublishPost(idea);
 
-      if (slug) {
-        published.push({ slug, title: idea.title, category: idea.category });
+      if (typeof result === "string") {
+        published.push({ slug: result, title: idea.title, category: idea.category });
       } else {
         failed.push(idea.slug);
       }
