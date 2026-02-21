@@ -102,15 +102,20 @@ function categoryDisplayName(category: string): string {
   return map[category] || "Privacy";
 }
 
+export interface GenerationResult {
+  post: WrittenBlogPost | null;
+  error?: string;
+}
+
 /**
  * Generate a full blog post for a given topic using Claude AI
  */
 export async function writeBlogPost(
   topic: BlogTopic
-): Promise<WrittenBlogPost | null> {
+): Promise<GenerationResult> {
   if (!process.env.ANTHROPIC_API_KEY) {
     console.error("[blog-writer] ANTHROPIC_API_KEY not set");
-    return null;
+    return { post: null, error: "ANTHROPIC_API_KEY not set" };
   }
   console.log(`[blog-writer] Starting generation for: ${topic.slug}`);
 
@@ -194,7 +199,7 @@ Return ONLY the markdown content, nothing else.`;
 
     if (!content || content.length < 500) {
       console.error("[blog-writer] Generated content too short");
-      return null;
+      return { post: null, error: `Content too short (${content.length} chars)` };
     }
 
     // Generate meta description
@@ -225,20 +230,23 @@ Return ONLY the markdown content, nothing else.`;
     ];
 
     return {
-      slug: topic.slug,
-      title: topic.title,
-      description: description.substring(0, 200),
-      content,
-      category: categoryDisplayName(topic.category),
-      tags,
-      readTime: estimateReadTime(content),
-      targetKeywords: topic.keywords,
+      post: {
+        slug: topic.slug,
+        title: topic.title,
+        description: description.substring(0, 200),
+        content,
+        category: categoryDisplayName(topic.category),
+        tags,
+        readTime: estimateReadTime(content),
+        targetKeywords: topic.keywords,
+      },
     };
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     const errStatus = (error as { status?: number })?.status;
-    console.error(`[blog-writer] Generation failed for ${topic.slug}: ${errMsg}${errStatus ? ` (HTTP ${errStatus})` : ""}`);
-    return null;
+    const errorDetail = `${errMsg}${errStatus ? ` (HTTP ${errStatus})` : ""}`;
+    console.error(`[blog-writer] Generation failed for ${topic.slug}: ${errorDetail}`);
+    return { post: null, error: errorDetail };
   }
 }
 
@@ -260,9 +268,10 @@ export async function writeAndPublishPost(
     return { reason: "slug_exists" };
   }
 
-  const post = await writeBlogPost(topic);
-  if (!post) return { reason: "ai_generation_failed" };
+  const result = await writeBlogPost(topic);
+  if (!result.post) return { reason: result.error || "ai_generation_failed" };
 
+  const post = result.post;
   try {
     await prisma.autoBlogPost.create({
       data: {
