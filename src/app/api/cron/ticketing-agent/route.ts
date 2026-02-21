@@ -25,22 +25,8 @@ export async function POST(request: Request) {
       return cronUnauthorizedResponse(authResult.reason);
     }
 
-    // Check if Anthropic API key is configured
-    if (!process.env.ANTHROPIC_API_KEY) {
-      console.log("[Cron: Ticketing Agent] ANTHROPIC_API_KEY not configured, skipping");
-      await logCronExecution({
-        jobName: "ticketing-agent",
-        status: "SKIPPED",
-        message: "ANTHROPIC_API_KEY not configured",
-      });
-      return NextResponse.json({
-        success: true,
-        skipped: true,
-        reason: "ANTHROPIC_API_KEY not configured",
-      });
-    }
-
-    console.log("[Cron: Ticketing Agent] Starting...");
+    const aiAvailable = !!process.env.ANTHROPIC_API_KEY;
+    console.log(`[Cron: Ticketing Agent] Starting... (${aiAvailable ? "AI available" : "rule-only mode"})`);
     const startTime = Date.now();
     const PROCESSING_DEADLINE_MS = 240_000; // 4 minutes — leave 1 min buffer for logging
     const deadline = startTime + PROCESSING_DEADLINE_MS;
@@ -82,6 +68,8 @@ export async function POST(request: Request) {
     let processed = 0;
     let autoResolved = 0;
     let autoFixed = 0;
+    let ruleResolved = 0;
+    let aiCalls = 0;
     let needsReview = 0;
     let failed = 0;
     let timeBoxed = false;
@@ -125,14 +113,18 @@ export async function POST(request: Request) {
         const result = await processNewTicket(ticket.id);
         processed++;
 
+        // Track resolution method
+        if (result.resolvedBy === "rules") ruleResolved++;
+        else if (result.resolvedBy === "ai") aiCalls++;
+
         if (result.autoResolved) {
           autoResolved++;
           results.push({
             ticketNumber: ticket.ticketNumber,
-            status: "auto_resolved",
+            status: result.resolvedBy === "rules" ? "rule_resolved" : "auto_resolved",
             result: result.message,
           });
-          console.log(`[Cron: Ticketing Agent] ${ticket.ticketNumber} auto-resolved`);
+          console.log(`[Cron: Ticketing Agent] ${ticket.ticketNumber} ${result.resolvedBy === "rules" ? "rule-resolved" : "auto-resolved"}`);
         } else if (result.success) {
           needsReview++;
           results.push({
@@ -174,6 +166,8 @@ export async function POST(request: Request) {
         found: ticketsToProcess.length,
         processed,
         autoFixed,
+        ruleResolved,
+        aiCalls,
         autoResolved,
         needsReview,
         failed,
@@ -287,15 +281,18 @@ export async function POST(request: Request) {
       jobName: "ticketing-agent",
       status: cronStatus as "SUCCESS" | "FAILED",
       duration,
-      message: `${timeBoxed ? "PARTIAL: " : ""}Processed ${processed}/${ticketsToProcess.length} tickets: ${autoFixed} auto-fixed, ${autoResolved} AI-resolved, ${needsReview} need review, ${failed} failed`,
+      message: `${timeBoxed ? "PARTIAL: " : ""}Processed ${processed}/${ticketsToProcess.length} tickets: ${autoFixed} auto-fixed, ${ruleResolved} rule-resolved, ${aiCalls} AI-calls, ${autoResolved} auto-resolved, ${needsReview} need review, ${failed} failed`,
       metadata: {
         found: ticketsToProcess.length,
         processed,
         autoFixed,
+        ruleResolved,
+        aiCalls,
         autoResolved,
         needsReview,
         failed,
         timeBoxed,
+        aiAvailable,
       },
     });
 

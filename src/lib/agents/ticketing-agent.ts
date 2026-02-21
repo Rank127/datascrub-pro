@@ -9,6 +9,7 @@ import { PrismaClient } from "@prisma/client";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSystemUserId } from "@/lib/support/ticket-service";
 import { getAdminFromEmail } from "@/lib/email";
+import { ruleBasedAnalyze } from "@/lib/support/ticket-templates";
 
 const prisma = new PrismaClient();
 
@@ -119,7 +120,7 @@ interface SimilarTicket {
   wasAutoResolved: boolean;
 }
 
-interface SentimentAnalysis {
+export interface SentimentAnalysis {
   score: number; // -1 to 1 (negative to positive)
   urgency: "low" | "medium" | "high" | "critical";
   frustration: boolean;
@@ -317,7 +318,15 @@ async function enrichContext(context: TicketContext, userId: string): Promise<Ti
 /**
  * Analyze a ticket and generate an appropriate response
  */
-export async function analyzeTicket(context: TicketContext): Promise<AgentResponse> {
+export async function analyzeTicket(context: TicketContext): Promise<AgentResponse & { resolvedBy?: "rules" | "ai" | "fallback" }> {
+  // Step 1: Try rule-based resolution first (0 API calls)
+  const ruleResult = ruleBasedAnalyze(context);
+  if (ruleResult) {
+    console.log(`[TicketingAgent] Rule-based resolution for ${context.ticketNumber} (type=${context.type})`);
+    return { ...ruleResult, resolvedBy: "rules" };
+  }
+
+  // Step 2: Fall through to AI — rules couldn't handle it
   // Build context message for the AI
   const contextMessage = buildContextMessage(context);
 
@@ -331,6 +340,7 @@ export async function analyzeTicket(context: TicketContext): Promise<AgentRespon
       needsHumanReview: true,
       internalNote: "AI agent unavailable — ANTHROPIC_API_KEY not configured",
       managerReviewItems: [],
+      resolvedBy: "fallback",
     };
   }
 
@@ -360,7 +370,7 @@ export async function analyzeTicket(context: TicketContext): Promise<AgentRespon
     }
 
     const response: AgentResponse = JSON.parse(jsonMatch[0]);
-    return response;
+    return { ...response, resolvedBy: "ai" };
   } catch (error) {
     console.error("Ticketing agent error:", error);
     // Return safe fallback response
@@ -372,6 +382,7 @@ export async function analyzeTicket(context: TicketContext): Promise<AgentRespon
       needsHumanReview: true,
       internalNote: `AI agent failed to process: ${error instanceof Error ? error.message : "Unknown error"}`,
       managerReviewItems: [],
+      resolvedBy: "fallback",
     };
   }
 }
@@ -490,6 +501,7 @@ export async function processNewTicket(ticketId: string): Promise<{
   success: boolean;
   autoResolved: boolean;
   message: string;
+  resolvedBy?: "rules" | "ai" | "fallback";
 }> {
   try {
     // Fetch ticket with all related data
@@ -638,7 +650,8 @@ export async function processNewTicket(ticketId: string): Promise<{
       return {
         success: true,
         autoResolved: true,
-        message: "Ticket auto-resolved by AI agent",
+        message: `Ticket auto-resolved by ${analysis.resolvedBy || "ai"} agent`,
+        resolvedBy: analysis.resolvedBy,
       };
     }
 
@@ -657,7 +670,8 @@ export async function processNewTicket(ticketId: string): Promise<{
       return {
         success: true,
         autoResolved: false,
-        message: "AI generated draft response for human review",
+        message: "Generated draft response for human review",
+        resolvedBy: analysis.resolvedBy,
       };
     }
 
@@ -665,6 +679,7 @@ export async function processNewTicket(ticketId: string): Promise<{
       success: true,
       autoResolved: false,
       message: "Ticket analyzed, requires human attention",
+      resolvedBy: analysis.resolvedBy,
     };
   } catch (error) {
     console.error("Error processing ticket:", error);

@@ -24,6 +24,8 @@ import {
 import { registerAgent } from "../registry";
 import { buildAgentMastermindPrompt } from "@/lib/mastermind";
 import { recordOutcome } from "@/lib/agents/learning";
+import { ruleBasedAnalyze, getTemplateResponse, shouldEscalateToAI } from "@/lib/support/ticket-templates";
+import type { TicketContext, SentimentAnalysis } from "@/lib/agents/ticketing-agent";
 
 // ============================================================================
 // CONSTANTS
@@ -193,17 +195,24 @@ class SupportAgent extends BaseAgent {
       estimatedTokens: 800,
     },
     {
+      id: "analyze-and-respond",
+      name: "Analyze & Respond",
+      description: "Combined analysis + response in a single AI call",
+      requiresAI: true,
+      estimatedTokens: 1500,
+    },
+    {
       id: "process-ticket",
       name: "Process Ticket",
-      description: "Full ticket processing including analysis and response",
-      requiresAI: true,
+      description: "Full ticket processing — rules first, AI only when needed",
+      requiresAI: false,
       estimatedTokens: 1500,
     },
     {
       id: "process-batch",
       name: "Process Batch",
-      description: "Process multiple pending tickets",
-      requiresAI: true,
+      description: "Process multiple pending tickets — rules first, AI only when needed",
+      requiresAI: false,
       supportsBatch: true,
       rateLimit: 5,
     },
@@ -217,6 +226,7 @@ class SupportAgent extends BaseAgent {
   protected registerHandlers(): void {
     this.handlers.set("analyze-ticket", this.handleAnalyzeTicket.bind(this));
     this.handlers.set("generate-response", this.handleGenerateResponse.bind(this));
+    this.handlers.set("analyze-and-respond", this.handleAnalyzeAndRespond.bind(this));
     this.handlers.set("process-ticket", this.handleProcessTicket.bind(this));
     this.handlers.set("process-batch", this.handleProcessBatch.bind(this));
   }
@@ -491,6 +501,220 @@ Generate a helpful, empathetic response in JSON format.`,
     }
   }
 
+  /**
+   * Combined analyze + respond in a single AI call (reduces 2 calls → 1).
+   * Used by handleProcessTicket when rules escalate to AI.
+   */
+  private async handleAnalyzeAndRespond(
+    input: unknown,
+    context: AgentContext
+  ): Promise<AgentResult<{
+    analysis: AnalysisResult;
+    responseText: string;
+    canAutoResolve: boolean;
+    priority: string;
+    suggestedActions: string[];
+  }>> {
+    const startTime = Date.now();
+    const { ticketId } = input as { ticketId: string };
+
+    try {
+      const ticket = await prisma.supportTicket.findUnique({
+        where: { id: ticketId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              plan: true,
+              createdAt: true,
+            },
+          },
+          comments: {
+            orderBy: { createdAt: "asc" },
+            take: 10,
+          },
+        },
+      });
+
+      if (!ticket) {
+        return {
+          success: false,
+          error: { code: "TICKET_NOT_FOUND", message: `Ticket ${ticketId} not found`, retryable: false },
+          needsHumanReview: false,
+          metadata: { agentId: this.id, capability: "analyze-and-respond", requestId: context.requestId, duration: Date.now() - startTime, usedFallback: false, executedAt: new Date() },
+        };
+      }
+
+      if (!this.anthropic) {
+        // Fallback to template
+        const tmpl = this.templateResponse(ticket, context, startTime);
+        const templateData = tmpl.data;
+        return this.createSuccessResult(
+          {
+            analysis: {
+              ticketId,
+              type: ticket.type,
+              priority: templateData?.priority || ticket.priority,
+              sentiment: "neutral",
+              canAutoResolve: templateData?.canAutoResolve || false,
+              suggestedActions: templateData?.suggestedActions || [],
+              needsEscalation: false,
+              confidence: 0.5,
+            },
+            responseText: templateData?.response || "Thank you for contacting support.",
+            canAutoResolve: templateData?.canAutoResolve || false,
+            priority: templateData?.priority || ticket.priority,
+            suggestedActions: templateData?.suggestedActions || [],
+          },
+          { capability: "analyze-and-respond", requestId: context.requestId, duration: Date.now() - startTime, usedFallback: true, executedAt: new Date() },
+        );
+      }
+
+      const ticketContext = await this.buildTicketContext(ticket, true);
+
+      const message = await this.anthropic.messages.create({
+        model: this.config.model || "claude-sonnet-4-5-20250929",
+        max_tokens: MAX_TOKENS,
+        system: this.getSystemPrompt(),
+        messages: [
+          {
+            role: "user",
+            content: `Analyze this support ticket AND generate a customer response in a single JSON response.
+
+TICKET #${ticket.ticketNumber}
+Type: ${ticket.type}
+Status: ${ticket.status}
+Priority: ${ticket.priority}
+Subject: ${ticket.subject}
+Description: ${ticket.description}
+User: ${ticket.user.name || "Customer"} (${ticket.user.plan} plan)
+
+${ticketContext}
+
+Return JSON with: canAutoResolve, response (customer-facing), internalNotes, suggestedActions, priority, needsHumanReview, needsEscalation, escalationReason, sentiment, confidence.`,
+          },
+        ],
+      });
+
+      const textContent = message.content.find((c) => c.type === "text");
+      if (!textContent || textContent.type !== "text") {
+        throw new Error("No text response from AI");
+      }
+
+      const parsed = this.parseAIResponse<{
+        canAutoResolve?: boolean;
+        response?: string;
+        priority?: string;
+        suggestedActions?: string[];
+        needsHumanReview?: boolean;
+        needsEscalation?: boolean;
+        escalationReason?: string;
+        internalNotes?: string;
+        sentiment?: string;
+        confidence?: number;
+      }>(textContent.text);
+
+      const tokensUsed = (message.usage?.input_tokens || 0) + (message.usage?.output_tokens || 0);
+      const d = parsed.data;
+
+      return this.createSuccessResult(
+        {
+          analysis: {
+            ticketId,
+            type: ticket.type,
+            priority: d?.priority || ticket.priority,
+            sentiment: d?.sentiment || "neutral",
+            canAutoResolve: d?.canAutoResolve || false,
+            suggestedResponse: d?.response,
+            suggestedActions: d?.suggestedActions || [],
+            needsEscalation: d?.needsEscalation || false,
+            escalationReason: d?.escalationReason,
+            internalNotes: d?.internalNotes,
+            confidence: d?.confidence || 0.7,
+          },
+          responseText: d?.response || "Thank you for contacting GhostMyData support. We're reviewing your request.",
+          canAutoResolve: d?.canAutoResolve || false,
+          priority: d?.priority || ticket.priority,
+          suggestedActions: d?.suggestedActions || [],
+        },
+        {
+          capability: "analyze-and-respond",
+          requestId: context.requestId,
+          duration: Date.now() - startTime,
+          tokensUsed,
+          model: this.config.model,
+          usedFallback: false,
+          executedAt: new Date(),
+        },
+        {
+          confidence: d?.confidence || 0.7,
+          needsHumanReview: d?.needsHumanReview,
+        }
+      );
+    } catch (error) {
+      return {
+        success: false,
+        error: { code: "ANALYZE_RESPOND_ERROR", message: error instanceof Error ? error.message : "Analysis + response failed", retryable: true },
+        needsHumanReview: true,
+        metadata: { agentId: this.id, capability: "analyze-and-respond", requestId: context.requestId, duration: Date.now() - startTime, usedFallback: false, executedAt: new Date() },
+      };
+    }
+  }
+
+  /**
+   * Build a minimal TicketContext for the shared rule engine from a DB ticket.
+   */
+  private buildRuleContext(ticket: {
+    ticketNumber: string;
+    type: string;
+    status: string;
+    priority: string;
+    subject: string;
+    description: string;
+    user: { name: string | null; email: string | null; plan: string };
+    comments: Array<{ content: string; createdAt: Date }>;
+  }): TicketContext {
+    const text = `${ticket.subject} ${ticket.description}`.toLowerCase();
+    // Inline lightweight sentiment (mirrors ticketing-agent analyzeSentiment)
+    const negKw = ["frustrated", "angry", "terrible", "awful", "worst", "unacceptable", "ridiculous", "scam", "fraud", "lawsuit", "attorney", "lawyer", "refund", "cancel", "disappointed", "furious", "outraged", "incompetent"];
+    const urgKw = ["urgent", "asap", "immediately", "emergency", "critical", "deadline", "today", "now", "help", "please help", "desperate"];
+    const negCount = negKw.filter((kw) => text.includes(kw)).length;
+    const urgCount = urgKw.filter((kw) => text.includes(kw)).length;
+    const hasExclamation = (text.match(/!/g) || []).length > 2;
+    const hasAllCaps = /[A-Z]{5,}/.test(`${ticket.subject} ${ticket.description}`);
+    const frustration = negCount > 0 || hasExclamation || hasAllCaps;
+    let score = 0;
+    if (negCount > 3) score = -1;
+    else if (negCount > 1) score = -0.5;
+    else if (negCount === 1) score = -0.2;
+    else if (text.includes("thank")) score = 0.3;
+    let urgency: SentimentAnalysis["urgency"] = "low";
+    if (urgCount > 2 || text.includes("lawsuit") || text.includes("attorney")) urgency = "critical";
+    else if (urgCount > 0 || negCount > 2) urgency = "high";
+    else if (negCount > 0 || hasExclamation) urgency = "medium";
+
+    return {
+      id: "",
+      ticketNumber: ticket.ticketNumber,
+      type: ticket.type,
+      status: ticket.status,
+      priority: ticket.priority,
+      subject: ticket.subject,
+      description: ticket.description,
+      userName: ticket.user.name || "User",
+      userEmail: ticket.user.email || "",
+      userPlan: ticket.user.plan || "FREE",
+      previousComments: ticket.comments.map((c) => ({
+        content: c.content,
+        isFromUser: true,
+        createdAt: c.createdAt,
+      })),
+      sentiment: { score, urgency, frustration, keywords: [] },
+    };
+  }
+
   private async handleProcessTicket(
     input: unknown,
     context: AgentContext
@@ -499,116 +723,143 @@ Generate a helpful, empathetic response in JSON format.`,
     const { ticketId, autoResolve = true } = input as ProcessTicketInput;
 
     try {
-      // First analyze the ticket
-      const analysisResult = await this.handleAnalyzeTicket(
-        { ticketId, includeContext: true },
-        context
-      );
+      // Fetch ticket for rule-based check
+      const ticket = await prisma.supportTicket.findUnique({
+        where: { id: ticketId },
+        include: {
+          user: { select: { id: true, name: true, email: true, plan: true, createdAt: true } },
+          comments: { orderBy: { createdAt: "asc" }, take: 10 },
+        },
+      });
 
-      if (!analysisResult.success || !analysisResult.data) {
+      if (!ticket) {
         return {
           success: false,
-          error: analysisResult.error || {
-            code: "ANALYSIS_FAILED",
-            message: "Failed to analyze ticket",
-            retryable: true,
-          },
-          needsHumanReview: true,
-          metadata: {
-            agentId: this.id,
-            capability: "process-ticket",
-            requestId: context.requestId,
-            duration: Date.now() - startTime,
-            usedFallback: false,
-            executedAt: new Date(),
-          },
+          error: { code: "TICKET_NOT_FOUND", message: `Ticket ${ticketId} not found`, retryable: false },
+          needsHumanReview: false,
+          metadata: { agentId: this.id, capability: "process-ticket", requestId: context.requestId, duration: Date.now() - startTime, usedFallback: false, executedAt: new Date() },
         };
       }
 
-      const analysis = analysisResult.data;
+      // ---- RULE-FIRST GATE ----
+      const ruleCtx = this.buildRuleContext(ticket);
+      const ruleResult = ruleBasedAnalyze(ruleCtx);
 
-      // Generate response
-      const responseResult = await this.handleGenerateResponse(
-        { ticketId, analysis },
-        context
-      );
+      if (ruleResult) {
+        // Rules handled it — 0 API calls
+        let wasAutoResolved = false;
 
-      if (!responseResult.success || !responseResult.data) {
-        return {
-          success: false,
-          error: responseResult.error || {
-            code: "RESPONSE_FAILED",
-            message: "Failed to generate response",
-            retryable: true,
+        if (autoResolve && ruleResult.canAutoResolve && !ruleResult.needsHumanReview) {
+          await prisma.ticketComment.create({
+            data: { id: nanoid(), ticketId, authorId: "system", content: ruleResult.response, isInternal: false },
+          });
+          await prisma.supportTicket.update({
+            where: { id: ticketId },
+            data: {
+              status: "RESOLVED",
+              priority: ruleResult.priority,
+              resolution: "Auto-resolved by rules",
+              resolvedAt: new Date(),
+              internalNotes: ruleResult.internalNote,
+              lastActivityAt: new Date(),
+            },
+          });
+          wasAutoResolved = true;
+
+          recordOutcome({
+            agentId: this.id, capability: "process-ticket", outcomeType: "SUCCESS",
+            context: { ticketId, ticketType: ticket.type, autoResolved: true, resolvedBy: "rules" },
+            outcome: { priority: ruleResult.priority },
+          }).catch(() => {});
+        } else {
+          await prisma.supportTicket.update({
+            where: { id: ticketId },
+            data: {
+              status: "IN_PROGRESS",
+              priority: ruleResult.priority,
+              internalNotes: `${ruleResult.internalNote}\n\nDraft Response:\n${ruleResult.response}`,
+              lastActivityAt: new Date(),
+            },
+          });
+
+          recordOutcome({
+            agentId: this.id, capability: "process-ticket", outcomeType: "PARTIAL",
+            context: { ticketId, ticketType: ticket.type, resolvedBy: "rules" },
+            outcome: { priority: ruleResult.priority },
+          }).catch(() => {});
+        }
+
+        return this.createSuccessResult<ProcessResult>(
+          {
+            ticketId,
+            status: wasAutoResolved ? "RESOLVED" : "IN_PROGRESS",
+            wasAutoResolved,
+            response: ruleResult.response,
+            needsHumanReview: !wasAutoResolved,
           },
-          needsHumanReview: true,
-          metadata: {
-            agentId: this.id,
+          {
             capability: "process-ticket",
             requestId: context.requestId,
             duration: Date.now() - startTime,
-            usedFallback: false,
+            tokensUsed: 0,
+            usedFallback: true,
             executedAt: new Date(),
           },
+          { needsHumanReview: !wasAutoResolved }
+        );
+      }
+
+      // ---- AI PATH (single combined call) ----
+      const aiResult = await this.handleAnalyzeAndRespond({ ticketId }, context);
+
+      if (!aiResult.success || !aiResult.data) {
+        return {
+          success: false,
+          error: aiResult.error || { code: "AI_FAILED", message: "AI analysis + response failed", retryable: true },
+          needsHumanReview: true,
+          metadata: { agentId: this.id, capability: "process-ticket", requestId: context.requestId, duration: Date.now() - startTime, usedFallback: false, executedAt: new Date() },
         };
       }
 
-      const response = responseResult.data;
+      const { analysis, responseText } = aiResult.data;
       let wasAutoResolved = false;
 
-      // Auto-resolve if appropriate
       if (autoResolve && analysis.canAutoResolve && !analysis.needsEscalation) {
-        // Add response as comment
         await prisma.ticketComment.create({
-          data: {
-            id: nanoid(),
-            ticketId,
-            authorId: "system", // System user ID
-            content: response.response,
-            isInternal: false,
-          },
+          data: { id: nanoid(), ticketId, authorId: "system", content: responseText, isInternal: false },
         });
-
-        // Update ticket status
         await prisma.supportTicket.update({
           where: { id: ticketId },
           data: {
             status: "RESOLVED",
-            priority: response.priority,
-            resolution: "Auto-resolved by Support Agent",
+            priority: aiResult.data.priority,
+            resolution: "Auto-resolved by Support Agent (AI)",
             resolvedAt: new Date(),
             internalNotes: analysis.internalNotes,
             lastActivityAt: new Date(),
           },
         });
-
         wasAutoResolved = true;
 
-        // Record learning outcome — auto-resolved successfully
         recordOutcome({
-          agentId: this.id,
-          capability: "process-ticket",
-          outcomeType: "SUCCESS",
-          context: { ticketId, ticketType: analysis.type, autoResolved: true },
-          outcome: { priority: response.priority, responseLength: response.response.length },
+          agentId: this.id, capability: "process-ticket", outcomeType: "SUCCESS",
+          context: { ticketId, ticketType: analysis.type, autoResolved: true, resolvedBy: "ai" },
+          outcome: { priority: aiResult.data.priority, responseLength: responseText.length },
         }).catch(() => {});
       } else {
-        // Record learning outcome — needed human review
         recordOutcome({
-          agentId: this.id,
-          capability: "process-ticket",
+          agentId: this.id, capability: "process-ticket",
           outcomeType: analysis.needsEscalation ? "PARTIAL" : "PARTIAL",
-          context: { ticketId, ticketType: analysis.type, needsEscalation: analysis.needsEscalation },
-          outcome: { priority: response.priority, escalated: analysis.needsEscalation },
+          context: { ticketId, ticketType: analysis.type, needsEscalation: analysis.needsEscalation, resolvedBy: "ai" },
+          outcome: { priority: aiResult.data.priority, escalated: analysis.needsEscalation },
         }).catch(() => {});
 
-        // Save draft response and update status
         await prisma.supportTicket.update({
           where: { id: ticketId },
           data: {
-            status: analysis.needsEscalation ? "IN_PROGRESS" : "IN_PROGRESS",
-            priority: response.priority,
-            internalNotes: `${analysis.internalNotes || ""}\n\nDraft Response:\n${response.response}`,
+            status: "IN_PROGRESS",
+            priority: aiResult.data.priority,
+            internalNotes: `${analysis.internalNotes || ""}\n\nDraft Response:\n${responseText}`,
             lastActivityAt: new Date(),
           },
         });
@@ -619,49 +870,30 @@ Generate a helpful, empathetic response in JSON format.`,
           ticketId,
           status: wasAutoResolved ? "RESOLVED" : "IN_PROGRESS",
           wasAutoResolved,
-          response: response.response,
+          response: responseText,
           needsHumanReview: !wasAutoResolved || analysis.needsEscalation,
         },
         {
           capability: "process-ticket",
           requestId: context.requestId,
           duration: Date.now() - startTime,
-          tokensUsed:
-            (analysisResult.metadata.tokensUsed || 0) +
-            (responseResult.metadata.tokensUsed || 0),
+          tokensUsed: aiResult.metadata.tokensUsed || 0,
           usedFallback: false,
           executedAt: new Date(),
         },
         {
           needsHumanReview: !wasAutoResolved || analysis.needsEscalation,
           managerReviewItems: analysis.needsEscalation
-            ? [
-                {
-                  category: "escalation",
-                  description: analysis.escalationReason || "Ticket needs escalation",
-                  priority: "HIGH",
-                },
-              ]
+            ? [{ category: "escalation", description: analysis.escalationReason || "Ticket needs escalation", priority: "HIGH" }]
             : undefined,
         }
       );
     } catch (error) {
       return {
         success: false,
-        error: {
-          code: "PROCESS_ERROR",
-          message: error instanceof Error ? error.message : "Processing failed",
-          retryable: true,
-        },
+        error: { code: "PROCESS_ERROR", message: error instanceof Error ? error.message : "Processing failed", retryable: true },
         needsHumanReview: true,
-        metadata: {
-          agentId: this.id,
-          capability: "process-ticket",
-          requestId: context.requestId,
-          duration: Date.now() - startTime,
-          usedFallback: false,
-          executedAt: new Date(),
-        },
+        metadata: { agentId: this.id, capability: "process-ticket", requestId: context.requestId, duration: Date.now() - startTime, usedFallback: false, executedAt: new Date() },
       };
     }
   }
