@@ -13,7 +13,7 @@ import { logCronExecution } from "@/lib/cron-logger";
 import { collectStandupMetrics, type StandupMetrics } from "@/lib/standup/collect-metrics";
 import { Resend } from "resend";
 import { buildMastermindPrompt } from "@/lib/mastermind";
-import { applyMastermindDirectives, getDirective } from "@/lib/mastermind/directives";
+import { applyMastermindDirectives } from "@/lib/mastermind/directives";
 import { getAdminFromEmail } from "@/lib/email";
 import type { MastermindDirectiveOutput } from "@/lib/mastermind/directives";
 import { prisma } from "@/lib/db";

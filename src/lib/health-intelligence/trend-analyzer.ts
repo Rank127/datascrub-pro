@@ -147,17 +147,8 @@ export async function analyzeHealthTrends(): Promise<TrendAnalysis[]> {
     orderBy: { createdAt: "asc" },
   }) as CronLogRow[];
 
-  // Live DB aggregates for current-point metrics
-  const [pendingCount, removalStats] = await Promise.all([
-    prisma.removalRequest.count({ where: { status: "PENDING" } }),
-    prisma.$queryRaw<Array<{ completed: bigint; failed: bigint }>>`
-      SELECT
-        COUNT(CASE WHEN status = 'COMPLETED' THEN 1 END) as completed,
-        COUNT(CASE WHEN status = 'FAILED' THEN 1 END) as failed
-      FROM "RemovalRequest"
-      WHERE "updatedAt" >= ${fourteenDaysAgo}
-    `,
-  ]);
+  // Live DB aggregate for current-point metrics
+  const pendingCount = await prisma.removalRequest.count({ where: { status: "PENDING" } });
 
   const analyses: TrendAnalysis[] = [];
 
