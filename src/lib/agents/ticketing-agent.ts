@@ -12,10 +12,10 @@ import { getAdminFromEmail } from "@/lib/email";
 
 const prisma = new PrismaClient();
 
-// Initialize Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || "",
-});
+// Initialize Anthropic client (lazy — validated before use)
+const anthropic = process.env.ANTHROPIC_API_KEY
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null;
 
 // System prompt for the ticketing agent
 const TICKETING_AGENT_PROMPT = `You are a professional customer support representative for GhostMyData, a leading privacy protection service that helps users remove their personal data from data broker websites.
@@ -320,6 +320,19 @@ async function enrichContext(context: TicketContext, userId: string): Promise<Ti
 export async function analyzeTicket(context: TicketContext): Promise<AgentResponse> {
   // Build context message for the AI
   const contextMessage = buildContextMessage(context);
+
+  if (!anthropic) {
+    console.error("[TicketingAgent] ANTHROPIC_API_KEY not configured — returning fallback response");
+    return {
+      canAutoResolve: false,
+      response: "Thank you for reaching out. Our support team has received your message and will review it shortly.",
+      suggestedActions: ["manual_review"],
+      priority: "NORMAL",
+      needsHumanReview: true,
+      internalNote: "AI agent unavailable — ANTHROPIC_API_KEY not configured",
+      managerReviewItems: [],
+    };
+  }
 
   try {
     const message = await anthropic.messages.create({
