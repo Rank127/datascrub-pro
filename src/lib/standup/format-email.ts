@@ -412,6 +412,39 @@ export function formatStandupEmail(
     <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 12px 0 0 0;">${analysis.brokerReport}</p>`
   );
 
+  // --- Health Intelligence ---
+  const hiMetrics = metrics.healthIntelligence;
+  const healthIntelligenceSection = hiMetrics.lastRunStatus ? card(
+    "Health Intelligence",
+    `<div style="display: flex; justify-content: space-around; margin-bottom: 12px;">
+      <!--[if mso]><table role="presentation" cellspacing="0" cellpadding="0"><tr><td><![endif]-->
+      ${statBox("Trends", hiMetrics.trendsAnalyzed, "#94a3b8")}
+      <!--[if mso]></td><td><![endif]-->
+      ${statBox("Adaptations", hiMetrics.adaptationsApplied, hiMetrics.adaptationsApplied > 0 ? "#8b5cf6" : "#94a3b8")}
+      <!--[if mso]></td><td><![endif]-->
+      ${statBox("Reverted", hiMetrics.pastReverted, hiMetrics.pastReverted > 0 ? "#f59e0b" : "#94a3b8")}
+      <!--[if mso]></td><td><![endif]-->
+      ${statBox("Critical", hiMetrics.qualityCritical, hiMetrics.qualityCritical > 0 ? "#ef4444" : "#10b981")}
+      <!--[if mso]></td></tr></table><![endif]-->
+    </div>
+    ${hiMetrics.recentAdaptations.length > 0 ? `
+    <div style="margin-top: 8px;">
+      <h3 style="color: #94a3b8; font-size: 12px; text-transform: uppercase; margin: 0 0 8px 0;">Recent Adaptations</h3>
+      ${hiMetrics.recentAdaptations.map(a => {
+        const scoreColor = a.effectivenessScore === null ? "#94a3b8" : a.effectivenessScore > 0 ? "#10b981" : a.effectivenessScore < -0.3 ? "#ef4444" : "#f59e0b";
+        const scoreStr = a.effectivenessScore !== null ? ` (score: ${a.effectivenessScore.toFixed(2)})` : " (pending eval)";
+        return `<div style="margin-bottom: 6px; padding: 6px 8px; background-color: #0f172a; border-radius: 4px;">
+          <span style="color: #a78bfa; font-size: 12px; font-family: monospace;">${a.directiveKey}</span>
+          <span style="color: #94a3b8; font-size: 12px;"> → </span>
+          <span style="color: #e2e8f0; font-size: 12px;">${JSON.stringify(a.newValue)}</span>
+          <span style="color: ${scoreColor}; font-size: 11px;">${scoreStr}</span>
+          <p style="color: #64748b; font-size: 11px; margin: 2px 0 0 0;">${a.rationale.slice(0, 120)}</p>
+        </div>`;
+      }).join("")}
+    </div>` : '<p style="color: #94a3b8; font-size: 13px; margin: 0;">No adaptations in last 7 days — system stable or in cold start.</p>'}
+    <p style="color: #64748b; font-size: 11px; margin: 8px 0 0 0;">Last run: ${hiMetrics.lastRunDate ? new Date(hiMetrics.lastRunDate).toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "Never"} ET — Status: ${hiMetrics.lastRunStatus}</p>`
+  ) : "";
+
   // --- Footer ---
   const footer = `
     <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #334155;">
@@ -446,6 +479,7 @@ export function formatStandupEmail(
         ${ticketSection}
         ${financialSection}
         ${brokerSection}
+        ${healthIntelligenceSection}
         ${footer}
       </div>
     </body>

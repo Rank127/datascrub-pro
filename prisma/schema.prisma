@@ -835,6 +835,29 @@ model StrategicDirective {
   @@index([isActive])
 }
 
+// Tracks auto-tuning actions from health-intelligence cron + mastermind-weekly
+// Self-evaluation loop reads entries 3-7 days later to score effectiveness and auto-revert failures
+model AdaptationLog {
+  id                 String    @id @default(cuid())
+  directiveKey       String    // e.g., "removal_anomaly_multiplier"
+  previousValue      Json      // Value before the change
+  newValue           Json      // Value after the change
+  rationale          String    // Why this adaptation was made
+  triggerMetric      String    // Which metric triggered it (e.g., "removal_success_rate")
+  triggerValue       Float     // The metric value that triggered the change
+  source             String    // "health-intelligence" or "mastermind-weekly"
+  evaluatedAt        DateTime? // When this adaptation was evaluated
+  effectivenessScore Float?    // -1.0 to 1.0 (positive = improved)
+  evaluationNotes    String?   // Human-readable evaluation result
+  reverted           Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+
+  @@index([directiveKey])
+  @@index([source])
+  @@index([createdAt])
+  @@index([evaluatedAt])
+}
+
 model NewsletterSubscriber {
   id           String   @id @default(cuid())
   email        String   @unique

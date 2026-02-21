@@ -13,9 +13,10 @@ import { logCronExecution } from "@/lib/cron-logger";
 import { collectStandupMetrics, type StandupMetrics } from "@/lib/standup/collect-metrics";
 import { Resend } from "resend";
 import { buildMastermindPrompt } from "@/lib/mastermind";
-import { applyMastermindDirectives } from "@/lib/mastermind/directives";
+import { applyMastermindDirectives, getDirective } from "@/lib/mastermind/directives";
 import { getAdminFromEmail } from "@/lib/email";
 import type { MastermindDirectiveOutput } from "@/lib/mastermind/directives";
+import { prisma } from "@/lib/db";
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY);
@@ -175,6 +176,26 @@ Always include strategic_priority and board_decision directives.`,
         const parsed = JSON.parse(dirJsonMatch[0]);
         directivesList = parsed.directives || [];
         directivesApplied = await applyMastermindDirectives(directivesList, "mastermind-weekly");
+
+        // Record directive changes to AdaptationLog for self-evaluation tracking
+        for (const d of directivesList) {
+          if (typeof d.value !== "number") continue; // Only track numeric directives
+          try {
+            await prisma.adaptationLog.create({
+              data: {
+                directiveKey: d.key,
+                previousValue: 0, // Previous value not easily available here
+                newValue: d.value,
+                rationale: d.rationale,
+                triggerMetric: "mastermind_board_meeting",
+                triggerValue: 0,
+                source: "mastermind-weekly",
+              },
+            });
+          } catch {
+            // Non-fatal — continue even if logging fails
+          }
+        }
       }
     } catch (dirError) {
       console.error("[MastermindWeekly] Directive generation failed (non-fatal):", dirError instanceof Error ? dirError.message : dirError);

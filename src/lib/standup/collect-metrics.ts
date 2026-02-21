@@ -139,6 +139,22 @@ export interface SecurityMetrics {
   }>;
 }
 
+export interface HealthIntelligenceMetrics {
+  lastRunStatus: string | null;
+  lastRunDate: string | null;
+  trendsAnalyzed: number;
+  adaptationsApplied: number;
+  pastReverted: number;
+  qualityCritical: number;
+  recentAdaptations: Array<{
+    directiveKey: string;
+    newValue: unknown;
+    rationale: string;
+    createdAt: string;
+    effectivenessScore: number | null;
+  }>;
+}
+
 export interface StandupMetrics {
   collectedAt: string;
   periodStart: string;
@@ -151,6 +167,7 @@ export interface StandupMetrics {
   brokers: BrokerMetrics;
   security: SecurityMetrics;
   tickets: TicketMetrics;
+  healthIntelligence: HealthIntelligenceMetrics;
 }
 
 export async function collectStandupMetrics(): Promise<StandupMetrics> {
@@ -167,6 +184,7 @@ export async function collectStandupMetrics(): Promise<StandupMetrics> {
     brokers,
     security,
     tickets,
+    healthIntelligence,
   ] = await Promise.all([
     collectAgentHealth(),
     collectCronHealth(twentyFourHoursAgo),
@@ -176,6 +194,7 @@ export async function collectStandupMetrics(): Promise<StandupMetrics> {
     collectBrokerMetrics(),
     collectSecurityMetrics(twentyFourHoursAgo),
     collectTicketMetrics(twentyFourHoursAgo),
+    collectHealthIntelligenceMetrics(),
   ]);
 
   return {
@@ -190,6 +209,7 @@ export async function collectStandupMetrics(): Promise<StandupMetrics> {
     brokers,
     security,
     tickets,
+    healthIntelligence,
   };
 }
 
@@ -574,4 +594,76 @@ async function collectTicketMetrics(
     aiResolvedCount24h,
     aiCallsAvoided24h: autoFixedCount24h, // Each auto-fix = 1 AI call saved
   };
+}
+
+async function collectHealthIntelligenceMetrics(): Promise<HealthIntelligenceMetrics> {
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [lastRun, recentAdaptations] = await Promise.all([
+      prisma.cronLog.findFirst({
+        where: { jobName: "health-intelligence" },
+        orderBy: { createdAt: "desc" },
+        select: { status: true, createdAt: true, metadata: true },
+      }),
+      prisma.adaptationLog.findMany({
+        where: { createdAt: { gte: sevenDaysAgo } },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: {
+          directiveKey: true,
+          newValue: true,
+          rationale: true,
+          createdAt: true,
+          effectivenessScore: true,
+        },
+      }),
+    ]);
+
+    let trendsAnalyzed = 0;
+    let adaptationsApplied = 0;
+    let pastReverted = 0;
+    let qualityCritical = 0;
+
+    if (lastRun?.metadata) {
+      try {
+        const meta = typeof lastRun.metadata === "string"
+          ? JSON.parse(lastRun.metadata)
+          : lastRun.metadata;
+        trendsAnalyzed = (meta.trendsAnalyzed as number) || 0;
+        adaptationsApplied = (meta.adaptationsApplied as number) || 0;
+        pastReverted = (meta.pastReverted as number) || 0;
+        qualityCritical = (meta.qualityCritical as number) || 0;
+      } catch {
+        // metadata parse failed — use defaults
+      }
+    }
+
+    return {
+      lastRunStatus: lastRun?.status || null,
+      lastRunDate: lastRun?.createdAt.toISOString() || null,
+      trendsAnalyzed,
+      adaptationsApplied,
+      pastReverted,
+      qualityCritical,
+      recentAdaptations: recentAdaptations.map(a => ({
+        directiveKey: a.directiveKey,
+        newValue: a.newValue,
+        rationale: a.rationale,
+        createdAt: a.createdAt.toISOString(),
+        effectivenessScore: a.effectivenessScore,
+      })),
+    };
+  } catch (error) {
+    console.warn("[Standup] Health intelligence metrics collection failed:", error instanceof Error ? error.message : error);
+    return {
+      lastRunStatus: null,
+      lastRunDate: null,
+      trendsAnalyzed: 0,
+      adaptationsApplied: 0,
+      pastReverted: 0,
+      qualityCritical: 0,
+      recentAdaptations: [],
+    };
+  }
 }

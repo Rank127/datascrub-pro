@@ -89,6 +89,8 @@ export async function GET(request: Request) {
         cronSuccesses: metrics.crons.successCount24h,
         cronFailures: metrics.crons.failureCount24h,
         removalsCompleted: metrics.removals.completed24h,
+        removalsPending: metrics.removals.pending,
+        removalsSubmitted: metrics.removals.submitted,
         scansCompleted: metrics.scans.completed24h,
         newSignups: metrics.users.newSignups24h,
         aiCost: metrics.agents.totalCost24h,
