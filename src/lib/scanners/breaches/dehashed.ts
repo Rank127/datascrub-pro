@@ -34,34 +34,35 @@ interface DehashedResponse {
  * Searches the Dehashed breach database for exposed credentials and personal data.
  * Dehashed aggregates data from thousands of breaches and dark web dumps.
  *
- * API Documentation: https://www.dehashed.com/docs
+ * API v2 (Feb 2026):
+ *   POST https://api.dehashed.com/v2/search
+ *   Header: Dehashed-Api-Key
+ *   Body: { query, page, size }
  *
- * Pricing: ~$5/month for API access
- * Rate Limits: Varies by plan
+ * Pricing: $15/500 credits (1 credit per query)
+ * Rate Limits: 10 req/sec
  */
 export class DehashedScanner extends BaseScanner {
   name = "Dehashed Scanner";
   source: DataSource = "DEHASHED";
 
   private apiKey: string;
-  private apiEmail: string;
-  private baseUrl = "https://api.dehashed.com/search";
+  private baseUrl = "https://api.dehashed.com/v2/search";
 
   constructor() {
     super();
     this.apiKey = process.env.DEHASHED_API_KEY || "";
-    this.apiEmail = process.env.DEHASHED_EMAIL || "";
   }
 
   async isAvailable(): Promise<boolean> {
-    return !!this.apiKey && !!this.apiEmail;
+    return !!this.apiKey;
   }
 
   async scan(input: ScanInput): Promise<ScanResult[]> {
     const results: ScanResult[] = [];
 
-    if (!this.apiKey || !this.apiEmail) {
-      console.log("[Dehashed] API credentials not configured, skipping");
+    if (!this.apiKey) {
+      console.log("[Dehashed] API key not configured, skipping");
       return results;
     }
 
@@ -124,39 +125,49 @@ export class DehashedScanner extends BaseScanner {
     return results;
   }
 
+  private retryCount = 0;
+
   private async searchByField(
     field: string,
     value: string
   ): Promise<DehashedEntry[]> {
     const query = `${field}:${value}`;
-    const url = `${this.baseUrl}?query=${encodeURIComponent(query)}`;
 
     console.log(`[Dehashed] Searching: ${field}:${this.maskValue(value)}`);
 
-    const auth = Buffer.from(`${this.apiEmail}:${this.apiKey}`).toString("base64");
-
-    const response = await fetch(url, {
+    const response = await fetch(this.baseUrl, {
+      method: "POST",
       headers: {
-        Accept: "application/json",
-        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/json",
+        "Dehashed-Api-Key": this.apiKey,
       },
+      body: JSON.stringify({ query, page: 1, size: 100 }),
     });
 
     if (response.status === 401) {
-      throw new Error("Invalid Dehashed API credentials");
+      const body = await response.text();
+      throw new Error(`Dehashed API auth error: ${body}`);
     }
 
     if (response.status === 429) {
-      console.warn("[Dehashed] Rate limited, waiting...");
-      await this.delay(5000);
-      return this.searchByField(field, value); // Retry once
+      if (this.retryCount < 1) {
+        this.retryCount++;
+        console.warn("[Dehashed] Rate limited, waiting 5s...");
+        await this.delay(5000);
+        return this.searchByField(field, value);
+      }
+      throw new Error("Dehashed rate limit exceeded after retry");
     }
 
     if (!response.ok) {
-      throw new Error(`Dehashed API error: ${response.status}`);
+      const body = await response.text();
+      throw new Error(`Dehashed API error ${response.status}: ${body.substring(0, 200)}`);
     }
 
+    this.retryCount = 0;
     const data: DehashedResponse = await response.json();
+
+    console.log(`[Dehashed] Balance: ${data.balance} credits remaining`);
 
     if (!data.success) {
       console.warn("[Dehashed] API returned success=false");
