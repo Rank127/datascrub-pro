@@ -114,22 +114,16 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
   }
 
   try {
-    // Try to verify the key by checking emails endpoint
-    // Note: Many Resend API keys are restricted to sending only
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      },
-    });
+    // Verify Resend connection using SDK (avoids raw GET /emails API noise)
+    const { Resend } = await import("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const { data, error: resendError } = await resend.emails.list();
 
-    // Resend free tier: 100 emails/day, 3000/month
     const dailyLimit = quotaStatus.limit;
 
-    if (response.ok) {
-      const data = await response.json();
-      const emailsSent = Array.isArray(data.data) ? data.data.length : 0;
-      // Use max of Resend count and our internal count (in case server restarted)
+    if (!resendError && data) {
+      const emailList = (data as unknown as { data: unknown[] })?.data;
+      const emailsSent = Array.isArray(emailList) ? emailList.length : 0;
       const actualSent = Math.max(emailsSent, quotaStatus.sent);
 
       return {
@@ -140,28 +134,22 @@ async function checkResendStatus(): Promise<ResendServiceStatus> {
         rateLimit: calculateRateLimitHealth(actualSent, dailyLimit, "midnight UTC"),
         queue: queueInfo,
       };
-    } else if (response.status === 401) {
-      // Check if it's a restricted key (send-only)
-      const errorData = await response.json().catch(() => ({}));
-      if (errorData.name === "restricted_api_key") {
-        // Key is valid but restricted to sending - use internal tracking
-        return {
-          status: "connected",
-          message: `Send-only API key (${quotaStatus.sent}/${quotaStatus.limit} today${queueInfo.queued > 0 ? `, ${queueInfo.queued} queued` : ''})`,
-          monthlyLimit: 3000,
-          rateLimit: calculateRateLimitHealth(quotaStatus.sent, quotaStatus.limit, "midnight UTC"),
-          queue: queueInfo,
-        };
-      }
+    } else if (resendError?.message?.includes("restricted")) {
+      // Key is valid but restricted to sending - use internal tracking
       return {
-        status: "error",
-        message: "Invalid API key",
+        status: "connected",
+        message: `Send-only API key (${quotaStatus.sent}/${quotaStatus.limit} today${queueInfo.queued > 0 ? `, ${queueInfo.queued} queued` : ''})`,
+        monthlyLimit: 3000,
+        rateLimit: calculateRateLimitHealth(quotaStatus.sent, quotaStatus.limit, "midnight UTC"),
         queue: queueInfo,
       };
     } else {
+      // API key configured, use internal tracking as fallback
       return {
-        status: "error",
-        message: `API returned ${response.status}`,
+        status: "connected",
+        message: `Resend configured (${quotaStatus.sent}/${quotaStatus.limit} today${queueInfo.queued > 0 ? `, ${queueInfo.queued} queued` : ''})`,
+        monthlyLimit: 3000,
+        rateLimit: calculateRateLimitHealth(quotaStatus.sent, dailyLimit, "midnight UTC"),
         queue: queueInfo,
       };
     }

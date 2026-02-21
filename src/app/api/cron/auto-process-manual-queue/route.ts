@@ -75,7 +75,7 @@ const BATCH_SIZE = 200;
 
 // Plan-based removal limits (matches removals/request/route.ts)
 const REMOVAL_LIMITS: Record<Plan, number> = {
-  FREE: 3,
+  FREE: 0, // FREE tier: scan + view only, no removals
   PRO: -1, // unlimited
   ENTERPRISE: -1, // unlimited
 };

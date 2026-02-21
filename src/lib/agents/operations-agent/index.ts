@@ -742,16 +742,13 @@ class OperationsAgent extends BaseAgent {
         );
       }
 
-      // Fetch emails from Resend API
-      const response = await fetch("https://api.resend.com/emails", {
-        headers: {
-          Authorization: `Bearer ${RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      });
+      // Fetch recent emails from Resend API using SDK
+      const { Resend } = await import("resend");
+      const resend = new Resend(RESEND_API_KEY);
+      const { data, error: resendError } = await resend.emails.list();
 
-      if (!response.ok) {
-        throw new Error(`Resend API error: ${response.status}`);
+      if (resendError) {
+        throw new Error(`Resend API error: ${resendError.message}`);
       }
 
       interface ResendEmail {
@@ -761,8 +758,7 @@ class OperationsAgent extends BaseAgent {
         last_event: string;
       }
 
-      const data = await response.json() as { data: ResendEmail[] };
-      const emails = data.data || [];
+      const emails = ((data as unknown as { data: ResendEmail[] })?.data || []) as ResendEmail[];
 
       // Analyze email statuses
       const deliveredStatuses = ["delivered", "sent", "opened", "clicked"];
