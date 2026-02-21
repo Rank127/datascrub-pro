@@ -112,6 +112,7 @@ export async function writeBlogPost(
     console.error("[blog-writer] ANTHROPIC_API_KEY not set");
     return null;
   }
+  console.log(`[blog-writer] Starting generation for: ${topic.slug}`);
 
   const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
@@ -234,7 +235,9 @@ Return ONLY the markdown content, nothing else.`;
       targetKeywords: topic.keywords,
     };
   } catch (error) {
-    console.error("[blog-writer] Generation failed:", error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errStatus = (error as { status?: number })?.status;
+    console.error(`[blog-writer] Generation failed for ${topic.slug}: ${errMsg}${errStatus ? ` (HTTP ${errStatus})` : ""}`);
     return null;
   }
 }
@@ -258,7 +261,7 @@ export async function writeAndPublishPost(
   }
 
   const post = await writeBlogPost(topic);
-  if (!post) return { reason: "generation_failed" };
+  if (!post) return { reason: "ai_generation_failed" };
 
   try {
     await prisma.autoBlogPost.create({
