@@ -22,7 +22,7 @@ export class InstantCheckmateScanner extends BaseBrokerScanner {
     estimatedRemovalDays: 7,
     privacyEmail: "privacy@instantcheckmate.com",
     requiresVerification: true,
-    usePremiumProxy: true,
+    useStealthProxy: true, // Heavy paywall + bot detection — stealth required
     rateLimit: {
       requestsPerMinute: 5,
       delayMs: 3000,

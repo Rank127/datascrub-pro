@@ -22,7 +22,7 @@ export class TruthFinderScanner extends BaseBrokerScanner {
     estimatedRemovalDays: 14,
     privacyEmail: "privacy@truthfinder.com",
     requiresVerification: true,
-    usePremiumProxy: true,
+    usePremiumProxy: true, // Premium proxy works for TruthFinder (verified via diagnostic)
     rateLimit: {
       requestsPerMinute: 5,
       delayMs: 3000,

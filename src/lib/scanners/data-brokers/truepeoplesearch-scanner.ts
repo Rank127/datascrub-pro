@@ -20,7 +20,7 @@ export class TruePeopleSearchScanner extends BaseBrokerScanner {
       "5. Your listing will be removed within minutes",
     estimatedRemovalDays: 1,
     requiresVerification: false,
-    usePremiumProxy: true, // Strong bot detection requires residential IPs
+    useStealthProxy: true, // Premium proxy times out — stealth required (verified via diagnostic)
     rateLimit: {
       requestsPerMinute: 10,
       delayMs: 2000,

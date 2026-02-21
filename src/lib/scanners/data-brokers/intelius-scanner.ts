@@ -22,7 +22,7 @@ export class InteliusScanner extends BaseBrokerScanner {
     estimatedRemovalDays: 3,
     privacyEmail: "privacy@intelius.com",
     requiresVerification: true,
-    usePremiumProxy: true, // Strong bot detection requires residential IPs
+    usePremiumProxy: true, // Premium proxy works for Intelius (verified via diagnostic)
     rateLimit: {
       requestsPerMinute: 5,
       delayMs: 3000,

@@ -22,7 +22,7 @@ export class BeenVerifiedScanner extends BaseBrokerScanner {
     estimatedRemovalDays: 1,
     privacyEmail: "privacy@beenverified.com",
     requiresVerification: true,
-    usePremiumProxy: true, // Strong bot detection requires residential IPs
+    useStealthProxy: true, // Paywall + Cloudflare — premium proxy gets blocked, stealth required
     rateLimit: {
       requestsPerMinute: 5,
       delayMs: 3000,

@@ -3,7 +3,13 @@
  *
  * Runs a FULL scan for a test user, captures per-scanner outcomes,
  * persists to ScannerHealthLog, and verifies the data.
+ *
+ * Usage: npx tsx scripts/test-scanner-health.ts
  */
+import dotenv from "dotenv";
+// Load .env.local (where SCRAPINGBEE_API_KEY lives) — dotenv/config only loads .env
+dotenv.config({ path: ".env.local" });
+
 import { PrismaClient } from "@prisma/client";
 import { decrypt } from "../src/lib/encryption/crypto";
 

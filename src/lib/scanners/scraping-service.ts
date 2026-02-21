@@ -265,18 +265,19 @@ async function fetchDirect(
     console.log(`[ScrapingService] Direct fetch success: ${html.length} bytes`);
 
     // Check for common bot detection indicators
-    const isBlocked =
+    // Match the same logic as fetchWithScrapingBee: require BOTH small response AND specific indicators
+    const isSmallResponse = html.length < 10000;
+    const hasBotIndicators =
+      html.includes("Access Denied") ||
+      html.includes("Request blocked") ||
       html.includes("captcha") ||
       html.includes("CAPTCHA") ||
-      html.includes("challenge-form") ||
-      html.includes("cf-browser-verification") ||
       html.includes("Please verify you are a human") ||
-      html.includes("Access Denied") ||
-      html.includes("blocked") ||
-      html.length < 1000; // Suspiciously small response
+      html.includes("cf-browser-verification") ||
+      html.includes("challenge-form");
 
-    if (isBlocked) {
-      console.warn(`[ScrapingService] Possible bot detection at ${url}`);
+    if (isSmallResponse && hasBotIndicators) {
+      console.warn(`[ScrapingService] Bot detection at ${url}: small response (${html.length} bytes) with blocking indicators`);
       return {
         success: false,
         html,
