@@ -37,8 +37,9 @@ export async function POST(request: Request) {
     const { plan, billingPeriod } = result.data;
 
     // Get the target price ID
+    // .trim() guards against env vars with trailing whitespace/newlines
     const priceEnvKey = `STRIPE_${plan}_${billingPeriod.toUpperCase()}_PRICE_ID`;
-    const newPriceId = process.env[priceEnvKey] || PLAN_TO_PRICE[plan];
+    const newPriceId = (process.env[priceEnvKey] || PLAN_TO_PRICE[plan]).trim();
 
     // Get subscription record
     const subscription = await prisma.subscription.findUnique({

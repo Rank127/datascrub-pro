@@ -27,17 +27,18 @@ export const stripe = {
 };
 
 // Price IDs - These should be created in your Stripe dashboard
+// Note: .trim() guards against env vars with trailing whitespace/newlines (common copy-paste issue)
 export const PRICE_IDS = {
-  PRO_MONTHLY: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || "price_pro_monthly",
-  PRO_YEARLY: process.env.STRIPE_PRO_YEARLY_PRICE_ID || "price_pro_yearly",
-  ENTERPRISE_MONTHLY: process.env.STRIPE_ENTERPRISE_MONTHLY_PRICE_ID || "price_enterprise_monthly",
-  ENTERPRISE_YEARLY: process.env.STRIPE_ENTERPRISE_YEARLY_PRICE_ID || "price_enterprise_yearly",
+  PRO_MONTHLY: (process.env.STRIPE_PRO_MONTHLY_PRICE_ID || "price_pro_monthly").trim(),
+  PRO_YEARLY: (process.env.STRIPE_PRO_YEARLY_PRICE_ID || "price_pro_yearly").trim(),
+  ENTERPRISE_MONTHLY: (process.env.STRIPE_ENTERPRISE_MONTHLY_PRICE_ID || "price_enterprise_monthly").trim(),
+  ENTERPRISE_YEARLY: (process.env.STRIPE_ENTERPRISE_YEARLY_PRICE_ID || "price_enterprise_yearly").trim(),
   // Corporate plan price IDs (placeholders — create in Stripe before go-live)
-  CORPORATE_10_YEARLY: process.env.STRIPE_CORPORATE_10_YEARLY_PRICE_ID || "price_corporate_10_yearly",
-  CORPORATE_25_YEARLY: process.env.STRIPE_CORPORATE_25_YEARLY_PRICE_ID || "price_corporate_25_yearly",
-  CORPORATE_50_YEARLY: process.env.STRIPE_CORPORATE_50_YEARLY_PRICE_ID || "price_corporate_50_yearly",
-  CORPORATE_100_YEARLY: process.env.STRIPE_CORPORATE_100_YEARLY_PRICE_ID || "price_corporate_100_yearly",
-  FAMILY_ADDON_YEARLY: process.env.STRIPE_FAMILY_ADDON_YEARLY_PRICE_ID || "price_family_addon_yearly",
+  CORPORATE_10_YEARLY: (process.env.STRIPE_CORPORATE_10_YEARLY_PRICE_ID || "price_corporate_10_yearly").trim(),
+  CORPORATE_25_YEARLY: (process.env.STRIPE_CORPORATE_25_YEARLY_PRICE_ID || "price_corporate_25_yearly").trim(),
+  CORPORATE_50_YEARLY: (process.env.STRIPE_CORPORATE_50_YEARLY_PRICE_ID || "price_corporate_50_yearly").trim(),
+  CORPORATE_100_YEARLY: (process.env.STRIPE_CORPORATE_100_YEARLY_PRICE_ID || "price_corporate_100_yearly").trim(),
+  FAMILY_ADDON_YEARLY: (process.env.STRIPE_FAMILY_ADDON_YEARLY_PRICE_ID || "price_family_addon_yearly").trim(),
 } as const;
 
 // Plan to Price mapping (annual-only billing)
