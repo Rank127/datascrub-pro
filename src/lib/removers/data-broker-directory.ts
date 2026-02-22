@@ -12758,6 +12758,140 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     estimatedDays: 14,
     notes: "Free background check aggregator. 690K Google-indexed pages.",
   },
+
+  // ==========================================
+  // MARKETING DATA BROKERS (Tier 3, Feb 2026)
+  // ==========================================
+  MELISSA_DATA: {
+    name: "Melissa Data",
+    optOutUrl: "https://www.melissa.com/privacy",
+    optOutEmail: "optout@melissa.com",
+    privacyEmail: "optout@melissa.com",
+    removalMethod: "BOTH",
+    estimatedDays: 30,
+    notes: "Major marketing data company. 20+ years. CA-registered data broker. Consumer/business data verification.",
+  },
+  ANALYTICSIQ: {
+    name: "AnalyticsIQ",
+    optOutUrl: "https://analytics-iq.com/privacy-policy/",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "264M consumer profiles via PeopleCore database. CA-registered data broker.",
+  },
+  AUDIENCE_ACUITY: {
+    name: "Audience Acuity",
+    optOutUrl: "https://audienceacuity.com/opt-out-of-database/",
+    privacyEmail: "privacy@audienceacuity.com",
+    removalMethod: "BOTH",
+    estimatedDays: 30,
+    notes: "Identity resolution from 70+ sources. CA-registered data broker.",
+  },
+  FOUR11_LOCATE: {
+    name: "411Locate",
+    optOutUrl: "https://www.411locate.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search and phone directory lookup.",
+  },
+
+  // ==========================================
+  // NICHE PEOPLE SEARCH / BACKGROUND (Tier 4, Feb 2026)
+  // ==========================================
+  ZOSEARCH: {
+    name: "ZoSearch",
+    optOutUrl: "https://www.zosearch.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search aggregator.",
+  },
+  FINDPEOPLEFAST: {
+    name: "FindPeopleFast",
+    optOutUrl: "https://www.findpeoplefast.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search site.",
+  },
+  PUBLICSEARCHER: {
+    name: "PublicSearcher",
+    optOutUrl: "https://www.publicsearcher.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Public records search.",
+  },
+  TRUTHRECORD: {
+    name: "TruthRecord",
+    optOutUrl: "https://www.truthrecord.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Background check site.",
+  },
+  SECRETINFO: {
+    name: "SecretInfo",
+    optOutUrl: "https://www.secretinfo.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Public records search.",
+  },
+  SEALEDRECORDS: {
+    name: "SealedRecords",
+    optOutUrl: "https://www.sealedrecords.net/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Court records search.",
+  },
+  BACKGROUNDCHECK_RUN: {
+    name: "BackgroundCheck.run",
+    optOutUrl: "https://backgroundcheck.run/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Background check aggregator.",
+  },
+  PROPERTYRECS: {
+    name: "PropertyRecs",
+    optOutUrl: "https://www.propertyrecs.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Property records with opt-out dashboard.",
+  },
+  QUICKPUBLICRECORDS: {
+    name: "QuickPublicRecords",
+    optOutUrl: "https://www.quickpublicrecords.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Public records aggregator.",
+  },
+  PUBLICRECORDREPORTS: {
+    name: "PublicRecordReports",
+    optOutUrl: "https://www.publicrecordreports.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Public records search.",
+  },
+
+  // ==========================================
+  // STATE RESIDENT DATABASES (Tier 4, Feb 2026)
+  // ==========================================
+  FLORIDA_RESIDENTS_DIRECTORY: {
+    name: "FloridaResidentsDirectory",
+    optOutUrl: "https://www.floridaresidentsdirectory.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Florida resident data. 1.1M Google-indexed pages.",
+  },
+  OHIO_RESIDENT_DATABASE: {
+    name: "OhioResidentDatabase",
+    optOutUrl: "https://www.ohioresidentdatabase.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Ohio resident data. 1.14M Google-indexed pages.",
+  },
+  NC_RESIDENT_DATABASE: {
+    name: "NorthCarolinaResidentDatabase",
+    optOutUrl: "https://www.northcarolinaresidentdatabase.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "North Carolina resident data.",
+  },
 };
 
 // Broker categories for organization
@@ -12783,13 +12917,17 @@ export const BROKER_CATEGORIES = {
     "SEARCHSYSTEMS", "PERSONSEARCH", "ARKANSASVOTERS", "FLORIDAVOTERS", "OHIOVOTERS",
     "GOLOOKUP", "PUBLICDATAUSA", "FOUR11_INFO", "CITY_DATA", "LOCATEPEOPLE",
     "FREEPEOPLEDIRECTORY", "PRIVATEREPORTS", "ALLPEOPLE", "PEEPLOOKUP",
-    "PERSONSEARCHERS", "NUMLOOKER"
+    "PERSONSEARCHERS", "NUMLOOKER",
+    "FOUR11_LOCATE", "ZOSEARCH", "FINDPEOPLEFAST", "PUBLICSEARCHER",
+    "FLORIDA_RESIDENTS_DIRECTORY", "OHIO_RESIDENT_DATABASE", "NC_RESIDENT_DATABASE"
   ],
   BACKGROUND_CHECK: [
     "TRUTHFINDER", "CHECKPEOPLE", "CYBERBACKGROUNDCHECKS", "PUBLICDATACHECK",
     "SEARCHPEOPLEFREE", "FREEPEOPLESEARCH", "SEARCHQUARRY",
     "FIRST_ADVANTAGE", "INTELLICORP", "TALENTWISE", "INFOMART", "SJV_ASSOCIATES",
-    "BACKGROUNDCHECKERS", "FREEBACKGROUNDCHECK"
+    "BACKGROUNDCHECKERS", "FREEBACKGROUNDCHECK",
+    "TRUTHRECORD", "SECRETINFO", "SEALEDRECORDS", "BACKGROUNDCHECK_RUN",
+    "QUICKPUBLICRECORDS", "PUBLICRECORDREPORTS"
   ],
   COURT_RECORDS: [
     "JUDYRECORDS", "UNICOURT", "COURTRECORDS_ORG", "ARRESTFACTS",
@@ -12809,7 +12947,7 @@ export const BROKER_CATEGORIES = {
     "TEXTMAGIC", "TEXTEM", "NUMVERIFY", "OKCALLER"
   ],
   PROPERTY_RECORDS: [
-    "NEIGHBOR_WHO", "HOMEMETRY", "BLOCKSHOPPER", "OWNERLY", "REHOLD", "NJPARCELS",
+    "NEIGHBOR_WHO", "HOMEMETRY", "BLOCKSHOPPER", "OWNERLY", "REHOLD", "NJPARCELS", "PROPERTYRECS",
     "PROPERTYSHARK", "ZILLOW", "REDFIN", "REALTOR_COM", "TRULIA",
     "HOUSEVALUES", "ADDRESSREPORT", "LANDWATCH", "REALTYHOP", "SHOWCASE",
     "HOMES_COM", "HOMESNAP", "MOVOTO", "OPENDOOR", "ESTATELY", "XOME",
@@ -12838,7 +12976,8 @@ export const BROKER_CATEGORIES = {
     "OPENX", "CRITEO", "VIANT", "ADSRVR", "EYEOTA",
     "MEDIAMATH", "AMOBEE", "ADROLL", "QUANTCAST", "SHARETHROUGH",
     "TRIPLELIFT", "APPNEXUS", "INDEX_EXCHANGE", "SOVRN", "SPOTX",
-    "TOWER_DATA", "NEXTROLL", "PERMUTIVE", "ADADYN", "INTENTIQ"
+    "TOWER_DATA", "NEXTROLL", "PERMUTIVE", "ADADYN", "INTENTIQ",
+    "MELISSA_DATA", "ANALYTICSIQ", "AUDIENCE_ACUITY"
   ],
   DATING_RELATIONSHIP: [
     "DATING_BACKGROUND", "MATCHDOTCOM_LOOKUP", "DATESEARCHSITE", "ROMANCESCAMS",

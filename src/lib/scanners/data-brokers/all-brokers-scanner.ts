@@ -86,6 +86,27 @@ const SEARCH_URL_PATTERNS: Record<string, (name: string, city?: string, state?: 
   FREEBACKGROUNDCHECK: (name) => `https://www.freebackgroundcheck.org/results?name=${encodeURIComponent(name)}`,
   AROUNDDEAL: (name) => `https://www.arounddeal.com/search/?q=${encodeURIComponent(name)}`,
   NJPARCELS: () => `https://njparcels.com/`,
+
+  // Tier 3 — Marketing data brokers
+  MELISSA_DATA: () => `https://www.melissa.com/lookups`,
+  ANALYTICSIQ: () => `https://analytics-iq.com/`,
+  AUDIENCE_ACUITY: () => `https://audienceacuity.com/`,
+  FOUR11_LOCATE: () => `https://www.411locate.com/`,
+
+  // Tier 4 — Niche people search / background / state DBs
+  ZOSEARCH: (name) => `https://www.zosearch.com/search/${encodeNameForUrl(name)}`,
+  FINDPEOPLEFAST: (name) => `https://www.findpeoplefast.com/search/${encodeNameForUrl(name)}`,
+  PUBLICSEARCHER: (name) => `https://www.publicsearcher.com/search/${encodeNameForUrl(name)}`,
+  TRUTHRECORD: (name) => `https://www.truthrecord.org/search/${encodeNameForUrl(name)}`,
+  SECRETINFO: (name) => `https://www.secretinfo.org/search/${encodeNameForUrl(name)}`,
+  SEALEDRECORDS: (name) => `https://www.sealedrecords.net/search/${encodeNameForUrl(name)}`,
+  BACKGROUNDCHECK_RUN: (name) => `https://backgroundcheck.run/search/${encodeNameForUrl(name)}`,
+  PROPERTYRECS: () => `https://www.propertyrecs.com/`,
+  QUICKPUBLICRECORDS: (name) => `https://www.quickpublicrecords.com/search/${encodeNameForUrl(name)}`,
+  PUBLICRECORDREPORTS: (name) => `https://www.publicrecordreports.com/search/${encodeNameForUrl(name)}`,
+  FLORIDA_RESIDENTS_DIRECTORY: (name) => `https://www.floridaresidentsdirectory.com/search/${encodeNameForUrl(name)}`,
+  OHIO_RESIDENT_DATABASE: (name) => `https://www.ohioresidentdatabase.com/search/${encodeNameForUrl(name)}`,
+  NC_RESIDENT_DATABASE: (name) => `https://www.northcarolinaresidentdatabase.com/search/${encodeNameForUrl(name)}`,
 };
 
 // Helper to encode name for URL paths
