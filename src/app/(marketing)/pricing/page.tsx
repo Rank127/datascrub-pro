@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CheckCircle, X, Shield, Lock, RefreshCcw } from "lucide-react";
+import { CheckCircle, X, Shield, Lock, RefreshCcw, Building2, ArrowRight } from "lucide-react";
 import { FAQSchema, PricingSchema } from "@/components/seo/structured-data";
 import { PricingButton, PricingPageTracker } from "@/components/pricing/pricing-button";
 import { AnimatedSection, AnimatedCard } from "@/components/marketing/animated-sections";
@@ -274,6 +274,27 @@ export default function PricingPage() {
           <p className="text-slate-400 max-w-lg mx-auto">
             Try any paid plan completely risk-free. If you&apos;re not satisfied with our data removal service within 30 days, we&apos;ll give you a full refund — no questions asked.
           </p>
+        </div>
+      </AnimatedSection>
+
+      {/* Business CTA */}
+      <AnimatedSection>
+        <div className="max-w-2xl mx-auto mb-24 p-8 bg-gradient-to-br from-violet-500/10 to-slate-800/50 rounded-2xl border border-violet-500/20 text-center card-hover-glow">
+          <Building2 className="h-12 w-12 text-violet-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-3">Protecting a Team?</h2>
+          <p className="text-slate-300 max-w-lg mx-auto mb-2">
+            Corporate plans for 10–100+ employees. Admin dashboards, compliance reporting, and automated removal — from <span className="font-semibold text-white">$10/seat/mo</span>.
+          </p>
+          <p className="text-sm text-slate-400 max-w-md mx-auto mb-6">
+            Reduce social engineering risk and stay CCPA/GDPR compliant across your entire organization.
+          </p>
+          <Link
+            href="/corporate"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-lg transition-colors"
+          >
+            View Business Plans
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </AnimatedSection>
 
