@@ -16,17 +16,20 @@ import type { BrokerConfig, BrokerSearchResult } from "../base-broker-scanner";
 import type { ScanInput } from "../../base-scanner";
 import type { DataSource } from "@/lib/types";
 
-// ─── Shared Parser ──────────────────────────────────────────────────────
+// ─── Shared URL Builder ─────────────────────────────────────────────────
+// InfoPay/InfoTracer sites use query-param format: ?fname=First&lname=Last
+// This matches the real InfoTracer URL pattern and avoids 404s from path-based URLs
 
 const infopayUrlBuilder: UrlBuilder = (input: ScanInput, config: BrokerConfig): string | null => {
   if (!input.fullName) return null;
   const nameParts = input.fullName.trim().split(/\s+/);
   if (nameParts.length < 2) return null;
 
-  const firstName = nameParts[0].toLowerCase();
-  const lastName = nameParts[nameParts.length - 1].toLowerCase();
+  const firstName = encodeURIComponent(nameParts[0]);
+  const lastName = encodeURIComponent(nameParts[nameParts.length - 1]);
 
-  return `${config.searchUrl}/${firstName}-${lastName}`;
+  // Use query params — universal across InfoPay network
+  return `${config.searchUrl}?fname=${firstName}&lname=${lastName}`;
 };
 
 const infopayParser: HtmlParser = (html: string, input: ScanInput): BrokerSearchResult => {
@@ -107,22 +110,22 @@ interface ClusterSite {
 }
 
 const INFOPAY_SITES: ClusterSite[] = [
-  { key: "RECORDSFINDER", name: "RecordsFinder", baseUrl: "https://recordsfinder.com", searchPath: "/people", optOutUrl: "https://recordsfinder.com/optout", privacyEmail: "privacy@recordsfinder.com" },
-  { key: "COURTCASEFINDER", name: "CourtCaseFinder", baseUrl: "https://courtcasefinder.com", searchPath: "/search", optOutUrl: "https://courtcasefinder.com/optout", privacyEmail: "privacy@courtcasefinder.com" },
-  { key: "STATERECORDS", name: "StateRecords", baseUrl: "https://staterecords.org", searchPath: "/people", optOutUrl: "https://staterecords.org/optout", privacyEmail: "privacy@staterecords.org" },
-  { key: "VERIFYRECORDS", name: "VerifyRecords", baseUrl: "https://www.verifyrecords.com", searchPath: "/people", optOutUrl: "https://www.verifyrecords.com/optout" },
-  { key: "GOVWARRANTSEARCH", name: "GovWarrantSearch", baseUrl: "https://govwarrantsearch.com", searchPath: "/search", optOutUrl: "https://govwarrantsearch.com/optout" },
-  { key: "NDB", name: "NDB (National Database)", baseUrl: "https://ndb.com", searchPath: "/people", optOutUrl: "https://ndb.com/optout" },
-  { key: "VERIFYPUBLICRECORDS", name: "VerifyPublicRecords", baseUrl: "https://verifypublicrecords.com", searchPath: "/search", optOutUrl: "https://verifypublicrecords.com/optout" },
-  { key: "USWARRANTS", name: "USWarrants", baseUrl: "https://uswarrants.org", searchPath: "/search", optOutUrl: "https://uswarrants.org/optout" },
-  { key: "USRECORDS", name: "USRecords", baseUrl: "https://usrecords.org", searchPath: "/people", optOutUrl: "https://usrecords.org/optout" },
-  { key: "REVERSERECORDS", name: "ReverseRecords", baseUrl: "https://reverserecords.org", searchPath: "/search", optOutUrl: "https://reverserecords.org/optout" },
-  { key: "INFOPAGES", name: "InfoPages", baseUrl: "https://infopages.com", searchPath: "/people", optOutUrl: "https://infopages.com/optout" },
-  { key: "DEATHRECORDS", name: "DeathRecords", baseUrl: "https://deathrecords.org", searchPath: "/search", optOutUrl: "https://deathrecords.org/optout" },
-  { key: "SEARCHUSAPEOPLE", name: "SearchUSAPeople", baseUrl: "https://searchusapeople.com", searchPath: "/people", optOutUrl: "https://searchusapeople.com/optout" },
-  { key: "FREEBACKGROUNDCHECK_IP", name: "FreeBackgroundCheck (InfoPay)", baseUrl: "https://freebackgroundcheck.org", searchPath: "/search", optOutUrl: "https://freebackgroundcheck.org/optout" },
-  { key: "CRIMINALRECORDS", name: "CriminalRecords", baseUrl: "https://criminalrecords.org", searchPath: "/search", optOutUrl: "https://criminalrecords.org/optout" },
-  { key: "BIRTHRECORDS", name: "BirthRecords", baseUrl: "https://birthrecords.org", searchPath: "/search", optOutUrl: "https://birthrecords.org/optout" },
+  { key: "RECORDSFINDER", name: "RecordsFinder", baseUrl: "https://recordsfinder.com", searchPath: "/people-search", optOutUrl: "https://recordsfinder.com/optout", privacyEmail: "privacy@recordsfinder.com" },
+  { key: "COURTCASEFINDER", name: "CourtCaseFinder", baseUrl: "https://courtcasefinder.com", searchPath: "/people-search", optOutUrl: "https://courtcasefinder.com/optout", privacyEmail: "privacy@courtcasefinder.com" },
+  { key: "STATERECORDS", name: "StateRecords", baseUrl: "https://staterecords.org", searchPath: "/people-search", optOutUrl: "https://staterecords.org/optout", privacyEmail: "privacy@staterecords.org" },
+  { key: "VERIFYRECORDS", name: "VerifyRecords", baseUrl: "https://www.verifyrecords.com", searchPath: "/people-search", optOutUrl: "https://www.verifyrecords.com/optout" },
+  { key: "GOVWARRANTSEARCH", name: "GovWarrantSearch", baseUrl: "https://govwarrantsearch.com", searchPath: "/people-search", optOutUrl: "https://govwarrantsearch.com/optout" },
+  { key: "NDB", name: "NDB (National Database)", baseUrl: "https://ndb.com", searchPath: "/people-search", optOutUrl: "https://ndb.com/optout" },
+  { key: "VERIFYPUBLICRECORDS", name: "VerifyPublicRecords", baseUrl: "https://verifypublicrecords.com", searchPath: "/people-search", optOutUrl: "https://verifypublicrecords.com/optout" },
+  { key: "USWARRANTS", name: "USWarrants", baseUrl: "https://uswarrants.org", searchPath: "/people-search", optOutUrl: "https://uswarrants.org/optout" },
+  { key: "USRECORDS", name: "USRecords", baseUrl: "https://usrecords.org", searchPath: "/people-search", optOutUrl: "https://usrecords.org/optout" },
+  { key: "REVERSERECORDS", name: "ReverseRecords", baseUrl: "https://reverserecords.org", searchPath: "/people-search", optOutUrl: "https://reverserecords.org/optout" },
+  { key: "INFOPAGES", name: "InfoPages", baseUrl: "https://infopages.com", searchPath: "/people-search", optOutUrl: "https://infopages.com/optout" },
+  { key: "DEATHRECORDS", name: "DeathRecords", baseUrl: "https://deathrecords.org", searchPath: "/people-search", optOutUrl: "https://deathrecords.org/optout" },
+  { key: "SEARCHUSAPEOPLE", name: "SearchUSAPeople", baseUrl: "https://searchusapeople.com", searchPath: "/people-search", optOutUrl: "https://searchusapeople.com/optout" },
+  { key: "FREEBACKGROUNDCHECK_IP", name: "FreeBackgroundCheck (InfoPay)", baseUrl: "https://freebackgroundcheck.org", searchPath: "/people-search", optOutUrl: "https://freebackgroundcheck.org/optout" },
+  { key: "CRIMINALRECORDS", name: "CriminalRecords", baseUrl: "https://criminalrecords.org", searchPath: "/people-search", optOutUrl: "https://criminalrecords.org/optout" },
+  { key: "BIRTHRECORDS", name: "BirthRecords", baseUrl: "https://birthrecords.org", searchPath: "/people-search", optOutUrl: "https://birthrecords.org/optout" },
 ];
 
 // ─── Factory Functions ──────────────────────────────────────────────────

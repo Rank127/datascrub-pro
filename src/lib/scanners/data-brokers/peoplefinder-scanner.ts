@@ -45,9 +45,11 @@ export class PeopleFinderScanner extends BaseBrokerScanner {
     // Add location if available
     if (input.addresses?.length) {
       const addr = input.addresses[0];
-      const city = this.formatNameForUrl(addr.city);
-      const state = this.formatStateForUrl(addr.state);
-      url += `/${city}-${state}`;
+      if (addr.city && addr.state) {
+        const city = this.formatNameForUrl(addr.city);
+        const state = this.formatStateForUrl(addr.state);
+        url += `/${city}-${state}`;
+      }
     }
 
     return url;

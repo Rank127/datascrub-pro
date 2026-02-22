@@ -36,7 +36,9 @@ export class TruePeopleSearchScanner extends BaseBrokerScanner {
     // Add location if available
     if (input.addresses?.length) {
       const addr = input.addresses[0];
-      url += `&citystatezip=${encodeURIComponent(addr.city + ", " + addr.state)}`;
+      if (addr.city && addr.state) {
+        url += `&citystatezip=${encodeURIComponent(addr.city + ", " + addr.state)}`;
+      }
     }
 
     return url;

@@ -198,9 +198,11 @@ export function createFastPeopleSearchManualScanner(): ManualCheckScanner {
 
       if (input.addresses?.length) {
         const addr = input.addresses[0];
-        const city = formatNameForUrl(addr.city);
-        const state = formatStateForUrl(addr.state);
-        url += `_${city}-${state}`;
+        if (addr.city && addr.state) {
+          const city = formatNameForUrl(addr.city);
+          const state = formatStateForUrl(addr.state);
+          url += `_${city}-${state}`;
+        }
       }
 
       return url;
@@ -238,9 +240,11 @@ export function createPeopleFinderManualScanner(): ManualCheckScanner {
 
       if (input.addresses?.length) {
         const addr = input.addresses[0];
-        const city = formatNameForUrl(addr.city);
-        const state = formatStateForUrl(addr.state);
-        url += `/${city}-${state}`;
+        if (addr.city && addr.state) {
+          const city = formatNameForUrl(addr.city);
+          const state = formatStateForUrl(addr.state);
+          url += `/${city}-${state}`;
+        }
       }
 
       return url;

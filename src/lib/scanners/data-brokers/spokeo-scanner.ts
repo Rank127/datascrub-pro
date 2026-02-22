@@ -44,9 +44,10 @@ export class SpokeoScanner extends BaseBrokerScanner {
     // Add state only (Spokeo doesn't accept city in URL)
     if (input.addresses?.length) {
       const addr = input.addresses[0];
-      // Use full state name, capitalized (e.g., "Georgia" not "ga")
-      const state = this.getFullStateName(addr.state);
-      url += `/${state}`;
+      if (addr.state) {
+        const state = this.getFullStateName(addr.state);
+        url += `/${state}`;
+      }
     }
 
     return url;

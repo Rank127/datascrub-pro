@@ -45,9 +45,11 @@ export class WhitePagesScanner extends BaseBrokerScanner {
     // Add location if available
     if (input.addresses?.length) {
       const addr = input.addresses[0];
-      const state = this.formatStateForUrl(addr.state).toUpperCase();
-      const city = this.formatNameForUrl(addr.city);
-      url += `/${city}-${state}`;
+      if (addr.state && addr.city) {
+        const state = this.formatStateForUrl(addr.state).toUpperCase();
+        const city = this.formatNameForUrl(addr.city);
+        url += `/${city}-${state}`;
+      }
     }
 
     return url;

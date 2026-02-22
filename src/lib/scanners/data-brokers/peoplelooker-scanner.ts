@@ -42,8 +42,10 @@ export class PeopleLookerScanner extends BaseBrokerScanner {
 
     if (input.addresses?.length) {
       const addr = input.addresses[0];
-      const state = this.formatStateForUrl(addr.state);
-      url += `/${state}`;
+      if (addr.state) {
+        const state = this.formatStateForUrl(addr.state);
+        url += `/${state}`;
+      }
     }
 
     return url;
