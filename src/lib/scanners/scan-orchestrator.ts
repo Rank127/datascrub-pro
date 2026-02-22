@@ -1,15 +1,20 @@
 import type { Scanner, ScanInput, ScanResult } from "./base-scanner";
+import { CONFIDENCE_THRESHOLDS } from "./base-scanner";
 import { MockDataBrokerScanner } from "./data-brokers/mock-broker-scanner";
 import { createRealBrokerScanners } from "./data-brokers";
 import { BaseBrokerScanner } from "./data-brokers/base-broker-scanner";
+import { ClusterBrokerScanner } from "./data-brokers/cluster-scanner";
 import { loadDynamicScanners } from "./data-brokers/dynamic-broker-scanner";
 import { HaveIBeenPwnedScanner } from "./breaches/haveibeenpwned";
 import { DehashedScanner } from "./breaches/dehashed";
 import { LeakCheckScanner } from "./breaches/leakcheck";
 import { SocialMediaScanner } from "./social/social-scanner";
 import { AIProtectionScanner } from "./ai-protection";
-import { getBrokerCount } from "../removers/data-broker-directory";
+import { getBrokerCount, getSubsidiaries } from "../removers/data-broker-directory";
 import { projectExposures, type ProjectionStats } from "./exposure-projector";
+import { DATA_BROKER_DIRECTORY, BROKER_CATEGORIES } from "../removers/data-broker-directory";
+import type { ConfidenceFactors, ConfidenceResult, MatchClassification } from "./base-scanner";
+import type { DataSource, Severity } from "@/lib/types";
 import type { Plan, ScanType } from "@/lib/types";
 
 // ─── Scanner Outcome Tracking ───
@@ -154,8 +159,7 @@ export class ScanOrchestrator {
     const allResults: ScanResult[] = [];
 
     // ScrapingBee has max concurrency of 5, so batch data broker scanners
-    // Separate scanners into batches to avoid hitting rate limits
-    const BATCH_SIZE = 4; // Stay under ScrapingBee's limit of 5
+    const BATCH_SIZE = 4;
 
     // Helper to run a single scanner with outcome tracking
     const runScanner = async (scanner: Scanner): Promise<ScanResult[]> => {
@@ -189,7 +193,6 @@ export class ScanOrchestrator {
         if (scanner instanceof BaseBrokerScanner) {
           const lastError = scanner.getLastError();
           if (lastError && results.length === 0) {
-            // Scanner caught an error and returned [] — classify it
             status = lastError.type === "TIMEOUT" ? "TIMEOUT"
               : lastError.type === "BOT_DETECTION" ? "BLOCKED"
               : "FAILED";
@@ -223,7 +226,6 @@ export class ScanOrchestrator {
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error(`[ScanOrchestrator] ${scanner.name} failed:`, error);
 
-        // Categorize the error
         let errorType = "UNKNOWN";
         let status: ScannerOutcome["status"] = "FAILED";
         if (errorMessage.includes("403") || errorMessage.toLowerCase().includes("access denied")) {
@@ -250,32 +252,118 @@ export class ScanOrchestrator {
       }
     };
 
-    // Process scanners in batches
-    for (let i = 0; i < this.scanners.length; i += BATCH_SIZE) {
-      const batch = this.scanners.slice(i, i + BATCH_SIZE);
-      console.log(`[ScanOrchestrator] Running batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.map(s => s.name).join(", ")}`);
+    // ─── Run batches of scanners ───
+    const runBatches = async (scanners: Scanner[], label: string) => {
+      for (let i = 0; i < scanners.length; i += BATCH_SIZE) {
+        const batch = scanners.slice(i, i + BATCH_SIZE);
+        console.log(`[ScanOrchestrator] ${label} batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.map(s => s.name).join(", ")}`);
 
-      const batchPromises = batch.map(scanner => runScanner(scanner));
-      const batchResults = await Promise.allSettled(batchPromises);
+        const batchPromises = batch.map(scanner => runScanner(scanner));
+        const batchResults = await Promise.allSettled(batchPromises);
 
-      for (const result of batchResults) {
-        if (result.status === "fulfilled") {
-          allResults.push(...result.value);
-        } else {
-          // Promise.allSettled rejection — track it
-          this.failedScannerCount++;
-          console.error(`[ScanOrchestrator] Scanner failed in batch: ${result.reason}`);
+        for (const result of batchResults) {
+          if (result.status === "fulfilled") {
+            allResults.push(...result.value);
+          } else {
+            this.failedScannerCount++;
+            console.error(`[ScanOrchestrator] Scanner failed in batch: ${result.reason}`);
+          }
+        }
+
+        this.partialResults = [...allResults];
+
+        if (i + BATCH_SIZE < scanners.length) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+    };
+
+    // ─── Tiered Execution ───
+    // Tier 1: Non-cluster scanners (original 8 active + breach + social + AI)
+    // Tier 2: Cluster children — skip if parent confirmed
+    const tier1Scanners: Scanner[] = [];
+    const clusterScanners: Scanner[] = [];
+
+    for (const scanner of this.scanners) {
+      if (scanner instanceof ClusterBrokerScanner) {
+        clusterScanners.push(scanner);
+      } else {
+        tier1Scanners.push(scanner);
+      }
+    }
+
+    console.log(`[ScanOrchestrator] Tiered execution: ${tier1Scanners.length} Tier 1 + ${clusterScanners.length} cluster`);
+
+    // Run Tier 1 first
+    await runBatches(tier1Scanners, "Tier 1");
+
+    // ─── Parent-skip optimization ───
+    // Check which cluster parents confirmed hits (score >= AUTO_PROCEED)
+    // If a parent confirmed, skip its cluster children — projection covers them at 0.95 weight
+    const confirmedParentKeys = new Set<string>();
+    for (const result of allResults) {
+      const score = result.confidence?.score ?? 0;
+      if (score >= CONFIDENCE_THRESHOLDS.AUTO_PROCEED) {
+        const sourceKey = String(result.source);
+        // Check if this scanner is a cluster parent (has subsidiaries)
+        const subs = getSubsidiaries(sourceKey);
+        if (subs.length > 0) {
+          confirmedParentKeys.add(sourceKey);
+        }
+      }
+    }
+
+    // Filter cluster children: skip those whose parent confirmed
+    const clusterToRun: Scanner[] = [];
+    const clusterSkipped: Scanner[] = [];
+
+    for (const scanner of clusterScanners) {
+      const brokerScanner = scanner as ClusterBrokerScanner;
+      const sourceKey = String(brokerScanner.config.source);
+
+      // Check if this child's parent confirmed — look at directory consolidatesTo
+      let shouldSkip = false;
+      // The scanner's source key should have a consolidatesTo in the directory
+      // We check confirmedParentKeys against known parent mappings
+      if (sourceKey === "RADARIS" || sourceKey === "INTELIUS" || sourceKey === "INFOTRACER") {
+        // These ARE parents, not children — always run
+        clusterToRun.push(scanner);
+        continue;
+      }
+
+      // Check if any confirmed parent key has this scanner's source in its subsidiaries
+      for (const parentKey of confirmedParentKeys) {
+        const parentSubs = getSubsidiaries(parentKey);
+        if (parentSubs.includes(sourceKey)) {
+          shouldSkip = true;
+          break;
         }
       }
 
-      // Track partial results after each batch for crash recovery
-      this.partialResults = [...allResults];
-
-      // Small delay between batches to avoid rate limiting
-      if (i + BATCH_SIZE < this.scanners.length) {
-        console.log(`[ScanOrchestrator] Waiting 1s before next batch...`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      if (shouldSkip) {
+        clusterSkipped.push(scanner);
+        this.outcomes.push({
+          scannerName: scanner.name,
+          scannerType: "STATIC_BROKER",
+          status: "SKIPPED",
+          responseTimeMs: 0,
+          resultsFound: 0,
+        });
+      } else {
+        clusterToRun.push(scanner);
       }
+    }
+
+    if (clusterSkipped.length > 0) {
+      console.log(
+        `[ScanOrchestrator] Parent-skip: ${clusterSkipped.length} cluster children skipped ` +
+        `(parents confirmed: ${[...confirmedParentKeys].join(", ")})`
+      );
+    }
+
+    // Run remaining cluster scanners
+    if (clusterToRun.length > 0) {
+      await runBatches(clusterToRun, "Cluster");
     }
 
     // Log scanner health summary
@@ -301,6 +389,15 @@ export class ScanOrchestrator {
       );
     }
 
+    // ─── Post-scan CHECKING enrichment ───
+    // Generate "checking" entries for brokers in the same category as confirmed exposures
+    // that weren't found by real scanners or projection. Max 20 entries.
+    const checkingResults = this.generateCheckingEntries(allResults);
+    if (checkingResults.length > 0) {
+      allResults.push(...checkingResults);
+      console.log(`[ScanOrchestrator] Added ${checkingResults.length} CHECKING entries`);
+    }
+
     // Final progress update
     if (onProgress) {
       onProgress({
@@ -313,6 +410,82 @@ export class ScanOrchestrator {
     }
 
     return allResults;
+  }
+
+  /**
+   * Generate CHECKING entries for brokers in the same category as confirmed exposures
+   * that weren't already found by scanners or projection. Max 20 entries.
+   */
+  private generateCheckingEntries(existingResults: ScanResult[]): ScanResult[] {
+    const MAX_CHECKING = 20;
+
+    // Get confirmed source keys
+    const confirmedCategories = new Set<string>();
+    const existingKeys = new Set(existingResults.map(r => String(r.source)));
+
+    for (const result of existingResults) {
+      const score = result.confidence?.score ?? 0;
+      if (score >= CONFIDENCE_THRESHOLDS.AUTO_PROCEED) {
+        const sourceKey = String(result.source);
+        // Find which category this broker belongs to
+        for (const [cat, brokers] of Object.entries(BROKER_CATEGORIES)) {
+          if ((brokers as readonly string[]).includes(sourceKey)) {
+            confirmedCategories.add(cat);
+          }
+        }
+      }
+    }
+
+    if (confirmedCategories.size === 0) return [];
+
+    // Find brokers in those categories that weren't already found
+    const checkingResults: ScanResult[] = [];
+
+    for (const category of confirmedCategories) {
+      const categoryBrokers = (BROKER_CATEGORIES as Record<string, readonly string[]>)[category];
+      if (!categoryBrokers) continue;
+
+      for (const brokerKey of categoryBrokers) {
+        if (checkingResults.length >= MAX_CHECKING) break;
+        if (existingKeys.has(brokerKey)) continue;
+
+        const info = DATA_BROKER_DIRECTORY[brokerKey];
+        if (!info || !info.optOutUrl) continue;
+
+        const factors: ConfidenceFactors = {
+          nameMatch: 0,
+          locationMatch: 0,
+          ageMatch: 0,
+          dataCorrelation: 0,
+          sourceReliability: 0,
+        };
+
+        const confidence: ConfidenceResult = {
+          score: 0,
+          classification: "CHECKING" as MatchClassification,
+          factors,
+          reasoning: [`CHECKING: Broker in ${category} category — same category as a confirmed exposure`],
+          validatedAt: new Date(),
+        };
+
+        checkingResults.push({
+          source: brokerKey as DataSource,
+          sourceName: info.name,
+          sourceUrl: info.optOutUrl,
+          dataType: "COMBINED_PROFILE",
+          dataPreview: `${info.name} may have your data — verify manually`,
+          severity: "LOW" as Severity,
+          rawData: { requiresManualCheck: true },
+          confidence,
+        });
+
+        existingKeys.add(brokerKey);
+      }
+
+      if (checkingResults.length >= MAX_CHECKING) break;
+    }
+
+    return checkingResults;
   }
 
   /**

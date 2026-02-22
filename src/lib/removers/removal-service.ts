@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { sendCCPARemovalRequest, queueRemovalDigest, queueRemovalStatusUpdate } from "@/lib/email";
-import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, isKnownDataBroker, getNotBrokerReason, isCaRegisteredBroker, type DataBrokerInfo } from "./data-broker-directory";
+import { getDataBrokerInfo, getOptOutInstructions, getSubsidiaries, isKnownDataBroker, getNotBrokerReason, isCaRegisteredBroker, getConsolidationParent, type DataBrokerInfo } from "./data-broker-directory";
 import { hasActiveDropSubmission } from "@/lib/drop";
 import { calculateVerifyAfterDate } from "./verification-service";
 import { attemptAutomatedOptOut, isAutomationEnabled, getBestAutomationMethod, canAutomateBroker } from "./browser-automation";
@@ -461,8 +461,16 @@ export async function executeRemoval(
   const dataType = removalRequest.exposure.dataType;
   const sourceUrl = removalRequest.exposure.sourceUrl;
 
-  // Get data broker info
-  const brokerInfo = getDataBrokerInfo(source);
+  // Get data broker info — route through parent if this is a subsidiary
+  const parentKey = getConsolidationParent(source);
+  const parentBrokerInfo = parentKey ? getDataBrokerInfo(parentKey) : null;
+  const brokerInfo = parentBrokerInfo || getDataBrokerInfo(source);
+
+  if (parentKey && parentBrokerInfo) {
+    console.log(
+      `[Removal] Routing ${source} removal through parent broker ${parentKey} (${parentBrokerInfo.name})`
+    );
+  }
 
   // =========================================================================
   // PRE-REMOVAL VERIFICATION: For uncertain matches, verify data exists first
@@ -641,12 +649,15 @@ export async function executeRemoval(
         // Only send if broker supports email AND has a valid privacyEmail
         const supportsEmail = brokerInfo.removalMethod === "EMAIL" || brokerInfo.removalMethod === "BOTH";
         if (supportsEmail && brokerInfo.privacyEmail) {
+          // When routing through parent, include the child site name so the parent knows which subsidiary data to remove
+          const childBrokerInfo = parentKey ? getDataBrokerInfo(source) : null;
           const result = await sendCCPARemovalRequest({
             toEmail: brokerInfo.privacyEmail,
             fromName: userName,
             fromEmail: userEmail,
             dataTypes: [formatDataType(dataType)],
             sourceUrl: removalRequest.exposure.sourceUrl || undefined,
+            subsidiaryName: parentKey && childBrokerInfo ? childBrokerInfo.name : undefined,
           });
 
           if (result.success) {
@@ -666,7 +677,9 @@ export async function executeRemoval(
             const emailSuccessResult: RemovalExecutionResult = {
               success: true,
               method: "AUTO_EMAIL",
-              message: `CCPA/GDPR removal request sent to ${brokerInfo.name}`,
+              message: parentKey
+                ? `CCPA/GDPR removal request sent to ${brokerInfo.name} (parent of ${childBrokerInfo?.name || source})`
+                : `CCPA/GDPR removal request sent to ${brokerInfo.name}`,
             };
             recordLearning(emailSuccessResult);
             return emailSuccessResult;

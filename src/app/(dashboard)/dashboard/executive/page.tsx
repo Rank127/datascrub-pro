@@ -22,6 +22,7 @@ import {
   Crosshair,
   Sprout,
   Plug,
+  Radar,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,6 +68,10 @@ const IntegrationsSection = dynamic(
   () => import("@/components/dashboard/integrations/integrations-section").then((m) => ({ default: m.IntegrationsSection })),
   { loading: TabLoader }
 );
+const ScanQualitySection = dynamic(
+  () => import("@/components/dashboard/executive/scan-quality-section").then((m) => ({ default: m.ScanQualitySection })),
+  { loading: TabLoader }
+);
 
 // Wrapper component to handle Suspense boundary for useSearchParams
 export default function ExecutiveDashboardPage() {
@@ -85,7 +90,7 @@ function ExecutiveDashboardContent() {
   useSession(); // Ensure user is authenticated
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const defaultTab = ["finance", "analytics", "operations", "activities", "users", "support", "integrations", "competitive", "growth"].includes(tabParam || "")
+  const defaultTab = ["finance", "analytics", "operations", "activities", "users", "support", "integrations", "competitive", "growth", "scan-quality"].includes(tabParam || "")
     ? tabParam!
     : "finance";
 
@@ -275,6 +280,13 @@ function ExecutiveDashboardContent() {
             <Sprout className="h-5 w-5" />
             <span className="hidden sm:inline">Growth</span>
           </TabsTrigger>
+          <TabsTrigger
+            value="scan-quality"
+            className="px-4 py-2.5 text-sm font-medium gap-2 data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-300 data-[state=active]:border-orange-500/50 data-[state=active]:border hover:bg-orange-500/10 hover:text-orange-400 transition-all"
+          >
+            <Radar className="h-5 w-5" />
+            <span className="hidden sm:inline">Scan Quality</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="finance" className="mt-6 p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
@@ -311,6 +323,10 @@ function ExecutiveDashboardContent() {
 
         <TabsContent value="growth" className="mt-6 p-4 rounded-lg border border-green-500/20 bg-green-500/5">
           <GrowthSection data={data.growth} />
+        </TabsContent>
+
+        <TabsContent value="scan-quality" className="mt-6 p-4 rounded-lg border border-orange-500/20 bg-orange-500/5">
+          <ScanQualitySection />
         </TabsContent>
       </Tabs>
     </div>

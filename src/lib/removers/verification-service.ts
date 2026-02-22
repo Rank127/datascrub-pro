@@ -8,6 +8,7 @@ import { HaveIBeenPwnedScanner } from "@/lib/scanners/breaches/haveibeenpwned";
 import { getScannerBySource as getDataBrokerScanner } from "@/lib/scanners/data-brokers";
 import type { ScanInput, ScanResult, Scanner } from "@/lib/scanners/base-scanner";
 import { generateScreenshotUrl } from "@/lib/screenshots/screenshot-service";
+import { getSubsidiaries, getConsolidationParent } from "@/lib/removers/data-broker-directory";
 
 // Days to wait before verification based on source
 // These are based on actual broker processing times + buffer
@@ -400,6 +401,53 @@ export async function verifyRemovalRequest(removalRequestId: string): Promise<{
         removalRequest.exposure.sourceName,
         removalRequestId
       ).catch(console.error);
+
+      // Auto-complete child/sibling removals when parent is verified
+      // If this source is a parent OR has a parent, propagate completion to all related subsidiaries
+      const subsidiaryKeys = getSubsidiaries(removalRequest.exposure.source);
+      const parentKey = getConsolidationParent(removalRequest.exposure.source);
+      const relatedKeys = subsidiaryKeys.length > 0
+        ? subsidiaryKeys
+        : parentKey
+          ? getSubsidiaries(parentKey).filter(k => k !== removalRequest.exposure.source)
+          : [];
+
+      if (relatedKeys.length > 0) {
+        try {
+          // Find pending/submitted child removal requests for this user
+          const childRemovals = await prisma.removalRequest.findMany({
+            where: {
+              userId: removalRequest.user.id,
+              status: { in: ["PENDING", "SUBMITTED", "IN_PROGRESS"] },
+              exposure: { source: { in: relatedKeys } },
+            },
+            select: { id: true, exposureId: true, exposure: { select: { source: true, sourceName: true } } },
+          });
+
+          if (childRemovals.length > 0) {
+            console.log(
+              `[Verification] Auto-completing ${childRemovals.length} related removals after parent ${removalRequest.exposure.source} verified`
+            );
+
+            await prisma.$transaction([
+              prisma.removalRequest.updateMany({
+                where: { id: { in: childRemovals.map(r => r.id) } },
+                data: {
+                  status: "COMPLETED",
+                  completedAt: new Date(),
+                  notes: `Auto-completed: parent broker ${removalRequest.exposure.sourceName} removal verified`,
+                },
+              }),
+              prisma.exposure.updateMany({
+                where: { id: { in: childRemovals.map(r => r.exposureId) } },
+                data: { status: "REMOVED" },
+              }),
+            ]);
+          }
+        } catch (propError) {
+          console.warn("[Verification] Failed to propagate completion to children:", propError);
+        }
+      }
 
       // Return update info for batched email (sent by runVerificationBatch)
       return {

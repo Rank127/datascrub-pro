@@ -289,10 +289,11 @@ export async function POST(request: Request) {
     const exposures = await Promise.all(
       newExposures.map((result) => {
         const isProjected = result.confidence?.classification === "PROJECTED";
+        const isChecking = result.confidence?.classification === "CHECKING";
 
-        // Generate proof screenshot URL only for real scanned results (not projected)
+        // Generate proof screenshot URL only for real scanned results (not projected/checking)
         let proofScreenshot: string | null = null;
-        if (!isProjected && result.sourceUrl && !result.sourceUrl.startsWith('mailto:')) {
+        if (!isProjected && !isChecking && result.sourceUrl && !result.sourceUrl.startsWith('mailto:')) {
           try {
             proofScreenshot = generateScreenshotUrl(result.sourceUrl, { delay: 2 });
           } catch (e) {
@@ -303,7 +304,8 @@ export async function POST(request: Request) {
         // Determine if manual review is required based on confidence score
         const confidenceScore = result.confidence?.score ?? 100; // Default high if no confidence data
         // Projected exposures don't require manual action — they're statistical projections
-        const requiresManualReview = isProjected ? false : confidenceScore < CONFIDENCE_THRESHOLDS.AUTO_PROCEED;
+        // CHECKING exposures always require manual action — user should verify
+        const requiresManualReview = isChecking ? true : isProjected ? false : confidenceScore < CONFIDENCE_THRESHOLDS.AUTO_PROCEED;
 
         // Log confidence-based decisions
         if (requiresManualReview) {

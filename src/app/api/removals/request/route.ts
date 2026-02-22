@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { executeRemoval } from "@/lib/removers/removal-service";
-import { getDataBrokerInfo, getSubsidiaries } from "@/lib/removers/data-broker-directory";
+import { getDataBrokerInfo, getSubsidiaries, getConsolidationParent } from "@/lib/removers/data-broker-directory";
 import { z } from "zod";
 import type { Plan, RemovalMethod } from "@/lib/types";
 import { isAdmin as _isAdmin } from "@/lib/admin";
@@ -13,9 +13,11 @@ const requestSchema = z.object({
   exposureId: z.string(),
 });
 
-// Determine removal method based on data source
+// Determine removal method based on data source (routes through parent for subsidiaries)
 function getRemovalMethod(source: string): RemovalMethod {
-  const broker = getDataBrokerInfo(source);
+  // If this is a subsidiary, use the parent's removal method
+  const parentKey = getConsolidationParent(source);
+  const broker = parentKey ? getDataBrokerInfo(parentKey) : getDataBrokerInfo(source);
 
   if (broker) {
     if (broker.removalMethod === "EMAIL" || broker.removalMethod === "BOTH") {
@@ -128,13 +130,20 @@ export async function POST(request: Request) {
 
       const subsidiaryKeys = getSubsidiaries(exposure.source);
       const isParent = subsidiaryKeys.length > 0;
+      const parentKey = getConsolidationParent(exposure.source);
+      const isChild = !!parentKey;
+
+      // If this is a child, get all siblings from the parent's subsidiary list
+      const siblingKeys = isChild ? getSubsidiaries(parentKey!).filter(k => k !== exposure.source) : [];
 
       let consolidatedExposures: { id: string; source: string; sourceName: string }[] = [];
-      if (isParent) {
+      const keysToConsolidate = isParent ? subsidiaryKeys : siblingKeys;
+
+      if (keysToConsolidate.length > 0) {
         consolidatedExposures = await tx.exposure.findMany({
           where: {
             userId: session.user.id,
-            source: { in: subsidiaryKeys },
+            source: { in: keysToConsolidate },
             isWhitelisted: false,
             status: { notIn: ["REMOVED", "REMOVAL_PENDING", "REMOVAL_IN_PROGRESS"] },
           },
@@ -142,15 +151,20 @@ export async function POST(request: Request) {
         });
       }
 
+      const parentBrokerInfo = parentKey ? getDataBrokerInfo(parentKey) : null;
+      const consolidationNote = isParent && consolidatedExposures.length > 0
+        ? `Consolidated removal - covers ${consolidatedExposures.length} subsidiary exposures`
+        : isChild && parentBrokerInfo
+          ? `Routed through parent broker ${parentBrokerInfo.name}. Covers ${consolidatedExposures.length} sibling sites.`
+          : undefined;
+
       const removalRequest = await tx.removalRequest.create({
         data: {
           userId: session.user.id,
           exposureId,
           method,
           status: "PENDING",
-          notes: consolidatedExposures.length > 0
-            ? `Consolidated removal - covers ${consolidatedExposures.length} subsidiary exposures`
-            : undefined,
+          notes: consolidationNote,
         },
       });
 
@@ -163,7 +177,7 @@ export async function POST(request: Request) {
         },
       });
 
-      return { ok: true as const, exposure, removalRequest, consolidatedExposures, method };
+      return { ok: true as const, exposure, removalRequest, consolidatedExposures, method, isChild, parentKey };
     });
 
     if (!txResult.ok) {
@@ -200,7 +214,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const { exposure, removalRequest, consolidatedExposures } = txResult;
+    const { exposure, removalRequest, consolidatedExposures, isChild: txIsChild, parentKey: txParentKey } = txResult;
 
     // Handle consolidated subsidiary exposures (batch)
     const consolidatedRequests: string[] = [];
@@ -216,13 +230,17 @@ export async function POST(request: Request) {
 
       if (newSubExposures.length > 0) {
         // Batch create removal requests for new subsidiaries
+        const txParentBrokerInfo = txParentKey ? getDataBrokerInfo(txParentKey) : null;
+        const parentName = txIsChild && txParentBrokerInfo
+          ? txParentBrokerInfo.name
+          : exposure.sourceName;
         await prisma.removalRequest.createMany({
           data: newSubExposures.map(subExposure => ({
             userId: session.user.id,
             exposureId: subExposure.id,
             method: "AUTO_EMAIL" as const,
             status: "PENDING",
-            notes: `Auto-created via consolidated removal from ${exposure.sourceName}. Will be completed when parent removal is confirmed.`,
+            notes: `Auto-created via consolidated removal routed to ${parentName}. Will be completed when parent removal is confirmed.`,
           })),
           skipDuplicates: true,
         });
@@ -262,7 +280,7 @@ export async function POST(request: Request) {
     if (consolidatedExposures.length > 0) {
       const subNames = consolidatedExposures.map(e => e.sourceName).slice(0, 5).join(", ");
       const moreCount = consolidatedExposures.length > 5 ? ` and ${consolidatedExposures.length - 5} more` : "";
-      message += `\n\n✓ BONUS: This removal also covers ${consolidatedExposures.length} related sites: ${subNames}${moreCount}`;
+      message += `\n\nThis removal also covers ${consolidatedExposures.length} related sites: ${subNames}${moreCount}`;
     }
 
     return NextResponse.json({

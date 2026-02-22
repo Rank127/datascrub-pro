@@ -94,7 +94,78 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     notes: "Use web form - email addresses bounce.",
 
     parentCompany: "PeopleConnect",
-    subsidiaries: ["ZABASEARCH","PUBLICRECORDS","ANYWHO","ADDRESSES","CLASSMATES","US_SEARCH","INSTANT_CHECKMATE","TRUTHFINDER"],
+    subsidiaries: [
+      "ZABASEARCH", "PUBLICRECORDS", "ANYWHO", "ADDRESSES", "CLASSMATES", "US_SEARCH",
+      "INSTANT_CHECKMATE", "TRUTHFINDER", "SNOOPSTATION", "ONLINESEARCHES",
+      "EASYBACKGROUNDCHECKS_PC", "PEOPLELOOKUP", "USAPEOPLEDATA", "ALLAREACODES",
+      "GEORGIAPUBLICRECORDS", "REVERSEPHONELOOKUP_PC",
+    ],
+  },
+  // ─── PeopleConnect Cluster Children (consolidate to INTELIUS) ───
+  SNOOPSTATION: {
+    name: "SnoopStation",
+    optOutUrl: "https://www.snoopstation.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 3,
+    consolidatesTo: "INTELIUS",
+    parentCompany: "PeopleConnect",
+  },
+  ONLINESEARCHES: {
+    name: "OnlineSearches",
+    optOutUrl: "https://www.onlinesearches.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 3,
+    consolidatesTo: "INTELIUS",
+    parentCompany: "PeopleConnect",
+  },
+  EASYBACKGROUNDCHECKS_PC: {
+    name: "EasyBackgroundChecks",
+    optOutUrl: "https://www.easybackgroundchecks.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 3,
+    consolidatesTo: "INTELIUS",
+    parentCompany: "PeopleConnect",
+  },
+  PEOPLELOOKUP: {
+    name: "PeopleLookup",
+    optOutUrl: "https://www.peoplelookup.com/opt-out",
+    privacyEmail: "privacy@peoplelookup.com",
+    removalMethod: "BOTH",
+    estimatedDays: 3,
+    consolidatesTo: "INTELIUS",
+    parentCompany: "PeopleConnect",
+  },
+  USAPEOPLEDATA: {
+    name: "USAPeopleData",
+    optOutUrl: "https://usapeopledata.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 3,
+    consolidatesTo: "INTELIUS",
+    parentCompany: "PeopleConnect",
+  },
+  ALLAREACODES: {
+    name: "AllAreaCodes",
+    optOutUrl: "https://www.allareacodes.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 3,
+    consolidatesTo: "INTELIUS",
+    parentCompany: "PeopleConnect",
+  },
+  GEORGIAPUBLICRECORDS: {
+    name: "GeorgiaPublicRecords",
+    optOutUrl: "https://georgiapublicrecords.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 3,
+    consolidatesTo: "INTELIUS",
+    parentCompany: "PeopleConnect",
+  },
+  REVERSEPHONELOOKUP_PC: {
+    name: "ReversePhoneLookup",
+    optOutUrl: "https://www.reversephonelookup.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 3,
+    consolidatesTo: "INTELIUS",
+    parentCompany: "PeopleConnect",
   },
   PEOPLEFINDER: {
     name: "PeopleFinder",
@@ -129,6 +200,102 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 14,
     notes: "May require multiple follow-ups",
+    parentCompany: "Gary Norden / Radaris",
+    subsidiaries: [
+      "CENTEDA", "PUBLICREPORTS", "VIRTORY", "CLUBSET", "PERSONTRUST",
+      "COUNCILON", "KWOLD", "NEWENGLANDFACTS", "PUB360", "DATAVERIA_CLUSTER", "VERICORA",
+    ],
+  },
+  // ─── Radaris/Norden Cluster Children (consolidate to RADARIS) ───
+  CENTEDA: {
+    name: "Centeda",
+    optOutUrl: "https://centeda.com/ng/privacy",
+    privacyEmail: "support@centeda.com",
+    removalMethod: "BOTH",
+    estimatedDays: 7,
+    consolidatesTo: "RADARIS",
+    parentCompany: "Gary Norden / Radaris",
+  },
+  PUBLICREPORTS: {
+    name: "PublicReports",
+    optOutUrl: "https://publicreports.com/ng/privacy",
+    privacyEmail: "support@publicreports.com",
+    removalMethod: "BOTH",
+    estimatedDays: 7,
+    consolidatesTo: "RADARIS",
+    parentCompany: "Gary Norden / Radaris",
+  },
+  VIRTORY: {
+    name: "Virtory",
+    optOutUrl: "https://virtory.com/ng/privacy",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "RADARIS",
+    parentCompany: "Gary Norden / Radaris",
+  },
+  CLUBSET: {
+    name: "Clubset",
+    optOutUrl: "https://clubset.com/ng/privacy",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "RADARIS",
+    parentCompany: "Gary Norden / Radaris",
+  },
+  PERSONTRUST: {
+    name: "PersonTrust",
+    optOutUrl: "https://persontrust.com/ng/privacy",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "RADARIS",
+    parentCompany: "Gary Norden / Radaris",
+  },
+  COUNCILON: {
+    name: "Councilon",
+    optOutUrl: "https://councilon.com/ng/privacy",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "RADARIS",
+    parentCompany: "Gary Norden / Radaris",
+  },
+  KWOLD: {
+    name: "Kwold",
+    optOutUrl: "https://kwold.com/ng/privacy",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "RADARIS",
+    parentCompany: "Gary Norden / Radaris",
+  },
+  NEWENGLANDFACTS: {
+    name: "NewEnglandFacts",
+    optOutUrl: "https://newenglandfacts.com/ng/privacy",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "RADARIS",
+    parentCompany: "Gary Norden / Radaris",
+  },
+  PUB360: {
+    name: "Pub360",
+    optOutUrl: "https://pub360.com/ng/privacy",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "RADARIS",
+    parentCompany: "Gary Norden / Radaris",
+  },
+  DATAVERIA_CLUSTER: {
+    name: "DataVeria",
+    optOutUrl: "https://dataveria.com/ng/privacy",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "RADARIS",
+    parentCompany: "Gary Norden / Radaris",
+  },
+  VERICORA: {
+    name: "Vericora",
+    optOutUrl: "https://vericora.com/ng/privacy",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "RADARIS",
+    parentCompany: "Gary Norden / Radaris",
   },
   FASTPEOPLESEARCH: {
     name: "FastPeopleSearch",
@@ -273,13 +440,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 7,
   },
-  PEOPLELOOKUP: {
-    name: "PeopleLookup.com",
-    optOutUrl: "https://www.peoplelookup.com/optout",
-    privacyEmail: "privacy@peoplelookup.com",
-    removalMethod: "BOTH",
-    estimatedDays: 7,
-  },
+  // PEOPLELOOKUP — moved to PeopleConnect Cluster (top of file)
   PEOPLESEARCHER: {
     name: "PeopleSearcher.com",
     optOutUrl: "https://www.peoplesearcher.com/optout",
@@ -373,13 +534,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 10,
   },
-  USRECORDS: {
-    name: "USRecords.net",
-    optOutUrl: "https://www.usrecords.net/optout",
-    privacyEmail: "privacy@usrecords.net",
-    removalMethod: "BOTH",
-    estimatedDays: 10,
-  },
+  // USRECORDS — moved to InfoPay Cluster (top of file)
   AMERICANPHONEBOOK: {
     name: "AmericanPhoneBook.com",
     optOutUrl: "https://www.americanphonebook.com/optout",
@@ -466,13 +621,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "EMAIL",
     estimatedDays: 14,
   },
-  USWARRANTS: {
-    name: "USWarrants.org",
-    optOutUrl: "https://www.uswarrants.org/optout",
-    privacyEmail: "privacy@uswarrants.org",
-    removalMethod: "EMAIL",
-    estimatedDays: 14,
-  },
+  // USWARRANTS — moved to InfoPay Cluster (top of file)
   INMATESEARCHER: {
     name: "InmatesSearcher.com",
     optOutUrl: "https://www.inmatesearcher.com/optout",
@@ -491,13 +640,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
   // ==========================================
   // COURT RECORDS SITES
   // ==========================================
-  COURTCASEFINDER: {
-    name: "CourtCaseFinder.com",
-    optOutUrl: "https://www.courtcasefinder.com/optout",
-    privacyEmail: "privacy@courtcasefinder.com",
-    removalMethod: "BOTH",
-    estimatedDays: 14,
-  },
+  // COURTCASEFINDER — moved to InfoPay Cluster (top of file)
   COURTRECORDFINDER: {
     name: "CourtRecordFinder.com",
     optOutUrl: "https://www.courtrecordfinder.com/optout",
@@ -1688,20 +1831,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 5,
   },
-  VIRTORY: {
-    name: "Virtory",
-    optOutUrl: "https://www.virtory.com/opt-out",
-    privacyEmail: "privacy@virtory.com",
-    removalMethod: "BOTH",
-    estimatedDays: 7,
-  },
-  VERICORA: {
-    name: "Vericora",
-    optOutUrl: "https://vericora.com/ng/optout",
-    privacyEmail: "privacy@vericora.com",
-    removalMethod: "BOTH",
-    estimatedDays: 7,
-  },
+  // VIRTORY, VERICORA — moved to Radaris Cluster (top of file)
   GLADIKNOW: {
     name: "GladIKnow",
     optOutUrl: "https://gladiknow.com/opt-out",
@@ -2533,13 +2663,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 14,
   },
-  CENTEDA: {
-    name: "Centeda",
-    optOutUrl: "https://centeda.com/ng/control/privacy",
-    privacyEmail: "privacy@centeda.com",
-    removalMethod: "BOTH",
-    estimatedDays: 7,
-  },
+  // CENTEDA — moved to Radaris Cluster (top of file)
   CUBIB: {
     name: "Cubib",
     optOutUrl: "https://cubib.com/optout.php",
@@ -2547,20 +2671,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 7,
   },
-  KWOLD: {
-    name: "Kwold",
-    optOutUrl: "https://www.kwold.com/optout",
-    privacyEmail: "privacy@kwold.com",
-    removalMethod: "BOTH",
-    estimatedDays: 7,
-  },
-  NEWENGLANDFACTS: {
-    name: "NewEnglandFacts",
-    optOutUrl: "https://newenglandfacts.com/ng/control/privacy",
-    privacyEmail: "privacy@newenglandfacts.com",
-    removalMethod: "BOTH",
-    estimatedDays: 7,
-  },
+  // KWOLD, NEWENGLANDFACTS — moved to Radaris Cluster (top of file)
   OFFICIALUSA: {
     name: "OfficialUSA",
     optOutUrl: "https://www.officialusa.com/opt-out/",
@@ -2568,13 +2679,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 7,
   },
-  PUB360: {
-    name: "Pub360",
-    optOutUrl: "https://www.pub360.com/optout",
-    privacyEmail: "privacy@pub360.com",
-    removalMethod: "BOTH",
-    estimatedDays: 7,
-  },
+  // PUB360 — moved to Radaris Cluster (top of file)
   PROFILEENGINE: {
     name: "ProfileEngine",
     optOutUrl: "https://profileengine.com/optout",
@@ -2624,13 +2729,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 7,
   },
-  STATERECORDS: {
-    name: "StateRecords.org",
-    optOutUrl: "https://staterecords.org/optout",
-    privacyEmail: "privacy@staterecords.org",
-    removalMethod: "BOTH",
-    estimatedDays: 7,
-  },
+  // STATERECORDS — moved to InfoPay Cluster (top of file)
   UNITEDSTATESPHONEBOOK: {
     name: "UnitedStatesPhoneBook",
     optOutUrl: "https://www.unitedstatesphonebook.com/contact.php",
@@ -3251,6 +3350,145 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     privacyEmail: "privacy@infotracer.com",
     removalMethod: "BOTH",
     estimatedDays: 7,
+    parentCompany: "InfoPay Inc / Accucom",
+    subsidiaries: [
+      "RECORDSFINDER", "COURTCASEFINDER", "STATERECORDS", "VERIFYRECORDS",
+      "GOVWARRANTSEARCH", "NDB", "VERIFYPUBLICRECORDS", "USWARRANTS",
+      "USRECORDS", "REVERSERECORDS", "INFOPAGES", "DEATHRECORDS",
+      "SEARCHUSAPEOPLE", "FREEBACKGROUNDCHECK_IP", "CRIMINALRECORDS", "BIRTHRECORDS",
+    ],
+  },
+  // ─── InfoPay/Accucom Cluster Children (consolidate to INFOTRACER) ───
+  RECORDSFINDER: {
+    name: "RecordsFinder",
+    optOutUrl: "https://recordsfinder.com/optout",
+    privacyEmail: "privacy@recordsfinder.com",
+    removalMethod: "BOTH",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  COURTCASEFINDER: {
+    name: "CourtCaseFinder",
+    optOutUrl: "https://courtcasefinder.com/optout",
+    privacyEmail: "privacy@courtcasefinder.com",
+    removalMethod: "BOTH",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  STATERECORDS: {
+    name: "StateRecords",
+    optOutUrl: "https://staterecords.org/optout",
+    privacyEmail: "privacy@staterecords.org",
+    removalMethod: "BOTH",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  VERIFYRECORDS: {
+    name: "VerifyRecords",
+    optOutUrl: "https://www.verifyrecords.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  GOVWARRANTSEARCH: {
+    name: "GovWarrantSearch",
+    optOutUrl: "https://govwarrantsearch.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  NDB: {
+    name: "NDB (National Database)",
+    optOutUrl: "https://ndb.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  VERIFYPUBLICRECORDS: {
+    name: "VerifyPublicRecords",
+    optOutUrl: "https://verifypublicrecords.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  USWARRANTS: {
+    name: "USWarrants",
+    optOutUrl: "https://uswarrants.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  USRECORDS: {
+    name: "USRecords",
+    optOutUrl: "https://usrecords.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  REVERSERECORDS: {
+    name: "ReverseRecords",
+    optOutUrl: "https://reverserecords.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  INFOPAGES: {
+    name: "InfoPages",
+    optOutUrl: "https://infopages.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  DEATHRECORDS: {
+    name: "DeathRecords",
+    optOutUrl: "https://deathrecords.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  SEARCHUSAPEOPLE: {
+    name: "SearchUSAPeople",
+    optOutUrl: "https://searchusapeople.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  FREEBACKGROUNDCHECK_IP: {
+    name: "FreeBackgroundCheck (InfoPay)",
+    optOutUrl: "https://freebackgroundcheck.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  CRIMINALRECORDS: {
+    name: "CriminalRecords",
+    optOutUrl: "https://criminalrecords.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
+  },
+  BIRTHRECORDS: {
+    name: "BirthRecords",
+    optOutUrl: "https://birthrecords.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 7,
+    consolidatesTo: "INFOTRACER",
+    parentCompany: "InfoPay Inc / Accucom",
   },
   COCOFINDER: {
     name: "CocoFinder",
@@ -3896,13 +4134,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     removalMethod: "BOTH",
     estimatedDays: 7,
   },
-  RECORDSFINDER: {
-    name: "RecordsFinder",
-    optOutUrl: "https://recordsfinder.com/optout.php",
-    privacyEmail: "privacy@recordsfinder.com",
-    removalMethod: "BOTH",
-    estimatedDays: 7,
-  },
+  // RECORDSFINDER — moved to InfoPay Cluster (top of file)
   PUBLICRECORDCENTER: {
     name: "PublicRecordCenter",
     optOutUrl: "https://www.publicrecordcenter.com/optout",
@@ -5866,7 +6098,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
 
   // Additional People Search - US Regional
   PEOPLESEARCHUSA: { name: "PeopleSearchUSA", optOutUrl: "https://peoplesearchusa.com/optout", removalMethod: "FORM", estimatedDays: 14 },
-  SEARCHUSAPEOPLE: { name: "SearchUSAPeople", optOutUrl: "https://searchusapeople.com/optout", removalMethod: "FORM", estimatedDays: 14 },
+  // SEARCHUSAPEOPLE — moved to InfoPay Cluster (top of file)
   AMERICANPEOPLESEARCH: { name: "AmericanPeopleSearch", optOutUrl: "https://americanpeoplesearch.com/optout", removalMethod: "FORM", estimatedDays: 14 },
   NATIONALPEOPLESEARCH: { name: "NationalPeopleSearch", optOutUrl: "https://nationalpeoplesearch.com/optout", removalMethod: "FORM", estimatedDays: 14 },
   USPEOPLEDIRECTORY: { name: "USPeopleDirectory", optOutUrl: "https://uspeopledirectory.com/optout", removalMethod: "FORM", estimatedDays: 14 },
@@ -12943,64 +13175,9 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     estimatedDays: 14,
     notes: "People search with phone/email exposure. Found in Malwarebytes scan.",
   },
-  SNOOPSTATION: {
-    name: "SnoopStation",
-    optOutUrl: "https://www.snoopstation.com/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "People search aggregator. Found in Malwarebytes scan.",
-  },
-  ONLINESEARCHES: {
-    name: "OnlineSearches",
-    optOutUrl: "https://www.onlinesearches.com/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "People search site. Found in Malwarebytes scan.",
-  },
-  USAPEOPLEDATA: {
-    name: "USAPeopleData",
-    optOutUrl: "https://www.usapeopledata.com/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "People search aggregator. Found in Malwarebytes scan.",
-  },
-  CLUBSET: {
-    name: "Clubset",
-    optOutUrl: "https://www.clubset.com/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "People search site. Found in Malwarebytes scan.",
-  },
-  PERSONTRUST: {
-    name: "Persontrust",
-    optOutUrl: "https://www.persontrust.com/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "People search site. Found in Malwarebytes scan.",
-  },
-  COUNCILON: {
-    name: "Councilon",
-    optOutUrl: "https://www.councilon.com/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "People search site. Found in Malwarebytes scan.",
-  },
-
-  // --- Public Records Sites ---
-  VERIFYRECORDS: {
-    name: "VerifyRecords",
-    optOutUrl: "https://www.verifyrecords.com/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "Public records search. Found in Malwarebytes scan.",
-  },
-  BIRTHRECORDS: {
-    name: "BirthRecords",
-    optOutUrl: "https://www.birthrecords.us/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "Public records search. Found in Malwarebytes scan.",
-  },
+  // SNOOPSTATION, ONLINESEARCHES, USAPEOPLEDATA — moved to PeopleConnect Cluster (top of file)
+  // CLUBSET, PERSONTRUST, COUNCILON — moved to Radaris Cluster (top of file)
+  // VERIFYRECORDS, BIRTHRECORDS — moved to InfoPay Cluster
   GOVERNMENTREGISTRY: {
     name: "GovernmentRegistry",
     optOutUrl: "https://www.governmentregistry.org/optout",
@@ -13008,48 +13185,8 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     estimatedDays: 14,
     notes: "Public records aggregator. Found in Malwarebytes scan.",
   },
-  REVERSERECORDS: {
-    name: "ReverseRecords",
-    optOutUrl: "https://www.reverserecords.org/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "Reverse lookup public records. Found in Malwarebytes scan.",
-  },
-  VERIFYPUBLICRECORDS: {
-    name: "VerifyPublicRecords",
-    optOutUrl: "https://www.verifypublicrecords.com/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "Public records verification site. Found in Malwarebytes scan.",
-  },
-  INFOPAGES: {
-    name: "InfoPages",
-    optOutUrl: "https://www.infopages.us/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "Public records and people search. Found in Malwarebytes scan.",
-  },
-  DEATHRECORDS: {
-    name: "DeathRecords",
-    optOutUrl: "https://www.deathrecords.org/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "Public death records search. Found in Malwarebytes scan.",
-  },
-  GOVWARRANTSEARCH: {
-    name: "GovWarrantSearch",
-    optOutUrl: "https://www.govwarrantsearch.org/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "Government warrant and public records search. Found in Malwarebytes scan.",
-  },
-  PUBLICREPORTS: {
-    name: "PublicReports",
-    optOutUrl: "https://www.publicreports.com/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "Public records and reports aggregator. Found in Malwarebytes scan.",
-  },
+  // REVERSERECORDS, VERIFYPUBLICRECORDS, INFOPAGES, DEATHRECORDS, GOVWARRANTSEARCH — moved to InfoPay Cluster
+  // PUBLICREPORTS — moved to Radaris Cluster
 
   // --- Phone / Directory Sites ---
   AMERICAPHONEBOOK: {
@@ -13059,22 +13196,7 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     estimatedDays: 14,
     notes: "Phone directory with name/address exposure. Found in Malwarebytes scan.",
   },
-  ALLAREACODES: {
-    name: "AllAreaCodes",
-    optOutUrl: "https://www.allareacodes.com/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "Phone directory and area code lookup. Found in Malwarebytes scan.",
-  },
-
-  // --- State Records ---
-  GEORGIAPUBLICRECORDS: {
-    name: "GeorgiaPublicRecords",
-    optOutUrl: "https://www.georgiapublicrecords.org/optout",
-    removalMethod: "FORM",
-    estimatedDays: 14,
-    notes: "Georgia state public records. Found in Malwarebytes scan.",
-  },
+  // ALLAREACODES, GEORGIAPUBLICRECORDS — moved to PeopleConnect Cluster
 
   // --- Alumni / Social ---
   HIGHSCHOOLALUMNI: {

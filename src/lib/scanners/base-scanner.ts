@@ -20,10 +20,12 @@ export type MatchClassification =
   | "LIKELY"      // 50-74: Auto-removal with caution
   | "POSSIBLE"    // 25-49: Manual review required
   | "REJECTED"    // 0-24: Don't create exposure
-  | "PROJECTED";  // Projected from confirmed exposure on related broker
+  | "PROJECTED"   // Projected from confirmed exposure on related broker
+  | "CHECKING";   // User should verify — broker in same category as confirmed exposure
 
 export const CONFIDENCE_THRESHOLDS = {
   AUTO_PROCEED: 75,   // Minimum score for auto-removal without confirmation (lowered: Tier 2 realistic max ~80)
+  DISPLAY: 50,        // Show to user, require confirmation before removal
   MANUAL_REVIEW: 40,  // Below this requires manual review
   REJECT: 25,         // Below this don't create exposure at all
   MIN_FACTORS: 2,     // Minimum number of matching factors required (1 for people-search brokers)

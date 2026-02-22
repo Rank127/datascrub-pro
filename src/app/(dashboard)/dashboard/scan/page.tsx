@@ -37,6 +37,7 @@ import { LoadingSpinner } from "@/components/dashboard/loading-spinner";
 import { UpgradeCta } from "@/components/dashboard/upgrade-cta";
 import { getBrokerCount } from "@/lib/removers/data-broker-directory";
 import { trackScanStarted, trackScanCompleted } from "@/components/analytics/google-analytics";
+import { ScanComparisonWidget } from "@/components/dashboard/scan-comparison-widget";
 
 const TOTAL_KNOWN_BROKERS = getBrokerCount();
 
@@ -705,6 +706,9 @@ export default function ScanPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Scan Comparison Widget — shows after at least one scan */}
+      {recentScans.length > 0 && <ScanComparisonWidget />}
 
       {/* Recent Scans */}
       <Card className="bg-slate-800/50 border-slate-700">

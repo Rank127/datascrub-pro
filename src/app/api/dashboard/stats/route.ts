@@ -63,26 +63,29 @@ export async function GET() {
       manualActionDone,
       recentExposures,
       _removalsByCategory,
+      confirmedExposures,
       aiTrainingExposures,
       facialRecognitionExposures,
       voiceCloningExposures,
       aiOptedOutExposures,
     ] = await Promise.all([
-      // Total exposures (excluding data processors)
+      // Total exposures (excluding data processors and CHECKING)
       prisma.exposure.count({
         where: {
           userId,
           source: { notIn: DATA_PROCESSOR_SOURCES },
           isWhitelisted: false,
+          matchClassification: { not: "CHECKING" },
         },
       }),
-      // Active exposures (not removed, not whitelisted, not data processors)
+      // Active exposures (not removed, not whitelisted, not data processors, not CHECKING)
       prisma.exposure.count({
         where: {
           userId,
           status: "ACTIVE",
           isWhitelisted: false,
           source: { notIn: DATA_PROCESSOR_SOURCES },
+          matchClassification: { not: "CHECKING" },
         },
       }),
       // Removed exposures (excluding data processors)
@@ -176,6 +179,16 @@ export async function GET() {
           status: { notIn: ["CANCELLED"] },
         },
         _count: true,
+      }),
+      // Confirmed exposures (confidence score >= 75, auto-removal eligible)
+      prisma.exposure.count({
+        where: {
+          userId,
+          status: "ACTIVE",
+          isWhitelisted: false,
+          source: { notIn: DATA_PROCESSOR_SOURCES },
+          confidenceScore: { gte: 75 },
+        },
       }),
       // AI Protection stats
       prisma.exposure.count({
@@ -460,6 +473,7 @@ export async function GET() {
       stats: {
         totalExposures,
         activeExposures,
+        confirmedExposures,
         removedExposures,
         whitelistedItems,
         dataProcessorsExcluded: dataProcessorCount, // Data Processors not counted as actionable exposures

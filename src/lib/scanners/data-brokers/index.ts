@@ -20,6 +20,12 @@ export { MyLifeScanner } from "./mylife-scanner";
 export { NuwberScanner } from "./nuwber-scanner";
 export { CheckPeopleScanner } from "./checkpeople-scanner";
 
+// Cluster scanner base + factory functions
+export { ClusterBrokerScanner } from "./cluster-scanner";
+export { createInfoPayClusterScanners, INFOPAY_BROKER_KEYS } from "./clusters/infopay-cluster";
+export { createRadarisClusterScanners, RADARIS_BROKER_KEYS } from "./clusters/radaris-cluster";
+export { createPeopleConnectClusterScanners, PEOPLECONNECT_BROKER_KEYS } from "./clusters/peopleconnect-cluster";
+
 // Manual check scanners for sites with bot protection / paywall SPAs
 export {
   ManualCheckScanner,
@@ -57,41 +63,46 @@ import {
   createNuwberManualScanner,
   createCheckPeopleManualScanner,
 } from "./manual-check-scanner";
-// createAllBrokersScanner is available for comprehensive scanning
+import { createInfoPayClusterScanners } from "./clusters/infopay-cluster";
+import { createRadarisClusterScanners } from "./clusters/radaris-cluster";
+import { createPeopleConnectClusterScanners } from "./clusters/peopleconnect-cluster";
 import type { Scanner } from "../base-scanner";
 
 /**
  * Create all real data broker scanners
  * Use this instead of MockDataBrokerScanner.createAll() for production
  *
- * Note: FastPeopleSearch and PeopleFinders use manual check scanners
- * because they have advanced bot protection that blocks scraping.
- * These return a link for the user to check manually.
+ * Scanner tiers:
+ * - Tier 1 (Critical): 8 original verified scrapers
+ * - Tier 2 (Cluster children): InfoPay (~16), Radaris (~11), PeopleConnect (~8) cluster sites
+ * - Manual check: 6 sites with paywall SPAs / bot protection
  *
- * IMPORTANT: We removed AllBrokersScanner because it was generating 2,100+
- * "potential exposure" items for every broker in the directory, overwhelming
- * users with manual review tasks for sites they may not even be listed on.
- * Only confirmed exposures from actual scans should be shown.
+ * Total: 8 active + ~35 cluster + 6 manual = ~49 scanners
  */
 export function createRealBrokerScanners(): Scanner[] {
   return [
-    // Active scrapers — verified working with premium proxy (Feb 2026)
+    // ─── Tier 1: Active scrapers — verified working with premium proxy (Feb 2026)
     new SpokeoScanner(),
     new WhitePagesScanner(),
     new TruePeopleSearchScanner(),
     new RadarisScanner(),
     new InteliusScanner(),
     new TruthFinderScanner(),
-    new InstantCheckmateScanner(),   // Fixed: /results/?firstName=...&lastName=... (was 404 on /people/)
-    new MyLifeScanner(),             // Fixed: /{first-last}/ path (was 404 on /pub/search)
+    new InstantCheckmateScanner(),
+    new MyLifeScanner(),
 
-    // Manual check — sites with paywall SPAs or bot protection that blocks scraping
+    // ─── Tier 2: Cluster children — share parent's HTML backend
+    ...createInfoPayClusterScanners(),       // ~16 InfoPay/Accucom sites
+    ...createRadarisClusterScanners(),       // ~11 Radaris/Norden sites
+    ...createPeopleConnectClusterScanners(), // ~8 PeopleConnect sites
+
+    // ─── Manual check: Sites with paywall SPAs or bot protection
     createFastPeopleSearchManualScanner(),
     createPeopleFinderManualScanner(),
-    createBeenVerifiedManualScanner(),   // React SPA — search URLs don't return scrapable results
-    createPeopleLookerManualScanner(),   // Paywall SPA — search paths redirect to generic page
-    createNuwberManualScanner(),         // Returns 0 bytes — completely blocks scrapers
-    createCheckPeopleManualScanner(),    // All URL patterns return 404
+    createBeenVerifiedManualScanner(),
+    createPeopleLookerManualScanner(),
+    createNuwberManualScanner(),
+    createCheckPeopleManualScanner(),
   ];
 }
 

@@ -1230,6 +1230,7 @@ interface RemovalRequestEmail {
   fromEmail: string;
   dataTypes: string[];
   sourceUrl?: string;
+  subsidiaryName?: string; // When routing through parent, name of the child site where data was found
 }
 
 export async function sendCCPARemovalRequest(data: RemovalRequestEmail) {
@@ -1257,6 +1258,7 @@ export async function sendCCPARemovalRequest(data: RemovalRequestEmail) {
         <li><strong>Email:</strong> ${data.fromEmail}</li>
         <li><strong>Data Types to Remove:</strong> ${data.dataTypes.join(', ')}</li>
         ${data.sourceUrl ? `<li><strong>Profile URL (if applicable):</strong> ${data.sourceUrl}</li>` : ''}
+        ${data.subsidiaryName ? `<li><strong>Site Where Data Was Found:</strong> ${data.subsidiaryName}</li>` : ''}
       </ul>
 
       <p>Under the CCPA (Cal. Civ. Code § 1798.105) and GDPR (Article 17), I have the right to request that a business delete any personal information about me that it has collected. I am making such a request now.</p>
