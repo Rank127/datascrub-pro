@@ -165,6 +165,9 @@ export class ScanOrchestrator {
     // ScrapingBee has max concurrency of 5, so batch data broker scanners
     const BATCH_SIZE = 4;
 
+    // Per-scanner timeout: prevents one slow scanner from blocking a batch
+    const SCANNER_TIMEOUT_MS = 15_000;
+
     // Helper to run a single scanner with outcome tracking
     const runScanner = async (scanner: Scanner): Promise<ScanResult[]> => {
       const scannerType = this.classifyScannerType(scanner);
@@ -186,7 +189,13 @@ export class ScanOrchestrator {
 
       console.log(`[ScanOrchestrator] Starting ${scanner.name}...`);
       try {
-        const results = await scanner.scan(input);
+        // Race scanner against per-scanner timeout
+        const results = await Promise.race([
+          scanner.scan(input),
+          new Promise<ScanResult[]>((_, reject) =>
+            setTimeout(() => reject(new Error(`Scanner timeout (${SCANNER_TIMEOUT_MS}ms)`)), SCANNER_TIMEOUT_MS)
+          ),
+        ]);
         const responseTimeMs = Date.now() - startTime;
         console.log(`[ScanOrchestrator] ${scanner.name} completed with ${results.length} results`);
 

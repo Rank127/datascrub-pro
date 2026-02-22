@@ -106,8 +106,8 @@ export async function POST(request: Request) {
       });
 
       if (existingInProgressScan) {
-        const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000);
-        if (existingInProgressScan.createdAt < threeMinutesAgo) {
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        if (existingInProgressScan.createdAt < fiveMinutesAgo) {
           await tx.scan.update({
             where: { id: existingInProgressScan.id },
             data: { status: "FAILED", completedAt: new Date() },
