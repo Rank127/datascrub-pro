@@ -110,7 +110,7 @@ interface ClusterSite {
 
 const RADARIS_SITES: ClusterSite[] = [
   { key: "CENTEDA", name: "Centeda", baseUrl: "https://centeda.com", searchPath: "/p", optOutUrl: "https://centeda.com/ng/privacy", privacyEmail: "support@centeda.com" },
-  { key: "PUBLICREPORTS", name: "PublicReports", baseUrl: "https://publicreports.com", searchPath: "/p", optOutUrl: "https://publicreports.com/ng/privacy", privacyEmail: "support@publicreports.com" },
+  // PUBLICREPORTS removed — redirects to centeda.com (wastes ScrapingBee credit)
   { key: "VIRTORY", name: "Virtory", baseUrl: "https://virtory.com", searchPath: "/p", optOutUrl: "https://virtory.com/ng/privacy" },
   { key: "CLUBSET", name: "Clubset", baseUrl: "https://clubset.com", searchPath: "/p", optOutUrl: "https://clubset.com/ng/privacy" },
   { key: "PERSONTRUST", name: "PersonTrust", baseUrl: "https://persontrust.com", searchPath: "/p", optOutUrl: "https://persontrust.com/ng/privacy" },

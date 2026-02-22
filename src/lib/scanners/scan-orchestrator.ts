@@ -454,6 +454,12 @@ export class ScanOrchestrator {
   private generateCheckingEntries(existingResults: ScanResult[]): ScanResult[] {
     const MAX_CHECKING = 20;
 
+    // Categories that should NEVER generate CHECKING entries —
+    // being on a people-search site does not mean you have arrest/court records
+    const EXCLUDED_CHECKING_CATEGORIES = new Set([
+      "COURT_RECORDS", "LEGAL_RECORDS",
+    ]);
+
     // Get confirmed source keys
     const confirmedCategories = new Set<string>();
     const existingKeys = new Set(existingResults.map(r => String(r.source)));
@@ -465,7 +471,9 @@ export class ScanOrchestrator {
         // Find which category this broker belongs to
         for (const [cat, brokers] of Object.entries(BROKER_CATEGORIES)) {
           if ((brokers as readonly string[]).includes(sourceKey)) {
-            confirmedCategories.add(cat);
+            if (!EXCLUDED_CHECKING_CATEGORIES.has(cat)) {
+              confirmedCategories.add(cat);
+            }
           }
         }
       }

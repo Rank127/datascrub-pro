@@ -37,7 +37,7 @@ export const CATEGORY_PROJECTION_RULES: Record<string, CategoryProjection[]> = {
     { targetCategory: "PHONE_LOOKUP", weight: 0.82 },
     { targetCategory: "BACKGROUND_CHECK", weight: 0.82 },
     { targetCategory: "PROPERTY_RECORDS", weight: 0.70 }, // Only if user has address
-    { targetCategory: "COURT_RECORDS", weight: 0.60 },
+    // COURT_RECORDS removed — people-search exposure does NOT mean arrest/mugshot records exist
   ],
   PHONE_LOOKUP: [
     { targetCategory: "PHONE_LOOKUP", weight: 0.85 },
@@ -46,7 +46,7 @@ export const CATEGORY_PROJECTION_RULES: Record<string, CategoryProjection[]> = {
   BACKGROUND_CHECK: [
     { targetCategory: "BACKGROUND_CHECK", weight: 0.85 },
     { targetCategory: "PEOPLE_SEARCH", weight: 0.75 },
-    { targetCategory: "COURT_RECORDS", weight: 0.70 },
+    // COURT_RECORDS removed — background check exposure does NOT mean arrest/mugshot records exist
   ],
 };
 

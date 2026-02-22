@@ -119,12 +119,12 @@ const INFOPAY_SITES: ClusterSite[] = [
   { key: "VERIFYPUBLICRECORDS", name: "VerifyPublicRecords", baseUrl: "https://verifypublicrecords.com", searchPath: "/people-search", optOutUrl: "https://verifypublicrecords.com/optout" },
   { key: "USWARRANTS", name: "USWarrants", baseUrl: "https://uswarrants.org", searchPath: "/people-search", optOutUrl: "https://uswarrants.org/optout" },
   { key: "USRECORDS", name: "USRecords", baseUrl: "https://usrecords.org", searchPath: "/people-search", optOutUrl: "https://usrecords.org/optout" },
-  { key: "REVERSERECORDS", name: "ReverseRecords", baseUrl: "https://reverserecords.org", searchPath: "/people-search", optOutUrl: "https://reverserecords.org/optout" },
-  { key: "INFOPAGES", name: "InfoPages", baseUrl: "https://infopages.com", searchPath: "/people-search", optOutUrl: "https://infopages.com/optout" },
-  { key: "DEATHRECORDS", name: "DeathRecords", baseUrl: "https://deathrecords.org", searchPath: "/people-search", optOutUrl: "https://deathrecords.org/optout" },
+  // REVERSERECORDS removed — redirects to infotracer.com (wastes ScrapingBee credit)
+  // INFOPAGES removed — redirects to infotracer.com (wastes ScrapingBee credit)
+  // DEATHRECORDS removed — site is dead (ERR_CONNECTION_CLOSED)
   { key: "SEARCHUSAPEOPLE", name: "SearchUSAPeople", baseUrl: "https://searchusapeople.com", searchPath: "/people-search", optOutUrl: "https://searchusapeople.com/optout" },
   { key: "FREEBACKGROUNDCHECK_IP", name: "FreeBackgroundCheck (InfoPay)", baseUrl: "https://freebackgroundcheck.org", searchPath: "/people-search", optOutUrl: "https://freebackgroundcheck.org/optout" },
-  { key: "CRIMINALRECORDS", name: "CriminalRecords", baseUrl: "https://criminalrecords.org", searchPath: "/people-search", optOutUrl: "https://criminalrecords.org/optout" },
+  // CRIMINALRECORDS removed — site is dead (ERR_CONNECTION_CLOSED)
   { key: "BIRTHRECORDS", name: "BirthRecords", baseUrl: "https://birthrecords.org", searchPath: "/people-search", optOutUrl: "https://birthrecords.org/optout" },
 ];
 
