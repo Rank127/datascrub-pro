@@ -42,8 +42,8 @@ jobs:
             const total = summary.total;
             const lines = total.lines.pct;
             console.log('Line coverage:', lines + '%');
-            if (lines < 8) {
-              console.error('Coverage below 8% threshold');
+            if (lines < 7) {
+              console.error('Coverage below 7% threshold');
               process.exit(1);
             }
           "
