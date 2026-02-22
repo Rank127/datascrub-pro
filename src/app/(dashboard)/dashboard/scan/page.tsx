@@ -404,15 +404,33 @@ export default function ScanPage() {
           )}
 
           {isScanning ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-300">Scanning...</span>
-                <span className="text-slate-400">{Math.round(scanProgress)}%</span>
+            <div className="space-y-5">
+              {/* Patience message */}
+              <div className="text-center space-y-3 py-2">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-500/10 animate-pulse">
+                  <Search className="h-7 w-7 text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">
+                  Deep Scan in Progress
+                </h3>
+                <p className="text-sm text-slate-400 max-w-md mx-auto">
+                  We&apos;re checking 50+ data broker sites, breach databases, and public records for your personal information. This thorough scan typically takes 1–3 minutes.
+                </p>
               </div>
-              <Progress value={scanProgress} className="h-2 bg-slate-700" />
-              <p className="text-sm text-slate-500 text-center">
-                Checking data brokers, breach databases, and social media...
-              </p>
+
+              {/* Progress bar */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-300 text-sm">Scanning...</span>
+                  <span className="text-slate-400 text-sm">{Math.round(scanProgress)}%</span>
+                </div>
+                <Progress value={scanProgress} className="h-2 bg-slate-700" />
+              </div>
+
+              <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <span>Checking data brokers, breach databases, and social media...</span>
+              </div>
             </div>
           ) : scanResult ? (
             <div className="space-y-6">
