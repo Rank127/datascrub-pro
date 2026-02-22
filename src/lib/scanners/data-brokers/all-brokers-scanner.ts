@@ -107,6 +107,33 @@ const SEARCH_URL_PATTERNS: Record<string, (name: string, city?: string, state?: 
   FLORIDA_RESIDENTS_DIRECTORY: (name) => `https://www.floridaresidentsdirectory.com/search/${encodeNameForUrl(name)}`,
   OHIO_RESIDENT_DATABASE: (name) => `https://www.ohioresidentdatabase.com/search/${encodeNameForUrl(name)}`,
   NC_RESIDENT_DATABASE: (name) => `https://www.northcarolinaresidentdatabase.com/search/${encodeNameForUrl(name)}`,
+
+  // Malwarebytes cross-reference (Feb 2026)
+  TOP4BACKGROUNDCHECKS: (name) => `https://www.top4backgroundchecks.com/search/${encodeNameForUrl(name)}`,
+  BACKGROUNDCHECKGATEWAY: (name) => `https://www.backgroundcheckgateway.com/search/${encodeNameForUrl(name)}`,
+  AFFORDABLEBACKGROUNDCHECKS: (name) => `https://www.affordablebackgroundchecks.com/search/${encodeNameForUrl(name)}`,
+  SELFIENETWORK: (name) => `https://www.selfienetwork.com/search/${encodeNameForUrl(name)}`,
+  PEOPLEWIN: (name) => `https://www.peoplewin.com/search/${encodeNameForUrl(name)}`,
+  PROFILESYSTEMS: (name) => `https://www.profilesystems.com/search/${encodeNameForUrl(name)}`,
+  SNOOPSTATION: (name) => `https://www.snoopstation.com/search/${encodeNameForUrl(name)}`,
+  ONLINESEARCHES: (name) => `https://www.onlinesearches.com/search/${encodeNameForUrl(name)}`,
+  USAPEOPLEDATA: (name) => `https://www.usapeopledata.com/search/${encodeNameForUrl(name)}`,
+  CLUBSET: (name) => `https://www.clubset.com/search/${encodeNameForUrl(name)}`,
+  PERSONTRUST: (name) => `https://www.persontrust.com/search/${encodeNameForUrl(name)}`,
+  COUNCILON: (name) => `https://www.councilon.com/search/${encodeNameForUrl(name)}`,
+  VERIFYRECORDS: (name) => `https://www.verifyrecords.com/search/${encodeNameForUrl(name)}`,
+  BIRTHRECORDS: (name) => `https://www.birthrecords.us/search/${encodeNameForUrl(name)}`,
+  GOVERNMENTREGISTRY: (name) => `https://www.governmentregistry.org/search/${encodeNameForUrl(name)}`,
+  REVERSERECORDS: (name) => `https://www.reverserecords.org/search/${encodeNameForUrl(name)}`,
+  VERIFYPUBLICRECORDS: (name) => `https://www.verifypublicrecords.com/search/${encodeNameForUrl(name)}`,
+  INFOPAGES: (name) => `https://www.infopages.us/search/${encodeNameForUrl(name)}`,
+  DEATHRECORDS: (name) => `https://www.deathrecords.org/search/${encodeNameForUrl(name)}`,
+  GOVWARRANTSEARCH: (name) => `https://www.govwarrantsearch.org/search/${encodeNameForUrl(name)}`,
+  PUBLICREPORTS: (name) => `https://www.publicreports.com/search/${encodeNameForUrl(name)}`,
+  AMERICAPHONEBOOK: (name) => `https://www.americaphonebook.com/search/${encodeNameForUrl(name)}`,
+  ALLAREACODES: (name) => `https://www.allareacodes.com/search/${encodeNameForUrl(name)}`,
+  GEORGIAPUBLICRECORDS: (name) => `https://www.georgiapublicrecords.org/search/${encodeNameForUrl(name)}`,
+  HIGHSCHOOLALUMNI: (name) => `https://www.highschoolalumni.com/search/${encodeNameForUrl(name)}`,
 };
 
 // Helper to encode name for URL paths

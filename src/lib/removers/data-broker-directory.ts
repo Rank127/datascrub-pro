@@ -12892,6 +12892,199 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     estimatedDays: 14,
     notes: "North Carolina resident data.",
   },
+
+  // ==========================================
+  // MALWAREBYTES CROSS-REFERENCE (Feb 21, 2026)
+  // Brokers found exposing user data in Malwarebytes scan
+  // ==========================================
+
+  // --- Background Check Sites ---
+  TOP4BACKGROUNDCHECKS: {
+    name: "Top4BackgroundChecks",
+    optOutUrl: "https://www.top4backgroundchecks.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Background check aggregator. Found in Malwarebytes scan.",
+  },
+  BACKGROUNDCHECKGATEWAY: {
+    name: "BackgroundCheckGateway",
+    optOutUrl: "https://www.backgroundcheckgateway.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Background check aggregator. Found in Malwarebytes scan.",
+  },
+  AFFORDABLEBACKGROUNDCHECKS: {
+    name: "AffordableBackgroundChecks",
+    optOutUrl: "https://www.affordablebackgroundchecks.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Background check site. Found in Malwarebytes scan.",
+  },
+
+  // --- People Search Sites ---
+  SELFIENETWORK: {
+    name: "SelfieNetwork",
+    optOutUrl: "https://www.selfienetwork.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search with phone/email exposure. Found in Malwarebytes scan.",
+  },
+  PEOPLEWIN: {
+    name: "PeopleWin",
+    optOutUrl: "https://www.peoplewin.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search site. Found in Malwarebytes scan.",
+  },
+  PROFILESYSTEMS: {
+    name: "ProfileSystems",
+    optOutUrl: "https://www.profilesystems.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search with phone/email exposure. Found in Malwarebytes scan.",
+  },
+  SNOOPSTATION: {
+    name: "SnoopStation",
+    optOutUrl: "https://www.snoopstation.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search aggregator. Found in Malwarebytes scan.",
+  },
+  ONLINESEARCHES: {
+    name: "OnlineSearches",
+    optOutUrl: "https://www.onlinesearches.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search site. Found in Malwarebytes scan.",
+  },
+  USAPEOPLEDATA: {
+    name: "USAPeopleData",
+    optOutUrl: "https://www.usapeopledata.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search aggregator. Found in Malwarebytes scan.",
+  },
+  CLUBSET: {
+    name: "Clubset",
+    optOutUrl: "https://www.clubset.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search site. Found in Malwarebytes scan.",
+  },
+  PERSONTRUST: {
+    name: "Persontrust",
+    optOutUrl: "https://www.persontrust.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search site. Found in Malwarebytes scan.",
+  },
+  COUNCILON: {
+    name: "Councilon",
+    optOutUrl: "https://www.councilon.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search site. Found in Malwarebytes scan.",
+  },
+
+  // --- Public Records Sites ---
+  VERIFYRECORDS: {
+    name: "VerifyRecords",
+    optOutUrl: "https://www.verifyrecords.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Public records search. Found in Malwarebytes scan.",
+  },
+  BIRTHRECORDS: {
+    name: "BirthRecords",
+    optOutUrl: "https://www.birthrecords.us/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Public records search. Found in Malwarebytes scan.",
+  },
+  GOVERNMENTREGISTRY: {
+    name: "GovernmentRegistry",
+    optOutUrl: "https://www.governmentregistry.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Public records aggregator. Found in Malwarebytes scan.",
+  },
+  REVERSERECORDS: {
+    name: "ReverseRecords",
+    optOutUrl: "https://www.reverserecords.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Reverse lookup public records. Found in Malwarebytes scan.",
+  },
+  VERIFYPUBLICRECORDS: {
+    name: "VerifyPublicRecords",
+    optOutUrl: "https://www.verifypublicrecords.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Public records verification site. Found in Malwarebytes scan.",
+  },
+  INFOPAGES: {
+    name: "InfoPages",
+    optOutUrl: "https://www.infopages.us/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Public records and people search. Found in Malwarebytes scan.",
+  },
+  DEATHRECORDS: {
+    name: "DeathRecords",
+    optOutUrl: "https://www.deathrecords.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Public death records search. Found in Malwarebytes scan.",
+  },
+  GOVWARRANTSEARCH: {
+    name: "GovWarrantSearch",
+    optOutUrl: "https://www.govwarrantsearch.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Government warrant and public records search. Found in Malwarebytes scan.",
+  },
+  PUBLICREPORTS: {
+    name: "PublicReports",
+    optOutUrl: "https://www.publicreports.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Public records and reports aggregator. Found in Malwarebytes scan.",
+  },
+
+  // --- Phone / Directory Sites ---
+  AMERICAPHONEBOOK: {
+    name: "AmericaPhoneBook",
+    optOutUrl: "https://www.americaphonebook.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Phone directory with name/address exposure. Found in Malwarebytes scan.",
+  },
+  ALLAREACODES: {
+    name: "AllAreaCodes",
+    optOutUrl: "https://www.allareacodes.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Phone directory and area code lookup. Found in Malwarebytes scan.",
+  },
+
+  // --- State Records ---
+  GEORGIAPUBLICRECORDS: {
+    name: "GeorgiaPublicRecords",
+    optOutUrl: "https://www.georgiapublicrecords.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Georgia state public records. Found in Malwarebytes scan.",
+  },
+
+  // --- Alumni / Social ---
+  HIGHSCHOOLALUMNI: {
+    name: "HighSchoolAlumni",
+    optOutUrl: "https://www.highschoolalumni.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Alumni directory. Part of PeopleConnect network. Found in Malwarebytes scan.",
+    consolidatesTo: "INTELIUS",
+  },
 };
 
 // Broker categories for organization
@@ -12919,7 +13112,12 @@ export const BROKER_CATEGORIES = {
     "FREEPEOPLEDIRECTORY", "PRIVATEREPORTS", "ALLPEOPLE", "PEEPLOOKUP",
     "PERSONSEARCHERS", "NUMLOOKER",
     "FOUR11_LOCATE", "ZOSEARCH", "FINDPEOPLEFAST", "PUBLICSEARCHER",
-    "FLORIDA_RESIDENTS_DIRECTORY", "OHIO_RESIDENT_DATABASE", "NC_RESIDENT_DATABASE"
+    "FLORIDA_RESIDENTS_DIRECTORY", "OHIO_RESIDENT_DATABASE", "NC_RESIDENT_DATABASE",
+    "SELFIENETWORK", "PEOPLEWIN", "PROFILESYSTEMS", "SNOOPSTATION",
+    "ONLINESEARCHES", "USAPEOPLEDATA", "CLUBSET", "PERSONTRUST", "COUNCILON",
+    "VERIFYRECORDS", "BIRTHRECORDS", "GOVERNMENTREGISTRY", "REVERSERECORDS",
+    "VERIFYPUBLICRECORDS", "INFOPAGES", "DEATHRECORDS", "GOVWARRANTSEARCH",
+    "PUBLICREPORTS", "GEORGIAPUBLICRECORDS", "HIGHSCHOOLALUMNI"
   ],
   BACKGROUND_CHECK: [
     "TRUTHFINDER", "CHECKPEOPLE", "CYBERBACKGROUNDCHECKS", "PUBLICDATACHECK",
@@ -12927,7 +13125,8 @@ export const BROKER_CATEGORIES = {
     "FIRST_ADVANTAGE", "INTELLICORP", "TALENTWISE", "INFOMART", "SJV_ASSOCIATES",
     "BACKGROUNDCHECKERS", "FREEBACKGROUNDCHECK",
     "TRUTHRECORD", "SECRETINFO", "SEALEDRECORDS", "BACKGROUNDCHECK_RUN",
-    "QUICKPUBLICRECORDS", "PUBLICRECORDREPORTS"
+    "QUICKPUBLICRECORDS", "PUBLICRECORDREPORTS",
+    "TOP4BACKGROUNDCHECKS", "BACKGROUNDCHECKGATEWAY", "AFFORDABLEBACKGROUNDCHECKS"
   ],
   COURT_RECORDS: [
     "JUDYRECORDS", "UNICOURT", "COURTRECORDS_ORG", "ARRESTFACTS",
@@ -12944,7 +13143,8 @@ export const BROKER_CATEGORIES = {
     "WHOCALLEDME", "WHOCALLSME", "WHYCALL", "CALLERID411", "FREECALLERIDSEARCH",
     "SHOWCALLER", "EYECON", "GETCONTACT", "CALLAPP", "WHOSCALL", "DRUPE",
     "SHOWCALLERID", "REVERSEMOBILE", "CARRIERLOOKUP", "FREECARRIERLOOKUP",
-    "TEXTMAGIC", "TEXTEM", "NUMVERIFY", "OKCALLER"
+    "TEXTMAGIC", "TEXTEM", "NUMVERIFY", "OKCALLER",
+    "AMERICAPHONEBOOK", "ALLAREACODES"
   ],
   PROPERTY_RECORDS: [
     "NEIGHBOR_WHO", "HOMEMETRY", "BLOCKSHOPPER", "OWNERLY", "REHOLD", "NJPARCELS", "PROPERTYRECS",
