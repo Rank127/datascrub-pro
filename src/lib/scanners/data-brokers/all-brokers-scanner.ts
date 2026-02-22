@@ -68,6 +68,24 @@ const SEARCH_URL_PATTERNS: Record<string, (name: string, city?: string, state?: 
   LEXISNEXIS: () => `https://optout.lexisnexis.com/`,
   ORACLE_DATACLOUD: () => `https://www.oracle.com/legal/privacy/marketing-cloud-data-cloud-privacy-policy.html#optout`,
   EXPERIAN_MARKETING: () => `https://www.experian.com/privacy/opt-out-form`,
+
+  // Additional people search sites (Feb 2026)
+  GOLOOKUP: (name) => `https://golookup.com/name/${encodeNameForUrl(name)}`,
+  PUBLICDATAUSA: (name) => `https://publicdatausa.com/search.php?q=${encodeURIComponent(name)}`,
+  FOUR11_INFO: (name) => `https://411.info/name/${encodeNameForUrl(name)}`,
+  CITY_DATA: () => `https://www.city-data.com/`,
+  LOCATEPEOPLE: (name) => `https://www.locatepeople.org/search/${encodeNameForUrl(name)}`,
+  FREEPEOPLEDIRECTORY: (name) => `https://www.freepeopledirectory.com/name/${encodeNameForUrl(name)}`,
+  PRIVATEREPORTS: (name) => `https://www.privatereports.com/name/${encodeNameForUrl(name)}`,
+  ALLPEOPLE: (name) => `https://allpeople.com/search?q=${encodeURIComponent(name)}`,
+  OKCALLER: () => `https://www.okcaller.com/`,
+  NUMLOOKER: () => `https://www.numlooker.com/`,
+  PEEPLOOKUP: (name) => `https://www.peeplookup.com/people/${encodeNameForUrl(name)}`,
+  PERSONSEARCHERS: (name) => `https://www.personsearchers.com/search/${encodeNameForUrl(name)}`,
+  BACKGROUNDCHECKERS: (name) => `https://www.backgroundcheckers.net/search/${encodeNameForUrl(name)}`,
+  FREEBACKGROUNDCHECK: (name) => `https://www.freebackgroundcheck.org/results?name=${encodeURIComponent(name)}`,
+  AROUNDDEAL: (name) => `https://www.arounddeal.com/search/?q=${encodeURIComponent(name)}`,
+  NJPARCELS: () => `https://njparcels.com/`,
 };
 
 // Helper to encode name for URL paths

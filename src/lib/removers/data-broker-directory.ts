@@ -12641,6 +12641,123 @@ export const DATA_BROKER_DIRECTORY: Record<string, DataBrokerInfo> = {
     estimatedDays: 1,
     notes: "AI training dataset leak tracking",
   },
+
+  // ==========================================
+  // ADDITIONAL PEOPLE SEARCH SITES (Feb 2026)
+  // ==========================================
+  GOLOOKUP: {
+    name: "GoLookUp",
+    optOutUrl: "https://golookup.com/support/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search with criminal records, mugshots, driving records. Form-based opt-out.",
+  },
+  PUBLICDATAUSA: {
+    name: "PublicDataUSA",
+    optOutUrl: "https://publicdatausa.com/optout.php",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Accesses SBA, FEC, FOIA data. Exposes campaign contributions, addresses, relatives, property.",
+  },
+  FOUR11_INFO: {
+    name: "411.info",
+    optOutUrl: "https://411.info/manage/",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Major people search and reverse lookup. 4.68M Google-indexed pages.",
+  },
+  CITY_DATA: {
+    name: "City-Data",
+    optOutUrl: "https://www.city-data.com/privacy-form.html",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "Combines property records, demographics, crime stats. 2.19M indexed pages.",
+  },
+  LOCATEPEOPLE: {
+    name: "LocatePeople",
+    optOutUrl: "https://www.locatepeople.org/optout/",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search aggregator. Data reappears every 12 months — requires periodic re-opt-out.",
+  },
+  FREEPEOPLEDIRECTORY: {
+    name: "FreePeopleDirectory",
+    optOutUrl: "https://www.freepeopledirectory.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Free people search directory from public records.",
+  },
+  PRIVATEREPORTS: {
+    name: "PrivateReports",
+    optOutUrl: "https://www.privatereports.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search directory. Shares data with PeopleSearcher — opt-out covers both.",
+  },
+  ALLPEOPLE: {
+    name: "AllPeople",
+    optOutUrl: "https://allpeople.com/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Business/professional people search. 1.02M Google-indexed pages.",
+  },
+  OKCALLER: {
+    name: "OkCaller",
+    optOutUrl: "https://www.okcaller.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Reverse phone lookup and caller ID. 1.11M indexed pages.",
+  },
+  NJPARCELS: {
+    name: "NJParcels",
+    optOutUrl: "https://njparcels.com/contact",
+    removalMethod: "FORM",
+    estimatedDays: 30,
+    notes: "New Jersey property records and parcel data. 1.3M indexed pages.",
+  },
+  AROUNDDEAL: {
+    name: "AroundDeal",
+    optOutUrl: "https://www.arounddeal.com/privacy-policy/",
+    privacyEmail: "privacy@arounddeal.com",
+    removalMethod: "BOTH",
+    estimatedDays: 30,
+    notes: "B2B contact data platform (ZoomInfo competitor). 498K indexed pages. GDPR request for removal.",
+  },
+  NUMLOOKER: {
+    name: "NumLooker",
+    optOutUrl: "https://www.numlooker.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Reverse phone lookup with 1B+ public records. Returns name, age, address, email, relatives.",
+  },
+  PEEPLOOKUP: {
+    name: "PeepLookup",
+    optOutUrl: "https://www.peeplookup.com/opt_out",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Aggregates government, court, property, and social media data.",
+  },
+  PERSONSEARCHERS: {
+    name: "PersonSearchers",
+    optOutUrl: "https://www.personsearchers.com/opt-out",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "People search with public records data.",
+  },
+  BACKGROUNDCHECKERS: {
+    name: "BackgroundCheckers",
+    optOutUrl: "https://www.backgroundcheckers.net/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Background check site aggregating criminal and public records.",
+  },
+  FREEBACKGROUNDCHECK: {
+    name: "FreeBackgroundCheck",
+    optOutUrl: "https://www.freebackgroundcheck.org/optout",
+    removalMethod: "FORM",
+    estimatedDays: 14,
+    notes: "Free background check aggregator. 690K Google-indexed pages.",
+  },
 };
 
 // Broker categories for organization
@@ -12663,12 +12780,16 @@ export const BROKER_CATEGORIES = {
     "EASYBACKGROUNDCHECKS", "UNMASK", "REVEALNAME", "INFORMATION_COM", "BACKGROUNDALERT",
     "DOBSEARCH", "NEIGHBOR_REPORT", "NUMERLOOKUP", "VALIDNUMBER", "SEARCHPUBLICRECORDS",
     "IDTRUE", "LOOKUPUK", "PEEPSEARCH", "RECORDSFINDER", "PUBLICRECORDCENTER",
-    "SEARCHSYSTEMS", "PERSONSEARCH", "ARKANSASVOTERS", "FLORIDAVOTERS", "OHIOVOTERS"
+    "SEARCHSYSTEMS", "PERSONSEARCH", "ARKANSASVOTERS", "FLORIDAVOTERS", "OHIOVOTERS",
+    "GOLOOKUP", "PUBLICDATAUSA", "FOUR11_INFO", "CITY_DATA", "LOCATEPEOPLE",
+    "FREEPEOPLEDIRECTORY", "PRIVATEREPORTS", "ALLPEOPLE", "PEEPLOOKUP",
+    "PERSONSEARCHERS", "NUMLOOKER"
   ],
   BACKGROUND_CHECK: [
     "TRUTHFINDER", "CHECKPEOPLE", "CYBERBACKGROUNDCHECKS", "PUBLICDATACHECK",
     "SEARCHPEOPLEFREE", "FREEPEOPLESEARCH", "SEARCHQUARRY",
-    "FIRST_ADVANTAGE", "INTELLICORP", "TALENTWISE", "INFOMART", "SJV_ASSOCIATES"
+    "FIRST_ADVANTAGE", "INTELLICORP", "TALENTWISE", "INFOMART", "SJV_ASSOCIATES",
+    "BACKGROUNDCHECKERS", "FREEBACKGROUNDCHECK"
   ],
   COURT_RECORDS: [
     "JUDYRECORDS", "UNICOURT", "COURTRECORDS_ORG", "ARRESTFACTS",
@@ -12685,10 +12806,10 @@ export const BROKER_CATEGORIES = {
     "WHOCALLEDME", "WHOCALLSME", "WHYCALL", "CALLERID411", "FREECALLERIDSEARCH",
     "SHOWCALLER", "EYECON", "GETCONTACT", "CALLAPP", "WHOSCALL", "DRUPE",
     "SHOWCALLERID", "REVERSEMOBILE", "CARRIERLOOKUP", "FREECARRIERLOOKUP",
-    "TEXTMAGIC", "TEXTEM", "NUMVERIFY"
+    "TEXTMAGIC", "TEXTEM", "NUMVERIFY", "OKCALLER"
   ],
   PROPERTY_RECORDS: [
-    "NEIGHBOR_WHO", "HOMEMETRY", "BLOCKSHOPPER", "OWNERLY", "REHOLD",
+    "NEIGHBOR_WHO", "HOMEMETRY", "BLOCKSHOPPER", "OWNERLY", "REHOLD", "NJPARCELS",
     "PROPERTYSHARK", "ZILLOW", "REDFIN", "REALTOR_COM", "TRULIA",
     "HOUSEVALUES", "ADDRESSREPORT", "LANDWATCH", "REALTYHOP", "SHOWCASE",
     "HOMES_COM", "HOMESNAP", "MOVOTO", "OPENDOOR", "ESTATELY", "XOME",
@@ -12706,7 +12827,8 @@ export const BROKER_CATEGORIES = {
     "KASPR", "DROPCONTACT", "ANYMAILFINDER", "EMAILHUNTER", "FINDYMAIL",
     "SKRAPP", "TOMBA", "NYMERIA", "PROSPECTLINKER", "SWORDFISH",
     "LEADFEEDER", "LEADGENIUS", "DEMANDBASE", "SIXSENSE", "BOMBORA",
-    "DISCOVERORG", "DUNS_BRADSTREET", "HOOVERS", "INSIDEVIEW", "CLEARBIT_ENRICHMENT"
+    "DISCOVERORG", "DUNS_BRADSTREET", "HOOVERS", "INSIDEVIEW", "CLEARBIT_ENRICHMENT",
+    "AROUNDDEAL"
   ],
   MARKETING: [
     "ACXIOM", "ORACLE_DATACLOUD", "EPSILON", "EXPERIAN_MARKETING",
