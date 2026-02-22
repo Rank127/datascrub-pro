@@ -157,6 +157,10 @@ export class ScanOrchestrator {
     }
 
     const allResults: ScanResult[] = [];
+    const scanStartTime = Date.now();
+
+    // Time-box: leave 50s buffer for projection, CHECKING, and DB writes
+    const SCAN_DEADLINE_MS = 240_000; // 240s of 300s max
 
     // ScrapingBee has max concurrency of 5, so batch data broker scanners
     const BATCH_SIZE = 4;
@@ -253,10 +257,29 @@ export class ScanOrchestrator {
     };
 
     // ─── Run batches of scanners ───
-    const runBatches = async (scanners: Scanner[], label: string) => {
-      for (let i = 0; i < scanners.length; i += BATCH_SIZE) {
-        const batch = scanners.slice(i, i + BATCH_SIZE);
-        console.log(`[ScanOrchestrator] ${label} batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.map(s => s.name).join(", ")}`);
+    const runBatches = async (scanners: Scanner[], label: string, batchSize = BATCH_SIZE, delayMs = 1000) => {
+      for (let i = 0; i < scanners.length; i += batchSize) {
+        // Time-box check: stop if approaching deadline
+        const elapsed = Date.now() - scanStartTime;
+        if (elapsed >= SCAN_DEADLINE_MS) {
+          const remaining = scanners.slice(i);
+          console.log(`[ScanOrchestrator] DEADLINE (${Math.round(elapsed / 1000)}s) — skipping ${remaining.length} ${label} scanners`);
+          for (const scanner of remaining) {
+            this.outcomes.push({
+              scannerName: scanner.name,
+              scannerType: this.classifyScannerType(scanner),
+              status: "TIMEOUT",
+              errorType: "DEADLINE",
+              errorMessage: `Scan deadline reached (${Math.round(elapsed / 1000)}s)`,
+              responseTimeMs: 0,
+              resultsFound: 0,
+            });
+          }
+          break;
+        }
+
+        const batch = scanners.slice(i, i + batchSize);
+        console.log(`[ScanOrchestrator] ${label} batch ${Math.floor(i / batchSize) + 1}: ${batch.map(s => s.name).join(", ")}`);
 
         const batchPromises = batch.map(scanner => runScanner(scanner));
         const batchResults = await Promise.allSettled(batchPromises);
@@ -272,8 +295,8 @@ export class ScanOrchestrator {
 
         this.partialResults = [...allResults];
 
-        if (i + BATCH_SIZE < scanners.length) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        if (i + batchSize < scanners.length) {
+          await new Promise(resolve => setTimeout(resolve, delayMs));
         }
       }
     };
@@ -296,6 +319,9 @@ export class ScanOrchestrator {
 
     // Run Tier 1 first
     await runBatches(tier1Scanners, "Tier 1");
+
+    const tier1Elapsed = Math.round((Date.now() - scanStartTime) / 1000);
+    console.log(`[ScanOrchestrator] Tier 1 complete in ${tier1Elapsed}s — ${allResults.length} results so far`);
 
     // ─── Parent-skip optimization ───
     // Check which cluster parents confirmed hits (score >= AUTO_PROCEED)
@@ -361,9 +387,9 @@ export class ScanOrchestrator {
       );
     }
 
-    // Run remaining cluster scanners
+    // Run remaining cluster scanners — larger batches (different domains, no rate limit conflict)
     if (clusterToRun.length > 0) {
-      await runBatches(clusterToRun, "Cluster");
+      await runBatches(clusterToRun, "Cluster", 6, 500);
     }
 
     // Log scanner health summary
